@@ -42,12 +42,12 @@ AndiGenerator.NET läuft unter Windows 10 und 11 (64 Bit). Administratorrechte s
 
 **Mit Setup (empfohlen)**
 
-1. Auf der Seite [Releases](https://github.com/PBuchmann/AndiGenerator.NET/releases) bei der neuesten Version die Datei `AndiGenerator.NET-win-Setup.exe` herunterladen.
-2. Die Datei starten. Das Programm wird für Ihr Benutzerkonto installiert, erscheint im Startmenü und auf dem Desktop und startet gleich.
+1. Auf der Seite [Releases](https://github.com/PBuchmann/AndiGenerator.NET/releases) bei der neuesten Version die Datei `AndiGeneratorNET-win-Setup.exe` herunterladen.
+2. Die Datei starten. Das Programm wird für Ihr Benutzerkonto installiert (im Ordner `%LOCALAPPDATA%\AndiGeneratorNET`), erscheint im Startmenü und auf dem Desktop und startet gleich.
 
 **Ohne Installation**
 
-Stattdessen `AndiGenerator.NET-win-Portable.zip` herunterladen, in einen beliebigen Ordner entpacken und dort `AndiGenerator.NET.exe` starten. Diese Variante eignet sich z. B. für einen USB-Stick.
+Stattdessen `AndiGeneratorNET-win-Portable.zip` herunterladen, in einen beliebigen Ordner entpacken und dort `AndiGenerator.NET.exe` starten. Diese Variante eignet sich z. B. für einen USB-Stick.
 
 **Warnung von Windows beim ersten Start**
 

@@ -12,6 +12,8 @@ permissions:
 
 env:
   VPK_VERSION: 0.0.1298   # wie das Paket Velopack in Directory.Packages.props
+  # Velopack installiert nach %LOCALAPPDATA%\<packId>. Die Paket-ID muss sich deshalb vom Datenordner
+  # %LOCALAPPDATA%\AndiGenerator.NET unterscheiden, sonst hielte Velopack ihn für eine vorhandene Installation.
 
 jobs:
   release:
@@ -47,7 +49,7 @@ jobs:
 
       - name: Pakete erzeugen
         run: >
-          vpk pack --packId AndiGenerator.NET --packVersion ${{ steps.version.outputs.version }}
+          vpk pack --packId AndiGeneratorNET --packVersion ${{ steps.version.outputs.version }}
           --packDir publish --mainExe AndiGenerator.NET.exe --packTitle "AndiGenerator.NET"
           --packAuthors "Peter Buchmann" --icon src/AndiGenerator.UI/Assets/AndiGenerator.NET.ico
 
