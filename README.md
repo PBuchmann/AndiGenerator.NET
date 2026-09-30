@@ -28,7 +28,7 @@ AndiGenerator.NET ist die C#/.NET-Portierung des **AndiGenerators** von **Andrea
 
 ## Installation
 
-AndiGenerator.NET ist noch in Vorbereitung auf die erste Version. Download und automatische Updates folgen über die [Releases](https://github.com/PBuchmann/AndiGenerator.NET/releases) dieses Repositorys.
+Die neueste Version gibt es unter [Releases](https://github.com/PBuchmann/AndiGenerator.NET/releases): `AndiGenerator.NET-win-Setup.exe` installiert das Programm für den eigenen Benutzer (ohne Administratorrechte) und hält es danach selbst aktuell; `AndiGenerator.NET-win-Portable.zip` läuft ohne Installation. Windows 10/11, 64 Bit. Bis zur digitalen Signierung warnt Windows beim ersten Start – Einzelheiten in der [Anleitung](Doku/ANLEITUNG.md#2-installation).
 
 ## Selbst bauen
 

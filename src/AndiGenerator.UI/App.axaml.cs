@@ -23,7 +23,8 @@ public partial class App : global::Avalonia.Application
         {
             Bildschirmfoto.Anmelden();
             var fenster = new HauptfensterView();
-            var modell = new HauptfensterViewModel(new AvaloniaOberflaeche(fenster), () => new HostWindow());
+            var oberflaeche = new AvaloniaOberflaeche(fenster);
+            var modell = new HauptfensterViewModel(oberflaeche, () => new HostWindow());
             fenster.DataContext = modell;
             desktop.MainWindow = fenster;
 
@@ -31,6 +32,7 @@ public partial class App : global::Avalonia.Application
             // des Andock-Layouts noch offen sind; sonst bleibt der Prozess samt Rechen-Threads im Hintergrund stehen.
             desktop.ShutdownMode = ShutdownMode.OnMainWindowClose;
             desktop.Exit += (_, _) => modell.Dispose();
+            fenster.Opened += (_, _) => Aktualisierung.Starten(oberflaeche);
         }
 
         base.OnFrameworkInitializationCompleted();

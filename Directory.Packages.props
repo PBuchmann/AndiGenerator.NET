@@ -16,6 +16,10 @@
     <PackageVersion Include="Dock.Avalonia.Themes.Fluent" Version="12.1.0.6" />
     <PackageVersion Include="Dock.Model.Mvvm" Version="12.1.0.6" />
   </ItemGroup>
+  <!-- Installation und Updates über GitHub Releases (MIGRATIONSPLAN E12), MIT. Version wie das Werkzeug vpk im Release-Workflow. -->
+  <ItemGroup>
+    <PackageVersion Include="Velopack" Version="0.0.1298" />
+  </ItemGroup>
   <!-- Analyzer nur zur Entwicklungszeit (nicht Teil der ausgelieferten Programme, siehe THIRD-PARTY-NOTICES.md). -->
   <ItemGroup>
     <GlobalPackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556" />

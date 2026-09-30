@@ -7,10 +7,11 @@
   </PropertyGroup>
   <ItemGroup>
     <PackageReference Include="Avalonia.Desktop" />
+    <PackageReference Include="Velopack" />
   </ItemGroup>
   <ItemGroup>
     <!-- Anleitung (erzeugt mit tools/anleitung aus Doku/ANLEITUNG.md); das Programm öffnet sie über „Anleitung“. -->
-    <None Include="..\..\Doku\Anleitung.pdf" Link="Anleitung.pdf" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\Doku\Anleitung.pdf" Link="Anleitung.pdf" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AndiGenerator.UI\AndiGenerator.UI.csproj" />

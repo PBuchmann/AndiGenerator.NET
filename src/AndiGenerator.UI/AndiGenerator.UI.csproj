@@ -11,6 +11,7 @@
     <PackageReference Include="Dock.Avalonia" />
     <PackageReference Include="Dock.Avalonia.Themes.Fluent" />
     <PackageReference Include="Dock.Model.Mvvm" />
+    <PackageReference Include="Velopack" />
   </ItemGroup>
   <ItemGroup>
     <!-- Programmsymbol (Fenster und Taskleiste); dieselbe Datei nutzt AndiGenerator.Desktop für die .exe. -->

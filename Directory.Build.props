@@ -8,6 +8,8 @@
     <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
     <Deterministic>true</Deterministic>
     <Product>AndiGenerator.NET</Product>
+    <!-- Versionsnummer; der Release-Workflow setzt sie aus dem Git-Tag (v1.2.3 → 1.2.3). -->
+    <VersionPrefix>0.9.0</VersionPrefix>
     <Authors>Peter Buchmann (C#-Portierung); Original: Andreas Hofmann</Authors>
     <Copyright>Copyright (c) 2026 Peter Buchmann (Portierung); Copyright (c) 2017 ff. Andreas Hofmann (AndiGenerator); GPL-3.0-only</Copyright>
     <PackageLicenseExpression>GPL-3.0-only</PackageLicenseExpression>

@@ -4,6 +4,7 @@
 
 using AndiGenerator.UI;
 using Avalonia;
+using Velopack;
 
 namespace AndiGenerator.Desktop;
 
@@ -13,7 +14,12 @@ internal static class Program
     /// <summary>Einstiegspunkt.</summary>
     /// <param name="args">Befehlszeilenargumente.</param>
     [STAThread]
-    public static void Main(string[] args) => BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
+    public static void Main(string[] args)
+    {
+        // Velopack erledigt hier Installation, Deinstallation und das Einspielen von Updates und beendet dann selbst.
+        VelopackApp.Build().Run();
+        BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
+    }
 
     /// <summary>Konfiguriert Avalonia (auch vom XAML-Previewer der IDE verwendet).</summary>
     /// <returns>Der konfigurierte Builder.</returns>

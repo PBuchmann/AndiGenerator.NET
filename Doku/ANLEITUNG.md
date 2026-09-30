@@ -38,13 +38,28 @@ Wenn Sie vorher mit dem Original-AndiGenerator gearbeitet haben, übernimmt Andi
 
 ## 2. Installation
 
-AndiGenerator.NET läuft unter Windows 10 und 11 (64 Bit). Eine Installation mit Administratorrechten ist nicht nötig.
+AndiGenerator.NET läuft unter Windows 10 und 11 (64 Bit). Administratorrechte sind nicht nötig, und .NET muss nicht installiert sein – alles Nötige ist dabei.
 
-1. Die aktuelle Version von der Download-Seite des Projekts herunterladen.
-2. Das Setup starten und den Anweisungen folgen. Das Programm erscheint danach im Startmenü.
-3. Neue Versionen werden beim Start angeboten und lassen sich mit einem Klick einspielen.
+**Mit Setup (empfohlen)**
 
-> **Hinweis:** Download-Seite und automatische Updates werden mit der ersten öffentlichen Version eingerichtet. Bis dahin erhalten Sie das Programm direkt vom Entwickler.
+1. Auf der Seite [Releases](https://github.com/PBuchmann/AndiGenerator.NET/releases) bei der neuesten Version die Datei `AndiGenerator.NET-win-Setup.exe` herunterladen.
+2. Die Datei starten. Das Programm wird für Ihr Benutzerkonto installiert, erscheint im Startmenü und auf dem Desktop und startet gleich.
+
+**Ohne Installation**
+
+Stattdessen `AndiGenerator.NET-win-Portable.zip` herunterladen, in einen beliebigen Ordner entpacken und dort `AndiGenerator.NET.exe` starten. Diese Variante eignet sich z. B. für einen USB-Stick.
+
+**Warnung von Windows beim ersten Start**
+
+Solange das Programm noch nicht digital signiert ist, warnt Windows beim ersten Start („Der Computer wurde durch Windows geschützt“). Klicken Sie auf **Weitere Informationen** und dann auf **Trotzdem ausführen**. Ist bei Ihnen die *Intelligente App-Steuerung* von Windows 11 eingeschaltet, lässt sich das Programm bis zur Signierung nicht starten.
+
+**Updates**
+
+Das installierte Programm sucht nach dem Start selbst nach einer neuen Version und lädt sie im Hintergrund. Danach fragt es, ob es gleich neu starten soll; andernfalls wird die neue Version beim nächsten Beenden eingespielt. Ihre Einstellungen, gemerkten Pläne und Staffeldateien bleiben dabei erhalten.
+
+**Deinstallieren**
+
+Über *Einstellungen → Apps → Installierte Apps → AndiGenerator.NET → Deinstallieren*. Ihre Daten im Ordner `%LOCALAPPDATA%\AndiGenerator.NET` und Ihre click-TT-Dateien bleiben erhalten.
 
 ## 3. Erste Schritte
 
