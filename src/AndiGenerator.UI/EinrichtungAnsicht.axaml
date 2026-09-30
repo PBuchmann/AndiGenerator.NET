@@ -1,0 +1,182 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:p="using:AndiGenerator.Presentation"
+             xmlns:ui="using:AndiGenerator.UI"
+             x:Class="AndiGenerator.UI.EinrichtungAnsicht"
+             x:DataType="p:EinrichtungViewModel">
+  <UserControl.Styles>
+    <Style Selector="Button.schritt">
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+      <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+      <Setter Property="MinHeight" Value="64" />
+      <Setter Property="Padding" Value="16,8" />
+      <Setter Property="Margin" Value="0,2" />
+      <Setter Property="CornerRadius" Value="14" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="BorderBrush" Value="Transparent" />
+    </Style>
+    <Style Selector="Button.schritt:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{StaticResource Schwebe}" />
+      <Setter Property="BorderBrush" Value="Transparent" />
+    </Style>
+    <Style Selector="Button.schritt.aktiv">
+      <Setter Property="Background" Value="#F3F7FC" />
+      <Setter Property="BorderBrush" Value="#C9DAF0" />
+    </Style>
+    <Style Selector="Button.schritt.aktiv:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="#F3F7FC" />
+      <Setter Property="BorderBrush" Value="#C9DAF0" />
+    </Style>
+    <Style Selector="Border.marke">
+      <Setter Property="Width" Value="34" />
+      <Setter Property="Height" Value="34" />
+      <Setter Property="CornerRadius" Value="17" />
+      <Setter Property="Background" Value="{StaticResource Schwebe}" />
+    </Style>
+    <Style Selector="Border.marke TextBlock">
+      <Setter Property="Foreground" Value="{StaticResource Tinte2}" />
+    </Style>
+    <Style Selector="Border.marke.aktiv">
+      <Setter Property="Background" Value="{StaticResource Akzent}" />
+    </Style>
+    <Style Selector="Border.marke.aktiv TextBlock">
+      <Setter Property="Foreground" Value="White" />
+    </Style>
+    <Style Selector="Border.marke.erledigt">
+      <Setter Property="Background" Value="#E4F1E8" />
+    </Style>
+    <Style Selector="Border.marke.erledigt TextBlock">
+      <Setter Property="Foreground" Value="{StaticResource Gut}" />
+    </Style>
+    <Style Selector="Grid.unter">
+      <Setter Property="Margin" Value="22,3,0,3" />
+    </Style>
+    <Style Selector="ListBox.wahl">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+    </Style>
+    <Style Selector="ListBox.wahl ListBoxItem">
+      <Setter Property="Margin" Value="0,0,12,12" />
+      <Setter Property="Padding" Value="18,14" />
+      <Setter Property="MinHeight" Value="72" />
+      <Setter Property="CornerRadius" Value="14" />
+      <Setter Property="BorderThickness" Value="2" />
+      <Setter Property="BorderBrush" Value="{StaticResource Rand}" />
+      <Setter Property="Background" Value="{StaticResource Flaeche}" />
+    </Style>
+    <Style Selector="ListBox.wahl ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{StaticResource Schwebe}" />
+      <Setter Property="BorderBrush" Value="{StaticResource Rand}" />
+    </Style>
+    <Style Selector="ListBox.wahl ListBoxItem:selected /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="#F3F7FC" />
+      <Setter Property="BorderBrush" Value="{StaticResource Akzent}" />
+    </Style>
+  </UserControl.Styles>
+  <DockPanel>
+    <Border DockPanel.Dock="Top" Classes="kopf" Background="{StaticResource Flaeche}" BorderBrush="{StaticResource Linie}" BorderThickness="0,0,0,1">
+      <Grid ColumnDefinitions="*,Auto">
+        <StackPanel VerticalAlignment="Center" Spacing="2" Margin="0,0,24,0">
+          <TextBlock Text="Nach dem Öffnen: bitte die folgenden Punkte prüfen" Classes="klein" />
+          <TextBlock Text="{Binding Titel}" Classes="titel" FontWeight="Bold" TextTrimming="CharacterEllipsis" />
+        </StackPanel>
+        <StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right" Spacing="6">
+          <TextBlock Text="{Binding FortschrittText}" FontSize="13" Foreground="{StaticResource Tinte2}" HorizontalAlignment="Right" />
+          <ProgressBar Value="{Binding Fortschritt}" Minimum="0" Maximum="100" Width="220" Height="8" MinHeight="8" CornerRadius="4" Foreground="{StaticResource Gut}" Background="#ECEAE4" />
+        </StackPanel>
+      </Grid>
+    </Border>
+    <Grid DockPanel.Dock="Bottom" ColumnDefinitions="*,Auto" Margin="28,0,28,20">
+      <TextBlock Text="Offene Punkte werden beim Abschließen übersprungen. Alles lässt sich später unter „Spielplandaten“ und „Einstellungen“ ändern." Classes="klein" FontSize="13" TextWrapping="Wrap" VerticalAlignment="Center" Margin="0,0,16,0" />
+      <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
+        <Button Classes="gross" Content="Abschließen" Command="{Binding AbschliessenCommand}" />
+        <Button Classes="gross primaer" Command="{Binding AbschliessenUndGenerierenCommand}">
+          <StackPanel Orientation="Horizontal" Spacing="10">
+            <ui:Symbol Daten="{StaticResource SymbolStart}" Gefuellt="True" Groesse="18" />
+            <TextBlock Text="Abschließen und generieren" VerticalAlignment="Center" />
+          </StackPanel>
+        </Button>
+      </StackPanel>
+    </Grid>
+    <Grid ColumnDefinitions="380,20,*" Margin="28,20">
+      <Border Classes="karte" Padding="10" CornerRadius="18">
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+          <ItemsControl ItemsSource="{Binding Schritte}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="p:Einrichtungsschritt">
+                <Button Classes="schritt" Classes.aktiv="{Binding IstAktiv}" Command="{Binding WaehlenCommand}">
+                  <Grid ColumnDefinitions="Auto,*">
+                    <Border Classes="marke" Classes.aktiv="{Binding IstAktiv}" Classes.erledigt="{Binding IstErledigt}" VerticalAlignment="Center" Margin="0,0,14,0">
+                      <TextBlock Text="{Binding Marke}" FontSize="13" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                      <TextBlock Text="{Binding Titel}" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource Tinte}" />
+                      <TextBlock Text="{Binding Status}" Classes="klein" />
+                    </StackPanel>
+                  </Grid>
+                </Button>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </ScrollViewer>
+      </Border>
+      <Border Grid.Column="2" Classes="karte" Padding="28,24" CornerRadius="18">
+        <DockPanel>
+          <StackPanel DockPanel.Dock="Bottom" Spacing="10">
+            <TextBlock Text="{Binding Meldung}" IsVisible="{Binding HatMeldung}" Foreground="{StaticResource Schlecht}" TextWrapping="Wrap" />
+            <Border BorderBrush="#ECEAE4" BorderThickness="0,1,0,0" Padding="0,16,0,0">
+              <Grid ColumnDefinitions="Auto,*,Auto">
+                <Button Classes="gross" Content="Überspringen" Command="{Binding UeberspringenCommand}" />
+                <Button Grid.Column="2" Classes="gross primaer" Command="{Binding UebernehmenCommand}">
+                  <StackPanel Orientation="Horizontal" Spacing="10">
+                    <ui:Symbol Daten="{StaticResource SymbolHaken}" Groesse="20" />
+                    <TextBlock Text="{Binding UebernehmenText}" VerticalAlignment="Center" />
+                  </StackPanel>
+                </Button>
+              </Grid>
+            </Border>
+          </StackPanel>
+          <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+            <StackPanel Spacing="12" Margin="0,0,12,0">
+              <TextBlock Text="{Binding Aktiv.Titel}" FontSize="20" FontWeight="Bold" />
+              <TextBlock Text="{Binding Aktiv.Text}" FontSize="13" LineHeight="23" Foreground="{StaticResource Tinte2}" TextWrapping="Wrap" MaxWidth="900" HorizontalAlignment="Left" />
+              <Border IsVisible="{Binding Aktiv.HatDetails}" Background="#F7F6F2" CornerRadius="12" Padding="16,10">
+                <ItemsControl ItemsSource="{Binding Aktiv.Details}">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="p:Detailzeile">
+                      <Grid ColumnDefinitions="Auto,*" Margin="0,3" Classes.unter="{Binding IstUnterpunkt}">
+                        <TextBlock Text="•" FontSize="13" Width="18" IsVisible="{Binding IstPunkt}" />
+                        <TextBlock Grid.Column="1" Text="{Binding Text}" FontSize="13" TextWrapping="Wrap" FontWeight="{Binding IstUeberschrift, Converter={x:Static ui:Konverter.MeldungGewicht}}" />
+                      </Grid>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </Border>
+              <ListBox Classes="wahl" IsVisible="{Binding Aktiv.IstEntscheidung}" ItemsSource="{Binding Aktiv.Optionen}" SelectedIndex="{Binding Aktiv.Auswahl}">
+                <ListBox.ItemsPanel>
+                  <ItemsPanelTemplate>
+                    <UniformGrid Columns="2" />
+                  </ItemsPanelTemplate>
+                </ListBox.ItemsPanel>
+                <ListBox.ItemTemplate>
+                  <DataTemplate x:DataType="p:Einrichtungsoption">
+                    <StackPanel Spacing="4">
+                      <TextBlock Text="{Binding Titel}" FontSize="14" FontWeight="SemiBold" TextWrapping="Wrap" />
+                      <TextBlock Text="{Binding Beschreibung}" Classes="klein" TextWrapping="Wrap" />
+                    </StackPanel>
+                  </DataTemplate>
+                </ListBox.ItemTemplate>
+              </ListBox>
+              <ContentControl Classes="seite" IsVisible="{Binding !Aktiv.IstEntscheidung}" Content="{Binding Aktiv.Seite.Seite}" Margin="-12,2,0,0">
+                <ContentControl.ContentTemplate>
+                  <ui:SeitenLocator />
+                </ContentControl.ContentTemplate>
+              </ContentControl>
+            </StackPanel>
+          </ScrollViewer>
+        </DockPanel>
+      </Border>
+    </Grid>
+  </DockPanel>
+</UserControl>

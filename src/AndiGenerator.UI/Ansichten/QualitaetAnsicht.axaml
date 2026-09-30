@@ -1,0 +1,74 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:p="using:AndiGenerator.Presentation"
+             xmlns:ui="using:AndiGenerator.UI"
+             x:Class="AndiGenerator.UI.Ansichten.QualitaetAnsicht"
+             x:DataType="p:QualitaetAnsichtViewModel">
+  <DockPanel Margin="18,14">
+    <StackPanel DockPanel.Dock="Top" Classes="leiste" Orientation="Horizontal" Spacing="10" Margin="0,0,0,10">
+      <TextBlock Text="Plan" Classes="klein" FontSize="13" VerticalAlignment="Center" />
+      <ComboBox MinWidth="280" ItemsSource="{Binding Quellen}" SelectedItem="{Binding Quelle}">
+        <ComboBox.ItemTemplate>
+          <DataTemplate x:DataType="p:PlanQuelle">
+            <TextBlock Text="{Binding Name}" />
+          </DataTemplate>
+        </ComboBox.ItemTemplate>
+      </ComboBox>
+      <Button Classes="gross" Command="{Binding EntfernenCommand}" ToolTip.Tip="Gewählten gemerkten Plan löschen">
+        <StackPanel Orientation="Horizontal" Spacing="8"><ui:Symbol Daten="{StaticResource SymbolLoeschen}" Groesse="20" /><TextBlock Text="Löschen" VerticalAlignment="Center" /></StackPanel>
+      </Button>
+      <Button Classes="gross" Command="{Binding ExcelCommand}" ToolTip.Tip="Plan als Excel-Arbeitsmappe speichern: Übersicht, Spielplan, Mannschaftspläne und Kosten">
+        <StackPanel Orientation="Horizontal" Spacing="8"><ui:Symbol Daten="{StaticResource SymbolExcel}" Groesse="20" /><TextBlock Text="Nach Excel" VerticalAlignment="Center" /></StackPanel>
+      </Button>
+      <ui:Zoomauswahl DataContext="{Binding Zoom}" Margin="12,0,0,0" />
+    </StackPanel>
+    <TextBlock DockPanel.Dock="Top" Text="{Binding Hinweis}" IsVisible="{Binding HatHinweis}" Margin="0,8" />
+    <Border DockPanel.Dock="Top" Classes="karte" Padding="18,12" Margin="0,4,0,12" HorizontalAlignment="Left" MinWidth="420" IsVisible="{Binding Zusammenfassung, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+      <StackPanel Orientation="Horizontal" Spacing="12">
+        <ui:Symbol Daten="{StaticResource SymbolHaken}" Farbe="{StaticResource Gut}" Groesse="24" VerticalAlignment="Center" IsVisible="{Binding PflichtErfuellt}" />
+        <ui:Symbol Daten="{StaticResource SymbolWarnung}" Farbe="{StaticResource Schlecht}" Groesse="24" VerticalAlignment="Center" IsVisible="{Binding !PflichtErfuellt}" />
+        <TextBlock Text="{Binding Zusammenfassung}" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" TextWrapping="Wrap"
+                   Foreground="{Binding PflichtErfuellt, Converter={x:Static ui:Konverter.PflichtFarbe}}" />
+      </StackPanel>
+    </Border>
+    <!-- Ein gemeinsamer Bildlauf für die ganze Tabelle wie in den übrigen Ansichten; die Leiste liegt rechts neben der Karte. -->
+    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
+                  IsVisible="{Binding Zusammenfassung, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+    <LayoutTransformControl LayoutTransform="{Binding Zoom.Faktor, Converter={x:Static ui:Konverter.Skalierung}}" HorizontalAlignment="Left" VerticalAlignment="Top">
+      <Border Classes="karte" Padding="18,10,18,6">
+        <DockPanel>
+          <Border DockPanel.Dock="Top" BorderBrush="{StaticResource Linie}" BorderThickness="0,0,0,1" Padding="0,6,0,8">
+            <Grid ColumnDefinitions="64,40,340,110,120">
+              <TextBlock Grid.Column="0" Text="STUFE" Classes="klein" FontSize="11" FontWeight="SemiBold" />
+              <TextBlock Grid.Column="2" Text="KRITERIUM" Classes="klein" FontSize="11" FontWeight="SemiBold" />
+              <TextBlock Grid.Column="3" Text="VERSTÖSSE" Classes="klein" FontSize="11" FontWeight="SemiBold" HorizontalAlignment="Right" />
+              <TextBlock Grid.Column="4" Text="KOSTEN" Classes="klein" FontSize="11" FontWeight="SemiBold" HorizontalAlignment="Right" />
+            </Grid>
+          </Border>
+          <ItemsControl ItemsSource="{Binding Zeilen}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="p:Qualitaetszeile">
+                <Border BorderBrush="{StaticResource Linie}" BorderThickness="0,0,0,1" MinHeight="44">
+                  <Grid ColumnDefinitions="64,40,340,110,120" VerticalAlignment="Center">
+                    <Border Grid.Column="0" Background="{StaticResource Schwebe}" CornerRadius="8" Padding="8,2" HorizontalAlignment="Left" VerticalAlignment="Center">
+                      <TextBlock Text="{Binding Stufe}" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource Tinte2}" />
+                    </Border>
+                    <Border Grid.Column="1" Width="24" Height="24" CornerRadius="12" HorizontalAlignment="Left" VerticalAlignment="Center"
+                            Background="{Binding Zustand, Converter={x:Static ui:Konverter.ZustandFarbe}}">
+                      <TextBlock Text="{Binding Zustand, Converter={x:Static ui:Konverter.ZustandSymbol}}" Foreground="White" FontSize="12" FontWeight="Bold"
+                                 HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <TextBlock Grid.Column="2" Text="{Binding Name}" FontSize="13" VerticalAlignment="Center" TextWrapping="Wrap" Margin="0,0,12,0" />
+                    <TextBlock Grid.Column="3" Text="{Binding Verstoesse}" Classes="ziffer" FontSize="13" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="4" Text="{Binding Kosten}" Classes="ziffer" FontSize="13" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                  </Grid>
+                </Border>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </DockPanel>
+      </Border>
+    </LayoutTransformControl>
+    </ScrollViewer>
+  </DockPanel>
+</UserControl>

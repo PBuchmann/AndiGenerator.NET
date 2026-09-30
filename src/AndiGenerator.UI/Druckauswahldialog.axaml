@@ -1,0 +1,44 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:p="using:AndiGenerator.Presentation"
+        x:Class="AndiGenerator.UI.Druckauswahldialog"
+        x:DataType="p:DruckauswahlViewModel"
+        Title="Drucken"
+        SizeToContent="WidthAndHeight" CanResize="False" ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner" Classes="dialog">
+  <StackPanel Margin="24" Spacing="8" MinWidth="360">
+    <TextBlock Text="Was soll gedruckt werden?" FontWeight="SemiBold" />
+    <CheckBox Content="Terminwünsche" IsChecked="{Binding Terminwuensche}" />
+    <CheckBox Content="Termine der Nachbarmannschaften" IsChecked="{Binding Nachbartermine}" />
+    <TextBlock Text="Plan:" FontWeight="SemiBold" Margin="0,8,0,0" />
+    <ComboBox ItemsSource="{Binding Quellen}" SelectedItem="{Binding Quelle}" IsEnabled="{Binding HatPlan}" HorizontalAlignment="Stretch">
+      <ComboBox.ItemTemplate>
+        <DataTemplate x:DataType="p:PlanQuelle">
+          <TextBlock Text="{Binding Name}" />
+        </DataTemplate>
+      </ComboBox.ItemTemplate>
+    </ComboBox>
+    <TextBlock Text="Noch kein Plan vorhanden – Kosten, Spielplan, Mannschaftspläne und Diagramme können nicht gedruckt werden."
+               IsVisible="{Binding !HatPlan}" Foreground="{StaticResource Grau}" TextWrapping="Wrap" MaxWidth="360" />
+    <StackPanel Spacing="8" Margin="16,0,0,0" IsEnabled="{Binding HatPlan}">
+      <CheckBox Content="Kosten" IsChecked="{Binding Kosten}" />
+      <CheckBox Content="Spielplan" IsChecked="{Binding Spielplan}" />
+      <CheckBox Content="Mannschaftspläne" IsChecked="{Binding Mannschaftsplaene}" />
+      <CheckBox Content="Mannschaftspläne mit Nachbarmannschaften" IsChecked="{Binding MannschaftsplaeneMitNachbarn}" />
+      <CheckBox Content="Diagramme" IsChecked="{Binding Diagramme}" />
+    </StackPanel>
+    <TextBlock Text="Format:" FontWeight="SemiBold" Margin="0,8,0,0" />
+    <StackPanel Orientation="Horizontal" Spacing="16">
+      <RadioButton Content="Hochformat" GroupName="Format" IsChecked="{Binding !Querformat}" />
+      <RadioButton Content="Querformat" GroupName="Format" IsChecked="{Binding Querformat}" />
+    </StackPanel>
+    <TextBlock Text="Der Ausdruck wird als PDF-Datei gespeichert und anschließend zum Ansehen und Drucken geöffnet."
+               Foreground="{StaticResource Grau}" TextWrapping="Wrap" MaxWidth="360" Margin="0,8,0,0" />
+    <Border Classes="dialogfuss">
+      <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right">
+        <Button x:Name="Abbrechen" Classes="gross" Content="Abbrechen" IsCancel="True" />
+        <Button x:Name="Ok" Classes="gross primaer" Content="PDF erzeugen…" IsDefault="True" IsEnabled="{Binding IstGueltig}" />
+      </StackPanel>
+    </Border>
+  </StackPanel>
+</Window>

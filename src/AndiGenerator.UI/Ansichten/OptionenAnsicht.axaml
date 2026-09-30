@@ -1,0 +1,107 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:p="using:AndiGenerator.Presentation"
+             x:Class="AndiGenerator.UI.Ansichten.OptionenAnsicht"
+             x:DataType="p:OptionenAnsichtViewModel">
+  <UserControl.Styles>
+    <!-- Einstellungen im Stil der Anwendung: Karten je Bereich, Zeilen mit Trennlinie, Bedienelemente ≥ 44 px -->
+    <Style Selector="Border.bereich">
+      <Setter Property="Width" Value="560" />
+      <Setter Property="Margin" Value="0,0,16,16" />
+      <Setter Property="Padding" Value="22,18" />
+      <Setter Property="VerticalAlignment" Value="Top" />
+    </Style>
+    <Style Selector="TextBlock.bereichstitel">
+      <Setter Property="FontSize" Value="15" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Foreground" Value="{StaticResource Tinte}" />
+    </Style>
+    <Style Selector="Border.bereich ComboBox">
+      <Setter Property="MinHeight" Value="44" />
+      <Setter Property="CornerRadius" Value="10" />
+      <Setter Property="FontSize" Value="13" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Border.bereich CalendarDatePicker">
+      <Setter Property="MinHeight" Value="44" />
+      <Setter Property="CornerRadius" Value="10" />
+      <Setter Property="FontSize" Value="13" />
+    </Style>
+    <Style Selector="Border.bereich CheckBox">
+      <Setter Property="MinHeight" Value="44" />
+      <Setter Property="FontSize" Value="13" />
+    </Style>
+    <Style Selector="Border.einstellzeile">
+      <Setter Property="BorderBrush" Value="{StaticResource Linie}" />
+      <Setter Property="BorderThickness" Value="0,0,0,1" />
+      <Setter Property="Padding" Value="0,6" />
+    </Style>
+  </UserControl.Styles>
+  <UserControl.Resources>
+    <DataTemplate x:Key="GewichtungsZeile" x:DataType="p:GewichtungsEintrag">
+      <Border Classes="einstellzeile">
+        <Grid ColumnDefinitions="*,210">
+          <TextBlock Grid.Column="0" Text="{Binding Name}" FontSize="13" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" Margin="0,0,12,0"
+                     ToolTip.Tip="{Binding Name}" />
+          <ComboBox Grid.Column="1" HorizontalAlignment="Stretch"
+                    ItemsSource="{x:Static p:GewichtungsEintrag.Stufen}"
+                    SelectedIndex="{Binding Stufe}" />
+        </Grid>
+      </Border>
+    </DataTemplate>
+  </UserControl.Resources>
+  <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+    <StackPanel Margin="18,14" Spacing="16">
+      <Grid ColumnDefinitions="*,Auto" MaxWidth="1136" HorizontalAlignment="Left">
+        <StackPanel VerticalAlignment="Center" Spacing="2" Margin="0,0,16,0">
+          <TextBlock Text="Einstellungen der Staffel" FontSize="20" FontWeight="Bold" />
+          <TextBlock Text="Änderungen werden sofort gespeichert und von einer laufenden Generierung übernommen." Classes="klein" FontSize="13" TextWrapping="Wrap" />
+        </StackPanel>
+        <Button Grid.Column="1" Classes="gross" Content="Standard wiederherstellen…" Command="{Binding StandardCommand}" VerticalAlignment="Center" />
+      </Grid>
+
+      <WrapPanel Orientation="Horizontal">
+        <Border Classes="karte bereich">
+          <StackPanel Spacing="8">
+            <TextBlock Text="Runden" Classes="bereichstitel" />
+            <ComboBox HorizontalAlignment="Stretch" ItemsSource="{x:Static p:OptionenAnsichtViewModel.Rundenplanungen}" SelectedIndex="{Binding RundenplanungIndex}" />
+            <CheckBox Content="Doppelrunde planen" IsChecked="{Binding Doppelrunde}" />
+            <StackPanel Margin="28,0,0,0" Spacing="6">
+              <CheckBox Content="Enddatum der Viertelrunden automatisch ermitteln" IsChecked="{Binding AutomatischeMitte}" IsEnabled="{Binding Doppelrunde}" />
+              <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,Auto" IsEnabled="{Binding MittenBearbeitbar}">
+                <TextBlock Grid.Row="0" Grid.Column="0" Text="Enddatum der 1. Viertelrunde" FontSize="13" VerticalAlignment="Center" />
+                <CalendarDatePicker Grid.Row="0" Grid.Column="1" SelectedDate="{Binding Mitte1}" MinWidth="180" Margin="0,0,0,8" />
+                <TextBlock Grid.Row="1" Grid.Column="0" Text="Enddatum der 3. Viertelrunde" FontSize="13" VerticalAlignment="Center" />
+                <CalendarDatePicker Grid.Row="1" Grid.Column="1" SelectedDate="{Binding Mitte2}" MinWidth="180" />
+              </Grid>
+            </StackPanel>
+          </StackPanel>
+        </Border>
+
+        <Border Classes="karte bereich">
+          <StackPanel Spacing="4">
+            <TextBlock Text="Allgemeine Plankosten" Classes="bereichstitel" Margin="0,0,0,4" />
+            <ItemsControl ItemsSource="{Binding PlanGewichte}" ItemTemplate="{StaticResource GewichtungsZeile}" />
+          </StackPanel>
+        </Border>
+
+        <Border Classes="karte bereich">
+          <StackPanel Spacing="4">
+            <TextBlock Text="Mannschaftskosten" Classes="bereichstitel" />
+            <CheckBox Content="Freitagsspiele sind bei der 60km-Regel zulässig" IsChecked="{Binding FreitagZaehltZumWochenende}" />
+            <ItemsControl ItemsSource="{Binding KostenartGewichte}" ItemTemplate="{StaticResource GewichtungsZeile}" />
+          </StackPanel>
+        </Border>
+
+        <Border Classes="karte bereich">
+          <StackPanel Spacing="4">
+            <TextBlock Text="Mannschaften" Classes="bereichstitel" />
+            <TextBlock Text="Gewichtung aller Kosten der Mannschaft. Eine Kostenart bei einer einzelnen Mannschaft: Klick auf die Zelle in der Kostenansicht."
+                       Classes="klein" FontSize="13" TextWrapping="Wrap" Margin="0,0,0,4" />
+            <ItemsControl ItemsSource="{Binding MannschaftsGewichte}" ItemTemplate="{StaticResource GewichtungsZeile}" />
+          </StackPanel>
+        </Border>
+      </WrapPanel>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

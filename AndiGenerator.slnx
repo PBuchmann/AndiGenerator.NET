@@ -1,0 +1,19 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/AndiGenerator.Domain/AndiGenerator.Domain.csproj" />
+    <Project Path="src/AndiGenerator.Engine/AndiGenerator.Engine.csproj" />
+    <Project Path="src/AndiGenerator.Persistence/AndiGenerator.Persistence.csproj" />
+    <Project Path="src/AndiGenerator.Rendering/AndiGenerator.Rendering.csproj" />
+    <Project Path="src/AndiGenerator.Application/AndiGenerator.Application.csproj" />
+    <Project Path="src/AndiGenerator.Presentation/AndiGenerator.Presentation.csproj" />
+    <Project Path="src/AndiGenerator.UI/AndiGenerator.UI.csproj" />
+    <Project Path="src/AndiGenerator.Desktop/AndiGenerator.Desktop.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/AndiGenerator.Persistence.Tests/AndiGenerator.Persistence.Tests.csproj" />
+    <Project Path="tests/AndiGenerator.Presentation.Tests/AndiGenerator.Presentation.Tests.csproj" />
+  </Folder>
+  <Folder Name="/tools/">
+    <Project Path="tools/AndiGenerator.Cli/AndiGenerator.Cli.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,17 @@
+# Textdateien im Repository mit LF, im Arbeitsordner wie im System üblich
+* text=auto
+
+# Windows-Skripte brauchen CRLF
+*.cmd text eol=crlf
+*.bat text eol=crlf
+
+# Testdaten byte-genau lassen: Die Tests vergleichen CSV-, XML- und Optionsdateien Byte für Byte
+# (click-TT-Kodierung Windows-1252 bzw. iso-8859-15, CRLF).
+testdaten/** -text
+
+# Binärdateien
+*.png binary
+*.ico binary
+*.pdf binary
+*.ttf binary
+*.xlsx binary

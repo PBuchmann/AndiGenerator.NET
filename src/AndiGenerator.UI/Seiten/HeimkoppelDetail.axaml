@@ -1,0 +1,21 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:p="using:AndiGenerator.Presentation"
+             x:Class="AndiGenerator.UI.Seiten.HeimkoppelDetail"
+             x:DataType="p:HeimkoppelDetailViewModel">
+  <StackPanel Spacing="4">
+    <TextBlock Classes="leer" Text="Koppelspiele sind in den Terminwünschen nicht enthalten" IsVisible="{Binding Keine}" />
+    <ItemsControl ItemsSource="{Binding Zeilen}">
+      <ItemsControl.ItemTemplate>
+        <DataTemplate x:DataType="p:HeimkoppelZeile">
+          <Border Classes="zeile">
+            <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,2">
+              <TextBlock Text="{Binding Beschriftung}" Width="260" VerticalAlignment="Center" />
+              <ComboBox MinWidth="420" ItemsSource="{Binding Auswahl}" SelectedIndex="{Binding Index}" />
+            </StackPanel>
+          </Border>
+        </DataTemplate>
+      </ItemsControl.ItemTemplate>
+    </ItemsControl>
+  </StackPanel>
+</UserControl>

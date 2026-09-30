@@ -1,0 +1,187 @@
+{
+ "id": "R2",
+ "eingabe": "eingabe/R2_4__Kreisklasse_Gruppe_A (2).xml + .modifications",
+ "plan": "existingSchedule = 4. Kreisklasse Gruppe A.csv (42 Spiele)",
+ "optionen": "Standardeinstellungen",
+ "hinterlegte_benutzereinstellungen_nicht_verwendet": [
+  "parallele Spiele: sehr hoch",
+  "Sperrtermine: sehr hoch",
+  "Ausweichtermine: sehr hoch",
+  "Wechsel H/A: sehr hoch",
+  "Ujuu Eaom IV Sperrtermine: Nicht berücksichtigen"
+ ],
+ "quelle": "Andi-Generator 24.5.1.0, Tab Kosten, Bildschirm, 27.09.2026",
+ "plan_kosten": {
+  "Gesamtkosten": "104 T",
+  "Überlappung Spieltage": "4.438",
+  "Länge Spieltage": "5.233",
+  "Überlappung letzter Spieltag": "11.250",
+  "Länge letzter Spieltag": "485"
+ },
+ "spalten": [
+  "Hallenbelegung",
+  "parallele Spiele",
+  "Sperrtermine",
+  "Ausweichtermine",
+  "3-Tage-Abstand",
+  "2-Spiele-die-Woche",
+  "Spielverteilung",
+  "Ungleich H/A",
+  "Wechsel H/A",
+  "Abstand H/A",
+  "Pflichtspieltage",
+  "Gesamt"
+ ],
+ "mannschaften": {
+  "Qvqm Bmno V": [
+   "0 (0)",
+   "0 (0)",
+   "0 /0 (0)",
+   "0 /0 (0)",
+   "0 (0)",
+   "0 (0)",
+   "1.058",
+   "0 (0)",
+   "3 (30)",
+   "4 (82)",
+   "0 /1 (0)",
+   "1.170"
+  ],
+  "Qvqm Bmno VII": [
+   "0 (0)",
+   "0 (0)",
+   "0 /0 (0)",
+   "0 /0 (0)",
+   "0 (0)",
+   "0 (0)",
+   "24",
+   "0 (0)",
+   "1 (3,33)",
+   "4 (82)",
+   "0 /1 (0)",
+   "110"
+  ],
+  "Tueq Qfga IV": [
+   "0 (0)",
+   "0 (0)",
+   "0 /14 (0)",
+   "0 /0 (0)",
+   "0 (0)",
+   "0 (0)",
+   "485",
+   "0 (0)",
+   "3 (30)",
+   "3 (82)",
+   "0 /1 (0)",
+   "597"
+  ],
+  "Ujuu Eaom IV": [
+   "0 (0)",
+   "0 (0)",
+   "5 /178 (35.738)",
+   "0 /0 (0)",
+   "0 (0)",
+   "0 (0)",
+   "471",
+   "0 (0)",
+   "2 (13)",
+   "3 (82)",
+   "0 /1 (0)",
+   "36.305"
+  ],
+  "Ujuu Hpom IV": [
+   "0 (0)",
+   "0 (0)",
+   "0 /1 (0)",
+   "0 /14 (0)",
+   "0 (0)",
+   "0 (0)",
+   "531",
+   "0 (0)",
+   "1 (3,33)",
+   "4 (82)",
+   "0 /1 (0)",
+   "616"
+  ],
+  "Ujuu Mdae Jxzs Agps V": [
+   "0 (0)",
+   "0 (0)",
+   "0 /0 (0)",
+   "0 /0 (0)",
+   "0 (0)",
+   "0 (0)",
+   "914",
+   "0 (0)",
+   "2 (13)",
+   "3 (82)",
+   "0 /1 (0)",
+   "1.009"
+  ],
+  "Vluy Wwae": [
+   "0 (0)",
+   "0 (0)",
+   "0 /2 (0)",
+   "0 /0 (0)",
+   "1 (100)",
+   "1 (40.000)",
+   "1.357",
+   "0 (0)",
+   "0 (0)",
+   "5 (933)",
+   "0 /1 (0)",
+   "42.390"
+  ]
+ },
+ "summe": [
+  "0",
+  "0",
+  "35.738",
+  "0",
+  "100",
+  "40.000",
+  "4.840",
+  "0",
+  "93",
+  "1.425",
+  "0",
+  "82.196"
+ ],
+ "meldungen": {
+  "Qvqm Bmno V": [
+   "Kein Wechsel Heimspiel und Auswärtsspiel: 3",
+   "Maximale Abweichung Reihenfolge Heim- und Auswärtsspiel: 4,00"
+  ],
+  "Qvqm Bmno VII": [
+   "Kein Wechsel Heimspiel und Auswärtsspiel: 1",
+   "Maximale Abweichung Reihenfolge Heim- und Auswärtsspiel: 4,00"
+  ],
+  "Tueq Qfga IV": [
+   "Kein Wechsel Heimspiel und Auswärtsspiel: 3",
+   "Maximale Abweichung Reihenfolge Heim- und Auswärtsspiel: 3,00"
+  ],
+  "Ujuu Eaom IV": [
+   "Sperrtermin wurde verletzt: Mi 23.09.2026",
+   "Sperrtermin wurde verletzt: Di 10.11.2026",
+   "Sperrtermin wurde verletzt: Mo 25.01.2027",
+   "Sperrtermin wurde verletzt: Mo 22.02.2027",
+   "Sperrtermin wurde verletzt: Do 15.04.2027",
+   "Kein Wechsel Heimspiel und Auswärtsspiel: 2",
+   "Maximale Abweichung Reihenfolge Heim- und Auswärtsspiel: 3,00"
+  ],
+  "Ujuu Hpom IV": [
+   "Kein Wechsel Heimspiel und Auswärtsspiel: 1",
+   "Maximale Abweichung Reihenfolge Heim- und Auswärtsspiel: 4,00"
+  ],
+  "Ujuu Mdae Jxzs Agps V": [
+   "Kein Wechsel Heimspiel und Auswärtsspiel: 2",
+   "Maximale Abweichung Reihenfolge Heim- und Auswärtsspiel: 3,00"
+  ],
+  "Vluy Wwae": [
+   "Weniger als drei Tage Abstand: Di 13.04.2027 - Fr 16.04.2027",
+   "Zwei Spiele die Woche: Di 13.04.2027 - Fr 16.04.2027",
+   "Kein Wechsel Heimspiel und Auswärtsspiel: 0",
+   "Maximale Abweichung Reihenfolge Heim- und Auswärtsspiel: 5,00"
+  ]
+ },
+ "bemerkung": "Gültiger Plan, keine ungültigen Spiele. Summe der Mannschafts-Gesamtkosten 82.196 + Plan-Kostenarten ≈ 104 T Gesamtkosten. Meldungen von Ujuu Hpom IV bis Vluy Wwae bei 50 % Zoom abgelesen."
+}

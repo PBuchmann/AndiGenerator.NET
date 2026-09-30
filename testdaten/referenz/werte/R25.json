@@ -1,0 +1,163 @@
+{
+ "id": "R25",
+ "eingabe": "eingabe/R25_Liga mit 2 Mannschaften aus einem Verein.xml (Testplan des Autors 2015; Erststart: Spiellokale, Setzliste übersprungen)",
+ "plan": "in Click-TT vorhandener Plan (existingSchedule, 90 Spiele)",
+ "optionen": "Standardeinstellungen (keine hinterlegten Benutzereinstellungen)",
+ "quelle": "Andi-Generator 24.5.1.0, Tab Kosten, Bildschirm (75 %), 27.09.2026",
+ "plan_kosten": {
+  "Gesamtkosten": "60.094 Mio",
+  "ungültige Spiele": "60.000 Mio",
+  "Überlappung Spieltage": "287 T",
+  "Länge Spieltage": "79.714",
+  "Überlappung letzter Spieltag": "12.500",
+  "Länge letzter Spieltag": "131",
+  "Vereinsinterne Spiele am Anfang": "480 T"
+ },
+ "spalten": [
+  "Hallenbelegung",
+  "parallele Spiele",
+  "Sperrtermine",
+  "3-Tage-Abstand",
+  "2-Spiele-die-Woche",
+  "Spielverteilung",
+  "Ungleich H/A",
+  "Wechsel H/A",
+  "Abstand H/A",
+  "Gesamt"
+ ],
+ "mannschaften": {
+  "Drfg Bsaq Ckeu II": [
+   "0 (0)",
+   "5 (22.361)",
+   "0 /0 (0)",
+   "1 (100)",
+   "1 (40.000)",
+   "407",
+   "0 (0)",
+   "2 (13)",
+   "8 (29.458)",
+   "92.339"
+  ],
+  "Euxw Gnmu III": [
+   "0 (0)",
+   "4 (16.000)",
+   "0 /0 (0)",
+   "2 (4.748)",
+   "2 (160 T)",
+   "4.484",
+   "0 (0)",
+   "4 (53)",
+   "8 (460)",
+   "186 T"
+  ],
+  "Euxw Gnmu IV": [
+   "1 (5,0 Mio)",
+   "5 (140 T)",
+   "0 /5 (0)",
+   "2 (4.748)",
+   "3 (360 T)",
+   "2.964",
+   "0 (0)",
+   "5 (83)",
+   "7 (13.221)",
+   "5,5 Mio"
+  ],
+  "Euxw Grxg Bcbs II": [
+   "0 (0)",
+   "4 (16.000)",
+   "0 /0 (0)",
+   "0 (0)",
+   "1 (40.000)",
+   "2.436",
+   "0 (0)",
+   "3 (30)",
+   "8 (29.458)",
+   "87.924"
+  ],
+  "Gpsa Euxw": [
+   "0 (0)",
+   "0 (0)",
+   "0 /0 (0)",
+   "3 (58.292)",
+   "3 (360 T)",
+   "8.222",
+   "0 (0)",
+   "6 (1.470)",
+   "8 (29.458)",
+   "457 T"
+  ],
+  "Gquq Qyts II": [
+   "0 (0)",
+   "3 (10.392)",
+   "0 /0 (0)",
+   "2 (4.748)",
+   "2 (160 T)",
+   "2.866",
+   "0 (0)",
+   "2 (13)",
+   "3 (82)",
+   "178 T"
+  ],
+  "Gslo Bdei II": [
+   "0 (0)",
+   "1 (2.000)",
+   "0 /5 (0)",
+   "2 (42.842)",
+   "2 (160 T)",
+   "3.308",
+   "0 (0)",
+   "3 (30)",
+   "8 (29.458)",
+   "238 T"
+  ],
+  "Qsng Txhw Atvc Cers": [
+   "1 (5,0 Mio)",
+   "2 (5.657)",
+   "0 /0 (0)",
+   "3 (6.226)",
+   "4 (640 T)",
+   "3.490",
+   "0 (0)",
+   "4 (53)",
+   "2 (7,19)",
+   "5,7 Mio"
+  ],
+  "Tosm Gxyq": [
+   "4 (80 Mio)",
+   "3 (10.392)",
+   "0 /0 (0)",
+   "2 (1.976)",
+   "5 (1,0 Mio)",
+   "9.616",
+   "0 (0)",
+   "3 (30)",
+   "6 (460)",
+   "81 Mio"
+  ],
+  "Virc Hadw II": [
+   "0 (0)",
+   "7 (37.041)",
+   "0 /2 (0)",
+   "2 (1.976)",
+   "1 (40.000)",
+   "3.685",
+   "0 (0)",
+   "3 (30)",
+   "8 (29.458)",
+   "112 T"
+  ]
+ },
+ "summe": [
+  "90 Mio",
+  "260 T",
+  "0",
+  "126 T",
+  "3,0 Mio",
+  "41.479",
+  "0",
+  "1.807",
+  "162 T",
+  "94 Mio"
+ ],
+ "bemerkung": "Vereinsmannschaften im selben Plan (Vereinsinterne Spiele am Anfang 480 T); 6 ungültige Spiele; Hallenkonflikte (80 Mio bei Tosm Gxyq). Keine Pflichtspieltage."
+}

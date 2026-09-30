@@ -1,0 +1,29 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:p="using:AndiGenerator.Presentation"
+             x:Class="AndiGenerator.UI.Seiten.HeimrechtDetail"
+             x:DataType="p:HeimrechtDetailViewModel">
+  <StackPanel Spacing="8">
+    <StackPanel Orientation="Horizontal" Spacing="12">
+      <TextBlock Text="Anzahl Heimspiele" VerticalAlignment="Center" />
+      <ComboBox MinWidth="260" ItemsSource="{Binding Anzahlen}" SelectedIndex="{Binding AnzahlIndex}" />
+    </StackPanel>
+    <TextBlock Classes="abschnitt" Text="Heimrecht bei diesen Mannschaften" />
+    <Grid ColumnDefinitions="260,*">
+      <TextBlock Text="GEGNERISCHE MANNSCHAFT" Classes="spaltenkopf" />
+      <TextBlock Grid.Column="1" Text="HEIMRECHT" Classes="spaltenkopf" />
+    </Grid>
+    <ItemsControl ItemsSource="{Binding Gegner}">
+      <ItemsControl.ItemTemplate>
+        <DataTemplate x:DataType="p:HeimrechtZeile">
+          <Border Classes="zeile">
+            <Grid ColumnDefinitions="260,*" Margin="0,2">
+              <TextBlock Text="{Binding Gegner}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+              <ComboBox Grid.Column="1" MinWidth="160" ItemsSource="{x:Static p:HeimrechtZeile.Auswahl}" SelectedIndex="{Binding Index}" />
+            </Grid>
+          </Border>
+        </DataTemplate>
+      </ItemsControl.ItemTemplate>
+    </ItemsControl>
+  </StackPanel>
+</UserControl>

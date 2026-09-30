@@ -1,0 +1,29 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:p="using:AndiGenerator.Presentation"
+        x:Class="AndiGenerator.UI.Ueberdialog"
+        x:DataType="p:UeberViewModel"
+        Title="Über AndiGenerator.NET"
+        SizeToContent="Height" Width="560" CanResize="False" ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner" Classes="dialog">
+  <StackPanel Margin="24" Spacing="10">
+    <StackPanel Orientation="Horizontal" Spacing="12">
+      <TextBlock Text="{x:Static p:UeberViewModel.Programm}" FontSize="20" FontWeight="SemiBold" />
+      <TextBlock Text="{Binding Version}" VerticalAlignment="Bottom" Margin="0,0,0,3" Foreground="{StaticResource Grau}" />
+    </StackPanel>
+    <TextBlock Text="{x:Static p:UeberViewModel.Beschreibung}" TextWrapping="Wrap" />
+    <TextBlock Text="{x:Static p:UeberViewModel.Original}" TextWrapping="Wrap" Margin="0,6,0,0" />
+    <TextBlock Text="{x:Static p:UeberViewModel.Portierung}" TextWrapping="Wrap" FontWeight="SemiBold" />
+    <TextBlock Text="{x:Static p:UeberViewModel.Entstehung}" TextWrapping="Wrap" />
+    <Border BorderBrush="{StaticResource Linie}" CornerRadius="10" Background="#F7F6F2" BorderThickness="1" Padding="10" Margin="0,6,0,0">
+      <SelectableTextBlock Text="{x:Static p:UeberViewModel.Lizenzhinweis}" TextWrapping="Wrap" FontSize="11" />
+    </Border>
+    <TextBlock Text="{x:Static p:UeberViewModel.Drittbibliotheken}" TextWrapping="Wrap" FontSize="11" Foreground="{StaticResource Grau}" />
+    <Border Classes="dialogfuss">
+      <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right">
+        <Button Classes="gross" Content="Lizenztext (GPL-3.0)…" Command="{Binding LizenzAnzeigenCommand}" />
+        <Button x:Name="Schliessen" Classes="gross primaer" Content="Schließen" IsDefault="True" IsCancel="True" />
+      </StackPanel>
+    </Border>
+  </StackPanel>
+</Window>

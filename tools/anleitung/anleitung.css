@@ -1,0 +1,28 @@
+@font-face { font-family: "Plex"; src: url("fonts/IBMPlexSans-Regular.ttf"); font-weight: 400; }
+@font-face { font-family: "Plex"; src: url("fonts/IBMPlexSans-SemiBold.ttf"); font-weight: 600; }
+@font-face { font-family: "Plex"; src: url("fonts/IBMPlexSans-Bold.ttf"); font-weight: 700; }
+@font-face { font-family: "PlexMono"; src: url("fonts/IBMPlexMono-Regular.ttf"); }
+@page { size: A4; margin: 22mm 18mm 20mm 18mm; }
+html { font-family: "Plex", sans-serif; font-size: 10pt; color: #1B1F24; line-height: 1.5; }
+body { margin: 0; }
+h1 { font-size: 26pt; font-weight: 700; margin: 0 0 8pt; color: #1B1F24; }
+h1:first-of-type { margin-top: 30mm; }
+h2 { font-size: 16pt; font-weight: 700; margin: 0 0 6pt; padding-bottom: 4pt; border-bottom: 1px solid #E2E0DA;
+     break-before: page; position: relative; }
+h2::after { content: ""; position: absolute; left: 0; bottom: -2px; width: 36pt; height: 3px; background: #1D5FA8; }
+h3 { font-size: 12pt; font-weight: 600; color: #164A84; margin: 14pt 0 4pt; break-after: avoid; }
+p, li { orphans: 3; widows: 3; }
+a { color: #1D5FA8; text-decoration: none; }
+code { font-family: "PlexMono", monospace; font-size: 9pt; background: #F0EFEA; padding: 0 3px; border-radius: 3px; }
+table { border-collapse: collapse; width: 100%; margin: 6pt 0 10pt; font-size: 9pt; break-inside: auto; }
+th { text-align: left; font-weight: 600; color: #5B6470; border-bottom: 1px solid #C9C5BB; padding: 4pt 6pt; }
+td { border-bottom: 1px solid #E2E0DA; padding: 4pt 6pt; vertical-align: top; }
+tr { break-inside: avoid; }
+blockquote { margin: 8pt 0; padding: 6pt 10pt; background: #E6EEF8; border-left: 3px solid #1D5FA8; border-radius: 4px; }
+blockquote p { margin: 0; }
+img { max-width: 100%; max-height: 100mm; display: block; margin: 8pt auto 10pt; border-radius: 4px; break-inside: avoid; }
+p:has(> img) { break-inside: avoid; }
+hr { border: none; border-top: 1px solid #E2E0DA; margin: 12pt 0; }
+ol, ul { padding-left: 18pt; }
+/* Inhaltsverzeichnis nach dem Einleitungstext */
+h1 + p + p + p strong { color: #164A84; }

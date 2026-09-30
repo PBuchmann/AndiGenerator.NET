@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>AndiGenerator.Application</RootNamespace>
+    <IsAotCompatible>true</IsAotCompatible>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AndiGenerator.Domain\AndiGenerator.Domain.csproj" />
+    <ProjectReference Include="..\AndiGenerator.Engine\AndiGenerator.Engine.csproj" />
+    <ProjectReference Include="..\AndiGenerator.Persistence\AndiGenerator.Persistence.csproj" />
+    <ProjectReference Include="..\AndiGenerator.Rendering\AndiGenerator.Rendering.csproj" />
+  </ItemGroup>
+</Project>

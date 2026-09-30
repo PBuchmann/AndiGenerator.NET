@@ -1,0 +1,107 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:p="using:AndiGenerator.Presentation"
+             xmlns:ui="using:AndiGenerator.UI"
+             x:Class="AndiGenerator.UI.Ansichten.TerminwunschAnsicht"
+             x:DataType="p:TerminwunschAnsichtViewModel">
+  <DockPanel Margin="18,14">
+  <StackPanel DockPanel.Dock="Top" Classes="leiste" Orientation="Horizontal" Spacing="18" Margin="0,0,0,12">
+    <Border Background="#ECEAE4" CornerRadius="12" Padding="4" VerticalAlignment="Center">
+      <StackPanel Orientation="Horizontal" Spacing="4">
+        <ToggleButton Classes="segment" Content="Übersicht" IsChecked="{Binding IstUebersicht}" ToolTip.Tip="Raster aller Terminwünsche" />
+        <ToggleButton Classes="segment" Content="Je Mannschaft" IsChecked="{Binding IstKarten}" ToolTip.Tip="Die Wünsche und ihre Auswertung je Mannschaft als Karten" />
+      </StackPanel>
+    </Border>
+    <ui:Zoomauswahl DataContext="{Binding Zoom}" />
+    <Border Classes="karte" Padding="16,8" VerticalAlignment="Center">
+      <StackPanel Orientation="Horizontal" Spacing="20">
+        <StackPanel Orientation="Horizontal" Spacing="8">
+          <Rectangle Width="4" Height="16" RadiusX="1" RadiusY="1" Fill="{StaticResource Tinte}" VerticalAlignment="Center" />
+          <TextBlock Text="Heimspielwunsch" FontSize="13" VerticalAlignment="Center" />
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding Uebersicht.HatKoppeltermine, FallbackValue=False}">
+          <Rectangle Width="4" Height="16" RadiusX="1" RadiusY="1" Fill="{StaticResource Akzent}" VerticalAlignment="Center" />
+          <TextBlock Text="Koppeltermin" FontSize="13" VerticalAlignment="Center" />
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Spacing="8">
+          <Rectangle Width="4" Height="16" RadiusX="1" RadiusY="1" Fill="{StaticResource Schlecht}" VerticalAlignment="Center" />
+          <TextBlock Text="Sperrtermin" FontSize="13" VerticalAlignment="Center" />
+        </StackPanel>
+      </StackPanel>
+    </Border>
+  </StackPanel>
+  <Panel>
+    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" IsVisible="{Binding IstUebersicht}">
+      <LayoutTransformControl LayoutTransform="{Binding Zoom.Faktor, Converter={x:Static ui:Konverter.Skalierung}}" HorizontalAlignment="Left" VerticalAlignment="Top">
+        <StackPanel Spacing="12">
+          <Border Classes="karte" Padding="16" HorizontalAlignment="Left">
+            <ui:Terminwunschdiagramm Uebersicht="{Binding Uebersicht}" HorizontalAlignment="Left" />
+          </Border>
+          <Border Classes="karte" Background="#FBF1DC" BorderBrush="#EBD3A0" IsVisible="{Binding HatHinweise}" HorizontalAlignment="Left" MaxWidth="900">
+            <StackPanel Spacing="6">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <ui:Symbol Daten="{StaticResource SymbolWarnung}" Farbe="#8A5A00" Groesse="18" VerticalAlignment="Center" />
+                <TextBlock Text="Hinweise" FontSize="14" FontWeight="SemiBold" Foreground="#6E4400" VerticalAlignment="Center" />
+              </StackPanel>
+              <ItemsControl ItemsSource="{Binding Hinweise}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="x:String">
+                    <SelectableTextBlock Text="{Binding}" FontSize="12" TextWrapping="Wrap" Foreground="#4A3A1A" Margin="0,2" />
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+          </Border>
+        </StackPanel>
+      </LayoutTransformControl>
+    </ScrollViewer>
+
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" IsVisible="{Binding IstKarten}">
+      <LayoutTransformControl LayoutTransform="{Binding Zoom.Faktor, Converter={x:Static ui:Konverter.Skalierung}}" VerticalAlignment="Top">
+        <ItemsControl ItemsSource="{Binding Karten}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+              <WrapPanel Orientation="Horizontal" ItemWidth="420" />
+            </ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="p:Wunschkarte">
+              <Border Classes="karte" Padding="16,12" Margin="0,0,12,12" VerticalAlignment="Top">
+                <StackPanel Spacing="8">
+                  <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock Text="{Binding Name}" FontSize="14" FontWeight="Bold" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                    <Border Grid.Column="1" CornerRadius="8" Padding="8,2" Margin="8,0,0,0" VerticalAlignment="Center" IsVisible="{Binding HatStatus}"
+                            Background="{Binding StatusFarbe, Converter={x:Static ui:Konverter.WunschHintergrund}}">
+                      <TextBlock Text="{Binding Status}" FontSize="11" FontWeight="SemiBold" Foreground="{Binding StatusFarbe, Converter={x:Static ui:Konverter.WunschSchrift}}" />
+                    </Border>
+                  </Grid>
+                  <ItemsControl ItemsSource="{Binding Abschnitte}">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate x:DataType="p:Wunschabschnitt">
+                        <StackPanel Spacing="2" Margin="0,0,0,8">
+                          <TextBlock Text="{Binding Titel}" IsVisible="{Binding HatTitel}" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource Grau}" Margin="0,0,0,2" />
+                          <ItemsControl ItemsSource="{Binding Eintraege}">
+                            <ItemsControl.ItemTemplate>
+                              <DataTemplate x:DataType="p:Wunscheintrag">
+                                <Border CornerRadius="6" Padding="{Binding Hervorgehoben, Converter={x:Static ui:Konverter.EintragAbstand}}" Margin="0,1"
+                                        Background="{Binding Farbe, Converter={x:Static ui:Konverter.WunschHintergrund}}">
+                                  <SelectableTextBlock Text="{Binding Text}" FontSize="12" TextWrapping="Wrap"
+                                                       Foreground="{Binding Farbe, Converter={x:Static ui:Konverter.WunschSchrift}}" />
+                                </Border>
+                              </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                          </ItemsControl>
+                        </StackPanel>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </StackPanel>
+              </Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </LayoutTransformControl>
+    </ScrollViewer>
+  </Panel>
+  </DockPanel>
+</UserControl>

@@ -1,0 +1,124 @@
+{
+ "id": "R18",
+ "eingabe": "eingabe/R18_Damen_Bezirksliga_Rheinhessen (1).xml (ohne .modifications; Erststart: alles übersprungen)",
+ "plan": "existingSchedule = Damen Bezirksliga Rheinhessen.csv (30 Spiele)",
+ "optionen": "Standardeinstellungen",
+ "hinterlegte_benutzereinstellungen_nicht_verwendet": [
+  "parallele Spiele: extrem hoch"
+ ],
+ "quelle": "Andi-Generator 24.5.1.0, Tab Kosten, Bildschirm (75 %), 27.09.2026",
+ "plan_kosten": {
+  "Gesamtkosten": "5.067",
+  "Überlappung Spieltage": "688",
+  "Länge Spieltage": "1.789",
+  "Überlappung letzter Spieltag": "0",
+  "Länge letzter Spieltag": "485"
+ },
+ "spalten": [
+  "Hallenbelegung",
+  "parallele Spiele",
+  "Sperrtermine",
+  "3-Tage-Abstand",
+  "2-Spiele-die-Woche",
+  "Spielverteilung",
+  "Ungleich H/A",
+  "Wechsel H/A",
+  "Abstand H/A",
+  "Pflichtspieltage",
+  "Gesamt"
+ ],
+ "mannschaften": {
+  "Gvfc Jfgi": [
+   "0 (0)",
+   "0 (0)",
+   "0 /10 (0)",
+   "0 (0)",
+   "0 (0)",
+   "238",
+   "0 (0)",
+   "3 (30)",
+   "2 (3,82)",
+   "0 /1 (0)",
+   "272"
+  ],
+  "Stqe Etvg II": [
+   "0 (0)",
+   "0 (0)",
+   "0 /0 (0)",
+   "0 (0)",
+   "0 (0)",
+   "244",
+   "0 (0)",
+   "3 (30)",
+   "2 (245)",
+   "0 /1 (0)",
+   "519"
+  ],
+  "Tmjo Gbyi IV": [
+   "0 (0)",
+   "0 (0)",
+   "0 /0 (0)",
+   "0 (0)",
+   "0 (0)",
+   "113",
+   "0 (0)",
+   "3 (30)",
+   "1 (3,82)",
+   "0 /1 (0)",
+   "147"
+  ],
+  "Trbk Fhaq": [
+   "0 (0)",
+   "0 (0)",
+   "0 /1 (0)",
+   "0 (0)",
+   "0 (0)",
+   "62",
+   "0 (0)",
+   "0 (0)",
+   "0 (0)",
+   "0 /1 (0)",
+   "62"
+  ],
+  "Tsqa Cmyi II": [
+   "0 (0)",
+   "0 (0)",
+   "0 /49 (0)",
+   "0 (0)",
+   "0 (0)",
+   "752",
+   "0 (0)",
+   "4 (53)",
+   "2 (245)",
+   "0 /1 (0)",
+   "1.050"
+  ],
+  "Ttki Tkuy": [
+   "0 (0)",
+   "0 (0)",
+   "0 /20 (0)",
+   "0 (0)",
+   "0 (0)",
+   "50",
+   "0 (0)",
+   "1 (3,33)",
+   "1 (3,82)",
+   "0 /1 (0)",
+   "57"
+  ]
+ },
+ "summe": [
+  "0",
+  "0",
+  "0",
+  "0",
+  "0",
+  "1.459",
+  "0",
+  "147",
+  "501",
+  "0",
+  "2.106"
+ ],
+ "bemerkung": "Kleinste Kosten; Dezimalwerte (3,82 / 3,33) → gute Rundungsprüfung. Gesamt 2.106 + 688 + 1.789 + 485 = 5.068 vs. Anzeige 5.067 (Rundung der Einzelwerte)."
+}

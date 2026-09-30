@@ -1,0 +1,42 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:p="using:AndiGenerator.Presentation"
+             x:Class="AndiGenerator.UI.Seiten.SpiellokalDetail"
+             x:DataType="p:SpiellokalDetailViewModel">
+  <StackPanel Spacing="8">
+    <StackPanel Orientation="Horizontal" Spacing="12">
+      <TextBlock Text="Standardspiellokal:" VerticalAlignment="Center" />
+      <ComboBox MinWidth="80" ItemsSource="{x:Static p:SpiellokalDetailViewModel.Spiellokale}" SelectedItem="{Binding Standardlokal}" />
+      <TextBlock Classes="leer" Text="leer, falls Verein nur in einem Spiellokal spielt" VerticalAlignment="Center" />
+    </StackPanel>
+    <TextBlock Classes="abschnitt" Text="Spiellokale an den konkreten Heimspieltagen" />
+    <TextBlock Classes="leer" Text="Keine Wunschtermine vorhanden" IsVisible="{Binding KeineHeimtage}" />
+    <ItemsControl ItemsSource="{Binding Heimtage}">
+      <ItemsControl.ItemTemplate>
+        <DataTemplate x:DataType="p:SpiellokalZeile">
+          <Border Classes="zeile">
+            <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,2">
+              <TextBlock Text="{Binding Beschriftung}" Width="220" VerticalAlignment="Center" />
+              <ComboBox MinWidth="80" ItemsSource="{x:Static p:SpiellokalDetailViewModel.Spiellokale}" SelectedItem="{Binding Spiellokal}" />
+            </StackPanel>
+          </Border>
+        </DataTemplate>
+      </ItemsControl.ItemTemplate>
+    </ItemsControl>
+    <TextBlock Classes="abschnitt" Text="Spiellokale der Nachbarmannschaften" />
+    <TextBlock Classes="leer" Text="Keine Nachbarmannschaften vorhanden" IsVisible="{Binding KeineNachbarn}" />
+    <ItemsControl ItemsSource="{Binding Nachbarn}">
+      <ItemsControl.ItemTemplate>
+        <DataTemplate x:DataType="p:SpiellokalZeile">
+          <Border Classes="zeile">
+            <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,2">
+              <TextBlock Text="{Binding Beschriftung}" Width="320" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
+                         Background="Transparent" DoubleTapped="NachbarDoppelklick" ToolTip.Tip="Doppelklick: Nachbarmannschaft bearbeiten" />
+              <ComboBox MinWidth="80" ItemsSource="{x:Static p:SpiellokalDetailViewModel.Spiellokale}" SelectedItem="{Binding Spiellokal}" />
+            </StackPanel>
+          </Border>
+        </DataTemplate>
+      </ItemsControl.ItemTemplate>
+    </ItemsControl>
+  </StackPanel>
+</UserControl>

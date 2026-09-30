@@ -1,0 +1,153 @@
+{
+ "id": "R13",
+ "eingabe": "eingabe/R13_4__Kreisklasse_Gruppe_B (2).xml + .modifications (enthält predefinedgames + ranking)",
+ "plan": "existingSchedule = 4. Kreisklasse Gruppe B.csv (56 Spiele)",
+ "optionen": "Standardeinstellungen",
+ "hinterlegte_benutzereinstellungen_nicht_verwendet": [
+  "Hallenbelegung: sehr hoch",
+  "parallele Spiele: sehr hoch",
+  "Pflichtspieltage: extrem hoch",
+  "Ujuu Eaom III Sperrtermine: Nicht berücksichtigen"
+ ],
+ "quelle": "Andi-Generator 24.5.1.0, Tab Kosten, Bildschirm, 27.09.2026",
+ "plan_kosten": {
+  "Gesamtkosten": "290 T",
+  "Überlappung Spieltage": "2.375",
+  "Länge Spieltage": "3.406",
+  "Überlappung letzter Spieltag": "0",
+  "Länge letzter Spieltag": "473"
+ },
+ "spalten": [
+  "Hallenbelegung",
+  "parallele Spiele",
+  "Sperrtermine",
+  "3-Tage-Abstand",
+  "2-Spiele-die-Woche",
+  "Spielverteilung",
+  "Ungleich H/A",
+  "Wechsel H/A",
+  "Abstand H/A",
+  "Pflichtspieltage",
+  "Gesamt"
+ ],
+ "mannschaften": {
+  "Qvqm Bmno VI": [
+   "0 (0)",
+   "0 (0)",
+   "0 /0 (0)",
+   "0 (0)",
+   "0 (0)",
+   "215",
+   "0 (0)",
+   "5 (83)",
+   "5 (370)",
+   "1 /1 (100 T)",
+   "101 T"
+  ],
+  "Tlpg Wwae V": [
+   "0 (0)",
+   "0 (0)",
+   "0 /0 (0)",
+   "0 (0)",
+   "0 (0)",
+   "168",
+   "0 (0)",
+   "2 (13)",
+   "5 (370)",
+   "0 /1 (0)",
+   "551"
+  ],
+  "Tndw Pciq II": [
+   "0 (0)",
+   "0 (0)",
+   "0 /2 (0)",
+   "0 (0)",
+   "0 (0)",
+   "602",
+   "0 (0)",
+   "4 (53)",
+   "2 (32)",
+   "0 /1 (0)",
+   "688"
+  ],
+  "Tosm Fdem IV": [
+   "0 (0)",
+   "0 (0)",
+   "0 /0 (0)",
+   "0 (0)",
+   "0 (0)",
+   "967",
+   "0 (0)",
+   "3 (30)",
+   "4 (370)",
+   "0 /1 (0)",
+   "1.367"
+  ],
+  "Tuyy Gahk": [
+   "0 (0)",
+   "0 (0)",
+   "0 /0 (0)",
+   "0 (0)",
+   "0 (0)",
+   "217",
+   "0 (0)",
+   "4 (53)",
+   "4 (370)",
+   "0 /1 (0)",
+   "640"
+  ],
+  "Tuyy Mmjw mhoa VCig IV": [
+   "0 (0)",
+   "0 (0)",
+   "0 /0 (0)",
+   "0 (0)",
+   "0 (0)",
+   "206",
+   "0 (0)",
+   "4 (53)",
+   "5 (370)",
+   "1 /1 (100 T)",
+   "101 T"
+  ],
+  "Ujuu Eaom III": [
+   "0 (0)",
+   "0 (0)",
+   "7 /178 (77.847)",
+   "0 (0)",
+   "0 (0)",
+   "176",
+   "0 (0)",
+   "4 (53)",
+   "5 (370)",
+   "0 /1 (0)",
+   "78.447"
+  ],
+  "Ujuu Mdae Jxzs Agps VI": [
+   "0 (0)",
+   "0 (0)",
+   "0 /0 (0)",
+   "0 (0)",
+   "0 (0)",
+   "273",
+   "0 (0)",
+   "2 (13)",
+   "4 (370)",
+   "0 /1 (0)",
+   "657"
+  ]
+ },
+ "summe": [
+  "0",
+  "0",
+  "77.847",
+  "0",
+  "0",
+  "2.824",
+  "0",
+  "353",
+  "2.623",
+  "200 T",
+  "284 T"
+ ],
+ "bemerkung": "Trotz ranking in .modifications keine Setzliste-Spalte (vermutlich ranking inaktiv oder ohne Kosten). Abstand H/A 5 → 370 (in anderen Staffeln 5 → 460/1.756): hängt von Mannschaftszahl ab."
+}

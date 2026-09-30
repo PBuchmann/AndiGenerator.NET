@@ -1,0 +1,59 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:p="using:AndiGenerator.Presentation"
+             xmlns:ui="using:AndiGenerator.UI"
+             xmlns:a="using:AndiGenerator.Application"
+             x:Class="AndiGenerator.UI.Seiten.AuswaertskoppelDetail"
+             x:DataType="p:AuswaertskoppelDetailViewModel">
+  <StackPanel Spacing="8">
+    <TextBlock Classes="abschnitt" Text="Auswärtskoppelwünsche" />
+    <DockPanel>
+      <StackPanel DockPanel.Dock="Right" Spacing="6" Margin="12,0,0,0">
+        <Button Command="{Binding NeuCommand}" MinWidth="190" HorizontalContentAlignment="Left">
+        <StackPanel Orientation="Horizontal" Spacing="8">
+          <ui:Symbol Daten="{StaticResource SymbolPlus}" Groesse="18" />
+          <TextBlock Text="Neuer Wunsch…" VerticalAlignment="Center" />
+        </StackPanel>
+      </Button>
+        <Button Command="{Binding BearbeitenCommand}" MinWidth="190" HorizontalContentAlignment="Left">
+        <StackPanel Orientation="Horizontal" Spacing="8">
+          <ui:Symbol Daten="{StaticResource SymbolKalender}" Groesse="18" />
+          <TextBlock Text="Wunsch bearbeiten…" VerticalAlignment="Center" />
+        </StackPanel>
+      </Button>
+        <Button Command="{Binding LoeschenCommand}" MinWidth="190" HorizontalContentAlignment="Left">
+        <StackPanel Orientation="Horizontal" Spacing="8">
+          <ui:Symbol Daten="{StaticResource SymbolLoeschen}" Groesse="18" />
+          <TextBlock Text="Wunsch löschen…" VerticalAlignment="Center" />
+        </StackPanel>
+      </Button>
+      </StackPanel>
+      <ListBox x:Name="Liste" ItemsSource="{Binding Koppeln}" SelectedItem="{Binding Auswahl}" MinHeight="120" MaxHeight="220">
+        <ListBox.ItemTemplate>
+          <DataTemplate x:DataType="a:Auswaertskoppeldaten">
+            <TextBlock Text="{Binding Bezeichnung}" />
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+    </DockPanel>
+    <TextBlock Classes="abschnitt" Text="Alternative Anfangszeiten" />
+    <TextBlock Classes="erklaerung" Text="{x:Static p:AuswaertskoppelDetailViewModel.Erklaerung}" TextWrapping="Wrap" />
+    <StackPanel Orientation="Horizontal" Spacing="8">
+      <Button Content="Alles setzen" Command="{Binding AllesSetzenCommand}" />
+      <Button Content="Alle löschen" Command="{Binding AlleLoeschenCommand}" />
+    </StackPanel>
+    <TextBlock Classes="leer" Text="Keine relevanten Termine vorhanden" IsVisible="{Binding KeineZweitzeiten}" />
+    <ItemsControl ItemsSource="{Binding Zweitzeiten}">
+      <ItemsControl.ItemTemplate>
+        <DataTemplate x:DataType="p:ZweitzeitZeile">
+          <Border Classes="zeile">
+            <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,2">
+              <TextBlock Text="{Binding Beschriftung}" Width="220" VerticalAlignment="Center" />
+              <TextBox Text="{Binding Text}" Width="90" PlaceholderText="hh:mm" />
+            </StackPanel>
+          </Border>
+        </DataTemplate>
+      </ItemsControl.ItemTemplate>
+    </ItemsControl>
+  </StackPanel>
+</UserControl>

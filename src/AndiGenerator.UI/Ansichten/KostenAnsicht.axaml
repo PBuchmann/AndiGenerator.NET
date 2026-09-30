@@ -1,0 +1,198 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:p="using:AndiGenerator.Presentation"
+             xmlns:ui="using:AndiGenerator.UI"
+             x:Class="AndiGenerator.UI.Ansichten.KostenAnsicht"
+             x:DataType="p:KostenAnsichtViewModel">
+  <UserControl.Styles>
+    <!-- Kennzahlen als flache Chips in der Leiste (so hoch wie die Knöpfe); der erste (Gesamtkosten des gewählten Plans) hervorgehoben -->
+    <Style Selector="Border.kennzahl">
+      <Setter Property="MinHeight" Value="44" />
+      <Setter Property="Margin" Value="0,0,8,8" />
+      <Setter Property="Padding" Value="12,0" />
+      <Setter Property="CornerRadius" Value="10" />
+    </Style>
+    <Style Selector="Border.kennzahl TextBlock.name">
+      <Setter Property="FontSize" Value="11" />
+      <Setter Property="Foreground" Value="{StaticResource Grau}" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Border.kennzahl TextBlock.wert">
+      <Setter Property="FontFamily" Value="{StaticResource Ziffernschrift}" />
+      <Setter Property="FontSize" Value="14" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Foreground" Value="{StaticResource Tinte}" />
+    </Style>
+    <Style Selector="Border.kennzahl.haupt">
+      <Setter Property="Background" Value="{StaticResource AkzentHell}" />
+      <Setter Property="BorderBrush" Value="#C9DAF0" />
+    </Style>
+    <Style Selector="Border.kennzahl.haupt TextBlock.wert">
+      <Setter Property="Foreground" Value="{StaticResource AkzentDunkel}" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector="Border.kennzahl.klickbar:pointerover">
+      <Setter Property="BorderBrush" Value="{StaticResource Akzent}" />
+    </Style>
+    <Style Selector="Button.stufe">
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+      <Setter Property="MinHeight" Value="44" />
+      <Setter Property="Margin" Value="0,0,6,6" />
+      <Setter Property="Padding" Value="4,0" />
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="Background" Value="{StaticResource Flaeche}" />
+      <Setter Property="BorderBrush" Value="{StaticResource Rand}" />
+      <Setter Property="BorderThickness" Value="1" />
+    </Style>
+    <Style Selector="Button.stufe.aktiv">
+      <Setter Property="Background" Value="{StaticResource Akzent}" />
+      <Setter Property="BorderBrush" Value="{StaticResource Akzent}" />
+      <Setter Property="Foreground" Value="White" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector="Button.stufe.aktiv:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{StaticResource AkzentDunkel}" />
+      <Setter Property="BorderBrush" Value="{StaticResource AkzentDunkel}" />
+      <Setter Property="Foreground" Value="White" />
+    </Style>
+  </UserControl.Styles>
+  <DockPanel Margin="16,10">
+    <!-- Leiste: Plan und Befehle; darunter in eigener Zeile die Kennzahlen als Chips (brechen bei Bedarf um) -->
+    <WrapPanel DockPanel.Dock="Top" Orientation="Horizontal">
+      <StackPanel Classes="leiste" Orientation="Horizontal" Spacing="10" Margin="0,0,16,8">
+        <TextBlock Text="Plan" Classes="klein" FontSize="13" VerticalAlignment="Center" />
+        <ComboBox MinWidth="280" ItemsSource="{Binding Quellen}" SelectedItem="{Binding Quelle}">
+          <ComboBox.ItemTemplate>
+            <DataTemplate x:DataType="p:PlanQuelle">
+              <TextBlock Text="{Binding Name}" />
+            </DataTemplate>
+          </ComboBox.ItemTemplate>
+        </ComboBox>
+        <Button Classes="gross" Command="{Binding EntfernenCommand}" ToolTip.Tip="Gewählten gemerkten Plan löschen">
+          <StackPanel Orientation="Horizontal" Spacing="8"><ui:Symbol Daten="{StaticResource SymbolLoeschen}" Groesse="20" /><TextBlock Text="Löschen" VerticalAlignment="Center" /></StackPanel>
+        </Button>
+        <Button Classes="gross" Command="{Binding ExcelCommand}" ToolTip.Tip="Plan als Excel-Arbeitsmappe speichern: Übersicht, Spielplan, Mannschaftspläne und Kosten">
+          <StackPanel Orientation="Horizontal" Spacing="8"><ui:Symbol Daten="{StaticResource SymbolExcel}" Groesse="20" /><TextBlock Text="Nach Excel" VerticalAlignment="Center" /></StackPanel>
+        </Button>
+        <ui:Zoomauswahl DataContext="{Binding Zoom}" Margin="12,0,0,0" />
+      </StackPanel>
+    </WrapPanel>
+    <WrapPanel x:Name="Kennzahlen" DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,2" />
+    <TextBlock DockPanel.Dock="Top" Text="{Binding Hinweis}" IsVisible="{Binding HatHinweis}" Margin="0,8" />
+    <Grid ColumnDefinitions="*,Auto">
+      <ScrollViewer x:Name="Rollbereich" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+        <LayoutTransformControl LayoutTransform="{Binding Zoom.Faktor, Converter={x:Static ui:Konverter.Skalierung}}" HorizontalAlignment="Left" VerticalAlignment="Top">
+          <StackPanel Spacing="12" HorizontalAlignment="Left">
+            <!-- Matrix links, Verteilung rechts daneben; reicht die Breite nicht, rückt die Verteilung darunter (im Code) -->
+            <Grid x:Name="Karten" ColumnDefinitions="Auto,Auto" RowDefinitions="Auto,Auto" HorizontalAlignment="Left">
+              <Border x:Name="MatrixKarte" Classes="karte" Padding="14,10" HorizontalAlignment="Left" VerticalAlignment="Top" IsVisible="{Binding HatMatrix}">
+                <Panel>
+                  <Grid x:Name="Tabelle" HorizontalAlignment="Left" />
+                  <!-- Umschalter der Zellen im freien Feld links oben über den Mannschaftsnamen -->
+                  <Border Background="#ECEAE4" CornerRadius="12" Padding="4" Margin="0,4,0,0" HorizontalAlignment="Left" VerticalAlignment="Top">
+                    <StackPanel Orientation="Horizontal" Spacing="4">
+                      <ToggleButton Classes="segment" Content="Kosten" IsChecked="{Binding ZeigtKosten}" ToolTip.Tip="Zellen zeigen die Kostenpunkte" />
+                      <ToggleButton Classes="segment" Content="Verstöße" IsChecked="{Binding ZeigtVerstoesse}" ToolTip.Tip="Zellen zeigen die Zahl der Verstöße (z. B. 2/178 = 2 von 178 möglichen)" />
+                    </StackPanel>
+                  </Border>
+                </Panel>
+              </Border>
+              <Border x:Name="VerteilungKarte" Grid.Column="1" Classes="karte" Width="300" Padding="16,12" Margin="12,0,0,0" VerticalAlignment="Top" IsVisible="{Binding HatMatrix}">
+                <StackPanel Spacing="8">
+                  <TextBlock Text="Wo stecken die Kosten?" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource Tinte2}" />
+                  <TextBlock Text="{Binding Matrix.Gesamt, StringFormat='Mannschaftskosten gesamt {0}'}" Classes="klein ziffer" />
+                  <Border CornerRadius="6" ClipToBounds="True" Height="12" Background="{StaticResource Schwebe}">
+                    <Grid x:Name="Verteilung" />
+                  </Border>
+                  <StackPanel x:Name="VerteilungLegende" Spacing="4" />
+                </StackPanel>
+              </Border>
+            </Grid>
+            <Expander x:Name="Legende" IsExpanded="False" HorizontalAlignment="Left" MaxWidth="820" MinWidth="420" IsVisible="{Binding HatMatrix}"
+                      Background="{StaticResource Flaeche}" BorderBrush="{StaticResource Linie}" BorderThickness="1" CornerRadius="14">
+              <Expander.Header>
+                <StackPanel Orientation="Horizontal" Spacing="10" MinHeight="36">
+                  <ui:Symbol Daten="{StaticResource SymbolInfo}" Farbe="{StaticResource Akzent}" Groesse="20" VerticalAlignment="Center" />
+                  <TextBlock Text="So funktioniert die Tabelle: lesen und bedienen" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource Akzent}" VerticalAlignment="Center" />
+                </StackPanel>
+              </Expander.Header>
+              <StackPanel Spacing="8" Margin="6,0,6,6">
+                <TextBlock TextWrapping="Wrap" Text="Zeilen sind die Mannschaften, Spalten die Kostenarten – beide nach Kosten sortiert, die teuersten stehen links oben. Die Generierung sucht den Plan mit den wenigsten Kostenpunkten." />
+                <TextBlock TextWrapping="Wrap" Text="Eine Zelle zeigt wahlweise die Kostenpunkte oder die Verstöße (Umschalter links oben in der Tabelle). 2/178 heißt: 2 von 178 möglichen Fällen verletzt, z. B. 2 der 178 gemeldeten Sperrtermine belegt. „·“ heißt: eingehalten. „–“: Diese Kostenart zählt keine Verstöße, nur Kostenpunkte (z. B. Spielverteilung). T = Tausend, Mio = Millionen." />
+                <TextBlock TextWrapping="Wrap" Text="Je röter eine Zelle, desto größer ihr Anteil an den Gesamtkosten – dort lohnt es sich zuerst hinzuschauen. Der Balken „Wo stecken die Kosten?“ zeigt dasselbe je Kostenart." />
+                <TextBlock TextWrapping="Wrap" Text="Blaue Marken (+1 bis +3 wichtiger, −1 bis −2 weniger wichtig, X nicht berücksichtigt) zeigen eine geänderte Gewichtung, ein blauer Punkt in einer Zelle eine eigene Gewichtung genau dieser Zelle." />
+                <TextBlock TextWrapping="Wrap" Text="Ein Klick auf eine Zelle, eine Kostenart, eine Mannschaft oder eine Kennzahl zeigt rechts Meldungen und Werte; dort lässt sich die Gewichtung direkt ändern. Was genau verletzt ist, zeigt auch die Ansicht „Meldungen“." Classes="klein" FontSize="13" />
+              </StackPanel>
+            </Expander>
+          </StackPanel>
+        </LayoutTransformControl>
+      </ScrollViewer>
+
+      <Border Grid.Column="1" Classes="karte" Padding="20,18" Width="380" Margin="16,0,0,0" VerticalAlignment="Stretch" IsVisible="{Binding HatDetail}">
+        <Panel>
+          <ScrollViewer VerticalScrollBarVisibility="Auto">
+            <StackPanel Spacing="14">
+              <StackPanel Spacing="2">
+                <Grid ColumnDefinitions="*,Auto">
+                  <TextBlock Text="{Binding Detail.Art}" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource Grau}" VerticalAlignment="Center" />
+                  <Button Grid.Column="1" Classes="schliessen" Command="{Binding DetailSchliessenCommand}" ToolTip.Tip="Details schließen" Margin="0,-6,-8,0">
+                    <ui:Symbol Daten="{StaticResource SymbolSchliessen}" Groesse="18" />
+                  </Button>
+                </Grid>
+                <TextBlock Text="{Binding Detail.Titel}" FontSize="18" FontWeight="Bold" TextWrapping="Wrap" />
+                <TextBlock Text="{Binding Detail.Unterzeile}" Classes="klein" FontSize="13" TextWrapping="Wrap" />
+              </StackPanel>
+              <UniformGrid Columns="3">
+                <Border Background="#F7F6F2" CornerRadius="10" Padding="10,8" Margin="0,0,6,0">
+                  <StackPanel Spacing="2"><TextBlock Text="Verstöße" Classes="klein" FontSize="11" /><TextBlock Text="{Binding Detail.Verstoesse}" Classes="ziffer" FontSize="14" FontWeight="SemiBold" /></StackPanel>
+                </Border>
+                <Border Background="#F7F6F2" CornerRadius="10" Padding="10,8" Margin="3,0">
+                  <StackPanel Spacing="2"><TextBlock Text="Kosten" Classes="klein" FontSize="11" /><TextBlock Text="{Binding Detail.Kosten}" Classes="ziffer" FontSize="14" FontWeight="SemiBold" /></StackPanel>
+                </Border>
+                <Border Background="#F7F6F2" CornerRadius="10" Padding="10,8" Margin="6,0,0,0">
+                  <StackPanel Spacing="2"><TextBlock Text="Anteil" Classes="klein" FontSize="11" /><TextBlock Text="{Binding Detail.Anteil}" Classes="ziffer" FontSize="14" FontWeight="SemiBold" /></StackPanel>
+                </Border>
+              </UniformGrid>
+              <StackPanel Spacing="8" IsVisible="{Binding Detail.HatGewichtung, FallbackValue=False}">
+                <TextBlock FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap" Text="{Binding Detail.GewichtungFuer, StringFormat='Gewichtung · {0}'}" />
+                <ItemsControl ItemsSource="{Binding Detail.Stufen}">
+                  <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                      <UniformGrid Columns="4" />
+                    </ItemsPanelTemplate>
+                  </ItemsControl.ItemsPanel>
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="p:Gewichtungsstufe">
+                      <Button Classes="stufe" Classes.aktiv="{Binding Aktiv}" Content="{Binding Name}"
+                              Command="{Binding $parent[UserControl].((p:KostenAnsichtViewModel)DataContext).StufeWaehlenCommand}" CommandParameter="{Binding}" />
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <TextBlock Classes="klein" TextWrapping="Wrap" Text="Wird sofort übernommen und gespeichert; eine laufende Generierung rechnet mit dem neuen Gewicht weiter." />
+                <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding Detail.IstZelle, FallbackValue=False}">
+                  <Button Classes="gross" Content="Kostenart für alle …" Command="{Binding ZurKostenartCommand}" ToolTip.Tip="Diese Kostenart bei allen Mannschaften zeigen und gewichten" />
+                  <Button Classes="gross" Content="Ganze Mannschaft …" Command="{Binding ZurMannschaftCommand}" ToolTip.Tip="Alle Kosten dieser Mannschaft zeigen und gewichten" />
+                </StackPanel>
+              </StackPanel>
+              <StackPanel Spacing="6" IsVisible="{Binding Detail.HatMeldungen, FallbackValue=False}">
+                <TextBlock Text="{Binding Detail.MeldungenTitel}" FontSize="13" FontWeight="SemiBold" />
+                <ItemsControl ItemsSource="{Binding Detail.Meldungen}">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="x:String">
+                      <Border Background="#FBEDEB" CornerRadius="8" Padding="10,6" Margin="0,0,0,4">
+                        <TextBlock Text="{Binding}" FontSize="12" Foreground="#7A1A12" TextWrapping="Wrap" />
+                      </Border>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </StackPanel>
+            </StackPanel>
+          </ScrollViewer>
+        </Panel>
+      </Border>
+    </Grid>
+  </DockPanel>
+</UserControl>

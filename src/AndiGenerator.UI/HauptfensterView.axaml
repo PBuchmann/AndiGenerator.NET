@@ -1,0 +1,364 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:p="using:AndiGenerator.Presentation"
+        xmlns:ui="using:AndiGenerator.UI"
+        xmlns:dock="using:Dock.Avalonia.Controls"
+        x:Class="AndiGenerator.UI.HauptfensterView"
+        x:DataType="p:HauptfensterViewModel"
+        Title="{Binding Titel}"
+        Width="1440" Height="900" MinWidth="720" MinHeight="560"
+        Background="{StaticResource Grund}"
+        WindowStartupLocation="CenterScreen" WindowState="Maximized">
+  <Window.KeyBindings>
+    <!-- Zoom der aktiven Ansicht wie im Browser; Haupttastatur und Ziffernblock. -->
+    <KeyBinding Gesture="Ctrl+OemPlus" Command="{Binding ZoomGroesserCommand}" />
+    <KeyBinding Gesture="Ctrl+Add" Command="{Binding ZoomGroesserCommand}" />
+    <KeyBinding Gesture="Ctrl+OemMinus" Command="{Binding ZoomKleinerCommand}" />
+    <KeyBinding Gesture="Ctrl+Subtract" Command="{Binding ZoomKleinerCommand}" />
+    <KeyBinding Gesture="Ctrl+D0" Command="{Binding ZoomZuruecksetzenCommand}" />
+    <KeyBinding Gesture="Ctrl+NumPad0" Command="{Binding ZoomZuruecksetzenCommand}" />
+  </Window.KeyBindings>
+  <Window.Styles>
+    <Style Selector="TextBlock.gut">
+      <Setter Property="Foreground" Value="{StaticResource Gut}" />
+    </Style>
+    <Style Selector="TextBlock.schlecht">
+      <Setter Property="Foreground" Value="{StaticResource Schlecht}" />
+    </Style>
+    <Style Selector="Button.kachel">
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+      <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+      <Setter Property="VerticalContentAlignment" Value="Stretch" />
+      <Setter Property="MinHeight" Value="200" />
+      <Setter Property="Padding" Value="28" />
+      <Setter Property="CornerRadius" Value="18" />
+      <Setter Property="Background" Value="{StaticResource Flaeche}" />
+      <Setter Property="BorderBrush" Value="{StaticResource Linie}" />
+      <Setter Property="BorderThickness" Value="1" />
+    </Style>
+    <Style Selector="Button.kachel:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{StaticResource Flaeche}" />
+      <Setter Property="BorderBrush" Value="{StaticResource Akzent}" />
+    </Style>
+    <!-- Anpassung an die Fenstergröße (Klassen „eng“ und „niedrig“, siehe Code): Kacheln 2 × 2 bzw. kompakt. -->
+    <Style Selector="Border.kopf">
+      <Setter Property="Padding" Value="28,16" />
+    </Style>
+    <Style Selector="Window.niedrig Border.kopf">
+      <Setter Property="Padding" Value="20,8" />
+    </Style>
+    <Style Selector="TextBlock.titel">
+      <Setter Property="FontSize" Value="24" />
+    </Style>
+    <Style Selector="Window.niedrig TextBlock.titel">
+      <Setter Property="FontSize" Value="18" />
+    </Style>
+    <Style Selector="UniformGrid.kacheln">
+      <Setter Property="Columns" Value="4" />
+    </Style>
+    <Style Selector="Window.eng UniformGrid.kacheln">
+      <Setter Property="Columns" Value="2" />
+    </Style>
+    <Style Selector="TextBlock.wert">
+      <Setter Property="FontSize" Value="26" />
+    </Style>
+    <Style Selector="TextBlock.pflicht">
+      <Setter Property="FontSize" Value="20" />
+    </Style>
+    <Style Selector="Window.niedrig TextBlock.wert">
+      <Setter Property="FontSize" Value="18" />
+    </Style>
+    <Style Selector="Window.niedrig TextBlock.pflicht">
+      <Setter Property="FontSize" Value="15" />
+    </Style>
+    <Style Selector="Window.niedrig TextBlock.hinweis, Window.niedrig Grid.hinweis">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <Style Selector="Button.kartenknopf">
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+      <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+      <Setter Property="VerticalAlignment" Value="Stretch" />
+      <Setter Property="VerticalContentAlignment" Value="Top" />
+      <Setter Property="Padding" Value="18,14" />
+      <Setter Property="CornerRadius" Value="14" />
+      <Setter Property="Background" Value="{StaticResource Flaeche}" />
+      <Setter Property="BorderBrush" Value="{StaticResource Linie}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="Cursor" Value="Hand" />
+    </Style>
+    <Style Selector="Button.kartenknopf:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{StaticResource Flaeche}" />
+      <Setter Property="BorderBrush" Value="{StaticResource Akzent}" />
+    </Style>
+    <Style Selector="Button.kartenknopf:disabled /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{StaticResource Flaeche}" />
+      <Setter Property="BorderBrush" Value="{StaticResource Linie}" />
+    </Style>
+    <Style Selector="Window.niedrig Button.kartenknopf">
+      <Setter Property="Padding" Value="14,6" />
+    </Style>
+    <Style Selector="Window.niedrig Border.karte">
+      <Setter Property="Padding" Value="14,6" />
+    </Style>
+    <Style Selector="Button.zuletzt">
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+      <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+      <Setter Property="MinHeight" Value="64" />
+      <Setter Property="Padding" Value="18,8" />
+      <Setter Property="CornerRadius" Value="12" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+    </Style>
+    <Style Selector="Button.zuletzt:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{StaticResource Schwebe}" />
+    </Style>
+    <Style Selector="Button.entfernen">
+      <Setter Property="Width" Value="44" />
+      <Setter Property="Height" Value="44" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="CornerRadius" Value="10" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+      <Setter Property="Foreground" Value="{StaticResource Grau}" />
+      <Setter Property="Margin" Value="4,0,6,0" />
+    </Style>
+    <Style Selector="Button.entfernen:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{StaticResource Schwebe}" />
+      <Setter Property="Foreground" Value="{StaticResource Schlecht}" />
+    </Style>
+  </Window.Styles>
+  <DockPanel>
+    <!-- Navigation links; bei schmalem Fenster nur Symbole (Klasse „schmal“, siehe Code). -->
+    <Border x:Name="Navigation" Classes="navigation" DockPanel.Dock="Left" Background="{StaticResource Flaeche}" BorderBrush="{StaticResource Linie}" BorderThickness="0,0,1,0">
+      <DockPanel>
+        <StackPanel DockPanel.Dock="Top" Orientation="Horizontal" Spacing="12" Margin="16,16,16,4">
+          <Border Width="40" Height="40" CornerRadius="12" Background="{StaticResource Akzent}">
+            <ui:Symbol Daten="{StaticResource SymbolLogo}" Farbe="White" Groesse="26" HorizontalAlignment="Center" VerticalAlignment="Center" />
+          </Border>
+          <StackPanel Classes="logotext" VerticalAlignment="Center">
+            <TextBlock Text="AndiGenerator.NET" FontWeight="Bold" FontSize="14" />
+            <TextBlock Text="Spielplan-Generator" Classes="klein" FontSize="11" />
+          </StackPanel>
+        </StackPanel>
+        <StackPanel DockPanel.Dock="Bottom" Margin="12,4,12,14">
+          <Button Classes="nav" Command="{Binding AnleitungCommand}" ToolTip.Tip="Anleitung als PDF öffnen">
+            <StackPanel Orientation="Horizontal" Spacing="12"><ui:Symbol Daten="{StaticResource SymbolAnleitung}" /><TextBlock Classes="navtext" Text="Anleitung" VerticalAlignment="Center" /></StackPanel>
+          </Button>
+          <Button Classes="nav" Command="{Binding UeberCommand}" ToolTip.Tip="Über AndiGenerator.NET">
+            <StackPanel Orientation="Horizontal" Spacing="12"><ui:Symbol Daten="{StaticResource SymbolInfo}" /><TextBlock Classes="navtext" Text="Über" VerticalAlignment="Center" /></StackPanel>
+          </Button>
+        </StackPanel>
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+          <StackPanel Margin="12,0">
+            <TextBlock Classes="sektion" Text="STAFFEL" />
+            <Button Classes="nav" Command="{Binding OeffnenCommand}" ToolTip.Tip="click-TT-Datei oder Plandatei öffnen">
+              <StackPanel Orientation="Horizontal" Spacing="12"><ui:Symbol Daten="{StaticResource SymbolOeffnen}" /><TextBlock Classes="navtext" Text="Öffnen" VerticalAlignment="Center" /></StackPanel>
+            </Button>
+            <Button Classes="nav" Command="{Binding NeuCommand}" ToolTip.Tip="Neue Datei zur komplett manuellen Eingabe erstellen">
+              <StackPanel Orientation="Horizontal" Spacing="12"><ui:Symbol Daten="{StaticResource SymbolNeu}" /><TextBlock Classes="navtext" Text="Neu" VerticalAlignment="Center" /></StackPanel>
+            </Button>
+            <Button Classes="nav" Command="{Binding DatenCommand}" ToolTip.Tip="Spielplandaten bearbeiten">
+              <StackPanel Orientation="Horizontal" Spacing="12"><ui:Symbol Daten="{StaticResource SymbolDaten}" /><TextBlock Classes="navtext" Text="Spielplandaten" VerticalAlignment="Center" /></StackPanel>
+            </Button>
+            <Button Classes="nav" Classes.aktiv="{Binding AktiveAnsicht, Converter={x:Static ui:Konverter.Gleich}, ConverterParameter=Einstellungen}" Command="{Binding EinstellungenCommand}" ToolTip.Tip="Einstellungen der Staffel">
+              <StackPanel Orientation="Horizontal" Spacing="12"><ui:Symbol Daten="{StaticResource SymbolEinstellungen}" /><TextBlock Classes="navtext" Text="Einstellungen" VerticalAlignment="Center" /></StackPanel>
+            </Button>
+            <TextBlock Classes="sektion" Text="ANSICHTEN" />
+            <Button Classes="nav" Classes.aktiv="{Binding AktiveAnsicht, Converter={x:Static ui:Konverter.Gleich}, ConverterParameter=Kosten}" Command="{Binding KostenansichtCommand}" ToolTip.Tip="Kosten">
+              <StackPanel Orientation="Horizontal" Spacing="12"><ui:Symbol Daten="{StaticResource SymbolKosten}" /><TextBlock Classes="navtext" Text="Kosten" VerticalAlignment="Center" /></StackPanel>
+            </Button>
+            <Button Classes="nav" Classes.aktiv="{Binding AktiveAnsicht, Converter={x:Static ui:Konverter.Gleich}, ConverterParameter=Qualitaet}" Command="{Binding QualitaetsansichtCommand}" ToolTip.Tip="Qualität">
+              <StackPanel Orientation="Horizontal" Spacing="12"><ui:Symbol Daten="{StaticResource SymbolQualitaet}" /><TextBlock Classes="navtext" Text="Qualität" VerticalAlignment="Center" /></StackPanel>
+            </Button>
+            <Button Classes="nav" Classes.aktiv="{Binding AktiveAnsicht, Converter={x:Static ui:Konverter.Gleich}, ConverterParameter=Meldungen}" Command="{Binding MeldungsansichtCommand}" ToolTip.Tip="Meldungen je Mannschaft">
+              <StackPanel Orientation="Horizontal" Spacing="12"><ui:Symbol Daten="{StaticResource SymbolMeldungen}" /><TextBlock Classes="navtext" Text="Meldungen" VerticalAlignment="Center" /></StackPanel>
+            </Button>
+            <Button Classes="nav" Classes.aktiv="{Binding AktiveAnsicht, Converter={x:Static ui:Konverter.Gleich}, ConverterParameter=Terminplan}" Command="{Binding TerminplanansichtCommand}" ToolTip.Tip="Terminplan">
+              <StackPanel Orientation="Horizontal" Spacing="12"><ui:Symbol Daten="{StaticResource SymbolTerminplan}" /><TextBlock Classes="navtext" Text="Terminplan" VerticalAlignment="Center" /></StackPanel>
+            </Button>
+            <Button Classes="nav" Classes.aktiv="{Binding AktiveAnsicht, Converter={x:Static ui:Konverter.Gleich}, ConverterParameter=Diagramme}" Command="{Binding DiagrammansichtCommand}" ToolTip.Tip="Diagramme">
+              <StackPanel Orientation="Horizontal" Spacing="12"><ui:Symbol Daten="{StaticResource SymbolDiagramme}" /><TextBlock Classes="navtext" Text="Diagramme" VerticalAlignment="Center" /></StackPanel>
+            </Button>
+            <Button Classes="nav" Classes.aktiv="{Binding AktiveAnsicht, Converter={x:Static ui:Konverter.Gleich}, ConverterParameter=Terminwuensche}" Command="{Binding TerminwunschansichtCommand}" ToolTip.Tip="Terminwünsche">
+              <StackPanel Orientation="Horizontal" Spacing="12"><ui:Symbol Daten="{StaticResource SymbolTerminwuensche}" /><TextBlock Classes="navtext" Text="Terminwünsche" VerticalAlignment="Center" /></StackPanel>
+            </Button>
+            <Button Classes="nav" Classes.aktiv="{Binding AktiveAnsicht, Converter={x:Static ui:Konverter.Gleich}, ConverterParameter=Nachbarn}" Command="{Binding NachbarterminansichtCommand}" ToolTip.Tip="Nachbarmannschaften">
+              <StackPanel Orientation="Horizontal" Spacing="12"><ui:Symbol Daten="{StaticResource SymbolNachbarn}" /><TextBlock Classes="navtext" Text="Nachbarmannschaften" VerticalAlignment="Center" /></StackPanel>
+            </Button>
+            <TextBlock Classes="sektion" Text="AUSGABE" />
+            <Button Classes="nav" Command="{Binding CsvExportierenCommand}" ToolTip.Tip="Bester Plan als CSV-Datei für den click-TT-Import">
+              <StackPanel Orientation="Horizontal" Spacing="12"><ui:Symbol Daten="{StaticResource SymbolExport}" /><TextBlock Classes="navtext" Text="Für click-TT exportieren" VerticalAlignment="Center" /></StackPanel>
+            </Button>
+            <Button Classes="nav" Command="{Binding DruckenCommand}" ToolTip.Tip="Ausdruck als PDF-Datei">
+              <StackPanel Orientation="Horizontal" Spacing="12"><ui:Symbol Daten="{StaticResource SymbolDrucken}" /><TextBlock Classes="navtext" Text="Drucken (PDF)" VerticalAlignment="Center" /></StackPanel>
+            </Button>
+          </StackPanel>
+        </ScrollViewer>
+      </DockPanel>
+    </Border>
+
+    <Border DockPanel.Dock="Bottom" Padding="16,4" BorderThickness="0,1,0,0" BorderBrush="{StaticResource Linie}" Background="{StaticResource Flaeche}">
+      <TextBlock Text="{Binding Statuszeile}" Classes="klein" TextTrimming="CharacterEllipsis" />
+    </Border>
+
+    <Grid RowDefinitions="Auto,Auto,*">
+      <!-- Kopf: Staffel und Steuerung der Generierung -->
+      <Border Grid.Row="0" Classes="kopf" IsVisible="{Binding ZeigtArbeitsbereich}" Background="{StaticResource Flaeche}" BorderBrush="{StaticResource Linie}" BorderThickness="0,0,0,1">
+        <Grid ColumnDefinitions="*,Auto">
+          <StackPanel VerticalAlignment="Center" Spacing="2" Margin="0,0,24,0">
+            <TextBlock Text="{Binding Staffelinfo}" Classes="klein" TextTrimming="CharacterEllipsis" />
+            <TextBlock Text="{Binding Staffelname}" Classes="titel" FontWeight="Bold" TextTrimming="CharacterEllipsis" />
+          </StackPanel>
+          <WrapPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right">
+            <StackPanel Spacing="4" Margin="0,0,12,0">
+              <TextBlock Text="Start mit" Classes="klein" FontSize="11" />
+              <ComboBox Classes="gross" MinWidth="220" ItemsSource="{Binding Startplaene}" SelectedItem="{Binding Startplan}" IsEnabled="{Binding StartplanWaehlbar}"
+                        ToolTip.Tip="Ausgangsplan für den nächsten Start. Eine laufende oder angehaltene Generierung setzt ihren eigenen besten Plan fort – für einen anderen Ausgangsplan zuerst „Beenden“."
+                        ToolTip.ShowOnDisabled="True">
+                <ComboBox.ItemTemplate>
+                  <DataTemplate x:DataType="p:Startplan">
+                    <TextBlock Text="{Binding Name}" />
+                  </DataTemplate>
+                </ComboBox.ItemTemplate>
+              </ComboBox>
+            </StackPanel>
+            <Button Classes="gross" Command="{Binding PlanMerkenCommand}" VerticalAlignment="Bottom" Margin="0,0,24,0" ToolTip.Tip="Besten Plan der Generierung unter einem Namen merken">
+              <StackPanel Orientation="Horizontal" Spacing="10"><ui:Symbol Daten="{StaticResource SymbolMerken}" Groesse="20" /><TextBlock Text="Plan merken" VerticalAlignment="Center" /></StackPanel>
+            </Button>
+            <Button Classes="gross primaer" Command="{Binding GenerierungCommand}" MinWidth="220" VerticalAlignment="Bottom" Margin="0,0,10,0" HorizontalContentAlignment="Center">
+              <StackPanel Orientation="Horizontal" Spacing="10">
+                <ui:Symbol Daten="{StaticResource SymbolPause}" Gefuellt="True" Groesse="20" IsVisible="{Binding ZeigtPause}" />
+                <ui:Symbol Daten="{StaticResource SymbolStart}" Gefuellt="True" Groesse="20" IsVisible="{Binding ZeigtStart}" />
+                <TextBlock Text="{Binding GenerierungText}" VerticalAlignment="Center" />
+              </StackPanel>
+            </Button>
+            <Button Classes="gross" Command="{Binding StoppenCommand}" VerticalAlignment="Bottom" Margin="0,0,10,0" ToolTip.Tip="Generierung beenden">
+              <StackPanel Orientation="Horizontal" Spacing="10"><ui:Symbol Daten="{StaticResource SymbolStopp}" Groesse="20" /><TextBlock Text="Beenden" VerticalAlignment="Center" /></StackPanel>
+            </Button>
+            <Button Classes="gross" Command="{Binding SchliessenCommand}" VerticalAlignment="Bottom" ToolTip.Tip="Staffel schließen und zur Startseite zurückkehren">
+              <StackPanel Orientation="Horizontal" Spacing="10"><ui:Symbol Daten="{StaticResource SymbolSchliessen}" Groesse="20" /><TextBlock Text="Schließen" VerticalAlignment="Center" /></StackPanel>
+            </Button>
+          </WrapPanel>
+        </Grid>
+      </Border>
+
+      <!-- Kacheln: Stand der Generierung -->
+      <UniformGrid Grid.Row="1" Classes="kacheln" IsVisible="{Binding ZeigtArbeitsbereich}" Margin="22,10,22,0">
+        <Button Classes="kartenknopf" Margin="6" Command="{Binding KostenansichtCommand}" ToolTip.Tip="Kostenansicht öffnen: Kosten je Mannschaft und Kostenart">
+          <StackPanel Spacing="2">
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBlock Text="Gesamtkosten (bester Plan)" Classes="klein" TextTrimming="CharacterEllipsis" />
+              <TextBlock Grid.Column="1" Text="Details ›" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource Akzent}" Margin="8,0,0,0" />
+            </Grid>
+            <TextBlock Text="{Binding Anzeige.Kosten}" Classes="ziffer wert" />
+            <TextBlock Text="{Binding Anzeige.KostenHinweis}" Classes="klein hinweis" TextWrapping="Wrap" MaxLines="2" TextTrimming="CharacterEllipsis" />
+          </StackPanel>
+        </Button>
+        <Border Classes="karte" Margin="6">
+          <StackPanel Spacing="2">
+            <TextBlock Text="Verbesserungen" Classes="klein" />
+            <TextBlock Text="{Binding Anzeige.Verbesserungen}" Classes="ziffer wert" />
+            <TextBlock Text="{Binding Anzeige.LetzteVerbesserung}" Classes="klein hinweis" />
+          </StackPanel>
+        </Border>
+        <Border Classes="karte" Margin="6">
+          <StackPanel Spacing="2">
+            <TextBlock Text="Berechnete Pläne" Classes="klein" />
+            <TextBlock Text="{Binding Anzeige.Plaene}" Classes="ziffer wert" />
+            <TextBlock Text="{Binding Anzeige.Tempo}" Classes="klein hinweis" />
+          </StackPanel>
+        </Border>
+        <Button Classes="kartenknopf" Margin="6" Command="{Binding QualitaetsansichtCommand}" ToolTip.Tip="Qualitätsansicht öffnen: welche Kriterien verletzt sind">
+          <StackPanel Spacing="2">
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBlock Text="Pflichtregeln (Stufe A)" Classes="klein" TextTrimming="CharacterEllipsis" />
+              <TextBlock Grid.Column="1" Text="Details ›" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource Akzent}" Margin="8,0,0,0" />
+            </Grid>
+            <StackPanel Orientation="Horizontal" Spacing="8" MinHeight="30">
+              <ui:Symbol Daten="{StaticResource SymbolHaken}" Farbe="{StaticResource Gut}" Groesse="24" VerticalAlignment="Center" IsVisible="{Binding Anzeige.PflichtErfuellt}" />
+              <ui:Symbol Daten="{StaticResource SymbolWarnung}" Farbe="{StaticResource Schlecht}" Groesse="24" VerticalAlignment="Center" IsVisible="{Binding !Anzeige.PflichtErfuellt}" />
+              <TextBlock Text="{Binding Anzeige.Pflicht}" Classes="pflicht" FontWeight="SemiBold" VerticalAlignment="Center"
+                         Classes.gut="{Binding Anzeige.PflichtErfuellt}" Classes.schlecht="{Binding !Anzeige.PflichtErfuellt}" />
+            </StackPanel>
+            <TextBlock Text="{Binding Anzeige.PflichtHinweis}" Classes="klein hinweis" TextWrapping="Wrap" MaxLines="2" TextTrimming="CharacterEllipsis" />
+          </StackPanel>
+        </Button>
+      </UniformGrid>
+
+      <!-- Ansichten -->
+      <dock:DockControl x:Name="Ansichten" Grid.Row="2" Layout="{Binding Layout}" Margin="22,2,22,10" IsVisible="{Binding ZeigtArbeitsbereich}" />
+
+      <!-- Einrichtung nach dem Öffnen einer Staffel (Rückfragen des Originals auf einer Seite) -->
+      <Border Grid.Row="0" Grid.RowSpan="3" IsVisible="{Binding ZeigtEinrichtung}">
+        <ui:EinrichtungAnsicht DataContext="{Binding Einrichtung}" />
+      </Border>
+
+      <!-- Startseite, solange keine Staffel geöffnet ist -->
+      <ScrollViewer Grid.Row="0" Grid.RowSpan="3" IsVisible="{Binding !IstGeoeffnet}" VerticalScrollBarVisibility="Auto">
+        <StackPanel MaxWidth="960" Margin="32,64,32,32" Spacing="32">
+          <StackPanel Orientation="Horizontal" Spacing="18">
+            <Border Width="64" Height="64" CornerRadius="18" Background="{StaticResource Akzent}" VerticalAlignment="Center">
+              <ui:Symbol Daten="{StaticResource SymbolLogo}" Farbe="White" Groesse="40" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Border>
+            <StackPanel VerticalAlignment="Center" Spacing="4">
+              <TextBlock Text="Willkommen bei AndiGenerator.NET" FontSize="30" FontWeight="Bold" TextWrapping="Wrap" />
+              <TextBlock Text="Spielpläne für Tischtennis-Staffeln erstellen – aus den Terminwünschen in click-TT." FontSize="15" Foreground="{StaticResource Tinte2}" TextWrapping="Wrap" />
+            </StackPanel>
+          </StackPanel>
+          <Grid ColumnDefinitions="*,20,*">
+            <Button Grid.Column="0" Classes="kachel" Command="{Binding OeffnenCommand}" BorderBrush="{StaticResource Akzent}">
+              <StackPanel Spacing="12">
+                <ui:Symbol Daten="{StaticResource SymbolOeffnen}" Farbe="{StaticResource Akzent}" Groesse="34" HorizontalAlignment="Left" />
+                <TextBlock Text="click-TT-Datei öffnen" FontSize="20" FontWeight="SemiBold" Foreground="{StaticResource Tinte}" />
+                <TextBlock Text="Die XML-Datei mit den Terminwünschen aus click-TT laden. Beim ersten Öffnen führt ein Assistent durch die wichtigsten Angaben." FontSize="13" Foreground="{StaticResource Tinte2}" TextWrapping="Wrap" />
+                <TextBlock Text="Datei auswählen …" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource Akzent}" />
+              </StackPanel>
+            </Button>
+            <Button Grid.Column="2" Classes="kachel" Command="{Binding NeuCommand}">
+              <StackPanel Spacing="12">
+                <ui:Symbol Daten="{StaticResource SymbolNeu}" Farbe="{StaticResource Tinte2}" Groesse="34" HorizontalAlignment="Left" />
+                <TextBlock Text="Neue Staffel von Hand anlegen" FontSize="20" FontWeight="SemiBold" Foreground="{StaticResource Tinte}" />
+                <TextBlock Text="Ohne click-TT: Liga, Mannschaften und Termine komplett selbst eingeben." FontSize="13" Foreground="{StaticResource Tinte2}" TextWrapping="Wrap" />
+                <TextBlock Text="Neue Datei anlegen …" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource Akzent}" />
+              </StackPanel>
+            </Button>
+          </Grid>
+          <Border Classes="karte" Padding="14" CornerRadius="18" IsVisible="{Binding HatZuletzt}">
+            <StackPanel>
+              <TextBlock Text="Zuletzt geöffnet" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource Tinte2}" Margin="18,6,18,8" />
+              <ItemsControl ItemsSource="{Binding Zuletzt}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="p:Zuletztzeile">
+                    <Grid ColumnDefinitions="*,Auto">
+                      <Button Classes="zuletzt" Command="{Binding $parent[Window].((p:HauptfensterViewModel)DataContext).ZuletztOeffnenCommand}" CommandParameter="{Binding Pfad}" ToolTip.Tip="{Binding Pfad}">
+                        <Grid ColumnDefinitions="Auto,*,Auto">
+                          <ui:Symbol Daten="{StaticResource SymbolKalender}" Farbe="{StaticResource Tinte2}" Groesse="26" VerticalAlignment="Center" Margin="0,0,16,0" />
+                          <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                            <TextBlock Text="{Binding Name}" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource Tinte}" TextTrimming="CharacterEllipsis" />
+                            <TextBlock Text="{Binding Ordner}" Classes="klein" TextTrimming="CharacterEllipsis" />
+                          </StackPanel>
+                          <TextBlock Grid.Column="2" Text="{Binding Zeit}" Classes="klein" VerticalAlignment="Center" Margin="16,0,0,0" />
+                        </Grid>
+                      </Button>
+                      <Button Grid.Column="1" Classes="entfernen" Command="{Binding $parent[Window].((p:HauptfensterViewModel)DataContext).ZuletztEntfernenCommand}" CommandParameter="{Binding Pfad}"
+                              ToolTip.Tip="Aus der Liste entfernen (die Datei selbst bleibt erhalten)">
+                        <ui:Symbol Daten="{StaticResource SymbolSchliessen}" Groesse="18" />
+                      </Button>
+                    </Grid>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+          </Border>
+          <Grid ColumnDefinitions="Auto,*">
+            <Button Classes="link" Command="{Binding UeberCommand}" Content="Über AndiGenerator.NET" />
+            <TextBlock Grid.Column="1" Text="Portierung des AndiGenerators von Andreas Hofmann · GPL-3.0" Classes="klein" HorizontalAlignment="Right" VerticalAlignment="Center" TextWrapping="Wrap" />
+          </Grid>
+        </StackPanel>
+      </ScrollViewer>
+    </Grid>
+  </DockPanel>
+</Window>

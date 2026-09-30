@@ -1,0 +1,22 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>AndiGenerator.UI</RootNamespace>
+    <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Avalonia" />
+    <!-- SkiaSharp für den PDF-Ausdruck (SKDocument); dieselbe Version, die Avalonia.Desktop ohnehin mitbringt. -->
+    <PackageReference Include="Avalonia.Skia" />
+    <PackageReference Include="Avalonia.Themes.Fluent" />
+    <PackageReference Include="Dock.Avalonia" />
+    <PackageReference Include="Dock.Avalonia.Themes.Fluent" />
+    <PackageReference Include="Dock.Model.Mvvm" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Programmsymbol (Fenster und Taskleiste); dieselbe Datei nutzt AndiGenerator.Desktop für die .exe. -->
+    <AvaloniaResource Include="Assets\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AndiGenerator.Presentation\AndiGenerator.Presentation.csproj" />
+  </ItemGroup>
+</Project>

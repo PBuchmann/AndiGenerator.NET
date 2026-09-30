@@ -1,0 +1,76 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:p="using:AndiGenerator.Presentation"
+        x:Class="AndiGenerator.UI.Nachbarmannschaftsdialog"
+        x:DataType="p:NachbarmannschaftsdialogViewModel"
+        Title="Nachbarmannschaft"
+        Width="900" Height="640" MinWidth="700" MinHeight="480" ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner" Classes="dialog">
+  <Window.Styles>
+    <Style Selector="Grid.formular > :is(Control)">
+      <Setter Property="Margin" Value="0,4" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+  </Window.Styles>
+  <DockPanel Margin="24">
+    <Grid DockPanel.Dock="Top" Classes="formular" ColumnDefinitions="160,300,Auto" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto">
+      <TextBlock Grid.Row="0" Text="Mannschaftsname" />
+      <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Name}" />
+      <TextBlock Grid.Row="1" Text="Mannschaftsnummer" />
+      <NumericUpDown Grid.Row="1" Grid.Column="1" Value="{Binding Nummer}" Minimum="1" Maximum="100" Increment="1" FormatString="0" />
+      <TextBlock Grid.Row="1" Grid.Column="2" Text="1., 2., 3. Mannschaft" Foreground="{StaticResource Grau}" Margin="12,4,0,4" />
+      <TextBlock Grid.Row="2" Text="Art (Herren/Damen)" />
+      <AutoCompleteBox Grid.Row="2" Grid.Column="1" ItemsSource="{x:Static p:NachbarmannschaftsdialogViewModel.Arten}" Text="{Binding Art}" MinimumPrefixLength="0" FilterMode="StartsWith" />
+      <TextBlock Grid.Row="3" Text="Spiellokal:" />
+      <StackPanel Grid.Row="3" Grid.Column="1" Grid.ColumnSpan="2" Orientation="Horizontal" Spacing="12">
+        <ComboBox ItemsSource="{x:Static p:NachbarmannschaftsdialogViewModel.Spiellokale}" SelectedItem="{Binding Spiellokal}" MinWidth="80" />
+        <TextBlock Text="leer, falls Verein nur in einem Spiellokal spielt" Foreground="{StaticResource Grau}" VerticalAlignment="Center" />
+      </StackPanel>
+      <CheckBox Grid.Row="4" Grid.Column="1" Grid.ColumnSpan="2" Content="Gleichzeitige (parallele) Spiele mit dieser Mannschaft vermeiden" IsChecked="{Binding KeineParallelenSpiele}" />
+      <CheckBox Grid.Row="5" Grid.Column="1" Grid.ColumnSpan="2" Content="Gleichzeitige (parallele) Heimspiele mit dieser Mannschaft sind erwünscht" IsChecked="{Binding ParalleleHeimspiele}" />
+    </Grid>
+    <StackPanel DockPanel.Dock="Bottom" Spacing="8" Margin="0,12,0,0">
+      <TextBlock Text="{Binding Meldung}" Classes="fehler" TextWrapping="Wrap" />
+      <Border Classes="dialogfuss">
+        <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right">
+          <Button x:Name="Abbrechen" Classes="gross" Content="Abbrechen" IsCancel="True" />
+          <Button x:Name="Ok" Classes="gross primaer" Content="OK" IsDefault="True" />
+        </StackPanel>
+      </Border>
+    </StackPanel>
+    <TextBlock DockPanel.Dock="Top" Text="Begegnungen" FontWeight="SemiBold" Margin="0,12,0,6" />
+    <StackPanel DockPanel.Dock="Right" Spacing="6" Margin="12,0,0,0">
+      <Button Classes="gross" Content="Neue Begegnung…" Command="{Binding NeuCommand}" MinWidth="170" />
+      <Button Classes="gross" Content="Begegnung bearbeiten…" Command="{Binding BearbeitenCommand}" MinWidth="170" />
+      <Button Classes="gross" Content="Begegnung löschen…" Command="{Binding LoeschenCommand}" MinWidth="170" />
+    </StackPanel>
+    <DockPanel>
+      <Grid DockPanel.Dock="Top" ColumnDefinitions="100,70,200,200,*" Margin="8,0,0,2">
+        <TextBlock Grid.Column="0" Text="Datum" FontWeight="SemiBold" />
+        <TextBlock Grid.Column="1" Text="Uhrzeit" FontWeight="SemiBold" />
+        <TextBlock Grid.Column="2" Text="Heimmannschaft" FontWeight="SemiBold" />
+        <TextBlock Grid.Column="3" Text="Gastmannschaft" FontWeight="SemiBold" />
+        <TextBlock Grid.Column="4" Text="Spiellokal" FontWeight="SemiBold" />
+      </Grid>
+      <ListBox x:Name="Liste" ItemsSource="{Binding Spiele}" SelectedItem="{Binding Auswahl}">
+        <ListBox.Styles>
+          <Style Selector="ListBoxItem">
+            <Setter Property="Padding" Value="8,2" />
+            <Setter Property="MinHeight" Value="0" />
+          </Style>
+        </ListBox.Styles>
+        <ListBox.ItemTemplate>
+          <DataTemplate x:DataType="p:NachbarspielZeile">
+            <Grid ColumnDefinitions="100,70,200,200,*">
+              <TextBlock Grid.Column="0" Text="{Binding Datum}" />
+              <TextBlock Grid.Column="1" Text="{Binding Uhrzeit}" />
+              <TextBlock Grid.Column="2" Text="{Binding Heim}" TextTrimming="CharacterEllipsis" />
+              <TextBlock Grid.Column="3" Text="{Binding Gast}" TextTrimming="CharacterEllipsis" />
+              <TextBlock Grid.Column="4" Text="{Binding Spiellokal}" />
+            </Grid>
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+    </DockPanel>
+  </DockPanel>
+</Window>

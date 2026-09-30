@@ -1,0 +1,49 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:p="using:AndiGenerator.Presentation"
+             xmlns:ui="using:AndiGenerator.UI"
+             x:Class="AndiGenerator.UI.Seiten.VorgabespieleSeite"
+             x:DataType="p:VorgabespieleSeiteViewModel">
+  <DockPanel Margin="12">
+    <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Spacing="8" Margin="0,12,0,0">
+      <Button Command="{Binding NeuCommand}" MinWidth="190" HorizontalContentAlignment="Left">
+        <StackPanel Orientation="Horizontal" Spacing="8">
+          <ui:Symbol Daten="{StaticResource SymbolPlus}" Groesse="18" />
+          <TextBlock Text="Neue Begegnung…" VerticalAlignment="Center" />
+        </StackPanel>
+      </Button>
+      <Button Command="{Binding BearbeitenCommand}" MinWidth="190" HorizontalContentAlignment="Left">
+        <StackPanel Orientation="Horizontal" Spacing="8">
+          <ui:Symbol Daten="{StaticResource SymbolKalender}" Groesse="18" />
+          <TextBlock Text="Begegnung bearbeiten…" VerticalAlignment="Center" />
+        </StackPanel>
+      </Button>
+      <Button Command="{Binding LoeschenCommand}" MinWidth="190" HorizontalContentAlignment="Left">
+        <StackPanel Orientation="Horizontal" Spacing="8">
+          <ui:Symbol Daten="{StaticResource SymbolLoeschen}" Groesse="18" />
+          <TextBlock Text="Begegnung löschen…" VerticalAlignment="Center" />
+        </StackPanel>
+      </Button>
+    </StackPanel>
+    <Grid DockPanel.Dock="Top" ColumnDefinitions="120,70,200,200,*" Margin="21,0,0,6">
+      <TextBlock Text="DATUM" Classes="spaltenkopf" />
+      <TextBlock Grid.Column="1" Text="UHRZEIT" Classes="spaltenkopf" />
+      <TextBlock Grid.Column="2" Text="HEIMMANNSCHAFT" Classes="spaltenkopf" />
+      <TextBlock Grid.Column="3" Text="GASTMANNSCHAFT" Classes="spaltenkopf" />
+      <TextBlock Grid.Column="4" Text="SPIELLOKAL" Classes="spaltenkopf" />
+    </Grid>
+    <ListBox x:Name="Liste" ItemsSource="{Binding Zeilen}" SelectedItem="{Binding Auswahl}" MinHeight="200">
+      <ListBox.ItemTemplate>
+        <DataTemplate x:DataType="p:VorgabespielZeile">
+          <Grid ColumnDefinitions="120,70,200,200,*">
+            <TextBlock Text="{Binding Datum}" />
+            <TextBlock Grid.Column="1" Text="{Binding Uhrzeit}" />
+            <TextBlock Grid.Column="2" Text="{Binding Heim}" TextTrimming="CharacterEllipsis" />
+            <TextBlock Grid.Column="3" Text="{Binding Gast}" TextTrimming="CharacterEllipsis" />
+            <TextBlock Grid.Column="4" Text="{Binding Spiellokal}" />
+          </Grid>
+        </DataTemplate>
+      </ListBox.ItemTemplate>
+    </ListBox>
+  </DockPanel>
+</UserControl>

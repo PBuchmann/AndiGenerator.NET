@@ -1,0 +1,14 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:ui="using:AndiGenerator.UI"
+             x:Class="AndiGenerator.UI.App"
+             RequestedThemeVariant="Light">
+  <Application.DataTemplates>
+    <ui:AnsichtenLocator />
+  </Application.DataTemplates>
+  <Application.Styles>
+    <FluentTheme />
+    <DockFluentTheme />
+    <StyleInclude Source="avares://AndiGenerator.UI/Stil.axaml" />
+  </Application.Styles>
+</Application>

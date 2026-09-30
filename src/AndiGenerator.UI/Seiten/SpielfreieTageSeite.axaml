@@ -1,0 +1,16 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:p="using:AndiGenerator.Presentation"
+             x:Class="AndiGenerator.UI.Seiten.SpielfreieTageSeite"
+             x:DataType="p:SpielfreieTageSeiteViewModel">
+  <DockPanel Margin="12">
+    <TextBlock DockPanel.Dock="Top" Classes="erklaerung" Text="An diesen Tagen sollen keine Spiele stattfinden:" TextWrapping="Wrap" Margin="0,0,0,8" />
+    <ItemsControl ItemsSource="{Binding Zeilen}">
+      <ItemsControl.ItemTemplate>
+        <DataTemplate x:DataType="p:AuswahlZeile">
+          <CheckBox Content="{Binding Name}" IsChecked="{Binding Gewaehlt}" Margin="0,1" />
+        </DataTemplate>
+      </ItemsControl.ItemTemplate>
+    </ItemsControl>
+  </DockPanel>
+</UserControl>

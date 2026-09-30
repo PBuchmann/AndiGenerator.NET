@@ -1,0 +1,13 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:p="using:AndiGenerator.Presentation"
+             x:Class="AndiGenerator.UI.Seiten.WochenendeDetail"
+             x:DataType="p:WochenendeDetailViewModel">
+  <ItemsControl ItemsSource="{Binding Gegner}">
+    <ItemsControl.ItemTemplate>
+      <DataTemplate x:DataType="p:AuswahlZeile">
+        <CheckBox Content="{Binding Name}" IsChecked="{Binding Gewaehlt}" Margin="0,1" />
+      </DataTemplate>
+    </ItemsControl.ItemTemplate>
+  </ItemsControl>
+</UserControl>

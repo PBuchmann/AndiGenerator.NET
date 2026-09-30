@@ -1,0 +1,210 @@
+{
+ "id": "R3",
+ "eingabe": "eingabe/R3_Damen_Bezirksoberliga_Rheinhessen (1).xml (ohne .modifications; Erststart-Assistent: alle Schritte 'Überspringen')",
+ "plan": "existingSchedule = Damen Bezirksoberliga Rheinhessen.csv (72 Spiele)",
+ "optionen": "Standardeinstellungen",
+ "hinterlegte_benutzereinstellungen_nicht_verwendet": [
+  "Vereinsinterne Spiele am Anfang: extrem hoch",
+  "parallele Spiele: extrem hoch",
+  "Sperrtermine: extrem hoch",
+  "3-Tage-Abstand: extrem hoch",
+  "2-Spiele-die-Woche: hoch",
+  "Wechsel H/A: hoch"
+ ],
+ "quelle": "Andi-Generator 24.5.1.0, Tab Kosten, Bildschirm, 27.09.2026",
+ "plan_kosten": {
+  "Gesamtkosten": "190 T",
+  "Überlappung Spieltage": "18.563",
+  "Länge Spieltage": "13.981",
+  "Überlappung letzter Spieltag": "10.000",
+  "Länge letzter Spieltag": "394"
+ },
+ "spalten": [
+  "Hallenbelegung",
+  "parallele Spiele",
+  "Sperrtermine",
+  "3-Tage-Abstand",
+  "2-Spiele-die-Woche",
+  "Spielverteilung",
+  "Ungleich H/A",
+  "Wechsel H/A",
+  "Abstand H/A",
+  "Pflichtspieltage",
+  "Gesamt"
+ ],
+ "mannschaften": {
+  "Qvqm Fgmi": [
+   "0 (0)",
+   "0 (0)",
+   "0 /0 (0)",
+   "0 (0)",
+   "0 (0)",
+   "681",
+   "0 (0)",
+   "4 (53)",
+   "7 (933)",
+   "0 /1 (0)",
+   "1.667"
+  ],
+  "Qvqm Tpmu Klgy": [
+   "0 (0)",
+   "0 (0)",
+   "0 /0 (0)",
+   "0 (0)",
+   "0 (0)",
+   "61",
+   "0 (0)",
+   "4 (53)",
+   "7 (933)",
+   "0 /1 (0)",
+   "1.048"
+  ],
+  "Tlpg Nhme": [
+   "0 (0)",
+   "0 (0)",
+   "0 /2 (0)",
+   "0 (0)",
+   "0 (0)",
+   "219",
+   "0 (0)",
+   "4 (53)",
+   "4 (933)",
+   "0 /1 (0)",
+   "1.205"
+  ],
+  "Tlpg Vsxc": [
+   "0 (0)",
+   "0 (0)",
+   "0 /0 (0)",
+   "0 (0)",
+   "0 (0)",
+   "226",
+   "0 (0)",
+   "3 (30)",
+   "6 (166)",
+   "1 /1 (100 T)",
+   "100 T"
+  ],
+  "Tmjo Gbyi II": [
+   "0 (0)",
+   "2 (5.657)",
+   "0 /0 (0)",
+   "0 (0)",
+   "0 (0)",
+   "3.303",
+   "0 (0)",
+   "6 (120)",
+   "6 (10.629)",
+   "0 /1 (0)",
+   "19.709"
+  ],
+  "Tmjo Gbyi III": [
+   "0 (0)",
+   "0 (0)",
+   "0 /0 (0)",
+   "0 (0)",
+   "0 (0)",
+   "2.657",
+   "0 (0)",
+   "6 (120)",
+   "6 (10.629)",
+   "0 /1 (0)",
+   "13.406"
+  ],
+  "Tndw Gzpo": [
+   "0 (0)",
+   "0 (0)",
+   "0 /0 (0)",
+   "0 (0)",
+   "0 (0)",
+   "615",
+   "0 (0)",
+   "3 (30)",
+   "5 (933)",
+   "0 /1 (0)",
+   "1.578"
+  ],
+  "Trbk Dfcm II": [
+   "0 (0)",
+   "0 (0)",
+   "0 /2 (0)",
+   "0 (0)",
+   "0 (0)",
+   "51",
+   "0 (0)",
+   "5 (83)",
+   "5 (3.560)",
+   "0 /1 (0)",
+   "3.694"
+  ],
+  "Trbk Nigm": [
+   "0 (0)",
+   "0 (0)",
+   "0 /42 (0)",
+   "0 (0)",
+   "0 (0)",
+   "243",
+   "0 (0)",
+   "4 (53)",
+   "5 (3.560)",
+   "0 /1 (0)",
+   "3.856"
+  ]
+ },
+ "summe": [
+  "0",
+  "5.657",
+  "0",
+  "0",
+  "0",
+  "8.056",
+  "0",
+  "597",
+  "32.275",
+  "100 T",
+  "147 T"
+ ],
+ "meldungen": {
+  "Qvqm Fgmi": [
+   "Kein Wechsel Heimspiel und Auswärtsspiel: 4",
+   "Maximale Abweichung Reihenfolge Heim- und Auswärtsspiel: 7,00"
+  ],
+  "Qvqm Tpmu Klgy": [
+   "Kein Wechsel Heimspiel und Auswärtsspiel: 4",
+   "Maximale Abweichung Reihenfolge Heim- und Auswärtsspiel: 7,00"
+  ],
+  "Tlpg Nhme": [
+   "Kein Wechsel Heimspiel und Auswärtsspiel: 4",
+   "Maximale Abweichung Reihenfolge Heim- und Auswärtsspiel: 4,00"
+  ],
+  "Tlpg Vsxc": [
+   "Kein Wechsel Heimspiel und Auswärtsspiel: 3",
+   "Maximale Abweichung Reihenfolge Heim- und Auswärtsspiel: 6,00",
+   "1 Spiel(e) zu wenig vom Mo 12.04.2027 - So 18.04.2027"
+  ],
+  "Tmjo Gbyi II": [
+   "Parallele Spiele: Sa 13.02.2027 Tmjo Gbyi - Pqke Joqa II",
+   "Parallele Spiele: Sa 13.03.2027 Tmjo Gbyi - Begy Bnqe",
+   "Kein Wechsel Heimspiel und Auswärtsspiel: 6",
+   "Maximale Abweichung Reihenfolge Heim- und Auswärtsspiel: 6,00"
+  ],
+  "Tmjo Gbyi III": [
+   "Kein Wechsel Heimspiel und Auswärtsspiel: 6",
+   "Maximale Abweichung Reihenfolge Heim- und Auswärtsspiel: 6,00"
+  ],
+  "Tndw Gzpo": [
+   "Kein Wechsel Heimspiel und Auswärtsspiel: 3",
+   "Maximale Abweichung Reihenfolge Heim- und Auswärtsspiel: 5,00"
+  ],
+  "Trbk Dfcm II": [
+   "Kein Wechsel Heimspiel und Auswärtsspiel: 5",
+   "Maximale Abweichung Reihenfolge Heim- und Auswärtsspiel: 5,00"
+  ],
+  "Trbk Nigm": [
+   "Kein Wechsel Heimspiel und Auswärtsspiel: 4",
+   "Maximale Abweichung Reihenfolge Heim- und Auswärtsspiel: 5,00"
+  ]
+ },
+ "herleitung": "Tlpg Vsxc Gesamt = 226+30+166+100000 = 100.422 (Anzeige '100 T'); Summe Gesamt = 146.585 ('147 T'); + Plan-Kostenarten 42.938 = 189.523 ('190 T').",
+ "bemerkung": "9 Mannschaften (ungerade): Pflichtspieltag in KW 15/2027 für Tlpg Vsxc nicht erfüllt (vgl. Befund #5/Pflichtspieltage bei ungerader Zahl)."
+}

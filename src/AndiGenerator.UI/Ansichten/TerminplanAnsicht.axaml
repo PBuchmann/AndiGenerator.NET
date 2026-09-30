@@ -1,0 +1,310 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:p="using:AndiGenerator.Presentation"
+             xmlns:ui="using:AndiGenerator.UI"
+             x:Class="AndiGenerator.UI.Ansichten.TerminplanAnsicht"
+             x:DataType="p:TerminplanAnsichtViewModel">
+  <UserControl.Styles>
+    <Style Selector="Button.spiel">
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+      <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+      <Setter Property="MinHeight" Value="34" />
+      <Setter Property="Padding" Value="6,3" />
+      <Setter Property="Margin" Value="0,1" />
+      <Setter Property="CornerRadius" Value="6" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="FontSize" Value="13" />
+    </Style>
+    <Style Selector="Button.spiel:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{StaticResource Schwebe}" />
+    </Style>
+    <Style Selector="Border.datum">
+      <Setter Property="Background" Value="#F0EFEA" />
+      <Setter Property="CornerRadius" Value="6" />
+      <Setter Property="Padding" Value="8,2" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Border.chip">
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="Padding" Value="7,1" />
+      <Setter Property="Margin" Value="0,1,4,1" />
+    </Style>
+    <Style Selector="Border.ha">
+      <Setter Property="Width" Value="12" />
+      <Setter Property="Height" Value="12" />
+      <Setter Property="Margin" Value="0,0,3,3" />
+      <Setter Property="CornerRadius" Value="3" />
+      <Setter Property="BorderThickness" Value="1.5" />
+      <Setter Property="BorderBrush" Value="{StaticResource Akzent}" />
+      <Setter Property="Background" Value="Transparent" />
+    </Style>
+    <Style Selector="Border.ha.heim">
+      <Setter Property="Background" Value="{StaticResource Akzent}" />
+    </Style>
+    <Style Selector="Border.hamarke">
+      <Setter Property="Width" Value="22" />
+      <Setter Property="Height" Value="22" />
+      <Setter Property="CornerRadius" Value="6" />
+      <Setter Property="BorderThickness" Value="1.5" />
+      <Setter Property="BorderBrush" Value="{StaticResource Akzent}" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="TextElement.Foreground" Value="{StaticResource Akzent}" />
+    </Style>
+    <Style Selector="Border.hamarke.heim">
+      <Setter Property="Background" Value="{StaticResource Akzent}" />
+      <Setter Property="TextElement.Foreground" Value="White" />
+    </Style>
+    <Style Selector="StackPanel.nachbar TextBlock">
+      <Setter Property="Foreground" Value="{StaticResource Grau}" />
+    </Style>
+    <Style Selector="StackPanel.nachbar.echt TextBlock">
+      <Setter Property="Foreground" Value="{StaticResource Akzent}" />
+    </Style>
+  </UserControl.Styles>
+  <DockPanel Margin="18,14">
+    <StackPanel DockPanel.Dock="Top" Classes="leiste" Orientation="Horizontal" Spacing="10" Margin="0,0,0,10">
+      <TextBlock Text="Plan" Classes="klein" FontSize="13" VerticalAlignment="Center" />
+      <ComboBox MinWidth="280" ItemsSource="{Binding Quellen}" SelectedItem="{Binding Quelle}">
+        <ComboBox.ItemTemplate>
+          <DataTemplate x:DataType="p:PlanQuelle">
+            <TextBlock Text="{Binding Name}" />
+          </DataTemplate>
+        </ComboBox.ItemTemplate>
+      </ComboBox>
+      <Button Classes="gross" Command="{Binding EntfernenCommand}" ToolTip.Tip="Gewählten gemerkten Plan löschen">
+        <StackPanel Orientation="Horizontal" Spacing="8"><ui:Symbol Daten="{StaticResource SymbolLoeschen}" Groesse="20" /><TextBlock Text="Löschen" VerticalAlignment="Center" /></StackPanel>
+      </Button>
+      <Button Classes="gross" Command="{Binding ExcelCommand}" ToolTip.Tip="Plan als Excel-Arbeitsmappe speichern: Übersicht, Spielplan, Mannschaftspläne und Kosten">
+        <StackPanel Orientation="Horizontal" Spacing="8"><ui:Symbol Daten="{StaticResource SymbolExcel}" Groesse="20" /><TextBlock Text="Nach Excel" VerticalAlignment="Center" /></StackPanel>
+      </Button>
+      <ui:Zoomauswahl DataContext="{Binding Zoom}" Margin="12,0,0,0" />
+    </StackPanel>
+    <Grid DockPanel.Dock="Top" ColumnDefinitions="Auto,*" Margin="0,0,0,12">
+      <Border Background="#ECEAE4" CornerRadius="12" Padding="4">
+        <StackPanel Orientation="Horizontal" Spacing="4">
+          <ToggleButton Classes="segment" Content="Spielplan" IsChecked="{Binding IstSpielplan}" ToolTip.Tip="Alle Spiele nach Kalenderwochen" />
+          <ToggleButton Classes="segment" Content="Mannschaftspläne" IsChecked="{Binding IstMannschaften}" ToolTip.Tip="Je Mannschaft ihre Spiele mit Heim/Auswärts-Folge" />
+          <ToggleButton Classes="segment" Content="mit Nachbarmannschaften" IsChecked="{Binding IstMitNachbarn}" ToolTip.Tip="Mannschaftspläne mit den Spielen der Vereinsmannschaften am selben Tag" />
+        </StackPanel>
+      </Border>
+      <TextBlock Grid.Column="1" Text="{Binding Zusammenfassung}" Classes="klein" FontSize="13" VerticalAlignment="Center" Margin="16,0,0,0" />
+    </Grid>
+    <TextBlock DockPanel.Dock="Top" Text="{Binding Hinweis}" IsVisible="{Binding HatHinweis}" Margin="0,8" />
+    <Grid ColumnDefinitions="*,Auto">
+      <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+        <LayoutTransformControl LayoutTransform="{Binding Zoom.Faktor, Converter={x:Static ui:Konverter.Skalierung}}" VerticalAlignment="Top">
+          <StackPanel Spacing="12">
+            <Border Classes="karte" Background="#FBF1DC" BorderBrush="#EBD3A0" IsVisible="{Binding HatOhneTermin}" HorizontalAlignment="Left" MinWidth="520">
+              <StackPanel Spacing="6">
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                  <ui:Symbol Daten="{StaticResource SymbolWarnung}" Farbe="#8A5A00" Groesse="18" VerticalAlignment="Center" />
+                  <TextBlock Text="{Binding OhneTerminTitel}" FontSize="14" FontWeight="SemiBold" Foreground="#6E4400" VerticalAlignment="Center" />
+                </StackPanel>
+                <ItemsControl ItemsSource="{Binding OhneTermin}">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="p:Terminspiel">
+                      <Button Classes="spiel" Command="{Binding $parent[UserControl].((p:TerminplanAnsichtViewModel)DataContext).SpielWaehlenCommand}" CommandParameter="{Binding}">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                          <TextBlock Text="{Binding Heim}" FontWeight="SemiBold" />
+                          <TextBlock Text="–" Foreground="{StaticResource Grau}" />
+                          <TextBlock Text="{Binding Gast}" />
+                          <TextBlock Text="{Binding Runde, StringFormat='· {0}'}" Classes="klein" VerticalAlignment="Center" />
+                        </StackPanel>
+                      </Button>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </StackPanel>
+            </Border>
+
+            <ItemsControl ItemsSource="{Binding Wochen}" IsVisible="{Binding IstSpielplan}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="p:Terminwoche">
+                  <StackPanel Spacing="6" Margin="0,0,0,12">
+                    <TextBlock Text="{Binding Rundenwechsel}" IsVisible="{Binding HatRundenwechsel}" FontSize="18" FontWeight="Bold" Margin="2,6,0,4" />
+                    <Border Classes="karte" Padding="14,10" MaxWidth="1100" HorizontalAlignment="Left">
+                      <StackPanel>
+                        <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,0,0,6">
+                          <TextBlock Text="{Binding Titel}" FontSize="14" FontWeight="Bold" />
+                          <TextBlock Text="{Binding Zeitraum}" Classes="klein ziffer" VerticalAlignment="Center" />
+                          <TextBlock Text="{Binding Anzahl}" Classes="klein" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <ItemsControl ItemsSource="{Binding Spiele}">
+                          <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="p:Terminspiel">
+                              <Button Classes="spiel" Command="{Binding $parent[UserControl].((p:TerminplanAnsichtViewModel)DataContext).SpielWaehlenCommand}" CommandParameter="{Binding}">
+                                <Grid ColumnDefinitions="96,52,*,Auto">
+                                  <Border Classes="datum" HorizontalAlignment="Left">
+                                    <TextBlock Text="{Binding Tag}" FontSize="12" Classes="ziffer" />
+                                  </Border>
+                                  <TextBlock Grid.Column="1" Text="{Binding Zeit}" Classes="ziffer" FontSize="12" VerticalAlignment="Center" Foreground="{StaticResource Tinte2}" />
+                                  <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding Heim}" FontWeight="SemiBold" />
+                                    <TextBlock Text="–" Foreground="{StaticResource Grau}" />
+                                    <TextBlock Text="{Binding Gast}" />
+                                  </StackPanel>
+                                  <Panel Grid.Column="3" Margin="12,0,0,0">
+                                    <ItemsControl ItemsSource="{Binding Chips}" VerticalAlignment="Center">
+                              <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                  <WrapPanel Orientation="Horizontal" />
+                                </ItemsPanelTemplate>
+                              </ItemsControl.ItemsPanel>
+                              <ItemsControl.ItemTemplate>
+                                <DataTemplate x:DataType="p:Hinweischip">
+                                  <Border Classes="chip" Background="{Binding Art, Converter={x:Static ui:Konverter.HinweisHintergrund}}" ToolTip.Tip="{Binding Erklaerung}">
+                                    <TextBlock Text="{Binding Text}" FontSize="11" Foreground="{Binding Art, Converter={x:Static ui:Konverter.HinweisSchrift}}" />
+                                  </Border>
+                                </DataTemplate>
+                              </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                                  </Panel>
+                                </Grid>
+                              </Button>
+                            </DataTemplate>
+                          </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                      </StackPanel>
+                    </Border>
+                  </StackPanel>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <ItemsControl ItemsSource="{Binding Plaene}" IsVisible="{Binding !IstSpielplan}">
+              <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                  <WrapPanel Orientation="Horizontal" ItemWidth="460" />
+                </ItemsPanelTemplate>
+              </ItemsControl.ItemsPanel>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="p:Mannschaftsplan">
+                  <Border Classes="karte" Padding="14,12" Margin="0,0,12,12" VerticalAlignment="Top">
+                    <StackPanel Spacing="8">
+                      <Grid ColumnDefinitions="*,Auto">
+                        <TextBlock Text="{Binding Name}" FontSize="14" FontWeight="Bold" TextTrimming="CharacterEllipsis" />
+                        <TextBlock Grid.Column="1" Text="{Binding Bilanz}" Classes="klein" VerticalAlignment="Center" Margin="8,0,0,0" />
+                      </Grid>
+                      <ItemsControl ItemsSource="{Binding Folge}" ToolTip.Tip="Heim/Auswärts-Folge: gefüllt = Heimspiel, hohl = Auswärtsspiel">
+                        <ItemsControl.ItemsPanel>
+                          <ItemsPanelTemplate>
+                            <WrapPanel Orientation="Horizontal" />
+                          </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                          <DataTemplate x:DataType="x:Boolean">
+                            <Border Classes="ha" Classes.heim="{Binding}" />
+                          </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                      </ItemsControl>
+                      <ItemsControl ItemsSource="{Binding Spiele}">
+                        <ItemsControl.ItemTemplate>
+                          <DataTemplate x:DataType="p:Mannschaftsspiel">
+                            <StackPanel>
+                              <Border Height="8" IsVisible="{Binding NeueRunde}" BorderBrush="{StaticResource Linie}" BorderThickness="0,0,0,1" Margin="0,0,0,8" />
+                              <Button Classes="spiel" Command="{Binding $parent[UserControl].((p:TerminplanAnsichtViewModel)DataContext).SpielWaehlenCommand}" CommandParameter="{Binding Spiel}">
+                                <Grid ColumnDefinitions="30,88,46,*">
+                                  <Border Classes="hamarke" Classes.heim="{Binding Heimspiel}" HorizontalAlignment="Left">
+                                    <TextBlock Text="{Binding Marke}" FontSize="11" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                  </Border>
+                                  <TextBlock Grid.Column="1" Text="{Binding Spiel.Tag}" Classes="ziffer" FontSize="12" VerticalAlignment="Center" />
+                                  <TextBlock Grid.Column="2" Text="{Binding Spiel.Zeit}" Classes="ziffer" FontSize="12" VerticalAlignment="Center" Foreground="{StaticResource Tinte2}" />
+                                  <StackPanel Grid.Column="3" Spacing="2" VerticalAlignment="Center">
+                                    <TextBlock Text="{Binding Gegner}" TextTrimming="CharacterEllipsis" />
+                                    <ItemsControl ItemsSource="{Binding Spiel.Chips}" IsVisible="{Binding Spiel.HatChips}">
+                                      <ItemsControl.ItemsPanel>
+                                        <ItemsPanelTemplate>
+                                          <WrapPanel Orientation="Horizontal" />
+                                        </ItemsPanelTemplate>
+                                      </ItemsControl.ItemsPanel>
+                                      <ItemsControl.ItemTemplate>
+                                        <DataTemplate x:DataType="p:Hinweischip">
+                                          <Border Classes="chip" Background="{Binding Art, Converter={x:Static ui:Konverter.HinweisHintergrund}}" ToolTip.Tip="{Binding Erklaerung}">
+                                            <TextBlock Text="{Binding Text}" FontSize="11" Foreground="{Binding Art, Converter={x:Static ui:Konverter.HinweisSchrift}}" />
+                                          </Border>
+                                        </DataTemplate>
+                                      </ItemsControl.ItemTemplate>
+                                    </ItemsControl>
+                                  </StackPanel>
+                                </Grid>
+                              </Button>
+                              <ItemsControl ItemsSource="{Binding Nachbarn}" IsVisible="{Binding HatNachbarn}" Margin="118,0,0,4">
+                                <ItemsControl.ItemTemplate>
+                                  <DataTemplate x:DataType="p:Nachbarspiel">
+                                    <StackPanel Orientation="Horizontal" Spacing="6" Classes.echt="{Binding Echt}" Classes="nachbar">
+                                      <TextBlock Text="{Binding Zeit}" Classes="ziffer" FontSize="11" />
+                                      <TextBlock Text="{Binding Text}" FontSize="11" TextTrimming="CharacterEllipsis" MaxWidth="300" />
+                                    </StackPanel>
+                                  </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                              </ItemsControl>
+                            </StackPanel>
+                          </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                      </ItemsControl>
+                    </StackPanel>
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </LayoutTransformControl>
+      </ScrollViewer>
+
+      <Border Grid.Column="1" Classes="karte" Padding="20,18" Width="360" Margin="16,0,0,0" VerticalAlignment="Stretch" IsVisible="{Binding HatAuswahl}">
+        <ScrollViewer VerticalScrollBarVisibility="Auto">
+          <StackPanel Spacing="14">
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBlock Text="SPIEL" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource Grau}" VerticalAlignment="Center" />
+              <Button Grid.Column="1" Classes="schliessen" Command="{Binding AuswahlSchliessenCommand}" ToolTip.Tip="Details schließen" Margin="0,-6,-8,0">
+                <ui:Symbol Daten="{StaticResource SymbolSchliessen}" Groesse="18" />
+              </Button>
+            </Grid>
+            <StackPanel Spacing="2">
+              <TextBlock Text="{Binding Auswahl.Heim}" FontSize="18" FontWeight="Bold" TextWrapping="Wrap" />
+              <TextBlock Text="{Binding Auswahl.Gast, StringFormat='gegen {0}'}" FontSize="14" TextWrapping="Wrap" />
+              <TextBlock Classes="klein" TextWrapping="Wrap" Margin="0,4,0,0">
+                <Run Text="{Binding Auswahl.Datum}" />
+                <Run Text="{Binding Auswahl.Zeit}" />
+                <Run Text="·" />
+                <Run Text="{Binding Auswahl.Runde}" />
+              </TextBlock>
+            </StackPanel>
+            <StackPanel Spacing="6" IsVisible="{Binding Auswahl.HatChips, FallbackValue=False}">
+              <TextBlock Text="Hinweise" FontSize="13" FontWeight="SemiBold" />
+              <ItemsControl ItemsSource="{Binding Auswahl.Chips}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="p:Hinweischip">
+                    <Border CornerRadius="8" Padding="10,6" Margin="0,0,0,4" Background="{Binding Art, Converter={x:Static ui:Konverter.HinweisHintergrund}}">
+                      <StackPanel Spacing="2">
+                        <TextBlock Text="{Binding Text}" FontSize="12" FontWeight="SemiBold" Foreground="{Binding Art, Converter={x:Static ui:Konverter.HinweisSchrift}}" TextWrapping="Wrap" />
+                        <TextBlock Text="{Binding Erklaerung}" FontSize="12" TextWrapping="Wrap" Foreground="{StaticResource Tinte2}" />
+                      </StackPanel>
+                    </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+            <StackPanel Spacing="6" IsVisible="{Binding Auswahl.HatNachbarn, FallbackValue=False}">
+              <TextBlock Text="Nachbar- und Vereinsmannschaften am selben Tag" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap" />
+              <ItemsControl ItemsSource="{Binding Auswahl.Nachbarn}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="p:Nachbarspiel">
+                    <Border BorderBrush="{StaticResource Linie}" BorderThickness="0,0,0,1" Padding="0,5">
+                      <StackPanel Spacing="1" Classes.echt="{Binding Echt}" Classes="nachbar">
+                        <TextBlock FontSize="12" TextWrapping="Wrap"><Run Text="{Binding Zeit}" /><Run Text="  " /><Run Text="{Binding Text}" /></TextBlock>
+                        <TextBlock Text="{Binding Lokal, StringFormat='Spiellokal {0}'}" FontSize="11" IsVisible="{Binding Lokal, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                      </StackPanel>
+                    </Border>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+          </StackPanel>
+        </ScrollViewer>
+      </Border>
+    </Grid>
+  </DockPanel>
+</UserControl>

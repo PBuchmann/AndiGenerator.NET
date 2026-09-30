@@ -1,0 +1,20 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:p="using:AndiGenerator.Presentation"
+             xmlns:ui="using:AndiGenerator.UI"
+             x:Class="AndiGenerator.UI.Zoomauswahl"
+             x:DataType="p:Zoom">
+  <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center"
+              ToolTip.Tip="Vergrößerung: Schieberegler, − / +, Strg + Mausrad, Strg + Plus / Strg + Minus; Strg + 0 oder Klick auf die Prozentzahl für 100 %">
+    <Button x:Name="Kleiner" Classes="gross" Width="44" MinHeight="44" Padding="0" HorizontalContentAlignment="Center" ToolTip.Tip="Verkleinern">
+      <ui:Symbol Daten="{StaticResource SymbolMinus}" Groesse="20" />
+    </Button>
+    <Slider Width="140" VerticalAlignment="Center" Margin="4,-8"
+            Minimum="25" Maximum="300" SmallChange="5" LargeChange="25" TickFrequency="5" IsSnapToTickEnabled="True"
+            Value="{Binding Schieber}" />
+    <Button x:Name="Groesser" Classes="gross" Width="44" MinHeight="44" Padding="0" HorizontalContentAlignment="Center" ToolTip.Tip="Vergrößern">
+      <ui:Symbol Daten="{StaticResource SymbolPlus}" Groesse="20" />
+    </Button>
+    <Button x:Name="Zuruecksetzen" Classes="gross" Content="{Binding Text}" MinWidth="72" MinHeight="44" Padding="10,0" FontWeight="Normal" HorizontalContentAlignment="Center" ToolTip.Tip="Auf 100 % zurücksetzen" />
+  </StackPanel>
+</UserControl>

@@ -1,0 +1,18 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:p="using:AndiGenerator.Presentation"
+             xmlns:ui="using:AndiGenerator.UI"
+             x:Class="AndiGenerator.UI.Seiten.MehrMannschaftenSeite"
+             x:DataType="p:MehrMannschaftenSeiteViewModel">
+  <DockPanel Margin="12">
+    <TextBlock DockPanel.Dock="Top" Classes="erklaerung" Text="{Binding Kopftext}" IsVisible="{Binding HatKopftext}" TextWrapping="Wrap" Margin="0,0,0,12" />
+    <ListBox x:Name="Liste" DockPanel.Dock="Left" ItemsSource="{Binding Namen}" MinWidth="200" MaxWidth="260" Margin="0,0,20,0" VerticalAlignment="Top" />
+    <TextBlock DockPanel.Dock="Top" Classes="abschnitt" Text="{Binding Ueberschrift}" Margin="0,0,0,8" />
+    <TextBlock DockPanel.Dock="Top" Classes="fehler" Text="{Binding Meldung}" TextWrapping="Wrap" />
+    <ContentControl Content="{Binding Detail}">
+      <ContentControl.ContentTemplate>
+        <ui:SeitenLocator />
+      </ContentControl.ContentTemplate>
+    </ContentControl>
+  </DockPanel>
+</UserControl>

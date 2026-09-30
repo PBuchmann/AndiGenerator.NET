@@ -1,0 +1,759 @@
+<?xml version="1.0" encoding="iso-8859-15"?>
+<TT name="Bezirksoberliga Rheinhessen Nord" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.tt-liga.de/TTGenerator http://www.tt-liga.de/includes/TTGenerator.xsd" xmlns="http://www.tt-liga.de/TTGenerator" mid="07.12.2026" from="17.08.2026" seasonType="STANDARD" until="09.05.2027" gender="Erwachsene" id="518360">
+  <noGameDays />
+  <mandatoryGameDays>
+	  <mandatoryDay day="12.04.2027" /><mandatoryDay day="13.04.2027" /><mandatoryDay day="14.04.2027" /><mandatoryDay day="15.04.2027" /><mandatoryDay day="16.04.2027" /><mandatoryDay day="17.04.2027" /><mandatoryDay day="18.04.2027" />
+  </mandatoryGameDays>
+  <predefinedGames>
+  	
+  </predefinedGames>
+  <existingSchedule>
+    
+  </existingSchedule>
+  <teams>
+    
+      <team gender="Erwachsene" clubId="004520" number="1" noDoubleDays="false" id="3082534">
+        <name>Trbk Bcqa Klgy</name>
+        <gameDays>
+           <homeGame secondary="false" courtHall="Jsno" maxParallelGames="2" day="16.04.2027" time="20:00" /> <homeGame secondary="false" courtHall="Jsno" maxParallelGames="2" day="10.04.2027" time="18:30" /> <homeGame secondary="false" courtHall="Jsno" maxParallelGames="2" day="20.02.2027" time="18:30" /> <homeGame secondary="false" courtHall="Jsno" maxParallelGames="2" day="15.01.2027" time="20:00" /> <homeGame secondary="false" courtHall="Jsno" maxParallelGames="2" day="05.02.2027" time="20:00" /> <homeGame secondary="false" courtHall="Jsno" maxParallelGames="2" day="12.02.2027" time="20:00" /> <homeGame secondary="false" courtHall="Jsno" maxParallelGames="2" day="20.11.2026" time="20:00" /> <homeGame secondary="false" courtHall="Jsno" maxParallelGames="2" day="13.03.2027" time="18:30" /> <homeGame secondary="false" courtHall="Jsno" maxParallelGames="2" day="16.10.2026" time="20:00" /> <homeGame secondary="false" courtHall="Jsno" maxParallelGames="2" day="14.11.2026" time="18:30" /> <homeGame secondary="false" courtHall="Jsno" maxParallelGames="2" day="26.02.2027" time="20:00" /> <homeGame secondary="false" courtHall="Jsno" maxParallelGames="2" day="09.10.2026" time="20:00" /> <homeGame secondary="false" courtHall="Jsno" maxParallelGames="2" day="30.01.2027" time="18:30" /> <homeGame secondary="false" courtHall="Jsno" maxParallelGames="2" day="05.12.2026" time="18:30" /> <homeGame secondary="false" courtHall="Jsno" maxParallelGames="2" day="26.09.2026" time="18:30" /> <homeGame secondary="false" courtHall="Jsno" maxParallelGames="2" day="05.09.2026" time="18:30" /> <homeGame secondary="false" courtHall="Jsno" maxParallelGames="2" day="28.11.2026" time="18:30" />
+           <noGame from="17.08.2026" until="17.08.2026" /> <noGame from="18.08.2026" until="18.08.2026" /> <noGame from="19.08.2026" until="19.08.2026" /> <noGame from="20.08.2026" until="20.08.2026" /> <noGame from="21.08.2026" until="21.08.2026" /> <noGame from="22.08.2026" until="22.08.2026" /> <noGame from="23.08.2026" until="23.08.2026" /> <noGame from="24.08.2026" until="24.08.2026" /> <noGame from="25.08.2026" until="25.08.2026" /> <noGame from="26.08.2026" until="26.08.2026" /> <noGame from="27.08.2026" until="27.08.2026" /> <noGame from="28.08.2026" until="28.08.2026" /> <noGame from="29.08.2026" until="29.08.2026" /> <noGame from="30.08.2026" until="30.08.2026" /> <noGame from="31.08.2026" until="31.08.2026" /> <noGame from="01.09.2026" until="01.09.2026" /> <noGame from="02.09.2026" until="02.09.2026" /> <noGame from="03.09.2026" until="03.09.2026" /> <noGame from="07.09.2026" until="07.09.2026" /> <noGame from="08.09.2026" until="08.09.2026" /> <noGame from="09.09.2026" until="09.09.2026" /> <noGame from="10.09.2026" until="10.09.2026" /> <noGame from="14.09.2026" until="14.09.2026" /> <noGame from="15.09.2026" until="15.09.2026" /> <noGame from="16.09.2026" until="16.09.2026" /> <noGame from="17.09.2026" until="17.09.2026" /> <noGame from="18.09.2026" until="18.09.2026" /> <noGame from="21.09.2026" until="21.09.2026" /> <noGame from="22.09.2026" until="22.09.2026" /> <noGame from="23.09.2026" until="23.09.2026" /> <noGame from="24.09.2026" until="24.09.2026" /> <noGame from="28.09.2026" until="28.09.2026" /> <noGame from="29.09.2026" until="29.09.2026" /> <noGame from="30.09.2026" until="30.09.2026" /> <noGame from="01.10.2026" until="01.10.2026" /> <noGame from="05.10.2026" until="05.10.2026" /> <noGame from="06.10.2026" until="06.10.2026" /> <noGame from="07.10.2026" until="07.10.2026" /> <noGame from="08.10.2026" until="08.10.2026" /> <noGame from="12.10.2026" until="12.10.2026" /> <noGame from="13.10.2026" until="13.10.2026" /> <noGame from="14.10.2026" until="14.10.2026" /> <noGame from="15.10.2026" until="15.10.2026" /> <noGame from="19.10.2026" until="19.10.2026" /> <noGame from="20.10.2026" until="20.10.2026" /> <noGame from="21.10.2026" until="21.10.2026" /> <noGame from="22.10.2026" until="22.10.2026" /> <noGame from="24.10.2026" until="24.10.2026" /> <noGame from="26.10.2026" until="26.10.2026" /> <noGame from="27.10.2026" until="27.10.2026" /> <noGame from="28.10.2026" until="28.10.2026" /> <noGame from="29.10.2026" until="29.10.2026" /> <noGame from="30.10.2026" until="30.10.2026" /> <noGame from="02.11.2026" until="02.11.2026" /> <noGame from="03.11.2026" until="03.11.2026" /> <noGame from="04.11.2026" until="04.11.2026" /> <noGame from="05.11.2026" until="05.11.2026" /> <noGame from="09.11.2026" until="09.11.2026" /> <noGame from="10.11.2026" until="10.11.2026" /> <noGame from="11.11.2026" until="11.11.2026" /> <noGame from="12.11.2026" until="12.11.2026" /> <noGame from="15.11.2026" until="15.11.2026" /> <noGame from="16.11.2026" until="16.11.2026" /> <noGame from="17.11.2026" until="17.11.2026" /> <noGame from="18.11.2026" until="18.11.2026" /> <noGame from="19.11.2026" until="19.11.2026" /> <noGame from="23.11.2026" until="23.11.2026" /> <noGame from="24.11.2026" until="24.11.2026" /> <noGame from="25.11.2026" until="25.11.2026" /> <noGame from="26.11.2026" until="26.11.2026" /> <noGame from="30.11.2026" until="30.11.2026" /> <noGame from="01.12.2026" until="01.12.2026" /> <noGame from="02.12.2026" until="02.12.2026" /> <noGame from="03.12.2026" until="03.12.2026" /> <noGame from="09.01.2027" until="09.01.2027" /> <noGame from="10.01.2027" until="10.01.2027" /> <noGame from="11.01.2027" until="11.01.2027" /> <noGame from="12.01.2027" until="12.01.2027" /> <noGame from="13.01.2027" until="13.01.2027" /> <noGame from="14.01.2027" until="14.01.2027" /> <noGame from="18.01.2027" until="18.01.2027" /> <noGame from="19.01.2027" until="19.01.2027" /> <noGame from="20.01.2027" until="20.01.2027" /> <noGame from="21.01.2027" until="21.01.2027" /> <noGame from="24.01.2027" until="24.01.2027" /> <noGame from="25.01.2027" until="25.01.2027" /> <noGame from="26.01.2027" until="26.01.2027" /> <noGame from="27.01.2027" until="27.01.2027" /> <noGame from="28.01.2027" until="28.01.2027" /> <noGame from="31.01.2027" until="31.01.2027" /> <noGame from="01.02.2027" until="01.02.2027" /> <noGame from="02.02.2027" until="02.02.2027" /> <noGame from="03.02.2027" until="03.02.2027" /> <noGame from="04.02.2027" until="04.02.2027" /> <noGame from="07.02.2027" until="07.02.2027" /> <noGame from="08.02.2027" until="08.02.2027" /> <noGame from="09.02.2027" until="09.02.2027" /> <noGame from="10.02.2027" until="10.02.2027" /> <noGame from="11.02.2027" until="11.02.2027" /> <noGame from="14.02.2027" until="14.02.2027" /> <noGame from="15.02.2027" until="15.02.2027" /> <noGame from="16.02.2027" until="16.02.2027" /> <noGame from="17.02.2027" until="17.02.2027" /> <noGame from="18.02.2027" until="18.02.2027" /> <noGame from="21.02.2027" until="21.02.2027" /> <noGame from="22.02.2027" until="22.02.2027" /> <noGame from="23.02.2027" until="23.02.2027" /> <noGame from="24.02.2027" until="24.02.2027" /> <noGame from="25.02.2027" until="25.02.2027" /> <noGame from="28.02.2027" until="28.02.2027" /> <noGame from="01.03.2027" until="01.03.2027" /> <noGame from="02.03.2027" until="02.03.2027" /> <noGame from="03.03.2027" until="03.03.2027" /> <noGame from="04.03.2027" until="04.03.2027" /> <noGame from="07.03.2027" until="07.03.2027" /> <noGame from="08.03.2027" until="08.03.2027" /> <noGame from="09.03.2027" until="09.03.2027" /> <noGame from="10.03.2027" until="10.03.2027" /> <noGame from="11.03.2027" until="11.03.2027" /> <noGame from="14.03.2027" until="14.03.2027" /> <noGame from="15.03.2027" until="15.03.2027" /> <noGame from="16.03.2027" until="16.03.2027" /> <noGame from="17.03.2027" until="17.03.2027" /> <noGame from="18.03.2027" until="18.03.2027" /> <noGame from="21.03.2027" until="21.03.2027" /> <noGame from="22.03.2027" until="22.03.2027" /> <noGame from="23.03.2027" until="23.03.2027" /> <noGame from="24.03.2027" until="24.03.2027" /> <noGame from="25.03.2027" until="25.03.2027" /> <noGame from="30.03.2027" until="30.03.2027" /> <noGame from="31.03.2027" until="31.03.2027" /> <noGame from="01.04.2027" until="01.04.2027" /> <noGame from="04.04.2027" until="04.04.2027" /> <noGame from="05.04.2027" until="05.04.2027" /> <noGame from="06.04.2027" until="06.04.2027" /> <noGame from="07.04.2027" until="07.04.2027" /> <noGame from="08.04.2027" until="08.04.2027" /> <noGame from="11.04.2027" until="11.04.2027" /> <noGame from="12.04.2027" until="12.04.2027" /> <noGame from="13.04.2027" until="13.04.2027" /> <noGame from="14.04.2027" until="14.04.2027" /> <noGame from="15.04.2027" until="15.04.2027" /> <noGame from="18.04.2027" until="18.04.2027" />
+          
+          
+        </gameDays>
+        <sisterTeams>
+        	
+        		<team gender="Erwachsene" number="2">
+        			<name>Trbk Bcqa Klgy II</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="3">
+        			<name>Trbk Bcqa Klgy III</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="4">
+        			<name>Trbk Bcqa Klgy IV</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="5">
+        			<name>Trbk Bcqa Klgy V</name>
+        			
+						</team>
+        	
+        		<team gender="Jugend 13" number="1">
+        			<name>Trbk Bcqa Klgy</name>
+        			
+						</team>
+        	
+        		<team gender="Jugend 13" number="2">
+        			<name>Trbk Bcqa Klgy II</name>
+        			
+						</team>
+        	
+        		<team gender="Jugend 19" number="1">
+        			<name>Trbk Bcqa Klgy</name>
+        			
+						</team>
+        	
+        		<team gender="Jugend 19" number="2">
+        			<name>Trbk Bcqa Klgy II</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="6">
+        			<name>Trbk Bcqa Klgy Aiuy VI</name>
+        			
+						</team>
+        	
+        </sisterTeams>
+				
+      </team>
+    
+      <team gender="Erwachsene" clubId="314" number="4" noDoubleDays="false" id="3082496">
+        <name>Pqke Joqa IV</name>
+        <gameDays>
+           <homeGame secondary="false" courtHall="Gymy" maxParallelGames="4" day="04.09.2026" time="20:00" /> <homeGame secondary="false" courtHall="Gymy" maxParallelGames="4" day="11.09.2026" time="20:00" /> <homeGame secondary="false" courtHall="Gymy" maxParallelGames="4" day="18.09.2026" time="20:00" /> <homeGame secondary="false" courtHall="Gymy" maxParallelGames="4" day="23.10.2026" time="20:00" /> <homeGame secondary="false" courtHall="Gymy" maxParallelGames="4" day="30.10.2026" time="20:00" /> <homeGame secondary="false" courtHall="Gymy" maxParallelGames="4" day="27.11.2026" time="20:00" /> <homeGame secondary="false" courtHall="Gymy" maxParallelGames="4" day="04.12.2026" time="20:00" /> <homeGame secondary="false" courtHall="Gymy" maxParallelGames="4" day="15.01.2027" time="20:00" /> <homeGame secondary="false" courtHall="Gymy" maxParallelGames="4" day="29.01.2027" time="20:00" /> <homeGame secondary="false" courtHall="Gymy" maxParallelGames="4" day="12.02.2027" time="20:00" /> <homeGame secondary="false" courtHall="Gymy" maxParallelGames="4" day="19.02.2027" time="20:00" /> <homeGame secondary="false" courtHall="Gymy" maxParallelGames="4" day="26.02.2027" time="20:00" /> <homeGame secondary="false" courtHall="Gymy" maxParallelGames="4" day="05.03.2027" time="20:00" /> <homeGame secondary="false" courtHall="Gymy" maxParallelGames="4" day="19.03.2027" time="20:00" /> <homeGame secondary="false" courtHall="Gymy" maxParallelGames="4" day="02.04.2027" time="20:00" /> <homeGame secondary="false" courtHall="Gymy" maxParallelGames="4" day="09.04.2027" time="20:00" /> <homeGame secondary="false" courtHall="Gymy" maxParallelGames="4" day="16.04.2027" time="20:00" />
+           <noGame from="21.08.2026" until="21.08.2026" /> <noGame from="22.08.2026" until="22.08.2026" /> <noGame from="23.08.2026" until="23.08.2026" /> <noGame from="28.08.2026" until="28.08.2026" /> <noGame from="29.08.2026" until="29.08.2026" /> <noGame from="30.08.2026" until="30.08.2026" /> <noGame from="02.10.2026" until="02.10.2026" /> <noGame from="09.10.2026" until="09.10.2026" /> <noGame from="16.10.2026" until="16.10.2026" /> <noGame from="06.11.2026" until="06.11.2026" /> <noGame from="07.11.2026" until="07.11.2026" /> <noGame from="08.11.2026" until="08.11.2026" /> <noGame from="13.11.2026" until="13.11.2026" /> <noGame from="14.11.2026" until="14.11.2026" /> <noGame from="15.11.2026" until="15.11.2026" /> <noGame from="20.11.2026" until="20.11.2026" /> <noGame from="21.11.2026" until="21.11.2026" /> <noGame from="22.11.2026" until="22.11.2026" /> <noGame from="05.02.2027" until="05.02.2027" /> <noGame from="06.02.2027" until="06.02.2027" /> <noGame from="07.02.2027" until="07.02.2027" />
+          
+          
+        </gameDays>
+        <sisterTeams>
+        	
+        		<team gender="Erwachsene" number="1">
+        			<name>Pqke Joqa</name>
+        			
+						</team>
+        	
+        		<team gender="Damen" number="1">
+        			<name>Pqke Joqa</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="2">
+        			<name>Pqke Joqa II</name>
+        			
+        				<game courtHall="Gymy" guestTeam="Ujuu Wboe" homeTeam="Pqke Joqa II" day="14.11.2026" time="14:00" />
+        			
+        				<game courtHall="Rmay Woya" guestTeam="Pqke Joqa II" homeTeam="Qvqm Fgmi" day="13.02.2027" time="18:00" />
+        			
+        				<game courtHall="Gymy" guestTeam="Qvqm Fgmi" homeTeam="Pqke Joqa II" day="05.09.2026" time="14:00" />
+        			
+        				<game courtHall="Gymy" guestTeam="Trbk Mosu" homeTeam="Pqke Joqa II" day="04.04.2027" time="11:00" />
+        			
+        				<game courtHall="Gymy" guestTeam="Trbk Wpsm II" homeTeam="Pqke Joqa II" day="03.04.2027" time="14:00" />
+        			
+        				<game courtHall="Gymy" guestTeam="Tuyy Kuqq" homeTeam="Pqke Joqa II" day="09.01.2027" time="14:00" />
+        			
+        				<game courtHall="Gymy" guestTeam="Trbk Wyjo" homeTeam="Pqke Joqa II" day="28.02.2027" time="11:00" />
+        			
+        				<game courtHall="Gymy" guestTeam="Virc Sclk" homeTeam="Pqke Joqa II" day="27.02.2027" time="14:00" />
+        			
+        				<game courtHall="Gymy" guestTeam="Trbk Gjci Jlmu" homeTeam="Pqke Joqa II" day="20.02.2027" time="14:00" />
+        			
+        				<game courtHall="Gymy" guestTeam="Qyts Wmoq" homeTeam="Pqke Joqa II" day="30.01.2027" time="14:00" />
+        			
+        				<game courtHall="Gymy" guestTeam="Trbk Fphg Zsea" homeTeam="Pqke Joqa II" day="15.11.2026" time="11:00" />
+        			
+        				<game courtHall="Lvzk Uxwi" guestTeam="Pqke Joqa II" homeTeam="Trbk Mosu" day="01.11.2026" time="11:00" />
+        			
+        				<game courtHall="Edia Wmoq" guestTeam="Pqke Joqa II" homeTeam="Qyts Wmoq" day="31.10.2026" time="18:00" />
+        			
+        				<game courtHall="Hhhw" guestTeam="Pqke Joqa II" homeTeam="Virc Sclk" day="24.10.2026" time="18:00" />
+        			
+        				<game courtHall="Spsq dhsa Ufcy" guestTeam="Pqke Joqa II" homeTeam="Tuyy Kuqq" day="26.09.2026" time="18:30" />
+        			
+        				<game courtHall="Hcxk" guestTeam="Pqke Joqa II" homeTeam="Trbk Gjci Jlmu" day="12.09.2026" time="14:00" />
+        			
+        				<game courtHall="Spsq kmua Ubfk rrwa" guestTeam="Pqke Joqa II" homeTeam="Trbk Wpsm II" day="05.12.2026" time="15:00" />
+        			
+        				<game courtHall="Gmke kmua Ghlk" guestTeam="Pqke Joqa II" homeTeam="Trbk Wyjo" day="29.11.2026" time="11:00" />
+        			
+        				<game courtHall="Spsq Ghlk Uige" guestTeam="Pqke Joqa II" homeTeam="Trbk Fphg Zsea" day="18.04.2027" time="11:00" />
+        			
+        				<game courtHall="Umds Wats" guestTeam="Pqke Joqa II" homeTeam="Ujuu Wboe" day="20.03.2027" time="19:00" />
+        			
+        				<game courtHall="Spsq Oxqu " guestTeam="Pqke Joqa II" homeTeam="Dqqy Qyts Pryu Ezwq" day="06.03.2027" time="18:00" />
+        			
+        				<game courtHall="Gymy" guestTeam="Dqqy Qyts Pryu Ezwq" homeTeam="Pqke Joqa II" day="06.09.2026" time="11:00" />
+        			
+						</team>
+        	
+        		<team gender="Damen" number="2">
+        			<name>Pqke Joqa II</name>
+        			
+        				<game courtHall="Hhhw" guestTeam="Pqke Joqa II" homeTeam="Virc Sclk" day="26.09.2026" time="14:30" />
+        			
+        				<game courtHall="Spsq fzwa kmua Dldw" guestTeam="Pqke Joqa II" homeTeam="Begy Bnqe" day="27.09.2026" time="11:00" />
+        			
+        				<game courtHall="pxca Spsq" guestTeam="Pqke Joqa II" homeTeam="Trvs Bsoy Kiya" day="24.10.2026" time="15:00" />
+        			
+        				<game courtHall="Iciy" guestTeam="Pqke Joqa II" homeTeam="Qvqm Jjye" day="18.10.2026" time="12:00" />
+        			
+        				<game courtHall="Copg" guestTeam="Pqke Joqa II" homeTeam="Qvqm Guqu" day="31.10.2026" time="15:00" />
+        			
+        				<game courtHall="Spsq Vhce Mxie" guestTeam="Pqke Joqa II" homeTeam="Vhce Mxie" day="21.11.2026" time="15:00" />
+        			
+        				<game courtHall="Spsq" guestTeam="Pqke Joqa II" homeTeam="Tsqa Wkzs Agps" day="12.09.2026" time="16:00" />
+        			
+        				<game courtHall="Gymy" guestTeam="Tmjo Gbyi" homeTeam="Pqke Joqa II" day="10.10.2026" time="14:00" />
+        			
+        				<game courtHall="Gymy" guestTeam="Tsqa Wkzs Agps" homeTeam="Pqke Joqa II" day="30.01.2027" time="17:30" />
+        			
+        				<game courtHall="Gymy" guestTeam="Qvqm Jjye" homeTeam="Pqke Joqa II" day="31.01.2027" time="12:00" />
+        			
+        				<game courtHall="Gymy" guestTeam="Trvs Bsoy Kiya" homeTeam="Pqke Joqa II" day="27.02.2027" time="17:30" />
+        			
+        				<game courtHall="Gymy" guestTeam="Begy Bnqe" homeTeam="Pqke Joqa II" day="14.03.2027" time="11:00" />
+        			
+        				<game courtHall="Gymy" guestTeam="Vhce Mxie" homeTeam="Pqke Joqa II" day="20.03.2027" time="17:30" />
+        			
+        				<game courtHall="Gymy" guestTeam="Virc Sclk" homeTeam="Pqke Joqa II" day="03.04.2027" time="14:00" />
+        			
+        				<game courtHall="Tmjo Gbyi" guestTeam="Pqke Joqa II" homeTeam="Tmjo Gbyi" day="13.02.2027" time="14:00" />
+        			
+        				<game courtHall="Gymy" guestTeam="Qvqm Guqu" homeTeam="Pqke Joqa II" day="17.04.2027" time="14:00" />
+        			
+						</team>
+        	
+        		<team gender="Jugend 19" number="1">
+        			<name>Pqke Joqa</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="3">
+        			<name>Pqke Joqa III</name>
+        			
+        				<game courtHall="Gymy" guestTeam="Dqqy Qyts Pryu Ezwq III" homeTeam="Pqke Joqa III" day="11.09.2026" time="20:00" />
+        			
+        				<game courtHall="Spsq Oxqu " guestTeam="Pqke Joqa III" homeTeam="Dqqy Qyts Pryu Ezwq III" day="26.02.2027" time="20:00" />
+        			
+        				<game courtHall="Gymy" guestTeam="Dqqy Qyts Pryu Ezwq II" homeTeam="Pqke Joqa III" day="30.10.2026" time="20:00" />
+        			
+        				<game courtHall="Gymy" guestTeam="Tosm Fsau II" homeTeam="Pqke Joqa III" day="19.03.2027" time="20:00" />
+        			
+        				<game courtHall="Gymy" guestTeam="Trbk Dfcm" homeTeam="Pqke Joqa III" day="09.04.2027" time="20:00" />
+        			
+        				<game courtHall="Gymy" guestTeam=" Aowi Trbk Bosu Agps" homeTeam="Pqke Joqa III" day="04.12.2026" time="20:00" />
+        			
+        				<game courtHall="Gymy" guestTeam="Aowi Ewam Llvk Amrc IV" homeTeam="Pqke Joqa III" day="15.01.2027" time="20:00" />
+        			
+        				<game courtHall="Gymy" guestTeam="Tuyy Kuqq II" homeTeam="Pqke Joqa III" day="12.02.2027" time="20:00" />
+        			
+        				<game courtHall="Gymy" guestTeam="Tosm Fsau" homeTeam="Pqke Joqa III" day="19.02.2027" time="20:00" />
+        			
+        				<game courtHall="Spsq kmua Ghlk" guestTeam="Pqke Joqa III" homeTeam="Tosm Fsau" day="05.09.2026" time="18:30" />
+        			
+        				<game courtHall="Snjs xaxt Kaiq Dfcm" guestTeam="Pqke Joqa III" homeTeam="Trbk Dfcm" day="11.10.2026" time="11:00" />
+        			
+        				<game courtHall="Bufw Kvky Rixs" guestTeam="Pqke Joqa III" homeTeam="Aowi Ewam Llvk Amrc IV" day="25.10.2026" time="12:00" />
+        			
+        				<game courtHall="Spsq kmua Ghlk" guestTeam="Pqke Joqa III" homeTeam="Tosm Fsau II" day="04.10.2026" time="12:00" />
+        			
+        				<game courtHall="Hsia" guestTeam="Pqke Joqa III" homeTeam="Ttki Tkuy" day="23.01.2027" time="16:00" />
+        			
+        				<game courtHall="Bphc Elai" guestTeam="Pqke Joqa III" homeTeam=" Aowi Trbk Bosu Agps" day="02.04.2027" time="20:00" />
+        			
+        				<game courtHall="Spsq Oxqu " guestTeam="Pqke Joqa III" homeTeam="Dqqy Qyts Pryu Ezwq II" day="17.04.2027" time="14:00" />
+        			
+        				<game courtHall="Spsq dhsa Ufcy" guestTeam="Pqke Joqa III" homeTeam="Tuyy Kuqq II" day="07.11.2026" time="14:30" />
+        			
+        				<game courtHall="Gymy" guestTeam="Ttki Tkuy" homeTeam="Pqke Joqa III" day="18.09.2026" time="20:00" />
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="5">
+        			<name>Pqke Joqa V</name>
+        			
+						</team>
+        	
+        		<team gender="Damen" number="3">
+        			<name>Pqke Joqa III</name>
+        			
+						</team>
+        	
+        		<team gender="Jugend 19" number="2">
+        			<name>Pqke Joqa II</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="6">
+        			<name>Pqke Joqa VI</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="7">
+        			<name>Pqke Joqa VII</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="8">
+        			<name>Pqke Joqa VIII</name>
+        			
+						</team>
+        	
+        		<team gender="Jugend 13" number="1">
+        			<name>Pqke Joqa</name>
+        			
+						</team>
+        	
+        		<team gender="Jugend 19" number="3">
+        			<name>Pqke Joqa III</name>
+        			
+						</team>
+        	
+        </sisterTeams>
+				
+      </team>
+    
+      <team gender="Erwachsene" clubId="303" number="1" noDoubleDays="false" id="3082487">
+        <name>Tmjo Dgfc</name>
+        <gameDays>
+           <homeGame secondary="false" courtHall="Tmjo Gpds" maxParallelGames="2" day="23.10.2026" time="20:15" /> <homeGame secondary="false" courtHall="Tmjo Gpds" maxParallelGames="2" day="20.11.2026" time="20:15" /> <homeGame secondary="false" courtHall="Tmjo Gpds" maxParallelGames="2" day="04.12.2026" time="20:15" /> <homeGame secondary="false" courtHall="Tmjo Gpds" maxParallelGames="2" day="29.01.2027" time="20:15" /> <homeGame secondary="false" courtHall="Tmjo Gpds" maxParallelGames="2" day="12.02.2027" time="20:15" /> <homeGame secondary="false" courtHall="Tmjo Gpds" maxParallelGames="2" day="26.02.2027" time="20:15" /> <homeGame secondary="false" courtHall="Tmjo Gpds" maxParallelGames="2" day="12.03.2027" time="20:15" /> <homeGame secondary="false" courtHall="Tmjo Gpds" maxParallelGames="2" day="09.04.2027" time="20:15" /> <homeGame secondary="false" courtHall="Tmjo Gpds" maxParallelGames="2" day="28.08.2026" time="20:15" /> <homeGame secondary="false" courtHall="Tmjo Gpds" maxParallelGames="2" day="11.09.2026" time="20:15" /> <homeGame secondary="false" courtHall="Tmjo Gpds" maxParallelGames="2" day="09.10.2026" time="20:15" /> <homeGame secondary="false" courtHall="Tmjo Gpds" maxParallelGames="2" day="02.10.2026" time="20:15" />
+           <noGame from="25.09.2026" until="25.09.2026" />
+          
+          
+        </gameDays>
+        <sisterTeams>
+        	
+        		<team gender="Jugend 19" number="1">
+        			<name>Tmjo Dgfc</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="2">
+        			<name>Tmjo Dgfc II</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="3">
+        			<name>Tmjo Dgfc III</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="4">
+        			<name>Tmjo Dgfc IV</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="5">
+        			<name>Tmjo Dgfc V</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="6">
+        			<name>Tmjo Dgfc VI</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="7">
+        			<name>Tmjo Dgfc VII</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="8">
+        			<name>Tmjo Dgfc VIII</name>
+        			
+						</team>
+        	
+        		<team gender="Jugend 19" number="2">
+        			<name>Tmjo Dgfc II</name>
+        			
+						</team>
+        	
+        </sisterTeams>
+				
+      </team>
+    
+      <team gender="Erwachsene" clubId="234" number="1" noDoubleDays="false" id="3082587">
+        <name>Tndw Wddc</name>
+        <gameDays>
+           <homeGame secondary="false" courtHall="Vzeu" maxParallelGames="1" day="09.04.2027" time="20:00" /> <homeGame secondary="false" courtHall="Vzeu" maxParallelGames="1" day="21.08.2026" time="20:00" /> <homeGame secondary="false" courtHall="Vzeu" maxParallelGames="1" day="04.12.2026" time="20:00" /> <homeGame secondary="false" courtHall="Vzeu" maxParallelGames="1" day="27.11.2026" time="20:00" /> <homeGame secondary="false" courtHall="Vzeu" maxParallelGames="1" day="20.11.2026" time="20:00" /> <homeGame secondary="false" courtHall="Vzeu" maxParallelGames="1" day="13.11.2026" time="20:00" /> <homeGame secondary="false" courtHall="Vzeu" maxParallelGames="1" day="06.11.2026" time="20:00" /> <homeGame secondary="false" courtHall="Vzeu" maxParallelGames="1" day="04.09.2026" time="20:00" /> <homeGame secondary="false" courtHall="Vzeu" maxParallelGames="1" day="16.04.2027" time="20:00" /> <homeGame secondary="false" courtHall="Vzeu" maxParallelGames="1" day="30.10.2026" time="20:00" /> <homeGame secondary="false" courtHall="Vzeu" maxParallelGames="1" day="19.03.2027" time="20:00" /> <homeGame secondary="false" courtHall="Vzeu" maxParallelGames="1" day="11.09.2026" time="20:00" /> <homeGame secondary="false" courtHall="Vzeu" maxParallelGames="1" day="18.09.2026" time="20:00" /> <homeGame secondary="false" courtHall="Vzeu" maxParallelGames="1" day="02.10.2026" time="20:00" /> <homeGame secondary="false" courtHall="Vzeu" maxParallelGames="1" day="23.10.2026" time="20:00" /> <homeGame secondary="false" courtHall="Vzeu" maxParallelGames="1" day="12.02.2027" time="20:00" /> <homeGame secondary="false" courtHall="Vzeu" maxParallelGames="1" day="19.02.2027" time="20:00" /> <homeGame secondary="false" courtHall="Vzeu" maxParallelGames="1" day="26.02.2027" time="20:00" /> <homeGame secondary="false" courtHall="Vzeu" maxParallelGames="1" day="05.03.2027" time="20:00" /> <homeGame secondary="false" courtHall="Vzeu" maxParallelGames="1" day="12.03.2027" time="20:00" />
+           <noGame from="27.08.2026" until="27.08.2026" /> <noGame from="28.08.2026" until="28.08.2026" /> <noGame from="29.08.2026" until="29.08.2026" /> <noGame from="30.08.2026" until="30.08.2026" /> <noGame from="31.08.2026" until="31.08.2026" /> <noGame from="01.09.2026" until="01.09.2026" /> <noGame from="05.09.2026" until="05.09.2026" /> <noGame from="25.09.2026" until="25.09.2026" /> <noGame from="05.10.2026" until="05.10.2026" /> <noGame from="06.10.2026" until="06.10.2026" /> <noGame from="07.10.2026" until="07.10.2026" /> <noGame from="08.10.2026" until="08.10.2026" /> <noGame from="09.10.2026" until="09.10.2026" /> <noGame from="10.10.2026" until="10.10.2026" /> <noGame from="11.10.2026" until="11.10.2026" /> <noGame from="12.10.2026" until="12.10.2026" /> <noGame from="13.10.2026" until="13.10.2026" /> <noGame from="14.10.2026" until="14.10.2026" /> <noGame from="15.10.2026" until="15.10.2026" /> <noGame from="16.10.2026" until="16.10.2026" /> <noGame from="17.10.2026" until="17.10.2026" /> <noGame from="18.10.2026" until="18.10.2026" /> <noGame from="09.01.2027" until="09.01.2027" /> <noGame from="10.01.2027" until="10.01.2027" /> <noGame from="04.02.2027" until="04.02.2027" /> <noGame from="05.02.2027" until="05.02.2027" /> <noGame from="06.02.2027" until="06.02.2027" /> <noGame from="07.02.2027" until="07.02.2027" /> <noGame from="08.02.2027" until="08.02.2027" /> <noGame from="09.02.2027" until="09.02.2027" /> <noGame from="10.02.2027" until="10.02.2027" /> <noGame from="22.03.2027" until="22.03.2027" /> <noGame from="23.03.2027" until="23.03.2027" /> <noGame from="24.03.2027" until="24.03.2027" /> <noGame from="25.03.2027" until="25.03.2027" /> <noGame from="30.03.2027" until="30.03.2027" /> <noGame from="31.03.2027" until="31.03.2027" /> <noGame from="01.04.2027" until="01.04.2027" /> <noGame from="02.04.2027" until="02.04.2027" /> <noGame from="03.04.2027" until="03.04.2027" /> <noGame from="04.04.2027" until="04.04.2027" />
+          
+          
+        </gameDays>
+        <sisterTeams>
+        	
+        		<team gender="Jugend 19" number="1">
+        			<name>Tndw Wddc</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="2">
+        			<name>Tndw Wddc II</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="3">
+        			<name>Tndw Wddc III</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="4">
+        			<name>Tndw Wddc IV</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="5">
+        			<name>Tndw Wddc V</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="6">
+        			<name>Tndw Wddc VI</name>
+        			
+						</team>
+        	
+        </sisterTeams>
+				
+      </team>
+    
+      <team gender="Erwachsene" clubId="215" number="1" noDoubleDays="false" id="3082548">
+        <name>Tndw Gzpo</name>
+        <gameDays>
+           <homeGame secondary="false" courtHall="Rmay kmua Ghlk Gzpo" maxParallelGames="1" day="18.11.2026" time="20:00" /> <homeGame secondary="false" courtHall="Rmay kmua Ghlk Gzpo" maxParallelGames="1" day="13.01.2027" time="20:00" /> <homeGame secondary="false" courtHall="Rmay kmua Ghlk Gzpo" maxParallelGames="1" day="20.01.2027" time="20:00" /> <homeGame secondary="false" courtHall="Rmay kmua Ghlk Gzpo" maxParallelGames="1" day="27.01.2027" time="20:00" /> <homeGame secondary="false" courtHall="Rmay kmua Ghlk Gzpo" maxParallelGames="1" day="03.02.2027" time="20:00" /> <homeGame secondary="false" courtHall="Rmay kmua Ghlk Gzpo" maxParallelGames="1" day="10.02.2027" time="20:00" /> <homeGame secondary="false" courtHall="Rmay kmua Ghlk Gzpo" maxParallelGames="1" day="17.02.2027" time="20:00" /> <homeGame secondary="false" courtHall="Rmay kmua Ghlk Gzpo" maxParallelGames="1" day="24.02.2027" time="20:00" /> <homeGame secondary="false" courtHall="Rmay kmua Ghlk Gzpo" maxParallelGames="1" day="03.03.2027" time="20:00" /> <homeGame secondary="false" courtHall="Rmay kmua Ghlk Gzpo" maxParallelGames="1" day="19.08.2026" time="20:00" /> <homeGame secondary="false" courtHall="Rmay kmua Ghlk Gzpo" maxParallelGames="1" day="25.11.2026" time="20:00" /> <homeGame secondary="false" courtHall="Rmay kmua Ghlk Gzpo" maxParallelGames="1" day="26.08.2026" time="20:00" /> <homeGame secondary="false" courtHall="Rmay kmua Ghlk Gzpo" maxParallelGames="1" day="02.12.2026" time="20:00" /> <homeGame secondary="false" courtHall="Rmay kmua Ghlk Gzpo" maxParallelGames="1" day="02.09.2026" time="20:00" /> <homeGame secondary="false" courtHall="Rmay kmua Ghlk Gzpo" maxParallelGames="1" day="09.09.2026" time="20:00" /> <homeGame secondary="false" courtHall="Rmay kmua Ghlk Gzpo" maxParallelGames="1" day="16.09.2026" time="20:00" /> <homeGame secondary="false" courtHall="Rmay kmua Ghlk Gzpo" maxParallelGames="1" day="23.09.2026" time="20:00" /> <homeGame secondary="false" courtHall="Rmay kmua Ghlk Gzpo" maxParallelGames="1" day="30.09.2026" time="20:00" /> <homeGame secondary="false" courtHall="Rmay kmua Ghlk Gzpo" maxParallelGames="1" day="21.10.2026" time="20:00" /> <homeGame secondary="false" courtHall="Rmay kmua Ghlk Gzpo" maxParallelGames="1" day="28.10.2026" time="20:00" /> <homeGame secondary="false" courtHall="Rmay kmua Ghlk Gzpo" maxParallelGames="1" day="04.11.2026" time="20:00" /> <homeGame secondary="false" courtHall="Rmay kmua Ghlk Gzpo" maxParallelGames="1" day="11.11.2026" time="20:00" />
+          
+          
+          
+        </gameDays>
+        <sisterTeams>
+        	
+        		<team gender="Jugend 19" number="1">
+        			<name>Tndw Gzpo</name>
+        			
+						</team>
+        	
+        		<team gender="Damen" number="1">
+        			<name>Tndw Gzpo</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="2">
+        			<name>Tndw Gzpo II</name>
+        			
+						</team>
+        	
+        		<team gender="Jugend 19" number="2">
+        			<name>Tndw Gzpo Aiuy II</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="3">
+        			<name>Tndw Gzpo III</name>
+        			
+						</team>
+        	
+        		<team gender="Jugend 19" number="3">
+        			<name>Tndw Gzpo III</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="4">
+        			<name>Tndw Gzpo IV</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="5">
+        			<name>Tndw Gzpo V</name>
+        			
+						</team>
+        	
+        </sisterTeams>
+				
+      </team>
+    
+      <team gender="Erwachsene" clubId="004520" number="2" noDoubleDays="false" id="3082694">
+        <name>Trbk Bcqa Klgy II</name>
+        <gameDays>
+           <homeGame secondary="false" courtHall="Jsno" maxParallelGames="2" day="05.03.2027" time="20:00" /> <homeGame secondary="false" courtHall="Jsno" maxParallelGames="2" day="19.03.2027" time="20:00" /> <homeGame secondary="false" courtHall="Jsno" maxParallelGames="2" day="05.12.2026" time="18:30" /> <homeGame secondary="false" courtHall="Jsno" maxParallelGames="2" day="09.10.2026" time="20:00" /> <homeGame secondary="false" courtHall="Jsno" maxParallelGames="2" day="16.10.2026" time="20:00" /> <homeGame secondary="false" courtHall="Jsno" maxParallelGames="2" day="13.03.2027" time="18:30" /> <homeGame secondary="false" courtHall="Jsno" maxParallelGames="2" day="28.11.2026" time="15:00" /> <homeGame secondary="false" courtHall="Jsno" maxParallelGames="2" day="24.10.2026" time="18:30" /> <homeGame secondary="false" courtHall="Jsno" maxParallelGames="2" day="14.11.2026" time="15:00" /> <homeGame secondary="false" courtHall="Jsno" maxParallelGames="2" day="05.09.2026" time="18:30" /> <homeGame secondary="false" courtHall="Jsno" maxParallelGames="2" day="02.04.2027" time="20:00" /> <homeGame secondary="false" courtHall="Jsno" maxParallelGames="2" day="10.04.2027" time="18:30" /> <homeGame secondary="false" courtHall="Jsno" maxParallelGames="2" day="26.09.2026" time="15:00" /> <homeGame secondary="false" courtHall="Jsno" maxParallelGames="2" day="20.02.2027" time="18:30" /> <homeGame secondary="false" courtHall="Jsno" maxParallelGames="2" day="30.01.2027" time="18:30" /> <homeGame secondary="false" courtHall="Jsno" maxParallelGames="2" day="29.01.2027" time="20:00" /> <homeGame secondary="false" courtHall="Jsno" maxParallelGames="2" day="15.01.2027" time="20:00" /> <homeGame secondary="false" courtHall="Jsno" maxParallelGames="2" day="16.04.2027" time="20:00" />
+           <noGame from="17.08.2026" until="17.08.2026" /> <noGame from="18.08.2026" until="18.08.2026" /> <noGame from="19.08.2026" until="19.08.2026" /> <noGame from="20.08.2026" until="20.08.2026" /> <noGame from="21.08.2026" until="21.08.2026" /> <noGame from="22.08.2026" until="22.08.2026" /> <noGame from="23.08.2026" until="23.08.2026" /> <noGame from="24.08.2026" until="24.08.2026" /> <noGame from="25.08.2026" until="25.08.2026" /> <noGame from="26.08.2026" until="26.08.2026" /> <noGame from="27.08.2026" until="27.08.2026" /> <noGame from="29.08.2026" until="29.08.2026" /> <noGame from="30.08.2026" until="30.08.2026" /> <noGame from="31.08.2026" until="31.08.2026" /> <noGame from="01.09.2026" until="01.09.2026" /> <noGame from="02.09.2026" until="02.09.2026" /> <noGame from="03.09.2026" until="03.09.2026" /> <noGame from="06.09.2026" until="06.09.2026" /> <noGame from="07.09.2026" until="07.09.2026" /> <noGame from="08.09.2026" until="08.09.2026" /> <noGame from="09.09.2026" until="09.09.2026" /> <noGame from="10.09.2026" until="10.09.2026" /> <noGame from="13.09.2026" until="13.09.2026" /> <noGame from="14.09.2026" until="14.09.2026" /> <noGame from="15.09.2026" until="15.09.2026" /> <noGame from="16.09.2026" until="16.09.2026" /> <noGame from="17.09.2026" until="17.09.2026" /> <noGame from="21.09.2026" until="21.09.2026" /> <noGame from="22.09.2026" until="22.09.2026" /> <noGame from="23.09.2026" until="23.09.2026" /> <noGame from="24.09.2026" until="24.09.2026" /> <noGame from="27.09.2026" until="27.09.2026" /> <noGame from="28.09.2026" until="28.09.2026" /> <noGame from="29.09.2026" until="29.09.2026" /> <noGame from="30.09.2026" until="30.09.2026" /> <noGame from="01.10.2026" until="01.10.2026" /> <noGame from="04.10.2026" until="04.10.2026" /> <noGame from="05.10.2026" until="05.10.2026" /> <noGame from="06.10.2026" until="06.10.2026" /> <noGame from="07.10.2026" until="07.10.2026" /> <noGame from="08.10.2026" until="08.10.2026" /> <noGame from="11.10.2026" until="11.10.2026" /> <noGame from="12.10.2026" until="12.10.2026" /> <noGame from="13.10.2026" until="13.10.2026" /> <noGame from="14.10.2026" until="14.10.2026" /> <noGame from="15.10.2026" until="15.10.2026" /> <noGame from="18.10.2026" until="18.10.2026" /> <noGame from="19.10.2026" until="19.10.2026" /> <noGame from="20.10.2026" until="20.10.2026" /> <noGame from="21.10.2026" until="21.10.2026" /> <noGame from="22.10.2026" until="22.10.2026" /> <noGame from="25.10.2026" until="25.10.2026" /> <noGame from="26.10.2026" until="26.10.2026" /> <noGame from="27.10.2026" until="27.10.2026" /> <noGame from="28.10.2026" until="28.10.2026" /> <noGame from="29.10.2026" until="29.10.2026" /> <noGame from="01.11.2026" until="01.11.2026" /> <noGame from="02.11.2026" until="02.11.2026" /> <noGame from="03.11.2026" until="03.11.2026" /> <noGame from="04.11.2026" until="04.11.2026" /> <noGame from="05.11.2026" until="05.11.2026" /> <noGame from="08.11.2026" until="08.11.2026" /> <noGame from="09.11.2026" until="09.11.2026" /> <noGame from="10.11.2026" until="10.11.2026" /> <noGame from="11.11.2026" until="11.11.2026" /> <noGame from="12.11.2026" until="12.11.2026" /> <noGame from="15.11.2026" until="15.11.2026" /> <noGame from="16.11.2026" until="16.11.2026" /> <noGame from="17.11.2026" until="17.11.2026" /> <noGame from="18.11.2026" until="18.11.2026" /> <noGame from="19.11.2026" until="19.11.2026" /> <noGame from="22.11.2026" until="22.11.2026" /> <noGame from="23.11.2026" until="23.11.2026" /> <noGame from="24.11.2026" until="24.11.2026" /> <noGame from="25.11.2026" until="25.11.2026" /> <noGame from="26.11.2026" until="26.11.2026" /> <noGame from="29.11.2026" until="29.11.2026" /> <noGame from="30.11.2026" until="30.11.2026" /> <noGame from="01.12.2026" until="01.12.2026" /> <noGame from="02.12.2026" until="02.12.2026" /> <noGame from="03.12.2026" until="03.12.2026" /> <noGame from="06.12.2026" until="06.12.2026" /> <noGame from="09.01.2027" until="09.01.2027" /> <noGame from="10.01.2027" until="10.01.2027" /> <noGame from="11.01.2027" until="11.01.2027" /> <noGame from="12.01.2027" until="12.01.2027" /> <noGame from="13.01.2027" until="13.01.2027" /> <noGame from="14.01.2027" until="14.01.2027" /> <noGame from="18.01.2027" until="18.01.2027" /> <noGame from="19.01.2027" until="19.01.2027" /> <noGame from="20.01.2027" until="20.01.2027" /> <noGame from="21.01.2027" until="21.01.2027" /> <noGame from="22.01.2027" until="22.01.2027" /> <noGame from="23.01.2027" until="23.01.2027" /> <noGame from="24.01.2027" until="24.01.2027" /> <noGame from="25.01.2027" until="25.01.2027" /> <noGame from="26.01.2027" until="26.01.2027" /> <noGame from="27.01.2027" until="27.01.2027" /> <noGame from="28.01.2027" until="28.01.2027" /> <noGame from="31.01.2027" until="31.01.2027" /> <noGame from="01.02.2027" until="01.02.2027" /> <noGame from="02.02.2027" until="02.02.2027" /> <noGame from="03.02.2027" until="03.02.2027" /> <noGame from="04.02.2027" until="04.02.2027" /> <noGame from="07.02.2027" until="07.02.2027" /> <noGame from="08.02.2027" until="08.02.2027" /> <noGame from="09.02.2027" until="09.02.2027" /> <noGame from="10.02.2027" until="10.02.2027" /> <noGame from="11.02.2027" until="11.02.2027" /> <noGame from="14.02.2027" until="14.02.2027" /> <noGame from="15.02.2027" until="15.02.2027" /> <noGame from="16.02.2027" until="16.02.2027" /> <noGame from="17.02.2027" until="17.02.2027" /> <noGame from="18.02.2027" until="18.02.2027" /> <noGame from="21.02.2027" until="21.02.2027" /> <noGame from="22.02.2027" until="22.02.2027" /> <noGame from="23.02.2027" until="23.02.2027" /> <noGame from="24.02.2027" until="24.02.2027" /> <noGame from="25.02.2027" until="25.02.2027" /> <noGame from="28.02.2027" until="28.02.2027" /> <noGame from="01.03.2027" until="01.03.2027" /> <noGame from="02.03.2027" until="02.03.2027" /> <noGame from="03.03.2027" until="03.03.2027" /> <noGame from="04.03.2027" until="04.03.2027" /> <noGame from="07.03.2027" until="07.03.2027" /> <noGame from="08.03.2027" until="08.03.2027" /> <noGame from="09.03.2027" until="09.03.2027" /> <noGame from="10.03.2027" until="10.03.2027" /> <noGame from="11.03.2027" until="11.03.2027" /> <noGame from="14.03.2027" until="14.03.2027" /> <noGame from="15.03.2027" until="15.03.2027" /> <noGame from="16.03.2027" until="16.03.2027" /> <noGame from="17.03.2027" until="17.03.2027" /> <noGame from="18.03.2027" until="18.03.2027" /> <noGame from="21.03.2027" until="21.03.2027" /> <noGame from="22.03.2027" until="22.03.2027" /> <noGame from="23.03.2027" until="23.03.2027" /> <noGame from="24.03.2027" until="24.03.2027" /> <noGame from="25.03.2027" until="25.03.2027" /> <noGame from="30.03.2027" until="30.03.2027" /> <noGame from="31.03.2027" until="31.03.2027" /> <noGame from="01.04.2027" until="01.04.2027" /> <noGame from="04.04.2027" until="04.04.2027" /> <noGame from="05.04.2027" until="05.04.2027" /> <noGame from="06.04.2027" until="06.04.2027" /> <noGame from="07.04.2027" until="07.04.2027" /> <noGame from="08.04.2027" until="08.04.2027" /> <noGame from="11.04.2027" until="11.04.2027" /> <noGame from="12.04.2027" until="12.04.2027" /> <noGame from="13.04.2027" until="13.04.2027" /> <noGame from="14.04.2027" until="14.04.2027" /> <noGame from="15.04.2027" until="15.04.2027" /> <noGame from="18.04.2027" until="18.04.2027" />
+          
+          
+        </gameDays>
+        <sisterTeams>
+        	
+        		<team gender="Erwachsene" number="1">
+        			<name>Trbk Bcqa Klgy</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="3">
+        			<name>Trbk Bcqa Klgy III</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="4">
+        			<name>Trbk Bcqa Klgy IV</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="5">
+        			<name>Trbk Bcqa Klgy V</name>
+        			
+						</team>
+        	
+        		<team gender="Jugend 13" number="1">
+        			<name>Trbk Bcqa Klgy</name>
+        			
+						</team>
+        	
+        		<team gender="Jugend 13" number="2">
+        			<name>Trbk Bcqa Klgy II</name>
+        			
+						</team>
+        	
+        		<team gender="Jugend 19" number="1">
+        			<name>Trbk Bcqa Klgy</name>
+        			
+						</team>
+        	
+        		<team gender="Jugend 19" number="2">
+        			<name>Trbk Bcqa Klgy II</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="6">
+        			<name>Trbk Bcqa Klgy Aiuy VI</name>
+        			
+						</team>
+        	
+        </sisterTeams>
+				
+      </team>
+    
+      <team gender="Erwachsene" clubId="206" number="1" noDoubleDays="false" id="3082507">
+        <name>Ttki Clhk</name>
+        <gameDays>
+           <homeGame secondary="false" courtHall="Oseq Cmka" maxParallelGames="2" day="25.09.2026" time="20:15" /> <homeGame secondary="false" courtHall="Oseq Cmka" maxParallelGames="2" day="23.10.2026" time="20:15" /> <homeGame secondary="false" courtHall="Oseq Cmka" maxParallelGames="2" day="06.11.2026" time="20:15" /> <homeGame secondary="false" courtHall="Oseq Cmka" maxParallelGames="2" day="20.11.2026" time="20:15" /> <homeGame secondary="false" courtHall="Oseq Cmka" maxParallelGames="2" day="04.12.2026" time="20:15" /> <homeGame secondary="false" courtHall="Oseq Cmka" maxParallelGames="2" day="15.01.2027" time="20:15" /> <homeGame secondary="false" courtHall="Ghlk Clvs" maxParallelGames="2" day="29.01.2027" time="20:00" /> <homeGame secondary="false" courtHall="Ghlk Clvs" maxParallelGames="2" day="12.02.2027" time="20:00" /> <homeGame secondary="false" courtHall="Oseq Cmka" maxParallelGames="2" day="26.02.2027" time="20:15" /> <homeGame secondary="false" courtHall="Oseq Cmka" maxParallelGames="2" day="12.03.2027" time="20:15" /> <homeGame secondary="false" courtHall="Oseq Cmka" maxParallelGames="2" day="09.04.2027" time="20:15" /> <homeGame secondary="false" courtHall="Ghlk Clvs" maxParallelGames="2" day="09.10.2026" time="20:00" />
+           <noGame from="28.08.2026" until="28.08.2026" /> <noGame from="29.08.2026" until="29.08.2026" /> <noGame from="11.09.2026" until="11.09.2026" /> <noGame from="02.10.2026" until="02.10.2026" /> <noGame from="04.10.2026" until="04.10.2026" /> <noGame from="05.12.2026" until="05.12.2026" />
+          
+          
+        </gameDays>
+        <sisterTeams>
+        	
+        		<team gender="Erwachsene" number="2">
+        			<name>Ttki Clhk II</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="3">
+        			<name>Ttki Clhk III</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="4">
+        			<name>Ttki Clhk IV</name>
+        			
+						</team>
+        	
+        		<team gender="Jugend 13" number="1">
+        			<name>Ttki Clhk</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="5">
+        			<name>Ttki Clhk V</name>
+        			
+						</team>
+        	
+        		<team gender="Jugend 19" number="1">
+        			<name>Ttki Clhk</name>
+        			
+						</team>
+        	
+        		<team gender="Jugend 19" number="2">
+        			<name>Ttki Clhk II</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="6">
+        			<name>Ttki Clhk VI</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="7">
+        			<name>Ttki Clhk VII</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="8">
+        			<name>Ttki Clhk VIII</name>
+        			
+						</team>
+        	
+        </sisterTeams>
+				
+      </team>
+    
+      <team gender="Erwachsene" clubId="209" number="1" noDoubleDays="false" id="3082626">
+        <name>Stqe Etvg</name>
+        <gameDays>
+           <homeGame secondary="false" courtHall="Dxuy" day="05.11.2026" time="20:15" /> <homeGame secondary="false" courtHall="Dxuy" day="22.10.2026" time="20:15" /> <homeGame secondary="false" courtHall="Dxuy" day="19.11.2026" time="20:15" /> <homeGame secondary="false" courtHall="Dxuy" day="08.10.2026" time="20:15" /> <homeGame secondary="false" courtHall="Dxuy" day="29.10.2026" time="20:15" /> <homeGame secondary="false" courtHall="Dxuy" day="28.01.2027" time="20:15" /> <homeGame secondary="false" courtHall="Dxuy" day="03.12.2026" time="20:15" /> <homeGame secondary="false" courtHall="Dxuy" day="01.04.2027" time="20:15" /> <homeGame secondary="false" courtHall="Dxuy" day="21.01.2027" time="20:15" /> <homeGame secondary="false" courtHall="Dxuy" day="04.02.2027" time="20:15" /> <homeGame secondary="false" courtHall="Dxuy" day="24.09.2026" time="20:15" /> <homeGame secondary="false" courtHall="Dxuy" day="18.02.2027" time="20:15" /> <homeGame secondary="false" courtHall="Dxuy" day="15.04.2027" time="20:15" /> <homeGame secondary="false" courtHall="Dxuy" day="04.03.2027" time="20:15" /> <homeGame secondary="false" courtHall="Dxuy" day="10.09.2026" time="20:15" /> <homeGame secondary="false" courtHall="Dxuy" day="18.03.2027" time="20:15" />
+           <noGame from="17.08.2026" until="17.08.2026" /> <noGame from="18.08.2026" until="18.08.2026" /> <noGame from="19.08.2026" until="19.08.2026" /> <noGame from="20.08.2026" until="20.08.2026" /> <noGame from="21.08.2026" until="21.08.2026" /> <noGame from="22.08.2026" until="22.08.2026" /> <noGame from="23.08.2026" until="23.08.2026" /> <noGame from="24.08.2026" until="24.08.2026" /> <noGame from="25.08.2026" until="25.08.2026" /> <noGame from="26.08.2026" until="26.08.2026" /> <noGame from="27.08.2026" until="27.08.2026" /> <noGame from="28.08.2026" until="28.08.2026" /> <noGame from="29.08.2026" until="29.08.2026" />
+          
+          
+        </gameDays>
+        <sisterTeams>
+        	
+        		<team gender="Damen" number="1">
+        			<name>Stqe Etvg</name>
+        			
+						</team>
+        	
+        		<team gender="Jugend 19" number="1">
+        			<name>Stqe Etvg</name>
+        			
+						</team>
+        	
+        		<team gender="Damen" number="2">
+        			<name>Stqe Etvg II</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="2">
+        			<name>Stqe Etvg II</name>
+        			
+						</team>
+        	
+        		<team gender="Jugend 19" number="2">
+        			<name>Stqe Etvg Aiuy II</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="3">
+        			<name>Stqe Etvg III</name>
+        			
+						</team>
+        	
+        		<team gender="Jugend 19" number="3">
+        			<name>Stqe Etvg III</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="4">
+        			<name>Stqe Etvg IV</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="5">
+        			<name>Stqe Etvg V</name>
+        			
+						</team>
+        	
+        </sisterTeams>
+				
+      </team>
+    
+      <team gender="Erwachsene" clubId="232" number="1" noDoubleDays="true" id="3082490">
+        <name>Tosm Voei</name>
+        <gameDays>
+           <homeGame secondary="false" courtHall="Umds fcma Puhs" day="16.10.2026" time="19:30" /> <homeGame secondary="false" courtHall="Umds fcma Puhs" maxParallelGames="1" day="09.04.2027" time="19:30" /> <homeGame secondary="false" courtHall="Umds fcma Puhs" maxParallelGames="1" day="03.04.2027" time="18:00" /> <homeGame secondary="false" courtHall="Umds fcma Puhs" maxParallelGames="1" day="17.04.2027" time="18:00" /> <homeGame secondary="false" courtHall="Umds fcma Puhs" maxParallelGames="1" day="19.02.2027" time="19:30" /> <homeGame secondary="false" courtHall="Umds fcma Puhs" maxParallelGames="1" day="29.01.2027" time="19:30" /> <homeGame secondary="false" courtHall="Umds fcma Puhs" maxParallelGames="1" day="19.03.2027" time="19:30" /> <homeGame secondary="false" courtHall="Umds fcma Puhs" maxParallelGames="1" day="31.10.2026" time="18:00" /> <homeGame secondary="false" courtHall="Umds fcma Puhs" maxParallelGames="1" day="25.09.2026" time="19:30" /> <homeGame secondary="false" courtHall="Umds fcma Puhs" maxParallelGames="1" day="02.10.2026" time="19:30" /> <homeGame secondary="false" courtHall="Umds fcma Puhs" maxParallelGames="1" day="06.11.2026" time="19:30" /> <homeGame secondary="false" courtHall="Umds fcma Puhs" maxParallelGames="1" day="20.11.2026" time="19:30" /> <homeGame secondary="false" courtHall="Umds fcma Puhs" maxParallelGames="1" day="04.12.2026" time="19:30" /> <homeGame secondary="false" courtHall="Umds fcma Puhs" maxParallelGames="1" day="28.08.2026" time="19:30" /> <homeGame secondary="false" courtHall="Umds fcma Puhs" maxParallelGames="1" day="13.03.2027" time="18:00" /> <homeGame secondary="false" courtHall="Umds fcma Puhs" maxParallelGames="1" day="05.03.2027" time="19:30" />
+           <noGame from="04.09.2026" until="04.09.2026" /> <noGame from="05.09.2026" until="05.09.2026" /> <noGame from="06.09.2026" until="06.09.2026" /> <noGame from="11.09.2026" until="11.09.2026" /> <noGame from="12.09.2026" until="12.09.2026" /> <noGame from="13.09.2026" until="13.09.2026" /> <noGame from="18.09.2026" until="18.09.2026" /> <noGame from="09.10.2026" until="09.10.2026" /> <noGame from="10.10.2026" until="10.10.2026" /> <noGame from="11.10.2026" until="11.10.2026" />
+           <noWeekGame team="Ttki Tkuy II" /> <noWeekGame team="Tndw Wddc" /> <noWeekGame team="Trbk Bcqa Klgy" /> <noWeekGame team="Ttki Clhk" /> <noWeekGame team="Trbk Bcqa Klgy II" />
+          
+        </gameDays>
+        <sisterTeams>
+        	
+        		<team gender="Erwachsene" number="2">
+        			<name>Tosm Voei II</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="3">
+        			<name>Tosm Voei III</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="4">
+        			<name>Tosm Voei IV</name>
+        			
+						</team>
+        	
+        </sisterTeams>
+				
+      </team>
+    
+      <team gender="Erwachsene" clubId="345" number="2" noDoubleDays="false" id="3082579">
+        <name>Ttki Tkuy II</name>
+        <gameDays>
+           <homeGame secondary="false" courtHall="Hsia" day="16.04.2027" time="20:00" /> <homeGame secondary="false" courtHall="Hsia" day="04.09.2026" time="20:00" /> <homeGame secondary="false" courtHall="Hsia" day="27.11.2026" time="20:00" /> <homeGame secondary="false" courtHall="Hsia" day="18.09.2026" time="20:00" /> <homeGame secondary="false" courtHall="Hsia" day="02.10.2026" time="20:00" /> <homeGame secondary="false" courtHall="Hsia" day="13.11.2026" time="20:00" /> <homeGame secondary="false" courtHall="Hsia" day="16.10.2026" time="20:00" /> <homeGame secondary="false" courtHall="Hsia" day="02.04.2027" time="20:00" /> <homeGame secondary="false" courtHall="Hsia" day="30.10.2026" time="20:00" /> <homeGame secondary="false" courtHall="Hsia" day="11.04.2027" time="10:30" /> <homeGame secondary="false" courtHall="Hsia" day="22.01.2027" time="20:00" /> <homeGame secondary="false" courtHall="Hsia" day="05.02.2027" time="20:00" /> <homeGame secondary="false" courtHall="Hsia" day="19.02.2027" time="20:00" /> <homeGame secondary="false" courtHall="Hsia" day="05.03.2027" time="20:00" /> <homeGame secondary="false" courtHall="Hsia" day="19.03.2027" time="20:00" /> <homeGame secondary="false" courtHall="Hsia" day="04.12.2026" time="20:00" />
+           <noGame from="17.08.2026" until="17.08.2026" /> <noGame from="18.08.2026" until="18.08.2026" /> <noGame from="19.08.2026" until="19.08.2026" /> <noGame from="20.08.2026" until="20.08.2026" /> <noGame from="21.08.2026" until="21.08.2026" /> <noGame from="22.08.2026" until="22.08.2026" /> <noGame from="05.09.2026" until="05.09.2026" /> <noGame from="03.10.2026" until="03.10.2026" /> <noGame from="17.10.2026" until="17.10.2026" /> <noGame from="31.10.2026" until="31.10.2026" /> <noGame from="14.11.2026" until="14.11.2026" /> <noGame from="21.11.2026" until="21.11.2026" /> <noGame from="28.11.2026" until="28.11.2026" /> <noGame from="05.12.2026" until="05.12.2026" /> <noGame from="09.01.2027" until="09.01.2027" /> <noGame from="10.01.2027" until="10.01.2027" /> <noGame from="23.01.2027" until="23.01.2027" /> <noGame from="06.02.2027" until="06.02.2027" /> <noGame from="20.02.2027" until="20.02.2027" /> <noGame from="06.03.2027" until="06.03.2027" /> <noGame from="20.03.2027" until="20.03.2027" /> <noGame from="03.04.2027" until="03.04.2027" /> <noGame from="10.04.2027" until="10.04.2027" /> <noGame from="17.04.2027" until="17.04.2027" />
+          
+          
+        </gameDays>
+        <sisterTeams>
+        	
+        		<team gender="Erwachsene" number="1">
+        			<name>Ttki Tkuy</name>
+        			
+        				<game courtHall="Hsia" guestTeam="Dqqy Qyts Pryu Ezwq II" homeTeam="Ttki Tkuy" day="03.10.2026" time="16:00" />
+        			
+        				<game courtHall="Bphc Elai" guestTeam="Ttki Tkuy" homeTeam=" Aowi Trbk Bosu Agps" day="26.02.2027" time="20:00" />
+        			
+        				<game courtHall="Hsia" guestTeam="Pqke Joqa III" homeTeam="Ttki Tkuy" day="23.01.2027" time="16:00" />
+        			
+        				<game courtHall="Hsia" guestTeam="Tuyy Kuqq II" homeTeam="Ttki Tkuy" day="20.03.2027" time="16:00" />
+        			
+        				<game courtHall="Hsia" guestTeam="Aowi Ewam Llvk Amrc IV" homeTeam="Ttki Tkuy" day="06.02.2027" time="16:00" />
+        			
+        				<game courtHall="Hsia" guestTeam="Trbk Dfcm" homeTeam="Ttki Tkuy" day="17.04.2027" time="16:00" />
+        			
+        				<game courtHall="Hsia" guestTeam="Tosm Fsau" homeTeam="Ttki Tkuy" day="14.11.2026" time="16:00" />
+        			
+        				<game courtHall="Hsia" guestTeam="Tosm Fsau II" homeTeam="Ttki Tkuy" day="05.12.2026" time="16:00" />
+        			
+        				<game courtHall="Hsia" guestTeam="Dqqy Qyts Pryu Ezwq III" homeTeam="Ttki Tkuy" day="06.03.2027" time="16:00" />
+        			
+        				<game courtHall="Gymy" guestTeam="Ttki Tkuy" homeTeam="Pqke Joqa III" day="18.09.2026" time="20:00" />
+        			
+        				<game courtHall="Bufw Kvky Rixs" guestTeam="Ttki Tkuy" homeTeam="Aowi Ewam Llvk Amrc IV" day="18.10.2026" time="12:00" />
+        			
+        				<game courtHall="Spsq dhsa Ufcy" guestTeam="Ttki Tkuy" homeTeam="Tuyy Kuqq II" day="29.08.2026" time="14:30" />
+        			
+        				<game courtHall="Spsq Oxqu " guestTeam="Ttki Tkuy" homeTeam="Dqqy Qyts Pryu Ezwq III" day="06.11.2026" time="20:00" />
+        			
+        				<game courtHall="Spsq Oxqu " guestTeam="Ttki Tkuy" homeTeam="Dqqy Qyts Pryu Ezwq II" day="30.01.2027" time="14:00" />
+        			
+        				<game courtHall="Spsq kmua Ghlk" guestTeam="Ttki Tkuy" homeTeam="Tosm Fsau II" day="04.04.2027" time="12:00" />
+        			
+        				<game courtHall="Snjs xaxt Kaiq Dfcm" guestTeam="Ttki Tkuy" homeTeam="Trbk Dfcm" day="22.11.2026" time="11:00" />
+        			
+        				<game courtHall="Spsq kmua Ghlk" guestTeam="Ttki Tkuy" homeTeam="Tosm Fsau" day="13.02.2027" time="18:30" />
+        			
+        				<game courtHall="Hsia" guestTeam=" Aowi Trbk Bosu Agps" homeTeam="Ttki Tkuy" day="31.10.2026" time="16:00" />
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="3">
+        			<name>Ttki Tkuy III</name>
+        			
+						</team>
+        	
+        		<team gender="Damen" number="1">
+        			<name>Ttki Tkuy</name>
+        			
+						</team>
+        	
+        		<team gender="Jugend 19" number="1">
+        			<name>Ttki Tkuy</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="4">
+        			<name>Ttki Tkuy IV</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="5">
+        			<name>Ttki Tkuy V</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="6">
+        			<name>Ttki Tkuy VI</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="7">
+        			<name>Ttki Tkuy VII</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="8">
+        			<name>Ttki Tkuy VIII</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="9">
+        			<name>Ttki Tkuy IX</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="10">
+        			<name>Ttki Tkuy X</name>
+        			
+						</team>
+        	
+        		<team gender="Jugend 13" number="1">
+        			<name>Ttki Tkuy</name>
+        			
+						</team>
+        	
+        		<team gender="Jugend 13" number="2">
+        			<name>Ttki Tkuy II</name>
+        			
+						</team>
+        	
+        		<team gender="Jugend 19" number="2">
+        			<name>Ttki Tkuy II</name>
+        			
+						</team>
+        	
+        </sisterTeams>
+				
+      </team>
+    
+  </teams>
+</TT>

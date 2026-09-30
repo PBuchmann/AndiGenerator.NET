@@ -1,0 +1,39 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:p="using:AndiGenerator.Presentation"
+        x:Class="AndiGenerator.UI.Nachbarspieldialog"
+        x:DataType="p:NachbarspieldialogViewModel"
+        Title="Begegnung"
+        SizeToContent="WidthAndHeight" CanResize="False" ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner" Classes="dialog">
+  <StackPanel Margin="24" Spacing="12">
+    <Grid Classes="formular" ColumnDefinitions="110,300" RowDefinitions="Auto,Auto,Auto,Auto,Auto">
+      <Grid.Styles>
+        <Style Selector="Grid.formular > :is(Control)">
+          <Setter Property="Margin" Value="0,4" />
+          <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+      </Grid.Styles>
+      <TextBlock Grid.Row="0" Text="Datum:" />
+      <CalendarDatePicker Grid.Row="0" Grid.Column="1" SelectedDate="{Binding Datum}" SelectedDateFormat="Custom" CustomDateFormatString="dd.MM.yyyy" />
+      <TextBlock Grid.Row="1" Text="Uhrzeit:" />
+      <TimePicker Grid.Row="1" Grid.Column="1" SelectedTime="{Binding Uhrzeit}" ClockIdentifier="24HourClock" MinuteIncrement="5" />
+      <TextBlock Grid.Row="2" Text="Art:" />
+      <ComboBox Grid.Row="2" Grid.Column="1" HorizontalAlignment="Stretch" ItemsSource="{x:Static p:NachbarspieldialogViewModel.Arten}" SelectedIndex="{Binding Art}" />
+      <TextBlock Grid.Row="3" Text="Gegner:" />
+      <TextBox Grid.Row="3" Grid.Column="1" Text="{Binding Gegner}" />
+      <TextBlock Grid.Row="4" Text="Spiellokal:" />
+      <StackPanel Grid.Row="4" Grid.Column="1" Orientation="Horizontal" Spacing="8">
+        <ComboBox ItemsSource="{x:Static p:NachbarspieldialogViewModel.Spiellokale}" SelectedItem="{Binding Spiellokal}" MinWidth="80" />
+        <TextBlock Text="leer: Standardspiellokal der Mannschaft" Foreground="{StaticResource Grau}" VerticalAlignment="Center" />
+      </StackPanel>
+    </Grid>
+    <TextBlock Text="{Binding Meldung}" Classes="fehler" TextWrapping="Wrap" MaxWidth="420" HorizontalAlignment="Left" />
+    <Border Classes="dialogfuss">
+      <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right">
+        <Button x:Name="Abbrechen" Classes="gross" Content="Abbrechen" IsCancel="True" />
+        <Button x:Name="Ok" Classes="gross primaer" Content="OK" IsDefault="True" />
+      </StackPanel>
+    </Border>
+  </StackPanel>
+</Window>

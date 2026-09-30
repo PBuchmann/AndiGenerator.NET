@@ -1,0 +1,62 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:p="using:AndiGenerator.Presentation"
+             x:Class="AndiGenerator.UI.Seiten.WunschterminDetail"
+             x:DataType="p:WunschterminDetailViewModel">
+  <UserControl.Styles>
+    <Style Selector="TextBox.tag">
+      <Setter Property="Width" Value="88" />
+      <Setter Property="MinHeight" Value="34" />
+      <Setter Property="Padding" Value="4,2" />
+      <Setter Property="Margin" Value="1" />
+      <Setter Property="FontSize" Value="11" />
+      <Setter Property="CornerRadius" Value="6" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+  </UserControl.Styles>
+  <StackPanel>
+    <StackPanel Orientation="Horizontal" Margin="0,0,0,2">
+      <TextBlock Width="104" />
+      <ItemsControl ItemsSource="{x:Static p:WunschterminDetailViewModel.Wochentage}">
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate>
+            <StackPanel Orientation="Horizontal" />
+          </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="x:String">
+            <TextBlock Text="{Binding}" Width="90" Classes="spaltenkopf" TextAlignment="Center" />
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </StackPanel>
+    <ItemsControl ItemsSource="{Binding Wochen}">
+      <ItemsControl.ItemTemplate>
+        <DataTemplate x:DataType="p:WunschterminZeile">
+          <StackPanel Orientation="Horizontal">
+            <TextBlock Text="{Binding Beschriftung}" Width="104" FontSize="12" LineHeight="16" VerticalAlignment="Center" TextWrapping="Wrap" />
+            <ItemsControl ItemsSource="{Binding Tage}">
+              <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                  <StackPanel Orientation="Horizontal" />
+                </ItemsPanelTemplate>
+              </ItemsControl.ItemsPanel>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="p:WunschterminZelle">
+                  <TextBox Classes="tag" Text="{Binding Text, UpdateSourceTrigger=LostFocus}">
+                    <TextBox.ContextMenu>
+                      <ContextMenu>
+                        <MenuItem Header="Bearbeiten…" Click="Bearbeiten" />
+                        <MenuItem Header="Löschen" Click="Loeschen" IsEnabled="{Binding HatTermin}" />
+                      </ContextMenu>
+                    </TextBox.ContextMenu>
+                  </TextBox>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </DataTemplate>
+      </ItemsControl.ItemTemplate>
+    </ItemsControl>
+  </StackPanel>
+</UserControl>

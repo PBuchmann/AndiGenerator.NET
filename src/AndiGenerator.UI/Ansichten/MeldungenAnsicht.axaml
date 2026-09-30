@@ -1,0 +1,61 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:p="using:AndiGenerator.Presentation"
+             xmlns:ui="using:AndiGenerator.UI"
+             x:Class="AndiGenerator.UI.Ansichten.MeldungenAnsicht"
+             x:DataType="p:MeldungenAnsichtViewModel">
+  <DockPanel Margin="18,14">
+    <StackPanel DockPanel.Dock="Top" Classes="leiste" Orientation="Horizontal" Spacing="10" Margin="0,0,0,10">
+      <TextBlock Text="Plan" Classes="klein" FontSize="13" VerticalAlignment="Center" />
+      <ComboBox MinWidth="280" ItemsSource="{Binding Quellen}" SelectedItem="{Binding Quelle}">
+        <ComboBox.ItemTemplate>
+          <DataTemplate x:DataType="p:PlanQuelle">
+            <TextBlock Text="{Binding Name}" />
+          </DataTemplate>
+        </ComboBox.ItemTemplate>
+      </ComboBox>
+      <Button Classes="gross" Command="{Binding EntfernenCommand}" ToolTip.Tip="Gewählten gemerkten Plan löschen">
+        <StackPanel Orientation="Horizontal" Spacing="8"><ui:Symbol Daten="{StaticResource SymbolLoeschen}" Groesse="20" /><TextBlock Text="Löschen" VerticalAlignment="Center" /></StackPanel>
+      </Button>
+      <ComboBox MinWidth="220" Margin="12,0,0,0" ItemsSource="{Binding Mannschaften}" SelectedItem="{Binding Mannschaft}" />
+      <ui:Zoomauswahl DataContext="{Binding Zoom}" Margin="12,0,0,0" />
+    </StackPanel>
+    <TextBlock DockPanel.Dock="Top" Text="{Binding Hinweis}" IsVisible="{Binding HatHinweis}" Margin="0,8" />
+    <TextBlock DockPanel.Dock="Top" Text="{Binding Zusammenfassung}" FontWeight="SemiBold" Margin="0,4,0,8" />
+    <TextBlock DockPanel.Dock="Top" Text="Keine Meldungen." IsVisible="{Binding KeineMeldungen}" Classes="leer" Margin="0,4" />
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+      <LayoutTransformControl LayoutTransform="{Binding Zoom.Faktor, Converter={x:Static ui:Konverter.Skalierung}}" VerticalAlignment="Top">
+        <ItemsControl ItemsSource="{Binding Gruppen}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+              <WrapPanel Orientation="Horizontal" ItemWidth="380" />
+            </ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="p:Meldungsgruppe">
+              <Border Classes="karte" Padding="16,12" Margin="0,0,12,12" VerticalAlignment="Top">
+                <StackPanel Spacing="8">
+                  <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock Text="{Binding Name}" FontSize="14" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                    <Border Grid.Column="1" Background="#FBEDEB" CornerRadius="8" Padding="8,2" Margin="8,0,0,0" VerticalAlignment="Center">
+                      <TextBlock Text="{Binding Anzahl}" FontSize="11" FontWeight="SemiBold" Foreground="#7A1A12" />
+                    </Border>
+                  </Grid>
+                  <ItemsControl ItemsSource="{Binding Meldungen}">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate x:DataType="x:String">
+                        <Border BorderBrush="{StaticResource Linie}" BorderThickness="0,1,0,0" Padding="0,5">
+                          <SelectableTextBlock Text="{Binding}" FontSize="12" TextWrapping="Wrap" Foreground="{StaticResource Tinte2}" />
+                        </Border>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </StackPanel>
+              </Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </LayoutTransformControl>
+    </ScrollViewer>
+  </DockPanel>
+</UserControl>

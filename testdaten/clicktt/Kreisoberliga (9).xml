@@ -1,0 +1,963 @@
+<?xml version="1.0" encoding="iso-8859-15"?>
+<TT name="Kreisoberliga" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.tt-liga.de/TTGenerator http://www.tt-liga.de/includes/TTGenerator.xsd" xmlns="http://www.tt-liga.de/TTGenerator" mid="07.12.2026" from="17.08.2026" seasonType="STANDARD" until="09.05.2027" gender="Erwachsene" id="518347">
+  <noGameDays />
+  <mandatoryGameDays>
+	  <mandatoryDay day="12.04.2027" /><mandatoryDay day="13.04.2027" /><mandatoryDay day="14.04.2027" /><mandatoryDay day="15.04.2027" /><mandatoryDay day="16.04.2027" /><mandatoryDay day="17.04.2027" /><mandatoryDay day="18.04.2027" />
+  </mandatoryGameDays>
+  <predefinedGames>
+  	
+  </predefinedGames>
+  <existingSchedule>
+    
+  </existingSchedule>
+  <teams>
+    
+      <team gender="Erwachsene" clubId="328" number="1" noDoubleDays="false" id="3081318">
+        <name>Trbk Loei Fllc</name>
+        <gameDays>
+           <homeGame secondary="false" courtHall="Bqya Fevk Pwqq Ahsi" maxParallelGames="1" day="05.11.2026" time="20:00" /> <homeGame secondary="false" courtHall="Bqya Fevk Pwqq Ahsi" maxParallelGames="1" day="29.10.2026" time="20:00" /> <homeGame secondary="false" courtHall="Bqya Fevk Pwqq Ahsi" maxParallelGames="1" day="22.10.2026" time="20:00" /> <homeGame secondary="false" courtHall="Bqya Fevk Pwqq Ahsi" maxParallelGames="1" day="15.10.2026" time="20:00" /> <homeGame secondary="false" courtHall="Bqya Fevk Pwqq Ahsi" maxParallelGames="1" day="08.10.2026" time="20:00" /> <homeGame secondary="false" courtHall="Bqya Fevk Pwqq Ahsi" maxParallelGames="1" day="01.10.2026" time="20:00" /> <homeGame secondary="false" courtHall="Bqya Fevk Pwqq Ahsi" maxParallelGames="1" day="24.09.2026" time="20:00" /> <homeGame secondary="false" courtHall="Bqya Fevk Pwqq Ahsi" maxParallelGames="1" day="17.09.2026" time="20:00" /> <homeGame secondary="false" courtHall="Bqya Fevk Pwqq Ahsi" maxParallelGames="1" day="10.09.2026" time="20:00" /> <homeGame secondary="false" courtHall="Bqya Fevk Pwqq Ahsi" maxParallelGames="1" day="03.09.2026" time="20:00" /> <homeGame secondary="false" courtHall="Bqya Fevk Pwqq Ahsi" maxParallelGames="1" day="27.08.2026" time="20:00" /> <homeGame secondary="false" courtHall="Bqya Fevk Pwqq Ahsi" maxParallelGames="1" day="20.08.2026" time="20:00" /> <homeGame secondary="false" courtHall="Bqya Fevk Pwqq Ahsi" maxParallelGames="1" day="15.04.2027" time="20:00" /> <homeGame secondary="false" courtHall="Bqya Fevk Pwqq Ahsi" maxParallelGames="1" day="08.04.2027" time="20:00" /> <homeGame secondary="false" courtHall="Bqya Fevk Pwqq Ahsi" maxParallelGames="1" day="12.11.2026" time="20:00" /> <homeGame secondary="false" courtHall="Bqya Fevk Pwqq Ahsi" maxParallelGames="1" day="01.04.2027" time="20:00" /> <homeGame secondary="false" courtHall="Bqya Fevk Pwqq Ahsi" maxParallelGames="1" day="19.11.2026" time="20:00" /> <homeGame secondary="false" courtHall="Bqya Fevk Pwqq Ahsi" maxParallelGames="1" day="25.03.2027" time="20:00" /> <homeGame secondary="false" courtHall="Bqya Fevk Pwqq Ahsi" maxParallelGames="1" day="18.03.2027" time="20:00" /> <homeGame secondary="false" courtHall="Bqya Fevk Pwqq Ahsi" maxParallelGames="1" day="11.03.2027" time="20:00" /> <homeGame secondary="false" courtHall="Bqya Fevk Pwqq Ahsi" maxParallelGames="1" day="04.03.2027" time="20:00" /> <homeGame secondary="false" courtHall="Bqya Fevk Pwqq Ahsi" maxParallelGames="1" day="25.02.2027" time="20:00" /> <homeGame secondary="false" courtHall="Bqya Fevk Pwqq Ahsi" maxParallelGames="1" day="18.02.2027" time="20:00" /> <homeGame secondary="false" courtHall="Bqya Fevk Pwqq Ahsi" maxParallelGames="1" day="11.02.2027" time="20:00" /> <homeGame secondary="false" courtHall="Bqya Fevk Pwqq Ahsi" maxParallelGames="1" day="04.02.2027" time="20:00" /> <homeGame secondary="false" courtHall="Bqya Fevk Pwqq Ahsi" maxParallelGames="1" day="28.01.2027" time="20:00" /> <homeGame secondary="false" courtHall="Bqya Fevk Pwqq Ahsi" maxParallelGames="1" day="21.01.2027" time="20:00" /> <homeGame secondary="false" courtHall="Bqya Fevk Pwqq Ahsi" maxParallelGames="1" day="14.01.2027" time="20:00" /> <homeGame secondary="false" courtHall="Bqya Fevk Pwqq Ahsi" maxParallelGames="1" day="26.11.2026" time="20:00" /> <homeGame secondary="false" courtHall="Bqya Fevk Pwqq Ahsi" maxParallelGames="1" day="03.12.2026" time="20:00" />
+          
+          
+          
+        </gameDays>
+        <sisterTeams>
+        	
+        		<team gender="Erwachsene" number="2">
+        			<name>Trbk Loei Fllc II</name>
+        			
+						</team>
+        	
+        </sisterTeams>
+				
+      </team>
+    
+      <team gender="Erwachsene" clubId="341" number="1" noDoubleDays="false" id="3082064">
+        <name>Bxns Iwqy Lnka Llvk Agps</name>
+        <gameDays>
+           <homeGame secondary="false" courtHall="Lswe Vzzg" maxParallelGames="2" day="02.12.2026" time="20:00" /> <homeGame secondary="false" courtHall="Lswe Vzzg" maxParallelGames="2" day="18.11.2026" time="20:00" /> <homeGame secondary="false" courtHall="Lswe Vzzg" maxParallelGames="2" day="04.11.2026" time="20:00" /> <homeGame secondary="false" courtHall="Lswe Vzzg" maxParallelGames="2" day="21.10.2026" time="20:00" /> <homeGame secondary="false" courtHall="Lswe Vzzg" maxParallelGames="2" day="30.09.2026" time="20:00" /> <homeGame secondary="false" courtHall="Lswe Vzzg" maxParallelGames="2" day="16.09.2026" time="20:00" /> <homeGame secondary="false" courtHall="Lswe Vzzg" maxParallelGames="2" day="02.09.2026" time="20:00" /> <homeGame secondary="false" courtHall="Lswe Vzzg" maxParallelGames="2" day="10.02.2027" time="20:00" /> <homeGame secondary="false" courtHall="Lswe Vzzg" maxParallelGames="2" day="19.08.2026" time="20:00" /> <homeGame secondary="false" courtHall="Lswe Vzzg" maxParallelGames="2" day="13.01.2027" time="20:00" /> <homeGame secondary="false" courtHall="Lswe Vzzg" maxParallelGames="2" day="14.04.2027" time="20:00" /> <homeGame secondary="false" courtHall="Lswe Vzzg" maxParallelGames="2" day="20.01.2027" time="20:00" /> <homeGame secondary="false" courtHall="Lswe Vzzg" maxParallelGames="2" day="27.01.2027" time="20:00" /> <homeGame secondary="false" courtHall="Lswe Vzzg" maxParallelGames="2" day="07.04.2027" time="20:00" /> <homeGame secondary="false" courtHall="Lswe Vzzg" maxParallelGames="2" day="10.03.2027" time="20:00" /> <homeGame secondary="false" courtHall="Lswe Vzzg" maxParallelGames="2" day="24.02.2027" time="20:00" />
+          
+          
+          
+        </gameDays>
+        <sisterTeams>
+        	
+        		<team gender="Erwachsene" number="2">
+        			<name>Bxns Iwqy Lnka Llvk Agps II</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="3">
+        			<name>Bxns Iwqy Lnka Llvk Agps Aiuy III</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="4">
+        			<name>Bxns Iwqy Lnka Llvk Agps IV</name>
+        			
+						</team>
+        	
+        		<team gender="Jugend 13" number="1">
+        			<name>Bxns Iwqy Llvk</name>
+        			
+						</team>
+        	
+        		<team gender="Jugend 13" number="2">
+        			<name>Bxns Iwqy Llvk II</name>
+        			
+						</team>
+        	
+        		<team gender="Jugend 19" number="1">
+        			<name>Bxns Iwqy Llvk</name>
+        			
+						</team>
+        	
+        </sisterTeams>
+				
+      </team>
+    
+      <team gender="Erwachsene" clubId="323" number="6" noDoubleDays="false" id="3081891">
+        <name>Aowi Ewam Llvk Amrc VI</name>
+        <gameDays>
+           <homeGame secondary="true" courtHall="Spsq kmua Cgiq Rjsa I xaxt III" maxParallelGames="2" day="26.02.2027" time="20:00" /> <homeGame secondary="true" courtHall="Spsq kmua Cgiq Rjsa I xaxt III" maxParallelGames="2" day="19.02.2027" time="20:00" /> <homeGame secondary="true" courtHall="Spsq kmua Cgiq Rjsa I xaxt III" maxParallelGames="2" day="12.02.2027" time="20:00" /> <homeGame secondary="true" courtHall="Spsq kmua Cgiq Rjsa I xaxt III" maxParallelGames="2" day="05.02.2027" time="20:00" /> <homeGame secondary="true" courtHall="Spsq kmua Cgiq Rjsa I xaxt III" maxParallelGames="2" day="29.01.2027" time="20:00" /> <homeGame secondary="true" courtHall="Spsq kmua Cgiq Rjsa I xaxt III" maxParallelGames="2" day="22.01.2027" time="20:00" /> <homeGame secondary="true" courtHall="Spsq kmua Cgiq Rjsa I xaxt III" maxParallelGames="2" day="15.01.2027" time="20:00" /> <homeGame secondary="true" courtHall="Spsq kmua Cgiq Rjsa I xaxt III" maxParallelGames="2" day="04.12.2026" time="20:00" /> <homeGame secondary="true" courtHall="Spsq kmua Cgiq Rjsa I xaxt III" maxParallelGames="2" day="27.11.2026" time="20:00" /> <homeGame secondary="true" courtHall="Spsq kmua Cgiq Rjsa I xaxt III" maxParallelGames="2" day="20.11.2026" time="20:00" /> <homeGame secondary="true" courtHall="Spsq kmua Cgiq Rjsa I xaxt III" maxParallelGames="2" day="13.11.2026" time="20:00" /> <homeGame secondary="true" courtHall="Spsq kmua Cgiq Rjsa I xaxt III" maxParallelGames="2" day="06.11.2026" time="20:00" /> <homeGame secondary="true" courtHall="Spsq kmua Cgiq Rjsa I xaxt III" maxParallelGames="2" day="30.10.2026" time="20:00" /> <homeGame secondary="true" courtHall="Spsq kmua Cgiq Rjsa I xaxt III" maxParallelGames="2" day="23.10.2026" time="20:00" /> <homeGame secondary="true" courtHall="Spsq kmua Cgiq Rjsa I xaxt III" maxParallelGames="2" day="16.10.2026" time="20:00" /> <homeGame secondary="true" courtHall="Spsq kmua Cgiq Rjsa I xaxt III" maxParallelGames="2" day="09.10.2026" time="20:00" /> <homeGame secondary="true" courtHall="Spsq kmua Cgiq Rjsa I xaxt III" maxParallelGames="2" day="02.10.2026" time="20:00" /> <homeGame secondary="true" courtHall="Spsq kmua Cgiq Rjsa I xaxt III" maxParallelGames="2" day="25.09.2026" time="20:00" /> <homeGame secondary="true" courtHall="Spsq kmua Cgiq Rjsa I xaxt III" maxParallelGames="2" day="18.09.2026" time="20:00" /> <homeGame secondary="true" courtHall="Spsq kmua Cgiq Rjsa I xaxt III" maxParallelGames="2" day="11.09.2026" time="20:00" /> <homeGame secondary="true" courtHall="Spsq kmua Cgiq Rjsa I xaxt III" maxParallelGames="2" day="04.09.2026" time="20:00" /> <homeGame secondary="true" courtHall="Spsq kmua Cgiq Rjsa I xaxt III" maxParallelGames="2" day="28.08.2026" time="20:00" /> <homeGame secondary="true" courtHall="Spsq kmua Cgiq Rjsa I xaxt III" maxParallelGames="2" day="16.04.2027" time="20:00" /> <homeGame secondary="true" courtHall="Spsq kmua Cgiq Rjsa I xaxt III" maxParallelGames="2" day="12.03.2027" time="20:00" /> <homeGame secondary="true" courtHall="Spsq kmua Cgiq Rjsa I xaxt III" maxParallelGames="2" day="09.04.2027" time="20:00" /> <homeGame secondary="true" courtHall="Spsq kmua Cgiq Rjsa I xaxt III" maxParallelGames="2" day="02.04.2027" time="20:00" /> <homeGame secondary="true" courtHall="Spsq kmua Cgiq Rjsa I xaxt III" maxParallelGames="2" day="19.03.2027" time="20:00" /> <homeGame secondary="false" courtHall="Bufw Kvky Rixs" maxParallelGames="2" day="31.03.2027" time="20:00" /> <homeGame secondary="false" courtHall="Bufw Kvky Rixs" maxParallelGames="2" day="14.04.2027" time="20:00" /> <homeGame secondary="false" courtHall="Bufw Kvky Rixs" maxParallelGames="2" day="07.04.2027" time="20:00" /> <homeGame secondary="false" courtHall="Bufw Kvky Rixs" maxParallelGames="2" day="24.03.2027" time="20:00" /> <homeGame secondary="false" courtHall="Bufw Kvky Rixs" maxParallelGames="2" day="17.03.2027" time="20:00" /> <homeGame secondary="false" courtHall="Bufw Kvky Rixs" maxParallelGames="2" day="10.03.2027" time="20:00" /> <homeGame secondary="false" courtHall="Bufw Kvky Rixs" maxParallelGames="2" day="03.03.2027" time="20:00" /> <homeGame secondary="false" courtHall="Bufw Kvky Rixs" maxParallelGames="2" day="24.02.2027" time="20:00" /> <homeGame secondary="false" courtHall="Bufw Kvky Rixs" maxParallelGames="2" day="17.02.2027" time="20:00" /> <homeGame secondary="false" courtHall="Bufw Kvky Rixs" maxParallelGames="2" day="10.02.2027" time="20:00" /> <homeGame secondary="false" courtHall="Bufw Kvky Rixs" maxParallelGames="2" day="03.02.2027" time="20:00" /> <homeGame secondary="false" courtHall="Bufw Kvky Rixs" maxParallelGames="2" day="27.01.2027" time="20:00" /> <homeGame secondary="false" courtHall="Bufw Kvky Rixs" maxParallelGames="2" day="20.01.2027" time="20:00" /> <homeGame secondary="false" courtHall="Bufw Kvky Rixs" maxParallelGames="2" day="13.01.2027" time="20:00" /> <homeGame secondary="false" courtHall="Bufw Kvky Rixs" maxParallelGames="2" day="02.12.2026" time="20:00" /> <homeGame secondary="false" courtHall="Bufw Kvky Rixs" maxParallelGames="2" day="25.11.2026" time="20:00" /> <homeGame secondary="false" courtHall="Bufw Kvky Rixs" maxParallelGames="2" day="18.11.2026" time="20:00" /> <homeGame secondary="false" courtHall="Bufw Kvky Rixs" maxParallelGames="2" day="11.11.2026" time="20:00" /> <homeGame secondary="false" courtHall="Bufw Kvky Rixs" maxParallelGames="2" day="04.11.2026" time="20:00" /> <homeGame secondary="false" courtHall="Bufw Kvky Rixs" maxParallelGames="2" day="28.10.2026" time="20:00" /> <homeGame secondary="false" courtHall="Bufw Kvky Rixs" maxParallelGames="2" day="21.10.2026" time="20:00" /> <homeGame secondary="false" courtHall="Bufw Kvky Rixs" maxParallelGames="2" day="14.10.2026" time="20:00" /> <homeGame secondary="false" courtHall="Bufw Kvky Rixs" maxParallelGames="2" day="07.10.2026" time="20:00" /> <homeGame secondary="false" courtHall="Bufw Kvky Rixs" maxParallelGames="2" day="30.09.2026" time="20:00" /> <homeGame secondary="false" courtHall="Bufw Kvky Rixs" maxParallelGames="2" day="23.09.2026" time="20:00" /> <homeGame secondary="false" courtHall="Bufw Kvky Rixs" maxParallelGames="2" day="16.09.2026" time="20:00" /> <homeGame secondary="false" courtHall="Bufw Kvky Rixs" maxParallelGames="2" day="09.09.2026" time="20:00" /> <homeGame secondary="false" courtHall="Bufw Kvky Rixs" maxParallelGames="2" day="02.09.2026" time="20:00" /> <homeGame secondary="false" courtHall="Bufw Kvky Rixs" maxParallelGames="2" day="26.08.2026" time="20:00" /> <homeGame secondary="true" courtHall="Spsq kmua Cgiq Rjsa I xaxt III" maxParallelGames="2" day="05.03.2027" time="20:00" />
+           <noGame from="09.01.2027" until="09.01.2027" /> <noGame from="10.01.2027" until="10.01.2027" />
+          
+          
+        </gameDays>
+        <sisterTeams>
+        	
+        		<team gender="Erwachsene" number="1">
+        			<name>Aowi Ewam Llvk Amrc</name>
+        			
+        				<game courtHall="Fnca Nskm" guestTeam="Aowi Ewam Llvk Amrc" homeTeam="Trbk ozsa Ivci" day="18.04.2027" time="14:00" />
+        			
+        				<game courtHall="Bufw Kvky Rixs" guestTeam="Trbk ozsa Ivci" homeTeam="Aowi Ewam Llvk Amrc" day="01.11.2026" time="13:00" />
+        			
+        				<game courtHall="Tndw Sqmy Gpds Aoia" guestTeam="Aowi Ewam Llvk Amrc" homeTeam="Tndw Iyfo" day="04.04.2027" time="15:00" />
+        			
+        				<game courtHall="Bufw Kvky Rixs" guestTeam="Tndw Iyfo" homeTeam="Aowi Ewam Llvk Amrc" day="31.10.2026" time="17:30" />
+        			
+        				<game courtHall="Brmi" guestTeam="Aowi Ewam Llvk Amrc" homeTeam="Aowi Euxw Kcro" day="28.02.2027" time="14:00" />
+        			
+        				<game courtHall="Bufw Kvky Rixs" guestTeam="Aowi Euxw Kcro" homeTeam="Aowi Ewam Llvk Amrc" day="13.09.2026" time="13:00" />
+        			
+        				<game courtHall="Bufw Kvky Rixs" guestTeam="Trbk Fdsu Osyy" homeTeam="Aowi Ewam Llvk Amrc" day="14.02.2027" time="13:00" />
+        			
+        				<game courtHall="Lvfc" guestTeam="Aowi Ewam Llvk Amrc" homeTeam="Trbk Fdsu Osyy" day="15.11.2026" time="14:00" />
+        			
+        				<game courtHall="Bufw Kvky Rixs" guestTeam="Qyts Utem Vcjk" homeTeam="Aowi Ewam Llvk Amrc" day="07.03.2027" time="13:00" />
+        			
+        				<game courtHall="Spsq Uqbg Tfiu" guestTeam="Aowi Ewam Llvk Amrc" homeTeam="Qyts Utem Vcjk" day="06.09.2026" time="16:00" />
+        			
+        				<game courtHall="Bufw Kvky Rixs" guestTeam="Aowi Euxw Rbwy II" homeTeam="Aowi Ewam Llvk Amrc" day="07.02.2027" time="13:00" />
+        			
+        				<game courtHall="Iovw Dunc Gpds" guestTeam="Aowi Ewam Llvk Amrc" homeTeam="Aowi Euxw Rbwy II" day="05.09.2026" time="14:00" />
+        			
+        				<game courtHall="Bufw Kvky Rixs" guestTeam="Tuyy Assm Hlsi" homeTeam="Aowi Ewam Llvk Amrc" day="08.11.2026" time="13:00" />
+        			
+        				<game courtHall="Sxns Hlsi" guestTeam="Aowi Ewam Llvk Amrc" homeTeam="Tuyy Assm Hlsi" day="24.01.2027" time="14:00" />
+        			
+        				<game courtHall="Bufw Kvky Rixs" guestTeam="Trbk Qwku Hqcu" homeTeam="Aowi Ewam Llvk Amrc" day="11.04.2027" time="13:00" />
+        			
+        				<game courtHall="Ozfk " guestTeam="Aowi Ewam Llvk Amrc" homeTeam="Trbk Qwku Hqcu" day="06.12.2026" time="15:00" />
+        			
+        				<game courtHall="Dyxo kmua Vlam" guestTeam="Aowi Ewam Llvk Amrc" homeTeam="Tosm Wnjc" day="23.01.2027" time="18:00" />
+        			
+        				<game courtHall="Bufw Kvky Rixs" guestTeam="Tosm Wnjc" homeTeam="Aowi Ewam Llvk Amrc" day="18.10.2026" time="13:00" />
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="2">
+        			<name>Aowi Ewam Llvk Amrc II</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="3">
+        			<name>Aowi Ewam Llvk Amrc III</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="4">
+        			<name>Aowi Ewam Llvk Amrc IV</name>
+        			
+        				<game courtHall="Bufw Kvky Rixs" guestTeam="Tuyy Kuqq II" homeTeam="Aowi Ewam Llvk Amrc IV" day="04.10.2026" time="12:00" />
+        			
+        				<game courtHall="Gymy" guestTeam="Aowi Ewam Llvk Amrc IV" homeTeam="Pqke Joqa III" day="15.01.2027" time="20:00" />
+        			
+        				<game courtHall="Bufw Kvky Rixs" guestTeam="Pqke Joqa III" homeTeam="Aowi Ewam Llvk Amrc IV" day="25.10.2026" time="12:00" />
+        			
+        				<game courtHall="Bufw Kvky Rixs" guestTeam="Tosm Fsau II" homeTeam="Aowi Ewam Llvk Amrc IV" day="31.01.2027" time="12:00" />
+        			
+        				<game courtHall="Bufw Kvky Rixs" guestTeam="Tosm Fsau" homeTeam="Aowi Ewam Llvk Amrc IV" day="21.03.2027" time="12:00" />
+        			
+        				<game courtHall="Bufw Kvky Rixs" guestTeam=" Aowi Trbk Bosu Agps" homeTeam="Aowi Ewam Llvk Amrc IV" day="11.04.2027" time="12:00" />
+        			
+        				<game courtHall="Bufw Kvky Rixs" guestTeam="Trbk Dfcm" homeTeam="Aowi Ewam Llvk Amrc IV" day="29.11.2026" time="12:00" />
+        			
+        				<game courtHall="Bufw Kvky Rixs" guestTeam="Dqqy Qyts Pryu Ezwq III" homeTeam="Aowi Ewam Llvk Amrc IV" day="21.02.2027" time="12:00" />
+        			
+        				<game courtHall="Bufw Kvky Rixs" guestTeam="Dqqy Qyts Pryu Ezwq II" homeTeam="Aowi Ewam Llvk Amrc IV" day="28.02.2027" time="12:00" />
+        			
+        				<game courtHall="Spsq kmua Ghlk" guestTeam="Aowi Ewam Llvk Amrc IV" homeTeam="Tosm Fsau II" day="06.09.2026" time="12:00" />
+        			
+        				<game courtHall="Spsq kmua Ghlk" guestTeam="Aowi Ewam Llvk Amrc IV" homeTeam="Tosm Fsau" day="12.09.2026" time="18:30" />
+        			
+        				<game courtHall="Bphc Elai" guestTeam="Aowi Ewam Llvk Amrc IV" homeTeam=" Aowi Trbk Bosu Agps" day="09.10.2026" time="20:00" />
+        			
+        				<game courtHall="Snjs xaxt Kaiq Dfcm" guestTeam="Aowi Ewam Llvk Amrc IV" homeTeam="Trbk Dfcm" day="14.03.2027" time="11:00" />
+        			
+        				<game courtHall="Spsq dhsa Ufcy" guestTeam="Aowi Ewam Llvk Amrc IV" homeTeam="Tuyy Kuqq II" day="17.04.2027" time="14:30" />
+        			
+        				<game courtHall="Hsia" guestTeam="Aowi Ewam Llvk Amrc IV" homeTeam="Ttki Tkuy" day="06.02.2027" time="16:00" />
+        			
+        				<game courtHall="Spsq Oxqu " guestTeam="Aowi Ewam Llvk Amrc IV" homeTeam="Dqqy Qyts Pryu Ezwq III" day="13.11.2026" time="20:00" />
+        			
+        				<game courtHall="Spsq Oxqu " guestTeam="Aowi Ewam Llvk Amrc IV" homeTeam="Dqqy Qyts Pryu Ezwq II" day="05.12.2026" time="14:00" />
+        			
+        				<game courtHall="Bufw Kvky Rixs" guestTeam="Ttki Tkuy" homeTeam="Aowi Ewam Llvk Amrc IV" day="18.10.2026" time="12:00" />
+        			
+						</team>
+        	
+        		<team gender="Jugend 19" number="1">
+        			<name>Aowi Ewam Llvk Amrc Aiuy</name>
+        			
+						</team>
+        	
+        		<team gender="Jugend 19" number="2">
+        			<name>Aowi Ewam Llvk Amrc II</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="5">
+        			<name>Aowi Ewam Llvk Amrc V</name>
+        			
+        				<game courtHall="Spsq kmua Cgiq Rjsa I xaxt III" guestTeam="Ttki Clhk II" homeTeam="Aowi Ewam Llvk Amrc V" day="04.12.2026" time="20:00" />
+        			
+        				<game courtHall="Ghlk Nqbo" guestTeam="Aowi Ewam Llvk Amrc V" homeTeam="Tueq Nqbo" day="24.01.2027" time="11:30" />
+        			
+        				<game courtHall="Spsq kmua Cgiq Rjsa I xaxt III" guestTeam="Ttki Tkuy III" homeTeam="Aowi Ewam Llvk Amrc V" day="06.11.2026" time="20:00" />
+        			
+        				<game courtHall="Spsq kmua Cgiq Rjsa I xaxt III" guestTeam="Tndw Ebrc" homeTeam="Aowi Ewam Llvk Amrc V" day="25.09.2026" time="20:00" />
+        			
+        				<game courtHall="Spsq kmua Cgiq Rjsa I xaxt III" guestTeam="Tueq Nqbo" homeTeam="Aowi Ewam Llvk Amrc V" day="28.08.2026" time="20:00" />
+        			
+        				<game courtHall="Bufw Kvky Rixs" guestTeam="Dqqy Qyts Pryu Ezwq IV" homeTeam="Aowi Ewam Llvk Amrc V" day="13.04.2027" time="20:00" />
+        			
+        				<game courtHall="Spsq kmua Cgiq Rjsa I xaxt III" guestTeam="Pqke Joqa V" homeTeam="Aowi Ewam Llvk Amrc V" day="09.04.2027" time="20:00" />
+        			
+        				<game courtHall="Bufw Kvky Rixs" guestTeam="Trbk Dfcm III" homeTeam="Aowi Ewam Llvk Amrc V" day="09.03.2027" time="20:00" />
+        			
+        				<game courtHall="Spsq kmua Cgiq Rjsa I xaxt III" guestTeam="Trbk Dfcm II" homeTeam="Aowi Ewam Llvk Amrc V" day="12.02.2027" time="20:00" />
+        			
+        				<game courtHall="Spsq Oxqu " guestTeam="Aowi Ewam Llvk Amrc V" homeTeam="Dqqy Qyts Pryu Ezwq IV" day="27.11.2026" time="20:00" />
+        			
+        				<game courtHall="Snjs xaxt Kaiq Dfcm" guestTeam="Aowi Ewam Llvk Amrc V" homeTeam="Trbk Dfcm III" day="16.10.2026" time="20:15" />
+        			
+        				<game courtHall="Snjs xaxt Kaiq Dfcm" guestTeam="Aowi Ewam Llvk Amrc V" homeTeam="Trbk Dfcm II" day="11.09.2026" time="20:15" />
+        			
+        				<game courtHall="Gymy" guestTeam="Aowi Ewam Llvk Amrc V" homeTeam="Pqke Joqa V" day="05.09.2026" time="10:30" />
+        			
+        				<game courtHall="Hsia" guestTeam="Aowi Ewam Llvk Amrc V" homeTeam="Ttki Tkuy III" day="16.04.2027" time="20:00" />
+        			
+        				<game courtHall="Ecfk Gpds" guestTeam="Aowi Ewam Llvk Amrc V" homeTeam="Tndw Ebrc" day="19.03.2027" time="20:00" />
+        			
+        				<game courtHall="Oseq Cmka" guestTeam="Aowi Ewam Llvk Amrc V" homeTeam="Ttki Clhk II" day="24.02.2027" time="20:15" />
+        			
+        				<game courtHall="Snjs xaxt Ezii Adwe Sbrc" guestTeam="Aowi Ewam Llvk Amrc V" homeTeam="Tuyy Dwea" day="19.02.2027" time="19:45" />
+        			
+        				<game courtHall="Spsq kmua Cgiq Rjsa I xaxt III" guestTeam="Tuyy Dwea" homeTeam="Aowi Ewam Llvk Amrc V" day="20.11.2026" time="20:00" />
+        			
+						</team>
+        	
+        		<team gender="Jugend 19" number="3">
+        			<name>Aowi Ewam Llvk Amrc III</name>
+        			
+						</team>
+        	
+        		<team gender="Jugend 13" number="1">
+        			<name>Aowi Ewam Llvk Amrc</name>
+        			
+						</team>
+        	
+        </sisterTeams>
+				
+      </team>
+    
+      <team gender="Erwachsene" clubId="307" number="2" noDoubleDays="true" id="3081666">
+        <name>Tndw Ebrc II</name>
+        <gameDays>
+           <homeGame secondary="false" courtHall="Ecfk Gpds" maxParallelGames="2" day="11.09.2026" time="20:00" /> <homeGame secondary="false" courtHall="Ecfk Gpds" maxParallelGames="2" day="18.09.2026" time="20:00" /> <homeGame secondary="false" courtHall="Ecfk Gpds" maxParallelGames="2" day="25.09.2026" time="20:00" /> <homeGame secondary="false" courtHall="Ecfk Gpds" maxParallelGames="2" day="23.10.2026" time="20:00" /> <homeGame secondary="false" courtHall="Ecfk Gpds" maxParallelGames="2" day="30.10.2026" time="20:00" /> <homeGame secondary="false" courtHall="Ecfk Gpds" maxParallelGames="2" day="06.11.2026" time="20:00" /> <homeGame secondary="false" courtHall="Ecfk Gpds" maxParallelGames="2" day="13.11.2026" time="20:00" /> <homeGame secondary="false" courtHall="Ecfk Gpds" maxParallelGames="2" day="20.11.2026" time="20:00" /> <homeGame secondary="false" courtHall="Ecfk Gpds" maxParallelGames="2" day="04.09.2026" time="20:00" /> <homeGame secondary="false" courtHall="Ecfk Gpds" maxParallelGames="2" day="15.01.2027" time="20:00" /> <homeGame secondary="false" courtHall="Ecfk Gpds" maxParallelGames="2" day="22.01.2027" time="20:00" /> <homeGame secondary="false" courtHall="Ecfk Gpds" maxParallelGames="2" day="04.12.2026" time="20:00" /> <homeGame secondary="false" courtHall="Ecfk Gpds" maxParallelGames="2" day="19.03.2027" time="20:00" /> <homeGame secondary="false" courtHall="Ecfk Gpds" maxParallelGames="2" day="12.03.2027" time="20:00" /> <homeGame secondary="false" courtHall="Ecfk Gpds" maxParallelGames="2" day="05.03.2027" time="20:00" /> <homeGame secondary="false" courtHall="Ecfk Gpds" maxParallelGames="2" day="26.02.2027" time="20:00" /> <homeGame secondary="false" courtHall="Ecfk Gpds" maxParallelGames="2" day="19.02.2027" time="20:00" /> <homeGame secondary="false" courtHall="Ecfk Gpds" maxParallelGames="2" day="27.11.2026" time="20:00" /> <homeGame secondary="false" courtHall="Ecfk Gpds" maxParallelGames="2" day="09.04.2027" time="20:00" /> <homeGame secondary="false" courtHall="Ecfk Gpds" maxParallelGames="2" day="16.04.2027" time="20:00" />
+           <noGame from="17.08.2026" until="17.08.2026" /> <noGame from="18.08.2026" until="18.08.2026" /> <noGame from="19.08.2026" until="19.08.2026" /> <noGame from="20.08.2026" until="20.08.2026" /> <noGame from="21.08.2026" until="21.08.2026" /> <noGame from="22.08.2026" until="22.08.2026" /> <noGame from="23.08.2026" until="23.08.2026" /> <noGame from="03.10.2026" until="03.10.2026" /> <noGame from="04.10.2026" until="04.10.2026" /> <noGame from="05.10.2026" until="05.10.2026" /> <noGame from="06.10.2026" until="06.10.2026" /> <noGame from="07.10.2026" until="07.10.2026" /> <noGame from="08.10.2026" until="08.10.2026" /> <noGame from="09.10.2026" until="09.10.2026" /> <noGame from="10.10.2026" until="10.10.2026" /> <noGame from="11.10.2026" until="11.10.2026" /> <noGame from="12.10.2026" until="12.10.2026" /> <noGame from="13.10.2026" until="13.10.2026" /> <noGame from="14.10.2026" until="14.10.2026" /> <noGame from="15.10.2026" until="15.10.2026" /> <noGame from="16.10.2026" until="16.10.2026" /> <noGame from="06.02.2027" until="06.02.2027" /> <noGame from="07.02.2027" until="07.02.2027" /> <noGame from="08.02.2027" until="08.02.2027" /> <noGame from="09.02.2027" until="09.02.2027" /> <noGame from="10.02.2027" until="10.02.2027" /> <noGame from="11.02.2027" until="11.02.2027" /> <noGame from="12.02.2027" until="12.02.2027" /> <noGame from="13.02.2027" until="13.02.2027" /> <noGame from="14.02.2027" until="14.02.2027" /> <noGame from="22.03.2027" until="22.03.2027" /> <noGame from="23.03.2027" until="23.03.2027" /> <noGame from="24.03.2027" until="24.03.2027" /> <noGame from="25.03.2027" until="25.03.2027" /> <noGame from="30.03.2027" until="30.03.2027" /> <noGame from="31.03.2027" until="31.03.2027" /> <noGame from="01.04.2027" until="01.04.2027" /> <noGame from="02.04.2027" until="02.04.2027" />
+          
+          
+        </gameDays>
+        <sisterTeams>
+        	
+        		<team gender="Damen" number="1">
+        			<name>Tndw Ebrc</name>
+        			
+        				<game courtHall="Ecfk Gpds" guestTeam="Tosm Ngrw" homeTeam="Tndw Ebrc" day="06.11.2026" time="20:00" />
+        			
+        				<game courtHall="Ecfk Gpds" guestTeam="Trbk Dfcm" homeTeam="Tndw Ebrc" day="23.10.2026" time="20:00" />
+        			
+        				<game courtHall="Ecfk Gpds" guestTeam="Dqqy Qyts Pryu Ezwq" homeTeam="Tndw Ebrc" day="11.09.2026" time="20:00" />
+        			
+        				<game courtHall="Ecfk Gpds" guestTeam="Tueq Qfga" homeTeam="Tndw Ebrc" day="19.03.2027" time="20:00" />
+        			
+        				<game courtHall="Ecfk Gpds" guestTeam="Stqe Etvg" homeTeam="Tndw Ebrc" day="05.03.2027" time="20:00" />
+        			
+        				<game courtHall="Ecfk Gpds" guestTeam="Tosm Fdem" homeTeam="Tndw Ebrc" day="19.02.2027" time="20:00" />
+        			
+        				<game courtHall="Spsq Oxqu " guestTeam="Tndw Ebrc" homeTeam="Dqqy Qyts Pryu Ezwq" day="29.01.2027" time="20:00" />
+        			
+        				<game courtHall="Dxuy" guestTeam="Tndw Ebrc" homeTeam="Stqe Etvg" day="01.12.2026" time="20:15" />
+        			
+        				<game courtHall="Rmay Fcqe" guestTeam="Tndw Ebrc" homeTeam="Tosm Fdem" day="19.11.2026" time="19:30" />
+        			
+        				<game courtHall="Umds " guestTeam="Tndw Ebrc" homeTeam="Tuyy Ohgi" day="23.09.2026" time="20:00" />
+        			
+        				<game courtHall="Umds kmua Ghlk Qfga" guestTeam="Tndw Ebrc" homeTeam="Tueq Qfga" day="31.08.2026" time="20:15" />
+        			
+        				<game courtHall="Umds Ngrw" guestTeam="Tndw Ebrc" homeTeam="Tosm Ngrw" day="13.04.2027" time="19:45" />
+        			
+        				<game courtHall="Snjs xaxt Kaiq Dfcm" guestTeam="Tndw Ebrc" homeTeam="Trbk Dfcm" day="07.04.2027" time="20:15" />
+        			
+        				<game courtHall="Ecfk Gpds" guestTeam="Tuyy Ohgi" homeTeam="Tndw Ebrc" day="15.01.2027" time="20:00" />
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="1">
+        			<name>Tndw Ebrc</name>
+        			
+        				<game courtHall="Ecfk Gpds" guestTeam="Dqqy Qyts Pryu Ezwq IV" homeTeam="Tndw Ebrc" day="04.12.2026" time="20:00" />
+        			
+        				<game courtHall="Spsq Oxqu " guestTeam="Tndw Ebrc" homeTeam="Dqqy Qyts Pryu Ezwq IV" day="29.01.2027" time="20:00" />
+        			
+        				<game courtHall="Ecfk Gpds" guestTeam="Trbk Dfcm II" homeTeam="Tndw Ebrc" day="23.10.2026" time="20:00" />
+        			
+        				<game courtHall="Ecfk Gpds" guestTeam="Ttki Clhk II" homeTeam="Tndw Ebrc" day="02.10.2026" time="20:00" />
+        			
+        				<game courtHall="Ecfk Gpds" guestTeam="Tuyy Dwea" homeTeam="Tndw Ebrc" day="09.04.2027" time="20:00" />
+        			
+        				<game courtHall="Ecfk Gpds" guestTeam="Aowi Ewam Llvk Amrc V" homeTeam="Tndw Ebrc" day="19.03.2027" time="20:00" />
+        			
+        				<game courtHall="Ecfk Gpds" guestTeam="Ttki Tkuy III" homeTeam="Tndw Ebrc" day="12.03.2027" time="20:00" />
+        			
+        				<game courtHall="Ecfk Gpds" guestTeam="Tueq Nqbo" homeTeam="Tndw Ebrc" day="26.02.2027" time="20:00" />
+        			
+        				<game courtHall="Ecfk Gpds" guestTeam="Pqke Joqa V" homeTeam="Tndw Ebrc" day="19.02.2027" time="20:00" />
+        			
+        				<game courtHall="Snjs xaxt Ezii Adwe Sbrc" guestTeam="Tndw Ebrc" homeTeam="Tuyy Dwea" day="27.11.2026" time="19:45" />
+        			
+        				<game courtHall="Gymy" guestTeam="Tndw Ebrc" homeTeam="Pqke Joqa V" day="14.11.2026" time="10:30" />
+        			
+        				<game courtHall="Ghlk Nqbo" guestTeam="Tndw Ebrc" homeTeam="Tueq Nqbo" day="01.11.2026" time="11:30" />
+        			
+        				<game courtHall="Hsia" guestTeam="Tndw Ebrc" homeTeam="Ttki Tkuy III" day="30.10.2026" time="20:00" />
+        			
+        				<game courtHall="Spsq kmua Cgiq Rjsa I xaxt III" guestTeam="Tndw Ebrc" homeTeam="Aowi Ewam Llvk Amrc V" day="25.09.2026" time="20:00" />
+        			
+        				<game courtHall="Snjs xaxt Kaiq Dfcm" guestTeam="Tndw Ebrc" homeTeam="Trbk Dfcm II" day="16.04.2027" time="20:15" />
+        			
+        				<game courtHall="Snjs xaxt Kaiq Dfcm" guestTeam="Tndw Ebrc" homeTeam="Trbk Dfcm III" day="05.03.2027" time="20:15" />
+        			
+        				<game courtHall="Oseq Cmka" guestTeam="Tndw Ebrc" homeTeam="Ttki Clhk II" day="10.02.2027" time="20:15" />
+        			
+        				<game courtHall="Ecfk Gpds" guestTeam="Trbk Dfcm III" homeTeam="Tndw Ebrc" day="20.11.2026" time="20:00" />
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="3">
+        			<name>Tndw Ebrc III</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="4">
+        			<name>Tndw Ebrc IV</name>
+        			
+						</team>
+        	
+        		<team gender="Jugend 19" number="1">
+        			<name>Tndw Ebrc</name>
+        			
+						</team>
+        	
+        </sisterTeams>
+				
+      </team>
+    
+      <team gender="Erwachsene" clubId="327" number="1" noDoubleDays="false" id="3081294">
+        <name>Tosm Ridk Llvk</name>
+        <gameDays>
+           <homeGame secondary="false" courtHall="Tosm Qtho Lgjg Eigu" maxParallelGames="1" day="17.08.2026" time="19:30" /> <homeGame secondary="true" courtHall="Tosm Qtho Lgjg Eigu" maxParallelGames="2" day="21.08.2026" time="19:30" /> <homeGame secondary="false" courtHall="Tosm Qtho Lgjg Eigu" maxParallelGames="1" day="24.08.2026" time="19:30" /> <homeGame secondary="true" courtHall="Tosm Qtho Lgjg Eigu" maxParallelGames="2" day="28.08.2026" time="19:30" /> <homeGame secondary="false" courtHall="Tosm Qtho Lgjg Eigu" maxParallelGames="1" day="31.08.2026" time="19:30" /> <homeGame secondary="true" courtHall="Tosm Qtho Lgjg Eigu" maxParallelGames="2" day="04.09.2026" time="19:30" /> <homeGame secondary="true" courtHall="Tosm Qtho Lgjg Eigu" maxParallelGames="2" day="16.04.2027" time="19:30" /> <homeGame secondary="false" courtHall="Tosm Qtho Lgjg Eigu" maxParallelGames="1" day="12.04.2027" time="19:30" /> <homeGame secondary="true" courtHall="Tosm Qtho Lgjg Eigu" maxParallelGames="2" day="09.04.2027" time="19:30" /> <homeGame secondary="false" courtHall="Tosm Qtho Lgjg Eigu" maxParallelGames="1" day="05.04.2027" time="19:30" /> <homeGame secondary="true" courtHall="Tosm Qtho Lgjg Eigu" maxParallelGames="2" day="02.04.2027" time="19:30" /> <homeGame secondary="false" courtHall="Tosm Qtho Lgjg Eigu" maxParallelGames="1" day="22.03.2027" time="19:30" /> <homeGame secondary="true" courtHall="Tosm Qtho Lgjg Eigu" maxParallelGames="2" day="19.03.2027" time="19:30" /> <homeGame secondary="false" courtHall="Tosm Qtho Lgjg Eigu" maxParallelGames="1" day="15.03.2027" time="19:30" /> <homeGame secondary="true" courtHall="Tosm Qtho Lgjg Eigu" maxParallelGames="2" day="12.03.2027" time="19:30" /> <homeGame secondary="false" courtHall="Tosm Qtho Lgjg Eigu" maxParallelGames="1" day="08.03.2027" time="19:30" /> <homeGame secondary="true" courtHall="Tosm Qtho Lgjg Eigu" maxParallelGames="2" day="05.03.2027" time="19:30" /> <homeGame secondary="false" courtHall="Tosm Qtho Lgjg Eigu" maxParallelGames="1" day="01.03.2027" time="19:30" /> <homeGame secondary="true" courtHall="Tosm Qtho Lgjg Eigu" maxParallelGames="2" day="26.02.2027" time="19:30" /> <homeGame secondary="false" courtHall="Tosm Qtho Lgjg Eigu" maxParallelGames="1" day="22.02.2027" time="19:30" /> <homeGame secondary="true" courtHall="Tosm Qtho Lgjg Eigu" maxParallelGames="2" day="19.02.2027" time="19:30" /> <homeGame secondary="false" courtHall="Tosm Qtho Lgjg Eigu" maxParallelGames="1" day="15.02.2027" time="19:30" /> <homeGame secondary="true" courtHall="Tosm Qtho Lgjg Eigu" maxParallelGames="2" day="12.02.2027" time="19:30" /> <homeGame secondary="false" courtHall="Tosm Qtho Lgjg Eigu" maxParallelGames="1" day="08.02.2027" time="19:30" /> <homeGame secondary="true" courtHall="Tosm Qtho Lgjg Eigu" maxParallelGames="2" day="05.02.2027" time="19:30" /> <homeGame secondary="false" courtHall="Tosm Qtho Lgjg Eigu" maxParallelGames="1" day="01.02.2027" time="19:30" /> <homeGame secondary="true" courtHall="Tosm Qtho Lgjg Eigu" maxParallelGames="2" day="29.01.2027" time="19:30" /> <homeGame secondary="false" courtHall="Tosm Qtho Lgjg Eigu" maxParallelGames="1" day="25.01.2027" time="19:30" /> <homeGame secondary="true" courtHall="Tosm Qtho Lgjg Eigu" maxParallelGames="2" day="22.01.2027" time="19:30" /> <homeGame secondary="false" courtHall="Tosm Qtho Lgjg Eigu" maxParallelGames="1" day="18.01.2027" time="19:30" /> <homeGame secondary="true" courtHall="Tosm Qtho Lgjg Eigu" maxParallelGames="2" day="15.01.2027" time="19:30" /> <homeGame secondary="false" courtHall="Tosm Qtho Lgjg Eigu" maxParallelGames="1" day="11.01.2027" time="19:30" /> <homeGame secondary="true" courtHall="Tosm Qtho Lgjg Eigu" maxParallelGames="2" day="04.12.2026" time="19:30" /> <homeGame secondary="false" courtHall="Tosm Qtho Lgjg Eigu" maxParallelGames="1" day="30.11.2026" time="19:30" /> <homeGame secondary="true" courtHall="Tosm Qtho Lgjg Eigu" maxParallelGames="2" day="27.11.2026" time="19:30" /> <homeGame secondary="false" courtHall="Tosm Qtho Lgjg Eigu" maxParallelGames="1" day="23.11.2026" time="19:30" /> <homeGame secondary="true" courtHall="Tosm Qtho Lgjg Eigu" maxParallelGames="2" day="20.11.2026" time="19:30" /> <homeGame secondary="false" courtHall="Tosm Qtho Lgjg Eigu" maxParallelGames="1" day="16.11.2026" time="19:30" /> <homeGame secondary="true" courtHall="Tosm Qtho Lgjg Eigu" maxParallelGames="2" day="13.11.2026" time="19:30" /> <homeGame secondary="false" courtHall="Tosm Qtho Lgjg Eigu" maxParallelGames="1" day="09.11.2026" time="19:30" /> <homeGame secondary="true" courtHall="Tosm Qtho Lgjg Eigu" maxParallelGames="2" day="06.11.2026" time="19:30" /> <homeGame secondary="false" courtHall="Tosm Qtho Lgjg Eigu" maxParallelGames="1" day="02.11.2026" time="19:30" /> <homeGame secondary="true" courtHall="Tosm Qtho Lgjg Eigu" maxParallelGames="2" day="30.10.2026" time="19:30" /> <homeGame secondary="false" courtHall="Tosm Qtho Lgjg Eigu" maxParallelGames="1" day="26.10.2026" time="19:30" /> <homeGame secondary="true" courtHall="Tosm Qtho Lgjg Eigu" maxParallelGames="2" day="23.10.2026" time="19:30" /> <homeGame secondary="false" courtHall="Tosm Qtho Lgjg Eigu" maxParallelGames="1" day="19.10.2026" time="19:30" /> <homeGame secondary="true" courtHall="Tosm Qtho Lgjg Eigu" maxParallelGames="2" day="16.10.2026" time="19:30" /> <homeGame secondary="false" courtHall="Tosm Qtho Lgjg Eigu" maxParallelGames="1" day="12.10.2026" time="19:30" /> <homeGame secondary="true" courtHall="Tosm Qtho Lgjg Eigu" maxParallelGames="2" day="09.10.2026" time="19:30" /> <homeGame secondary="false" courtHall="Tosm Qtho Lgjg Eigu" maxParallelGames="1" day="05.10.2026" time="19:30" /> <homeGame secondary="true" courtHall="Tosm Qtho Lgjg Eigu" maxParallelGames="2" day="02.10.2026" time="19:30" /> <homeGame secondary="false" courtHall="Tosm Qtho Lgjg Eigu" maxParallelGames="1" day="28.09.2026" time="19:30" /> <homeGame secondary="true" courtHall="Tosm Qtho Lgjg Eigu" maxParallelGames="2" day="25.09.2026" time="19:30" /> <homeGame secondary="false" courtHall="Tosm Qtho Lgjg Eigu" maxParallelGames="1" day="21.09.2026" time="19:30" /> <homeGame secondary="true" courtHall="Tosm Qtho Lgjg Eigu" maxParallelGames="2" day="18.09.2026" time="19:30" /> <homeGame secondary="false" courtHall="Tosm Qtho Lgjg Eigu" maxParallelGames="1" day="14.09.2026" time="19:30" /> <homeGame secondary="true" courtHall="Tosm Qtho Lgjg Eigu" maxParallelGames="2" day="11.09.2026" time="19:30" /> <homeGame secondary="false" courtHall="Tosm Qtho Lgjg Eigu" maxParallelGames="1" day="07.09.2026" time="19:30" />
+          
+          
+          
+        </gameDays>
+        <sisterTeams>
+        	
+        		<team gender="Jugend 19" number="1">
+        			<name>Tosm Ridk Llvk</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="2">
+        			<name>Tosm Ridk Llvk II</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="3">
+        			<name>Tosm Ridk Llvk III</name>
+        			
+						</team>
+        	
+        		<team gender="Jugend 13" number="1">
+        			<name>Tosm Ridk Llvk</name>
+        			
+						</team>
+        	
+        </sisterTeams>
+				
+      </team>
+    
+      <team gender="Erwachsene" clubId="345" number="4" noDoubleDays="true" id="3082520">
+        <name>Ttki Tkuy IV</name>
+        <gameDays>
+           <homeGame secondary="false" courtHall="Hsia" maxParallelGames="2" day="29.01.2027" time="20:00" /> <homeGame secondary="false" courtHall="Hsia" maxParallelGames="2" day="12.02.2027" time="20:00" /> <homeGame secondary="false" courtHall="Hsia" maxParallelGames="2" day="26.02.2027" time="20:00" /> <homeGame secondary="false" courtHall="Hsia" maxParallelGames="2" day="12.03.2027" time="20:00" /> <homeGame secondary="false" courtHall="Hsia" maxParallelGames="2" day="04.04.2027" time="10:30" /> <homeGame secondary="false" courtHall="Hsia" maxParallelGames="2" day="09.04.2027" time="20:00" /> <homeGame secondary="false" courtHall="Hsia" maxParallelGames="2" day="18.04.2027" time="10:30" /> <homeGame secondary="false" courtHall="Hsia" maxParallelGames="2" day="06.11.2026" time="20:00" /> <homeGame secondary="false" courtHall="Hsia" maxParallelGames="2" day="20.11.2026" time="20:00" /> <homeGame secondary="false" courtHall="Hsia" maxParallelGames="2" day="28.08.2026" time="20:00" /> <homeGame secondary="false" courtHall="Hsia" maxParallelGames="2" day="11.09.2026" time="20:00" /> <homeGame secondary="false" courtHall="Hsia" maxParallelGames="2" day="15.01.2027" time="20:00" /> <homeGame secondary="false" courtHall="Hsia" maxParallelGames="2" day="25.09.2026" time="20:00" /> <homeGame secondary="false" courtHall="Hsia" maxParallelGames="2" day="04.12.2026" time="20:00" /> <homeGame secondary="false" courtHall="Hsia" maxParallelGames="2" day="09.10.2026" time="20:00" /> <homeGame secondary="false" courtHall="Hsia" maxParallelGames="2" day="23.10.2026" time="20:00" />
+           <noGame from="17.08.2026" until="17.08.2026" /> <noGame from="18.08.2026" until="18.08.2026" /> <noGame from="19.08.2026" until="19.08.2026" /> <noGame from="20.08.2026" until="20.08.2026" /> <noGame from="21.08.2026" until="21.08.2026" /> <noGame from="22.08.2026" until="22.08.2026" /> <noGame from="23.08.2026" until="23.08.2026" />
+          
+          
+        </gameDays>
+        <sisterTeams>
+        	
+        		<team gender="Erwachsene" number="1">
+        			<name>Ttki Tkuy</name>
+        			
+        				<game courtHall="Hsia" guestTeam="Dqqy Qyts Pryu Ezwq II" homeTeam="Ttki Tkuy" day="03.10.2026" time="16:00" />
+        			
+        				<game courtHall="Bphc Elai" guestTeam="Ttki Tkuy" homeTeam=" Aowi Trbk Bosu Agps" day="26.02.2027" time="20:00" />
+        			
+        				<game courtHall="Hsia" guestTeam="Pqke Joqa III" homeTeam="Ttki Tkuy" day="23.01.2027" time="16:00" />
+        			
+        				<game courtHall="Hsia" guestTeam="Tuyy Kuqq II" homeTeam="Ttki Tkuy" day="20.03.2027" time="16:00" />
+        			
+        				<game courtHall="Hsia" guestTeam="Aowi Ewam Llvk Amrc IV" homeTeam="Ttki Tkuy" day="06.02.2027" time="16:00" />
+        			
+        				<game courtHall="Hsia" guestTeam="Trbk Dfcm" homeTeam="Ttki Tkuy" day="17.04.2027" time="16:00" />
+        			
+        				<game courtHall="Hsia" guestTeam="Tosm Fsau" homeTeam="Ttki Tkuy" day="14.11.2026" time="16:00" />
+        			
+        				<game courtHall="Hsia" guestTeam="Tosm Fsau II" homeTeam="Ttki Tkuy" day="05.12.2026" time="16:00" />
+        			
+        				<game courtHall="Hsia" guestTeam="Dqqy Qyts Pryu Ezwq III" homeTeam="Ttki Tkuy" day="06.03.2027" time="16:00" />
+        			
+        				<game courtHall="Gymy" guestTeam="Ttki Tkuy" homeTeam="Pqke Joqa III" day="18.09.2026" time="20:00" />
+        			
+        				<game courtHall="Bufw Kvky Rixs" guestTeam="Ttki Tkuy" homeTeam="Aowi Ewam Llvk Amrc IV" day="18.10.2026" time="12:00" />
+        			
+        				<game courtHall="Spsq dhsa Ufcy" guestTeam="Ttki Tkuy" homeTeam="Tuyy Kuqq II" day="29.08.2026" time="14:30" />
+        			
+        				<game courtHall="Spsq Oxqu " guestTeam="Ttki Tkuy" homeTeam="Dqqy Qyts Pryu Ezwq III" day="06.11.2026" time="20:00" />
+        			
+        				<game courtHall="Spsq Oxqu " guestTeam="Ttki Tkuy" homeTeam="Dqqy Qyts Pryu Ezwq II" day="30.01.2027" time="14:00" />
+        			
+        				<game courtHall="Spsq kmua Ghlk" guestTeam="Ttki Tkuy" homeTeam="Tosm Fsau II" day="04.04.2027" time="12:00" />
+        			
+        				<game courtHall="Snjs xaxt Kaiq Dfcm" guestTeam="Ttki Tkuy" homeTeam="Trbk Dfcm" day="22.11.2026" time="11:00" />
+        			
+        				<game courtHall="Spsq kmua Ghlk" guestTeam="Ttki Tkuy" homeTeam="Tosm Fsau" day="13.02.2027" time="18:30" />
+        			
+        				<game courtHall="Hsia" guestTeam=" Aowi Trbk Bosu Agps" homeTeam="Ttki Tkuy" day="31.10.2026" time="16:00" />
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="2">
+        			<name>Ttki Tkuy II</name>
+        			
+        				<game courtHall="Hsia" guestTeam="Pqke Joqa IV" homeTeam="Ttki Tkuy II" day="22.01.2027" time="20:00" />
+        			
+        				<game courtHall="Jsno" guestTeam="Ttki Tkuy II" homeTeam="Trbk Bcqa Klgy II" day="30.01.2027" time="18:30" />
+        			
+        				<game courtHall="Hsia" guestTeam="Tndw Gzpo" homeTeam="Ttki Tkuy II" day="11.04.2027" time="10:30" />
+        			
+        				<game courtHall="Hsia" guestTeam="Trbk Bcqa Klgy" homeTeam="Ttki Tkuy II" day="02.04.2027" time="20:00" />
+        			
+        				<game courtHall="Hsia" guestTeam="Trbk Bcqa Klgy II" homeTeam="Ttki Tkuy II" day="13.11.2026" time="20:00" />
+        			
+        				<game courtHall="Hsia" guestTeam="Tndw Wddc" homeTeam="Ttki Tkuy II" day="30.10.2026" time="20:00" />
+        			
+        				<game courtHall="Hsia" guestTeam="Ttki Clhk" homeTeam="Ttki Tkuy II" day="16.10.2026" time="20:00" />
+        			
+        				<game courtHall="Hsia" guestTeam="Stqe Etvg" homeTeam="Ttki Tkuy II" day="04.09.2026" time="20:00" />
+        			
+        				<game courtHall="Hsia" guestTeam="Tosm Voei" homeTeam="Ttki Tkuy II" day="05.02.2027" time="20:00" />
+        			
+        				<game courtHall="Dxuy" guestTeam="Ttki Tkuy II" homeTeam="Stqe Etvg" day="04.03.2027" time="20:15" />
+        			
+        				<game courtHall="Umds fcma Puhs" guestTeam="Ttki Tkuy II" homeTeam="Tosm Voei" day="04.12.2026" time="19:30" />
+        			
+        				<game courtHall="Jsno" guestTeam="Ttki Tkuy II" homeTeam="Trbk Bcqa Klgy" day="20.11.2026" time="20:00" />
+        			
+        				<game courtHall="Rmay kmua Ghlk Gzpo" guestTeam="Ttki Tkuy II" homeTeam="Tndw Gzpo" day="21.10.2026" time="20:00" />
+        			
+        				<game courtHall="Tmjo Gpds" guestTeam="Ttki Tkuy II" homeTeam="Tmjo Dgfc" day="09.10.2026" time="20:15" />
+        			
+        				<game courtHall="Gymy" guestTeam="Ttki Tkuy II" homeTeam="Pqke Joqa IV" day="11.09.2026" time="20:00" />
+        			
+        				<game courtHall="Vzeu" guestTeam="Ttki Tkuy II" homeTeam="Tndw Wddc" day="19.02.2027" time="20:00" />
+        			
+        				<game courtHall="Ghlk Clvs" guestTeam="Ttki Tkuy II" homeTeam="Ttki Clhk" day="12.02.2027" time="20:00" />
+        			
+        				<game courtHall="Hsia" guestTeam="Tmjo Dgfc" homeTeam="Ttki Tkuy II" day="16.04.2027" time="20:00" />
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="3">
+        			<name>Ttki Tkuy III</name>
+        			
+        				<game courtHall="Hsia" guestTeam="Trbk Dfcm II" homeTeam="Ttki Tkuy III" day="27.11.2026" time="20:00" />
+        			
+        				<game courtHall="Snjs xaxt Ezii Adwe Sbrc" guestTeam="Ttki Tkuy III" homeTeam="Tuyy Dwea" day="22.01.2027" time="19:45" />
+        			
+        				<game courtHall="Hsia" guestTeam="Tuyy Dwea" homeTeam="Ttki Tkuy III" day="02.10.2026" time="20:00" />
+        			
+        				<game courtHall="Hsia" guestTeam="Pqke Joqa V" homeTeam="Ttki Tkuy III" day="18.09.2026" time="20:00" />
+        			
+        				<game courtHall="Hsia" guestTeam="Trbk Dfcm III" homeTeam="Ttki Tkuy III" day="04.09.2026" time="20:00" />
+        			
+        				<game courtHall="Hsia" guestTeam="Aowi Ewam Llvk Amrc V" homeTeam="Ttki Tkuy III" day="16.04.2027" time="20:00" />
+        			
+        				<game courtHall="Hsia" guestTeam="Ttki Clhk II" homeTeam="Ttki Tkuy III" day="02.04.2027" time="20:00" />
+        			
+        				<game courtHall="Hsia" guestTeam="Dqqy Qyts Pryu Ezwq IV" homeTeam="Ttki Tkuy III" day="19.03.2027" time="20:00" />
+        			
+        				<game courtHall="Hsia" guestTeam="Tueq Nqbo" homeTeam="Ttki Tkuy III" day="05.03.2027" time="20:00" />
+        			
+        				<game courtHall="Oseq Cmka" guestTeam="Ttki Tkuy III" homeTeam="Ttki Clhk II" day="18.11.2026" time="20:15" />
+        			
+        				<game courtHall="Spsq kmua Cgiq Rjsa I xaxt III" guestTeam="Ttki Tkuy III" homeTeam="Aowi Ewam Llvk Amrc V" day="06.11.2026" time="20:00" />
+        			
+        				<game courtHall="Spsq Oxqu " guestTeam="Ttki Tkuy III" homeTeam="Dqqy Qyts Pryu Ezwq IV" day="23.10.2026" time="20:00" />
+        			
+        				<game courtHall="Ghlk Nqbo" guestTeam="Ttki Tkuy III" homeTeam="Tueq Nqbo" day="18.10.2026" time="11:30" />
+        			
+        				<game courtHall="Snjs xaxt Kaiq Dfcm" guestTeam="Ttki Tkuy III" homeTeam="Trbk Dfcm III" day="09.04.2027" time="20:15" />
+        			
+        				<game courtHall="Ecfk Gpds" guestTeam="Ttki Tkuy III" homeTeam="Tndw Ebrc" day="12.03.2027" time="20:00" />
+        			
+        				<game courtHall="Snjs xaxt Kaiq Dfcm" guestTeam="Ttki Tkuy III" homeTeam="Trbk Dfcm II" day="26.02.2027" time="20:15" />
+        			
+        				<game courtHall="Gymy" guestTeam="Ttki Tkuy III" homeTeam="Pqke Joqa V" day="30.01.2027" time="10:30" />
+        			
+        				<game courtHall="Hsia" guestTeam="Tndw Ebrc" homeTeam="Ttki Tkuy III" day="30.10.2026" time="20:00" />
+        			
+						</team>
+        	
+        		<team gender="Damen" number="1">
+        			<name>Ttki Tkuy</name>
+        			
+        				<game courtHall="Hsia" guestTeam="Tmjo Gbyi IV" homeTeam="Ttki Tkuy" day="05.09.2026" time="16:00" />
+        			
+        				<game courtHall="Hsia" guestTeam="Gvfc Jfgi" homeTeam="Ttki Tkuy" day="20.03.2027" time="16:00" />
+        			
+        				<game courtHall="Hsia" guestTeam="Trbk Fhaq" homeTeam="Ttki Tkuy" day="06.03.2027" time="16:00" />
+        			
+        				<game courtHall="Hsia" guestTeam="Stqe Etvg II" homeTeam="Ttki Tkuy" day="23.01.2027" time="20:00" />
+        			
+        				<game courtHall="Dxuy" guestTeam="Ttki Tkuy" homeTeam="Stqe Etvg II" day="28.08.2026" time="20:00" />
+        			
+        				<game courtHall="Nbfs lkea Taqy" guestTeam="Ttki Tkuy" homeTeam="Tsqa Cmyi II" day="14.04.2027" time="19:30" />
+        			
+        				<game courtHall="Tmjo Gbyi" guestTeam="Ttki Tkuy" homeTeam="Tmjo Gbyi IV" day="20.02.2027" time="15:00" />
+        			
+        				<game courtHall=" Umds Deoe Gerw Rixs" guestTeam="Ttki Tkuy" homeTeam="Trbk Fhaq" day="12.10.2026" time="20:00" />
+        			
+        				<game courtHall="Ects" guestTeam="Ttki Tkuy" homeTeam="Gvfc Jfgi" day="24.11.2026" time="20:00" />
+        			
+        				<game courtHall="Hsia" guestTeam="Tsqa Cmyi II" homeTeam="Ttki Tkuy" day="31.10.2026" time="16:00" />
+        			
+						</team>
+        	
+        		<team gender="Jugend 19" number="1">
+        			<name>Ttki Tkuy</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="5">
+        			<name>Ttki Tkuy V</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="6">
+        			<name>Ttki Tkuy VI</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="7">
+        			<name>Ttki Tkuy VII</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="8">
+        			<name>Ttki Tkuy VIII</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="9">
+        			<name>Ttki Tkuy IX</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="10">
+        			<name>Ttki Tkuy X</name>
+        			
+						</team>
+        	
+        		<team gender="Jugend 13" number="1">
+        			<name>Ttki Tkuy</name>
+        			
+						</team>
+        	
+        		<team gender="Jugend 13" number="2">
+        			<name>Ttki Tkuy II</name>
+        			
+						</team>
+        	
+        		<team gender="Jugend 19" number="2">
+        			<name>Ttki Tkuy II</name>
+        			
+						</team>
+        	
+        </sisterTeams>
+				
+      </team>
+    
+      <team gender="Erwachsene" clubId="311" number="1" noDoubleDays="false" id="3081452">
+        <name>Tmjo Gbyi</name>
+        <gameDays>
+           <homeGame secondary="false" courtHall="Tmjo Gbyi" maxParallelGames="3" day="14.02.2027" time="10:30" /> <homeGame secondary="false" courtHall="Tmjo Gbyi" maxParallelGames="3" day="28.02.2027" time="10:30" /> <homeGame secondary="false" courtHall="Tmjo Gbyi" maxParallelGames="3" day="14.03.2027" time="10:30" /> <homeGame secondary="false" courtHall="Tmjo Gbyi" maxParallelGames="3" day="11.04.2027" time="10:30" /> <homeGame secondary="false" courtHall="Tmjo Gbyi" maxParallelGames="3" day="30.08.2026" time="10:30" /> <homeGame secondary="false" courtHall="Tmjo Gbyi" maxParallelGames="2" day="29.11.2026" time="10:30" /> <homeGame secondary="false" courtHall="Tmjo Gbyi" maxParallelGames="3" day="10.01.2027" time="10:30" /> <homeGame secondary="false" courtHall="Tmjo Gbyi" maxParallelGames="3" day="18.10.2026" time="10:30" /> <homeGame secondary="false" courtHall="Tmjo Gbyi" maxParallelGames="3" day="14.01.2027" time="20:30" /> <homeGame secondary="false" courtHall="Tmjo Gbyi" maxParallelGames="3" day="07.03.2027" time="10:30" /> <homeGame secondary="false" courtHall="Tmjo Gbyi" maxParallelGames="3" day="23.08.2026" time="10:30" /> <homeGame secondary="false" courtHall="Tmjo Gbyi" maxParallelGames="3" day="04.02.2027" time="20:30" /> <homeGame secondary="false" courtHall="Tmjo Gbyi" maxParallelGames="3" day="08.11.2026" time="10:30" /> <homeGame secondary="false" courtHall="Tmjo Gbyi" maxParallelGames="3" day="13.09.2026" time="10:30" /> <homeGame secondary="false" courtHall="Tmjo Gbyi" maxParallelGames="3" day="27.09.2026" time="10:30" /> <homeGame secondary="false" courtHall="Tmjo Gbyi" maxParallelGames="3" day="11.10.2026" time="10:30" />
+          
+          
+          
+        </gameDays>
+        <sisterTeams>
+        	
+        		<team gender="Damen" number="1">
+        			<name>Tmjo Gbyi</name>
+        			
+        				<game courtHall="Spsq fzwa kmua Dldw" guestTeam="Tmjo Gbyi" homeTeam="Begy Bnqe" day="31.10.2026" time="19:00" />
+        			
+        				<game courtHall="pxca Spsq" guestTeam="Tmjo Gbyi" homeTeam="Trvs Bsoy Kiya" day="12.09.2026" time="19:00" />
+        			
+        				<game courtHall="Tmjo Gbyi" guestTeam="Qvqm Jjye" homeTeam="Tmjo Gbyi" day="29.08.2026" time="14:00" />
+        			
+        				<game courtHall="Tmjo Gbyi" guestTeam="Virc Sclk" homeTeam="Tmjo Gbyi" day="28.11.2026" time="14:00" />
+        			
+        				<game courtHall="Spsq Vhce Mxie" guestTeam="Tmjo Gbyi" homeTeam="Vhce Mxie" day="24.10.2026" time="15:00" />
+        			
+        				<game courtHall="Spsq" guestTeam="Tmjo Gbyi" homeTeam="Tsqa Wkzs Agps" day="22.08.2026" time="16:00" />
+        			
+        				<game courtHall="Gymy" guestTeam="Tmjo Gbyi" homeTeam="Pqke Joqa II" day="10.10.2026" time="14:00" />
+        			
+        				<game courtHall="Tmjo Gbyi" guestTeam="Qvqm Guqu" homeTeam="Tmjo Gbyi" day="05.12.2026" time="14:00" />
+        			
+        				<game courtHall="Copg" guestTeam="Tmjo Gbyi" homeTeam="Qvqm Guqu" day="03.04.2027" time="15:00" />
+        			
+        				<game courtHall="Hhhw" guestTeam="Tmjo Gbyi" homeTeam="Virc Sclk" day="10.04.2027" time="16:00" />
+        			
+        				<game courtHall="Iciy" guestTeam="Tmjo Gbyi" homeTeam="Qvqm Jjye" day="23.01.2027" time="14:00" />
+        			
+        				<game courtHall="Tmjo Gbyi" guestTeam="Pqke Joqa II" homeTeam="Tmjo Gbyi" day="13.02.2027" time="14:00" />
+        			
+        				<game courtHall="Tmjo Gbyi" guestTeam="Trvs Bsoy Kiya" homeTeam="Tmjo Gbyi" day="27.02.2027" time="14:00" />
+        			
+        				<game courtHall="Tmjo Gbyi" guestTeam="Begy Bnqe" homeTeam="Tmjo Gbyi" day="13.03.2027" time="14:00" />
+        			
+        				<game courtHall="Tmjo Gbyi" guestTeam="Vhce Mxie" homeTeam="Tmjo Gbyi" day="20.03.2027" time="14:00" />
+        			
+        				<game courtHall="Tmjo Gbyi" guestTeam="Tsqa Wkzs Agps" homeTeam="Tmjo Gbyi" day="30.01.2027" time="14:00" />
+        			
+						</team>
+        	
+        		<team gender="Jugend 19" number="1">
+        			<name>Tmjo Gbyi</name>
+        			
+						</team>
+        	
+        		<team gender="Damen" number="2">
+        			<name>Tmjo Gbyi II</name>
+        			
+        				<game courtHall="Tmjo Gbyi" guestTeam="Qvqm Fgmi" homeTeam="Tmjo Gbyi II" day="21.11.2026" time="15:00" />
+        			
+        				<game courtHall="Lvzk" guestTeam="Tmjo Gbyi II" homeTeam="Tlpg Vsxc" day="09.04.2027" time="20:15" />
+        			
+        				<game courtHall="Tmjo Gbyi" guestTeam="Tndw Gzpo" homeTeam="Tmjo Gbyi II" day="26.09.2026" time="15:00" />
+        			
+        				<game courtHall="Tmjo Gbyi" guestTeam="Tlpg Vsxc" homeTeam="Tmjo Gbyi II" day="12.09.2026" time="15:00" />
+        			
+        				<game courtHall="Tmjo Gbyi" guestTeam="Qvqm Tpmu Klgy" homeTeam="Tmjo Gbyi II" day="13.03.2027" time="15:00" />
+        			
+        				<game courtHall="Tmjo Gbyi" guestTeam="Trbk Dfcm II" homeTeam="Tmjo Gbyi II" day="20.02.2027" time="15:00" />
+        			
+        				<game courtHall="Tmjo Gbyi" guestTeam="Tmjo Gbyi III" homeTeam="Tmjo Gbyi II" day="13.02.2027" time="15:00" />
+        			
+        				<game courtHall="Tmjo Gbyi" guestTeam="Trbk Nigm" homeTeam="Tmjo Gbyi II" day="17.04.2027" time="15:00" />
+        			
+        				<game courtHall="Snjs xaxt Kaiq Dfcm" guestTeam="Tmjo Gbyi II" homeTeam="Trbk Dfcm II" day="27.11.2026" time="20:15" />
+        			
+        				<game courtHall="Ssbo Idxo Qijg" guestTeam="Tmjo Gbyi II" homeTeam="Qvqm Tpmu Klgy" day="26.10.2026" time="20:00" />
+        			
+        				<game courtHall="Dhhs Nigm" guestTeam="Tmjo Gbyi II" homeTeam="Trbk Nigm" day="02.10.2026" time="20:00" />
+        			
+        				<game courtHall="Tmjo Gbyi" guestTeam="Tmjo Gbyi II" homeTeam="Tmjo Gbyi III" day="05.09.2026" time="15:00" />
+        			
+        				<game courtHall="Rmay kmua Ghlk Gzpo" guestTeam="Tmjo Gbyi II" homeTeam="Tndw Gzpo" day="02.04.2027" time="20:00" />
+        			
+        				<game courtHall="Tlpg Ssbo" guestTeam="Tmjo Gbyi II" homeTeam="Tlpg Nhme" day="01.03.2027" time="20:15" />
+        			
+        				<game courtHall="Uomq Ffya" guestTeam="Tmjo Gbyi II" homeTeam="Qvqm Fgmi" day="24.02.2027" time="20:00" />
+        			
+        				<game courtHall="Tmjo Gbyi" guestTeam="Tlpg Nhme" homeTeam="Tmjo Gbyi II" day="07.11.2026" time="15:00" />
+        			
+						</team>
+        	
+        		<team gender="Damen" number="3">
+        			<name>Tmjo Gbyi III</name>
+        			
+        				<game courtHall="Tmjo Gbyi" guestTeam="Trbk Dfcm II" homeTeam="Tmjo Gbyi III" day="17.10.2026" time="15:00" />
+        			
+        				<game courtHall="Snjs xaxt Kaiq Dfcm" guestTeam="Tmjo Gbyi III" homeTeam="Trbk Dfcm II" day="16.04.2027" time="20:15" />
+        			
+        				<game courtHall="Tmjo Gbyi" guestTeam="Qvqm Fgmi" homeTeam="Tmjo Gbyi III" day="03.10.2026" time="15:00" />
+        			
+        				<game courtHall="Tmjo Gbyi" guestTeam="Tmjo Gbyi II" homeTeam="Tmjo Gbyi III" day="05.09.2026" time="15:00" />
+        			
+        				<game courtHall="Tmjo Gbyi" guestTeam="Tlpg Nhme" homeTeam="Tmjo Gbyi III" day="20.03.2027" time="15:00" />
+        			
+        				<game courtHall="Tmjo Gbyi" guestTeam="Tndw Gzpo" homeTeam="Tmjo Gbyi III" day="06.03.2027" time="15:00" />
+        			
+        				<game courtHall="Tmjo Gbyi" guestTeam="Tlpg Vsxc" homeTeam="Tmjo Gbyi III" day="27.02.2027" time="15:00" />
+        			
+        				<game courtHall="Tmjo Gbyi" guestTeam="Qvqm Tpmu Klgy" homeTeam="Tmjo Gbyi III" day="03.04.2027" time="15:00" />
+        			
+        				<game courtHall="Rmay kmua Ghlk Gzpo" guestTeam="Tmjo Gbyi III" homeTeam="Tndw Gzpo" day="20.11.2026" time="20:00" />
+        			
+        				<game courtHall="Lvzk" guestTeam="Tmjo Gbyi III" homeTeam="Tlpg Vsxc" day="30.10.2026" time="20:15" />
+        			
+        				<game courtHall="Tlpg Ssbo" guestTeam="Tmjo Gbyi III" homeTeam="Tlpg Nhme" day="21.09.2026" time="20:15" />
+        			
+        				<game courtHall="Ssbo Idxo Qijg" guestTeam="Tmjo Gbyi III" homeTeam="Qvqm Tpmu Klgy" day="14.09.2026" time="20:00" />
+        			
+        				<game courtHall="Uomq Ffya" guestTeam="Tmjo Gbyi III" homeTeam="Qvqm Fgmi" day="10.03.2027" time="20:00" />
+        			
+        				<game courtHall="Dhhs Nigm" guestTeam="Tmjo Gbyi III" homeTeam="Trbk Nigm" day="19.02.2027" time="20:00" />
+        			
+        				<game courtHall="Tmjo Gbyi" guestTeam="Tmjo Gbyi III" homeTeam="Tmjo Gbyi II" day="13.02.2027" time="15:00" />
+        			
+        				<game courtHall="Tmjo Gbyi" guestTeam="Trbk Nigm" homeTeam="Tmjo Gbyi III" day="05.12.2026" time="15:00" />
+        			
+						</team>
+        	
+        		<team gender="Damen" number="4">
+        			<name>Tmjo Gbyi IV</name>
+        			
+        				<game courtHall="Tmjo Gbyi" guestTeam="Gvfc Jfgi" homeTeam="Tmjo Gbyi IV" day="29.08.2026" time="15:00" />
+        			
+        				<game courtHall="Tmjo Gbyi" guestTeam="Trbk Fhaq" homeTeam="Tmjo Gbyi IV" day="17.04.2027" time="15:00" />
+        			
+        				<game courtHall="Tmjo Gbyi" guestTeam="Ttki Tkuy" homeTeam="Tmjo Gbyi IV" day="20.02.2027" time="15:00" />
+        			
+        				<game courtHall="Tmjo Gbyi" guestTeam="Stqe Etvg II" homeTeam="Tmjo Gbyi IV" day="07.11.2026" time="15:00" />
+        			
+        				<game courtHall=" Umds Deoe Gerw Rixs" guestTeam="Tmjo Gbyi IV" homeTeam="Trbk Fhaq" day="23.11.2026" time="20:00" />
+        			
+        				<game courtHall="Hsia" guestTeam="Tmjo Gbyi IV" homeTeam="Ttki Tkuy" day="05.09.2026" time="16:00" />
+        			
+        				<game courtHall="Nbfs lkea Taqy" guestTeam="Tmjo Gbyi IV" homeTeam="Tsqa Cmyi II" day="24.03.2027" time="19:30" />
+        			
+        				<game courtHall="Dxuy" guestTeam="Tmjo Gbyi IV" homeTeam="Stqe Etvg II" day="12.03.2027" time="20:00" />
+        			
+        				<game courtHall="Ects" guestTeam="Tmjo Gbyi IV" homeTeam="Gvfc Jfgi" day="26.01.2027" time="20:00" />
+        			
+        				<game courtHall="Tmjo Gbyi" guestTeam="Tsqa Cmyi II" homeTeam="Tmjo Gbyi IV" day="10.10.2026" time="15:00" />
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="2">
+        			<name>Tmjo Gbyi II</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="3">
+        			<name>Tmjo Gbyi III</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="4">
+        			<name>Tmjo Gbyi IV</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="5">
+        			<name>Tmjo Gbyi V</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="6">
+        			<name>Tmjo Gbyi VI</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="7">
+        			<name>Tmjo Gbyi VII</name>
+        			
+						</team>
+        	
+        		<team gender="Jugend 13" number="1">
+        			<name>Tmjo Gbyi</name>
+        			
+						</team>
+        	
+        		<team gender="Jugend 19" number="2">
+        			<name>Tmjo Gbyi II</name>
+        			
+						</team>
+        	
+        </sisterTeams>
+				
+      </team>
+    
+      <team gender="Erwachsene" clubId="301" number="1" noDoubleDays="false" id="3082100">
+        <name>Vghs Cuqq Frmm Agps</name>
+        <gameDays>
+           <homeGame coupleGame="soft" secondary="false" courtHall="Cqge Gopk" day="12.02.2027" time="20:00" /> <homeGame coupleGame="soft" secondary="false" courtHall="Cqge Gopk" day="19.02.2027" time="20:00" /> <homeGame coupleGame="soft" secondary="false" courtHall="Cqge Gopk" day="26.02.2027" time="20:00" /> <homeGame coupleGame="soft" secondary="false" courtHall="Cqge Gopk" day="04.09.2026" time="20:00" /> <homeGame coupleGame="soft" secondary="false" courtHall="Cqge Gopk" day="11.09.2026" time="20:00" /> <homeGame coupleGame="soft" secondary="false" courtHall="Cqge Gopk" day="18.09.2026" time="20:00" /> <homeGame coupleGame="soft" secondary="false" courtHall="Cqge Gopk" day="25.09.2026" time="20:00" /> <homeGame coupleGame="soft" secondary="false" courtHall="Cqge Gopk" day="02.10.2026" time="20:00" /> <homeGame coupleGame="soft" secondary="false" courtHall="Cqge Gopk" day="09.10.2026" time="20:00" /> <homeGame coupleGame="soft" secondary="false" courtHall="Cqge Gopk" day="16.10.2026" time="20:00" /> <homeGame coupleGame="soft" secondary="false" courtHall="Cqge Gopk" day="23.10.2026" time="20:00" /> <homeGame coupleGame="soft" secondary="false" courtHall="Cqge Gopk" day="30.10.2026" time="20:00" /> <homeGame coupleGame="soft" secondary="false" courtHall="Cqge Gopk" day="05.03.2027" time="20:00" /> <homeGame coupleGame="soft" secondary="false" courtHall="Cqge Gopk" day="06.11.2026" time="20:00" /> <homeGame coupleGame="soft" secondary="false" courtHall="Cqge Gopk" day="16.04.2027" time="20:00" /> <homeGame coupleGame="soft" secondary="false" courtHall="Cqge Gopk" day="09.04.2027" time="20:00" /> <homeGame coupleGame="soft" secondary="false" courtHall="Cqge Gopk" day="19.03.2027" time="20:00" /> <homeGame coupleGame="soft" secondary="false" courtHall="Cqge Gopk" day="12.03.2027" time="20:00" /> <homeGame coupleGame="soft" secondary="false" courtHall="Cqge Gopk" day="04.12.2026" time="20:00" /> <homeGame coupleGame="soft" secondary="false" courtHall="Cqge Gopk" day="15.01.2027" time="20:00" />
+           <noGame from="21.08.2026" until="21.08.2026" /> <noGame from="28.08.2026" until="28.08.2026" /> <noGame from="13.11.2026" until="13.11.2026" /> <noGame from="20.11.2026" until="20.11.2026" /> <noGame from="27.11.2026" until="27.11.2026" /> <noGame from="02.04.2027" until="02.04.2027" />
+          
+          
+        </gameDays>
+        <sisterTeams>
+        	
+        		<team gender="Erwachsene" number="2">
+        			<name>Vghs Cuqq Frmm Agps II</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="3">
+        			<name>Vghs Cuqq Frmm Agps III</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="4">
+        			<name>Vghs Cuqq Frmm Agps IV</name>
+        			
+						</team>
+        	
+        		<team gender="Jugend 13" number="1">
+        			<name>Vghs Cuqq Frmm Agps</name>
+        			
+						</team>
+        	
+        		<team gender="Jugend 13" number="2">
+        			<name>Vghs Cuqq Frmm Agps II</name>
+        			
+						</team>
+        	
+        		<team gender="Jugend 19" number="1">
+        			<name>Vghs Cuqq Frmm Agps</name>
+        			
+						</team>
+        	
+        		<team gender="Jugend 19" number="2">
+        			<name>Vghs Cuqq Frmm Agps II</name>
+        			
+						</team>
+        	
+        </sisterTeams>
+				
+      </team>
+    
+      <team gender="Erwachsene" clubId="343" number="1" noDoubleDays="true" id="3082157">
+        <name>Tuyy Lmps</name>
+        <gameDays>
+           <homeGame secondary="false" courtHall="Gpds Tvtg" maxParallelGames="1" day="15.04.2027" time="20:30" /> <homeGame secondary="false" courtHall="Gpds Tvtg" maxParallelGames="1" day="08.04.2027" time="20:30" /> <homeGame secondary="false" courtHall="Gpds Tvtg" maxParallelGames="1" day="25.03.2027" time="20:30" /> <homeGame secondary="false" courtHall="Gpds Tvtg" maxParallelGames="1" day="11.03.2027" time="20:30" /> <homeGame secondary="false" courtHall="Gpds Tvtg" maxParallelGames="1" day="25.02.2027" time="20:30" /> <homeGame secondary="false" courtHall="Gpds Tvtg" maxParallelGames="1" day="18.02.2027" time="20:30" /> <homeGame secondary="false" courtHall="Gpds Tvtg" maxParallelGames="1" day="28.01.2027" time="20:30" /> <homeGame secondary="false" courtHall="Gpds Tvtg" maxParallelGames="1" day="15.10.2026" time="20:30" /> <homeGame secondary="false" courtHall="Gpds Tvtg" maxParallelGames="1" day="14.01.2027" time="20:30" /> <homeGame secondary="false" courtHall="Gpds Tvtg" maxParallelGames="1" day="27.08.2026" time="20:30" /> <homeGame secondary="false" courtHall="Gpds Tvtg" maxParallelGames="1" day="01.10.2026" time="20:30" /> <homeGame secondary="false" courtHall="Gpds Tvtg" maxParallelGames="1" day="03.12.2026" time="20:30" /> <homeGame secondary="false" courtHall="Gpds Tvtg" maxParallelGames="1" day="19.11.2026" time="20:30" /> <homeGame secondary="false" courtHall="Gpds Tvtg" maxParallelGames="1" day="12.11.2026" time="20:30" /> <homeGame secondary="false" courtHall="Gpds Tvtg" maxParallelGames="1" day="05.11.2026" time="20:30" /> <homeGame secondary="false" courtHall="Gpds Tvtg" maxParallelGames="1" day="22.10.2026" time="20:30" />
+          
+          
+          
+        </gameDays>
+        <sisterTeams>
+        	
+        		<team gender="Erwachsene" number="2">
+        			<name>Tuyy Lmps II</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="3">
+        			<name>Tuyy Lmps III</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="4">
+        			<name>Tuyy Lmps IV</name>
+        			
+						</team>
+        	
+        </sisterTeams>
+				
+      </team>
+    
+      <team gender="Erwachsene" clubId="303" number="2" noDoubleDays="false" id="3082396">
+        <name>Tmjo Dgfc II</name>
+        <gameDays>
+           <homeGame secondary="false" courtHall="Tmjo Gpds" maxParallelGames="2" day="24.08.2026" time="20:15" /> <homeGame secondary="false" courtHall="Tmjo Gpds" maxParallelGames="2" day="07.09.2026" time="20:15" /> <homeGame secondary="false" courtHall="Tmjo Gpds" maxParallelGames="2" day="21.09.2026" time="20:15" /> <homeGame secondary="false" courtHall="Tmjo Gpds" maxParallelGames="2" day="05.10.2026" time="20:15" /> <homeGame secondary="false" courtHall="Tmjo Gpds" maxParallelGames="2" day="19.10.2026" time="20:15" /> <homeGame secondary="false" courtHall="Tmjo Gpds" maxParallelGames="2" day="02.11.2026" time="20:15" /> <homeGame secondary="false" courtHall="Tmjo Gpds" maxParallelGames="2" day="16.11.2026" time="20:15" /> <homeGame secondary="false" courtHall="Tmjo Gpds" maxParallelGames="2" day="30.11.2026" time="20:15" /> <homeGame secondary="false" courtHall="Tmjo Gpds" maxParallelGames="2" day="11.01.2027" time="20:15" /> <homeGame secondary="false" courtHall="Tmjo Gpds" maxParallelGames="2" day="25.01.2027" time="20:15" /> <homeGame secondary="false" courtHall="Tmjo Gpds" maxParallelGames="2" day="08.02.2027" time="20:15" /> <homeGame secondary="false" courtHall="Tmjo Gpds" maxParallelGames="2" day="22.02.2027" time="20:15" /> <homeGame secondary="false" courtHall="Tmjo Gpds" maxParallelGames="2" day="08.03.2027" time="20:15" /> <homeGame secondary="false" courtHall="Tmjo Gpds" maxParallelGames="2" day="22.03.2027" time="20:15" /> <homeGame secondary="false" courtHall="Tmjo Gpds" maxParallelGames="2" day="05.04.2027" time="20:15" />
+          
+          
+          
+        </gameDays>
+        <sisterTeams>
+        	
+        		<team gender="Erwachsene" number="1">
+        			<name>Tmjo Dgfc</name>
+        			
+        				<game courtHall="Tmjo Gpds" guestTeam="Tosm Voei" homeTeam="Tmjo Dgfc" day="26.02.2027" time="20:15" />
+        			
+        				<game courtHall="Jsno" guestTeam="Tmjo Dgfc" homeTeam="Trbk Bcqa Klgy" day="12.02.2027" time="20:00" />
+        			
+        				<game courtHall="Tmjo Gpds" guestTeam="Pqke Joqa IV" homeTeam="Tmjo Dgfc" day="12.03.2027" time="20:15" />
+        			
+        				<game courtHall="Tmjo Gpds" guestTeam="Trbk Bcqa Klgy II" homeTeam="Tmjo Dgfc" day="04.12.2026" time="20:15" />
+        			
+        				<game courtHall="Tmjo Gpds" guestTeam="Tndw Gzpo" homeTeam="Tmjo Dgfc" day="28.08.2026" time="20:15" />
+        			
+        				<game courtHall="Tmjo Gpds" guestTeam="Stqe Etvg" homeTeam="Tmjo Dgfc" day="23.10.2026" time="20:15" />
+        			
+        				<game courtHall="Tmjo Gpds" guestTeam="Ttki Tkuy II" homeTeam="Tmjo Dgfc" day="09.10.2026" time="20:15" />
+        			
+        				<game courtHall="Tmjo Gpds" guestTeam="Trbk Bcqa Klgy" homeTeam="Tmjo Dgfc" day="02.10.2026" time="20:15" />
+        			
+        				<game courtHall="Tmjo Gpds" guestTeam="Tndw Wddc" homeTeam="Tmjo Dgfc" day="29.01.2027" time="20:15" />
+        			
+        				<game courtHall="Rmay kmua Ghlk Gzpo" guestTeam="Tmjo Dgfc" homeTeam="Tndw Gzpo" day="20.01.2027" time="20:00" />
+        			
+        				<game courtHall="Hsia" guestTeam="Tmjo Dgfc" homeTeam="Ttki Tkuy II" day="16.04.2027" time="20:00" />
+        			
+        				<game courtHall="Dxuy" guestTeam="Tmjo Dgfc" homeTeam="Stqe Etvg" day="18.03.2027" time="20:15" />
+        			
+        				<game courtHall="Jsno" guestTeam="Tmjo Dgfc" homeTeam="Trbk Bcqa Klgy II" day="05.03.2027" time="20:00" />
+        			
+        				<game courtHall="Oseq Cmka" guestTeam="Tmjo Dgfc" homeTeam="Ttki Clhk" day="20.11.2026" time="20:15" />
+        			
+        				<game courtHall="Vzeu" guestTeam="Tmjo Dgfc" homeTeam="Tndw Wddc" day="13.11.2026" time="20:00" />
+        			
+        				<game courtHall="Umds fcma Puhs" guestTeam="Tmjo Dgfc" homeTeam="Tosm Voei" day="31.10.2026" time="18:00" />
+        			
+        				<game courtHall="Gymy" guestTeam="Tmjo Dgfc" homeTeam="Pqke Joqa IV" day="04.09.2026" time="20:00" />
+        			
+        				<game courtHall="Tmjo Gpds" guestTeam="Ttki Clhk" homeTeam="Tmjo Dgfc" day="09.04.2027" time="20:15" />
+        			
+						</team>
+        	
+        		<team gender="Jugend 19" number="1">
+        			<name>Tmjo Dgfc</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="3">
+        			<name>Tmjo Dgfc III</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="4">
+        			<name>Tmjo Dgfc IV</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="5">
+        			<name>Tmjo Dgfc V</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="6">
+        			<name>Tmjo Dgfc VI</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="7">
+        			<name>Tmjo Dgfc VII</name>
+        			
+						</team>
+        	
+        		<team gender="Erwachsene" number="8">
+        			<name>Tmjo Dgfc VIII</name>
+        			
+						</team>
+        	
+        		<team gender="Jugend 19" number="2">
+        			<name>Tmjo Dgfc II</name>
+        			
+						</team>
+        	
+        </sisterTeams>
+				
+      </team>
+    
+  </teams>
+</TT>

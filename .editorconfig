@@ -1,0 +1,40 @@
+# Code-Stil und Analyzer-Einstellungen (StyleCop.Analyzers, SonarAnalyzer.CSharp).
+root = true
+
+[*]
+charset = utf-8
+indent_style = space
+indent_size = 4
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.{csproj,props,targets,slnx,json,xml}]
+indent_size = 2
+
+[*.cs]
+# --- StyleCop: bewusste Abweichungen ---
+# Kein Pflicht-Präfix "this." (übliche .NET-Konvention, Microsoft-Codierrichtlinien).
+dotnet_diagnostic.SA1101.severity = none
+# Feste englische Satzanfänge ("Gets ...", "Initializes a new instance ...") passen nicht zur deutschen Dokumentation (E13).
+dotnet_diagnostic.SA1623.severity = none
+dotnet_diagnostic.SA1642.severity = none
+
+# --- Tests: xUnit-Klassen und -Methoden müssen nicht XML-dokumentiert werden ---
+[tests/**.cs]
+dotnet_diagnostic.SA1600.severity = none
+
+# --- Referenzmodell der Engine: 1:1-Portierung des Originals als Maßstab für die Paritätstests ---
+# Exakte Gleitkommavergleiche (Delphi-TDateTime) und die Methodenstruktur des Originals bleiben bewusst erhalten.
+[src/AndiGenerator.Engine/Referenz/**.cs]
+dotnet_diagnostic.S1244.severity = none
+dotnet_diagnostic.S3776.severity = none
+
+# --- Schnelle Engine: bitgleiche Nachbildung des Referenzmodells (differenziell getestet) ---
+# Gleiche Gleitkommavergleiche und Kontrollfluss wie im Referenzmodell, damit Kosten und Zufallsfolgen bitgleich bleiben.
+[src/AndiGenerator.Engine/Kern/**.cs]
+dotnet_diagnostic.S1244.severity = none
+dotnet_diagnostic.S3776.severity = none
+
+# --- Engine: Zufallszahlen steuern nur die Suche (Startwert für reproduzierbare Läufe), keine Sicherheitsfunktion ---
+[src/AndiGenerator.Engine/**.cs]
+dotnet_diagnostic.S2245.severity = none

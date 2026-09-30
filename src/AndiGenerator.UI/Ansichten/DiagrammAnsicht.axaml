@@ -1,0 +1,80 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:p="using:AndiGenerator.Presentation"
+             xmlns:ui="using:AndiGenerator.UI"
+             x:Class="AndiGenerator.UI.Ansichten.DiagrammAnsicht"
+             x:DataType="p:DiagrammAnsichtViewModel">
+  <UserControl.Styles>
+    <Style Selector="Button.diagrammwahl">
+      <Setter Property="MinHeight" Value="44" />
+      <Setter Property="MinWidth" Value="120" />
+      <Setter Property="Padding" Value="16,0" />
+      <Setter Property="Margin" Value="0,0,8,8" />
+      <Setter Property="CornerRadius" Value="10" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="Background" Value="{StaticResource Flaeche}" />
+      <Setter Property="BorderBrush" Value="{StaticResource Linie}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="Foreground" Value="{StaticResource Tinte2}" />
+    </Style>
+    <Style Selector="Button.diagrammwahl:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{StaticResource Schwebe}" />
+      <Setter Property="BorderBrush" Value="{StaticResource Rand}" />
+      <Setter Property="Foreground" Value="{StaticResource Tinte}" />
+    </Style>
+    <Style Selector="Button.diagrammwahl.aktiv">
+      <Setter Property="Background" Value="{StaticResource AkzentHell}" />
+      <Setter Property="BorderBrush" Value="#C9DAF0" />
+      <Setter Property="Foreground" Value="{StaticResource AkzentDunkel}" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector="Button.diagrammwahl.aktiv:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{StaticResource AkzentHell}" />
+      <Setter Property="Foreground" Value="{StaticResource AkzentDunkel}" />
+    </Style>
+  </UserControl.Styles>
+  <DockPanel Margin="18,14">
+    <StackPanel DockPanel.Dock="Top" Classes="leiste" Orientation="Horizontal" Spacing="10" Margin="0,0,0,10">
+      <TextBlock Text="Plan" Classes="klein" FontSize="13" VerticalAlignment="Center" />
+      <ComboBox MinWidth="280" ItemsSource="{Binding Quellen}" SelectedItem="{Binding Quelle}">
+        <ComboBox.ItemTemplate>
+          <DataTemplate x:DataType="p:PlanQuelle">
+            <TextBlock Text="{Binding Name}" />
+          </DataTemplate>
+        </ComboBox.ItemTemplate>
+      </ComboBox>
+      <Button Classes="gross" Command="{Binding EntfernenCommand}" ToolTip.Tip="Gewählten gemerkten Plan löschen">
+        <StackPanel Orientation="Horizontal" Spacing="8"><ui:Symbol Daten="{StaticResource SymbolLoeschen}" Groesse="20" /><TextBlock Text="Löschen" VerticalAlignment="Center" /></StackPanel>
+      </Button>
+      <Button Classes="gross" Command="{Binding ExcelCommand}" ToolTip.Tip="Plan als Excel-Arbeitsmappe speichern: Übersicht, Spielplan, Mannschaftspläne und Kosten">
+        <StackPanel Orientation="Horizontal" Spacing="8"><ui:Symbol Daten="{StaticResource SymbolExcel}" Groesse="20" /><TextBlock Text="Nach Excel" VerticalAlignment="Center" /></StackPanel>
+      </Button>
+      <ui:Zoomauswahl DataContext="{Binding Zoom}" Margin="12,0,0,0" />
+    </StackPanel>
+    <TextBlock DockPanel.Dock="Top" Text="{Binding Hinweis}" IsVisible="{Binding HatHinweis}" Margin="0,8" />
+    <ItemsControl DockPanel.Dock="Top" ItemsSource="{Binding Auswahl}" Margin="0,0,0,12">
+      <ItemsControl.ItemsPanel>
+        <ItemsPanelTemplate>
+          <WrapPanel Orientation="Horizontal" />
+        </ItemsPanelTemplate>
+      </ItemsControl.ItemsPanel>
+      <ItemsControl.ItemTemplate>
+        <DataTemplate x:DataType="p:Diagrammwahl">
+          <Button Classes="diagrammwahl" Classes.aktiv="{Binding Aktiv}" ToolTip.Tip="{Binding Beschreibung}"
+                  Command="{Binding $parent[UserControl].((p:DiagrammAnsichtViewModel)DataContext).WaehlenCommand}" CommandParameter="{Binding}">
+            <TextBlock Text="{Binding Titel}" FontSize="13" TextWrapping="Wrap" />
+          </Button>
+        </DataTemplate>
+      </ItemsControl.ItemTemplate>
+    </ItemsControl>
+    <TextBlock DockPanel.Dock="Top" Text="{Binding Beschreibung}" IsVisible="{Binding HatBeschreibung}" Classes="klein" FontSize="13" TextWrapping="Wrap" Margin="2,0,0,10" />
+    <Border Classes="karte" Padding="0" ClipToBounds="True">
+      <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+        <LayoutTransformControl LayoutTransform="{Binding Zoom.Faktor, Converter={x:Static ui:Konverter.Skalierung}}" HorizontalAlignment="Left" VerticalAlignment="Top">
+          <ui:Diagrammzeichnung Daten="{Binding Daten}" Teile="{Binding Teile}" Margin="20" />
+        </LayoutTransformControl>
+      </ScrollViewer>
+    </Border>
+  </DockPanel>
+</UserControl>

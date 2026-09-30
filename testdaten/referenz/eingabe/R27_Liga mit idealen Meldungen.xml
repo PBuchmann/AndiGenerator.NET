@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="iso-8859-15"?>
+<TT name="Liga mit idealen Meldungen" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.tt-liga.de/TTGenerator http://www.tt-liga.de/includes/TTGenerator.xsd" xmlns="http://www.tt-liga.de/TTGenerator" mid="21.12.2015" from="01.09.2015" until="15.05.2016" gender="Herren" id="10022">
+  <noGameDays />
+  <mandatoryGameDays>
+	  
+  </mandatoryGameDays>
+  <predefinedGames>
+  	
+  </predefinedGames>
+  <teams>
+    
+      <team clubId="10023" number="1" id="10024">
+        <name>Qsng Txhw Atvc Cers</name>
+        <gameDays>
+           <homeGame day="15.02.2016" time="20:00" maxParallelGames="2" /> <homeGame day="22.02.2016" time="20:00" maxParallelGames="2" /> <homeGame day="01.02.2016" time="20:00" maxParallelGames="2" /> <homeGame day="25.01.2016" time="20:00" maxParallelGames="2" /> <homeGame day="18.01.2016" time="20:00" maxParallelGames="2" /> <homeGame day="14.12.2015" time="20:00" maxParallelGames="2" /> <homeGame day="21.09.2015" time="20:00" maxParallelGames="2" /> <homeGame day="07.12.2015" time="20:00" maxParallelGames="2" /> <homeGame day="14.09.2015" time="20:00" maxParallelGames="2" /> <homeGame day="30.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="23.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="16.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="09.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="02.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="26.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="19.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="12.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="05.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="28.09.2015" time="20:00" maxParallelGames="2" /> <homeGame day="11.04.2016" time="20:00" maxParallelGames="2" /> <homeGame day="04.04.2016" time="20:00" maxParallelGames="2" /> <homeGame day="14.03.2016" time="20:00" maxParallelGames="2" /> <homeGame day="07.03.2016" time="20:00" maxParallelGames="2" /> <homeGame day="29.02.2016" time="20:00" maxParallelGames="2" />
+          
+          
+          
+        </gameDays>
+        
+      </team>
+    
+      <team clubId="10025" number="2" id="10026">
+        <name>Drfg Bsaq Ckeu II</name>
+        <gameDays>
+           <homeGame day="15.02.2016" time="20:00" maxParallelGames="2" /> <homeGame day="22.02.2016" time="20:00" maxParallelGames="2" /> <homeGame day="01.02.2016" time="20:00" maxParallelGames="2" /> <homeGame day="25.01.2016" time="20:00" maxParallelGames="2" /> <homeGame day="18.01.2016" time="20:00" maxParallelGames="2" /> <homeGame day="14.12.2015" time="20:00" maxParallelGames="2" /> <homeGame day="21.09.2015" time="20:00" maxParallelGames="2" /> <homeGame day="07.12.2015" time="20:00" maxParallelGames="2" /> <homeGame day="14.09.2015" time="20:00" maxParallelGames="2" /> <homeGame day="30.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="23.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="16.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="09.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="02.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="26.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="19.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="12.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="05.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="28.09.2015" time="20:00" maxParallelGames="2" /> <homeGame day="11.04.2016" time="20:00" maxParallelGames="2" /> <homeGame day="04.04.2016" time="20:00" maxParallelGames="2" /> <homeGame day="14.03.2016" time="20:00" maxParallelGames="2" /> <homeGame day="07.03.2016" time="20:00" maxParallelGames="2" /> <homeGame day="29.02.2016" time="20:00" maxParallelGames="2" />
+          
+          
+          
+        </gameDays>
+        
+      </team>
+    
+      <team clubId="10027" number="3" id="10028">
+        <name>Euxw Gnmu III</name>
+        <gameDays>
+           <homeGame day="15.02.2016" time="20:00" maxParallelGames="2" /> <homeGame day="22.02.2016" time="20:00" maxParallelGames="2" /> <homeGame day="01.02.2016" time="20:00" maxParallelGames="2" /> <homeGame day="25.01.2016" time="20:00" maxParallelGames="2" /> <homeGame day="18.01.2016" time="20:00" maxParallelGames="2" /> <homeGame day="14.12.2015" time="20:00" maxParallelGames="2" /> <homeGame day="21.09.2015" time="20:00" maxParallelGames="2" /> <homeGame day="07.12.2015" time="20:00" maxParallelGames="2" /> <homeGame day="14.09.2015" time="20:00" maxParallelGames="2" /> <homeGame day="30.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="23.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="16.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="09.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="02.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="26.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="19.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="12.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="05.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="28.09.2015" time="20:00" maxParallelGames="2" /> <homeGame day="11.04.2016" time="20:00" maxParallelGames="2" /> <homeGame day="04.04.2016" time="20:00" maxParallelGames="2" /> <homeGame day="14.03.2016" time="20:00" maxParallelGames="2" /> <homeGame day="07.03.2016" time="20:00" maxParallelGames="2" /> <homeGame day="29.02.2016" time="20:00" maxParallelGames="2" />
+          
+          
+          
+        </gameDays>
+        
+      </team>
+    
+      <team clubId="10029" number="2" id="10030">
+        <name>Virc Hadw II</name>
+        <gameDays>
+           <homeGame day="15.02.2016" time="20:00" maxParallelGames="2" /> <homeGame day="22.02.2016" time="20:00" maxParallelGames="2" /> <homeGame day="01.02.2016" time="20:00" maxParallelGames="2" /> <homeGame day="25.01.2016" time="20:00" maxParallelGames="2" /> <homeGame day="18.01.2016" time="20:00" maxParallelGames="2" /> <homeGame day="14.12.2015" time="20:00" maxParallelGames="2" /> <homeGame day="21.09.2015" time="20:00" maxParallelGames="2" /> <homeGame day="07.12.2015" time="20:00" maxParallelGames="2" /> <homeGame day="14.09.2015" time="20:00" maxParallelGames="2" /> <homeGame day="30.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="23.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="16.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="09.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="02.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="26.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="19.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="12.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="05.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="28.09.2015" time="20:00" maxParallelGames="2" /> <homeGame day="11.04.2016" time="20:00" maxParallelGames="2" /> <homeGame day="04.04.2016" time="20:00" maxParallelGames="2" /> <homeGame day="14.03.2016" time="20:00" maxParallelGames="2" /> <homeGame day="07.03.2016" time="20:00" maxParallelGames="2" /> <homeGame day="29.02.2016" time="20:00" maxParallelGames="2" />          
+          
+        </gameDays>
+        
+      </team>
+    
+      <team clubId="10031" number="1" id="10032">
+        <name>Gpsa Euxw</name>
+        <gameDays>
+           <homeGame day="15.02.2016" time="20:00" maxParallelGames="2" /> <homeGame day="22.02.2016" time="20:00" maxParallelGames="2" /> <homeGame day="01.02.2016" time="20:00" maxParallelGames="2" /> <homeGame day="25.01.2016" time="20:00" maxParallelGames="2" /> <homeGame day="18.01.2016" time="20:00" maxParallelGames="2" /> <homeGame day="14.12.2015" time="20:00" maxParallelGames="2" /> <homeGame day="21.09.2015" time="20:00" maxParallelGames="2" /> <homeGame day="07.12.2015" time="20:00" maxParallelGames="2" /> <homeGame day="14.09.2015" time="20:00" maxParallelGames="2" /> <homeGame day="30.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="23.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="16.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="09.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="02.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="26.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="19.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="12.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="05.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="28.09.2015" time="20:00" maxParallelGames="2" /> <homeGame day="11.04.2016" time="20:00" maxParallelGames="2" /> <homeGame day="04.04.2016" time="20:00" maxParallelGames="2" /> <homeGame day="14.03.2016" time="20:00" maxParallelGames="2" /> <homeGame day="07.03.2016" time="20:00" maxParallelGames="2" /> <homeGame day="29.02.2016" time="20:00" maxParallelGames="2" />
+          
+          
+          
+        </gameDays>
+        
+      </team>
+    
+      <team clubId="10033" number="2" id="10034">
+        <name>Gslo Bdei II</name>
+        <gameDays>
+           <homeGame day="15.02.2016" time="20:00" maxParallelGames="2" /> <homeGame day="22.02.2016" time="20:00" maxParallelGames="2" /> <homeGame day="01.02.2016" time="20:00" maxParallelGames="2" /> <homeGame day="25.01.2016" time="20:00" maxParallelGames="2" /> <homeGame day="18.01.2016" time="20:00" maxParallelGames="2" /> <homeGame day="14.12.2015" time="20:00" maxParallelGames="2" /> <homeGame day="21.09.2015" time="20:00" maxParallelGames="2" /> <homeGame day="07.12.2015" time="20:00" maxParallelGames="2" /> <homeGame day="14.09.2015" time="20:00" maxParallelGames="2" /> <homeGame day="30.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="23.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="16.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="09.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="02.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="26.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="19.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="12.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="05.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="28.09.2015" time="20:00" maxParallelGames="2" /> <homeGame day="11.04.2016" time="20:00" maxParallelGames="2" /> <homeGame day="04.04.2016" time="20:00" maxParallelGames="2" /> <homeGame day="14.03.2016" time="20:00" maxParallelGames="2" /> <homeGame day="07.03.2016" time="20:00" maxParallelGames="2" /> <homeGame day="29.02.2016" time="20:00" maxParallelGames="2" />          
+          
+        </gameDays>
+        
+      </team>
+    
+      <team clubId="10035" number="2" id="10036">
+        <name>Gquq Qyts II</name>
+        <gameDays>
+           <homeGame day="15.02.2016" time="20:00" maxParallelGames="2" /> <homeGame day="22.02.2016" time="20:00" maxParallelGames="2" /> <homeGame day="01.02.2016" time="20:00" maxParallelGames="2" /> <homeGame day="25.01.2016" time="20:00" maxParallelGames="2" /> <homeGame day="18.01.2016" time="20:00" maxParallelGames="2" /> <homeGame day="14.12.2015" time="20:00" maxParallelGames="2" /> <homeGame day="21.09.2015" time="20:00" maxParallelGames="2" /> <homeGame day="07.12.2015" time="20:00" maxParallelGames="2" /> <homeGame day="14.09.2015" time="20:00" maxParallelGames="2" /> <homeGame day="30.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="23.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="16.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="09.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="02.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="26.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="19.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="12.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="05.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="28.09.2015" time="20:00" maxParallelGames="2" /> <homeGame day="11.04.2016" time="20:00" maxParallelGames="2" /> <homeGame day="04.04.2016" time="20:00" maxParallelGames="2" /> <homeGame day="14.03.2016" time="20:00" maxParallelGames="2" /> <homeGame day="07.03.2016" time="20:00" maxParallelGames="2" /> <homeGame day="29.02.2016" time="20:00" maxParallelGames="2" />
+          
+          
+          
+        </gameDays>
+        
+      </team>
+    
+      <team clubId="90027" number="4" id="10037">
+        <name>Euxw Bzsy</name>
+        <gameDays>
+           <homeGame day="15.02.2016" time="20:00" maxParallelGames="2" /> <homeGame day="22.02.2016" time="20:00" maxParallelGames="2" /> <homeGame day="01.02.2016" time="20:00" maxParallelGames="2" /> <homeGame day="25.01.2016" time="20:00" maxParallelGames="2" /> <homeGame day="18.01.2016" time="20:00" maxParallelGames="2" /> <homeGame day="14.12.2015" time="20:00" maxParallelGames="2" /> <homeGame day="21.09.2015" time="20:00" maxParallelGames="2" /> <homeGame day="07.12.2015" time="20:00" maxParallelGames="2" /> <homeGame day="14.09.2015" time="20:00" maxParallelGames="2" /> <homeGame day="30.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="23.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="16.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="09.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="02.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="26.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="19.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="12.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="05.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="28.09.2015" time="20:00" maxParallelGames="2" /> <homeGame day="11.04.2016" time="20:00" maxParallelGames="2" /> <homeGame day="04.04.2016" time="20:00" maxParallelGames="2" /> <homeGame day="14.03.2016" time="20:00" maxParallelGames="2" /> <homeGame day="07.03.2016" time="20:00" maxParallelGames="2" /> <homeGame day="29.02.2016" time="20:00" maxParallelGames="2" />          
+          
+        </gameDays>
+        
+      </team>
+    
+      <team clubId="10038" number="1" id="10039">
+        <name>Tosm Gxyq</name>
+        <gameDays>
+           <homeGame day="15.02.2016" time="20:00" maxParallelGames="2" /> <homeGame day="22.02.2016" time="20:00" maxParallelGames="2" /> <homeGame day="01.02.2016" time="20:00" maxParallelGames="2" /> <homeGame day="25.01.2016" time="20:00" maxParallelGames="2" /> <homeGame day="18.01.2016" time="20:00" maxParallelGames="2" /> <homeGame day="14.12.2015" time="20:00" maxParallelGames="2" /> <homeGame day="21.09.2015" time="20:00" maxParallelGames="2" /> <homeGame day="07.12.2015" time="20:00" maxParallelGames="2" /> <homeGame day="14.09.2015" time="20:00" maxParallelGames="2" /> <homeGame day="30.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="23.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="16.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="09.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="02.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="26.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="19.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="12.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="05.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="28.09.2015" time="20:00" maxParallelGames="2" /> <homeGame day="11.04.2016" time="20:00" maxParallelGames="2" /> <homeGame day="04.04.2016" time="20:00" maxParallelGames="2" /> <homeGame day="14.03.2016" time="20:00" maxParallelGames="2" /> <homeGame day="07.03.2016" time="20:00" maxParallelGames="2" /> <homeGame day="29.02.2016" time="20:00" maxParallelGames="2" />
+          
+          
+          
+        </gameDays>
+        
+      </team>
+    
+      <team clubId="10040" number="2" id="10041">
+        <name>Euxw Grxg Bcbs II</name>
+        <gameDays>
+           <homeGame day="15.02.2016" time="20:00" maxParallelGames="2" /> <homeGame day="22.02.2016" time="20:00" maxParallelGames="2" /> <homeGame day="01.02.2016" time="20:00" maxParallelGames="2" /> <homeGame day="25.01.2016" time="20:00" maxParallelGames="2" /> <homeGame day="18.01.2016" time="20:00" maxParallelGames="2" /> <homeGame day="14.12.2015" time="20:00" maxParallelGames="2" /> <homeGame day="21.09.2015" time="20:00" maxParallelGames="2" /> <homeGame day="07.12.2015" time="20:00" maxParallelGames="2" /> <homeGame day="14.09.2015" time="20:00" maxParallelGames="2" /> <homeGame day="30.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="23.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="16.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="09.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="02.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="26.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="19.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="12.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="05.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="28.09.2015" time="20:00" maxParallelGames="2" /> <homeGame day="11.04.2016" time="20:00" maxParallelGames="2" /> <homeGame day="04.04.2016" time="20:00" maxParallelGames="2" /> <homeGame day="14.03.2016" time="20:00" maxParallelGames="2" /> <homeGame day="07.03.2016" time="20:00" maxParallelGames="2" /> <homeGame day="29.02.2016" time="20:00" maxParallelGames="2" />
+          
+          
+          
+        </gameDays>
+        
+      </team>
+    
+  </teams>
+</TT>

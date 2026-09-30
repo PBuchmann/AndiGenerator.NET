@@ -1,0 +1,1067 @@
+<?xml version="1.0" encoding="iso-8859-15"?>
+<TT name="Liga für Doppelrunde" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.tt-liga.de/TTGenerator http://www.tt-liga.de/includes/TTGenerator.xsd" xmlns="http://www.tt-liga.de/TTGenerator" mid="21.12.2015" from="01.09.2015" until="15.05.2016" gender="Herren" id="10022">
+  <noGameDays />
+  <mandatoryGameDays>
+	  
+  </mandatoryGameDays>
+  <predefinedGames>
+  	
+  </predefinedGames>
+  <existingSchedule>
+
+  </existingSchedule>
+  <teams>
+    
+      <team clubId="10023" number="1" id="10024">
+        <name>Qsng Txhw Atvc Cers</name>
+        <gameDays>
+           <homeGame day="15.02.2016" time="20:00" maxParallelGames="2" /> <homeGame day="22.02.2016" time="20:00" maxParallelGames="2" /> <homeGame day="01.02.2016" time="20:00" maxParallelGames="2" /> <homeGame day="25.01.2016" time="20:00" maxParallelGames="2" /> <homeGame day="18.01.2016" time="20:00" maxParallelGames="2" /> <homeGame day="14.12.2015" time="20:00" maxParallelGames="2" /> <homeGame day="21.09.2015" time="20:00" maxParallelGames="2" /> <homeGame day="07.12.2015" time="20:00" maxParallelGames="2" /> <homeGame day="14.09.2015" time="20:00" maxParallelGames="2" /> <homeGame day="30.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="23.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="16.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="09.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="02.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="26.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="19.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="12.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="05.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="28.09.2015" time="20:00" maxParallelGames="2" /> <homeGame day="11.04.2016" time="20:00" maxParallelGames="2" /> <homeGame day="04.04.2016" time="20:00" maxParallelGames="2" /> <homeGame day="14.03.2016" time="20:00" maxParallelGames="2" /> <homeGame day="07.03.2016" time="20:00" maxParallelGames="2" /> <homeGame day="29.02.2016" time="20:00" maxParallelGames="2" />
+          
+          
+          
+        </gameDays>
+        <sisterTeams>
+        	
+        		<team gender="Herren" number="2">
+        			<name>Qsng Txhw Atvc Cers II</name>
+        			
+        				<game day="18.09.2015" time="20:00" homeTeam="Qsng Txhw Atvc Cers II" guestTeam="Tywm Cymu Cers" />
+        			
+        				<game day="25.09.2015" time="20:00" homeTeam="Qsng Txhw Atvc Cers II" guestTeam="Vjlo Btdg IV" />
+        			
+        				<game day="19.10.2015" time="20:15" homeTeam="Ixlg Cavo V" guestTeam="Qsng Txhw Atvc Cers II" />
+        			
+        				<game day="30.10.2015" time="20:00" homeTeam="Bkii Bfjo IV" guestTeam="Qsng Txhw Atvc Cers II" />
+        			
+        				<game day="06.11.2015" time="20:00" homeTeam="Qsng Txhw Atvc Cers II" guestTeam="Crxc Bbnk Cers II" />
+        			
+        				<game day="20.11.2015" time="20:00" homeTeam="Qsng Txhw Atvc Cers II" guestTeam="Hgto Bwzk Cers II" />
+        			
+        				<game day="24.11.2015" time="20:15" homeTeam="Cfga Fkim Ehee mhoa VCig" guestTeam="Qsng Txhw Atvc Cers II" />
+        			
+        				<game day="27.11.2015" time="20:00" homeTeam="Qsng Txhw Atvc Cers II" guestTeam="Crxc Bbnk Cers III" />
+        			
+        				<game day="11.12.2015" time="20:00" homeTeam="Kgpc Bidc III" guestTeam="Qsng Txhw Atvc Cers II" />
+        			
+        				<game day="15.01.2016" time="20:00" homeTeam="Hgto Bwzk Cers II" guestTeam="Qsng Txhw Atvc Cers II" />
+        			
+        				<game day="21.01.2016" time="20:00" homeTeam="Crxc Bbnk Cers II" guestTeam="Qsng Txhw Atvc Cers II" />
+        			
+        				<game day="29.01.2016" time="20:00" homeTeam="Qsng Txhw Atvc Cers II" guestTeam="Cfga Fkim Ehee mhoa VCig" />
+        			
+        				<game day="05.02.2016" time="20:00" homeTeam="Vjlo Btdg IV" guestTeam="Qsng Txhw Atvc Cers II" />
+        			
+        				<game day="12.02.2016" time="20:00" homeTeam="Tywm Cymu Cers" guestTeam="Qsng Txhw Atvc Cers II" />
+        			
+        				<game day="19.02.2016" time="20:00" homeTeam="Qsng Txhw Atvc Cers II" guestTeam="Ixlg Cavo V" />
+        			
+        				<game day="26.02.2016" time="20:00" homeTeam="Qsng Txhw Atvc Cers II" guestTeam="Bkii Bfjo IV" />
+        			
+        				<game day="04.03.2016" time="20:00" homeTeam="Qsng Txhw Atvc Cers II" guestTeam="Kgpc Bidc III" />
+        			
+        				<game day="08.04.2016" time="20:00" homeTeam="Crxc Bbnk Cers III" guestTeam="Qsng Txhw Atvc Cers II" />
+        			
+						</team>
+        	
+        		<team gender="Herren" number="3">
+        			<name>Qsng Txhw Atvc Cers III</name>
+        			
+        				<game day="14.09.2015" time="20:00" homeTeam="Qsng Txhw Atvc Cers III" guestTeam="Ixlg Cavo VIII" />
+        			
+        				<game day="06.10.2015" time="20:15" homeTeam="Cfga Fkim Ehee mhoa VCig II" guestTeam="Qsng Txhw Atvc Cers III" />
+        			
+        				<game day="14.10.2015" time="20:15" homeTeam="Euxw Gnmu VI" guestTeam="Qsng Txhw Atvc Cers III" />
+        			
+        				<game day="19.10.2015" time="20:00" homeTeam="Qsng Txhw Atvc Cers III" guestTeam="Vjlo Btdg V" />
+        			
+        				<game day="02.11.2015" time="20:00" homeTeam="Qsng Txhw Atvc Cers III" guestTeam="Vnjw Amcu Cers IV" />
+        			
+        				<game day="11.11.2015" time="20:00" homeTeam="Bkii Bfjo V" guestTeam="Qsng Txhw Atvc Cers III" />
+        			
+        				<game day="16.11.2015" time="20:00" homeTeam="Qsng Txhw Atvc Cers III" guestTeam="Whbk Hgfg IV" />
+        			
+        				<game day="18.01.2016" time="19:30" homeTeam="Vjlo Btdg V" guestTeam="Qsng Txhw Atvc Cers III" />
+        			
+        				<game day="25.01.2016" time="20:00" homeTeam="Qsng Txhw Atvc Cers III" guestTeam="Cfga Fkim Ehee mhoa VCig II" />
+        			
+        				<game day="12.02.2016" time="20:00" homeTeam="Whbk Hgfg IV" guestTeam="Qsng Txhw Atvc Cers III" />
+        			
+        				<game day="23.02.2016" time="20:00" homeTeam="Vnjw Amcu Cers IV" guestTeam="Qsng Txhw Atvc Cers III" />
+        			
+        				<game day="04.03.2016" time="20:00" homeTeam="Ixlg Cavo VIII" guestTeam="Qsng Txhw Atvc Cers III" />
+        			
+        				<game day="14.03.2016" time="20:00" homeTeam="Qsng Txhw Atvc Cers III" guestTeam="Euxw Gnmu VI" />
+        			
+        				<game day="04.04.2016" time="20:00" homeTeam="Qsng Txhw Atvc Cers III" guestTeam="Bkii Bfjo V" />
+        			
+						</team>
+        	
+        		<team gender="Damen" number="1">
+        			<name>Qsng Txhw Atvc Cers</name>
+        			
+        				<game day="05.10.2015" time="20:00" homeTeam="Qsng Txhw Atvc Cers" guestTeam="Vghs Leai" />
+        			
+        				<game day="20.10.2015" time="20:00" homeTeam="Vnjw Amcu Cers III" guestTeam="Qsng Txhw Atvc Cers" />
+        			
+        				<game day="26.10.2015" time="20:00" homeTeam="Qsng Txhw Atvc Cers" guestTeam="Qsng Heoi" />
+        			
+        				<game day="16.11.2015" time="20:00" homeTeam="Qsng Txhw Atvc Cers" guestTeam="Ixlg Cavo II" />
+        			
+        				<game day="19.11.2015" time="20:00" homeTeam="Cxke Qsng" guestTeam="Qsng Txhw Atvc Cers" />
+        			
+        				<game day="23.11.2015" time="20:00" homeTeam="Qsng Txhw Atvc Cers" guestTeam="Qyts Dshw Bdsq III" />
+        			
+        				<game day="27.11.2015" time="20:00" homeTeam="Bsaq Gslo" guestTeam="Qsng Txhw Atvc Cers" />
+        			
+        				<game day="07.12.2015" time="20:00" homeTeam="Qsng Txhw Atvc Cers" guestTeam="Kgpc Bidc" />
+        			
+        				<game day="11.12.2015" time="20:00" homeTeam="Eeyy Qsng" guestTeam="Qsng Txhw Atvc Cers" />
+        			
+        				<game day="18.01.2016" time="20:00" homeTeam="Qsng Txhw Atvc Cers" guestTeam="Eeyy Qsng" />
+        			
+        				<game day="28.01.2016" time="20:15" homeTeam="Vghs Leai" guestTeam="Qsng Txhw Atvc Cers" />
+        			
+        				<game day="01.02.2016" time="20:00" homeTeam="Qsng Txhw Atvc Cers" guestTeam="Cxke Qsng" />
+        			
+        				<game day="05.02.2016" time="20:30" homeTeam="Kgpc Bidc" guestTeam="Qsng Txhw Atvc Cers" />
+        			
+        				<game day="24.02.2016" time="20:00" homeTeam="Qsng Heoi" guestTeam="Qsng Txhw Atvc Cers" />
+        			
+        				<game day="29.02.2016" time="20:15" homeTeam="Ixlg Cavo II" guestTeam="Qsng Txhw Atvc Cers" />
+        			
+        				<game day="14.03.2016" time="20:00" homeTeam="Qsng Txhw Atvc Cers" guestTeam="Vnjw Amcu Cers III" />
+        			
+        				<game day="20.03.2016" time="14:00" homeTeam="Qyts Dshw Bdsq III" guestTeam="Qsng Txhw Atvc Cers" />
+        			
+        				<game day="04.04.2016" time="20:00" homeTeam="Qsng Txhw Atvc Cers" guestTeam="Bsaq Gslo" />
+        			
+						</team>
+        	
+        </sisterTeams>
+        
+      </team>
+	
+    
+      <team clubId="10033" number="2" id="10034">
+        <name>Gslo Bdei II</name>
+        <gameDays>
+           <homeGame day="29.10.2015" time="19:30" maxParallelGames="1" /> <homeGame day="14.04.2016" time="19:30" maxParallelGames="1" /> <homeGame day="17.03.2016" time="19:30" maxParallelGames="1" /> <homeGame day="03.03.2016" time="19:30" maxParallelGames="1" /> <homeGame day="18.02.2016" time="19:30" maxParallelGames="1" /> <homeGame day="28.01.2016" time="19:30" maxParallelGames="1" /> <homeGame day="14.01.2016" time="19:30" maxParallelGames="1" /> <homeGame day="17.12.2015" time="19:30" maxParallelGames="1" /> <homeGame day="19.11.2015" time="19:30" maxParallelGames="1" /> <homeGame day="10.12.2015" time="19:30" maxParallelGames="1" /> <homeGame day="08.10.2015" time="19:30" maxParallelGames="1" /> <homeGame day="15.10.2015" time="19:30" maxParallelGames="1" />
+           <noGame from="01.10.2015" until="01.10.2015" /> <noGame from="22.10.2015" until="22.10.2015" /> <noGame from="12.11.2015" until="12.11.2015" /> <noGame from="26.11.2015" until="26.11.2015" /> <noGame from="03.12.2015" until="03.12.2015" />
+          
+          
+        </gameDays>
+        <sisterTeams>
+        	
+        		<team gender="Herren" number="1">
+        			<name>Gslo Bdei</name>
+        			
+        				<game day="09.10.2015" time="20:00" homeTeam="Whbk Hgfg" guestTeam="Gslo Bdei" />
+        			
+        				<game day="13.10.2015" time="19:30" homeTeam="Gslo Bdei" guestTeam="Bkii Bfjo" />
+        			
+        				<game day="21.10.2015" time="20:00" homeTeam="Bsaq Gslo" guestTeam="Gslo Bdei" />
+        			
+        				<game day="27.10.2015" time="19:30" homeTeam="Gslo Bdei" guestTeam="Vjlo Btdg" />
+        			
+        				<game day="06.11.2015" time="20:00" homeTeam="Drfg Bsaq Ckeu" guestTeam="Gslo Bdei" />
+        			
+        				<game day="17.11.2015" time="19:30" homeTeam="Gslo Bdei" guestTeam="Vnjw Amcu Cers II" />
+        			
+        				<game day="27.11.2015" time="20:00" homeTeam="Crxc Bbnk Cers" guestTeam="Gslo Bdei" />
+        			
+        				<game day="01.12.2015" time="19:30" homeTeam="Gslo Bdei" guestTeam="Euxw Grxg Bcbs" />
+        			
+        				<game day="15.12.2015" time="19:30" homeTeam="Gslo Bdei" guestTeam="Sjme Ccmm III" />
+        			
+        				<game day="26.01.2016" time="19:30" homeTeam="Gslo Bdei" guestTeam="Bsaq Gslo" />
+        			
+        				<game day="30.01.2016" time="19:00" homeTeam="Vnjw Amcu Cers II" guestTeam="Gslo Bdei" />
+        			
+        				<game day="16.02.2016" time="19:30" homeTeam="Gslo Bdei" guestTeam="Crxc Bbnk Cers" />
+        			
+        				<game day="19.02.2016" time="20:00" homeTeam="Sjme Ccmm III" guestTeam="Gslo Bdei" />
+        			
+        				<game day="01.03.2016" time="19:30" homeTeam="Gslo Bdei" guestTeam="Drfg Bsaq Ckeu" />
+        			
+        				<game day="09.03.2016" time="20:30" homeTeam="Bkii Bfjo" guestTeam="Gslo Bdei" />
+        			
+        				<game day="15.03.2016" time="19:30" homeTeam="Gslo Bdei" guestTeam="Whbk Hgfg" />
+        			
+        				<game day="08.04.2016" time="20:00" homeTeam="Vjlo Btdg" guestTeam="Gslo Bdei" />
+        			
+        				<game day="09.04.2016" time="15:00" homeTeam="Euxw Grxg Bcbs" guestTeam="Gslo Bdei" />
+        			
+						</team>
+        	
+        		<team gender="Herren" number="3">
+        			<name>Gslo Bdei III</name>
+        			
+        				<game day="25.09.2015" time="20:00" homeTeam="Virc Hadw IV" guestTeam="Gslo Bdei III" />
+        			
+        				<game day="01.10.2015" time="19:30" homeTeam="Gslo Bdei III" guestTeam="Euxw Grxg Bcbs IV" />
+        			
+        				<game day="06.10.2015" time="20:00" homeTeam="Euxw Bvim III" guestTeam="Gslo Bdei III" />
+        			
+        				<game day="22.10.2015" time="19:30" homeTeam="Gslo Bdei III" guestTeam="Tosm Gxyq III" />
+        			
+        				<game day="28.10.2015" time="20:00" homeTeam="Tosm Gxyq IV" guestTeam="Gslo Bdei III" />
+        			
+        				<game day="12.11.2015" time="19:30" homeTeam="Gslo Bdei III" guestTeam="Drfg Bsaq Ckeu IV" />
+        			
+        				<game day="03.12.2015" time="19:30" homeTeam="Gslo Bdei III" guestTeam="Whbk Hgfg III" />
+        			
+        				<game day="13.01.2016" time="20:00" homeTeam="Whbk Hgfg III" guestTeam="Gslo Bdei III" />
+        			
+        				<game day="21.01.2016" time="19:30" homeTeam="Gslo Bdei III" guestTeam="Virc Hadw IV" />
+        			
+        				<game day="27.01.2016" time="20:15" homeTeam="Euxw Grxg Bcbs IV" guestTeam="Gslo Bdei III" />
+        			
+        				<game day="04.02.2016" time="19:30" homeTeam="Gslo Bdei III" guestTeam="Euxw Bvim III" />
+        			
+        				<game day="12.02.2016" time="00:00" homeTeam="Drfg Bsaq Ckeu IV" guestTeam="Gslo Bdei III" />
+        			
+        				<game day="15.02.2016" time="20:00" homeTeam="Tosm Gxyq III" guestTeam="Gslo Bdei III" />
+        			
+        				<game day="25.02.2016" time="19:30" homeTeam="Gslo Bdei III" guestTeam="Tosm Gxyq IV" />
+        			
+						</team>
+        	
+        		<team gender="Damen" number="1">
+        			<name>Gslo Bdei</name>
+        			
+        				<game day="06.11.2015" time="20:00" homeTeam="Sjme Ccmm II" guestTeam="Gslo Bdei" />
+        			
+        				<game day="10.11.2015" time="20:00" homeTeam="Gslo Bdei" guestTeam="Euxw Gnmu III" />
+        			
+        				<game day="28.11.2015" time="14:00" homeTeam="Vnjw Amcu Cers IV" guestTeam="Gslo Bdei" />
+        			
+        				<game day="08.12.2015" time="20:00" homeTeam="Gslo Bdei" guestTeam="Euxw Gnmu IV" />
+        			
+        				<game day="16.01.2016" time="14:30" homeTeam="Euxw Gnmu IV" guestTeam="Gslo Bdei" />
+        			
+        				<game day="19.01.2016" time="20:00" homeTeam="Gslo Bdei" guestTeam="Vnjw Amcu Cers IV" />
+        			
+        				<game day="24.02.2016" time="20:00" homeTeam="Euxw Gnmu III" guestTeam="Gslo Bdei" />
+        			
+        				<game day="08.03.2016" time="20:00" homeTeam="Gslo Bdei" guestTeam="Sjme Ccmm II" />
+        			
+						</team>
+        	
+        </sisterTeams>
+        
+      </team>
+    
+      <team clubId="10035" number="2" id="10036">
+        <name>Gquq Qyts II</name>
+        <gameDays>
+           <homeGame day="13.04.2016" time="20:00" maxParallelGames="1" /> <homeGame day="06.04.2016" time="20:00" maxParallelGames="1" /> <homeGame day="16.03.2016" time="20:00" maxParallelGames="1" /> <homeGame day="09.03.2016" time="20:00" maxParallelGames="1" /> <homeGame day="02.03.2016" time="20:00" maxParallelGames="1" /> <homeGame day="24.02.2016" time="20:00" maxParallelGames="1" /> <homeGame day="17.02.2016" time="20:00" maxParallelGames="1" /> <homeGame day="03.02.2016" time="20:00" maxParallelGames="1" /> <homeGame day="16.09.2015" time="20:00" maxParallelGames="1" /> <homeGame day="27.01.2016" time="20:00" maxParallelGames="1" /> <homeGame day="14.10.2015" time="20:00" maxParallelGames="1" /> <homeGame day="20.01.2016" time="20:00" maxParallelGames="1" /> <homeGame day="13.01.2016" time="20:00" maxParallelGames="1" /> <homeGame day="16.12.2015" time="20:00" maxParallelGames="1" /> <homeGame day="09.12.2015" time="20:00" maxParallelGames="1" /> <homeGame day="02.12.2015" time="20:00" maxParallelGames="1" /> <homeGame day="25.11.2015" time="20:00" maxParallelGames="1" /> <homeGame day="23.09.2015" time="20:00" maxParallelGames="1" /> <homeGame day="28.10.2015" time="20:00" maxParallelGames="1" /> <homeGame day="21.10.2015" time="20:00" maxParallelGames="1" /> <homeGame day="04.11.2015" time="20:00" /> <homeGame day="11.11.2015" time="20:00" />
+          
+          
+          
+        </gameDays>
+        <sisterTeams>
+        	
+        		<team gender="Herren" number="1">
+        			<name>Gquq Qyts</name>
+        			
+        				<game day="26.09.2015" time="19:30" homeTeam="Qnbc Leuq" guestTeam="Gquq Qyts" />
+        			
+        				<game day="29.09.2015" time="20:00" homeTeam="Qyts Dshw Bdsq II" guestTeam="Gquq Qyts" />
+        			
+        				<game day="09.10.2015" time="20:00" homeTeam="Gquq Qyts" guestTeam="Ixlg Cavo II" />
+        			
+        				<game day="16.10.2015" time="20:00" homeTeam="Gquq Qyts" guestTeam="Aowi Euxw Cslk" />
+        			
+        				<game day="13.11.2015" time="20:00" homeTeam="Gquq Qyts" guestTeam="Aowi Ewam Llvk Amrc" />
+        			
+        				<game day="17.11.2015" time="20:00" homeTeam="Lhdo Egpw II" guestTeam="Gquq Qyts" />
+        			
+        				<game day="20.11.2015" time="20:00" homeTeam="Gquq Qyts" guestTeam="Euxw Gnmu II" />
+        			
+        				<game day="27.11.2015" time="20:00" homeTeam="Gquq Qyts" guestTeam="Cxke Qsng" />
+        			
+        				<game day="11.12.2015" time="20:15" homeTeam="Virc Hadw" guestTeam="Gquq Qyts" />
+        			
+        				<game day="15.01.2016" time="20:00" homeTeam="Gquq Qyts" guestTeam="Virc Hadw" />
+        			
+        				<game day="22.01.2016" time="20:00" homeTeam="Cxke Qsng" guestTeam="Gquq Qyts" />
+        			
+        				<game day="05.02.2016" time="20:00" homeTeam="Gquq Qyts" guestTeam="Qyts Dshw Bdsq II" />
+        			
+        				<game day="12.02.2016" time="20:00" homeTeam="Ixlg Cavo II" guestTeam="Gquq Qyts" />
+        			
+        				<game day="25.02.2016" time="20:00" homeTeam="Aowi Ewam Llvk Amrc" guestTeam="Gquq Qyts" />
+        			
+        				<game day="04.03.2016" time="20:00" homeTeam="Gquq Qyts" guestTeam="Lhdo Egpw II" />
+        			
+        				<game day="11.03.2016" time="20:15" homeTeam="Aowi Euxw Cslk" guestTeam="Gquq Qyts" />
+        			
+        				<game day="18.03.2016" time="20:00" homeTeam="Gquq Qyts" guestTeam="Qnbc Leuq" />
+        			
+        				<game day="08.04.2016" time="20:00" homeTeam="Euxw Gnmu II" guestTeam="Gquq Qyts" />
+        			
+						</team>
+        	
+        		<team gender="Herren" number="3">
+        			<name>Gquq Qyts III</name>
+        			
+        				<game day="02.10.2015" time="20:00" homeTeam="Gquq Qyts III" guestTeam="Euxw Grxg Bcbs III" />
+        			
+        				<game day="12.10.2015" time="20:00" homeTeam="Drfg Bsaq Ckeu III" guestTeam="Gquq Qyts III" />
+        			
+        				<game day="29.10.2015" time="20:00" homeTeam="Bsaq Gslo II" guestTeam="Gquq Qyts III" />
+        			
+        				<game day="06.11.2015" time="20:00" homeTeam="Gquq Qyts III" guestTeam="Bsaq Gslo III" />
+        			
+        				<game day="11.11.2015" time="20:15" homeTeam="Euxw Gnmu V" guestTeam="Gquq Qyts III" />
+        			
+        				<game day="13.11.2015" time="20:00" homeTeam="Vnjw Amcu Cers III" guestTeam="Gquq Qyts III" />
+        			
+        				<game day="04.12.2015" time="20:00" homeTeam="Pvwi Lkgu" guestTeam="Gquq Qyts III" />
+        			
+        				<game day="11.12.2015" time="20:00" homeTeam="Gquq Qyts III" guestTeam="Qsng Heoi" />
+        			
+        				<game day="18.12.2015" time="20:00" homeTeam="Gquq Qyts III" guestTeam="Virc Hadw III" />
+        			
+        				<game day="11.01.2016" time="20:15" homeTeam="Virc Hadw III" guestTeam="Gquq Qyts III" />
+        			
+        				<game day="15.01.2016" time="20:00" homeTeam="Gquq Qyts III" guestTeam="Vnjw Amcu Cers III" />
+        			
+        				<game day="22.01.2016" time="20:00" homeTeam="Qsng Heoi" guestTeam="Gquq Qyts III" />
+        			
+        				<game day="29.01.2016" time="20:00" homeTeam="Gquq Qyts III" guestTeam="Bsaq Gslo II" />
+        			
+        				<game day="05.02.2016" time="20:00" homeTeam="Gquq Qyts III" guestTeam="Drfg Bsaq Ckeu III" />
+        			
+        				<game day="17.02.2016" time="20:00" homeTeam="Euxw Grxg Bcbs III" guestTeam="Gquq Qyts III" />
+        			
+        				<game day="26.02.2016" time="20:00" homeTeam="Gquq Qyts III" guestTeam="Euxw Gnmu V" />
+        			
+        				<game day="04.03.2016" time="20:00" homeTeam="Bsaq Gslo III" guestTeam="Gquq Qyts III" />
+        			
+        				<game day="11.03.2016" time="20:00" homeTeam="Gquq Qyts III" guestTeam="Pvwi Lkgu" />
+        			
+						</team>
+        	
+        		<team gender="Bambini" number="1">
+        			<name>Gquq Qyts</name>
+        			
+        				<game day="23.09.2015" time="18:00" homeTeam="Bkii Bfjo II" guestTeam="Gquq Qyts" />
+        			
+        				<game day="07.10.2015" time="18:15" homeTeam="Gquq Qyts" guestTeam="Drfg Bsaq Ckeu III" />
+        			
+        				<game day="14.10.2015" time="18:15" homeTeam="Gquq Qyts" guestTeam="Crxc Bbnk Cers II" />
+        			
+        				<game day="20.10.2015" time="18:00" homeTeam="Drfg Bsaq Ckeu III" guestTeam="Gquq Qyts" />
+        			
+        				<game day="28.10.2015" time="18:00" homeTeam="Crxc Bbnk Cers" guestTeam="Gquq Qyts" />
+        			
+        				<game day="11.11.2015" time="18:15" homeTeam="Gquq Qyts" guestTeam="Crxc Bbnk Cers" />
+        			
+        				<game day="21.11.2015" time="11:00" homeTeam="Whbk Hgfg II" guestTeam="Gquq Qyts" />
+        			
+        				<game day="25.11.2015" time="18:15" homeTeam="Gquq Qyts" guestTeam="Whbk Hgfg II" />
+        			
+        				<game day="02.12.2015" time="18:00" homeTeam="Crxc Bbnk Cers II" guestTeam="Gquq Qyts" />
+        			
+        				<game day="16.12.2015" time="18:15" homeTeam="Gquq Qyts" guestTeam="Bkii Bfjo II" />
+        			
+        				<game day="13.01.2016" time="18:15" homeTeam="Gquq Qyts" guestTeam="Drfg Bsaq Ckeu III" />
+        			
+        				<game day="30.01.2016" time="11:00" homeTeam="Whbk Hgfg II" guestTeam="Gquq Qyts" />
+        			
+        				<game day="03.02.2016" time="18:15" homeTeam="Gquq Qyts" guestTeam="Crxc Bbnk Cers II" />
+        			
+        				<game day="17.02.2016" time="18:00" homeTeam="Crxc Bbnk Cers" guestTeam="Gquq Qyts" />
+        			
+        				<game day="24.02.2016" time="18:15" homeTeam="Gquq Qyts" guestTeam="Crxc Bbnk Cers" />
+        			
+        				<game day="02.03.2016" time="18:00" homeTeam="Crxc Bbnk Cers II" guestTeam="Gquq Qyts" />
+        			
+        				<game day="09.03.2016" time="18:00" homeTeam="Bkii Bfjo II" guestTeam="Gquq Qyts" />
+        			
+        				<game day="16.03.2016" time="18:15" homeTeam="Gquq Qyts" guestTeam="Bkii Bfjo II" />
+        			
+        				<game day="06.04.2016" time="18:15" homeTeam="Gquq Qyts" guestTeam="Whbk Hgfg II" />
+        			
+        				<game day="12.04.2016" time="18:00" homeTeam="Drfg Bsaq Ckeu III" guestTeam="Gquq Qyts" />
+        			
+						</team>
+        	
+        </sisterTeams>
+        
+      </team>
+    
+      <team clubId="10027" number="4" id="10037">
+        <name>Euxw Gnmu IV</name>
+        <gameDays>
+           <homeGame day="24.02.2016" time="20:15" maxParallelGames="2" /> <homeGame day="14.10.2015" time="20:15" maxParallelGames="2" /> <homeGame day="15.04.2016" time="20:00" maxParallelGames="2" /> <homeGame day="13.04.2016" time="20:15" maxParallelGames="2" /> <homeGame day="08.04.2016" time="20:00" maxParallelGames="2" /> <homeGame day="06.04.2016" time="20:15" maxParallelGames="2" /> <homeGame day="18.03.2016" time="20:00" maxParallelGames="2" /> <homeGame day="16.03.2016" time="20:15" maxParallelGames="2" /> <homeGame day="11.03.2016" time="20:00" maxParallelGames="2" /> <homeGame day="09.03.2016" time="20:15" maxParallelGames="2" /> <homeGame day="04.03.2016" time="20:00" maxParallelGames="2" /> <homeGame day="02.03.2016" time="20:15" maxParallelGames="2" /> <homeGame day="26.02.2016" time="20:00" maxParallelGames="2" /> <homeGame day="19.02.2016" time="20:00" maxParallelGames="2" /> <homeGame day="17.02.2016" time="20:15" maxParallelGames="2" /> <homeGame day="05.02.2016" time="20:00" maxParallelGames="2" /> <homeGame day="03.02.2016" time="20:15" maxParallelGames="2" /> <homeGame day="29.01.2016" time="20:00" maxParallelGames="2" /> <homeGame day="27.01.2016" time="20:15" maxParallelGames="2" /> <homeGame day="22.01.2016" time="20:00" maxParallelGames="2" /> <homeGame day="20.01.2016" time="20:15" maxParallelGames="2" /> <homeGame day="15.01.2016" time="20:00" maxParallelGames="2" /> <homeGame day="13.01.2016" time="20:15" maxParallelGames="2" /> <homeGame day="18.12.2015" time="20:00" maxParallelGames="2" /> <homeGame day="09.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="16.12.2015" time="20:15" maxParallelGames="2" /> <homeGame day="23.09.2015" time="20:15" maxParallelGames="2" /> <homeGame day="25.09.2015" time="20:00" maxParallelGames="2" /> <homeGame day="11.12.2015" time="20:00" maxParallelGames="2" /> <homeGame day="09.12.2015" time="20:15" maxParallelGames="2" /> <homeGame day="04.12.2015" time="20:00" maxParallelGames="2" /> <homeGame day="02.12.2015" time="20:15" maxParallelGames="2" /> <homeGame day="30.09.2015" time="20:15" maxParallelGames="2" /> <homeGame day="02.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="07.10.2015" time="20:15" maxParallelGames="2" /> <homeGame day="25.11.2015" time="20:15" maxParallelGames="2" /> <homeGame day="20.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="13.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="11.11.2015" time="20:15" maxParallelGames="2" /> <homeGame day="30.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="28.10.2015" time="20:15" maxParallelGames="2" /> <homeGame day="23.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="21.10.2015" time="20:15" maxParallelGames="2" /> <homeGame day="16.10.2015" time="20:00" maxParallelGames="2" />
+           <noGame from="04.10.2015" until="04.10.2015" /> <noGame from="27.11.2015" until="27.11.2015" /> <noGame from="28.11.2015" until="28.11.2015" /> <noGame from="29.11.2015" until="29.11.2015" /> <noGame from="12.12.2015" until="12.12.2015" />
+          
+          
+        </gameDays>
+        <sisterTeams>
+        	
+        		<team gender="Herren" number="1">
+        			<name>Euxw Gnmu</name>
+        			
+        				<game day="09.10.2015" time="20:00" homeTeam="Euxw Dmuu Xxka Iobo II" guestTeam="Euxw Gnmu" />
+        			
+        				<game day="10.10.2015" time="18:30" homeTeam="Jaom Qsng" guestTeam="Euxw Gnmu" />
+        			
+        				<game day="17.10.2015" time="15:00" homeTeam="Euxw Gnmu" guestTeam="Hhwe Jbiu III" />
+        			
+        				<game day="18.10.2015" time="17:00" homeTeam="Euxw Gnmu" guestTeam="Eivc Ierw II" />
+        			
+        				<game day="31.10.2015" time="18:00" homeTeam="Vnjw Amcu Cers" guestTeam="Euxw Gnmu" />
+        			
+        				<game day="14.11.2015" time="15:00" homeTeam="Euxw Gnmu" guestTeam="Aowi Euxw Iyfo" />
+        			
+        				<game day="15.11.2015" time="11:00" homeTeam="Eeyy Qsng" guestTeam="Euxw Gnmu" />
+        			
+        				<game day="21.11.2015" time="15:00" homeTeam="Euxw Gnmu" guestTeam="Aowi Euxw Ehee Eekq" />
+        			
+        				<game day="05.12.2015" time="15:00" homeTeam="Euxw Gnmu" guestTeam="Lhxw Ierw" />
+        			
+        				<game day="22.01.2016" time="20:00" homeTeam="Aowi Euxw Iyfo" guestTeam="Euxw Gnmu" />
+        			
+        				<game day="29.01.2016" time="20:15" homeTeam="Eivc Ierw II" guestTeam="Euxw Gnmu" />
+        			
+        				<game day="06.02.2016" time="19:00" homeTeam="Aowi Euxw Ehee Eekq" guestTeam="Euxw Gnmu" />
+        			
+        				<game day="28.02.2016" time="14:00" homeTeam="Euxw Gnmu" guestTeam="Euxw Dmuu Xxka Iobo II" />
+        			
+        				<game day="05.03.2016" time="15:00" homeTeam="Euxw Gnmu" guestTeam="Vnjw Amcu Cers" />
+        			
+        				<game day="13.03.2016" time="14:00" homeTeam="Euxw Gnmu" guestTeam="Jaom Qsng" />
+        			
+        				<game day="18.03.2016" time="20:15" homeTeam="Hhwe Jbiu III" guestTeam="Euxw Gnmu" />
+        			
+        				<game day="09.04.2016" time="15:00" homeTeam="Euxw Gnmu" guestTeam="Eeyy Qsng" />
+        			
+        				<game day="16.04.2016" time="16:30" homeTeam="Lhxw Ierw" guestTeam="Euxw Gnmu" />
+        			
+						</team>
+        	
+        		<team gender="Herren" number="2">
+        			<name>Euxw Gnmu II</name>
+        			
+        				<game day="09.10.2015" time="20:15" homeTeam="Aowi Euxw Cslk" guestTeam="Euxw Gnmu II" />
+        			
+        				<game day="16.10.2015" time="20:00" homeTeam="Euxw Gnmu II" guestTeam="Cxke Qsng" />
+        			
+        				<game day="23.10.2015" time="20:15" homeTeam="Virc Hadw" guestTeam="Euxw Gnmu II" />
+        			
+        				<game day="30.10.2015" time="20:00" homeTeam="Euxw Gnmu II" guestTeam="Lhdo Egpw II" />
+        			
+        				<game day="07.11.2015" time="19:30" homeTeam="Qnbc Leuq" guestTeam="Euxw Gnmu II" />
+        			
+        				<game day="13.11.2015" time="20:00" homeTeam="Euxw Gnmu II" guestTeam="Qyts Dshw Bdsq II" />
+        			
+        				<game day="20.11.2015" time="20:00" homeTeam="Gquq Qyts" guestTeam="Euxw Gnmu II" />
+        			
+        				<game day="26.11.2015" time="20:00" homeTeam="Aowi Ewam Llvk Amrc" guestTeam="Euxw Gnmu II" />
+        			
+        				<game day="11.12.2015" time="20:00" homeTeam="Euxw Gnmu II" guestTeam="Ixlg Cavo II" />
+        			
+        				<game day="05.02.2016" time="20:00" homeTeam="Euxw Gnmu II" guestTeam="Virc Hadw" />
+        			
+        				<game day="12.02.2016" time="20:00" homeTeam="Cxke Qsng" guestTeam="Euxw Gnmu II" />
+        			
+        				<game day="19.02.2016" time="20:00" homeTeam="Euxw Gnmu II" guestTeam="Qnbc Leuq" />
+        			
+        				<game day="23.02.2016" time="20:00" homeTeam="Qyts Dshw Bdsq II" guestTeam="Euxw Gnmu II" />
+        			
+        				<game day="26.02.2016" time="20:00" homeTeam="Euxw Gnmu II" guestTeam="Aowi Euxw Cslk" />
+        			
+        				<game day="04.03.2016" time="20:00" homeTeam="Ixlg Cavo II" guestTeam="Euxw Gnmu II" />
+        			
+        				<game day="11.03.2016" time="20:00" homeTeam="Euxw Gnmu II" guestTeam="Aowi Ewam Llvk Amrc" />
+        			
+        				<game day="15.03.2016" time="20:00" homeTeam="Lhdo Egpw II" guestTeam="Euxw Gnmu II" />
+        			
+        				<game day="08.04.2016" time="20:00" homeTeam="Euxw Gnmu II" guestTeam="Gquq Qyts" />
+        			
+						</team>
+        	
+        		<team gender="Herren" number="3">
+        			<name>Euxw Gnmu III</name>
+        			
+        				<game day="25.09.2015" time="20:00" homeTeam="Euxw Grxg Bcbs II" guestTeam="Euxw Gnmu III" />
+        			
+        				<game day="30.09.2015" time="20:15" homeTeam="Euxw Gnmu III" guestTeam="Virc Hadw II" />
+        			
+        				<game day="02.10.2015" time="20:15" homeTeam="Euxw Gnmu IV" guestTeam="Euxw Gnmu III" />
+        			
+        				<game day="12.10.2015" time="20:00" homeTeam="Qsng Txhw Atvc Cers" guestTeam="Euxw Gnmu III" />
+        			
+        				<game day="14.10.2015" time="20:15" homeTeam="Euxw Gnmu III" guestTeam="Gslo Bdei II" />
+        			
+        				<game day="13.11.2015" time="20:00" homeTeam="Gpsa Euxw" guestTeam="Euxw Gnmu III" />
+        			
+        				<game day="20.11.2015" time="20:00" homeTeam="Euxw Gnmu III" guestTeam="Gquq Qyts II" />
+        			
+        				<game day="11.12.2015" time="20:00" homeTeam="Drfg Bsaq Ckeu II" guestTeam="Euxw Gnmu III" />
+        			
+        				<game day="18.12.2015" time="20:00" homeTeam="Euxw Gnmu III" guestTeam="Tosm Gxyq" />
+        			
+        				<game day="08.01.2016" time="20:15" homeTeam="Euxw Gnmu III" guestTeam="Euxw Gnmu IV" />
+        			
+        				<game day="22.01.2016" time="20:15" homeTeam="Virc Hadw II" guestTeam="Euxw Gnmu III" />
+        			
+        				<game day="28.01.2016" time="19:30" homeTeam="Gslo Bdei II" guestTeam="Euxw Gnmu III" />
+        			
+        				<game day="03.02.2016" time="20:15" homeTeam="Euxw Gnmu III" guestTeam="Qsng Txhw Atvc Cers" />
+        			
+        				<game day="17.02.2016" time="20:15" homeTeam="Euxw Gnmu III" guestTeam="Gpsa Euxw" />
+        			
+        				<game day="29.02.2016" time="20:00" homeTeam="Tosm Gxyq" guestTeam="Euxw Gnmu III" />
+        			
+        				<game day="09.03.2016" time="20:15" homeTeam="Euxw Gnmu III" guestTeam="Drfg Bsaq Ckeu II" />
+        			
+        				<game day="16.03.2016" time="20:00" homeTeam="Gquq Qyts II" guestTeam="Euxw Gnmu III" />
+        			
+        				<game day="06.04.2016" time="20:15" homeTeam="Euxw Gnmu III" guestTeam="Euxw Grxg Bcbs II" />
+        			
+						</team>
+        	
+        		<team gender="Herren" number="5">
+        			<name>Euxw Gnmu V</name>
+        			
+        				<game day="23.09.2015" time="20:15" homeTeam="Euxw Gnmu V" guestTeam="Bsaq Gslo II" />
+        			
+        				<game day="30.09.2015" time="20:15" homeTeam="Euxw Gnmu V" guestTeam="Drfg Bsaq Ckeu III" />
+        			
+        				<game day="07.10.2015" time="20:15" homeTeam="Euxw Gnmu V" guestTeam="Bsaq Gslo III" />
+        			
+        				<game day="21.10.2015" time="20:00" homeTeam="Euxw Grxg Bcbs III" guestTeam="Euxw Gnmu V" />
+        			
+        				<game day="06.11.2015" time="20:00" homeTeam="Qsng Heoi" guestTeam="Euxw Gnmu V" />
+        			
+        				<game day="11.11.2015" time="20:15" homeTeam="Euxw Gnmu V" guestTeam="Gquq Qyts III" />
+        			
+        				<game day="13.11.2015" time="20:00" homeTeam="Pvwi Lkgu" guestTeam="Euxw Gnmu V" />
+        			
+        				<game day="20.11.2015" time="20:00" homeTeam="Vnjw Amcu Cers III" guestTeam="Euxw Gnmu V" />
+        			
+        				<game day="30.11.2015" time="20:15" homeTeam="Virc Hadw III" guestTeam="Euxw Gnmu V" />
+        			
+        				<game day="13.01.2016" time="20:15" homeTeam="Euxw Gnmu V" guestTeam="Virc Hadw III" />
+        			
+        				<game day="18.01.2016" time="20:00" homeTeam="Drfg Bsaq Ckeu III" guestTeam="Euxw Gnmu V" />
+        			
+        				<game day="27.01.2016" time="20:15" homeTeam="Euxw Gnmu V" guestTeam="Euxw Grxg Bcbs III" />
+        			
+        				<game day="03.02.2016" time="20:15" homeTeam="Euxw Gnmu V" guestTeam="Vnjw Amcu Cers III" />
+        			
+        				<game day="12.02.2016" time="20:00" homeTeam="Bsaq Gslo III" guestTeam="Euxw Gnmu V" />
+        			
+        				<game day="17.02.2016" time="20:15" homeTeam="Euxw Gnmu V" guestTeam="Pvwi Lkgu" />
+        			
+        				<game day="26.02.2016" time="20:00" homeTeam="Gquq Qyts III" guestTeam="Euxw Gnmu V" />
+        			
+        				<game day="02.03.2016" time="20:15" homeTeam="Euxw Gnmu V" guestTeam="Qsng Heoi" />
+        			
+        				<game day="10.03.2016" time="20:00" homeTeam="Bsaq Gslo II" guestTeam="Euxw Gnmu V" />
+        			
+						</team>
+        	
+        		<team gender="Herren" number="6">
+        			<name>Euxw Gnmu VI</name>
+        			
+        				<game day="26.09.2015" time="15:00" homeTeam="Euxw Gnmu VI" guestTeam="Vnjw Amcu Cers IV" />
+        			
+        				<game day="28.09.2015" time="19:30" homeTeam="Vjlo Btdg V" guestTeam="Euxw Gnmu VI" />
+        			
+        				<game day="07.10.2015" time="20:00" homeTeam="Bkii Bfjo V" guestTeam="Euxw Gnmu VI" />
+        			
+        				<game day="14.10.2015" time="20:15" homeTeam="Euxw Gnmu VI" guestTeam="Qsng Txhw Atvc Cers III" />
+        			
+        				<game day="30.10.2015" time="20:00" homeTeam="Whbk Hgfg IV" guestTeam="Euxw Gnmu VI" />
+        			
+        				<game day="25.11.2015" time="20:30" homeTeam="Cfga Fkim Ehee mhoa VCig II" guestTeam="Euxw Gnmu VI" />
+        			
+        				<game day="02.12.2015" time="20:15" homeTeam="Euxw Gnmu VI" guestTeam="Ixlg Cavo VIII" />
+        			
+        				<game day="13.01.2016" time="20:15" homeTeam="Euxw Gnmu VI" guestTeam="Cfga Fkim Ehee mhoa VCig II" />
+        			
+        				<game day="23.01.2016" time="15:00" homeTeam="Euxw Gnmu VI" guestTeam="Bkii Bfjo V" />
+        			
+        				<game day="02.03.2016" time="20:15" homeTeam="Euxw Gnmu VI" guestTeam="Whbk Hgfg IV" />
+        			
+        				<game day="08.03.2016" time="20:00" homeTeam="Vnjw Amcu Cers IV" guestTeam="Euxw Gnmu VI" />
+        			
+        				<game day="09.03.2016" time="20:15" homeTeam="Euxw Gnmu VI" guestTeam="Vjlo Btdg V" />
+        			
+        				<game day="14.03.2016" time="20:00" homeTeam="Qsng Txhw Atvc Cers III" guestTeam="Euxw Gnmu VI" />
+        			
+        				<game day="15.04.2016" time="20:00" homeTeam="Ixlg Cavo VIII" guestTeam="Euxw Gnmu VI" />
+        			
+						</team>
+        	
+        		<team gender="Damen" number="1">
+        			<name>Euxw Gnmu</name>
+        			
+        				<game day="03.10.2015" time="18:00" homeTeam="Vnjw Amcu Cers" guestTeam="Euxw Gnmu" />
+        			
+        				<game day="10.10.2015" time="18:00" homeTeam="Euxw Gnmu" guestTeam="Hqrc Jijo" />
+        			
+        				<game day="11.10.2015" time="11:00" homeTeam="Euxw Gnmu" guestTeam="Qsng Fdsu Kcro" />
+        			
+        				<game day="31.10.2015" time="14:00" homeTeam="Kjsi Qsng II" guestTeam="Euxw Gnmu" />
+        			
+        				<game day="31.10.2015" time="19:00" homeTeam="Vghs Ktwi" guestTeam="Euxw Gnmu" />
+        			
+        				<game day="14.11.2015" time="15:15" homeTeam="Prem Vjlo Wtqu II" guestTeam="Euxw Gnmu" />
+        			
+        				<game day="05.12.2015" time="19:00" homeTeam="Euxw Gnmu" guestTeam="Qsng Dnxk" />
+        			
+        				<game day="12.12.2015" time="18:00" homeTeam="Qrsy Vfng" guestTeam="Euxw Gnmu" />
+        			
+        				<game day="19.12.2015" time="17:00" homeTeam="Euxw Gnmu" guestTeam="Vjlo Kcro III" />
+        			
+        				<game day="23.01.2016" time="15:00" homeTeam="Vjlo Kcro III" guestTeam="Euxw Gnmu" />
+        			
+        				<game day="30.01.2016" time="14:30" homeTeam="Euxw Gnmu" guestTeam="Vghs Ktwi" />
+        			
+        				<game day="06.02.2016" time="17:00" homeTeam="Euxw Gnmu" guestTeam="Vnjw Amcu Cers" />
+        			
+        				<game day="13.02.2016" time="18:00" homeTeam="Hqrc Jijo" guestTeam="Euxw Gnmu" />
+        			
+        				<game day="20.02.2016" time="14:00" homeTeam="Euxw Gnmu" guestTeam="Qrsy Vfng" />
+        			
+        				<game day="27.02.2016" time="17:00" homeTeam="Euxw Gnmu" guestTeam="Kjsi Qsng II" />
+        			
+        				<game day="12.03.2016" time="18:00" homeTeam="Euxw Gnmu" guestTeam="Prem Vjlo Wtqu II" />
+        			
+        				<game day="19.03.2016" time="15:00" homeTeam="Qsng Fdsu Kcro" guestTeam="Euxw Gnmu" />
+        			
+        				<game day="03.04.2016" time="13:00" homeTeam="Qsng Dnxk" guestTeam="Euxw Gnmu" />
+        			
+						</team>
+        	
+        		<team gender="Damen" number="2">
+        			<name>Euxw Gnmu II</name>
+        			
+        				<game day="30.09.2015" time="20:00" homeTeam="Euxw Dmuu Xxka Iobo II" guestTeam="Euxw Gnmu II" />
+        			
+        				<game day="09.10.2015" time="20:15" homeTeam="Euxw Gnmu II" guestTeam="Qyts Vscq Lqng" />
+        			
+        				<game day="16.10.2015" time="20:15" homeTeam="Euxw Gnmu II" guestTeam="Virc Lqng" />
+        			
+        				<game day="21.10.2015" time="20:00" homeTeam="Euxw Dmuu Xxka Iobo" guestTeam="Euxw Gnmu II" />
+        			
+        				<game day="30.10.2015" time="20:15" homeTeam="Euxw Gnmu II" guestTeam="Qyts Dshw Bdsq" />
+        			
+        				<game day="06.11.2015" time="20:00" homeTeam="Qnbc Leuq" guestTeam="Euxw Gnmu II" />
+        			
+        				<game day="20.11.2015" time="20:15" homeTeam="Euxw Gnmu II" guestTeam="Bsaq Lrho" />
+        			
+        				<game day="26.11.2015" time="19:30" homeTeam="Aowi Euxw Cslk" guestTeam="Euxw Gnmu II" />
+        			
+        				<game day="02.12.2015" time="20:00" homeTeam="Qsng Fdsu Kcro III" guestTeam="Euxw Gnmu II" />
+        			
+        				<game day="11.12.2015" time="20:15" homeTeam="Euxw Gnmu II" guestTeam="Qyts Lxoa" />
+        			
+        				<game day="29.01.2016" time="20:15" homeTeam="Euxw Gnmu II" guestTeam="Qnbc Leuq" />
+        			
+        				<game day="30.01.2016" time="16:00" homeTeam="Virc Lqng" guestTeam="Euxw Gnmu II" />
+        			
+        				<game day="14.02.2016" time="14:00" homeTeam="Qyts Dshw Bdsq" guestTeam="Euxw Gnmu II" />
+        			
+        				<game day="19.02.2016" time="20:15" homeTeam="Euxw Gnmu II" guestTeam="Qsng Fdsu Kcro III" />
+        			
+        				<game day="26.02.2016" time="20:15" homeTeam="Qyts Vscq Lqng" guestTeam="Euxw Gnmu II" />
+        			
+        				<game day="04.03.2016" time="20:15" homeTeam="Euxw Gnmu II" guestTeam="Aowi Euxw Cslk" />
+        			
+        				<game day="11.03.2016" time="20:15" homeTeam="Qyts Lxoa" guestTeam="Euxw Gnmu II" />
+        			
+        				<game day="18.03.2016" time="20:15" homeTeam="Euxw Gnmu II" guestTeam="Euxw Dmuu Xxka Iobo" />
+        			
+        				<game day="08.04.2016" time="20:15" homeTeam="Euxw Gnmu II" guestTeam="Euxw Dmuu Xxka Iobo II" />
+        			
+        				<game day="09.04.2016" time="18:30" homeTeam="Bsaq Lrho" guestTeam="Euxw Gnmu II" />
+        			
+						</team>
+        	
+        		<team gender="Damen" number="3">
+        			<name>Euxw Gnmu III</name>
+        			
+        				<game day="19.09.2015" time="14:30" homeTeam="Euxw Gnmu IV" guestTeam="Euxw Gnmu III" />
+        			
+        				<game day="21.10.2015" time="20:00" homeTeam="Euxw Gnmu III" guestTeam="Vnjw Amcu Cers IV" />
+        			
+        				<game day="10.11.2015" time="20:00" homeTeam="Gslo Bdei" guestTeam="Euxw Gnmu III" />
+        			
+        				<game day="09.12.2015" time="20:00" homeTeam="Euxw Gnmu III" guestTeam="Sjme Ccmm II" />
+        			
+        				<game day="20.01.2016" time="20:00" homeTeam="Euxw Gnmu III" guestTeam="Euxw Gnmu IV" />
+        			
+        				<game day="06.02.2016" time="14:00" homeTeam="Vnjw Amcu Cers IV" guestTeam="Euxw Gnmu III" />
+        			
+        				<game day="12.02.2016" time="20:00" homeTeam="Sjme Ccmm II" guestTeam="Euxw Gnmu III" />
+        			
+        				<game day="24.02.2016" time="20:00" homeTeam="Euxw Gnmu III" guestTeam="Gslo Bdei" />
+        			
+						</team>
+        	
+        		<team gender="Damen" number="4">
+        			<name>Euxw Gnmu IV</name>
+        			
+        				<game day="19.09.2015" time="14:30" homeTeam="Euxw Gnmu IV" guestTeam="Euxw Gnmu III" />
+        			
+        				<game day="10.10.2015" time="14:30" homeTeam="Euxw Gnmu IV" guestTeam="Sjme Ccmm II" />
+        			
+        				<game day="15.11.2015" time="14:00" homeTeam="Vnjw Amcu Cers IV" guestTeam="Euxw Gnmu IV" />
+        			
+        				<game day="08.12.2015" time="20:00" homeTeam="Gslo Bdei" guestTeam="Euxw Gnmu IV" />
+        			
+        				<game day="16.01.2016" time="14:30" homeTeam="Euxw Gnmu IV" guestTeam="Gslo Bdei" />
+        			
+        				<game day="20.01.2016" time="20:00" homeTeam="Euxw Gnmu III" guestTeam="Euxw Gnmu IV" />
+        			
+        				<game day="29.01.2016" time="20:00" homeTeam="Sjme Ccmm II" guestTeam="Euxw Gnmu IV" />
+        			
+        				<game day="12.03.2016" time="14:30" homeTeam="Euxw Gnmu IV" guestTeam="Vnjw Amcu Cers IV" />
+        			
+						</team>
+        	
+        		<team gender="Bambini" number="1">
+        			<name>Euxw Gnmu</name>
+        			
+        				<game day="23.09.2015" time="18:00" homeTeam="Euxw Gnmu" guestTeam="Ixlg Cavo" />
+        			
+        				<game day="09.10.2015" time="17:30" homeTeam="Euxw Gnmu" guestTeam="Euxw Grxg Bcbs" />
+        			
+        				<game day="23.10.2015" time="17:30" homeTeam="Bsaq Gslo" guestTeam="Euxw Gnmu" />
+        			
+        				<game day="30.10.2015" time="17:30" homeTeam="Euxw Gnmu" guestTeam="Sjme Ccmm III" />
+        			
+        				<game day="13.11.2015" time="17:30" homeTeam="Vjlo Btdg" guestTeam="Euxw Gnmu" />
+        			
+        				<game day="20.11.2015" time="17:30" homeTeam="Euxw Gnmu" guestTeam="Euxw Hrfk" />
+        			
+        				<game day="27.11.2015" time="18:00" homeTeam="Drfg Bsaq Ckeu II" guestTeam="Euxw Gnmu" />
+        			
+        				<game day="02.12.2015" time="18:00" homeTeam="Euxw Gnmu" guestTeam="Whbk Hgfg" />
+        			
+        				<game day="07.12.2015" time="18:20" homeTeam="Virc Hadw" guestTeam="Euxw Gnmu" />
+        			
+        				<game day="13.01.2016" time="18:00" homeTeam="Euxw Gnmu" guestTeam="Bsaq Gslo" />
+        			
+        				<game day="29.01.2016" time="18:30" homeTeam="Euxw Grxg Bcbs" guestTeam="Euxw Gnmu" />
+        			
+        				<game day="05.02.2016" time="17:30" homeTeam="Sjme Ccmm III" guestTeam="Euxw Gnmu" />
+        			
+        				<game day="17.02.2016" time="18:00" homeTeam="Euxw Gnmu" guestTeam="Virc Hadw" />
+        			
+        				<game day="24.02.2016" time="17:30" homeTeam="Euxw Hrfk" guestTeam="Euxw Gnmu" />
+        			
+        				<game day="01.03.2016" time="18:00" homeTeam="Ixlg Cavo" guestTeam="Euxw Gnmu" />
+        			
+        				<game day="18.03.2016" time="17:30" homeTeam="Euxw Gnmu" guestTeam="Drfg Bsaq Ckeu II" />
+        			
+        				<game day="09.04.2016" time="11:00" homeTeam="Whbk Hgfg" guestTeam="Euxw Gnmu" />
+        			
+        				<game day="13.04.2016" time="18:00" homeTeam="Euxw Gnmu" guestTeam="Vjlo Btdg" />
+        			
+						</team>
+        	
+        </sisterTeams>
+        
+      </team>
+    
+      <team clubId="10038" number="1" id="10039">
+        <name>Tosm Gxyq</name>
+        <gameDays>
+           <homeGame day="28.09.2015" time="20:00" maxParallelGames="1" /> <homeGame day="05.10.2015" time="20:00" maxParallelGames="1" /> <homeGame day="12.10.2015" time="20:00" maxParallelGames="1" /> <homeGame day="19.10.2015" time="20:00" maxParallelGames="1" /> <homeGame day="26.10.2015" time="20:00" maxParallelGames="1" /> <homeGame day="09.11.2015" time="20:00" maxParallelGames="1" /> <homeGame day="23.11.2015" time="20:00" maxParallelGames="1" /> <homeGame day="11.04.2016" time="20:00" maxParallelGames="1" /> <homeGame day="30.11.2015" time="20:00" maxParallelGames="1" /> <homeGame day="14.03.2016" time="20:00" maxParallelGames="1" /> <homeGame day="04.04.2016" time="20:00" maxParallelGames="1" /> <homeGame day="25.01.2016" time="20:00" maxParallelGames="1" /> <homeGame day="18.01.2016" time="20:00" maxParallelGames="1" /> <homeGame day="01.02.2016" time="20:00" maxParallelGames="1" /> <homeGame day="07.12.2015" time="20:00" maxParallelGames="1" /> <homeGame day="15.02.2016" time="20:00" maxParallelGames="1" /> <homeGame day="22.02.2016" time="20:00" maxParallelGames="1" /> <homeGame day="29.02.2016" time="20:00" maxParallelGames="1" /> <homeGame day="07.03.2016" time="20:00" maxParallelGames="1" />
+          
+          
+          
+        </gameDays>
+        <sisterTeams>
+        	
+        		<team gender="Herren" number="2">
+        			<name>Tosm Gxyq II</name>
+        			
+        				<game day="25.09.2015" time="20:00" homeTeam="Vjlo Btdg III" guestTeam="Tosm Gxyq II" />
+        			
+        				<game day="30.09.2015" time="20:00" homeTeam="Tosm Gxyq II" guestTeam="Qyts Byca Alom II" />
+        			
+        				<game day="09.10.2015" time="20:00" homeTeam="Hgto Bwzk Cers" guestTeam="Tosm Gxyq II" />
+        			
+        				<game day="14.10.2015" time="20:00" homeTeam="Tosm Gxyq II" guestTeam="Cbye Holw" />
+        			
+        				<game day="21.10.2015" time="20:00" homeTeam="Tosm Gxyq II" guestTeam="Ixlg Cavo VI" />
+        			
+        				<game day="30.10.2015" time="20:00" homeTeam="Crxc Bbnk Cers IV" guestTeam="Tosm Gxyq II" />
+        			
+        				<game day="11.11.2015" time="20:00" homeTeam="Whbk Hgfg II" guestTeam="Tosm Gxyq II" />
+        			
+        				<game day="25.11.2015" time="20:00" homeTeam="Tosm Gxyq II" guestTeam="Euxw Hrfk" />
+        			
+        				<game day="02.12.2015" time="20:00" homeTeam="Tosm Gxyq II" guestTeam="Euxw Bvim II" />
+        			
+        				<game day="12.01.2016" time="20:00" homeTeam="Euxw Bvim II" guestTeam="Tosm Gxyq II" />
+        			
+        				<game day="18.01.2016" time="20:00" homeTeam="Qyts Byca Alom II" guestTeam="Tosm Gxyq II" />
+        			
+        				<game day="27.01.2016" time="20:00" homeTeam="Tosm Gxyq II" guestTeam="Whbk Hgfg II" />
+        			
+        				<game day="12.02.2016" time="20:00" homeTeam="Cbye Holw" guestTeam="Tosm Gxyq II" />
+        			
+        				<game day="02.03.2016" time="20:00" homeTeam="Tosm Gxyq II" guestTeam="Hgto Bwzk Cers" />
+        			
+        				<game day="08.03.2016" time="20:15" homeTeam="Euxw Hrfk" guestTeam="Tosm Gxyq II" />
+        			
+        				<game day="09.03.2016" time="20:00" homeTeam="Tosm Gxyq II" guestTeam="Vjlo Btdg III" />
+        			
+        				<game day="18.03.2016" time="20:00" homeTeam="Ixlg Cavo VI" guestTeam="Tosm Gxyq II" />
+        			
+        				<game day="06.04.2016" time="20:00" homeTeam="Tosm Gxyq II" guestTeam="Crxc Bbnk Cers IV" />
+        			
+						</team>
+        	
+        		<team gender="Herren" number="3">
+        			<name>Tosm Gxyq III</name>
+        			
+        				<game day="28.09.2015" time="20:00" homeTeam="Tosm Gxyq III" guestTeam="Tosm Gxyq IV" />
+        			
+        				<game day="07.10.2015" time="20:15" homeTeam="Euxw Grxg Bcbs IV" guestTeam="Tosm Gxyq III" />
+        			
+        				<game day="12.10.2015" time="20:00" homeTeam="Tosm Gxyq III" guestTeam="Euxw Bvim III" />
+        			
+        				<game day="22.10.2015" time="19:30" homeTeam="Gslo Bdei III" guestTeam="Tosm Gxyq III" />
+        			
+        				<game day="26.10.2015" time="20:00" homeTeam="Tosm Gxyq III" guestTeam="Drfg Bsaq Ckeu IV" />
+        			
+        				<game day="09.11.2015" time="20:00" homeTeam="Tosm Gxyq III" guestTeam="Virc Hadw IV" />
+        			
+        				<game day="11.11.2015" time="20:00" homeTeam="Whbk Hgfg III" guestTeam="Tosm Gxyq III" />
+        			
+        				<game day="20.01.2016" time="20:00" homeTeam="Tosm Gxyq IV" guestTeam="Tosm Gxyq III" />
+        			
+        				<game day="29.01.2016" time="20:00" homeTeam="Virc Hadw IV" guestTeam="Tosm Gxyq III" />
+        			
+        				<game day="01.02.2016" time="20:00" homeTeam="Tosm Gxyq III" guestTeam="Euxw Grxg Bcbs IV" />
+        			
+        				<game day="12.02.2016" time="00:00" homeTeam="Euxw Bvim III" guestTeam="Tosm Gxyq III" />
+        			
+        				<game day="15.02.2016" time="20:00" homeTeam="Tosm Gxyq III" guestTeam="Gslo Bdei III" />
+        			
+        				<game day="22.02.2016" time="20:00" homeTeam="Drfg Bsaq Ckeu IV" guestTeam="Tosm Gxyq III" />
+        			
+        				<game day="29.02.2016" time="20:00" homeTeam="Tosm Gxyq III" guestTeam="Whbk Hgfg III" />
+        			
+						</team>
+        	
+        		<team gender="Herren" number="4">
+        			<name>Tosm Gxyq IV</name>
+        			
+        				<game day="28.09.2015" time="20:00" homeTeam="Tosm Gxyq III" guestTeam="Tosm Gxyq IV" />
+        			
+        				<game day="30.09.2015" time="20:00" homeTeam="Tosm Gxyq IV" guestTeam="Whbk Hgfg III" />
+        			
+        				<game day="09.10.2015" time="20:00" homeTeam="Virc Hadw IV" guestTeam="Tosm Gxyq IV" />
+        			
+        				<game day="14.10.2015" time="20:00" homeTeam="Tosm Gxyq IV" guestTeam="Euxw Grxg Bcbs IV" />
+        			
+        				<game day="20.10.2015" time="20:00" homeTeam="Euxw Bvim III" guestTeam="Tosm Gxyq IV" />
+        			
+        				<game day="28.10.2015" time="20:00" homeTeam="Tosm Gxyq IV" guestTeam="Gslo Bdei III" />
+        			
+        				<game day="02.11.2015" time="20:00" homeTeam="Drfg Bsaq Ckeu IV" guestTeam="Tosm Gxyq IV" />
+        			
+        				<game day="20.01.2016" time="20:00" homeTeam="Tosm Gxyq IV" guestTeam="Tosm Gxyq III" />
+        			
+        				<game day="27.01.2016" time="20:00" homeTeam="Whbk Hgfg III" guestTeam="Tosm Gxyq IV" />
+        			
+        				<game day="03.02.2016" time="20:00" homeTeam="Tosm Gxyq IV" guestTeam="Virc Hadw IV" />
+        			
+        				<game day="12.02.2016" time="00:00" homeTeam="Euxw Grxg Bcbs IV" guestTeam="Tosm Gxyq IV" />
+        			
+        				<game day="17.02.2016" time="20:00" homeTeam="Tosm Gxyq IV" guestTeam="Euxw Bvim III" />
+        			
+        				<game day="25.02.2016" time="19:30" homeTeam="Gslo Bdei III" guestTeam="Tosm Gxyq IV" />
+        			
+        				<game day="02.03.2016" time="20:00" homeTeam="Tosm Gxyq IV" guestTeam="Drfg Bsaq Ckeu IV" />
+        			
+						</team>
+        	
+        </sisterTeams>
+        
+      </team>
+    
+      <team clubId="10040" number="2" id="10041">
+        <name>Euxw Grxg Bcbs II</name>
+        <gameDays>
+           <homeGame day="04.12.2015" time="20:00" maxParallelGames="2" /> <homeGame day="15.04.2016" time="20:00" maxParallelGames="2" /> <homeGame day="15.01.2016" time="20:00" maxParallelGames="2" /> <homeGame day="22.01.2016" time="20:00" maxParallelGames="2" /> <homeGame day="18.03.2016" time="20:00" maxParallelGames="2" /> <homeGame day="29.01.2016" time="20:00" maxParallelGames="2" /> <homeGame day="18.09.2015" time="20:00" maxParallelGames="2" /> <homeGame day="12.02.2016" time="20:00" maxParallelGames="2" /> <homeGame day="02.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="04.03.2016" time="20:00" maxParallelGames="2" /> <homeGame day="25.09.2015" time="20:00" maxParallelGames="2" /> <homeGame day="27.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="13.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="30.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="23.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="16.10.2015" time="20:00" maxParallelGames="2" />
+          
+          
+          
+        </gameDays>
+        <sisterTeams>
+        	
+        		<team gender="Herren" number="1">
+        			<name>Euxw Grxg Bcbs</name>
+        			
+        				<game day="10.10.2015" time="15:00" homeTeam="Euxw Grxg Bcbs" guestTeam="Vjlo Btdg" />
+        			
+        				<game day="10.10.2015" time="19:00" homeTeam="Euxw Grxg Bcbs" guestTeam="Drfg Bsaq Ckeu" />
+        			
+        				<game day="30.10.2015" time="20:00" homeTeam="Sjme Ccmm III" guestTeam="Euxw Grxg Bcbs" />
+        			
+        				<game day="07.11.2015" time="19:00" homeTeam="Vnjw Amcu Cers II" guestTeam="Euxw Grxg Bcbs" />
+        			
+        				<game day="11.11.2015" time="20:00" homeTeam="Bsaq Gslo" guestTeam="Euxw Grxg Bcbs" />
+        			
+        				<game day="01.12.2015" time="19:30" homeTeam="Gslo Bdei" guestTeam="Euxw Grxg Bcbs" />
+        			
+        				<game day="11.12.2015" time="20:00" homeTeam="Whbk Hgfg" guestTeam="Euxw Grxg Bcbs" />
+        			
+        				<game day="12.12.2015" time="15:00" homeTeam="Euxw Grxg Bcbs" guestTeam="Bkii Bfjo" />
+        			
+        				<game day="12.12.2015" time="19:00" homeTeam="Euxw Grxg Bcbs" guestTeam="Crxc Bbnk Cers" />
+        			
+        				<game day="27.01.2016" time="20:30" homeTeam="Bkii Bfjo" guestTeam="Euxw Grxg Bcbs" />
+        			
+        				<game day="06.02.2016" time="15:00" homeTeam="Euxw Grxg Bcbs" guestTeam="Sjme Ccmm III" />
+        			
+        				<game day="06.02.2016" time="19:00" homeTeam="Euxw Grxg Bcbs" guestTeam="Vnjw Amcu Cers II" />
+        			
+        				<game day="12.02.2016" time="20:00" homeTeam="Drfg Bsaq Ckeu" guestTeam="Euxw Grxg Bcbs" />
+        			
+        				<game day="20.02.2016" time="15:00" homeTeam="Euxw Grxg Bcbs" guestTeam="Whbk Hgfg" />
+        			
+        				<game day="20.02.2016" time="19:00" homeTeam="Euxw Grxg Bcbs" guestTeam="Bsaq Gslo" />
+        			
+        				<game day="26.02.2016" time="20:00" homeTeam="Crxc Bbnk Cers" guestTeam="Euxw Grxg Bcbs" />
+        			
+        				<game day="11.03.2016" time="20:00" homeTeam="Vjlo Btdg" guestTeam="Euxw Grxg Bcbs" />
+        			
+        				<game day="09.04.2016" time="15:00" homeTeam="Euxw Grxg Bcbs" guestTeam="Gslo Bdei" />
+        			
+						</team>
+        	
+        		<team gender="Herren" number="3">
+        			<name>Euxw Grxg Bcbs III</name>
+        			
+        				<game day="25.09.2015" time="20:00" homeTeam="Bsaq Gslo III" guestTeam="Euxw Grxg Bcbs III" />
+        			
+        				<game day="30.09.2015" time="20:00" homeTeam="Euxw Grxg Bcbs III" guestTeam="Qsng Heoi" />
+        			
+        				<game day="02.10.2015" time="20:00" homeTeam="Gquq Qyts III" guestTeam="Euxw Grxg Bcbs III" />
+        			
+        				<game day="21.10.2015" time="20:00" homeTeam="Euxw Grxg Bcbs III" guestTeam="Euxw Gnmu V" />
+        			
+        				<game day="26.10.2015" time="20:00" homeTeam="Drfg Bsaq Ckeu III" guestTeam="Euxw Grxg Bcbs III" />
+        			
+        				<game day="11.11.2015" time="20:00" homeTeam="Euxw Grxg Bcbs III" guestTeam="Virc Hadw III" />
+        			
+        				<game day="27.11.2015" time="20:00" homeTeam="Vnjw Amcu Cers III" guestTeam="Euxw Grxg Bcbs III" />
+        			
+        				<game day="02.12.2015" time="20:00" homeTeam="Euxw Grxg Bcbs III" guestTeam="Pvwi Lkgu" />
+        			
+        				<game day="03.12.2015" time="20:00" homeTeam="Bsaq Gslo II" guestTeam="Euxw Grxg Bcbs III" />
+        			
+        				<game day="13.01.2016" time="20:00" homeTeam="Euxw Grxg Bcbs III" guestTeam="Drfg Bsaq Ckeu III" />
+        			
+        				<game day="20.01.2016" time="20:00" homeTeam="Euxw Grxg Bcbs III" guestTeam="Vnjw Amcu Cers III" />
+        			
+        				<game day="21.01.2016" time="20:00" homeTeam="Euxw Grxg Bcbs III" guestTeam="Bsaq Gslo III" />
+        			
+        				<game day="27.01.2016" time="20:15" homeTeam="Euxw Gnmu V" guestTeam="Euxw Grxg Bcbs III" />
+        			
+        				<game day="17.02.2016" time="20:00" homeTeam="Euxw Grxg Bcbs III" guestTeam="Gquq Qyts III" />
+        			
+        				<game day="26.02.2016" time="20:00" homeTeam="Qsng Heoi" guestTeam="Euxw Grxg Bcbs III" />
+        			
+        				<game day="02.03.2016" time="20:00" homeTeam="Euxw Grxg Bcbs III" guestTeam="Bsaq Gslo II" />
+        			
+        				<game day="14.03.2016" time="20:15" homeTeam="Virc Hadw III" guestTeam="Euxw Grxg Bcbs III" />
+        			
+        				<game day="18.03.2016" time="20:00" homeTeam="Pvwi Lkgu" guestTeam="Euxw Grxg Bcbs III" />
+        			
+						</team>
+        	
+        		<team gender="Herren" number="4">
+        			<name>Euxw Grxg Bcbs IV</name>
+        			
+        				<game day="23.09.2015" time="20:15" homeTeam="Euxw Grxg Bcbs IV" guestTeam="Drfg Bsaq Ckeu IV" />
+        			
+        				<game day="01.10.2015" time="19:30" homeTeam="Gslo Bdei III" guestTeam="Euxw Grxg Bcbs IV" />
+        			
+        				<game day="07.10.2015" time="20:15" homeTeam="Euxw Grxg Bcbs IV" guestTeam="Tosm Gxyq III" />
+        			
+        				<game day="14.10.2015" time="20:00" homeTeam="Tosm Gxyq IV" guestTeam="Euxw Grxg Bcbs IV" />
+        			
+        				<game day="23.10.2015" time="20:00" homeTeam="Virc Hadw IV" guestTeam="Euxw Grxg Bcbs IV" />
+        			
+        				<game day="04.11.2015" time="20:15" homeTeam="Euxw Grxg Bcbs IV" guestTeam="Euxw Bvim III" />
+        			
+        				<game day="09.12.2015" time="20:15" homeTeam="Euxw Grxg Bcbs IV" guestTeam="Whbk Hgfg III" />
+        			
+        				<game day="11.01.2016" time="20:00" homeTeam="Drfg Bsaq Ckeu IV" guestTeam="Euxw Grxg Bcbs IV" />
+        			
+        				<game day="19.01.2016" time="20:00" homeTeam="Euxw Bvim III" guestTeam="Euxw Grxg Bcbs IV" />
+        			
+        				<game day="27.01.2016" time="20:15" homeTeam="Euxw Grxg Bcbs IV" guestTeam="Gslo Bdei III" />
+        			
+        				<game day="01.02.2016" time="20:00" homeTeam="Tosm Gxyq III" guestTeam="Euxw Grxg Bcbs IV" />
+        			
+        				<game day="12.02.2016" time="00:00" homeTeam="Euxw Grxg Bcbs IV" guestTeam="Tosm Gxyq IV" />
+        			
+        				<game day="17.02.2016" time="20:00" homeTeam="Whbk Hgfg III" guestTeam="Euxw Grxg Bcbs IV" />
+        			
+        				<game day="24.02.2016" time="20:15" homeTeam="Euxw Grxg Bcbs IV" guestTeam="Virc Hadw IV" />
+        			
+						</team>
+        	
+        		<team gender="Bambini" number="1">
+        			<name>Euxw Grxg Bcbs</name>
+        			
+        				<game day="25.09.2015" time="17:30" homeTeam="Vjlo Btdg" guestTeam="Euxw Grxg Bcbs" />
+        			
+        				<game day="02.10.2015" time="18:30" homeTeam="Euxw Grxg Bcbs" guestTeam="Drfg Bsaq Ckeu II" />
+        			
+        				<game day="09.10.2015" time="17:30" homeTeam="Euxw Gnmu" guestTeam="Euxw Grxg Bcbs" />
+        			
+        				<game day="16.10.2015" time="18:30" homeTeam="Euxw Grxg Bcbs" guestTeam="Bsaq Gslo" />
+        			
+        				<game day="19.10.2015" time="18:20" homeTeam="Virc Hadw" guestTeam="Euxw Grxg Bcbs" />
+        			
+        				<game day="30.10.2015" time="17:30" homeTeam="Euxw Hrfk" guestTeam="Euxw Grxg Bcbs" />
+        			
+        				<game day="13.11.2015" time="18:30" homeTeam="Euxw Grxg Bcbs" guestTeam="Ixlg Cavo" />
+        			
+        				<game day="28.11.2015" time="11:00" homeTeam="Whbk Hgfg" guestTeam="Euxw Grxg Bcbs" />
+        			
+        				<game day="11.12.2015" time="18:30" homeTeam="Euxw Grxg Bcbs" guestTeam="Sjme Ccmm III" />
+        			
+        				<game day="15.01.2016" time="18:00" homeTeam="Drfg Bsaq Ckeu II" guestTeam="Euxw Grxg Bcbs" />
+        			
+        				<game day="19.01.2016" time="18:00" homeTeam="Ixlg Cavo" guestTeam="Euxw Grxg Bcbs" />
+        			
+        				<game day="29.01.2016" time="18:30" homeTeam="Euxw Grxg Bcbs" guestTeam="Euxw Gnmu" />
+        			
+        				<game day="05.02.2016" time="18:30" homeTeam="Euxw Grxg Bcbs" guestTeam="Whbk Hgfg" />
+        			
+        				<game day="19.02.2016" time="17:30" homeTeam="Bsaq Gslo" guestTeam="Euxw Grxg Bcbs" />
+        			
+        				<game day="04.03.2016" time="18:30" homeTeam="Euxw Grxg Bcbs" guestTeam="Euxw Hrfk" />
+        			
+        				<game day="11.03.2016" time="17:30" homeTeam="Sjme Ccmm III" guestTeam="Euxw Grxg Bcbs" />
+        			
+        				<game day="18.03.2016" time="18:30" homeTeam="Euxw Grxg Bcbs" guestTeam="Vjlo Btdg" />
+        			
+        				<game day="15.04.2016" time="18:30" homeTeam="Euxw Grxg Bcbs" guestTeam="Virc Hadw" />
+        			
+						</team>
+        	
+        </sisterTeams>
+        
+      </team>
+    
+  </teams>
+</TT>

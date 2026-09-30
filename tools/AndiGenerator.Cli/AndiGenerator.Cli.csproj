@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>andigen</AssemblyName>
+    <RootNamespace>AndiGenerator.Cli</RootNamespace>
+    <IsAotCompatible>true</IsAotCompatible>
+    <ServerGarbageCollector>false</ServerGarbageCollector>
+    <TieredPGO>true</TieredPGO>
+  </PropertyGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\AndiGenerator.Persistence\AndiGenerator.Persistence.csproj" />
+    <ProjectReference Include="..\..\src\AndiGenerator.Engine\AndiGenerator.Engine.csproj" />
+  </ItemGroup>
+</Project>

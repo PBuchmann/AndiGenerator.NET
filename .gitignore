@@ -55,3 +55,23 @@ CodeCoverage/
 *.VisualState.xml
 TestResult.xml
 nunit-*.xml
+
+## AndiGenerator.NET
+.vs/
+*.user
+
+# Protokolle der Skripte (bauen.cmd, abdeckung.cmd, optimieren.cmd)
+build-log.txt
+build-messung.txt
+optimierung-log.txt
+abdeckung-log.txt
+
+# Private Originaldaten (Klarnamen) – öffentlich nur die anonymisierte Kopie unter testdaten/
+/Referenz/
+
+# Lokale Ergebnisse
+TestResults/
+/Claude outputs/
+/Bildschirmfotos/
+verlauf*.csv
+__pycache__/

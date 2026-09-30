@@ -1,0 +1,28 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:p="using:AndiGenerator.Presentation"
+             xmlns:ui="using:AndiGenerator.UI"
+             x:Class="AndiGenerator.UI.Seiten.SetzlistenSeite"
+             x:DataType="p:SetzlistenSeiteViewModel">
+  <DockPanel Margin="12">
+    <TextBlock DockPanel.Dock="Top" Classes="erklaerung doppelt" Text="{x:Static p:SetzlistenSeiteViewModel.Erklaerung}" TextWrapping="Wrap" MaxWidth="700" HorizontalAlignment="Left" />
+    <CheckBox DockPanel.Dock="Top" Content="Setzliste aktivieren" IsChecked="{Binding Aktiv}" Margin="0,12" />
+    <TextBlock DockPanel.Dock="Top" Classes="abschnitt" Text="Erwartete Reihenfolge" />
+    <TextBlock DockPanel.Dock="Top" Classes="leer" Text="Mannschaft auf eine andere ziehen oder die Knöpfe nutzen" TextWrapping="Wrap" Margin="0,0,0,8" />
+    <StackPanel DockPanel.Dock="Right" Spacing="6" Margin="12,0,0,0">
+      <Button Command="{Binding HochCommand}" MinWidth="140" HorizontalContentAlignment="Left">
+        <StackPanel Orientation="Horizontal" Spacing="8">
+          <ui:Symbol Daten="{StaticResource SymbolHoch}" Groesse="18" />
+          <TextBlock Text="Nach oben" VerticalAlignment="Center" />
+        </StackPanel>
+      </Button>
+      <Button Command="{Binding RunterCommand}" MinWidth="140" HorizontalContentAlignment="Left">
+        <StackPanel Orientation="Horizontal" Spacing="8">
+          <ui:Symbol Daten="{StaticResource SymbolRunter}" Groesse="18" />
+          <TextBlock Text="Nach unten" VerticalAlignment="Center" />
+        </StackPanel>
+      </Button>
+    </StackPanel>
+    <ListBox x:Name="Liste" ItemsSource="{Binding Reihenfolge}" SelectedIndex="{Binding Auswahl}" MinHeight="260" MaxWidth="500" HorizontalAlignment="Left" MinWidth="320" />
+  </DockPanel>
+</UserControl>

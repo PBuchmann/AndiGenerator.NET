@@ -1,0 +1,33 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:p="using:AndiGenerator.Presentation"
+             x:Class="AndiGenerator.UI.Seiten.LigadatenSeite"
+             x:DataType="p:LigadatenSeiteViewModel">
+  <Grid Classes="formular" ColumnDefinitions="200,340" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto,Auto" Margin="12">
+    <Grid.Styles>
+      <Style Selector="TextBlock.beschriftung">
+        <Setter Property="VerticalAlignment" Value="Center" />
+      </Style>
+      <Style Selector="Grid.formular > :is(Control)">
+        <Setter Property="Margin" Value="0,5" />
+      </Style>
+    </Grid.Styles>
+    <TextBlock Grid.Row="0" Classes="beschriftung" Text="Name der Liga" />
+    <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Name}" />
+    <TextBlock Grid.Row="1" Classes="beschriftung" Text="Liganummer" />
+    <TextBox Grid.Row="1" Grid.Column="1" Text="{Binding Id}" />
+    <TextBlock Grid.Row="2" Classes="beschriftung" Text="Art (Herren/Damen)" />
+    <AutoCompleteBox Grid.Row="2" Grid.Column="1" ItemsSource="{x:Static p:LigadatenSeiteViewModel.Arten}"
+                     Text="{Binding Art}" MinimumPrefixLength="0" FilterMode="StartsWith" />
+    <TextBlock Grid.Row="3" Classes="beschriftung" Text="Start Vorrunde" />
+    <CalendarDatePicker Grid.Row="3" Grid.Column="1" SelectedDate="{Binding Beginn}"
+                        SelectedDateFormat="Custom" CustomDateFormatString="dd.MM.yyyy" />
+    <TextBlock Grid.Row="4" Classes="beschriftung" Text="Start Rückrunde*" />
+    <CalendarDatePicker Grid.Row="4" Grid.Column="1" SelectedDate="{Binding Rueckrundenbeginn}"
+                        SelectedDateFormat="Custom" CustomDateFormatString="dd.MM.yyyy" />
+    <TextBlock Grid.Row="5" Classes="beschriftung" Text="Ende Rückrunde" />
+    <CalendarDatePicker Grid.Row="5" Grid.Column="1" SelectedDate="{Binding Ende}"
+                        SelectedDateFormat="Custom" CustomDateFormatString="dd.MM.yyyy" />
+    <TextBlock Grid.Row="6" Grid.ColumnSpan="2" Text="* wird bei Halbrunden ignoriert" Classes="leer" Margin="0,12,0,0" />
+  </Grid>
+</UserControl>

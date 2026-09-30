@@ -1,0 +1,86 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:p="using:AndiGenerator.Presentation"
+             xmlns:ui="using:AndiGenerator.UI"
+             x:Class="AndiGenerator.UI.Ansichten.NachbarterminAnsicht"
+             x:DataType="p:NachbarterminAnsichtViewModel">
+  <UserControl.Styles>
+    <Style Selector="StackPanel.nachbar TextBlock">
+      <Setter Property="Foreground" Value="{StaticResource Tinte2}" />
+    </Style>
+    <Style Selector="StackPanel.nachbar.echt TextBlock">
+      <Setter Property="Foreground" Value="{StaticResource AkzentDunkel}" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+  </UserControl.Styles>
+  <DockPanel Margin="18,14">
+    <StackPanel DockPanel.Dock="Top" Classes="leiste" Orientation="Horizontal" Spacing="16" Margin="0,0,0,12">
+      <ui:Zoomauswahl DataContext="{Binding Zoom}" />
+      <Border Classes="karte" Padding="14,8" VerticalAlignment="Center">
+        <StackPanel Orientation="Horizontal" Spacing="18">
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <Ellipse Width="10" Height="10" Fill="{StaticResource Akzent}" VerticalAlignment="Center" />
+            <TextBlock Text="direkte Nachbarmannschaft" FontSize="13" VerticalAlignment="Center" />
+          </StackPanel>
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <Ellipse Width="10" Height="10" Fill="{StaticResource Rand}" VerticalAlignment="Center" />
+            <TextBlock Text="weitere Vereinsmannschaft" FontSize="13" VerticalAlignment="Center" />
+          </StackPanel>
+        </StackPanel>
+      </Border>
+      <TextBlock Text="{Binding Zusammenfassung}" Classes="klein" FontSize="13" VerticalAlignment="Center" />
+    </StackPanel>
+    <TextBlock DockPanel.Dock="Top" Text="Keine Spiele von Nachbarmannschaften." IsVisible="{Binding KeineTermine}" Classes="leer" />
+    <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+      <LayoutTransformControl LayoutTransform="{Binding Zoom.Faktor, Converter={x:Static ui:Konverter.Skalierung}}" VerticalAlignment="Top">
+        <ItemsControl ItemsSource="{Binding Karten}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+              <WrapPanel Orientation="Horizontal" ItemWidth="460" />
+            </ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="p:Nachbarkarte">
+              <Border Classes="karte" Padding="16,12" Margin="0,0,12,12" VerticalAlignment="Top">
+                <StackPanel Spacing="10">
+                  <Grid ColumnDefinitions="*,Auto,Auto">
+                    <TextBlock Text="{Binding Name}" FontSize="14" FontWeight="Bold" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                    <TextBlock Grid.Column="1" Text="{Binding Bilanz}" Classes="klein" VerticalAlignment="Center" Margin="8,0,0,0" />
+                    <Border Grid.Column="2" Background="{StaticResource AkzentHell}" CornerRadius="8" Padding="8,2" Margin="8,0,0,0" VerticalAlignment="Center" IsVisible="{Binding HatDirekte}">
+                      <TextBlock Text="{Binding Direkte}" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource AkzentDunkel}" />
+                    </Border>
+                  </Grid>
+                  <ItemsControl ItemsSource="{Binding Tage}">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate x:DataType="p:Nachbartag">
+                        <Grid ColumnDefinitions="118,*" Margin="0,0,0,6">
+                          <Border Background="#F0EFEA" CornerRadius="6" Padding="8,2" HorizontalAlignment="Left" VerticalAlignment="Top">
+                            <TextBlock Text="{Binding Datum}" Classes="ziffer" FontSize="11" />
+                          </Border>
+                          <ItemsControl Grid.Column="1" ItemsSource="{Binding Spiele}">
+                            <ItemsControl.ItemTemplate>
+                              <DataTemplate x:DataType="p:Nachbarspiel">
+                                <StackPanel Classes="nachbar" Classes.echt="{Binding Echt}" Spacing="0" Margin="0,1,0,3">
+                                  <StackPanel Orientation="Horizontal" Spacing="8">
+                                    <TextBlock Text="{Binding Zeit}" Classes="ziffer" FontSize="12" />
+                                    <TextBlock Text="{Binding Text}" FontSize="12" TextWrapping="Wrap" MaxWidth="260" />
+                                  </StackPanel>
+                                  <TextBlock Text="{Binding Lokal, StringFormat='Spiellokal {0}'}" FontSize="11" Margin="44,0,0,0"
+                                             IsVisible="{Binding Lokal, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                                </StackPanel>
+                              </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                          </ItemsControl>
+                        </Grid>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </StackPanel>
+              </Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </LayoutTransformControl>
+    </ScrollViewer>
+  </DockPanel>
+</UserControl>
