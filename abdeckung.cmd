@@ -4,7 +4,7 @@ chcp 65001 >nul
 cd /d "%~dp0"
 set "LOG=%~dp0abdeckung-log.txt"
 echo ===== START %date% %time% > "%LOG%"
-dotnet test AndiGenerator.slnx -c Release --no-build -nologo --collect "Code Coverage;Format=cobertura" --results-directory TestResults\Abdeckung >> "%LOG%" 2>&1
+dotnet test AndiGenerator.slnx -c Release --no-build -nologo --filter "Kategorie!=Messung" --settings .runsettings --collect "Code Coverage;Format=cobertura" --results-directory TestResults\Abdeckung >> "%LOG%" 2>&1
 echo ----- TEST Exitcode %ERRORLEVEL% >> "%LOG%"
 echo ----- ZUSAMMENFASSUNG >> "%LOG%"
 powershell -NoProfile -ExecutionPolicy Bypass -File tools\abdeckung\zusammenfassen.ps1 -Ordner TestResults\Abdeckung >> "%LOG%" 2>&1

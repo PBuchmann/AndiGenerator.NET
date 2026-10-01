@@ -77,7 +77,11 @@ public class InseloptimiererTests
                 MindestDurchlaeufeSpezialInsel = 3_000,
             });
 
-        optimierer.Rechnen(200_000);
+        // In Schritten rechnen und aufhören, sobald die Spezial-Insel eine Insel neu gestartet hat (statt immer 200 000).
+        for (long durchlaeufe = 10_000; optimierer.SpezialVerwendet == 0 && durchlaeufe <= 200_000; durchlaeufe += 10_000)
+        {
+            optimierer.Rechnen(durchlaeufe);
+        }
 
         Assert.NotNull(optimierer.SpezialKostenart);
         Assert.True(optimierer.SpezialVerwendet > 0);

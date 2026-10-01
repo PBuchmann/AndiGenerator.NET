@@ -65,6 +65,7 @@ build-log.txt
 build-messung.txt
 optimierung-log.txt
 abdeckung-log.txt
+messen-log.txt
 
 # Private Originaldaten (Klarnamen) – öffentlich nur die anonymisierte Kopie unter testdaten/
 /Referenz/

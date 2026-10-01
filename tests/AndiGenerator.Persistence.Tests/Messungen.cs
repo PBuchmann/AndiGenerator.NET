@@ -16,9 +16,11 @@ namespace AndiGenerator.Persistence.Tests;
 
 /// <summary>
 /// Geschwindigkeitsmessungen (Ausgabe in <c>build-messung.txt</c>). Sie prüfen nichts Fachliches und laufen allein,
-/// damit andere Tests die Kerne nicht mitbenutzen.
+/// damit andere Tests die Kerne nicht mitbenutzen. Wegen ihrer Laufzeit gehören sie nicht zum normalen Testlauf
+/// (<c>bauen.cmd</c>, <c>abdeckung.cmd</c>, CI filtern <c>Kategorie!=Messung</c>), sondern laufen mit <c>messen.cmd</c>.
 /// </summary>
 [Collection(MessungenSammlung.Name)]
+[Trait("Kategorie", "Messung")]
 public class Messungen
 {
     private static readonly string[] Strategien = ["R", "15", "5", "S1,25", "M2,10"];

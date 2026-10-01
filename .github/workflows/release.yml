@@ -37,7 +37,7 @@ jobs:
       - name: Bauen und testen
         run: |
           dotnet build AndiGenerator.slnx -c Release -nologo -p:Version=${{ steps.version.outputs.version }}
-          dotnet test AndiGenerator.slnx -c Release --no-build -nologo
+          dotnet test AndiGenerator.slnx -c Release --no-build -nologo --filter "Kategorie!=Messung"
 
       - name: Veröffentlichen
         run: dotnet publish src/AndiGenerator.Desktop -c Release -r win-x64 --self-contained -nologo -o publish -p:Version=${{ steps.version.outputs.version }}
