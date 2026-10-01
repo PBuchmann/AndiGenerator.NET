@@ -57,6 +57,10 @@ Unter Windows erledigen `bauen.cmd` (bauen und testen) und `starten.cmd` dasselb
 
 Die Tests laufen gegen die anonymisierten Testdaten in `testdaten/` (Vereinsnamen durch Kunstnamen ersetzt, siehe [Doku/TESTDATEN.md](Doku/TESTDATEN.md)). Planung, Entscheidungen und Stand der Portierung stehen in [Doku/MIGRATIONSPLAN.md](Doku/MIGRATIONSPLAN.md).
 
+## Mitwirken
+
+Beiträge sind willkommen – Ablauf über Branches und Pull Requests, Code-Stil und Umgang mit Testdaten stehen in [CONTRIBUTING.md](CONTRIBUTING.md). Sicherheitslücken bitte vertraulich melden, siehe [SECURITY.md](SECURITY.md).
+
 ## Lizenz
 
 AndiGenerator.NET ist Freie Software unter der [GNU General Public License Version 3](LICENSE) (`GPL-3.0-only`), wie das Original.
