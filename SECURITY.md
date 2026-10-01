@@ -31,9 +31,10 @@ Hilfreich sind: betroffene Version, Windows-Version, eine Beschreibung der Lück
 
 - das Programm selbst, insbesondere das Einlesen von Dateien (click-TT-XML, `.modifications`, Optionen, gemerkte Pläne),
 - Installation und automatische Updates (Velopack über GitHub Releases),
-- die von diesem Repository veröffentlichten Dateien (Setup, Portable-ZIP).
+- die von diesem Repository veröffentlichten Dateien (Setup, Portable-ZIP),
+- **Bibliotheken, soweit AndiGenerator.NET betroffen ist:** wenn das Programm eine Bibliotheksversion mit bekannter Sicherheitslücke ausliefert oder eine Bibliothek so verwendet, dass dadurch eine Lücke entsteht. Bitte auch das vertraulich hier melden.
 
-Nicht dazu gehören Lücken in click-TT selbst, in Windows oder in den verwendeten Bibliotheken – diese bitte direkt bei den jeweiligen Anbietern melden (siehe [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)). Fehler ohne Sicherheitsbezug gehören in die normalen [Issues](https://github.com/PBuchmann/AndiGenerator.NET/issues).
+Eine Lücke **in der Bibliothek selbst** (in ihrem Code, unabhängig von AndiGenerator.NET) melden Sie bitte zuerst beim jeweiligen Anbieter (siehe [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md)); ein kurzer vertraulicher Hinweis hier hilft uns, rechtzeitig eine korrigierte Version auszuliefern. Nicht dazu gehören Lücken in click-TT selbst oder in Windows. Fehler ohne Sicherheitsbezug gehören in die normalen [Issues](https://github.com/PBuchmann/AndiGenerator.NET/issues).
 
 ## Datenschutz
 

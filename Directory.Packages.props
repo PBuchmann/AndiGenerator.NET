@@ -1,5 +1,5 @@
 <Project>
-  <!-- Zentrale Paketversionen. Nur MIT/Apache/BSD/LGPL-lizenzierte Pakete (MIGRATIONSPLAN E11). -->
+  <!-- Zentrale Paketversionen. Ausgelieferte und als Bibliothek verwendete Pakete: nur MIT/Apache/BSD/LGPL (MIGRATIONSPLAN E11). -->
   <ItemGroup>
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.14.1" />
     <PackageVersion Include="xunit" Version="2.9.3" />
@@ -20,7 +20,7 @@
   <ItemGroup>
     <PackageVersion Include="Velopack" Version="0.0.1298" />
   </ItemGroup>
-  <!-- Analyzer nur zur Entwicklungszeit (nicht Teil der ausgelieferten Programme, siehe THIRD-PARTY-NOTICES.md). -->
+  <!-- Analyzer nur zur Entwicklungszeit: nicht Teil der ausgelieferten Programme und daher von der Lizenzregel ausgenommen (E11, präzisiert 01.10.2026); Lizenzen siehe THIRD-PARTY-NOTICES.md. -->
   <ItemGroup>
     <GlobalPackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556" />
     <GlobalPackageReference Include="SonarAnalyzer.CSharp" Version="10.33.0.1635" />

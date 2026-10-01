@@ -1,6 +1,6 @@
 # Drittbibliotheken
 
-Zulässig sind nur MIT-, Apache-2.0-, BSD- oder LGPL-lizenzierte Bibliotheken (MIGRATIONSPLAN E11). Jede neue Abhängigkeit wird hier eingetragen.
+Für alles, was mit dem Programm ausgeliefert oder im Quellcode als Bibliothek verwendet wird, sind nur MIT-, Apache-2.0-, BSD- oder LGPL-lizenzierte Pakete zulässig (MIGRATIONSPLAN E11). Reine Entwicklungswerkzeuge sind davon ausgenommen (siehe unten). Jede neue Abhängigkeit wird hier eingetragen.
 
 Ausnahme Schriften: Die SIL Open Font License (OFL 1.1) erlaubt das Einbetten und Weitergeben mit GPL-Software; der Lizenztext liegt neben den Schriftdateien, der reservierte Name „Plex“ wird nicht für veränderte Schriften verwendet.
 
@@ -21,7 +21,7 @@ Ausnahme Schriften: Die SIL Open Font License (OFL 1.1) erlaubt das Einbetten un
 
 Analyzer laufen nur beim Kompilieren und landen nicht in den Programmdateien (`PrivateAssets=all` über `GlobalPackageReference`). E11 betrifft sie daher nicht; sie sind trotzdem hier aufgeführt.
 
-Geprüft vor der Veröffentlichung (01.10.2026): SonarAnalyzer.CSharp steht seit Version 10.33 unter der Sonar Source-Available License. Wir halten das für unproblematisch, weil der Analyzer ein reines Entwicklungswerkzeug ist – wie ein Compiler: Er wird beim Bauen von NuGet geladen, ist nicht Teil des Quellcodes im Repository und wird weder ausgeliefert noch signiert. Die Bedingung aus E11 (nur MIT/Apache/BSD/LGPL) und die der SignPath Foundation (kein proprietärer Code in den signierten Dateien) gelten für ausgelieferte Bestandteile und sind damit erfüllt. Wer das Projekt ohne Sonar bauen möchte, entfernt die Zeile in `Directory.Packages.props`; StyleCop (MIT) bleibt.
+Geprüft vor der Veröffentlichung (01.10.2026): SonarAnalyzer.CSharp steht seit Version 10.33 unter der Sonar Source-Available License. Wir halten das für unproblematisch, weil der Analyzer ein reines Entwicklungswerkzeug ist – wie ein Compiler: Er wird beim Bauen von NuGet geladen, ist nicht Teil des Quellcodes im Repository und wird weder ausgeliefert noch signiert. E11 nimmt solche Werkzeuge seit der Präzisierung vom 01.10.2026 ausdrücklich von der Lizenzregel aus; die Bedingung der SignPath Foundation (kein proprietärer Code in den signierten Dateien) betrifft ebenfalls nur ausgelieferte Bestandteile. Wer das Projekt ohne Sonar bauen möchte, entfernt die Zeile in `Directory.Packages.props`; StyleCop (MIT) bleibt.
 
 | Paket | Version | Lizenz | Verwendung |
 |---|---|---|---|
