@@ -21,9 +21,11 @@ Ausnahme Schriften: Die SIL Open Font License (OFL 1.1) erlaubt das Einbetten un
 
 Analyzer laufen nur beim Kompilieren und landen nicht in den Programmdateien (`PrivateAssets=all` über `GlobalPackageReference`). E11 betrifft sie daher nicht; sie sind trotzdem hier aufgeführt.
 
+Geprüft vor der Veröffentlichung (01.10.2026): SonarAnalyzer.CSharp steht seit Version 10.33 unter der Sonar Source-Available License. Wir halten das für unproblematisch, weil der Analyzer ein reines Entwicklungswerkzeug ist – wie ein Compiler: Er wird beim Bauen von NuGet geladen, ist nicht Teil des Quellcodes im Repository und wird weder ausgeliefert noch signiert. Die Bedingung aus E11 (nur MIT/Apache/BSD/LGPL) und die der SignPath Foundation (kein proprietärer Code in den signierten Dateien) gelten für ausgelieferte Bestandteile und sind damit erfüllt. Wer das Projekt ohne Sonar bauen möchte, entfernt die Zeile in `Directory.Packages.props`; StyleCop (MIT) bleibt.
+
 | Paket | Version | Lizenz | Verwendung |
 |---|---|---|---|
 | StyleCop.Analyzers | 1.2.0-beta.556 | MIT | Stilprüfung (Konfiguration: `stylecop.json`, `.editorconfig`) |
-| SonarAnalyzer.CSharp | 10.33.0.1635 | Sonar Source-Available License v1 (kein OSI-Open-Source; vor Veröffentlichung des Repositorys nochmals prüfen) | Qualitätsprüfung |
+| SonarAnalyzer.CSharp | 10.33.0.1635 | Sonar Source-Available License v1 (kein OSI-Open-Source; bis 10.32 LGPL-3.0) | Qualitätsprüfung |
 
 Geplant: Avalonia.Controls.DataGrid (MIT). **Nicht** zulässig: Avalonia TreeDataGrid/Accelerate, QuestPDF.
