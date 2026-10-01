@@ -18,6 +18,10 @@
     <AvaloniaResource Include="Assets\**" />
   </ItemGroup>
   <ItemGroup>
+    <!-- Oberflächentests ohne Bildschirm (Avalonia.Headless) erreichen auch die internen Dialoge. -->
+    <InternalsVisibleTo Include="AndiGenerator.UI.Tests" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\AndiGenerator.Presentation\AndiGenerator.Presentation.csproj" />
   </ItemGroup>
 </Project>

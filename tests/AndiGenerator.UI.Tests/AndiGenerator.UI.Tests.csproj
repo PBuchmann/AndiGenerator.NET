@@ -1,0 +1,29 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+    <PackageReference Include="Avalonia.Headless" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\AndiGenerator.UI\AndiGenerator.UI.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Dieselbe Test-Oberfläche und dieselben Testdaten wie die ViewModel-Tests. -->
+    <Compile Include="..\AndiGenerator.Presentation.Tests\TestOberflaeche.cs" Link="Gemeinsam\TestOberflaeche.cs" />
+    <Compile Include="..\AndiGenerator.Presentation.Tests\Testdaten.cs" Link="Gemeinsam\Testdaten.cs" />
+    <Compile Include="..\AndiGenerator.Presentation.Tests\Arbeitsplatz.cs" Link="Gemeinsam\Arbeitsplatz.cs" />
+    <Compile Include="..\AndiGenerator.Presentation.Tests\Namen.cs" Link="Gemeinsam\Namen.cs" />
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>Referenz</_Parameter1>
+      <_Parameter2>$(MSBuildThisFileDirectory)../../testdaten/referenz</_Parameter2>
+    </AssemblyAttribute>
+  </ItemGroup>
+</Project>
