@@ -10,6 +10,7 @@
     <Project Path="src/AndiGenerator.Desktop/AndiGenerator.Desktop.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/AndiGenerator.Architektur.Tests/AndiGenerator.Architektur.Tests.csproj" />
     <Project Path="tests/AndiGenerator.Persistence.Tests/AndiGenerator.Persistence.Tests.csproj" />
     <Project Path="tests/AndiGenerator.Presentation.Tests/AndiGenerator.Presentation.Tests.csproj" />
   </Folder>

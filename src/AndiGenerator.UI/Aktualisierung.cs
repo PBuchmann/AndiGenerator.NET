@@ -2,6 +2,7 @@
 // SPDX-FileCopyrightText: 2026 Peter Buchmann
 // SPDX-License-Identifier: GPL-3.0-only
 
+using AndiGenerator.Application;
 using AndiGenerator.Presentation;
 using Velopack;
 using Velopack.Sources;
@@ -11,7 +12,8 @@ namespace AndiGenerator.UI;
 /// <summary>
 /// Sucht nach dem Start auf GitHub Releases nach einer neuen Version (Velopack, MIGRATIONSPLAN E12), lädt sie im
 /// Hintergrund und fragt dann, ob sie gleich eingespielt werden soll; sonst geschieht das beim Beenden. Nur in einer
-/// installierten Version, nicht beim Start aus der Entwicklungsumgebung.
+/// installierten Version, nicht beim Start aus der Entwicklungsumgebung, und nur, wenn die Suche im Dialog „Über“ nicht
+/// abgeschaltet ist (Programmeinstellungen).
 /// </summary>
 internal static class Aktualisierung
 {
@@ -27,7 +29,7 @@ internal static class Aktualisierung
         try
         {
             var verwaltung = new UpdateManager(new GithubSource(Repository, null, false));
-            if (!verwaltung.IsInstalled)
+            if (!verwaltung.IsInstalled || !Programmeinstellungen.Laden(Plansitzung.EigeneBasis()).UpdatesSuchen)
             {
                 return;
             }

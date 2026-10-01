@@ -1,0 +1,28 @@
+# Dependabot: neue Versionen der NuGet-Pakete und GitHub Actions als Pull Request, einmal im Monat und gebündelt.
+# Jeder Pull Request durchläuft Build, Tests und CodeQL wie jede andere Änderung.
+version: 2
+updates:
+  - package-ecosystem: nuget
+    directory: /
+    schedule:
+      interval: monthly
+    open-pull-requests-limit: 5
+    groups:
+      avalonia-und-dock:
+        patterns: [ "Avalonia*", "Dock.*" ]
+      tests:
+        patterns: [ "xunit*", "Microsoft.NET.Test.Sdk" ]
+      analyzer:
+        patterns: [ "StyleCop.Analyzers", "SonarAnalyzer.CSharp" ]
+    ignore:
+      # Velopack hängt mit dem Werkzeug vpk im Release-Workflow (VPK_VERSION) zusammen und wird mit ihm gemeinsam von Hand
+      # aktualisiert, sonst passen Programm und Update-Pakete nicht zusammen.
+      - dependency-name: Velopack
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    groups:
+      actions:
+        patterns: [ "*" ]

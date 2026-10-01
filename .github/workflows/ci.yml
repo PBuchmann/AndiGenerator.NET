@@ -24,12 +24,19 @@ jobs:
       - name: Bauen
         run: dotnet build AndiGenerator.slnx -c Release -nologo
 
-      - name: Testen
-        run: dotnet test AndiGenerator.slnx -c Release --no-build -nologo --logger "trx" --results-directory TestResults
+      - name: Testen (mit Messung der Testabdeckung)
+        run: dotnet test AndiGenerator.slnx -c Release --no-build -nologo --logger "trx" --results-directory TestResults --collect "Code Coverage;Format=cobertura"
+
+      - name: Testabdeckung zusammenfassen
+        if: always()
+        shell: pwsh
+        run: ./tools/abdeckung/zusammenfassen.ps1 -Ordner TestResults -Ausgabe $env:GITHUB_STEP_SUMMARY
 
       - name: Testergebnisse aufheben
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: testergebnisse
-          path: TestResults/*.trx
+          path: |
+            TestResults/**/*.trx
+            TestResults/**/*.cobertura.xml

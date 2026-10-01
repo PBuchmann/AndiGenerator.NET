@@ -26,6 +26,8 @@ Geprüft vor der Veröffentlichung (01.10.2026): SonarAnalyzer.CSharp steht seit
 | Paket | Version | Lizenz | Verwendung |
 |---|---|---|---|
 | StyleCop.Analyzers | 1.2.0-beta.556 | MIT | Stilprüfung (Konfiguration: `stylecop.json`, `.editorconfig`) |
+| anchore/sbom-action (GitHub Action, nutzt Syft) | v0 | Apache-2.0 | Stückliste (SBOM) im Release-Workflow |
+| actions/attest-build-provenance, actions/attest-sbom (GitHub Actions) | v2 | MIT | Herkunftsnachweise im Release-Workflow |
 | SonarAnalyzer.CSharp | 10.33.0.1635 | Sonar Source-Available License v1 (kein OSI-Open-Source; bis 10.32 LGPL-3.0) | Qualitätsprüfung |
 
 Geplant: Avalonia.Controls.DataGrid (MIT). **Nicht** zulässig: Avalonia TreeDataGrid/Accelerate, QuestPDF.

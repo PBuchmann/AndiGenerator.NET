@@ -19,6 +19,10 @@
       <SelectableTextBlock Text="{x:Static p:UeberViewModel.Lizenzhinweis}" TextWrapping="Wrap" FontSize="11" />
     </Border>
     <TextBlock Text="{x:Static p:UeberViewModel.Drittbibliotheken}" TextWrapping="Wrap" FontSize="11" Foreground="{StaticResource Grau}" />
+    <StackPanel Spacing="2" Margin="0,6,0,0" IsVisible="{Binding HatEinstellungen}">
+      <CheckBox Content="Beim Start nach neuen Versionen suchen" IsChecked="{Binding UpdatesSuchen}" />
+      <TextBlock Text="Fragt dazu GitHub nach der neuesten Version; Daten aus Ihren Staffeln werden nicht übertragen." TextWrapping="Wrap" FontSize="11" Foreground="{StaticResource Grau}" Margin="28,0,0,0" />
+    </StackPanel>
     <Border Classes="dialogfuss">
       <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right">
         <Button Classes="gross" Content="Lizenztext (GPL-3.0)…" Command="{Binding LizenzAnzeigenCommand}" />

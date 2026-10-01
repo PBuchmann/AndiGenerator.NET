@@ -1,0 +1,31 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <IsPackable>false</IsPackable>
+    <IsTestProject>true</IsTestProject>
+  </PropertyGroup>
+  <ItemGroup>
+    <Using Include="Xunit" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.NET.Test.Sdk" />
+    <PackageReference Include="xunit" />
+    <PackageReference Include="xunit.runner.visualstudio" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- Alle Projekte, damit ihre gebauten DLLs im Testordner liegen; gelesen werden sie nur als Metadaten, nicht geladen. -->
+    <ProjectReference Include="..\..\src\AndiGenerator.Domain\AndiGenerator.Domain.csproj" />
+    <ProjectReference Include="..\..\src\AndiGenerator.Engine\AndiGenerator.Engine.csproj" />
+    <ProjectReference Include="..\..\src\AndiGenerator.Persistence\AndiGenerator.Persistence.csproj" />
+    <ProjectReference Include="..\..\src\AndiGenerator.Rendering\AndiGenerator.Rendering.csproj" />
+    <ProjectReference Include="..\..\src\AndiGenerator.Application\AndiGenerator.Application.csproj" />
+    <ProjectReference Include="..\..\src\AndiGenerator.Presentation\AndiGenerator.Presentation.csproj" />
+    <ProjectReference Include="..\..\src\AndiGenerator.UI\AndiGenerator.UI.csproj" />
+    <ProjectReference Include="..\..\src\AndiGenerator.Desktop\AndiGenerator.Desktop.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
+      <_Parameter1>Loesungsordner</_Parameter1>
+      <_Parameter2>$(MSBuildThisFileDirectory)../..</_Parameter2>
+    </AssemblyAttribute>
+  </ItemGroup>
+</Project>

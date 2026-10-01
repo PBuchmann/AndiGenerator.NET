@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 using System.Reflection;
+using AndiGenerator.Application;
 using CommunityToolkit.Mvvm.Input;
 
 namespace AndiGenerator.Presentation;
@@ -17,16 +18,39 @@ public sealed class UeberViewModel
     public const string Lizenzadresse = "https://www.gnu.org/licenses/gpl-3.0.html";
 
     private readonly IOberflaeche oberflaeche;
+    private readonly string? basis;
+    private bool updatesSuchen = true;
 
-    /// <summary>Initialisiert den Dialog.</summary>
+    /// <summary>Initialisiert den Dialog ohne Programmeinstellungen.</summary>
     /// <param name="oberflaeche">Dienste der Oberfläche (Lizenz im Browser öffnen).</param>
     /// <param name="version">Anzuzeigende Programmversion.</param>
     public UeberViewModel(IOberflaeche oberflaeche, string version)
+        : this(oberflaeche, version, null)
+    {
+    }
+
+    /// <summary>Initialisiert den Dialog.</summary>
+    /// <param name="oberflaeche">Dienste der Oberfläche (Lizenz im Browser öffnen, Fehler melden).</param>
+    /// <param name="version">Anzuzeigende Programmversion.</param>
+    /// <param name="basis">Eigener Ordner mit den Programmeinstellungen oder <c>null</c> (dann ohne Einstellung).</param>
+    public UeberViewModel(IOberflaeche oberflaeche, string version, string? basis)
     {
         ArgumentNullException.ThrowIfNull(oberflaeche);
         this.oberflaeche = oberflaeche;
+        this.basis = basis;
         Version = "Version " + version;
         LizenzAnzeigenCommand = new AsyncRelayCommand(() => this.oberflaeche.AdresseOeffnenAsync(new Uri(Lizenzadresse)));
+        if (basis is not null)
+        {
+            try
+            {
+                updatesSuchen = Programmeinstellungen.Laden(basis).UpdatesSuchen;
+            }
+            catch (IOException)
+            {
+                updatesSuchen = Programmeinstellungen.Standard.UpdatesSuchen;
+            }
+        }
     }
 
     /// <summary>Holt den Programmnamen.</summary>
@@ -64,7 +88,7 @@ public sealed class UeberViewModel
 
     /// <summary>Holt den Hinweis auf die verwendeten Bibliotheken.</summary>
     public static string Drittbibliotheken =>
-        "Verwendet Avalonia, Dock, CommunityToolkit.Mvvm und SkiaSharp (jeweils MIT-Lizenz) sowie die Schriften IBM Plex Sans und Mono "
+        "Verwendet Avalonia, Dock, CommunityToolkit.Mvvm, SkiaSharp und Velopack (jeweils MIT-Lizenz) sowie die Schriften IBM Plex Sans und Mono "
         + "(SIL Open Font License 1.1); Einzelheiten in THIRD-PARTY-NOTICES.md.";
 
     /// <summary>Holt die Programmversion.</summary>
@@ -72,6 +96,34 @@ public sealed class UeberViewModel
 
     /// <summary>Holt den Befehl, der den Lizenztext im Browser öffnet.</summary>
     public IAsyncRelayCommand LizenzAnzeigenCommand { get; }
+
+    /// <summary>Holt, ob die Programmeinstellung angezeigt wird (nur mit eigenem Ordner).</summary>
+    public bool HatEinstellungen => basis is not null;
+
+    /// <summary>
+    /// Holt oder setzt, ob das Programm beim Start auf GitHub nach einer neuen Version sucht; wird sofort gespeichert.
+    /// </summary>
+    public bool UpdatesSuchen
+    {
+        get => updatesSuchen;
+        set
+        {
+            if (value == updatesSuchen || basis is null)
+            {
+                return;
+            }
+
+            updatesSuchen = value;
+            try
+            {
+                new Programmeinstellungen(value).Speichern(basis);
+            }
+            catch (Exception fehler) when (fehler is IOException or UnauthorizedAccessException)
+            {
+                _ = oberflaeche.MeldenAsync("Einstellung speichern", "Die Einstellung konnte nicht gespeichert werden:" + Environment.NewLine + fehler.Message);
+            }
+        }
+    }
 
     /// <summary>Ermittelt die Version einer Programmdatei (ohne angehängten Quelltext-Stand).</summary>
     /// <param name="assembly">Die Programmdatei.</param>
