@@ -6,6 +6,8 @@ set "LOG=%~dp0abdeckung-log.txt"
 echo ===== START %date% %time% > "%LOG%"
 dotnet test AndiGenerator.slnx -c Release --no-build -nologo --collect "Code Coverage;Format=cobertura" --results-directory TestResults\Abdeckung >> "%LOG%" 2>&1
 echo ----- TEST Exitcode %ERRORLEVEL% >> "%LOG%"
+echo ----- ZUSAMMENFASSUNG >> "%LOG%"
+powershell -NoProfile -ExecutionPolicy Bypass -File tools\abdeckung\zusammenfassen.ps1 -Ordner TestResults\Abdeckung >> "%LOG%" 2>&1
 echo ===== ENDE %date% %time% >> "%LOG%"
 echo.
 echo Fertig. Ergebnis unter TestResults\Abdeckung - Claude kann es jetzt lesen.

@@ -59,7 +59,7 @@ Die Tests laufen gegen die anonymisierten Testdaten in `testdaten/` (Vereinsname
 
 ## Mitwirken
 
-Beiträge sind willkommen – Ablauf über Branches und Pull Requests, Code-Stil und Umgang mit Testdaten stehen in [CONTRIBUTING.md](CONTRIBUTING.md). Sicherheitslücken bitte vertraulich melden, siehe [SECURITY.md](SECURITY.md).
+Beiträge sind willkommen – Ablauf über Branches und Pull Requests, Code-Stil und Umgang mit Testdaten stehen in [CONTRIBUTING.md](CONTRIBUTING.md). Sicherheitslücken bitte vertraulich melden, siehe [SECURITY.md](SECURITY.md). Wie Releases gebaut und signiert werden, steht in [CODE_SIGNING.md](CODE_SIGNING.md).
 
 ## Lizenz
 

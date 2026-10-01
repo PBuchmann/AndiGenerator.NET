@@ -2,6 +2,8 @@
 // SPDX-FileCopyrightText: 2026 Peter Buchmann
 // SPDX-License-Identifier: GPL-3.0-only
 
+using AndiGenerator.Application;
+
 namespace AndiGenerator.Presentation.Tests;
 
 /// <summary>Dialog „Über“: Urheber, Rechtshinweise nach GPL-3.0 Abschnitt 5d und Version.</summary>
@@ -34,6 +36,37 @@ public sealed class UeberTests
         string version = UeberViewModel.VersionVon(typeof(UeberViewModel).Assembly);
         Assert.DoesNotContain('+', version);
         Assert.Matches(@"^\d+\.\d+", version);
+    }
+
+    [Fact]
+    public void Update_Suche_ist_standardmaessig_an_und_wird_gespeichert()
+    {
+        var o = new TestOberflaeche();
+        string basis = Path.Combine(Path.GetTempPath(), "andigen-ueber-" + Guid.NewGuid().ToString("N"));
+        try
+        {
+            Assert.False(new UeberViewModel(o, "1.0").HatEinstellungen);
+            Assert.True(Programmeinstellungen.Laden(basis).UpdatesSuchen);
+
+            var ueber = new UeberViewModel(o, "1.0", basis);
+            Assert.True(ueber.HatEinstellungen);
+            Assert.True(ueber.UpdatesSuchen);
+
+            ueber.UpdatesSuchen = false;
+            Assert.False(Programmeinstellungen.Laden(basis).UpdatesSuchen);
+            Assert.False(new UeberViewModel(o, "1.0", basis).UpdatesSuchen);
+
+            File.WriteAllLines(Path.Combine(basis, Programmeinstellungen.Dateiname), ["unbekannt=1", "updates-suchen=vielleicht"]);
+            Assert.True(Programmeinstellungen.Laden(basis).UpdatesSuchen);
+            Assert.Empty(o.Meldungen);
+        }
+        finally
+        {
+            if (Directory.Exists(basis))
+            {
+                Directory.Delete(basis, recursive: true);
+            }
+        }
     }
 
     [Fact]

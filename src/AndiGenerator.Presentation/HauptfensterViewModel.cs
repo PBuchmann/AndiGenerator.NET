@@ -134,7 +134,7 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         CsvExportierenCommand = new AsyncRelayCommand(CsvExportierenAsync, () => laufenderStand is not null);
         DruckenCommand = new AsyncRelayCommand(DruckenAsync, () => ZeigtArbeitsbereich);
         AnleitungCommand = new AsyncRelayCommand(AnleitungAsync);
-        UeberCommand = new AsyncRelayCommand(() => oberflaeche.UeberAnzeigenAsync(new UeberViewModel(oberflaeche, UeberViewModel.VersionVon(typeof(HauptfensterViewModel).Assembly))));
+        UeberCommand = new AsyncRelayCommand(() => oberflaeche.UeberAnzeigenAsync(new UeberViewModel(oberflaeche, UeberViewModel.VersionVon(typeof(HauptfensterViewModel).Assembly), this.eigeneBasis)));
         KostenansichtCommand = new RelayCommand(() => AnsichtZeigen(() => new KostenAnsichtViewModel(this, NaechsteId())), () => HatPlan && ZeigtArbeitsbereich);
         TerminplanansichtCommand = new RelayCommand(() => AnsichtZeigen(() => new TerminplanAnsichtViewModel(this, NaechsteId())), () => HatPlan && ZeigtArbeitsbereich);
         QualitaetsansichtCommand = new RelayCommand(() => AnsichtZeigen(() => new QualitaetAnsichtViewModel(this, NaechsteId())), () => HatPlan && ZeigtArbeitsbereich);

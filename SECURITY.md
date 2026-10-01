@@ -38,4 +38,4 @@ Eine Lücke **in der Bibliothek selbst** (in ihrem Code, unabhängig von AndiGen
 
 ## Datenschutz
 
-Das Programm arbeitet lokal. Es verbindet sich nur mit GitHub, um nach einer neuen Version zu suchen und sie herunterzuladen; dabei werden keine Daten aus Ihren Staffeln übertragen.
+Das Programm arbeitet lokal. Es verbindet sich nur mit GitHub, um nach einer neuen Version zu suchen und sie herunterzuladen; dabei werden keine Daten aus Ihren Staffeln übertragen. Die Suche lässt sich im Dialog **Über** abschalten. Einzelheiten in [CODE_SIGNING.md](CODE_SIGNING.md#datenschutz).

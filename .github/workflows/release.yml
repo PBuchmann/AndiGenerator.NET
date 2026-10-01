@@ -9,6 +9,8 @@ on:
 
 permissions:
   contents: write
+  id-token: write       # für die Herkunftsnachweise (Attestierungen)
+  attestations: write
 
 env:
   VPK_VERSION: 0.0.1298   # wie das Paket Velopack in Directory.Packages.props
@@ -53,8 +55,41 @@ jobs:
           --packDir publish --mainExe AndiGenerator.NET.exe --packTitle "AndiGenerator.NET"
           --packAuthors "Peter Buchmann" --icon src/AndiGenerator.UI/Assets/AndiGenerator.NET.ico
 
+      # Stückliste und Nachweise sind Zugaben: Scheitern sie, wird das Release trotzdem veröffentlicht.
+      - name: Stückliste (SBOM) der ausgelieferten Dateien
+        continue-on-error: true
+        uses: anchore/sbom-action@v0
+        with:
+          path: publish
+          format: spdx-json
+          output-file: AndiGeneratorNET-${{ steps.version.outputs.version }}-sbom.spdx.json
+          upload-artifact: false
+          upload-release-assets: false
+
+      - name: Herkunftsnachweis (gebaut auf GitHub Actions aus diesem Commit)
+        continue-on-error: true
+        uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: |
+            Releases/*-Setup.exe
+            Releases/*-Portable.zip
+            Releases/*-${{ steps.version.outputs.version }}-*.nupkg
+
+      - name: Stückliste bestätigen
+        continue-on-error: true
+        uses: actions/attest-sbom@v2
+        with:
+          subject-path: Releases/*-Setup.exe
+          sbom-path: AndiGeneratorNET-${{ steps.version.outputs.version }}-sbom.spdx.json
+
       - name: Auf GitHub Releases hochladen
         run: >
           vpk upload github --repoUrl ${{ github.server_url }}/${{ github.repository }}
           --token ${{ secrets.GITHUB_TOKEN }} --publish
           --releaseName "AndiGenerator.NET ${{ steps.version.outputs.version }}" --tag ${{ github.ref_name }}
+
+      - name: Stückliste an das Release hängen
+        continue-on-error: true
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload ${{ github.ref_name }} AndiGeneratorNET-${{ steps.version.outputs.version }}-sbom.spdx.json
