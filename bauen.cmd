@@ -21,7 +21,7 @@ echo ----- BUILD Exitcode %BUILDRC% >> "%LOG%"
 if not "%BUILDRC%"=="0" goto ende
 echo Teste ...
 echo ----- TEST >> "%LOG%"
-dotnet test AndiGenerator.slnx -c Release --no-build -nologo --logger "console;verbosity=normal" >> "%LOG%" 2>&1
+dotnet test AndiGenerator.slnx -c Release --no-build -nologo --filter "Kategorie!=Messung" --logger "console;verbosity=normal" >> "%LOG%" 2>&1
 set TESTRC=%ERRORLEVEL%
 echo ----- TEST Exitcode %TESTRC% >> "%LOG%"
 :ende

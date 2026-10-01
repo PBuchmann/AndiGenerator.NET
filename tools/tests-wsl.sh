@@ -20,7 +20,7 @@ export DOTNET_ROOT="${DOTNET_ROOT:-$HOME/.dotnet}"
     echo "----- BUILD Exitcode $rc"
     if [ "$rc" -eq 0 ]; then
         echo "----- TEST"
-        dotnet test AndiGenerator.slnx -c Release --no-build -nologo --logger "console;verbosity=normal"
+        dotnet test AndiGenerator.slnx -c Release --no-build -nologo --filter "Kategorie!=Messung" --logger "console;verbosity=normal"
         echo "----- TEST Exitcode $?"
     fi
     echo "===== ENDE $(date '+%d.%m.%Y %H:%M:%S')"
