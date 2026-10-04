@@ -39,6 +39,9 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
     private readonly Optimierungsdienst dienst;
     private readonly DockFabrik fabrik;
     private readonly List<AnsichtViewModel> ansichten = [];
+
+    /// <summary>Ansichten, die „Start mit“ vor dem Start auf den Ausgangsplan gestellt hat.</summary>
+    private readonly List<AnsichtViewModel> startplanAnsichten = [];
     private readonly Dictionary<string, Planstand?> gemerkteStaende = new(StringComparer.Ordinal);
     private readonly Timer statusTakt;
     private readonly string eigeneBasis;
@@ -1324,7 +1327,8 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
             return;
         }
 
-        IReadOnlyList<Spiel>? ausgangsplan = startplan.Quelle is PlanQuelle quelle ? PlanFuer(quelle)?.Spiele : null;
+        PlanQuelle? ausgangsquelle = startplan.Quelle;
+        IReadOnlyList<Spiel>? ausgangsplan = ausgangsquelle is null ? null : PlanFuer(ausgangsquelle)?.Spiele;
         laufenderStand = null;
         dienst.Pausiert = false;
         dienst.Automodus = Automodus;
@@ -1334,6 +1338,7 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         Laeuft = true;
         Pausiert = false;
         BefehleAktualisieren();
+        StartplanAnsichtenZuruecksetzen(ausgangsquelle);
         AnsichtenAktualisieren(PlanQuellenArt.LaufendeGenerierung);
         VerfahrensansichtZeigen();
     }
@@ -1689,6 +1694,7 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         if (!Laeuft && startplan.Quelle is PlanQuelle quelle && Planquellen.Contains(quelle))
         {
             ansicht.Quelle = quelle;
+            startplanAnsichten.Add(ansicht);
         }
     }
 
@@ -1767,15 +1773,33 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
             return;
         }
 
+        startplanAnsichten.Clear();
         foreach (AnsichtViewModel ansicht in ansichten.Where(a => a.Quellen.Contains(quelle)))
         {
             ansicht.Quelle = quelle;
+            startplanAnsichten.Add(ansicht);
         }
 
         if (PlanFuer(quelle) is Planstand stand)
         {
             Anzeige.PlanZeigen(stand.Bewertung, Einteilung, quelle.Name);
         }
+    }
+
+    /// <summary>
+    /// Nach dem Start zeigen die Ansichten, die „Start mit“ auf den Ausgangsplan gestellt hat, wieder die laufende
+    /// Generierung – sonst bliebe dort der unveränderte Ausgangsplan stehen, während die Kacheln den besten Plan zeigen.
+    /// Ansichten, deren Plan der Anwender selbst gewählt hat, bleiben, wie sie sind.
+    /// </summary>
+    /// <param name="ausgangsquelle">Die Quelle des Ausgangsplans.</param>
+    private void StartplanAnsichtenZuruecksetzen(PlanQuelle? ausgangsquelle)
+    {
+        foreach (AnsichtViewModel ansicht in startplanAnsichten.Where(a => ansichten.Contains(a) && a.Quelle == ausgangsquelle && a.Quellen.Contains(PlanQuelle.Laufend)))
+        {
+            ansicht.Quelle = PlanQuelle.Laufend;
+        }
+
+        startplanAnsichten.Clear();
     }
 
     private void StartplaeneAufbauen()

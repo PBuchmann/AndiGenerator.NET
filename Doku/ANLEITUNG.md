@@ -10,7 +10,7 @@ AndiGenerator.NET ist die Weiterentwicklung des **AndiGenerators** von Andreas H
 2. [Installation](#2-installation)
 3. [Erste Schritte](#3-erste-schritte)
 4. [Das Hauptfenster](#4-das-hauptfenster)
-5. [Die Generierung steuern](#5-die-generierung-steuern)
+5. [Die Generierung steuern](#5-die-generierung-steuern) – mit [Der Automodus](#51-der-automodus)
 6. [Pläne beurteilen: die Ansichten](#6-pläne-beurteilen-die-ansichten)
 7. [Gewichtungen anpassen](#7-gewichtungen-anpassen)
 8. [Pläne merken und vergleichen](#8-pläne-merken-und-vergleichen)
@@ -38,7 +38,7 @@ Wenn Sie vorher mit dem Original-AndiGenerator gearbeitet haben, übernimmt Andi
 
 ## 2. Installation
 
-AndiGenerator.NET läuft unter Windows 10 und 11 (64 Bit). Administratorrechte sind nicht nötig, und .NET muss nicht installiert sein – alles Nötige ist dabei.
+AndiGenerator.NET läuft unter Windows 10 und 11 (64 Bit), auf Chromebooks und unter Linux (siehe unten). Administratorrechte sind nicht nötig, und .NET muss nicht installiert sein – alles Nötige ist dabei.
 
 **Mit Setup (empfohlen)**
 
@@ -60,6 +60,17 @@ Das installierte Programm sucht nach dem Start selbst nach einer neuen Version u
 **Deinstallieren**
 
 Über *Einstellungen → Apps → Installierte Apps → AndiGenerator.NET → Deinstallieren*. Ihre Daten im Ordner `%LOCALAPPDATA%\AndiGenerator.NET` und Ihre click-TT-Dateien bleiben erhalten.
+
+**Auf einem Chromebook (und unter Linux)**
+
+Auf Chromebooks läuft das Programm in der Linux-Entwicklungsumgebung, die ChromeOS mitbringt.
+
+1. Einmalig Linux einschalten: *Einstellungen → Info zu ChromeOS → Entwickler → Linux-Entwicklungsumgebung → Aktivieren* (bei älteren Versionen *Einstellungen → Erweitert → Entwickler*).
+2. Auf der Seite [Releases](https://github.com/PBuchmann/AndiGenerator.NET/releases) das passende Paket herunterladen: `andigenerator-net_<Version>_amd64.deb` für Chromebooks mit Intel- oder AMD-Prozessor, `…_arm64.deb` für Chromebooks mit ARM-Prozessor (z. B. MediaTek oder Qualcomm). Welcher Prozessor eingebaut ist, steht unter *Einstellungen → Info zu ChromeOS → Weitere Details*, oder im Linux-Terminal mit `dpkg --print-architecture`.
+3. In der App *Dateien* doppelt auf die heruntergeladene Datei klicken und **Installieren** wählen. Das Programm erscheint danach im Launcher im Ordner *Linux-Apps*.
+4. Die click-TT-Dateien müssen für Linux sichtbar sein: entweder in den Ordner *Linux-Dateien* legen oder einen Ordner in *Dateien* mit der rechten Maustaste **Mit Linux teilen**.
+
+Ohne Installation geht es mit `AndiGeneratorNET-<Version>-linux-x64.tar.gz` bzw. `…-linux-arm64.tar.gz`: entpacken und `./AndiGenerator.NET` starten. Unter Linux liegen die eigenen Daten im Ordner `~/.local/share/AndiGenerator.NET`. Neue Versionen werden hier nicht selbst gesucht – zum Aktualisieren das neue Paket genauso installieren.
 
 ## 3. Erste Schritte
 
@@ -113,7 +124,9 @@ Bevor Sie die Generierung starten, lohnt ein Blick in die Ansicht **Terminwünsc
 Mit dem blauen Startknopf oben rechts beginnt die Suche. Über den Pfeil rechts daneben wählen Sie das Verfahren:
 
 - **Kostenoptimierung** – wie im Original: Die Suche senkt die Gesamtkosten mit Ihren Gewichtungen.
-- **Automodus** – die Suche lenkt sich selbst über die Gewichte, so wie man es von Hand an den Reglern tun würde: Erst drängt sie Verstöße der Stufen A und B heraus (Hallenbelegung, parallele Spiele, Pflichtspieltage, Koppel-, Sperr- und Ausweichtermine), dann glättet sie die übrigen Kriterien, ohne A und B wieder zu verschlechtern. Die erste Kachel zeigt dann statt der Gesamtkosten die Verstöße A, B und C des besten Plans (ein Klick öffnet die Ansicht **Qualität**; die Kachel *Pflichtregeln* entfällt), oben die Phase des Automodus (**Basisoptimierung** mit Ihren Gewichtungen, dann **Optimierung Stufe A**, **Stufe B** und **Stufe C**), unten nur Hinweise wie „angehalten“ oder verbliebene harte Fehler. Wechseln Sie während der Generierung von der Kostenoptimierung in den Automodus, entfällt die Basisoptimierung: Der bisher beste Plan ist schon optimiert und gilt als Basis, der Automodus beginnt sofort mit Stufe A. Beim Start des Automodus (und beim Wechsel zu ihm) springt das Programm in die Ansicht **Qualität**, beim Start der Kostenoptimierung (und beim Wechsel zu ihr) in die Ansicht **Kosten**; fehlt die Ansicht, wird sie geöffnet.
+- **Automodus** – die Suche lenkt sich selbst über die Gewichte, so wie man es von Hand an den Reglern tun würde: Erst drängt sie die Verstöße der Stufen A und B heraus (Hallenbelegung, parallele Spiele, Pflichtspieltage, Koppel-, Sperr- und Ausweichtermine), dann glättet sie die übrigen Kriterien, ohne A und B wieder zu verschlechtern. Wie er arbeitet und wann er sich lohnt, steht in Abschnitt [5.1](#51-der-automodus).
+
+Beim Start des Automodus (und beim Wechsel zu ihm) springt das Programm in die Ansicht **Qualität**, beim Start der Kostenoptimierung (und beim Wechsel zu ihr) in die Ansicht **Kosten**; fehlt die Ansicht, wird sie geöffnet.
 
 Der Knopf merkt sich die Wahl und heißt danach **Kostenoptimierung starten** bzw. **Automodus starten**. Auch während der Generierung – laufend oder pausiert – lässt sich über den Pfeil zum anderen Verfahren wechseln; die Suche setzt beim bisher besten Plan fort.
 
@@ -154,6 +167,8 @@ Darunter vier **Kacheln** mit dem Stand der Generierung:
 
 Im Automodus entfällt die Kachel *Pflichtregeln*; die Ergebniskachel nimmt ihren Platz mit ein, *Verbesserungen* und *Berechnete Pläne* bleiben an ihrer Stelle. Die breitere Ergebniskachel zeigt oben die Phase (z. B. „Automodus · Optimierung Stufe A“) und unten unter **In Arbeit** alle Kriterien, an denen gerade gearbeitet wird (in Stufe A und B die zuletzt angehobenen, in C das, das geglättet wird) und vor jeder Verstoßzahl klein den Stand am Ende der Basisoptimierung (z. B. „A 14 → 3“).
 
+![Ergebniskachel im Automodus](Anleitung/Bilder/18-automodus.png)
+
 Den **Hauptbereich** füllen die Ansichten. Jede Ansicht öffnet sich als Reiter; Sie können mehrere öffnen, zwischen ihnen wechseln, sie per Maus nebeneinander anordnen und mit dem **×** am Reiter schließen. In vielen Ansichten vergrößert oder verkleinert **Strg + Mausrad** (oder der Zoomregler) die Darstellung.
 
 Ganz unten zeigt die **Statuszeile** den Stand in einer Zeile.
@@ -178,6 +193,28 @@ Ganz unten zeigt die **Statuszeile** den Stand in einer Zeile.
 Solange eine Generierung läuft oder pausiert ist, ist *Start mit* gesperrt: Eine laufende Generierung setzt immer ihren eigenen besten Plan fort. Für einen anderen Ausgangsplan zuerst **Beenden**.
 
 Änderungen an den **Einstellungen** und **Spielplandaten** übernimmt eine laufende Generierung sofort; sie rechnet vom bisher besten Plan aus weiter.
+
+### 5.1 Der Automodus
+
+Bei der **Kostenoptimierung** sucht das Programm den Plan mit den niedrigsten Gesamtkosten; was dabei wie viel zählt, bestimmen Sie über die Gewichtungen (Abschnitt [7](#7-gewichtungen-anpassen)). Oft dreht man dann von Hand nach: Ein Kriterium hat noch Verstöße, also Gewicht hoch, abwarten, nächstes Kriterium. Genau das übernimmt der **Automodus**. Er verändert die Gewichte selbst und richtet sich dabei nach der Einteilung der Kriterien in die Stufen A, B und C, die Sie in der Ansicht **Qualität** festlegen (Abschnitt [6.2](#62-qualität)). Ihre eigenen Gewichtungen bleiben dabei unverändert.
+
+Der Automodus arbeitet in **Phasen**; die laufende steht oben in der Ergebniskachel:
+
+1. **Basisoptimierung** – eine gewöhnliche Kostenoptimierung mit Ihren Gewichtungen, bis sie etwa 10 Sekunden lang nichts mehr verbessert. Ihr bester Plan ist der Maßstab für alles Weitere (in der Kachel die kleine Zahl vor dem Pfeil, z. B. „A 14 → 3“).
+2. **Optimierung Stufe A** – der Automodus beobachtet die Verstöße der Stufe A. Ändern sie sich 10 Sekunden lang nicht mehr, hebt er das Gewicht genau der Mannschaften und Kriterien um eine Stufe an, die noch Verstöße haben. Das wiederholt er, bis keine Verstöße mehr übrig sind, nichts mehr anzuheben ist oder es dreimal hintereinander nicht besser wird.
+3. **Optimierung Stufe B** – ebenso für die Stufe B; die Gewichte der Stufe A bleiben dabei stehen.
+4. **Optimierung Stufe C** – nun glättet er die übrigen Kriterien der Reihe nach, wie sie in der Einteilung stehen, ausgehend vom besten Plan. Zuerst nimmt er sich Ausreißer vor: Mannschaften, die bei einem Kriterium mehr als zwei Verstöße mehr haben als nach der Basisoptimierung – ein, zwei mehr sind in Ordnung, viele bei einer Mannschaft wären unfair. Steigen dabei die Verstöße in A oder B wieder, nimmt er die letzte Anhebung zurück und macht beim nächsten Kriterium weiter. Sind alle Kriterien der Stufe C durch, beginnt er wieder mit dem Herausdrängen.
+
+Der Automodus hat keine Zeitgrenze; er läuft, bis Sie **Pausieren** oder **Beenden**. Unter **In Arbeit** zeigt die Ergebniskachel, an welchen Kriterien er gerade arbeitet (Abschnitt [4](#4-das-hauptfenster)).
+
+**Welcher Plan ist der beste?** Der Automodus vergleicht Pläne nicht nach den Gesamtkosten, sondern der Reihe nach: harte Fehler, Verstöße der Stufe A, Verstöße der Stufe B, Ausreißer in C, Verstöße in C und erst zuletzt die Kosten mit Ihren Gewichtungen. Ein Plan mit weniger Verstößen in A gewinnt also immer, auch wenn er teurer ist.
+
+**Eingreifen während der Generierung:**
+
+- **Einteilung ändern** – verschieben Sie in der Ansicht **Qualität** ein Kriterium, gilt das sofort, ohne neue Basisoptimierung. Rückt etwa ein Kriterium von B1 nach A2, drängt der Automodus zuerst genau dieses Kriterium heraus und danach wieder die ganze Stufe A.
+- **Verfahren wechseln** – über den Pfeil am Startknopf, auch in der Pause. Beim Wechsel von der Kostenoptimierung in den Automodus entfällt die Basisoptimierung: Der bisher beste Plan ist schon optimiert und gilt als Basis, der Automodus beginnt sofort mit Stufe A. Ein bewährter Weg ist deshalb, mit der Kostenoptimierung zu beginnen und, wenn sie kaum noch Fortschritte macht, in den Automodus zu wechseln.
+
+**Wann welches Verfahren?** Der Automodus lohnt sich, wenn Pflichtregeln und Terminwünsche der Vereine Vorrang haben und Sie nicht selbst an den Gewichten drehen wollen. Die Kostenoptimierung ist die richtige Wahl, wenn Sie die Gewichtungen gezielt einsetzen oder Ergebnisse mit dem alten AndiGenerator vergleichen wollen – sie rechnet wie das Original.
 
 ## 6. Pläne beurteilen: die Ansichten
 

@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=AndiGenerator.NET
+GenericName=Spielplan-Generator
+Comment=Spielpläne für Tischtennis-Staffeln aus den click-TT-Terminwünschen erstellen
+Exec=/opt/andigenerator-net/AndiGenerator.NET %f
+Icon=andigenerator-net
+Terminal=false
+Categories=Office;
+MimeType=application/xml;text/xml;
