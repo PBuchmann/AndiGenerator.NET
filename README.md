@@ -19,7 +19,7 @@ AndiGenerator.NET ist die C#/.NET-Portierung des **AndiGenerators** von **Andrea
 - Einrichtung nach dem Öffnen: alle Rückfragen (Spiellokale, Koppeltermine, Setzliste, Pflichtspieltage …) auf einer Seite
 - Generierung auf allen Kernen, laufend übernommene Gewichtungen, Pläne merken und vergleichen
 - Ansichten: Kostenmatrix, Qualität (Pflichtregeln), Meldungen, Terminplan, Diagramme, Terminwünsche, Nachbarmannschaften
-- Ausgabe: CSV für click-TT, Excel-Arbeitsmappe, Ausdruck als PDF
+- Ausgabe: CSV für click-TT, Ausdruck als PDF
 - Vor- und Rückrunde, Halbrunde, Doppelrunde, einzelne Runden
 
 ## Anleitung
@@ -48,7 +48,7 @@ Unter Windows erledigen `bauen.cmd` (bauen und testen) und `starten.cmd` dasselb
 |---|---|
 | `AndiGenerator.Domain` | Fachmodell: Staffel, Mannschaften, Termine, Optionen |
 | `AndiGenerator.Engine` | Bewertung (Kostenfunktion) und Optimierung: Referenzmodell, schnelle Engine, Inselmodell |
-| `AndiGenerator.Persistence` | click-TT-Import, `.modifications`, Optionen, gemerkte Pläne, CSV und Excel |
+| `AndiGenerator.Persistence` | click-TT-Import, `.modifications`, Optionen, gemerkte Pläne, CSV |
 | `AndiGenerator.Application` | Ablauf einer Sitzung, Optimierungsdienst, Datenbearbeitung |
 | `AndiGenerator.Rendering` | Diagramme, Terminwunschraster und Ausdruck – für Bildschirm und PDF |
 | `AndiGenerator.Presentation` | ViewModels (MVVM, ohne Oberflächenbibliothek) |

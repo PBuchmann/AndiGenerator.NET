@@ -49,6 +49,9 @@ internal sealed class Insel
     /// <summary>Durchläufe seit dem letzten Neustart (für die Spezial-Insel: seit dem letzten Wechsel der Kostenart).</summary>
     public long SeitNeustart => durchlaeufe - neustartBei;
 
+    /// <summary>Holt einen Zähler, der sich bei jeder neuen Lösung der Insel (Verbesserung oder Neustart) erhöht (Automodus).</summary>
+    public int Stand { get; private set; }
+
     /// <summary>Anzahl der Neustarts dieser Insel.</summary>
     public int Neustarts { get; private set; }
 
@@ -70,6 +73,7 @@ internal sealed class Insel
             {
                 kandidat.KopierenNach(Loesung);
                 Kosten = kosten;
+                Stand++;
                 besteStrategie = platz.Strategie;
             }
         }
@@ -108,6 +112,7 @@ internal sealed class Insel
     {
         start.KopierenNach(Loesung);
         Kosten = kosten;
+        Stand++;
         verbesserungBei = durchlaeufe;
         neustartBei = durchlaeufe;
         Neustarts++;

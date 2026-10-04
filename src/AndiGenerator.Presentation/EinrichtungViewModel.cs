@@ -18,7 +18,7 @@ public sealed class EinrichtungViewModel : ObservableObject
 {
     private readonly Func<Einrichtungsschritt, Task<bool>> uebernehmen;
     private readonly Func<Einrichtungsschritt, DatenDialogViewModel?> seiteErzeugen;
-    private readonly Func<bool, Task> abschliessen;
+    private readonly Func<Task> abschliessen;
     private Einrichtungsschritt aktiv;
     private string meldung = string.Empty;
 
@@ -27,13 +27,13 @@ public sealed class EinrichtungViewModel : ObservableObject
     /// <param name="schritte">Die Punkte in ihrer Reihenfolge (mindestens einer).</param>
     /// <param name="uebernehmen">Übernimmt einen Punkt; <c>false</c>, wenn er nicht übernommen werden konnte.</param>
     /// <param name="seiteErzeugen">Erzeugt die eingebettete Seite eines Datenpunkts mit dem aktuellen Stand der Daten.</param>
-    /// <param name="abschliessen">Schließt die Seite; der Parameter sagt, ob danach generiert werden soll.</param>
+    /// <param name="abschliessen">Schließt die Seite; generiert wird danach erst mit „Generierung starten“.</param>
     public EinrichtungViewModel(
         string titel,
         IReadOnlyList<Einrichtungsschritt> schritte,
         Func<Einrichtungsschritt, Task<bool>> uebernehmen,
         Func<Einrichtungsschritt, DatenDialogViewModel?> seiteErzeugen,
-        Func<bool, Task> abschliessen)
+        Func<Task> abschliessen)
     {
         ArgumentNullException.ThrowIfNull(schritte);
         ArgumentOutOfRangeException.ThrowIfZero(schritte.Count);
@@ -54,8 +54,7 @@ public sealed class EinrichtungViewModel : ObservableObject
         Zeigen(aktiv);
         UebernehmenCommand = new AsyncRelayCommand(UebernehmenAsync);
         UeberspringenCommand = new RelayCommand(Ueberspringen);
-        AbschliessenCommand = new AsyncRelayCommand(() => this.abschliessen(false));
-        AbschliessenUndGenerierenCommand = new AsyncRelayCommand(() => this.abschliessen(true));
+        AbschliessenCommand = new AsyncRelayCommand(AbschliessenAsync);
     }
 
     /// <summary>Holt die Überschrift.</summary>
@@ -115,11 +114,11 @@ public sealed class EinrichtungViewModel : ObservableObject
     /// <summary>Holt den Befehl „Überspringen“.</summary>
     public IRelayCommand UeberspringenCommand { get; }
 
-    /// <summary>Holt den Befehl „Abschließen“ (offene Punkte bleiben unverändert).</summary>
+    /// <summary>
+    /// Holt den Befehl „Abschließen“: Bei offenen Entscheidungen gilt die angeklickte Wahl, alle übrigen offenen Punkte
+    /// bleiben unverändert.
+    /// </summary>
     public IAsyncRelayCommand AbschliessenCommand { get; }
-
-    /// <summary>Holt den Befehl „Abschließen und generieren“.</summary>
-    public IAsyncRelayCommand AbschliessenUndGenerierenCommand { get; }
 
     private int Bearbeitet => Schritte.Count(s => s.Zustand != Schrittzustand.Offen);
 
@@ -142,6 +141,23 @@ public sealed class EinrichtungViewModel : ObservableObject
         }
 
         Abhaken(schritt, Schrittzustand.Erledigt);
+    }
+
+    private async Task AbschliessenAsync()
+    {
+        foreach (Einrichtungsschritt schritt in Schritte.Where(s => s.IstEntscheidung && s.IstGewaehlt && s.Zustand == Schrittzustand.Offen).ToList())
+        {
+            if (!await uebernehmen(schritt))
+            {
+                Aktiv = schritt;
+                Meldung = "Der Punkt konnte nicht übernommen werden.";
+                return;
+            }
+
+            Abhaken(schritt, Schrittzustand.Erledigt);
+        }
+
+        await abschliessen();
     }
 
     private void Ueberspringen() => Abhaken(Aktiv, Schrittzustand.Uebersprungen);

@@ -78,8 +78,20 @@ public sealed class Einrichtungsschritt : ObservableObject
     public int Auswahl
     {
         get => auswahl;
-        set => SetProperty(ref auswahl, value < 0 ? 0 : value);
+        set
+        {
+            if (SetProperty(ref auswahl, value < 0 ? 0 : value))
+            {
+                IstGewaehlt = true;
+            }
+        }
     }
+
+    /// <summary>
+    /// Holt einen Wert, der angibt, ob der Anwender bei dieser Entscheidung eine andere Wahl angeklickt hat; sie gilt dann
+    /// auch beim Abschließen, ohne dass „Auswahl übernehmen“ gedrückt wurde.
+    /// </summary>
+    public bool IstGewaehlt { get; private set; }
 
     /// <summary>Holt die eingebettete Seite der Spielplandaten (nur Datenpunkte, solange der Schritt gewählt ist).</summary>
     public DatenDialogViewModel? Seite

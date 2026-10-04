@@ -357,6 +357,32 @@ public sealed class PlansitzungTests : IDisposable
     }
 
     [Fact]
+    public void Einteilung_der_Kriterien_steht_als_Attribut_am_Plan_in_den_Modifikationen()
+    {
+        Plansitzung sitzung = Oeffnen(mitAenderungen: true);
+        Assert.Equal(string.Empty, sitzung.Staffel.Kriterienstufen);
+        const string Einteilung = "A:Sperrtermine,Hallenbelegung;B:ParalleleSpiele;C:Spielverteilung";
+
+        sitzung.KriterienstufenSpeichern(Einteilung);
+
+        Assert.Equal(Einteilung, sitzung.Staffel.Kriterienstufen);
+        DatenKnoten modifikationen = PlanDatenDatei.Laden(Plansitzung.ModifikationenPfad(sitzung.Pfad));
+        Assert.Equal(Einteilung, modifikationen.Lesen(StaffelAbbildung.KriterienAttribut));
+        Assert.Empty(modifikationen.KinderMitNamen(StaffelAbbildung.KriterienAttribut));
+        Plansitzung wieder = Plansitzung.Oeffnen(sitzung.Pfad, Path.Combine(ordner, "basis"));
+        Assert.Equal(Einteilung, wieder.Staffel.Kriterienstufen);
+
+        // Einrichtung „Standardreihenfolge verwenden“: nur für diese Sitzung, auch nach anderen Datenänderungen; gespeichert bleibt sie.
+        wieder.StandardKriterienstufenFuerDieseSitzung();
+        Assert.Empty(wieder.Staffel.Kriterienstufen);
+        wieder.DatenUebernehmen(wieder.DatenBearbeiten());
+        Assert.Empty(wieder.Staffel.Kriterienstufen);
+        Assert.Equal(Einteilung, Plansitzung.Oeffnen(sitzung.Pfad, Path.Combine(ordner, "basis")).Staffel.Kriterienstufen);
+        wieder.KriterienstufenSpeichern(Einteilung);
+        Assert.Equal(Einteilung, wieder.Staffel.Kriterienstufen);
+    }
+
+    [Fact]
     public void Geaenderte_Ligadaten_werden_gespeichert_und_gelten_sofort()
     {
         Plansitzung sitzung = Oeffnen(mitAenderungen: true);

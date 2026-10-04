@@ -4,6 +4,136 @@
              xmlns:ui="using:AndiGenerator.UI"
              x:Class="AndiGenerator.UI.Ansichten.QualitaetAnsicht"
              x:DataType="p:QualitaetAnsichtViewModel">
+  <UserControl.Styles>
+    <!-- Einstufung im Automodus: A/B/C als zusammenhängende Schaltergruppe, Pfeile als gleich große Knöpfe -->
+    <Style Selector="Button.stufe, Button.pfeil">
+      <Setter Property="Width" Value="40" />
+      <Setter Property="Height" Value="34" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="FontSize" Value="13" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+      <Setter Property="Background" Value="{StaticResource Flaeche}" />
+      <Setter Property="BorderBrush" Value="{StaticResource Rand}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="Foreground" Value="{StaticResource Tinte2}" />
+    </Style>
+    <Style Selector="Button.pfeil">
+      <Setter Property="CornerRadius" Value="8" />
+    </Style>
+    <Style Selector="Button.stufe:pointerover /template/ ContentPresenter#PART_ContentPresenter, Button.pfeil:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{StaticResource AkzentHell}" />
+      <Setter Property="BorderBrush" Value="{StaticResource Akzent}" />
+      <Setter Property="Foreground" Value="{StaticResource Akzent}" />
+    </Style>
+    <Style Selector="Button.stufe:disabled /template/ ContentPresenter#PART_ContentPresenter, Button.pfeil:disabled /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{StaticResource Flaeche}" />
+      <Setter Property="BorderBrush" Value="{StaticResource Linie}" />
+      <Setter Property="Foreground" Value="#B8BCC2" />
+    </Style>
+    <Style Selector="Button.stufe.gewaehlt /template/ ContentPresenter#PART_ContentPresenter, Button.stufe.gewaehlt:disabled /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{StaticResource Akzent}" />
+      <Setter Property="BorderBrush" Value="{StaticResource Akzent}" />
+      <Setter Property="Foreground" Value="White" />
+    </Style>
+    <!-- Spalte Einstufung: links durch eine dünne Linie abgesetzt, mit Luft für Schaltergruppe und Pfeile -->
+    <Style Selector="Border.einstufung">
+      <Setter Property="Width" Value="268" />
+      <Setter Property="Margin" Value="20,0,0,0" />
+      <Setter Property="Padding" Value="20,0,12,0" />
+      <Setter Property="BorderBrush" Value="{StaticResource Linie}" />
+      <Setter Property="BorderThickness" Value="1,0,0,0" />
+    </Style>
+    <Style Selector="Border.griff">
+      <Setter Property="Width" Value="26" />
+      <Setter Property="Height" Value="34" />
+      <Setter Property="CornerRadius" Value="6" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Cursor" Value="SizeNorthSouth" />
+    </Style>
+    <Style Selector="Border.griff:pointerover">
+      <Setter Property="Background" Value="{StaticResource Schwebe}" />
+    </Style>
+    <!-- Gewählte Zeile: ihre Verstöße stehen rechts daneben -->
+    <Style Selector="Border.zeile">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Cursor" Value="Hand" />
+    </Style>
+    <Style Selector="Border.zeile:pointerover">
+      <Setter Property="Background" Value="{StaticResource Schwebe}" />
+    </Style>
+    <Style Selector="Border.zeile.gewaehlt">
+      <Setter Property="Background" Value="{StaticResource AkzentHell}" />
+    </Style>
+    <!-- Beim Ziehen: an der Ablagestelle eine leere Lücke, die Zeile selbst hängt am Mauszeiger -->
+    <Style Selector="Border.zeile.gezogen">
+      <Setter Property="Background" Value="{StaticResource AkzentHell}" />
+      <Setter Property="BorderBrush" Value="{StaticResource Akzent}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="8" />
+    </Style>
+    <Style Selector="Border.zeile.gezogen > Grid">
+      <Setter Property="Opacity" Value="0" />
+    </Style>
+    <Style Selector="Border.schwebend">
+      <Setter Property="Background" Value="{StaticResource Flaeche}" />
+      <Setter Property="BorderBrush" Value="{StaticResource Akzent}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="BoxShadow" Value="0 8 24 0 #40000000" />
+      <Setter Property="Opacity" Value="0.96" />
+    </Style>
+    <Style Selector="Border.schwebend Border.zeile">
+      <Setter Property="BorderThickness" Value="0" />
+    </Style>
+  </UserControl.Styles>
+  <UserControl.Resources>
+    <!-- Eine Zeile der Tabelle; auch für die Zeile, die beim Ziehen am Mauszeiger hängt -->
+    <DataTemplate x:Key="Zeilenvorlage" x:DataType="p:Qualitaetszeile">
+      <Border Classes="zeile" Classes.gezogen="{Binding IstGezogen}" Classes.gewaehlt="{Binding IstGewaehlt}" BorderBrush="{StaticResource Linie}" BorderThickness="0,0,0,1" MinHeight="48">
+        <Grid ColumnDefinitions="Auto,56,40,210,90,Auto,Auto">
+          <!-- Griff zum Ziehen (nur im Automodus, nicht bei den harten Fehlern) -->
+          <Border Grid.Column="0" Width="30" IsVisible="{Binding $parent[UserControl].((p:QualitaetAnsichtViewModel)DataContext).Bearbeitbar}">
+            <Border Classes="griff" IsVisible="{Binding IstEinstufbar}"
+                    ToolTip.Tip="Ziehen: an die gewünschte Stelle legen – Stufe und Nummer ergeben sich aus der Stelle">
+              <TextBlock Text="⋮⋮" FontSize="16" FontWeight="Bold" Foreground="{StaticResource Tinte2}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            </Border>
+          </Border>
+          <Border Grid.Column="1" Background="{StaticResource Schwebe}" CornerRadius="8" Padding="8,2" VerticalAlignment="Center" HorizontalAlignment="Left" MinWidth="36">
+            <TextBlock Text="{Binding Stufe}" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource Tinte2}" HorizontalAlignment="Center" />
+          </Border>
+          <Border Grid.Column="2" Width="24" Height="24" CornerRadius="12" HorizontalAlignment="Left" VerticalAlignment="Center"
+                  Background="{Binding Zustand, Converter={x:Static ui:Konverter.ZustandFarbe}}">
+            <TextBlock Text="{Binding Zustand, Converter={x:Static ui:Konverter.ZustandSymbol}}" Foreground="White" FontSize="12" FontWeight="Bold"
+                       HorizontalAlignment="Center" VerticalAlignment="Center" />
+          </Border>
+          <TextBlock Grid.Column="3" Text="{Binding Name}" FontSize="13" VerticalAlignment="Center" TextWrapping="Wrap" Margin="0,0,12,0" />
+          <TextBlock Grid.Column="4" Text="{Binding Verstoesse}" Classes="ziffer" FontSize="13" HorizontalAlignment="Right" VerticalAlignment="Center" />
+          <TextBlock Grid.Column="5" Text="{Binding Kosten}" Width="90" Classes="ziffer" FontSize="13" TextAlignment="Right" VerticalAlignment="Center"
+                     IsVisible="{Binding $parent[UserControl].((p:QualitaetAnsichtViewModel)DataContext).ZeigtKosten}" />
+          <!-- Einstufen (nach unten an den Anfang, nach oben ans Ende der neuen Stufe) und Reihenfolge; am Stufenrand führen die Pfeile in die Nachbarstufe -->
+          <Border Grid.Column="6" Classes="einstufung" IsVisible="{Binding $parent[UserControl].((p:QualitaetAnsichtViewModel)DataContext).Bearbeitbar}">
+          <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+            <StackPanel Orientation="Horizontal" IsVisible="{Binding IstEinstufbar}">
+              <Button Classes="stufe" Classes.gewaehlt="{Binding IstA}" CornerRadius="8,0,0,8" Content="A" Command="{Binding EinstufenACommand}" ToolTip.Tip="Stufe A: muss eingehalten werden" />
+              <Button Classes="stufe" Classes.gewaehlt="{Binding IstB}" CornerRadius="0" Content="B" Command="{Binding EinstufenBCommand}" ToolTip.Tip="Stufe B: soll eingehalten werden" />
+              <Button Classes="stufe" Classes.gewaehlt="{Binding IstC}" CornerRadius="0,8,8,0" Content="C" Command="{Binding EinstufenCCommand}" ToolTip.Tip="Stufe C: wird geglättet" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" Spacing="4" IsVisible="{Binding IstEinstufbar}">
+              <Button Classes="pfeil" Command="{Binding HochCommand}" ToolTip.Tip="Wichtiger: nach oben – an erster Stelle ans Ende der Stufe darüber">
+                <ui:Symbol Daten="{StaticResource SymbolHoch}" Groesse="18" />
+              </Button>
+              <Button Classes="pfeil" Command="{Binding RunterCommand}" ToolTip.Tip="Weniger wichtig: nach unten – an letzter Stelle an den Anfang der Stufe darunter">
+                <ui:Symbol Daten="{StaticResource SymbolRunter}" Groesse="18" />
+              </Button>
+            </StackPanel>
+          </StackPanel>
+          </Border>
+        </Grid>
+      </Border>
+    </DataTemplate>
+  </UserControl.Resources>
   <DockPanel Margin="18,14">
     <StackPanel DockPanel.Dock="Top" Classes="leiste" Orientation="Horizontal" Spacing="10" Margin="0,0,0,10">
       <TextBlock Text="Plan" Classes="klein" FontSize="13" VerticalAlignment="Center" />
@@ -14,12 +144,6 @@
           </DataTemplate>
         </ComboBox.ItemTemplate>
       </ComboBox>
-      <Button Classes="gross" Command="{Binding EntfernenCommand}" ToolTip.Tip="Gewählten gemerkten Plan löschen">
-        <StackPanel Orientation="Horizontal" Spacing="8"><ui:Symbol Daten="{StaticResource SymbolLoeschen}" Groesse="20" /><TextBlock Text="Löschen" VerticalAlignment="Center" /></StackPanel>
-      </Button>
-      <Button Classes="gross" Command="{Binding ExcelCommand}" ToolTip.Tip="Plan als Excel-Arbeitsmappe speichern: Übersicht, Spielplan, Mannschaftspläne und Kosten">
-        <StackPanel Orientation="Horizontal" Spacing="8"><ui:Symbol Daten="{StaticResource SymbolExcel}" Groesse="20" /><TextBlock Text="Nach Excel" VerticalAlignment="Center" /></StackPanel>
-      </Button>
       <ui:Zoomauswahl DataContext="{Binding Zoom}" Margin="12,0,0,0" />
     </StackPanel>
     <TextBlock DockPanel.Dock="Top" Text="{Binding Hinweis}" IsVisible="{Binding HatHinweis}" Margin="0,8" />
@@ -35,39 +159,73 @@
     <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
                   IsVisible="{Binding Zusammenfassung, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
     <LayoutTransformControl LayoutTransform="{Binding Zoom.Faktor, Converter={x:Static ui:Konverter.Skalierung}}" HorizontalAlignment="Left" VerticalAlignment="Top">
-      <Border Classes="karte" Padding="18,10,18,6">
+    <!-- Links die Kriterien, rechts die Verstöße der gewählten Zeile je Mannschaft -->
+    <StackPanel Orientation="Horizontal" Spacing="16" VerticalAlignment="Top">
+      <Border Classes="karte" Padding="18,10,18,6" VerticalAlignment="Top">
+        <Grid>
         <DockPanel>
           <Border DockPanel.Dock="Top" BorderBrush="{StaticResource Linie}" BorderThickness="0,0,0,1" Padding="0,6,0,8">
-            <Grid ColumnDefinitions="64,40,340,110,120">
-              <TextBlock Grid.Column="0" Text="STUFE" Classes="klein" FontSize="11" FontWeight="SemiBold" />
-              <TextBlock Grid.Column="2" Text="KRITERIUM" Classes="klein" FontSize="11" FontWeight="SemiBold" />
-              <TextBlock Grid.Column="3" Text="VERSTÖSSE" Classes="klein" FontSize="11" FontWeight="SemiBold" HorizontalAlignment="Right" />
-              <TextBlock Grid.Column="4" Text="KOSTEN" Classes="klein" FontSize="11" FontWeight="SemiBold" HorizontalAlignment="Right" />
+            <Grid ColumnDefinitions="Auto,56,40,210,90,Auto,Auto">
+              <Border Grid.Column="0" Width="30" IsVisible="{Binding Bearbeitbar}" />
+              <TextBlock Grid.Column="1" Text="STUFE" Classes="klein" FontSize="11" FontWeight="SemiBold" />
+              <TextBlock Grid.Column="3" Text="KRITERIUM" Classes="klein" FontSize="11" FontWeight="SemiBold" />
+              <TextBlock Grid.Column="4" Text="VERSTÖSSE" Classes="klein" FontSize="11" FontWeight="SemiBold" HorizontalAlignment="Right" />
+              <TextBlock Grid.Column="5" Text="KOSTEN" Width="90" Classes="klein" FontSize="11" FontWeight="SemiBold" TextAlignment="Right" IsVisible="{Binding ZeigtKosten}" />
+              <Border Grid.Column="6" Classes="einstufung" IsVisible="{Binding Bearbeitbar}">
+                <TextBlock Text="EINSTUFUNG" Classes="klein" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center" />
+              </Border>
             </Grid>
           </Border>
-          <ItemsControl ItemsSource="{Binding Zeilen}">
+          <!-- Im Automodus: Zeilen am Griff links ziehen; die Zeile hängt am Mauszeiger, die Tabelle macht an der Ablagestelle Platz und nummeriert schon um. -->
+          <ItemsControl x:Name="Liste" ItemsSource="{Binding Zeilen}" Background="Transparent"
+                        ItemTemplate="{StaticResource Zeilenvorlage}"
+                        PointerPressed="ListeGedrueckt" PointerMoved="ListeBewegt" PointerReleased="ListeLosgelassen" PointerCaptureLost="ListeVerloren" />
+        </DockPanel>
+        <!-- Ebene über der Tabelle für die Zeile am Mauszeiger -->
+        <Canvas x:Name="Schwebeebene" IsHitTestVisible="False" ClipToBounds="False">
+          <Border x:Name="Schwebezeile" Classes="schwebend" IsVisible="{Binding Schwebend, Converter={x:Static ObjectConverters.IsNotNull}}">
+            <ContentControl Content="{Binding Schwebend}" ContentTemplate="{StaticResource Zeilenvorlage}" />
+          </Border>
+        </Canvas>
+        </Grid>
+      </Border>
+      <Border Classes="karte" Padding="18,12" Width="440" VerticalAlignment="Top" IsVisible="{Binding ZeigtDetails}">
+        <StackPanel Spacing="12">
+          <Grid ColumnDefinitions="*,Auto">
+            <StackPanel Spacing="2" VerticalAlignment="Center">
+              <TextBlock Text="VERSTÖSSE" Classes="klein" FontSize="11" FontWeight="SemiBold" />
+              <TextBlock Text="{Binding DetailTitel}" FontSize="14" FontWeight="SemiBold" TextWrapping="Wrap" />
+            </StackPanel>
+            <Button Grid.Column="1" Classes="pfeil" VerticalAlignment="Top" Command="{Binding DetailsSchliessenCommand}" ToolTip.Tip="Verstöße schließen">
+              <ui:Symbol Daten="{StaticResource SymbolSchliessen}" Groesse="16" />
+            </Button>
+          </Grid>
+          <ItemsControl ItemsSource="{Binding Details}">
             <ItemsControl.ItemTemplate>
-              <DataTemplate x:DataType="p:Qualitaetszeile">
-                <Border BorderBrush="{StaticResource Linie}" BorderThickness="0,0,0,1" MinHeight="44">
-                  <Grid ColumnDefinitions="64,40,340,110,120" VerticalAlignment="Center">
-                    <Border Grid.Column="0" Background="{StaticResource Schwebe}" CornerRadius="8" Padding="8,2" HorizontalAlignment="Left" VerticalAlignment="Center">
-                      <TextBlock Text="{Binding Stufe}" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource Tinte2}" />
+              <DataTemplate x:DataType="p:Meldungsgruppe">
+                <StackPanel Spacing="4" Margin="0,0,0,12">
+                  <Grid ColumnDefinitions="*,Auto">
+                    <TextBlock Text="{Binding Name}" FontSize="13" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                    <Border Grid.Column="1" Background="#FBEDEB" CornerRadius="8" Padding="8,2" Margin="8,0,0,0" VerticalAlignment="Center">
+                      <TextBlock Text="{Binding Anzahl}" FontSize="11" FontWeight="SemiBold" Foreground="#7A1A12" />
                     </Border>
-                    <Border Grid.Column="1" Width="24" Height="24" CornerRadius="12" HorizontalAlignment="Left" VerticalAlignment="Center"
-                            Background="{Binding Zustand, Converter={x:Static ui:Konverter.ZustandFarbe}}">
-                      <TextBlock Text="{Binding Zustand, Converter={x:Static ui:Konverter.ZustandSymbol}}" Foreground="White" FontSize="12" FontWeight="Bold"
-                                 HorizontalAlignment="Center" VerticalAlignment="Center" />
-                    </Border>
-                    <TextBlock Grid.Column="2" Text="{Binding Name}" FontSize="13" VerticalAlignment="Center" TextWrapping="Wrap" Margin="0,0,12,0" />
-                    <TextBlock Grid.Column="3" Text="{Binding Verstoesse}" Classes="ziffer" FontSize="13" HorizontalAlignment="Right" VerticalAlignment="Center" />
-                    <TextBlock Grid.Column="4" Text="{Binding Kosten}" Classes="ziffer" FontSize="13" HorizontalAlignment="Right" VerticalAlignment="Center" />
                   </Grid>
-                </Border>
+                  <ItemsControl ItemsSource="{Binding Meldungen}">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate x:DataType="x:String">
+                        <Border BorderBrush="{StaticResource Linie}" BorderThickness="0,1,0,0" Padding="0,5">
+                          <SelectableTextBlock Text="{Binding}" FontSize="12" TextWrapping="Wrap" Foreground="{StaticResource Tinte2}" />
+                        </Border>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </StackPanel>
               </DataTemplate>
             </ItemsControl.ItemTemplate>
           </ItemsControl>
-        </DockPanel>
+        </StackPanel>
       </Border>
+    </StackPanel>
     </LayoutTransformControl>
     </ScrollViewer>
   </DockPanel>

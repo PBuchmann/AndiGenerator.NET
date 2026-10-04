@@ -2,9 +2,9 @@
 // SPDX-FileCopyrightText: 2026 Peter Buchmann
 // SPDX-License-Identifier: GPL-3.0-only
 
-using System.IO.Compression;
-using System.Xml.Linq;
+using AndiGenerator.Application;
 using AndiGenerator.Domain.Optionen;
+using AndiGenerator.Engine.Inseln;
 using AndiGenerator.Rendering;
 using Dock.Model.Core;
 
@@ -120,7 +120,65 @@ public sealed class HauptfensterTests : IDisposable
     }
 
     [Fact]
-    public async Task Einrichtung_abschliessen_und_generieren_startet_die_Generierung()
+    public async Task Einrichtung_bietet_die_gespeicherte_Kriterienreihenfolge_an_und_Standard_gilt_nur_fuer_diese_Sitzung()
+    {
+        string basis = Path.Combine(ordner, "basis");
+        string eigene = Stufeneinteilung.Standard.Einstufen(Kostenkriterium.Hallenbelegung, Stufe.B).Text();
+        Plansitzung.Oeffnen(datei, basis).KriterienstufenSpeichern(eigene);
+        string halle = Planqualitaet.Name(Kostenkriterium.Hallenbelegung);
+
+        await hf.OeffnenCommand.ExecuteAsync(null);
+        EinrichtungViewModel einrichtung = hf.Einrichtung!;
+        Einrichtungsschritt stufen = einrichtung.Schritte.Single(s => s.Titel == "Gespeicherte Kriterienreihenfolge");
+        Assert.Contains(stufen.Details, d => d.Text == "B1 " + halle);
+        stufen.WaehlenCommand.Execute(null);
+        Assert.Same(stufen, einrichtung.Aktiv);
+        stufen.Auswahl = 1;
+        await einrichtung.UebernehmenCommand.ExecuteAsync(null);
+        Assert.Equal(Schrittzustand.Erledigt, stufen.Zustand);
+        await einrichtung.AbschliessenCommand.ExecuteAsync(null);
+
+        // In dieser Sitzung gilt der Standard (Hallenbelegung wieder A2), gespeichert bleibt die eigene Einteilung.
+        hf.QualitaetsansichtCommand.Execute(null);
+        QualitaetAnsichtViewModel qualitaet = Assert.Single(Ansichten<QualitaetAnsichtViewModel>());
+        qualitaet.Quelle = PlanQuelle.ClickTt;
+        Assert.Equal(halle, qualitaet.Zeilen.First(z => z.Stufe == "A2").Name);
+        Assert.Equal(eigene, Plansitzung.Oeffnen(datei, basis).Staffel.Kriterienstufen);
+
+        // Beim nächsten Öffnen mit „Diese Reihenfolge verwenden“ gilt die eigene Einteilung.
+        await hf.OeffnenCommand.ExecuteAsync(null);
+        einrichtung = hf.Einrichtung!;
+        stufen = einrichtung.Schritte.Single(s => s.Titel == "Gespeicherte Kriterienreihenfolge");
+        stufen.WaehlenCommand.Execute(null);
+        await einrichtung.UebernehmenCommand.ExecuteAsync(null);
+        await einrichtung.AbschliessenCommand.ExecuteAsync(null);
+        hf.QualitaetsansichtCommand.Execute(null);
+        qualitaet = Assert.Single(Ansichten<QualitaetAnsichtViewModel>());
+        qualitaet.Quelle = PlanQuelle.ClickTt;
+        Assert.Equal(halle, qualitaet.Zeilen.First(z => z.Stufe == "B1").Name);
+    }
+
+    [Fact]
+    public async Task Gewaehlter_Ausgangsplan_wird_vor_dem_Start_in_allen_Ansichten_und_Kacheln_gezeigt()
+    {
+        await OeffnenAsync();
+        KostenAnsichtViewModel kosten = Assert.Single(Ansichten<KostenAnsichtViewModel>());
+        Assert.Equal("–", hf.Anzeige.Kosten);
+
+        hf.Startplan = hf.Startplaene.Single(p => p.Quelle == PlanQuelle.ClickTt);
+
+        Assert.False(hf.Laeuft);
+        Assert.Equal(PlanQuelle.ClickTt, kosten.Quelle);
+        Assert.NotEqual("–", hf.Anzeige.Kosten);
+        Assert.Equal("Ausgangsplan: " + PlanQuelle.ClickTt.Name, hf.Anzeige.KostenHinweis);
+
+        // Eine danach geöffnete Ansicht zeigt ihn ebenfalls.
+        hf.QualitaetsansichtCommand.Execute(null);
+        Assert.Equal(PlanQuelle.ClickTt, Assert.Single(Ansichten<QualitaetAnsichtViewModel>()).Quelle);
+    }
+
+    [Fact]
+    public async Task Einrichtung_abschliessen_zeigt_den_Arbeitsbereich_ohne_zu_generieren()
     {
         await hf.OeffnenCommand.ExecuteAsync(null);
         EinrichtungViewModel einrichtung = hf.Einrichtung!;
@@ -133,10 +191,10 @@ public sealed class HauptfensterTests : IDisposable
         Assert.Same(einrichtung.Schritte[^1], einrichtung.Aktiv);
         Assert.False(einrichtung.HatMeldung);
 
-        await einrichtung.AbschliessenUndGenerierenCommand.ExecuteAsync(null);
+        await einrichtung.AbschliessenCommand.ExecuteAsync(null);
         Assert.False(hf.ZeigtEinrichtung);
-        Assert.True(hf.Laeuft);
-        hf.StoppenCommand.Execute(null);
+        Assert.False(hf.Laeuft);
+        Assert.True(hf.StartenCommand.CanExecute(null));
     }
 
     [Fact]
@@ -276,6 +334,26 @@ public sealed class HauptfensterTests : IDisposable
         QualitaetAnsichtViewModel qualitaet = Assert.Single(Ansichten<QualitaetAnsichtViewModel>());
         qualitaet.Quelle = PlanQuelle.ClickTt;
         Assert.NotEmpty(qualitaet.Zeilen);
+
+        // Klick auf eine Zeile mit Verstößen zeigt sie je Mannschaft rechts daneben, ein zweiter Klick schließt.
+        Qualitaetszeile verletzt = qualitaet.Zeilen.First(z => z.Zustand != Qualitaetszustand.Erfuellt && z.Kriterium is Kostenkriterium k
+            && k < Kostenkriterium.VereinsinterneSpieleAmAnfang && k != Kostenkriterium.Spielverteilung);
+        qualitaet.Waehlen(verletzt);
+        Assert.True(verletzt.IstGewaehlt);
+        Assert.True(qualitaet.ZeigtDetails, verletzt.Name);
+        Assert.StartsWith(verletzt.Stufe + " · ", qualitaet.DetailTitel, StringComparison.Ordinal);
+        Assert.All(qualitaet.Details, d => Assert.False(string.IsNullOrEmpty(d.Name)));
+        qualitaet.Waehlen(verletzt);
+        Assert.False(verletzt.IstGewaehlt);
+        Assert.False(qualitaet.ZeigtDetails);
+
+        // Ein Kriterium ohne Verstöße bleibt gewählt, die rechte Tabelle aber zu.
+        Qualitaetszeile erfuellt = qualitaet.Zeilen.First(z => z.Kriterium is not null && z.Zustand == Qualitaetszustand.Erfuellt);
+        qualitaet.Waehlen(erfuellt);
+        Assert.True(erfuellt.IstGewaehlt);
+        Assert.False(qualitaet.ZeigtDetails);
+        qualitaet.DetailsSchliessenCommand.Execute(null);
+        Assert.False(erfuellt.IstGewaehlt);
 
         hf.DiagrammansichtCommand.Execute(null);
         DiagrammAnsichtViewModel diagramm = Assert.Single(Ansichten<DiagrammAnsichtViewModel>());
@@ -428,14 +506,48 @@ public sealed class HauptfensterTests : IDisposable
     }
 
     [Fact]
+    public async Task Verfahren_wird_beim_Start_gewaehlt_und_laesst_sich_waehrend_der_Generierung_wechseln()
+    {
+        Assert.False(hf.AutomodusCommand.CanExecute(null));
+        await OeffnenAsync();
+        Assert.Equal("Kostenoptimierung starten", hf.KostenoptimierungText);
+        Assert.Equal("Automodus starten", hf.AutomodusText);
+
+        hf.AutomodusCommand.Execute(null);
+        Assert.True(hf.Laeuft);
+        Assert.True(hf.Automodus);
+        Assert.Single(Ansichten<QualitaetAnsichtViewModel>());
+        Assert.Equal("Qualitaet", hf.AktiveAnsicht);
+        Assert.Equal("Pausieren", hf.GenerierungText);
+        Assert.Equal("Automodus (läuft)", hf.AutomodusText);
+        Assert.Equal("Zur Kostenoptimierung wechseln", hf.KostenoptimierungText);
+        Assert.False(hf.AutomodusCommand.CanExecute(null));
+
+        hf.GenerierungCommand.Execute(null);
+        Assert.True(hf.Pausiert);
+        hf.KostenoptimierungCommand.Execute(null);
+        Assert.True(hf.Laeuft);
+        Assert.False(hf.Pausiert);
+        Assert.False(hf.Automodus);
+        Assert.Equal("Kosten", hf.AktiveAnsicht);
+        Assert.Equal("Zum Automodus wechseln", hf.AutomodusText);
+        Assert.True(hf.AutomodusCommand.CanExecute(null));
+
+        hf.StoppenCommand.Execute(null);
+        Assert.Equal("Kostenoptimierung starten", hf.GenerierungText);
+    }
+
+    [Fact]
     public async Task Generierung_Pause_Plan_merken_exportieren_und_entfernen()
     {
         Assert.False(hf.GenerierungCommand.CanExecute(null));
         await OeffnenAsync();
         Assert.False(hf.PlanMerkenCommand.CanExecute(null));
-        Assert.Equal("Generierung starten", hf.GenerierungText);
+        Assert.Equal("Kostenoptimierung starten", hf.GenerierungText);
         Assert.True(hf.ZeigtStart);
         Assert.Equal("–", hf.Anzeige.Kosten);
+        Assert.False(hf.CsvExportierenCommand.CanExecute(null));
+        Assert.StartsWith("Kein Plan", hf.CsvHinweis, StringComparison.Ordinal);
 
         // Meldungen der Generierung kommen aus einem Hintergrund-Thread; wie auf dem UI-Thread laufen sie nur hier.
         o.Sammeln = true;
@@ -468,8 +580,22 @@ public sealed class HauptfensterTests : IDisposable
         string csv = Path.Combine(ordner, "export.csv");
         o.DateiZumSpeichern = csv;
         o.Antwort = true;
+
+        // Exportiert wird der angezeigte Plan: hier der Stand der Generierung in der Kostenansicht.
+        Assert.True(hf.CsvExportierenCommand.CanExecute(null));
+        Assert.EndsWith(PlanQuelle.Laufend.Name, hf.CsvHinweis, StringComparison.Ordinal);
         await hf.CsvExportierenCommand.ExecuteAsync(null);
         Assert.True(File.Exists(csv));
+
+        // Zeigt die Ansicht den gemerkten Plan, wird dieser exportiert.
+        KostenAnsichtViewModel angezeigt = Ansichten<KostenAnsichtViewModel>()[0];
+        angezeigt.Quelle = gemerkt;
+        Assert.EndsWith(gemerkt.Name, hf.CsvHinweis, StringComparison.Ordinal);
+        string gemerktCsv = Path.Combine(ordner, "gemerkt.csv");
+        o.DateiZumSpeichern = gemerktCsv;
+        await hf.CsvExportierenCommand.ExecuteAsync(null);
+        Assert.True(File.Exists(gemerktCsv));
+        angezeigt.Quelle = PlanQuelle.Laufend;
 
         hf.StoppenCommand.Execute(null);
         Assert.False(hf.Laeuft);
@@ -484,9 +610,13 @@ public sealed class HauptfensterTests : IDisposable
         KostenAnsichtViewModel kosten = Ansichten<KostenAnsichtViewModel>()[0];
         kosten.Quelle = gemerkt;
         Assert.NotEmpty(kosten.Tabelle.Zeilen);
-        Assert.True(kosten.EntfernenCommand.CanExecute(null));
-        await kosten.EntfernenCommand.ExecuteAsync(null);
+
+        // Gelöscht wird oben am Platz von „Plan merken“, wenn vor dem Start ein gemerkter Plan gewählt ist.
+        Assert.True(hf.ZeigtPlanLoeschen);
+        Assert.True(hf.PlanLoeschenCommand.CanExecute(null));
+        await hf.PlanLoeschenCommand.ExecuteAsync(null);
         Assert.DoesNotContain(hf.Planquellen, q => q.Art == PlanQuellenArt.GemerkterPlan);
+        Assert.False(hf.ZeigtPlanLoeschen);
     }
 
     [Fact]
@@ -635,45 +765,6 @@ public sealed class HauptfensterTests : IDisposable
     }
 
     [Fact]
-    public async Task Excel_Export_speichert_den_Plan_der_Ansicht()
-    {
-        await OeffnenAsync();
-        KostenAnsichtViewModel kosten = Ansichten<KostenAnsichtViewModel>()[0];
-        Assert.False(kosten.ExcelCommand.CanExecute(null));
-        kosten.Quelle = PlanQuelle.ClickTt;
-        Assert.True(kosten.ExcelCommand.CanExecute(null));
-
-        o.DateiZumSpeichern = null;
-        await kosten.ExcelCommand.ExecuteAsync(null);
-        Assert.Empty(o.Angezeigt);
-
-        string pfad = Path.Combine(ordner, "plan.xlsx");
-        o.DateiZumSpeichern = pfad;
-        await kosten.ExcelCommand.ExecuteAsync(null);
-
-        Assert.Equal(pfad, Assert.Single(o.Angezeigt));
-        using (ZipArchive zip = await ZipFile.OpenReadAsync(pfad))
-        {
-            XNamespace haupt = "http://schemas.openxmlformats.org/spreadsheetml/2006/main";
-            XDocument mappe = Xml(zip, "xl/workbook.xml");
-            string[] blaetter = ["Übersicht", "Spielplan", "Mannschaftspläne", "Kosten"];
-            Assert.Equal(blaetter, mappe.Descendants(haupt + "sheet").Select(b => (string)b.Attribute("name")!));
-            XDocument spielplan = Xml(zip, "xl/worksheets/sheet2.xml");
-            int spiele = spielplan.Descendants(haupt + "row").Count() - 1;
-            Assert.True(spiele > 0);
-            XDocument mannschaften = Xml(zip, "xl/worksheets/sheet3.xml");
-            Assert.Equal(2 * spiele, mannschaften.Descendants(haupt + "row").Count() - 1);
-            XDocument kostenblatt = Xml(zip, "xl/worksheets/sheet4.xml");
-            Assert.Contains(kostenblatt.Descendants(haupt + "t"), t => t.Value == "Summe");
-        }
-
-        o.DateiZumSpeichern = Path.Combine(ordner, "gibt-es-nicht", "plan.xlsx");
-        await kosten.ExcelCommand.ExecuteAsync(null);
-        Assert.Contains(o.Meldungen, m => m.StartsWith("Nach Excel exportieren:", StringComparison.Ordinal));
-        Assert.Single(o.Angezeigt);
-    }
-
-    [Fact]
     public async Task Oeffnen_beendet_die_Generierung_der_bisherigen_Staffel()
     {
         Assert.False(hf.StartplanWaehlbar);
@@ -690,7 +781,7 @@ public sealed class HauptfensterTests : IDisposable
 
         Assert.False(hf.Laeuft);
         Assert.False(hf.Pausiert);
-        Assert.Equal("Generierung starten", hf.GenerierungText);
+        Assert.Equal("Kostenoptimierung starten", hf.GenerierungText);
         Assert.False(hf.StoppenCommand.CanExecute(null));
         Assert.True(hf.StartplanWaehlbar);
     }
@@ -758,12 +849,6 @@ public sealed class HauptfensterTests : IDisposable
         await hf.DruckenCommand.ExecuteAsync(null);
         Assert.Contains("Drucken: Datei gesperrt", o.Meldungen);
         Assert.Empty(o.Angezeigt);
-    }
-
-    private static XDocument Xml(ZipArchive zip, string name)
-    {
-        using Stream strom = zip.GetEntry(name)!.Open();
-        return XDocument.Load(strom);
     }
 
     private static void Sammeln<T>(IDockable dockable, List<T> liste)

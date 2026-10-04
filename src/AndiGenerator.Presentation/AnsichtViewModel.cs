@@ -2,7 +2,6 @@
 // SPDX-FileCopyrightText: 2026 Peter Buchmann
 // SPDX-License-Identifier: GPL-3.0-only
 
-using CommunityToolkit.Mvvm.Input;
 using Dock.Model.Mvvm.Controls;
 
 namespace AndiGenerator.Presentation;
@@ -18,7 +17,6 @@ public abstract class AnsichtViewModel : Document, IZoombar
     private IReadOnlyList<PlanQuelle> quellen;
     private PlanQuelle? quelle;
     private string hinweis = string.Empty;
-    private bool hatPlan;
 
     /// <summary>Initialisiert die Ansicht.</summary>
     /// <param name="hauptfenster">Hauptfenster, das Pläne und Quellen liefert.</param>
@@ -35,8 +33,6 @@ public abstract class AnsichtViewModel : Document, IZoombar
         quellen = hauptfenster.Planquellen;
         quelle = PlanQuelle.Laufend;
         Title = TitelBilden();
-        EntfernenCommand = new AsyncRelayCommand(EntfernenAsync, () => Quelle?.Art == PlanQuellenArt.GemerkterPlan);
-        ExcelCommand = new AsyncRelayCommand(ExcelAsync, () => hatPlan);
     }
 
     /// <summary>Holt die auswählbaren Planquellen.</summary>
@@ -55,7 +51,6 @@ public abstract class AnsichtViewModel : Document, IZoombar
             if (SetProperty(ref quelle, value))
             {
                 Title = TitelBilden();
-                EntfernenCommand.NotifyCanExecuteChanged();
                 Aktualisieren();
             }
         }
@@ -80,12 +75,6 @@ public abstract class AnsichtViewModel : Document, IZoombar
     /// <inheritdoc/>
     public Zoom Zoom { get; } = new();
 
-    /// <summary>Holt den Befehl, der den gewählten gemerkten Plan löscht.</summary>
-    public IAsyncRelayCommand EntfernenCommand { get; }
-
-    /// <summary>Holt den Befehl „Nach Excel…“: den angezeigten Plan als Excel-Arbeitsmappe speichern.</summary>
-    public IAsyncRelayCommand ExcelCommand { get; }
-
     /// <summary>Holt die Quelle als Art (für die Aktualisierung bei Verbesserungen).</summary>
     internal PlanQuellenArt? QuellenArt => Quelle?.Art;
 
@@ -97,9 +86,8 @@ public abstract class AnsichtViewModel : Document, IZoombar
     {
         Planstand? stand = Quelle is null ? null : hauptfenster.PlanFuer(Quelle);
         Hinweis = stand is null ? HinweisOhnePlan() : string.Empty;
-        hatPlan = stand is not null;
-        ExcelCommand.NotifyCanExecuteChanged();
         Anzeigen(stand);
+        hauptfenster.ExportAktualisieren();
     }
 
     /// <summary>Übernimmt neue Planquellen und behält die gewählte bei, sofern es sie noch gibt.</summary>
@@ -134,8 +122,4 @@ public abstract class AnsichtViewModel : Document, IZoombar
     };
 
     private string TitelBilden() => Quelle is null ? art : $"{art} – {Quelle.Name}";
-
-    private Task ExcelAsync() => Quelle is null ? Task.CompletedTask : hauptfenster.ExcelExportierenAsync(Quelle);
-
-    private Task EntfernenAsync() => Quelle is null ? Task.CompletedTask : hauptfenster.GemerktenPlanEntfernenAsync(Quelle);
 }

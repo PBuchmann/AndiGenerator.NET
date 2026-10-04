@@ -24,20 +24,27 @@ public sealed class Inseloptimierer : IDisposable
 
     private readonly Lock sperre = new();
     private readonly Optimierungseinstellungen einstellungen;
-    private readonly KernDefinition definition;
     private readonly Staffel staffel;
-    private readonly Berechnungsoptionen optionen;
     private readonly Insel[] inseln;
     private readonly Insel? spezial;
     private readonly Suchplatz[] alle;
     private readonly Loesung beste;
     private readonly Loesung leer;
-    private readonly KernPlan bewerter;
+    private readonly Automodus? auto;
+    private readonly double autoBudget;
+    private readonly int[] autoStand;
     private readonly Random koordinatorZufall;
     private readonly ManualResetEventSlim laufen = new(true);
     private readonly Stopwatch uhr = new();
+
+    /// <summary>Reine Rechenzeit ohne Pausen (für den Automodus, der nach Sekunden lenkt).</summary>
+    private readonly Stopwatch laufzeit = new();
     private readonly List<Thread> threads = [];
     private CancellationTokenSource? abbruch;
+    private KernDefinition definition;
+    private Berechnungsoptionen optionen;
+    private KernPlan bewerter;
+    private long rechnenZiel;
     private double besteKosten;
     private int verbesserungen;
     private int abgleiche;
@@ -67,6 +74,12 @@ public sealed class Inseloptimierer : IDisposable
         definition = new KernDefinition(referenz);
         bewerter = NeuerPlan(referenz, definition);
         besteKosten = bewerter.Kosten();
+        if (this.einstellungen.Automodus)
+        {
+            autoBudget = this.einstellungen.Zeitbudget > 0 ? this.einstellungen.Zeitbudget : Automodus.StandardBudget;
+            auto = new Automodus(referenz, definition, this.einstellungen);
+        }
+
         beste = new Loesung(bewerter.AnzahlErlaubt);
         bewerter.LoesungSchreiben(beste);
         leer = new Loesung(bewerter.AnzahlErlaubt);
@@ -74,12 +87,14 @@ public sealed class Inseloptimierer : IDisposable
         var samen = new Random(this.einstellungen.Startwert ?? Random.Shared.Next());
         koordinatorZufall = new Random(samen.Next());
         inseln = new Insel[this.einstellungen.Inseln];
+        autoStand = new int[inseln.Length];
+        Array.Fill(autoStand, -1);
         for (int i = 0; i < inseln.Length; i++)
         {
             inseln[i] = InselAnlegen(i + 1, referenz, samen, aktiv: true);
         }
 
-        if (this.einstellungen.SpezialInsel)
+        if (this.einstellungen.SpezialInsel && auto is null)
         {
             spezial = InselAnlegen(0, referenz, samen, aktiv: false);
         }
@@ -149,6 +164,18 @@ public sealed class Inseloptimierer : IDisposable
         }
     }
 
+    /// <summary>Stand des Automodus; <c>null</c>, wenn er nicht eingeschaltet ist.</summary>
+    public Lenkungsstand? Lenkung
+    {
+        get
+        {
+            lock (sperre)
+            {
+                return auto?.Stand;
+            }
+        }
+    }
+
     /// <summary>Angehalten (Original <c>Paused</c>); die Threads warten ohne Rechenlast.</summary>
     public bool Pausiert
     {
@@ -159,11 +186,17 @@ public sealed class Inseloptimierer : IDisposable
             {
                 laufen.Reset();
                 uhr.Stop();
+                laufzeit.Stop();
             }
             else
             {
                 Volatile.Write(ref durchlaeufeBeiMessbeginn, Durchlaeufe);
                 uhr.Restart();
+                if (abbruch is not null)
+                {
+                    laufzeit.Start();
+                }
+
                 laufen.Set();
             }
         }
@@ -171,6 +204,26 @@ public sealed class Inseloptimierer : IDisposable
 
     /// <summary>Fehler, an dem ein Rechen-Thread abgebrochen ist; dann ist die Optimierung beendet.</summary>
     public Exception? Fehler => Volatile.Read(ref fehler);
+
+    /// <summary>
+    /// Übernimmt eine geänderte Einteilung der Kriterien in den laufenden Automodus (ohne neue Basisoptimierung); die Inseln
+    /// werden danach nach der neuen Einteilung verglichen.
+    /// </summary>
+    /// <param name="neu">Die neue Einteilung.</param>
+    public void EinteilungAendern(Stufeneinteilung neu)
+    {
+        ArgumentNullException.ThrowIfNull(neu);
+        lock (sperre)
+        {
+            if (auto is null)
+            {
+                return;
+            }
+
+            auto.EinteilungAendern(neu, AutoSekunden());
+            Array.Fill(autoStand, -1);
+        }
+    }
 
     /// <summary>Startet die Rechen-Threads und den Koordinator im Hintergrund.</summary>
     public void Starten()
@@ -191,6 +244,10 @@ public sealed class Inseloptimierer : IDisposable
 
         threads.Add(ThreadStarten(() => Koordinieren(token), "Koordinator", ThreadPriority.Normal));
         uhr.Restart();
+        if (!Pausiert)
+        {
+            laufzeit.Start();
+        }
     }
 
     /// <summary>Beendet alle Threads und übernimmt die letzten Ergebnisse.</summary>
@@ -212,6 +269,7 @@ public sealed class Inseloptimierer : IDisposable
         abbruch.Dispose();
         abbruch = null;
         uhr.Stop();
+        laufzeit.Stop();
         lock (sperre)
         {
             Abgleichen(optimiererSchritt: true);
@@ -232,6 +290,7 @@ public sealed class Inseloptimierer : IDisposable
         }
 
         uhr.Restart();
+        rechnenZiel = durchlaeufe;
         long gerechnet = Durchlaeufe;
         int index = 0;
         while (gerechnet < durchlaeufe)
@@ -264,14 +323,17 @@ public sealed class Inseloptimierer : IDisposable
     {
         lock (sperre)
         {
-            var spiele = new List<Spiel>(beste.Datum.Length);
-            for (int s = 0; s < beste.Datum.Length; s++)
+            // Im Automodus nach dem Grundlauf: bester Plan nach Stufen, Kosten mit den Gewichtungen des Anwenders.
+            bool gelenkt = auto is { Grundlauf: false };
+            Loesung ergebnis = gelenkt ? auto!.Beste : beste;
+            var spiele = new List<Spiel>(ergebnis.Datum.Length);
+            for (int s = 0; s < ergebnis.Datum.Length; s++)
             {
-                DateTime? zeitpunkt = beste.Datum[s] != 0.0 ? DelphiDatum.ZuDateTime(beste.Datum[s]) : null;
+                DateTime? zeitpunkt = ergebnis.Datum[s] != 0.0 ? DelphiDatum.ZuDateTime(ergebnis.Datum[s]) : null;
                 spiele.Add(new Spiel(zeitpunkt, definition.Name[definition.SpielHeim[s]], definition.Name[definition.SpielGast[s]], string.Empty));
             }
 
-            return new Optimierungsergebnis(besteKosten, verbesserungen, spiele);
+            return new Optimierungsergebnis(gelenkt ? auto!.BesteKosten : besteKosten, verbesserungen + (auto?.Verbesserungen ?? 0), spiele);
         }
     }
 
@@ -463,6 +525,11 @@ public sealed class Inseloptimierer : IDisposable
             }
         }
 
+        if (auto is not null)
+        {
+            AutoSchritt();
+        }
+
         if (spezial is not null && !spezialLaeuft && Durchlaeufe > einstellungen.DurchlaeufeVorSpezialInsel)
         {
             SpezialNeuAufsetzen(spezial);
@@ -483,6 +550,77 @@ public sealed class Inseloptimierer : IDisposable
         else
         {
             schlechteste.Neustarten(leer, -1);
+        }
+    }
+
+    /// <summary>Sekunden reiner Rechenzeit für den Automodus (bei fester Zahl von Durchläufen anteilig am Zeitbudget).</summary>
+    private double AutoSekunden() => rechnenZiel > 0 ? Durchlaeufe / (double)rechnenZiel * autoBudget : laufzeit.Elapsed.TotalSeconds;
+
+    /// <summary>
+    /// Automodus, bei jedem Optimierer-Schritt: Grundlauf beenden, Inseln nach Stufen bewerten und bei Stillstand
+    /// die Gewichte ändern.
+    /// </summary>
+    private void AutoSchritt()
+    {
+        // Der Automodus beobachtet die Verstöße über die reine Rechenzeit (ohne Pausen); er kennt keine Zeitgrenzen. Bei einer
+        // festen Zahl von Durchläufen (reproduzierbar) entspricht der ganze Lauf dem Zeitbudget bzw. 300 s.
+        double f = AutoSekunden();
+        auto!.Beobachten(besteKosten, f);
+        if (auto.Grundlauf)
+        {
+            // Nach einem Wechsel von der Kostenoptimierung ist der Plan schon optimiert: gleich mit Stufe A beginnen.
+            if (besteKosten >= 0 && (einstellungen.AutoOhneGrundlauf || auto.GrundlaufVorbei(f)))
+            {
+                auto.GrundlaufBeenden(beste, f, sofortLenken: einstellungen.AutoOhneGrundlauf);
+            }
+
+            return;
+        }
+
+        for (int i = 0; i < inseln.Length; i++)
+        {
+            Insel insel = inseln[i];
+            if (insel.Kosten >= 0 && insel.Stand != autoStand[i])
+            {
+                autoStand[i] = insel.Stand;
+                auto.Pruefen(insel.Loesung);
+            }
+        }
+
+        if (besteKosten >= 0)
+        {
+            auto.Verfolgen(beste, f);
+        }
+
+        if (besteKosten >= 0 && auto.Lenken(beste, f) is { } neu)
+        {
+            GewichteWechseln(neu);
+        }
+    }
+
+    /// <summary>
+    /// Neue Gewichtungen für alle Inseln (wie ein Anwender, der während der Rechnung die Gewichte ändert): Jede Insel rechnet
+    /// mit neuen Plänen ab dem besten Plan nach Stufen weiter.
+    /// </summary>
+    private void GewichteWechseln(Berechnungsoptionen neu)
+    {
+        optionen = neu;
+        RefPlan referenz = RefPlan.Laden(staffel, neu);
+        var stammdaten = new KernDefinition(referenz);
+        definition = stammdaten;
+        bewerter = NeuerPlan(referenz, stammdaten);
+
+        // Normalerweise rechnet die Suche mit ihrem Plan weiter; beim Glätten beginnt sie beim besten Plan neu.
+        if (auto!.NeustartVomBesten)
+        {
+            auto.Beste.KopierenNach(beste);
+            auto.NeustartVomBesten = false;
+        }
+
+        besteKosten = Bewerten(bewerter, beste);
+        foreach (Insel insel in inseln)
+        {
+            insel.NeuAufsetzen(beste, besteKosten, () => NeuerPlan(referenz, stammdaten));
         }
     }
 }

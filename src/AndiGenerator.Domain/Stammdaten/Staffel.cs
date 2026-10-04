@@ -35,6 +35,13 @@ public sealed record Staffel(
     Setzliste? Setzliste,
     IReadOnlyList<Spiel> BestehenderSpielplan)
 {
+    /// <summary>
+    /// Holt die vom Staffelleiter gewählte Einteilung der Kriterien in die Stufen A, B und C mit ihrer Reihenfolge
+    /// (Attribut <c>kriterienstufen</c> am Knoten <c>plan</c>, z. B. <c>A:Hallenbelegung,ParalleleSpiele;B:…;C:…</c>;
+    /// nicht im Original, das unbekannte Attribute beim Laden übernimmt und beim Speichern wieder schreibt). Leer = Standard.
+    /// </summary>
+    public string Kriterienstufen { get; init; } = string.Empty;
+
     /// <summary>Holt eine leere Staffel (Original: „Neu“ im Menü).</summary>
     public static Staffel Leer { get; } = new(string.Empty, string.Empty, string.Empty, null, null, null, [], [], [], [], null, []);
 }

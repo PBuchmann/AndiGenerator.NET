@@ -4,6 +4,7 @@
 
 using AndiGenerator.Domain.Optionen;
 using AndiGenerator.Domain.Stammdaten;
+using AndiGenerator.Engine.Inseln;
 
 namespace AndiGenerator.Application;
 
@@ -17,6 +18,7 @@ namespace AndiGenerator.Application;
 /// <param name="SeitLetzterVerbesserung">Zeit seit der letzten Verbesserung.</param>
 /// <param name="SpezialKostenart">Kostenart der Spezial-Insel, wenn sie läuft.</param>
 /// <param name="Spiele">Der beste Plan (alle Spiele; <see cref="Spiel.Zeitpunkt"/> = <c>null</c> für nicht terminierte).</param>
+/// <param name="Lenkung">Stand des Automodus; <c>null</c>, wenn er nicht läuft.</param>
 public sealed record Optimierungsstand(
     bool Laeuft,
     bool Pausiert,
@@ -26,7 +28,8 @@ public sealed record Optimierungsstand(
     int Verbesserungen,
     TimeSpan SeitLetzterVerbesserung,
     MannschaftsKostenart? SpezialKostenart,
-    IReadOnlyList<Spiel> Spiele)
+    IReadOnlyList<Spiel> Spiele,
+    Lenkungsstand? Lenkung = null)
 {
     /// <summary>Stand ohne laufende Generierung.</summary>
     public static Optimierungsstand Leer { get; } = new(false, false, 0, 0, -1, 0, TimeSpan.Zero, null, []);

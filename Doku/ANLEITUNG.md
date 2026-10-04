@@ -14,7 +14,7 @@ AndiGenerator.NET ist die Weiterentwicklung des **AndiGenerators** von Andreas H
 6. [Pläne beurteilen: die Ansichten](#6-pläne-beurteilen-die-ansichten)
 7. [Gewichtungen anpassen](#7-gewichtungen-anpassen)
 8. [Pläne merken und vergleichen](#8-pläne-merken-und-vergleichen)
-9. [Export, Excel und Druck](#9-export-excel-und-druck)
+9. [Export und Druck](#9-export-und-druck)
 10. [Spielplandaten bearbeiten](#10-spielplandaten-bearbeiten)
 11. [Runden: Doppelrunde, Halbrunde, Vor- und Rückrunde einzeln](#11-runden)
 12. [Bewertung der Pläne (Kosten)](#12-bewertung-der-pläne-kosten)
@@ -94,6 +94,7 @@ click-TT überträgt nicht alles, was für einen guten Plan nötig ist, und die 
 | Punkt | Worum es geht |
 |---|---|
 | **Gespeicherte Einstellungen** | Sie haben die Staffel schon einmal bearbeitet und dabei Gewichtungen geändert. Wählen Sie, ob Sie diese weiterverwenden oder für diese Sitzung mit den Standardeinstellungen rechnen wollen (die gespeicherten bleiben erhalten). |
+| **Gespeicherte Kriterienreihenfolge** | Sie haben für diese Staffel in der Ansicht **Qualität** eine eigene Einteilung der Kriterien in die Stufen A, B und C festgelegt (danach richtet sich der Automodus). Die Seite zeigt sie; wählen Sie, ob Sie sie weiterverwenden oder für diese Sitzung die Standardreihenfolge nehmen (die gespeicherte bleibt erhalten, bis Sie die Einteilung wieder ändern). |
 | **Rundenplanung** | Ist die Runde kürzer als sechs Monate, schlägt das Programm eine Halbrunde vor. Liegt die Vorrunde schon in der Vergangenheit, schlägt es vor, nur die Rückrunde zu planen. |
 | **Spiellokale** | click-TT überträgt keine Spiellokale. Haben Vereine mehrere Hallen, tragen Sie hier ein, welche Mannschaft wo spielt – sonst stimmt die Berechnung der Hallenbelegung nicht. Haben alle Vereine nur eine Halle, können Sie den Punkt überspringen. |
 | **Koppeltermine** | Die Staffel enthält Koppelwünsche oder mögliche Doppelspieltage. Das Programm leitet sie aus den Meldungen ab; bitte kontrollieren. |
@@ -101,7 +102,7 @@ click-TT überträgt nicht alles, was für einen guten Plan nötig ist, und die 
 | **Setzliste** | Wenn Sie mit einer Setzliste arbeiten wollen, geben Sie hier die erwartete Abschlusstabelle vor. |
 | **Pflichtspieltage** | Die Staffel enthält Pflichtspieltage. Sie sind bei ungerader Mannschaftszahl problematisch (siehe [Pflichtspieltage](#pflichtspieltage)). |
 
-Jeder Punkt lässt sich direkt auf der Seite bearbeiten; mit **Auswahl übernehmen** ist er erledigt, mit **Überspringen** bleibt er, wie er ist. Unten beendet **Abschließen** die Einrichtung, **Abschließen und generieren** startet zusätzlich gleich die Generierung. Offene Punkte werden dabei übersprungen. Alles lässt sich später unter **Spielplandaten** und **Einstellungen** ändern.
+Jeder Punkt lässt sich direkt auf der Seite bearbeiten; mit **Auswahl übernehmen** ist er erledigt, mit **Überspringen** bleibt er, wie er ist. Unten beendet **Abschließen** die Einrichtung; die Generierung startet danach im Hauptfenster mit **Kostenoptimierung starten** bzw. **Automodus starten**, wo auch der Ausgangsplan gewählt wird. Bei Entscheidungen gilt dabei die angeklickte Wahl, auch ohne **Auswahl übernehmen**; Punkte, bei denen Sie nichts gewählt haben, bleiben unverändert. Die Wahlkacheln und Knöpfe stehen immer unten im Blick, auch wenn die Erklärung darüber lang ist. Alles lässt sich später unter **Spielplandaten**, **Einstellungen** und in der Ansicht **Qualität** ändern.
 
 ### 3.4 Terminwünsche kontrollieren
 
@@ -109,7 +110,14 @@ Bevor Sie die Generierung starten, lohnt ein Blick in die Ansicht **Terminwünsc
 
 ### 3.5 Generierung starten und beobachten
 
-Mit **Generierung starten** oben rechts beginnt die Suche. Das Programm rechnet mit allen Prozessorkernen bis auf einen, damit der Rechner bedienbar bleibt, und zeigt laufend den besten bisher gefundenen Plan.
+Mit dem blauen Startknopf oben rechts beginnt die Suche. Über den Pfeil rechts daneben wählen Sie das Verfahren:
+
+- **Kostenoptimierung** – wie im Original: Die Suche senkt die Gesamtkosten mit Ihren Gewichtungen.
+- **Automodus** – die Suche lenkt sich selbst über die Gewichte, so wie man es von Hand an den Reglern tun würde: Erst drängt sie Verstöße der Stufen A und B heraus (Hallenbelegung, parallele Spiele, Pflichtspieltage, Koppel-, Sperr- und Ausweichtermine), dann glättet sie die übrigen Kriterien, ohne A und B wieder zu verschlechtern. Die erste Kachel zeigt dann statt der Gesamtkosten die Verstöße A, B und C des besten Plans (ein Klick öffnet die Ansicht **Qualität**; die Kachel *Pflichtregeln* entfällt), oben die Phase des Automodus (**Basisoptimierung** mit Ihren Gewichtungen, dann **Optimierung Stufe A**, **Stufe B** und **Stufe C**), unten nur Hinweise wie „angehalten“ oder verbliebene harte Fehler. Wechseln Sie während der Generierung von der Kostenoptimierung in den Automodus, entfällt die Basisoptimierung: Der bisher beste Plan ist schon optimiert und gilt als Basis, der Automodus beginnt sofort mit Stufe A. Beim Start des Automodus (und beim Wechsel zu ihm) springt das Programm in die Ansicht **Qualität**, beim Start der Kostenoptimierung (und beim Wechsel zu ihr) in die Ansicht **Kosten**; fehlt die Ansicht, wird sie geöffnet.
+
+Der Knopf merkt sich die Wahl und heißt danach **Kostenoptimierung starten** bzw. **Automodus starten**. Auch während der Generierung – laufend oder pausiert – lässt sich über den Pfeil zum anderen Verfahren wechseln; die Suche setzt beim bisher besten Plan fort.
+
+Das Programm rechnet mit allen Prozessorkernen bis auf einen, damit der Rechner bedienbar bleibt, und zeigt laufend den besten bisher gefundenen Plan.
 
 Schon nach wenigen Sekunden steht ein erster Plan. Nach einigen hunderttausend berechneten Plänen ist meist etwas Brauchbares dabei; nach einigen Millionen findet das Programm oft nur noch kleine Verbesserungen. Wie schnell das geht, hängt stark vom Prozessor ab – die Anzeige **Berechnete Pläne** nennt die aktuelle Geschwindigkeit.
 
@@ -117,7 +125,7 @@ Schon nach wenigen Sekunden steht ein erster Plan. Nach einigen hunderttausend b
 
 Während die Generierung läuft, beurteilen Sie den Plan in den Ansichten **Kosten**, **Qualität** und **Diagramme** und steuern über die Gewichtungen nach (Abschnitt [7](#7-gewichtungen-anpassen)). Die Generierung muss dafür nicht angehalten werden.
 
-Passt der Plan, **pausieren** Sie und exportieren ihn mit **Für click-TT exportieren** als CSV-Datei (Abschnitt [9](#9-export-excel-und-druck)). Die CSV-Datei importieren Sie in click-TT als Spielplan.
+Passt der Plan, **pausieren** Sie und exportieren ihn mit **Für click-TT exportieren** als CSV-Datei (Abschnitt [9](#9-export-und-druck)). Die CSV-Datei importieren Sie in click-TT als Spielplan.
 
 ## 4. Das Hauptfenster
 
@@ -127,20 +135,24 @@ Passt der Plan, **pausieren** Sie und exportieren ihn mit **Für click-TT export
 
 - **Staffel:** Öffnen, Neu, Spielplandaten, Einstellungen
 - **Ansichten:** Kosten, Qualität, Meldungen, Terminplan, Diagramme, Terminwünsche, Nachbarmannschaften
-- **Ausgabe:** Für click-TT exportieren, Drucken (PDF)
+- **Ausgabe:** Für click-TT exportieren (farblich hervorgehoben), Drucken (PDF)
 - **Anleitung:** öffnet diese Anleitung als PDF
 - **Über:** Version, Urheber und Lizenzen
 
-**Oben** stehen der Name der Staffel, die Datei und die Steuerung der Generierung: **Start mit**, **Plan merken**, **Generierung starten / Pausieren / Fortsetzen**, **Beenden** und **Schließen**. *Schließen* führt zur Startseite zurück; läuft noch eine Generierung, fragt das Programm vorher nach.
+Die Abschnitte *Staffel*, *Ansichten* und *Ausgabe* lassen sich mit einem Klick auf ihre Überschrift zu- und wieder aufklappen; so bleibt die Leiste auch auf kleinen Bildschirmen übersichtlich.
+
+**Oben** stehen der Name der Staffel, die Datei und die Steuerung der Generierung: **Start mit**, **Plan merken**, **Kostenoptimierung starten / Automodus starten / Pausieren / Fortsetzen** (mit dem Pfeil zur Wahl des Verfahrens), **Beenden** und **Schließen**. *Schließen* führt zur Startseite zurück; läuft noch eine Generierung, fragt das Programm vorher nach. Wählen Sie unter **Start mit** einen vorhandenen Plan (gemerkt oder aus click-TT), zeigen alle Ansichten und die Kacheln sofort diesen Plan – mit Kosten und Qualität –, ohne dass eine Optimierung startet und ihn verändert.
 
 Darunter vier **Kacheln** mit dem Stand der Generierung:
 
 | Kachel | Bedeutung |
 |---|---|
 | **Gesamtkosten (bester Plan)** | Die Kosten des besten bisher gefundenen Plans; darunter, wie stark sie seit Beginn gesunken sind. Nach einer Änderung der Gewichtung gilt der Vergleich ab dieser Änderung, weil die Kosten davor anders berechnet wurden. **Details ›** öffnet die Kostenansicht. |
+| **Pflichtregeln (Stufe A)** | Ob der beste Plan die wichtigsten Regeln einhält (siehe [Qualität](#62-qualität)). **Details ›** öffnet die Qualitätsansicht. |
 | **Verbesserungen** | Wie oft ein besserer Plan gefunden wurde, und wann zuletzt. |
 | **Berechnete Pläne** | Anzahl der geprüften Pläne und die aktuelle Geschwindigkeit. |
-| **Pflichtregeln (Stufe A)** | Ob der beste Plan die wichtigsten Regeln einhält (siehe [Qualität](#62-qualität)). **Details ›** öffnet die Qualitätsansicht. |
+
+Im Automodus entfällt die Kachel *Pflichtregeln*; die Ergebniskachel nimmt ihren Platz mit ein, *Verbesserungen* und *Berechnete Pläne* bleiben an ihrer Stelle. Die breitere Ergebniskachel zeigt oben die Phase (z. B. „Automodus · Optimierung Stufe A“) und unten unter **In Arbeit** alle Kriterien, an denen gerade gearbeitet wird (in Stufe A und B die zuletzt angehobenen, in C das, das geglättet wird) und vor jeder Verstoßzahl klein den Stand am Ende der Basisoptimierung (z. B. „A 14 → 3“).
 
 Den **Hauptbereich** füllen die Ansichten. Jede Ansicht öffnet sich als Reiter; Sie können mehrere öffnen, zwischen ihnen wechseln, sie per Maus nebeneinander anordnen und mit dem **×** am Reiter schließen. In vielen Ansichten vergrößert oder verkleinert **Strg + Mausrad** (oder der Zoomregler) die Darstellung.
 
@@ -150,7 +162,8 @@ Ganz unten zeigt die **Statuszeile** den Stand in einer Zeile.
 
 | Schaltfläche | Wirkung |
 |---|---|
-| **Generierung starten** | Beginnt die Suche mit dem Ausgangsplan aus **Start mit**. |
+| **Kostenoptimierung starten** / **Automodus starten** | Beginnt die Suche mit dem Ausgangsplan aus **Start mit** und dem gewählten Verfahren. |
+| **Pfeil neben dem Startknopf** | Wählt das Verfahren; während der Generierung wechselt er zum anderen Verfahren, ab dem bisher besten Plan. |
 | **Pausieren** | Hält die Suche an. Der beste Plan bleibt erhalten; so können Sie ihn in Ruhe ansehen oder exportieren. |
 | **Fortsetzen** | Setzt eine pausierte Suche mit ihrem besten Plan fort. |
 | **Beenden** | Beendet die Generierung. Danach kann mit einem anderen Ausgangsplan neu gestartet werden. |
@@ -168,7 +181,7 @@ Solange eine Generierung läuft oder pausiert ist, ist *Start mit* gesperrt: Ein
 
 ## 6. Pläne beurteilen: die Ansichten
 
-Die Ansichten **Kosten, Qualität, Meldungen, Terminplan** und **Diagramme** zeigen einen Plan. Welchen, wählen Sie oben in der Ansicht unter **Plan**: den besten Plan der laufenden Generierung, den in click-TT vorhandenen Plan oder einen gemerkten Plan. So lassen sich Pläne nebeneinander vergleichen – etwa zwei Kostenansichten mit verschiedenen Plänen. Gemerkte Pläne löschen Sie dort mit **Löschen**; **Nach Excel** speichert den gewählten Plan als Excel-Arbeitsmappe.
+Die Ansichten **Kosten, Qualität, Meldungen, Terminplan** und **Diagramme** zeigen einen Plan. Welchen, wählen Sie oben in der Ansicht unter **Plan**: den besten Plan der laufenden Generierung, den in click-TT vorhandenen Plan oder einen gemerkten Plan. So lassen sich Pläne nebeneinander vergleichen – etwa zwei Kostenansichten mit verschiedenen Plänen.
 
 Die Ansichten **Terminwünsche** und **Nachbarmannschaften** hängen nicht vom Plan ab, sondern nur von den Daten der Staffel.
 
@@ -195,15 +208,19 @@ Die aufklappbare Hilfe **So funktioniert die Tabelle** unter der Matrix fasst da
 
 ![Qualitätsansicht](Anleitung/Bilder/05-qualitaet.png)
 
-Die Kosten sagen, wie gut ein Plan *insgesamt* ist. Die Qualitätsansicht beantwortet eine andere Frage: **Welche Regeln verletzt der Plan, und wie oft?** Die Kriterien sind nach Wichtigkeit in drei Stufen geordnet:
+Die Kosten sagen, wie gut ein Plan *insgesamt* ist. Die Qualitätsansicht beantwortet eine andere Frage: **Welche Regeln verletzt der Plan, und wie oft?** Die Kriterien sind nach Wichtigkeit in drei Stufen geordnet. Voreingestellt ist:
 
 | Stufe | Kriterien | Ziel |
 |---|---|---|
-| **A – Pflicht** | A1 alle Spiele terminiert, gültig und nicht an spielfreien Tagen · A2 Hallenbelegung · A3 parallele Spiele · A4 vereinsinterne Spiele am Anfang · A5 Pflichtspieltage | einhalten |
-| **B – Wünsche** | B1 Sperrtermine · B2 Ausweichtermine | möglichst wenige Verstöße; bei sehr vielen gemeldeten Sperrterminen ist ein Rest vertretbar |
-| **C – Güte** | alle übrigen Kostenarten, z. B. Wechsel Heim/Auswärts, 3-Tage-Abstand, Überlappung der Spieltage | so gut wie möglich |
+| **A – Pflicht** | A1 alle Spiele terminiert, gültig und nicht an spielfreien Tagen · A2 Hallenbelegung · A3 parallele Spiele · A4 Pflichtspieltage · A5 vereinsinterne Spiele am Anfang | einhalten |
+| **B – Wünsche** | B1 Auswärtskoppel · B2 Heimkoppel · B3 Sperrtermine · B4 Ausweichtermine | möglichst wenige Verstöße; bei sehr vielen gemeldeten Sperrterminen ist ein Rest vertretbar |
+| **C – Güte** | alle übrigen Kostenarten, z. B. Heim/Auswärts ausgeglichen, Wechsel Heim/Auswärts, 3-Tage-Abstand, zuletzt die Spieltage | so gut wie möglich |
 
-Rot markiert sind verletzte Pflichten der Stufe A. Die Kachel **Pflichtregeln (Stufe A)** im Kopf zeigt denselben Stand für die laufende Generierung.
+**Verstöße im Einzelnen:** Ein Klick auf eine Zeile zeigt rechts daneben, wo das Kriterium verletzt ist – je Mannschaft, die meisten Verstöße zuerst, mit den Meldungen wie in der Ansicht **Meldungen** (bei A1 die harten Fehler des ganzen Plans). Ein zweiter Klick auf die Zeile oder **×** schließt die Liste. Hat das Kriterium keine Verstöße, bleibt sie zu; die Liste folgt dem Plan, auch während die Generierung läuft. Länge und Überlappung der Spieltage und vereinsinterne Spiele haben keine Einzelangaben.
+
+**Die Einteilung bestimmen Sie selbst (im Automodus):** Rechts in jeder Zeile wählen Sie die Stufe **A**, **B** oder **C** und verschieben das Kriterium mit den Pfeilen nach oben (wichtiger) oder unten. Rückt ein Kriterium in eine weniger wichtige Stufe (A → B, B → C), steht es dort an erster Stelle; rückt es in eine wichtigere (C → B, B → A), kommt es ans Ende. Am Rand einer Stufe führen die Pfeile in die Nachbarstufe. Oder Sie ziehen die Zeile am Griff **⋮⋮** links an die gewünschte Stelle: Die Zeile hängt dann am Mauszeiger, und die Tabelle macht dort Platz, wo sie landen würde, und nummeriert schon um – Stufe und Nummer ergeben sich aus der Stelle. **Esc** bricht das Ziehen ab. Bei der Kostenoptimierung ist die Einteilung nur zu sehen, nicht zu ändern. Die Nummern folgen der Reihenfolge. Nur A1 (harte Fehler) ist fest, und Länge und Überlappung der Spieltage bleiben in C, weil sie keine Anzahl von Verstößen haben. Die Einteilung wird mit den Spielplandaten gespeichert (bei click-TT-Dateien in der `.modifications`; der alte AndiGenerator lädt die Datei weiterhin und lässt die Angabe unbeachtet). Der **Automodus** richtet sich nach dieser Einteilung: Er drängt erst die Verstöße der Stufe A, dann B heraus und glättet C in der gewählten Reihenfolge. Eine Änderung während der Generierung gilt sofort, ohne neue Basisoptimierung: Der Automodus behält seine Gewichte und macht sofort beim wichtigsten geänderten Kriterium weiter – schieben Sie etwa B1 nach A2, drängt er zuerst genau dieses Kriterium heraus (solange es dort noch vorangeht), danach wieder die ganze Stufe A; bei einer Änderung in C glättet er ab diesem Kriterium. Liegt die Änderung hinter der Stelle, an der er gerade arbeitet, macht er dort einfach weiter.
+
+Die Spalte **Kosten** erscheint nur bei der Kostenoptimierung. Rot markiert sind verletzte Pflichten der Stufe A. Die Kachel **Pflichtregeln (Stufe A)** im Kopf zeigt denselben Stand für die laufende Generierung.
 
 ### 6.3 Meldungen
 
@@ -300,29 +317,23 @@ Um Pläne aus verschiedenen Einstellungen zu vergleichen, merken Sie sich Zwisch
 1. **Plan merken** (oben) anklicken – gemerkt wird der beste Plan der laufenden Generierung.
 2. Einen Namen eingeben, z. B. „Sperrtermine hoch“.
 
-Der Plan erscheint danach in jeder Ansicht in der Auswahl **Plan** und unter **Start mit**. Sie können ihn so ansehen, mit dem aktuellen vergleichen, als Ausgangsplan für eine neue Generierung nehmen oder mit **Löschen** entfernen.
+Der Plan erscheint danach in jeder Ansicht in der Auswahl **Plan** und unter **Start mit**. Sie können ihn so ansehen, mit dem aktuellen vergleichen, als Ausgangsplan für eine neue Generierung nehmen oder entfernen: Ist er vor dem Start unter **Start mit** gewählt, steht oben an der Stelle von *Plan merken* der Knopf **Plan löschen**.
 
 Gemerkte Pläne liegen im Datenordner der Staffel und stehen auch nach einem Neustart zur Verfügung.
 
-## 9. Export, Excel und Druck
+## 9. Export und Druck
 
 ### 9.1 Für click-TT exportieren
 
-**Für click-TT exportieren** speichert den **besten Plan der Generierung** als CSV-Datei, die click-TT als Spielplan importiert. Pausieren Sie die Generierung vorher, damit sich der Plan nicht mehr ändert.
+**Für click-TT exportieren** (linke Leiste, *Ausgabe*, farblich hervorgehoben) speichert den **gerade angezeigten Plan** als CSV-Datei, die click-TT als Spielplan importiert: den Plan, den die aktive Ansicht zeigt (laufende Generierung, click-TT-Plan oder ein gemerkter Plan), sonst den Stand der Generierung bzw. den unter *Start mit* gewählten Plan. Welcher es ist, verrät der Tooltip. Gibt es keinen Plan, ist der Eintrag grau und nicht anklickbar. Exportieren Sie den laufenden Plan, pausieren Sie die Generierung vorher, damit er sich nicht mehr ändert.
 
 Vor dem Export prüft das Programm auf harte Fehler: Spiele ohne Termin, Spiele mit ungültigem Termin und Spiele an spielfreien Tagen. Gibt es welche, werden sie aufgelistet, und Sie entscheiden, ob Sie trotzdem exportieren. Spiele ohne Termin stehen in der CSV-Datei am ersten Tag der Runde um 00:00 Uhr.
 
 Die Spiellokale werden mit exportiert. Sie müssen dafür Nummern von 1 bis 5 sein, so wie click-TT sie erwartet.
 
-> **Einen gemerkten Plan exportieren:** Wählen Sie ihn unter **Start mit**, starten Sie die Generierung und pausieren Sie sofort. Der gemerkte Plan ist dann der beste Plan und wird exportiert.
-
 Wurde nur die Vor- oder nur die Rückrunde geplant, enthält die CSV-Datei auch nur deren Spiele.
 
-### 9.2 Nach Excel
-
-**Nach Excel** in den Plan-Ansichten speichert den dort gewählten Plan als Excel-Arbeitsmappe mit den Blättern *Übersicht*, *Spielplan*, *Mannschaftspläne* und *Kosten*. Spielplan und Mannschaftspläne sind filterbare Listen mit echten Datums- und Zeitwerten; die Kostentabelle ist eingefärbt wie in der Kostenansicht. So lässt sich ein Plan mit anderen teilen oder weiter auswerten.
-
-### 9.3 Drucken (PDF)
+### 9.2 Drucken (PDF)
 
 ![Druckauswahl](Anleitung/Bilder/11-druckauswahl.png)
 
