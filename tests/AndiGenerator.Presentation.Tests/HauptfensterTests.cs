@@ -178,6 +178,27 @@ public sealed class HauptfensterTests : IDisposable
     }
 
     [Fact]
+    public async Task Nach_dem_Start_zeigen_die_Ansichten_des_Ausgangsplans_die_laufende_Generierung()
+    {
+        await OeffnenAsync();
+        KostenAnsichtViewModel kosten = Assert.Single(Ansichten<KostenAnsichtViewModel>());
+        hf.Startplan = hf.Startplaene.Single(p => p.Quelle == PlanQuelle.ClickTt);
+        hf.QualitaetsansichtCommand.Execute(null);
+        QualitaetAnsichtViewModel qualitaet = Assert.Single(Ansichten<QualitaetAnsichtViewModel>());
+
+        hf.StartenCommand.Execute(null);
+        try
+        {
+            Assert.Equal(PlanQuelle.Laufend, kosten.Quelle);
+            Assert.Equal(PlanQuelle.Laufend, qualitaet.Quelle);
+        }
+        finally
+        {
+            hf.StoppenCommand.Execute(null);
+        }
+    }
+
+    [Fact]
     public async Task Einrichtung_abschliessen_zeigt_den_Arbeitsbereich_ohne_zu_generieren()
     {
         await hf.OeffnenCommand.ExecuteAsync(null);

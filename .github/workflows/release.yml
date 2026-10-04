@@ -1,6 +1,7 @@
 # Erzeugt eine neue Version auf GitHub Releases, sobald ein Tag wie v1.0.0 gepusht wird:
 # bauen und testen, veröffentlichen (win-x64, eigenständig), mit Velopack Setup, portable ZIP und Update-Pakete
 # erzeugen und alles als Release hochladen. Das installierte Programm findet die neue Version dort selbst.
+# Danach kommen Linux-Pakete für Chromebooks dazu (x64 und arm64, je .deb und portables tar.gz; ohne Selbst-Update).
 name: Release
 
 on:
@@ -93,3 +94,42 @@ jobs:
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release upload ${{ github.ref_name }} AndiGeneratorNET-${{ steps.version.outputs.version }}-sbom.spdx.json
+
+  # Linux (Chromebooks mit Linux-Entwicklungsumgebung, auch andere Linux-Systeme): eigenständig veröffentlichen und als
+  # Debian-Paket und tar.gz an das Release hängen, das der Windows-Job angelegt hat. Getestet wird im Windows-Job.
+  linux:
+    needs: release
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        rid: [ linux-x64, linux-arm64 ]
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Version aus dem Tag
+        id: version
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Veröffentlichen
+        run: dotnet publish src/AndiGenerator.Desktop -c Release -r ${{ matrix.rid }} --self-contained -nologo -o publish -p:Version=${{ steps.version.outputs.version }}
+
+      - name: Pakete erzeugen
+        run: |
+          mkdir -p pakete
+          bash src/AndiGenerator.Desktop/Linux/paket-bauen.sh ${{ matrix.rid }} ${{ steps.version.outputs.version }} publish pakete
+          ls -l pakete
+
+      - name: Herkunftsnachweis
+        continue-on-error: true
+        uses: actions/attest-build-provenance@v4
+        with:
+          subject-path: pakete/*
+
+      - name: An das Release hängen
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload ${{ github.ref_name }} pakete/* --clobber --repo ${{ github.repository }}
