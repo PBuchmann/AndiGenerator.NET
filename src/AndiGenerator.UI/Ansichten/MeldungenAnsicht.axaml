@@ -14,9 +14,6 @@
           </DataTemplate>
         </ComboBox.ItemTemplate>
       </ComboBox>
-      <Button Classes="gross" Command="{Binding EntfernenCommand}" ToolTip.Tip="Gewählten gemerkten Plan löschen">
-        <StackPanel Orientation="Horizontal" Spacing="8"><ui:Symbol Daten="{StaticResource SymbolLoeschen}" Groesse="20" /><TextBlock Text="Löschen" VerticalAlignment="Center" /></StackPanel>
-      </Button>
       <ComboBox MinWidth="220" Margin="12,0,0,0" ItemsSource="{Binding Mannschaften}" SelectedItem="{Binding Mannschaft}" />
       <ui:Zoomauswahl DataContext="{Binding Zoom}" Margin="12,0,0,0" />
     </StackPanel>

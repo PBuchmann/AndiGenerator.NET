@@ -7,11 +7,11 @@ using System.Xml;
 using AndiGenerator.Application;
 using AndiGenerator.Domain.Optionen;
 using AndiGenerator.Domain.Stammdaten;
+using AndiGenerator.Engine.Inseln;
 using AndiGenerator.Engine.Referenz;
 using AndiGenerator.Persistence.ClickTt;
 using AndiGenerator.Persistence.Gemeinsam;
 using AndiGenerator.Persistence.Plandaten;
-using AndiGenerator.Persistence.Tabellen;
 using AndiGenerator.Rendering;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
@@ -28,6 +28,8 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
 {
     /// <summary>Dateiname der Anleitung neben dem Programm.</summary>
     public const string Anleitungsdatei = "Anleitung.pdf";
+
+    private const string KeinExportplan = "Kein Plan zum Exportieren – erst eine Generierung starten oder einen Plan wählen.";
 
     private static readonly CultureInfo Deutsch = CultureInfo.GetCultureInfo("de-DE");
 
@@ -47,6 +49,8 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
     private IReadOnlyList<PlanQuelle> planquellen = [PlanQuelle.Laufend];
     private IReadOnlyList<Startplan> startplaene = [Startplan.Leer];
     private Startplan startplan = Startplan.Leer;
+    private string csvHinweis = KeinExportplan;
+    private bool automodus;
     private OptionenAnsichtViewModel? optionenAnsicht;
     private TerminwunschAnsichtViewModel? terminwunschAnsicht;
     private NachbarterminAnsichtViewModel? nachbarterminAnsicht;
@@ -84,6 +88,7 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         this.uebernahmeAus = uebernahmeAus;
         dienst = new Optimierungsdienst();
         dienst.Verbessert += BeiVerbesserung;
+        CsvExportierenCommand = new AsyncRelayCommand(CsvExportierenAsync, () => ExportQuelle() is not null);
 
         // Zu Beginn nur die Kostenansicht; weitere Ansichten erst, wenn sie links angeklickt werden.
         ansichten.Add(new KostenAnsichtViewModel(this, NaechsteId()));
@@ -94,6 +99,8 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
             {
                 AktiveAnsicht = art;
             }
+
+            ExportAktualisieren();
         };
         fabrik.DockableClosed += (_, e) =>
         {
@@ -122,6 +129,8 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         NeuCommand = new AsyncRelayCommand(NeueDateiAsync);
         SchliessenCommand = new AsyncRelayCommand(SchliessenAsync, () => IstGeoeffnet);
         GenerierungCommand = new RelayCommand(GenerierungUmschalten, () => IstGeoeffnet);
+        KostenoptimierungCommand = new RelayCommand(() => VerfahrenWaehlen(false), () => IstGeoeffnet && !(Laeuft && !Automodus));
+        AutomodusCommand = new RelayCommand(() => VerfahrenWaehlen(true), () => IstGeoeffnet && !(Laeuft && Automodus));
         ZuletztOeffnenCommand = new AsyncRelayCommand<string>(ZuletztOeffnenAsync);
         ZuletztEntfernenCommand = new RelayCommand<string>(ZuletztEntfernen);
         ZoomGroesserCommand = new RelayCommand(() => ZoombareAnsicht()?.Zoom.Groesser());
@@ -131,13 +140,19 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         PauseCommand = new RelayCommand(PauseUmschalten, () => Laeuft);
         StoppenCommand = new RelayCommand(Stoppen, () => Laeuft);
         PlanMerkenCommand = new AsyncRelayCommand(PlanMerkenAsync, () => laufenderStand is not null);
-        CsvExportierenCommand = new AsyncRelayCommand(CsvExportierenAsync, () => laufenderStand is not null);
+        PlanLoeschenCommand = new AsyncRelayCommand(
+            () => startplan.Quelle is PlanQuelle quelle ? GemerktenPlanEntfernenAsync(quelle) : Task.CompletedTask,
+            () => ZeigtPlanLoeschen);
         DruckenCommand = new AsyncRelayCommand(DruckenAsync, () => ZeigtArbeitsbereich);
         AnleitungCommand = new AsyncRelayCommand(AnleitungAsync);
         UeberCommand = new AsyncRelayCommand(() => oberflaeche.UeberAnzeigenAsync(new UeberViewModel(oberflaeche, UeberViewModel.VersionVon(typeof(HauptfensterViewModel).Assembly), this.eigeneBasis)));
         KostenansichtCommand = new RelayCommand(() => AnsichtZeigen(() => new KostenAnsichtViewModel(this, NaechsteId())), () => HatPlan && ZeigtArbeitsbereich);
         TerminplanansichtCommand = new RelayCommand(() => AnsichtZeigen(() => new TerminplanAnsichtViewModel(this, NaechsteId())), () => HatPlan && ZeigtArbeitsbereich);
         QualitaetsansichtCommand = new RelayCommand(() => AnsichtZeigen(() => new QualitaetAnsichtViewModel(this, NaechsteId())), () => HatPlan && ZeigtArbeitsbereich);
+        ErgebnisCommand = new RelayCommand(
+            () => (Anzeige.ZeigtVerstoesse ? QualitaetsansichtCommand : KostenansichtCommand).Execute(null),
+            () => HatPlan && ZeigtArbeitsbereich);
+        Anzeige.ZeigtVerstoesseGeaendert += (_, _) => OnPropertyChanged(nameof(ErgebnisHinweis));
         MeldungsansichtCommand = new RelayCommand(() => AnsichtZeigen(() => new MeldungenAnsichtViewModel(this, NaechsteId())), () => HatPlan && ZeigtArbeitsbereich);
         DiagrammansichtCommand = new RelayCommand(() => AnsichtZeigen(() => new DiagrammAnsichtViewModel(this, NaechsteId())), () => HatPlan && ZeigtArbeitsbereich);
         EinstellungenCommand = new RelayCommand(EinstellungenOeffnen, () => ZeigtArbeitsbereich);
@@ -241,7 +256,7 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
     /// <summary>Holt die Beschriftung des Knopfs, der die Generierung startet, anhält und fortsetzt.</summary>
     public string GenerierungText => (Laeuft, Pausiert) switch
     {
-        (false, _) => "Generierung starten",
+        (false, _) => Automodus ? "Automodus starten" : "Kostenoptimierung starten",
         (true, true) => "Fortsetzen",
         _ => "Pausieren",
     };
@@ -257,6 +272,12 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
     /// Generierung setzt immer ihren eigenen besten Plan fort; für einen anderen Ausgangsplan erst „Beenden“.
     /// </summary>
     public bool StartplanWaehlbar => IstGeoeffnet && !Laeuft;
+
+    /// <summary>
+    /// Holt einen Wert, der angibt, ob statt „Plan merken“ der Knopf „Plan löschen“ steht: vor dem Start, wenn unter
+    /// „Start mit“ ein gemerkter Plan gewählt ist.
+    /// </summary>
+    public bool ZeigtPlanLoeschen => StartplanWaehlbar && startplan.Quelle?.Art == PlanQuellenArt.GemerkterPlan;
 
     /// <summary>Holt die Statuszeile (Pläne, Pläne/s, Kosten, Verbesserungen).</summary>
     public string Statuszeile
@@ -346,8 +367,8 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
     /// <summary>Holt den Befehl „Plan merken…“ (bester Plan der Generierung).</summary>
     public IAsyncRelayCommand PlanMerkenCommand { get; }
 
-    /// <summary>Holt den Befehl „CSV für click-TT exportieren…“ (bester Plan der Generierung).</summary>
-    public IAsyncRelayCommand CsvExportierenCommand { get; }
+    /// <summary>Holt den Befehl „Plan löschen“: den unter „Start mit“ gewählten gemerkten Plan nach Rückfrage löschen.</summary>
+    public IAsyncRelayCommand PlanLoeschenCommand { get; }
 
     /// <summary>Holt den Befehl „Drucken…“ (Original: Druckauswahl und Ausdruck; hier als PDF-Datei).</summary>
     public IAsyncRelayCommand DruckenCommand { get; }
@@ -370,6 +391,14 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
     /// <summary>Holt den Befehl „Neue Qualitätsansicht“.</summary>
     public IRelayCommand QualitaetsansichtCommand { get; }
 
+    /// <summary>Holt den Befehl der Ergebniskachel: Kostenansicht, im Automodus die Qualitätsansicht.</summary>
+    public IRelayCommand ErgebnisCommand { get; }
+
+    /// <summary>Holt den Hinweis der Ergebniskachel.</summary>
+    public string ErgebnisHinweis => Anzeige.ZeigtVerstoesse
+        ? "Qualitätsansicht öffnen: welche Kriterien verletzt sind"
+        : "Kostenansicht öffnen: Kosten je Mannschaft und Kostenart";
+
     /// <summary>Holt den Befehl „Neue Meldungsansicht“ (Meldungen je Mannschaft, im Original unter der Kostentabelle).</summary>
     public IRelayCommand MeldungsansichtCommand { get; }
 
@@ -385,6 +414,19 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
     /// <summary>Holt den Befehl „Spielplandaten…“ (Original Schaltfläche „Daten“).</summary>
     public IAsyncRelayCommand DatenCommand { get; }
 
+    /// <summary>
+    /// Holt den Befehl „Für click-TT exportieren“: den aktuell angezeigten Plan (Plan der aktiven Ansicht, sonst den
+    /// Stand der Generierung bzw. den gewählten Ausgangsplan) als CSV speichern; deaktiviert, wenn es keinen gibt.
+    /// </summary>
+    public IAsyncRelayCommand CsvExportierenCommand { get; }
+
+    /// <summary>Holt den Hinweis zum click-TT-Export: welcher Plan exportiert würde.</summary>
+    public string CsvHinweis
+    {
+        get => csvHinweis;
+        private set => SetProperty(ref csvHinweis, value);
+    }
+
     /// <summary>Holt die möglichen Ausgangspläne für „Generierung starten“.</summary>
     public IReadOnlyList<Startplan> Startplaene
     {
@@ -392,18 +434,66 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         private set => SetProperty(ref startplaene, value);
     }
 
-    /// <summary>Holt oder setzt den Ausgangsplan für „Generierung starten“ (Standard: leerer Plan wie im Original).</summary>
+    /// <summary>
+    /// Holt oder setzt den Ausgangsplan für „Generierung starten“ (Standard: leerer Plan wie im Original). Ein gewählter
+    /// vorhandener Plan wird sofort in allen Ansichten und den Kacheln gezeigt, ohne dass eine Optimierung startet.
+    /// </summary>
     public Startplan? Startplan
     {
         get => startplan;
         set
         {
-            if (value is not null)
+            if (value is not null && SetProperty(ref startplan, value))
             {
-                SetProperty(ref startplan, value);
+                PlanLoeschenAktualisieren();
+                if (value.Quelle is PlanQuelle quelle)
+                {
+                    StartplanZeigen(quelle);
+                }
             }
         }
     }
+
+    /// <summary>
+    /// Holt einen Wert, der angibt, ob mit Automodus generiert wird bzw. beim nächsten Start werden soll: Die Suche lenkt sich
+    /// selbst über die Gewichte, erst Verstöße der Stufen A und B herausdrängen, dann C glätten (MIGRATIONSPLAN
+    /// Abschnitt 11). Sonst Kostenoptimierung wie im Original.
+    /// </summary>
+    public bool Automodus
+    {
+        get => automodus;
+        private set
+        {
+            if (SetProperty(ref automodus, value))
+            {
+                VerfahrenGeaendert();
+                foreach (QualitaetAnsichtViewModel qualitaet in ansichten.OfType<QualitaetAnsichtViewModel>())
+                {
+                    qualitaet.VerfahrenGeaendert();
+                }
+            }
+        }
+    }
+
+    /// <summary>Holt den Eintrag „Kostenoptimierung“ im Auswahlmenü des Startknopfs.</summary>
+    public string KostenoptimierungText => Menueeintrag("Kostenoptimierung", !Automodus);
+
+    /// <summary>Holt den Eintrag „Automodus“ im Auswahlmenü des Startknopfs.</summary>
+    public string AutomodusText => Menueeintrag("Automodus", Automodus);
+
+    /// <summary>Holt den Hinweis zum Startknopf: welches Verfahren läuft bzw. startet.</summary>
+    public string VerfahrenHinweis => Automodus
+        ? "Automodus: Die Suche lenkt sich selbst über die Gewichte. Über den Pfeil rechts lässt sich zur Kostenoptimierung wechseln."
+        : "Kostenoptimierung wie im Original. Über den Pfeil rechts lässt sich zum Automodus wechseln.";
+
+    /// <summary>Holt den Befehl „Kostenoptimierung starten“ bzw. während der Generierung „zur Kostenoptimierung wechseln“.</summary>
+    public IRelayCommand KostenoptimierungCommand { get; }
+
+    /// <summary>Holt den Befehl „Automodus starten“ bzw. während der Generierung „zum Automodus wechseln“.</summary>
+    public IRelayCommand AutomodusCommand { get; }
+
+    /// <summary>Holt die Einteilung der Kriterien in die Stufen A, B und C der geöffneten Staffel (sonst den Standard).</summary>
+    internal Stufeneinteilung Einteilung => Stufeneinteilung.AusText(sitzung?.Staffel.Kriterienstufen);
 
     /// <summary>Holt die Optionen der geöffneten Staffel (<c>null</c>, solange keine geöffnet ist).</summary>
     internal Berechnungsoptionen? Optionen => sitzung?.Optionen;
@@ -457,6 +547,46 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
                 return clickTtStand;
             default:
                 return GemerktenStandLaden(s, quelle.Eintrag!);
+        }
+    }
+
+    /// <summary>
+    /// Ändert die Einteilung der Kriterien (Qualitätsansicht) und speichert sie mit den Spielplandaten; eine laufende
+    /// Generierung übernimmt sie wie jede Datenänderung – der Automodus lenkt danach nach den neuen Stufen.
+    /// </summary>
+    /// <param name="aendern">Die Änderung an der bisherigen Einteilung.</param>
+    /// <returns>Erledigt nach dem Speichern.</returns>
+    internal async Task EinteilungAendernAsync(Func<Stufeneinteilung, Stufeneinteilung> aendern)
+    {
+        if (sitzung is not Plansitzung s)
+        {
+            return;
+        }
+
+        Stufeneinteilung bisher = Einteilung;
+        Stufeneinteilung neu = aendern(bisher);
+        if (neu.Text() == bisher.Text())
+        {
+            return;
+        }
+
+        try
+        {
+            s.KriterienstufenSpeichern(neu.Text());
+        }
+        catch (Exception fehler) when (fehler is IOException or UnauthorizedAccessException)
+        {
+            await oberflaeche.MeldenAsync("Qualität", "Die Einteilung konnte nicht gespeichert werden:" + Environment.NewLine + fehler.Message);
+            return;
+        }
+
+        // Die Kosten ändern sich nicht: Der laufende Automodus übernimmt die Einteilung ohne Neustart und macht beim
+        // wichtigsten geänderten Kriterium weiter.
+        dienst.EinteilungAendern(neu);
+        AlleAnsichtenAktualisieren();
+        if (laufenderStand is Planstand stand)
+        {
+            Anzeige.Uebernehmen(stand.Bewertung, Einteilung);
         }
     }
 
@@ -519,6 +649,51 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
     /// <returns>Die Meldungen; leer, wenn es keine gibt.</returns>
     internal IReadOnlyList<string> Zellmeldungen(string mannschaft, MannschaftsKostenart art, Planstand? angezeigt) =>
         sitzung is Plansitzung s && angezeigt is not null ? s.Meldungen(angezeigt.Spiele, mannschaft, art) : [];
+
+    /// <summary>
+    /// Einzelheiten eines Kriteriums im angezeigten Plan (Qualitätsansicht): je betroffener Mannschaft ihre Verstöße, die
+    /// meisten zuerst; bei den harten Fehlern die Fehler des ganzen Plans. Leer, wenn es keine gibt oder das Kriterium
+    /// keine Einzelangaben hat (Spieltage, vereinsinterne Spiele).
+    /// </summary>
+    /// <param name="harteFehler"><c>true</c> für die harten Fehler (A1), sonst gilt <paramref name="kriterium"/>.</param>
+    /// <param name="kriterium">Das Kriterium.</param>
+    /// <param name="angezeigt">Der angezeigte Plan.</param>
+    /// <returns>Die Einzelheiten.</returns>
+    internal IReadOnlyList<Meldungsgruppe> Kriteriumsdetails(bool harteFehler, Kostenkriterium? kriterium, Planstand? angezeigt)
+    {
+        if (sitzung is not Plansitzung s || angezeigt is null)
+        {
+            return [];
+        }
+
+        if (harteFehler)
+        {
+            IReadOnlyList<string> fehler = s.HarteFehler(angezeigt.Spiele);
+            if (fehler.Count == 0)
+            {
+                return [];
+            }
+
+            return [new Meldungsgruppe("Ganzer Plan", string.Create(Deutsch, $"{fehler.Count} Fehler"), fehler)];
+        }
+
+        if (kriterium is not Kostenkriterium k || k >= Kostenkriterium.VereinsinterneSpieleAmAnfang)
+        {
+            return [];
+        }
+
+        var art = (MannschaftsKostenart)(int)k;
+        Dictionary<string, IReadOnlyList<string>> texte = s.MeldungenJeMannschaft(angezeigt.Spiele, art)
+            .GroupBy(m => m.Mannschaft, StringComparer.Ordinal)
+            .ToDictionary(g => g.Key, g => g.First().Meldungen, StringComparer.Ordinal);
+        return angezeigt.Bewertung.Mannschaften
+            .Select(m => (m.Name, Zelle: m.JeKostenart[(int)art], Texte: texte.GetValueOrDefault(m.Name) ?? []))
+            .Where(x => x.Zelle.Anzahl > 0 || x.Texte.Count > 0 || (x.Zelle.Anzahl < 0 && x.Zelle.Kosten > 0))
+            .OrderByDescending(x => Math.Max(x.Zelle.Anzahl, x.Texte.Count))
+            .ThenByDescending(x => x.Zelle.Kosten)
+            .Select(x => new Meldungsgruppe(x.Name, Anzahltext(x.Zelle.Anzahl, x.Texte.Count), x.Texte))
+            .ToList();
+    }
 
     /// <summary>
     /// Übernimmt geänderte Optionen wie das Original (<c>DoOnAfterPlanChanged</c>): speichern, laufende Generierung vom
@@ -591,47 +766,6 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         return new Druckdokument(s.Staffel.Name, plan, DateTime.Now, abschnitte);
     }
 
-    /// <summary>
-    /// Speichert einen Plan als Excel-Arbeitsmappe (Übersicht, Spielplan, Mannschaftspläne, Kosten) und öffnet sie
-    /// anschließend mit dem zugeordneten Programm.
-    /// </summary>
-    /// <param name="quelle">Die Planquelle.</param>
-    /// <returns>Erledigt nach dem Export.</returns>
-    internal async Task ExcelExportierenAsync(PlanQuelle quelle)
-    {
-        ArgumentNullException.ThrowIfNull(quelle);
-        if (sitzung is not Plansitzung s || PlanFuer(quelle) is not Planstand stand)
-        {
-            return;
-        }
-
-        const string Titeltext = "Nach Excel exportieren";
-        string? pfad = await oberflaeche.DateiSpeichernAsync(Titeltext, s.Staffel.Name + ".xlsx", new Dateifilter("Excel-Arbeitsmappen", ["*.xlsx"]));
-        if (pfad is null)
-        {
-            return;
-        }
-
-        try
-        {
-            Arbeitsmappe mappe = Tabellenexport.Erstellen(
-                s.Staffel,
-                quelle.Name,
-                DateTime.Now,
-                s.Terminplan(stand.Spiele),
-                Kostendarstellung.Kennzahlen(stand.Bewertung, s.Optionen),
-                Kostendarstellung.Tabelle(stand.Bewertung, s.Optionen, s.Staffel));
-            XlsxDatei.Speichern(pfad, mappe);
-        }
-        catch (Exception fehler) when (fehler is IOException or UnauthorizedAccessException)
-        {
-            await oberflaeche.MeldenAsync(Titeltext, fehler.Message);
-            return;
-        }
-
-        await oberflaeche.DateiAnzeigenAsync(pfad);
-    }
-
     /// <summary>Daten der Diagramme eines Plans.</summary>
     /// <param name="stand">Plan.</param>
     /// <returns>Die Diagrammdaten oder <c>null</c>, solange keine Staffel geöffnet ist.</returns>
@@ -640,6 +774,16 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
     /// <summary>Automatisch ermittelte Enddaten der Viertelrunden für die aktuellen Optionen.</summary>
     /// <returns>Die Daten oder <c>null</c>, solange keine Staffel geöffnet ist.</returns>
     internal (DateOnly Mitte1, DateOnly Mitte2)? AutomatischeRundenmitten() => sitzung?.AutomatischeRundenmitten();
+
+    /// <summary>
+    /// Der angezeigte Plan hat sich geändert (aktive Ansicht, ihre Planquelle, Generierung): Export für click-TT neu
+    /// bestimmen.
+    /// </summary>
+    internal void ExportAktualisieren()
+    {
+        CsvHinweis = ExportQuelle() is PlanQuelle quelle ? "Für click-TT exportieren: " + quelle.Name : KeinExportplan;
+        CsvExportierenCommand.NotifyCanExecuteChanged();
+    }
 
     /// <summary>Löscht einen gemerkten Plan nach Rückfrage.</summary>
     /// <param name="quelle">Quelle des gemerkten Plans.</param>
@@ -668,6 +812,30 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         gemerkteStaende.Remove(eintrag.Pfad);
         QuellenNeuAufbauen();
     }
+
+    /// <summary>Die Einteilung als Aufzählung für die Einrichtung: je Stufe eine Überschrift, darunter die Kriterien mit Nummer.</summary>
+    private static List<string> Einteilungszeilen(Stufeneinteilung einteilung)
+    {
+        Stufeneinteilung e = einteilung.Vervollstaendigt();
+        var zeilen = new List<string> { "Stufe A", "  A1 Harte Fehler (fest)" };
+        zeilen.AddRange(e.A.Select((k, i) => string.Create(Deutsch, $"  A{i + 2} {Planqualitaet.Name(k)}")));
+        zeilen.Add(string.Empty);
+        zeilen.Add("Stufe B");
+        zeilen.AddRange(e.B.Select((k, i) => string.Create(Deutsch, $"  B{i + 1} {Planqualitaet.Name(k)}")));
+        zeilen.Add(string.Empty);
+        zeilen.Add("Stufe C");
+        zeilen.AddRange(e.C.Select((k, i) => string.Create(Deutsch, $"  C{i + 1} {Planqualitaet.Name(k)}")));
+        return zeilen;
+    }
+
+    private static string Anzahltext(int verstoesse, int meldungen) => (verstoesse, meldungen) switch
+    {
+        (1, _) => "1 Verstoß",
+        (> 1, _) => string.Create(Deutsch, $"{verstoesse} Verstöße"),
+        (_, 1) => "1 Meldung",
+        (_, > 1) => string.Create(Deutsch, $"{meldungen} Meldungen"),
+        _ => "Abweichung",
+    };
 
     private static IReadOnlyList<string> DetailMeldungen(Plansitzung s, MannschaftsKostenartGewichtungsziel ziel, Planstand? angezeigt)
     {
@@ -761,6 +929,11 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         if (stand.SpezialKostenart is { } art)
         {
             text += $" · Spezial-Insel: {Referenzbewertung.Kostenartnamen[(int)art]}";
+        }
+
+        if (stand.Lenkung is { } lenkung)
+        {
+            text += $" · Automodus: {lenkung.Bezeichnung}";
         }
 
         return stand.Pausiert ? "Angehalten – " + text : text;
@@ -871,6 +1044,8 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         OnPropertyChanged(nameof(StartplanWaehlbar));
         StartenCommand.NotifyCanExecuteChanged();
         GenerierungCommand.NotifyCanExecuteChanged();
+        KostenoptimierungCommand.NotifyCanExecuteChanged();
+        AutomodusCommand.NotifyCanExecuteChanged();
         EinstellungenCommand.NotifyCanExecuteChanged();
         DatenCommand.NotifyCanExecuteChanged();
         DruckenCommand.NotifyCanExecuteChanged();
@@ -915,6 +1090,8 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         OnPropertyChanged(nameof(StartplanWaehlbar));
         StartenCommand.NotifyCanExecuteChanged();
         GenerierungCommand.NotifyCanExecuteChanged();
+        KostenoptimierungCommand.NotifyCanExecuteChanged();
+        AutomodusCommand.NotifyCanExecuteChanged();
         EinstellungenCommand.NotifyCanExecuteChanged();
         DatenCommand.NotifyCanExecuteChanged();
         DruckenCommand.NotifyCanExecuteChanged();
@@ -952,6 +1129,24 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
                 ]));
         }
 
+        // Eigene Einteilung der Kriterien für den Automodus (Qualitätsansicht): wie die gespeicherten Einstellungen zur Wahl.
+        Einrichtungsschritt? stufenschritt = null;
+        if (!string.IsNullOrWhiteSpace(neu.Staffel.Kriterienstufen)
+            && Stufeneinteilung.Lesen(neu.Staffel.Kriterienstufen) is Stufeneinteilung gespeichert
+            && gespeichert.Text() != Stufeneinteilung.Standard.Text())
+        {
+            stufenschritt = new Einrichtungsschritt(
+                schritte.Count + 1,
+                "Gespeicherte Kriterienreihenfolge",
+                "Bei der letzten Verwendung wurde zu dieser Staffel folgende Einteilung der Kriterien hinterlegt. Nach ihr richtet sich der Automodus:",
+                Einteilungszeilen(gespeichert),
+                [
+                    new Einrichtungsoption("Diese Reihenfolge verwenden", "wie bei der letzten Verwendung"),
+                    new Einrichtungsoption("Standardreihenfolge verwenden", "nur für diese Sitzung; die gespeicherte bleibt erhalten"),
+                ]);
+            schritte.Add(stufenschritt);
+        }
+
         Rundenvorschlag vorschlag = neu.RundeVorschlagen(DateOnly.FromDateTime(DateTime.Today));
         Einrichtungsschritt? rundenschritt = null;
         if (vorschlag != Rundenvorschlag.Keiner)
@@ -980,7 +1175,7 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
             : new EinrichtungViewModel(
                 neu.Staffel.Name + " einrichten",
                 schritte,
-                schritt => SchrittUebernehmenAsync(neu, schritt, ReferenceEquals(schritt, rundenschritt) ? vorschlag : Rundenvorschlag.Keiner),
+                schritt => EinrichtungsschrittUebernehmenAsync(neu, schritt, stufenschritt, rundenschritt, vorschlag),
                 schritt => SeiteErzeugen(neu, schritt),
                 EinrichtungAbschliessen);
     }
@@ -1002,6 +1197,39 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
             _ => new PflichtspieltageSeiteViewModel(bearbeitung, oberflaeche),
         };
         return new DatenDialogViewModel(bearbeitung, [seite]);
+    }
+
+    /// <summary>Übernimmt einen Punkt der Einrichtung: Kriterienreihenfolge, Rundenplanung (mit Vorschlag) oder einen anderen Punkt.</summary>
+    private Task<bool> EinrichtungsschrittUebernehmenAsync(
+        Plansitzung s,
+        Einrichtungsschritt schritt,
+        Einrichtungsschritt? stufenschritt,
+        Einrichtungsschritt? rundenschritt,
+        Rundenvorschlag vorschlag)
+    {
+        if (ReferenceEquals(schritt, stufenschritt))
+        {
+            return Task.FromResult(KriterienschrittUebernehmen(s, schritt));
+        }
+
+        return SchrittUebernehmenAsync(s, schritt, ReferenceEquals(schritt, rundenschritt) ? vorschlag : Rundenvorschlag.Keiner);
+    }
+
+    /// <summary>Einrichtung: gespeicherte Kriterienreihenfolge verwenden oder für diese Sitzung die Standardreihenfolge.</summary>
+    private bool KriterienschrittUebernehmen(Plansitzung s, Einrichtungsschritt schritt)
+    {
+        if (!ReferenceEquals(s, sitzung))
+        {
+            return false;
+        }
+
+        if (schritt.Auswahl == 1)
+        {
+            s.StandardKriterienstufenFuerDieseSitzung();
+            AlleAnsichtenAktualisieren();
+        }
+
+        return true;
     }
 
     /// <summary>
@@ -1056,14 +1284,9 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         }
     }
 
-    private Task EinrichtungAbschliessen(bool generieren)
+    private Task EinrichtungAbschliessen()
     {
         Einrichtung = null;
-        if (generieren && IstGeoeffnet && !Laeuft)
-        {
-            Starten();
-        }
-
         return Task.CompletedTask;
     }
 
@@ -1104,6 +1327,7 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         IReadOnlyList<Spiel>? ausgangsplan = startplan.Quelle is PlanQuelle quelle ? PlanFuer(quelle)?.Spiele : null;
         laufenderStand = null;
         dienst.Pausiert = false;
+        dienst.Automodus = Automodus;
         Anzeige.Zuruecksetzen("erster Plan wird gesucht …");
         dienst.Starten(s.Staffel, s.Optionen, ausgangsplan);
         StartplaeneAufbauen();
@@ -1111,6 +1335,7 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         Pausiert = false;
         BefehleAktualisieren();
         AnsichtenAktualisieren(PlanQuellenArt.LaufendeGenerierung);
+        VerfahrensansichtZeigen();
     }
 
     private void GenerierungUmschalten()
@@ -1125,12 +1350,76 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         }
     }
 
+    /// <summary>
+    /// Auswahl im Menü des Startknopfs: vor dem Start wird mit diesem Verfahren gestartet; während der Generierung wird zu
+    /// ihm gewechselt, und die Suche setzt beim bisher besten Plan fort (auch aus der Pause heraus).
+    /// </summary>
+    private void VerfahrenWaehlen(bool auto)
+    {
+        Automodus = auto;
+        if (!Laeuft)
+        {
+            Starten();
+            return;
+        }
+
+        if (sitzung is Plansitzung s)
+        {
+            dienst.Automodus = auto;
+            dienst.DatenAendern(s.Staffel, s.Optionen);
+            Anzeige.KostenAngepasst();
+            dienst.Pausiert = false;
+            Pausiert = false;
+            VerfahrensansichtZeigen();
+        }
+    }
+
+    /// <summary>
+    /// Zum Verfahren passende Ansicht zeigen (vorher öffnen, falls nötig): im Automodus die Qualitätsansicht, in der der
+    /// Staffelleiter lenkt, bei der Kostenoptimierung die Kostenansicht.
+    /// </summary>
+    private void VerfahrensansichtZeigen()
+    {
+        if (!ZeigtArbeitsbereich)
+        {
+            return;
+        }
+
+        if (Automodus)
+        {
+            AnsichtZeigen(() => new QualitaetAnsichtViewModel(this, NaechsteId()));
+        }
+        else
+        {
+            AnsichtZeigen(() => new KostenAnsichtViewModel(this, NaechsteId()));
+        }
+    }
+
+    private string Menueeintrag(string verfahren, bool gewaehlt) => (Laeuft, gewaehlt) switch
+    {
+        (false, _) => verfahren + " starten",
+        (true, true) => verfahren + " (läuft)",
+        _ => (verfahren == "Automodus" ? "Zum " : "Zur ") + verfahren + " wechseln",
+    };
+
+    private void VerfahrenGeaendert()
+    {
+        OnPropertyChanged(nameof(GenerierungText));
+        OnPropertyChanged(nameof(KostenoptimierungText));
+        OnPropertyChanged(nameof(AutomodusText));
+        OnPropertyChanged(nameof(VerfahrenHinweis));
+        KostenoptimierungCommand.NotifyCanExecuteChanged();
+        AutomodusCommand.NotifyCanExecuteChanged();
+    }
+
     private void GenerierungGeaendert()
     {
+        VerfahrenGeaendert();
         OnPropertyChanged(nameof(GenerierungText));
         OnPropertyChanged(nameof(ZeigtPause));
         OnPropertyChanged(nameof(ZeigtStart));
         OnPropertyChanged(nameof(StartplanWaehlbar));
+        PlanLoeschenAktualisieren();
     }
 
     private void KopfAktualisieren(Plansitzung s)
@@ -1232,9 +1521,10 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         QuellenNeuAufbauen();
     }
 
+    /// <summary>Exportiert den aktuell angezeigten Plan als CSV für den click-TT-Import.</summary>
     private async Task CsvExportierenAsync()
     {
-        if (sitzung is not Plansitzung s || laufenderStand is not Planstand stand)
+        if (sitzung is not Plansitzung s || ExportQuelle() is not PlanQuelle quelle || PlanFuer(quelle) is not Planstand stand)
         {
             return;
         }
@@ -1394,6 +1684,12 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         ansichten.Add(ansicht);
         fabrik.AnsichtHinzufuegen(ansicht);
         ansicht.QuellenUebernehmen(Planquellen);
+
+        // Vor dem Start zeigt eine neue Ansicht den gewählten Ausgangsplan.
+        if (!Laeuft && startplan.Quelle is PlanQuelle quelle && Planquellen.Contains(quelle))
+        {
+            ansicht.Quelle = quelle;
+        }
     }
 
     private Planstand? GemerktenStandLaden(Plansitzung s, GemerkterPlanEintrag eintrag)
@@ -1441,6 +1737,47 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
     }
 
     /// <summary>Ausgangspläne für „Generierung starten“: leer, bester Plan der letzten Generierung, click-TT-Plan, gemerkte Pläne.</summary>
+    private void PlanLoeschenAktualisieren()
+    {
+        OnPropertyChanged(nameof(ZeigtPlanLoeschen));
+        PlanLoeschenCommand.NotifyCanExecuteChanged();
+    }
+
+    /// <summary>
+    /// Der aktuell angezeigte Plan: der Plan der aktiven Ansicht, sonst der Stand der Generierung, sonst der gewählte
+    /// Ausgangsplan; <c>null</c>, wenn es keinen gibt.
+    /// </summary>
+    private PlanQuelle? ExportQuelle()
+    {
+        if (sitzung is null || !ZeigtArbeitsbereich)
+        {
+            return null;
+        }
+
+        PlanQuelle? quelle = ((Layout.ActiveDockable as IDock)?.ActiveDockable as AnsichtViewModel)?.Quelle;
+        quelle ??= laufenderStand is not null ? PlanQuelle.Laufend : startplan.Quelle;
+        return quelle is not null && PlanFuer(quelle) is not null ? quelle : null;
+    }
+
+    /// <summary>Zeigt den gewählten Ausgangsplan vor dem Start: alle Ansichten auf diesen Plan, die Kacheln mit seiner Bewertung.</summary>
+    private void StartplanZeigen(PlanQuelle quelle)
+    {
+        if (Laeuft || sitzung is null)
+        {
+            return;
+        }
+
+        foreach (AnsichtViewModel ansicht in ansichten.Where(a => a.Quellen.Contains(quelle)))
+        {
+            ansicht.Quelle = quelle;
+        }
+
+        if (PlanFuer(quelle) is Planstand stand)
+        {
+            Anzeige.PlanZeigen(stand.Bewertung, Einteilung, quelle.Name);
+        }
+    }
+
     private void StartplaeneAufbauen()
     {
         var starts = new List<Startplan> { Startplan.Leer };
@@ -1451,6 +1788,7 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         Startplaene = starts;
         startplan = starts.FirstOrDefault(p => p == bisher) ?? Startplan.Leer;
         OnPropertyChanged(nameof(Startplan));
+        PlanLoeschenAktualisieren();
     }
 
     private void AlleAnsichtenAktualisieren()
@@ -1472,7 +1810,7 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
     private void BefehleAktualisieren()
     {
         PlanMerkenCommand.NotifyCanExecuteChanged();
-        CsvExportierenCommand.NotifyCanExecuteChanged();
+        ExportAktualisieren();
         AnsichtsbefehleAktualisieren();
     }
 
@@ -1481,6 +1819,7 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         OnPropertyChanged(nameof(HatPlan));
         KostenansichtCommand.NotifyCanExecuteChanged();
         QualitaetsansichtCommand.NotifyCanExecuteChanged();
+        ErgebnisCommand.NotifyCanExecuteChanged();
         MeldungsansichtCommand.NotifyCanExecuteChanged();
         TerminplanansichtCommand.NotifyCanExecuteChanged();
         DiagrammansichtCommand.NotifyCanExecuteChanged();
@@ -1525,7 +1864,7 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
 
             bool erster = laufenderStand is null;
             laufenderStand = neu;
-            Anzeige.Uebernehmen(neu.Bewertung);
+            Anzeige.Uebernehmen(neu.Bewertung, Einteilung);
             if (erster)
             {
                 StartplaeneAufbauen();

@@ -56,7 +56,6 @@
       <StreamGeometry x:Key="SymbolNachbarn">M5.5 8a3.5 3.5 0 1 0 7 0a3.5 3.5 0 1 0 -7 0 M2.5 20a6.5 6.5 0 0 1 13 0 M16 4.5a3.5 3.5 0 0 1 0 7 M18 14.5a6.5 6.5 0 0 1 3.5 5.5</StreamGeometry>
       <StreamGeometry x:Key="SymbolExport">M12 15V3 M7 8l5-5l5 5 M4 15v4a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-4</StreamGeometry>
       <StreamGeometry x:Key="SymbolDrucken">M6 9V3h12v6 M5 9h14a2 2 0 0 1 2 2v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4a2 2 0 0 1 2-2z M6 14h12v7H6z</StreamGeometry>
-      <StreamGeometry x:Key="SymbolExcel">M6 3h12a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z M4 9h16 M4 15h16 M10 3v18</StreamGeometry>
       <StreamGeometry x:Key="SymbolAnleitung">M4 4h6a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H4z M20 4h-6a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h7z</StreamGeometry>
       <StreamGeometry x:Key="SymbolInfo">M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0 M12 11v5 M12 8h0.01</StreamGeometry>
       <StreamGeometry x:Key="SymbolStart">M7 4l13 8l-13 8z</StreamGeometry>
@@ -71,6 +70,7 @@
       <StreamGeometry x:Key="SymbolHoch">M12 19V5 M6 11l6-6 6 6</StreamGeometry>
       <StreamGeometry x:Key="SymbolSchliessen">M6 6l12 12 M18 6L6 18</StreamGeometry>
       <StreamGeometry x:Key="SymbolRunter">M12 5v14 M6 13l6 6 6-6</StreamGeometry>
+      <StreamGeometry x:Key="SymbolAuswahl">M6 9l6 6 6-6</StreamGeometry>
       <StreamGeometry x:Key="SymbolWarnung">M12 4l9 16H3z M12 10v4 M12 17h0.01</StreamGeometry>
       <StreamGeometry x:Key="SymbolKalender">M5 4h14a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z M3 9h18 M8 2v4 M16 2v4</StreamGeometry>
     </ResourceDictionary>
@@ -149,6 +149,66 @@
   <Style Selector="Button.nav.aktiv ui|Symbol">
     <Setter Property="Farbe" Value="{StaticResource Akzent}" />
   </Style>
+  <!-- Klappbare Abschnitte der linken Leiste: Überschrift als Schalter, Pfeil nach unten = offen, nach rechts = zu -->
+  <Style Selector="ToggleButton.sektion">
+    <Setter Property="HorizontalAlignment" Value="Stretch" />
+    <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="CornerRadius" Value="8" />
+    <Setter Property="Padding" Value="14,16,12,6" />
+    <Setter Property="FontSize" Value="11" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="Foreground" Value="{StaticResource Grau}" />
+  </Style>
+  <Style Selector="ToggleButton.sektion /template/ ContentPresenter#PART_ContentPresenter, ToggleButton.sektion:checked /template/ ContentPresenter#PART_ContentPresenter, ToggleButton.sektion:pressed /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{StaticResource Grau}" />
+  </Style>
+  <Style Selector="ToggleButton.sektion:pointerover /template/ ContentPresenter#PART_ContentPresenter, ToggleButton.sektion:checked:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="{StaticResource Tinte}" />
+  </Style>
+  <Style Selector="ToggleButton.sektion ui|Symbol.klappe">
+    <Setter Property="Farbe" Value="{StaticResource Grau}" />
+    <Setter Property="VerticalAlignment" Value="Center" />
+  </Style>
+  <Style Selector="ToggleButton.sektion:unchecked ui|Symbol.klappe">
+    <Setter Property="RenderTransform" Value="rotate(-90deg)" />
+  </Style>
+  <Style Selector="StackPanel.sektionsinhalt.zu">
+    <Setter Property="IsVisible" Value="False" />
+  </Style>
+  <!-- Schmale Leiste (nur Symbole): keine Überschriften, alle Abschnitte offen -->
+  <Style Selector="Border.schmal ToggleButton.sektion">
+    <Setter Property="IsVisible" Value="False" />
+  </Style>
+  <Style Selector="Border.schmal StackPanel.sektionsinhalt.zu">
+    <Setter Property="IsVisible" Value="True" />
+  </Style>
+  <!-- Hervorgehobener Eintrag der Leiste (Export für click-TT): Akzentfarbe wie die Hauptaktion -->
+  <Style Selector="Button.nav.hervorgehoben">
+    <Setter Property="Background" Value="{StaticResource AkzentHell}" />
+    <Setter Property="Foreground" Value="{StaticResource Akzent}" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+  </Style>
+  <Style Selector="Button.nav.hervorgehoben:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="#D3E1F2" />
+    <Setter Property="Foreground" Value="{StaticResource AkzentDunkel}" />
+  </Style>
+  <Style Selector="Button.nav.hervorgehoben ui|Symbol">
+    <Setter Property="Farbe" Value="{StaticResource Akzent}" />
+  </Style>
+  <Style Selector="Button.nav.hervorgehoben:disabled /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="Foreground" Value="#9CA2AA" />
+  </Style>
+  <Style Selector="Button.nav.hervorgehoben:disabled">
+    <Setter Property="FontWeight" Value="Normal" />
+  </Style>
+  <Style Selector="Button.nav.hervorgehoben:disabled ui|Symbol">
+    <Setter Property="Farbe" Value="#B8BCC2" />
+  </Style>
   <Style Selector="Border.navigation">
     <Setter Property="Width" Value="248" />
   </Style>
@@ -201,6 +261,43 @@
     <Setter Property="Background" Value="#9DB5D3" />
     <Setter Property="BorderBrush" Value="#9DB5D3" />
     <Setter Property="Foreground" Value="White" />
+  </Style>
+  <!-- Auswahl des Verfahrens am Startknopf: Karte wie die übrigen, Einträge mit Titel, Erklärung und Haken beim gewählten -->
+  <Style Selector="MenuFlyoutPresenter.verfahren">
+    <Setter Property="Background" Value="{StaticResource Flaeche}" />
+    <Setter Property="BorderBrush" Value="{StaticResource Rand}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="12" />
+    <Setter Property="Padding" Value="6" />
+    <Setter Property="MinWidth" Value="360" />
+  </Style>
+  <Style Selector="MenuFlyoutPresenter.verfahren MenuItem">
+    <Setter Property="Padding" Value="12,10" />
+    <Setter Property="CornerRadius" Value="8" />
+    <Setter Property="Foreground" Value="{StaticResource Tinte}" />
+  </Style>
+  <Style Selector="MenuFlyoutPresenter.verfahren MenuItem /template/ Border#PART_LayoutRoot">
+    <Setter Property="CornerRadius" Value="8" />
+  </Style>
+  <Style Selector="MenuFlyoutPresenter.verfahren MenuItem:pointerover /template/ Border#PART_LayoutRoot, MenuFlyoutPresenter.verfahren MenuItem:selected /template/ Border#PART_LayoutRoot">
+    <Setter Property="Background" Value="{StaticResource AkzentHell}" />
+  </Style>
+  <Style Selector="MenuFlyoutPresenter.verfahren MenuItem:pressed /template/ Border#PART_LayoutRoot">
+    <Setter Property="Background" Value="#D3E1F2" />
+  </Style>
+  <Style Selector="MenuFlyoutPresenter.verfahren MenuItem:disabled">
+    <Setter Property="Opacity" Value="0.5" />
+  </Style>
+  <Style Selector="TextBlock.verfahrenstitel">
+    <Setter Property="FontSize" Value="13" />
+    <Setter Property="FontWeight" Value="SemiBold" />
+    <Setter Property="Foreground" Value="{StaticResource Tinte}" />
+  </Style>
+  <Style Selector="TextBlock.verfahrenstext">
+    <Setter Property="FontSize" Value="12" />
+    <Setter Property="Foreground" Value="{StaticResource Tinte2}" />
+    <Setter Property="TextWrapping" Value="Wrap" />
+    <Setter Property="MaxWidth" Value="300" />
   </Style>
   <Style Selector="Button.link">
     <Setter Property="Background" Value="Transparent" />

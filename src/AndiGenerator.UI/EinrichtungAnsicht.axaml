@@ -88,15 +88,9 @@
       </Grid>
     </Border>
     <Grid DockPanel.Dock="Bottom" ColumnDefinitions="*,Auto" Margin="28,0,28,20">
-      <TextBlock Text="Offene Punkte werden beim Abschließen übersprungen. Alles lässt sich später unter „Spielplandaten“ und „Einstellungen“ ändern." Classes="klein" FontSize="13" TextWrapping="Wrap" VerticalAlignment="Center" Margin="0,0,16,0" />
+      <TextBlock Text="Beim Abschließen gilt bei Entscheidungen die angeklickte Wahl; Punkte ohne Wahl bleiben unverändert. Alles lässt sich später unter „Spielplandaten“, „Einstellungen“ und in der Qualitätsansicht ändern." Classes="klein" FontSize="13" TextWrapping="Wrap" VerticalAlignment="Center" Margin="0,0,16,0" />
       <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
-        <Button Classes="gross" Content="Abschließen" Command="{Binding AbschliessenCommand}" />
-        <Button Classes="gross primaer" Command="{Binding AbschliessenUndGenerierenCommand}">
-          <StackPanel Orientation="Horizontal" Spacing="10">
-            <ui:Symbol Daten="{StaticResource SymbolStart}" Gefuellt="True" Groesse="18" />
-            <TextBlock Text="Abschließen und generieren" VerticalAlignment="Center" />
-          </StackPanel>
-        </Button>
+        <Button Classes="gross primaer" Content="Abschließen" Command="{Binding AbschliessenCommand}" />
       </StackPanel>
     </Grid>
     <Grid ColumnDefinitions="380,20,*" Margin="28,20">
@@ -123,7 +117,23 @@
       </Border>
       <Border Grid.Column="2" Classes="karte" Padding="28,24" CornerRadius="18">
         <DockPanel>
-          <StackPanel DockPanel.Dock="Bottom" Spacing="10">
+          <!-- Entscheidungen und Knöpfe stehen fest unten, die Erklärung darüber scrollt -->
+          <StackPanel DockPanel.Dock="Bottom" Spacing="10" Margin="0,12,0,0">
+            <ListBox Classes="wahl" IsVisible="{Binding Aktiv.IstEntscheidung}" ItemsSource="{Binding Aktiv.Optionen}" SelectedIndex="{Binding Aktiv.Auswahl}">
+              <ListBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                  <UniformGrid Columns="2" />
+                </ItemsPanelTemplate>
+              </ListBox.ItemsPanel>
+              <ListBox.ItemTemplate>
+                <DataTemplate x:DataType="p:Einrichtungsoption">
+                  <StackPanel Spacing="4">
+                    <TextBlock Text="{Binding Titel}" FontSize="14" FontWeight="SemiBold" TextWrapping="Wrap" />
+                    <TextBlock Text="{Binding Beschreibung}" Classes="klein" TextWrapping="Wrap" />
+                  </StackPanel>
+                </DataTemplate>
+              </ListBox.ItemTemplate>
+            </ListBox>
             <TextBlock Text="{Binding Meldung}" IsVisible="{Binding HatMeldung}" Foreground="{StaticResource Schlecht}" TextWrapping="Wrap" />
             <Border BorderBrush="#ECEAE4" BorderThickness="0,1,0,0" Padding="0,16,0,0">
               <Grid ColumnDefinitions="Auto,*,Auto">
@@ -153,21 +163,6 @@
                   </ItemsControl.ItemTemplate>
                 </ItemsControl>
               </Border>
-              <ListBox Classes="wahl" IsVisible="{Binding Aktiv.IstEntscheidung}" ItemsSource="{Binding Aktiv.Optionen}" SelectedIndex="{Binding Aktiv.Auswahl}">
-                <ListBox.ItemsPanel>
-                  <ItemsPanelTemplate>
-                    <UniformGrid Columns="2" />
-                  </ItemsPanelTemplate>
-                </ListBox.ItemsPanel>
-                <ListBox.ItemTemplate>
-                  <DataTemplate x:DataType="p:Einrichtungsoption">
-                    <StackPanel Spacing="4">
-                      <TextBlock Text="{Binding Titel}" FontSize="14" FontWeight="SemiBold" TextWrapping="Wrap" />
-                      <TextBlock Text="{Binding Beschreibung}" Classes="klein" TextWrapping="Wrap" />
-                    </StackPanel>
-                  </DataTemplate>
-                </ListBox.ItemTemplate>
-              </ListBox>
               <ContentControl Classes="seite" IsVisible="{Binding !Aktiv.IstEntscheidung}" Content="{Binding Aktiv.Seite.Seite}" Margin="-12,2,0,0">
                 <ContentControl.ContentTemplate>
                   <ui:SeitenLocator />

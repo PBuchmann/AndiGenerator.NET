@@ -71,12 +71,6 @@
             </DataTemplate>
           </ComboBox.ItemTemplate>
         </ComboBox>
-        <Button Classes="gross" Command="{Binding EntfernenCommand}" ToolTip.Tip="Gewählten gemerkten Plan löschen">
-          <StackPanel Orientation="Horizontal" Spacing="8"><ui:Symbol Daten="{StaticResource SymbolLoeschen}" Groesse="20" /><TextBlock Text="Löschen" VerticalAlignment="Center" /></StackPanel>
-        </Button>
-        <Button Classes="gross" Command="{Binding ExcelCommand}" ToolTip.Tip="Plan als Excel-Arbeitsmappe speichern: Übersicht, Spielplan, Mannschaftspläne und Kosten">
-          <StackPanel Orientation="Horizontal" Spacing="8"><ui:Symbol Daten="{StaticResource SymbolExcel}" Groesse="20" /><TextBlock Text="Nach Excel" VerticalAlignment="Center" /></StackPanel>
-        </Button>
         <ui:Zoomauswahl DataContext="{Binding Zoom}" Margin="12,0,0,0" />
       </StackPanel>
     </WrapPanel>

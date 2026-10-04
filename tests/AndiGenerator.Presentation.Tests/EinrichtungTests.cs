@@ -18,7 +18,7 @@ public sealed class EinrichtungTests
         var uebernommen = new List<string>();
         bool erfolg = false;
         var erzeugt = new List<string>();
-        bool? abgeschlossen = null;
+        int abgeschlossen = 0;
         var einrichtung = new EinrichtungViewModel(
             "Staffel einrichten",
             [entscheidung, lokale, setzliste],
@@ -32,9 +32,9 @@ public sealed class EinrichtungTests
                 erzeugt.Add(s.Titel);
                 return null;
             },
-            generieren =>
+            () =>
             {
-                abgeschlossen = generieren;
+                abgeschlossen++;
                 return Task.CompletedTask;
             });
 
@@ -80,10 +80,43 @@ public sealed class EinrichtungTests
         Assert.Equal("3 von 3 Punkten erledigt", einrichtung.FortschrittText);
         Assert.Equal(100, einrichtung.Fortschritt);
 
-        await einrichtung.AbschliessenUndGenerierenCommand.ExecuteAsync(null);
-        Assert.True(abgeschlossen);
         await einrichtung.AbschliessenCommand.ExecuteAsync(null);
-        Assert.False(abgeschlossen);
+        Assert.Equal(1, abgeschlossen);
+    }
+
+    [Fact]
+    public async Task Abschliessen_uebernimmt_angeklickte_Entscheidungen_und_laesst_unberuehrte_unveraendert()
+    {
+        var angeklickt = new Einrichtungsschritt(1, "Kriterien", "?", [], [new Einrichtungsoption("Diese", "x"), new Einrichtungsoption("Standard", "y")]);
+        var unberuehrt = new Einrichtungsschritt(2, "Runde", "?", [], [new Einrichtungsoption("Rückrunde", "x"), new Einrichtungsoption("Ganz", "y")]);
+        var uebernommen = new List<string>();
+        int abgeschlossen = 0;
+        var einrichtung = new EinrichtungViewModel(
+            "Staffel einrichten",
+            [angeklickt, unberuehrt],
+            s =>
+            {
+                uebernommen.Add(s.Titel + ":" + s.Auswahl);
+                return Task.FromResult(true);
+            },
+            _ => null,
+            () =>
+            {
+                abgeschlossen++;
+                return Task.CompletedTask;
+            });
+
+        Assert.False(angeklickt.IstGewaehlt);
+        angeklickt.Auswahl = 0;
+        Assert.False(angeklickt.IstGewaehlt);
+        angeklickt.Auswahl = 1;
+        Assert.True(angeklickt.IstGewaehlt);
+        await einrichtung.AbschliessenCommand.ExecuteAsync(null);
+
+        Assert.Equal(["Kriterien:1"], uebernommen);
+        Assert.Equal(Schrittzustand.Erledigt, angeklickt.Zustand);
+        Assert.Equal(Schrittzustand.Offen, unberuehrt.Zustand);
+        Assert.Equal(1, abgeschlossen);
     }
 
     [Fact]
