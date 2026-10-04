@@ -97,4 +97,28 @@ public static class Referenzbewertung
         mannschaft.KostenFuerArt(plan, art, kosten, meldungen: true);
         return kosten.Meldungen.ToList();
     }
+
+    /// <summary>
+    /// Meldungen aller Mannschaften zu einer einzelnen Kostenart (wie <see cref="Meldungen"/>, aber mit einmaligem Laden des
+    /// Plans; für die Einzelheiten eines Kriteriums in der Qualitätsansicht).
+    /// </summary>
+    /// <param name="staffel">Staffel mit dem zu bewertenden Plan als bestehendem Spielplan.</param>
+    /// <param name="optionen">Berechnungsoptionen.</param>
+    /// <param name="art">Kostenart.</param>
+    /// <returns>Je Mannschaft (in der Reihenfolge der Bewertung) ihre Meldungen.</returns>
+    public static IReadOnlyList<Mannschaftsmeldungen> MeldungenJeMannschaft(Staffel staffel, Berechnungsoptionen optionen, MannschaftsKostenart art)
+    {
+        ArgumentNullException.ThrowIfNull(staffel);
+        ArgumentNullException.ThrowIfNull(optionen);
+        RefPlan plan = RefPlan.Laden(staffel, optionen);
+        var liste = new List<Mannschaftsmeldungen>();
+        foreach (RefMannschaft mannschaft in plan.Mannschaften)
+        {
+            var kosten = new RefMannschaftsKosten();
+            mannschaft.KostenFuerArt(plan, art, kosten, meldungen: true);
+            liste.Add(new Mannschaftsmeldungen(mannschaft.TeamName, kosten.Meldungen.ToList()));
+        }
+
+        return liste;
+    }
 }

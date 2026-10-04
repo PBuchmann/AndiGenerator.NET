@@ -17,6 +17,9 @@ namespace AndiGenerator.Persistence.Plandaten;
 /// </summary>
 public static class StaffelAbbildung
 {
+    /// <summary>Attribut am Knoten <c>plan</c> mit der Einteilung der Kriterien (nicht im Original, dort ohne Wirkung).</summary>
+    public const string KriterienAttribut = "kriterienstufen";
+
     /// <summary>Liest die Stammdaten aus dem Datenbaum.</summary>
     /// <param name="plan">Wurzelknoten <c>plan</c> (click-TT-Import, ggf. mit eingearbeiteten Änderungen).</param>
     /// <returns>Die Staffel.</returns>
@@ -39,7 +42,10 @@ public static class StaffelAbbildung
                 SpielfreieTage: plan.KinderMitNamen("nogameday").Select(k => Datum(k.Lesen("date"))).ToList(),
                 Pflichtspielzeitraeume: plan.KinderMitNamen("mandatorygames").Select(PflichtspielzeitraumLesen).ToList(),
                 Setzliste: ranking is null ? null : SetzlisteLesen(ranking),
-                BestehenderSpielplan: SpieleLesen(plan.ErstesKind("existingschedule")));
+                BestehenderSpielplan: SpieleLesen(plan.ErstesKind("existingschedule")))
+            {
+                Kriterienstufen = plan.Lesen(KriterienAttribut),
+            };
         }
         catch (FormatException ex)
         {
@@ -60,6 +66,10 @@ public static class StaffelAbbildung
         plan.Setzen("until", DatumText(staffel.Ende));
         plan.Setzen("name", staffel.Name);
         plan.Setzen("id", staffel.Id);
+        if (staffel.Kriterienstufen.Length > 0)
+        {
+            plan.Setzen(KriterienAttribut, staffel.Kriterienstufen);
+        }
 
         foreach (Mannschaft mannschaft in staffel.Mannschaften)
         {

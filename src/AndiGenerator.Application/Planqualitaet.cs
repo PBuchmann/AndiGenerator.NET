@@ -2,52 +2,80 @@
 // SPDX-FileCopyrightText: 2026 Peter Buchmann
 // SPDX-License-Identifier: GPL-3.0-only
 
+using System.Globalization;
 using AndiGenerator.Domain.Optionen;
+using AndiGenerator.Engine.Inseln;
 using AndiGenerator.Engine.Referenz;
 
 namespace AndiGenerator.Application;
 
 /// <summary>
-/// Planqualität als Zahl der Verstöße je Kriterium in der Rangfolge aus MIGRATIONSPLAN E14 (A = Muss, B = Sperr- und
-/// Ausweichtermine, C = übrige). Ergänzt die gewichtete Kostensumme, die je nach Gewichtung schwer zu deuten ist.
+/// Planqualität als Zahl der Verstöße je Kriterium in der Rangfolge aus MIGRATIONSPLAN E14: zuerst die harten Fehler (A1),
+/// dann die Kriterien in der Einteilung des Staffelleiters (Stufen A, B, C, darin in seiner Reihenfolge nummeriert).
+/// Ergänzt die gewichtete Kostensumme, die je nach Gewichtung schwer zu deuten ist.
 /// </summary>
 public static class Planqualitaet
 {
     /// <summary>Kosten je hartem Fehler im Original (10 × <c>cMaxKostenNoHardError</c>).</summary>
     private const double KostenJeHartemFehler = 10.0 * 1_000_000_000.0;
 
-    private static readonly MannschaftsKostenart[] StufeA = [MannschaftsKostenart.Hallenbelegung, MannschaftsKostenart.ParalleleSpiele];
-
-    private static readonly MannschaftsKostenart[] StufeB = [MannschaftsKostenart.Sperrtermine, MannschaftsKostenart.Ausweichtermine];
-
     /// <summary>Ermittelt die Kriterien aus einer Bewertung.</summary>
     /// <param name="bewertung">Bewertung des Plans.</param>
-    /// <returns>Die Kriterien in der Rangfolge A1 … C.</returns>
-    public static IReadOnlyList<Qualitaetskriterium> Kriterien(Planbewertung bewertung)
+    /// <param name="einteilung">Einteilung der Kriterien; <c>null</c> = <see cref="Stufeneinteilung.Standard"/>.</param>
+    /// <returns>Die Kriterien: A1 (harte Fehler), dann A2 …, B1 …, C1 … in der Reihenfolge der Einteilung.</returns>
+    public static IReadOnlyList<Qualitaetskriterium> Kriterien(Planbewertung bewertung, Stufeneinteilung? einteilung = null)
     {
         ArgumentNullException.ThrowIfNull(bewertung);
+        Stufeneinteilung e = (einteilung ?? Stufeneinteilung.Standard).Vervollstaendigt();
         var ergebnis = new List<Qualitaetskriterium>
         {
             HarterFehler("Spiele ohne Termin", bewertung.NichtTerminiert),
             HarterFehler("Spiele mit ungültigem Termin", bewertung.UngueltigeSpiele),
             HarterFehler("Spiele an spielfreien Tagen", bewertung.SpieleAnSpielfreienTagen),
-            Kostenart(bewertung, "A2", MannschaftsKostenart.Hallenbelegung),
-            Kostenart(bewertung, "A3", MannschaftsKostenart.ParalleleSpiele),
-            new("A4", "Vereinsinterne Spiele am Anfang", null, null, bewertung.VereinsinterneSpieleAmAnfang),
-            Kostenart(bewertung, "A5", MannschaftsKostenart.Pflichtspieltage),
-            Kostenart(bewertung, "B1", MannschaftsKostenart.Sperrtermine),
-            Kostenart(bewertung, "B2", MannschaftsKostenart.Ausweichtermine),
         };
-
-        ergebnis.AddRange(bewertung.SichtbareKostenarten
-            .Where(a => !StufeA.Contains(a) && !StufeB.Contains(a) && a != MannschaftsKostenart.Pflichtspieltage)
-            .Select(a => Kostenart(bewertung, "C", a)));
-        ergebnis.Add(new("C", "Überlappung Spieltage", null, null, bewertung.UeberlappungSpieltage));
-        ergebnis.Add(new("C", "Länge Spieltage", null, null, bewertung.LaengeSpieltage));
-        ergebnis.Add(new("C", "Überlappung letzter Spieltag", null, null, bewertung.UeberlappungLetzterSpieltag));
-        ergebnis.Add(new("C", "Länge letzter Spieltag", null, null, bewertung.LaengeLetzterSpieltag));
+        ergebnis.AddRange(Stufe(bewertung, "A", e.A, 2));
+        ergebnis.AddRange(Stufe(bewertung, "B", e.B, 1));
+        ergebnis.AddRange(Stufe(bewertung, "C", e.C, 1));
         return ergebnis;
     }
+
+    /// <summary>Anzeigename eines Kriteriums, wie in der Qualitätsansicht.</summary>
+    /// <param name="k">Das Kriterium.</param>
+    /// <returns>Der Name, z. B. „Sperrtermine“ oder „Länge Spieltage“.</returns>
+    public static string Name(Kostenkriterium k) => k switch
+    {
+        Kostenkriterium.VereinsinterneSpieleAmAnfang => "Vereinsinterne Spiele am Anfang",
+        Kostenkriterium.Spieltaglaenge => "Länge Spieltage",
+        Kostenkriterium.Spieltagueberlappung => "Überlappung Spieltage",
+        Kostenkriterium.LetzterSpieltagLaenge => "Länge letzter Spieltag",
+        Kostenkriterium.LetzterSpieltagUeberlappung => "Überlappung letzter Spieltag",
+        _ => Gewichtungsanzeige.Name((MannschaftsKostenart)(int)k),
+    };
+
+    private static IEnumerable<Qualitaetskriterium> Stufe(Planbewertung bewertung, string stufe, IReadOnlyList<Kostenkriterium> kriterien, int erste)
+    {
+        int nummer = erste;
+        foreach (Kostenkriterium k in kriterien)
+        {
+            // Kostenarten, die in dieser Staffel keine Rolle spielen (z. B. Setzliste ohne Setzliste), zeigt die Ansicht in C nicht.
+            if (stufe == "C" && (int)k < (int)Kostenkriterium.VereinsinterneSpieleAmAnfang && !bewertung.SichtbareKostenarten.Contains((MannschaftsKostenart)(int)k))
+            {
+                continue;
+            }
+
+            yield return Kriterium(bewertung, string.Create(CultureInfo.InvariantCulture, $"{stufe}{nummer++}"), k);
+        }
+    }
+
+    private static Qualitaetskriterium Kriterium(Planbewertung bewertung, string stufe, Kostenkriterium k) => k switch
+    {
+        Kostenkriterium.VereinsinterneSpieleAmAnfang => new(stufe, Name(k), null, null, bewertung.VereinsinterneSpieleAmAnfang, k),
+        Kostenkriterium.Spieltaglaenge => new(stufe, Name(k), null, null, bewertung.LaengeSpieltage, k),
+        Kostenkriterium.Spieltagueberlappung => new(stufe, Name(k), null, null, bewertung.UeberlappungSpieltage, k),
+        Kostenkriterium.LetzterSpieltagLaenge => new(stufe, Name(k), null, null, bewertung.LaengeLetzterSpieltag, k),
+        Kostenkriterium.LetzterSpieltagUeberlappung => new(stufe, Name(k), null, null, bewertung.UeberlappungLetzterSpieltag, k),
+        _ => Kostenart(bewertung, stufe, (MannschaftsKostenart)(int)k) with { Kriterium = k },
+    };
 
     private static Qualitaetskriterium HarterFehler(string name, double kosten) =>
         new("A1", name, (int)Math.Round(kosten / KostenJeHartemFehler), null, kosten);

@@ -2,6 +2,8 @@
 // SPDX-FileCopyrightText: 2026 Peter Buchmann
 // SPDX-License-Identifier: GPL-3.0-only
 
+using AndiGenerator.Engine.Inseln;
+
 namespace AndiGenerator.Application;
 
 /// <summary>Ein Kriterium der Planqualität nach der Rangfolge aus MIGRATIONSPLAN E14.</summary>
@@ -10,7 +12,8 @@ namespace AndiGenerator.Application;
 /// <param name="Anzahl">Zahl der Verstöße; <c>null</c>, wenn die Kostenart keine Anzahl kennt (dann zählen nur die Kosten).</param>
 /// <param name="Gesamtzahl">Zahl der Wünsche, gegen die geprüft wurde (z. B. gemeldete Sperrtermine), sonst <c>null</c>.</param>
 /// <param name="Kosten">Kosten dieses Kriteriums.</param>
-public sealed record Qualitaetskriterium(string Stufe, string Name, int? Anzahl, int? Gesamtzahl, double Kosten)
+/// <param name="Kriterium">Das einstufbare Kriterium; <c>null</c> bei den harten Fehlern (immer A1).</param>
+public sealed record Qualitaetskriterium(string Stufe, string Name, int? Anzahl, int? Gesamtzahl, double Kosten, Kostenkriterium? Kriterium = null)
 {
     /// <summary>Holt einen Wert, der angibt, ob das Kriterium ohne Verstoß erfüllt ist.</summary>
     public bool Erfuellt => Anzahl is int anzahl ? anzahl == 0 : Kosten <= 0;

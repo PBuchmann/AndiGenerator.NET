@@ -4,6 +4,7 @@
 
 using AndiGenerator.Application;
 using AndiGenerator.Domain.Optionen;
+using AndiGenerator.Engine.Inseln;
 using AndiGenerator.Engine.Referenz;
 
 namespace AndiGenerator.Persistence.Tests;
@@ -104,14 +105,41 @@ public class GewichtungTests
         Assert.False(ungueltig.Erfuellt);
         Assert.True(ungueltig.IstPflicht);
 
-        Qualitaetskriterium sperr = kriterien.Single(k => k.Stufe == "B1");
+        // Standard: B = Auswärtskoppel, Heimkoppel, Sperrtermine, Ausweichtermine.
+        Qualitaetskriterium sperr = kriterien.Single(k => k.Kriterium == Kostenkriterium.Sperrtermine);
+        Assert.Equal("B3", sperr.Stufe);
         Assert.Equal(3, sperr.Anzahl);
         Assert.Equal(15, sperr.Gesamtzahl);
         Assert.Equal(300.0, sperr.Kosten);
 
         Qualitaetskriterium halle = kriterien.Single(k => k.Stufe == "A2");
+        Assert.Equal(Kostenkriterium.Hallenbelegung, halle.Kriterium);
         Assert.True(halle.Erfuellt);
-        Assert.Null(kriterien.Single(k => k.Stufe == "B2").Anzahl);
-        Assert.DoesNotContain(kriterien, k => k.Stufe == "C" && k.Name == "Sperrtermine");
+        Assert.Null(kriterien.Single(k => k.Stufe == "B4").Anzahl);
+        Assert.DoesNotContain(kriterien, k => k.Stufe.StartsWith('C') && k.Name == "Sperrtermine");
+
+        // Eigene Einteilung des Staffelleiters: Sperrtermine als erstes A-Kriterium (nach den harten Fehlern A1).
+        Stufeneinteilung eigene = Stufeneinteilung.Standard.Einstufen(Kostenkriterium.Sperrtermine, Stufe.A);
+        for (int i = 0; i < 4; i++)
+        {
+            eigene = eigene.Verschieben(Kostenkriterium.Sperrtermine, -1);
+        }
+
+        IReadOnlyList<Qualitaetskriterium> umgestuft = Planqualitaet.Kriterien(bewertung, eigene);
+        Assert.Equal("A2", umgestuft.Single(k => k.Kriterium == Kostenkriterium.Sperrtermine).Stufe);
+        Assert.Equal("A3", umgestuft.Single(k => k.Kriterium == Kostenkriterium.Hallenbelegung).Stufe);
+        Assert.Equal(eigene.Text(), Stufeneinteilung.AusText(eigene.Text()).Text());
+
+        // Nach unten umgestuft kommt ein Kriterium an die erste Stelle der neuen Stufe, nach oben ans Ende.
+        Stufeneinteilung runter = Stufeneinteilung.Standard.Einstufen(Kostenkriterium.Hallenbelegung, Stufe.B);
+        Assert.Equal(Kostenkriterium.Hallenbelegung, runter.B[0]);
+        Stufeneinteilung hoch = Stufeneinteilung.Standard.Einstufen(Kostenkriterium.DreiTageAbstand, Stufe.B);
+        Assert.Equal(Kostenkriterium.DreiTageAbstand, hoch.B[^1]);
+
+        // Ziehen und Ablegen: Das Kriterium übernimmt Stufe und Stelle seines Nachbarn; Spieltage bleiben in C.
+        Stufeneinteilung abgelegt = Stufeneinteilung.Standard.Platzieren(Kostenkriterium.DreiTageAbstand, Kostenkriterium.ParalleleSpiele, davor: false);
+        Assert.Equal(Stufe.A, abgelegt.StufeVon(Kostenkriterium.DreiTageAbstand));
+        Assert.Equal(abgelegt.Position(Kostenkriterium.ParalleleSpiele) + 1, abgelegt.Position(Kostenkriterium.DreiTageAbstand));
+        Assert.Same(Stufeneinteilung.Standard, Stufeneinteilung.Standard.Platzieren(Kostenkriterium.Spieltaglaenge, Kostenkriterium.Sperrtermine, davor: true));
     }
 }

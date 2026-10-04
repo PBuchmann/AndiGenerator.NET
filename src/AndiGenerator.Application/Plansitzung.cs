@@ -31,6 +31,7 @@ public sealed class Plansitzung
     private const string Uebernahmevermerk = "uebernommen-aus-AndiGeneratorNeu.txt";
 
     private readonly DatenKnoten stand;
+    private bool standardKriterienstufen;
 
     private Plansitzung(string pfad, DatenKnoten stand, bool istClickTt, bool ersterStart, string basisordner, string? uebernahmeAus)
     {
@@ -210,7 +211,33 @@ public sealed class Plansitzung
         }
 
         stand.Zuweisen(bearbeitung.Arbeitsstand);
-        Staffel = neu;
+        Staffel = standardKriterienstufen ? neu with { Kriterienstufen = string.Empty } : neu;
+    }
+
+    /// <summary>
+    /// Speichert die vom Staffelleiter gewählte Einteilung der Kriterien (Stufen A, B, C mit Reihenfolge) mit den
+    /// Spielplandaten: bei click-TT-Dateien in der <c>.modifications</c>, sonst in der Plandatei (Attribut am Knoten
+    /// <c>plan</c>, das der alte AndiGenerator übernimmt, ohne es zu beachten).
+    /// </summary>
+    /// <param name="text">Die Einteilung als Text (<c>Stufeneinteilung.Text</c>).</param>
+    /// <exception cref="IOException">Die Datei konnte nicht geschrieben werden.</exception>
+    public void KriterienstufenSpeichern(string text)
+    {
+        ArgumentNullException.ThrowIfNull(text);
+        standardKriterienstufen = false;
+        Datenbearbeitung bearbeitung = DatenBearbeiten();
+        bearbeitung.Arbeitsstand.Setzen(StaffelAbbildung.KriterienAttribut, text);
+        DatenUebernehmen(bearbeitung);
+    }
+
+    /// <summary>
+    /// Rechnet in dieser Sitzung mit der Standard-Einteilung der Kriterien, ohne die gespeicherte zu überschreiben (wie
+    /// <see cref="StandardoptionenFuerDieseSitzung"/>). Ändert der Staffelleiter die Einteilung, gilt und speichert er seine.
+    /// </summary>
+    public void StandardKriterienstufenFuerDieseSitzung()
+    {
+        standardKriterienstufen = true;
+        Staffel = Staffel with { Kriterienstufen = string.Empty };
     }
 
     /// <summary>Übernimmt neue Optionen und speichert sie im Staffelordner.</summary>
@@ -348,6 +375,13 @@ public sealed class Plansitzung
     /// <returns>Die Meldungen; leer, wenn keine anfallen.</returns>
     public IReadOnlyList<string> Meldungen(IReadOnlyList<Spiel> spiele, string mannschaftsName, MannschaftsKostenart art) =>
         Referenzbewertung.Meldungen(Staffel with { BestehenderSpielplan = spiele }, Optionen, mannschaftsName, art);
+
+    /// <summary>Meldungen aller Mannschaften zu einer Kostenart (Einzelheiten eines Kriteriums in der Qualitätsansicht).</summary>
+    /// <param name="spiele">Spiele des Plans.</param>
+    /// <param name="art">Kostenart.</param>
+    /// <returns>Je Mannschaft ihre Meldungen.</returns>
+    public IReadOnlyList<Mannschaftsmeldungen> MeldungenJeMannschaft(IReadOnlyList<Spiel> spiele, MannschaftsKostenart art) =>
+        Referenzbewertung.MeldungenJeMannschaft(Staffel with { BestehenderSpielplan = spiele }, Optionen, art);
 
     /// <summary>Ändert eine Gewichtung und speichert die Optionen im Staffelordner (wie das Original nach dem Gewichtungsdialog).</summary>
     /// <param name="ziel">Die Gewichtung.</param>

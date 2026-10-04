@@ -15,6 +15,24 @@ namespace AndiGenerator.Engine.Inseln;
 /// <param name="DurchlaeufeVorSpezialInsel">Gesamtdurchläufe, ab denen die Spezial-Insel startet (Original 3 000 000).</param>
 /// <param name="MindestDurchlaeufeSpezialInsel">Durchläufe der Spezial-Insel seit dem letzten Wechsel der Kostenart, bevor ihre Lösung eine Insel neu startet (Original 200 000; Befund #10 korrigiert).</param>
 /// <param name="Startwert">Startwert der Zufallsfolgen; <c>null</c> = zufällig. Nur <see cref="Inseloptimierer.Rechnen"/> ist damit reproduzierbar.</param>
+/// <param name="Zeitbudget">
+/// Für <see cref="Inseloptimierer.Rechnen"/> mit Automodus: Sekunden, denen der ganze Lauf entspricht (der Automodus beobachtet
+/// Sekunden reiner Rechenzeit; reproduzierbar werden sie aus den Durchläufen abgeleitet); 0 = 300 s.
+/// </param>
+/// <param name="Automodus">
+/// Automodus: Nach der Basisoptimierung (Grundlauf mit den Gewichtungen des Anwenders, bis die Suche 10 s keine
+/// Verbesserung findet, mindestens 10 s) lenkt die Suche über die Gewichte: erst A-, dann B-Verstöße herausdrängen, dann
+/// die C-Kriterien nach Wichtigkeit je Mannschaft glätten, bis A oder B wieder steigen. Ohne Zeitgrenzen: Der Automodus
+/// beobachtet, ob sich die Verstöße nach einer Gewichtsänderung noch ändern (10 s ohne Verbesserung, frühestens 8 s nach der letzten Änderung = nächster Schritt).
+/// Die Spezial-Insel ist dabei aus.
+/// </param>
+/// <param name="AutoSpielraum">Verstöße, die eine Mannschaft je C-Kriterium mehr haben darf als im Grundlauf, bevor sie als Ausreißer gilt.</param>
+/// <param name="AutoKostenToleranz">Erlaubter Anstieg der Kosten der Spieltagskriterien (ohne Anzahl) gegenüber dem Grundlauf (0,5 = 50 %, mindestens 2 % der C-Kosten).</param>
+/// <param name="AutoStufen">Einteilung der Kriterien in A, B und C mit der Wichtigkeit der C-Kriterien; <c>null</c> = <see cref="Stufeneinteilung.Standard"/>.</param>
+/// <param name="AutoOhneGrundlauf">
+/// Automodus ohne Basisoptimierung: Der Ausgangsplan ist schon optimiert (Wechsel von der Kostenoptimierung), sein bester
+/// Plan wird sofort Maßstab, und die Optimierung der Stufe A beginnt gleich.
+/// </param>
 public sealed record Optimierungseinstellungen(
     int Kerne,
     int Inseln,
@@ -25,7 +43,13 @@ public sealed record Optimierungseinstellungen(
     bool SpezialInsel,
     long DurchlaeufeVorSpezialInsel,
     long MindestDurchlaeufeSpezialInsel,
-    int? Startwert)
+    int? Startwert,
+    double Zeitbudget = 0,
+    bool Automodus = false,
+    int AutoSpielraum = 2,
+    double AutoKostenToleranz = 0.5,
+    Stufeneinteilung? AutoStufen = null,
+    bool AutoOhneGrundlauf = false)
 {
     /// <summary>Standard: Topologie des Originals (4 Inseln × 14 feste + 10 dynamische Suchplätze, Spezial-Insel), alle Kerne bis auf einen.</summary>
     public static Optimierungseinstellungen Standard { get; } = new(

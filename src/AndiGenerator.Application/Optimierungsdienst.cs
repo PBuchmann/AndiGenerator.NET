@@ -29,7 +29,10 @@ public sealed class Optimierungsdienst : IDisposable
     private long fruehereDurchlaeufe;
     private int fruehereVerbesserungen;
     private double letzteKosten = -1;
+    private int letzteVerbesserungen = -1;
     private bool pausiert;
+    private bool automodus;
+    private bool laufenderAutomodus;
 
     /// <summary>Legt den Dienst an.</summary>
     /// <param name="einstellungen">Einstellungen des Inselmodells; <c>null</c> = Standard.</param>
@@ -73,6 +76,29 @@ public sealed class Optimierungsdienst : IDisposable
                 {
                     optimierer.Pausiert = value;
                 }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Mit Automodus (MIGRATIONSPLAN Abschnitt 11): Die Suche lenkt sich selbst über die Gewichte, um Verstöße der
+    /// Stufen A und B herauszudrängen und danach C zu glätten. Gilt ab dem nächsten <see cref="Starten"/>.
+    /// </summary>
+    public bool Automodus
+    {
+        get
+        {
+            lock (sperre)
+            {
+                return automodus;
+            }
+        }
+
+        set
+        {
+            lock (sperre)
+            {
+                automodus = value;
             }
         }
     }
@@ -135,7 +161,24 @@ public sealed class Optimierungsdienst : IDisposable
             fruehereDurchlaeufe += optimierer.Durchlaeufe;
             fruehereVerbesserungen += bisher.Verbesserungen;
             optimierer.Dispose();
-            NeuStarten(staffel with { BestehenderSpielplan = bisher.Spiele }, optionen, ausgangsplanMelden: true);
+
+            // Wechsel von der Kostenoptimierung in den Automodus: Der Plan ist schon optimiert, keine neue Basisoptimierung.
+            bool wechselZumAutomodus = automodus && !laufenderAutomodus && bisher.Spiele.Count > 0;
+            NeuStarten(staffel with { BestehenderSpielplan = bisher.Spiele }, optionen, ausgangsplanMelden: true, ohneGrundlauf: wechselZumAutomodus);
+        }
+    }
+
+    /// <summary>
+    /// Übernimmt eine geänderte Einteilung der Kriterien in den laufenden Automodus: keine neue Basisoptimierung, er macht
+    /// beim wichtigsten geänderten Kriterium weiter. Bei der Kostenoptimierung ändert sich nichts.
+    /// </summary>
+    /// <param name="neu">Die neue Einteilung.</param>
+    public void EinteilungAendern(Stufeneinteilung neu)
+    {
+        ArgumentNullException.ThrowIfNull(neu);
+        lock (sperre)
+        {
+            optimierer?.EinteilungAendern(neu);
         }
     }
 
@@ -194,12 +237,20 @@ public sealed class Optimierungsdienst : IDisposable
             fruehereVerbesserungen + bester.Verbesserungen,
             seitVerbesserung.Elapsed,
             optimierer.SpezialKostenart,
-            bester.Spiele);
+            bester.Spiele,
+            optimierer.Lenkung);
     }
 
-    private void NeuStarten(Staffel staffel, Berechnungsoptionen optionen, bool ausgangsplanMelden)
+    private void NeuStarten(Staffel staffel, Berechnungsoptionen optionen, bool ausgangsplanMelden, bool ohneGrundlauf = false)
     {
-        optimierer = new Inseloptimierer(staffel, optionen, einstellungen);
+        // Der Automodus lenkt nach der Einteilung der Kriterien, die der Staffelleiter in der Qualitätsansicht gewählt hat.
+        optimierer = new Inseloptimierer(staffel, optionen, einstellungen with
+        {
+            Automodus = automodus,
+            AutoStufen = Stufeneinteilung.AusText(staffel.Kriterienstufen),
+            AutoOhneGrundlauf = ohneGrundlauf,
+        });
+        laufenderAutomodus = automodus;
         optimierer.Pausiert = pausiert;
         optimierer.Starten();
 
@@ -207,6 +258,7 @@ public sealed class Optimierungsdienst : IDisposable
         // sofort gemeldet: Er ist der beste Plan, und ohne Meldung blieben Ansichten und Pflichtregeln leer, bis er
         // übertroffen wird. Ohne Ausgangsplan (noch keine Termine) wird erst der erste gefundene Plan gemeldet.
         letzteKosten = ausgangsplanMelden ? -1 : optimierer.BesterStand().Kosten;
+        letzteVerbesserungen = ausgangsplanMelden ? -1 : optimierer.BesterStand().Verbesserungen;
         seitVerbesserung.Restart();
     }
 
@@ -222,10 +274,14 @@ public sealed class Optimierungsdienst : IDisposable
                     continue;
                 }
 
-                double kosten = optimierer.BesterStand().Kosten;
-                if (kosten >= 0 && (kosten < letzteKosten || letzteKosten < 0))
+                // Im Automodus zählt die Bewertung nach Verstößen; dort kann der beste Plan auch teurer werden.
+                Optimierungsergebnis bester = optimierer.BesterStand();
+                double kosten = bester.Kosten;
+                bool besser = kosten < letzteKosten || letzteKosten < 0 || (optimierer.Lenkung is not null && bester.Verbesserungen != letzteVerbesserungen);
+                if (kosten >= 0 && besser)
                 {
                     letzteKosten = kosten;
+                    letzteVerbesserungen = bester.Verbesserungen;
                     seitVerbesserung.Restart();
                     neu = StandIntern();
                 }
