@@ -28,7 +28,7 @@ AndiGenerator.NET ist die C#/.NET-Portierung des **AndiGenerators** von **Andrea
 
 ## Installation
 
-Die neueste Version gibt es unter [Releases](https://github.com/PBuchmann/AndiGenerator.NET/releases): `AndiGeneratorNET-win-Setup.exe` installiert das Programm für den eigenen Benutzer (ohne Administratorrechte) und hält es danach selbst aktuell; `AndiGeneratorNET-win-Portable.zip` läuft ohne Installation. Windows 10/11, 64 Bit. Für Chromebooks (Linux-Entwicklungsumgebung) und Linux gibt es Debian-Pakete `andigenerator-net_<Version>_amd64.deb` bzw. `_arm64.deb` und portable `tar.gz`. Bis zur digitalen Signierung warnt Windows beim ersten Start – Einzelheiten in der [Anleitung](Doku/ANLEITUNG.md#2-installation).
+Die neueste Version gibt es unter [Releases](https://github.com/PBuchmann/AndiGenerator.NET/releases): `AndiGeneratorNET-win-Setup.exe` installiert das Programm für den eigenen Benutzer (ohne Administratorrechte) und hält es danach selbst aktuell; `AndiGeneratorNET-win-Portable.zip` läuft ohne Installation. Windows 10/11, 64 Bit; für Windows-Laptops mit ARM-Prozessor (Snapdragon) `AndiGeneratorNET-win-arm64-Setup.exe` bzw. `-win-arm64-Portable.zip`. Für Macs (macOS 14 oder neuer) gibt es Disk-Images `AndiGeneratorNET-<Version>-macos-arm64.dmg` (Apple-Chip) bzw. `-macos-x64.dmg` (Intel). Für Chromebooks (Linux-Entwicklungsumgebung) und Linux gibt es Debian-Pakete `andigenerator-net_<Version>_amd64.deb` bzw. `_arm64.deb` und portable `tar.gz`. Bis zur digitalen Signierung warnt Windows beim ersten Start – Einzelheiten in der [Anleitung](Doku/ANLEITUNG.md#2-installation).
 
 ## Selbst bauen
 

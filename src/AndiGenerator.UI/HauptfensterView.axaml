@@ -17,6 +17,13 @@
     <KeyBinding Gesture="Ctrl+Subtract" Command="{Binding ZoomKleinerCommand}" />
     <KeyBinding Gesture="Ctrl+D0" Command="{Binding ZoomZuruecksetzenCommand}" />
     <KeyBinding Gesture="Ctrl+NumPad0" Command="{Binding ZoomZuruecksetzenCommand}" />
+    <!-- Auf dem Mac mit der Befehlstaste (⌘); unter Windows fängt das System Win+Plus/Minus selbst ab. -->
+    <KeyBinding Gesture="Meta+OemPlus" Command="{Binding ZoomGroesserCommand}" />
+    <KeyBinding Gesture="Meta+Add" Command="{Binding ZoomGroesserCommand}" />
+    <KeyBinding Gesture="Meta+OemMinus" Command="{Binding ZoomKleinerCommand}" />
+    <KeyBinding Gesture="Meta+Subtract" Command="{Binding ZoomKleinerCommand}" />
+    <KeyBinding Gesture="Meta+D0" Command="{Binding ZoomZuruecksetzenCommand}" />
+    <KeyBinding Gesture="Meta+NumPad0" Command="{Binding ZoomZuruecksetzenCommand}" />
   </Window.KeyBindings>
   <Window.Styles>
     <Style Selector="TextBlock.gut">

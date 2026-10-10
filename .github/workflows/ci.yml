@@ -1,4 +1,6 @@
 # Baut die Solution und führt alle Tests aus – bei jedem Push und Pull Request.
+# Zusätzlich auf macOS: Tests, App-Paket bauen und einmal starten (ersetzt einen fehlenden Test-Mac), und auf Windows
+# mit ARM-Prozessor: Tests (ersetzt einen fehlenden Snapdragon-Laptop).
 # Warnungen (auch StyleCop und SonarAnalyzer) gelten als Fehler, siehe Directory.Build.props.
 name: Build und Tests
 
@@ -40,3 +42,62 @@ jobs:
           path: |
             TestResults/**/*.trx
             TestResults/**/*.cobertura.xml
+
+  macos:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Bauen
+        run: dotnet build AndiGenerator.slnx -c Release -nologo
+
+      - name: Testen
+        run: dotnet test AndiGenerator.slnx -c Release --no-build -nologo --filter "Kategorie!=Messung" --logger "console;verbosity=minimal"
+
+      - name: App-Paket bauen
+        run: |
+          dotnet publish src/AndiGenerator.Desktop -c Release -r osx-arm64 --self-contained -nologo -o publish -p:Version=0.0.0-ci
+          mkdir -p pakete
+          bash src/AndiGenerator.Desktop/macOS/paket-bauen.sh osx-arm64 0.0.0-ci publish pakete
+
+      # Startet das Programm aus dem Disk-Image und prüft, dass es nach 20 Sekunden noch läuft (Laufzeit, Signatur,
+      # native Bibliotheken, Hauptfenster); ein Bildschirmfoto davon wird mit aufgehoben.
+      - name: Starten (Rauchtest)
+        run: |
+          hdiutil attach pakete/*.dmg -mountpoint /tmp/andigen -nobrowse
+          /tmp/andigen/AndiGenerator.NET.app/Contents/MacOS/AndiGenerator.NET > start.log 2>&1 &
+          pid=$!
+          sleep 20
+          screencapture -x start.png || true
+          if ! kill -0 "$pid" 2>/dev/null; then cat start.log; echo "Programm ist beim Start beendet worden" >&2; exit 1; fi
+          kill "$pid"
+          hdiutil detach /tmp/andigen
+
+      - name: Paket und Startbild aufheben
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: macos
+          path: |
+            pakete/*.dmg
+            start.png
+            start.log
+
+  windows-arm:
+    runs-on: windows-11-arm
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Bauen
+        run: dotnet build AndiGenerator.slnx -c Release -nologo
+
+      - name: Testen
+        run: dotnet test AndiGenerator.slnx -c Release --no-build -nologo --filter "Kategorie!=Messung" --logger "console;verbosity=minimal"

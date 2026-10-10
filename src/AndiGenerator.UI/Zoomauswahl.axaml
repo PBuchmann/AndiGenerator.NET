@@ -5,7 +5,7 @@
              x:Class="AndiGenerator.UI.Zoomauswahl"
              x:DataType="p:Zoom">
   <StackPanel Orientation="Horizontal" Spacing="6" VerticalAlignment="Center"
-              ToolTip.Tip="Vergrößerung: Schieberegler, − / +, Strg + Mausrad, Strg + Plus / Strg + Minus; Strg + 0 oder Klick auf die Prozentzahl für 100 %">
+              ToolTip.Tip="Vergrößerung: Schieberegler, − / +, Strg (Mac: ⌘) + Mausrad, Strg + Plus / Strg + Minus; Strg + 0 oder Klick auf die Prozentzahl für 100 %">
     <Button x:Name="Kleiner" Classes="gross" Width="44" MinHeight="44" Padding="0" HorizontalContentAlignment="Center" ToolTip.Tip="Verkleinern">
       <ui:Symbol Daten="{StaticResource SymbolMinus}" Groesse="20" />
     </Button>

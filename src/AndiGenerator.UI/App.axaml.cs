@@ -33,8 +33,26 @@ public partial class App : global::Avalonia.Application
             desktop.ShutdownMode = ShutdownMode.OnMainWindowClose;
             desktop.Exit += (_, _) => modell.Dispose();
             fenster.Opened += (_, _) => Aktualisierung.Starten(oberflaeche);
+            if (OperatingSystem.IsMacOS())
+            {
+                NativeMenu.SetMenu(this, Programmmenue(modell));
+            }
         }
 
         base.OnFrameworkInitializationCompleted();
+    }
+
+    /// <summary>
+    /// Programmmenü des Macs (oben links in der Menüleiste, unter dem Programmnamen): „Über“ und die Anleitung statt der
+    /// Vorgabe von Avalonia. Beenden, Ausblenden usw. ergänzt macOS selbst.
+    /// </summary>
+    /// <param name="modell">Das Hauptfenster mit den Befehlen.</param>
+    /// <returns>Das Menü.</returns>
+    private static NativeMenu Programmmenue(HauptfensterViewModel modell)
+    {
+        var menue = new NativeMenu();
+        menue.Items.Add(new NativeMenuItem("Über AndiGenerator.NET") { Command = modell.UeberCommand });
+        menue.Items.Add(new NativeMenuItem("Anleitung") { Command = modell.AnleitungCommand });
+        return menue;
     }
 }
