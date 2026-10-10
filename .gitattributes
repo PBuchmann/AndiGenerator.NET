@@ -15,7 +15,11 @@ testdaten/** -text
 *.pdf binary
 *.ttf binary
 *.xlsx binary
+*.icns binary
 
 # Linux-Skripte und -Dateien (Chromebook-Pakete) brauchen LF
 *.sh text eol=lf
 *.desktop text eol=lf
+
+# macOS-Paket: Skript und Info.plist mit LF
+*.plist text eol=lf

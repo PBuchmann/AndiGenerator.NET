@@ -1,7 +1,8 @@
 # Erzeugt eine neue Version auf GitHub Releases, sobald ein Tag wie v1.0.0 gepusht wird:
-# bauen und testen, veröffentlichen (win-x64, eigenständig), mit Velopack Setup, portable ZIP und Update-Pakete
+# bauen und testen, veröffentlichen (win-x64 und win-arm64, eigenständig), mit Velopack Setup, portable ZIP und Update-Pakete
 # erzeugen und alles als Release hochladen. Das installierte Programm findet die neue Version dort selbst.
-# Danach kommen Linux-Pakete für Chromebooks dazu (x64 und arm64, je .deb und portables tar.gz; ohne Selbst-Update).
+# Danach kommen Linux-Pakete für Chromebooks dazu (x64 und arm64, je .deb und portables tar.gz; ohne Selbst-Update)
+# und macOS-Pakete (Apple-Chip und Intel, je .dmg mit ad hoc signiertem App-Paket; ohne Selbst-Update).
 name: Release
 
 on:
@@ -43,6 +44,11 @@ jobs:
       - name: Veröffentlichen
         run: dotnet publish src/AndiGenerator.Desktop -c Release -r win-x64 --self-contained -nologo -o publish -p:Version=${{ steps.version.outputs.version }}
 
+      # Windows-Laptops mit ARM-Prozessor (Snapdragon): eigener Velopack-Kanal win-arm64 mit eigenem Setup; ein so
+      # installiertes Programm sucht Updates nur in diesem Kanal.
+      - name: Veröffentlichen (ARM64)
+        run: dotnet publish src/AndiGenerator.Desktop -c Release -r win-arm64 --self-contained -nologo -o publish-arm64 -p:Version=${{ steps.version.outputs.version }}
+
       - name: Velopack installieren
         run: dotnet tool install -g vpk --version ${{ env.VPK_VERSION }}
 
@@ -50,11 +56,22 @@ jobs:
         continue-on-error: true
         run: vpk download github --repoUrl ${{ github.server_url }}/${{ github.repository }} --token ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Vorige ARM64-Version für Delta-Updates holen
+        continue-on-error: true
+        run: vpk download github --channel win-arm64 --repoUrl ${{ github.server_url }}/${{ github.repository }} --token ${{ secrets.GITHUB_TOKEN }}
+
       - name: Pakete erzeugen
         run: >
           vpk pack --packId AndiGeneratorNET --packVersion ${{ steps.version.outputs.version }}
           --packDir publish --mainExe AndiGenerator.NET.exe --packTitle "AndiGenerator.NET"
           --packAuthors "Peter Buchmann" --icon src/AndiGenerator.UI/Assets/AndiGenerator.NET.ico
+
+      - name: Pakete erzeugen (ARM64)
+        run: >
+          vpk pack --packId AndiGeneratorNET --packVersion ${{ steps.version.outputs.version }}
+          --packDir publish-arm64 --mainExe AndiGenerator.NET.exe --packTitle "AndiGenerator.NET"
+          --packAuthors "Peter Buchmann" --icon src/AndiGenerator.UI/Assets/AndiGenerator.NET.ico
+          --channel win-arm64 --runtime win-arm64
 
       # Stückliste und Nachweise sind Zugaben: Scheitern sie, wird das Release trotzdem veröffentlicht.
       - name: Stückliste (SBOM) der ausgelieferten Dateien
@@ -80,13 +97,19 @@ jobs:
         continue-on-error: true
         uses: actions/attest-sbom@v4
         with:
-          subject-path: Releases/*-Setup.exe
+          subject-path: Releases/AndiGeneratorNET-win-Setup.exe
           sbom-path: AndiGeneratorNET-${{ steps.version.outputs.version }}-sbom.spdx.json
 
       - name: Auf GitHub Releases hochladen
         run: >
           vpk upload github --repoUrl ${{ github.server_url }}/${{ github.repository }}
           --token ${{ secrets.GITHUB_TOKEN }} --publish
+          --releaseName "AndiGenerator.NET ${{ steps.version.outputs.version }}" --tag ${{ github.ref_name }}
+
+      - name: ARM64-Pakete zum Release hinzufügen
+        run: >
+          vpk upload github --channel win-arm64 --repoUrl ${{ github.server_url }}/${{ github.repository }}
+          --token ${{ secrets.GITHUB_TOKEN }} --publish --merge
           --releaseName "AndiGenerator.NET ${{ steps.version.outputs.version }}" --tag ${{ github.ref_name }}
 
       - name: Stückliste an das Release hängen
@@ -121,6 +144,45 @@ jobs:
         run: |
           mkdir -p pakete
           bash src/AndiGenerator.Desktop/Linux/paket-bauen.sh ${{ matrix.rid }} ${{ steps.version.outputs.version }} publish pakete
+          ls -l pakete
+
+      - name: Herkunftsnachweis
+        continue-on-error: true
+        uses: actions/attest-build-provenance@v4
+        with:
+          subject-path: pakete/*
+
+      - name: An das Release hängen
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh release upload ${{ github.ref_name }} pakete/* --clobber --repo ${{ github.repository }}
+
+  # macOS (MacBook, iMac, Mac mini …): eigenständig veröffentlichen, zum App-Paket bündeln, ad hoc signieren und als
+  # Disk-Image an das Release hängen. Ohne Apple-Entwicklerkonto keine Beglaubigung (Notarisierung); siehe Anleitung.
+  macos:
+    needs: release
+    runs-on: macos-latest
+    strategy:
+      matrix:
+        rid: [ osx-arm64, osx-x64 ]
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Version aus dem Tag
+        id: version
+        run: echo "version=${GITHUB_REF_NAME#v}" >> "$GITHUB_OUTPUT"
+
+      - name: Veröffentlichen
+        run: dotnet publish src/AndiGenerator.Desktop -c Release -r ${{ matrix.rid }} --self-contained -nologo -o publish -p:Version=${{ steps.version.outputs.version }}
+
+      - name: Paket erzeugen
+        run: |
+          mkdir -p pakete
+          bash src/AndiGenerator.Desktop/macOS/paket-bauen.sh ${{ matrix.rid }} ${{ steps.version.outputs.version }} publish pakete
           ls -l pakete
 
       - name: Herkunftsnachweis

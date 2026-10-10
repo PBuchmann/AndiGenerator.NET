@@ -38,16 +38,16 @@ Wenn Sie vorher mit dem Original-AndiGenerator gearbeitet haben, übernimmt Andi
 
 ## 2. Installation
 
-AndiGenerator.NET läuft unter Windows 10 und 11 (64 Bit), auf Chromebooks und unter Linux (siehe unten). Administratorrechte sind nicht nötig, und .NET muss nicht installiert sein – alles Nötige ist dabei.
+AndiGenerator.NET läuft unter Windows 10 und 11 (64 Bit), auf dem Mac (macOS 14 oder neuer), auf Chromebooks und unter Linux (siehe unten). Administratorrechte sind nicht nötig, und .NET muss nicht installiert sein – alles Nötige ist dabei.
 
 **Mit Setup (empfohlen)**
 
-1. Auf der Seite [Releases](https://github.com/PBuchmann/AndiGenerator.NET/releases) bei der neuesten Version die Datei `AndiGeneratorNET-win-Setup.exe` herunterladen.
+1. Auf der Seite [Releases](https://github.com/PBuchmann/AndiGenerator.NET/releases) bei der neuesten Version die Datei `AndiGeneratorNET-win-Setup.exe` herunterladen. Für Windows-Laptops mit ARM-Prozessor (z. B. Snapdragon) gibt es `AndiGeneratorNET-win-arm64-Setup.exe`; sie rechnet dort deutlich schneller. Welcher Prozessor eingebaut ist, steht unter *Einstellungen → System → Info → Systemtyp* („ARM-basierter Prozessor“).
 2. Die Datei starten. Das Programm wird für Ihr Benutzerkonto installiert (im Ordner `%LOCALAPPDATA%\AndiGeneratorNET`), erscheint im Startmenü und auf dem Desktop und startet gleich.
 
 **Ohne Installation**
 
-Stattdessen `AndiGeneratorNET-win-Portable.zip` herunterladen, in einen beliebigen Ordner entpacken und dort `AndiGenerator.NET.exe` starten. Diese Variante eignet sich z. B. für einen USB-Stick.
+Stattdessen `AndiGeneratorNET-win-Portable.zip` (bzw. `AndiGeneratorNET-win-arm64-Portable.zip`) herunterladen, in einen beliebigen Ordner entpacken und dort `AndiGenerator.NET.exe` starten. Diese Variante eignet sich z. B. für einen USB-Stick.
 
 **Warnung von Windows beim ersten Start**
 
@@ -61,14 +61,25 @@ Das installierte Programm sucht nach dem Start selbst nach einer neuen Version u
 
 Über *Einstellungen → Apps → Installierte Apps → AndiGenerator.NET → Deinstallieren*. Ihre Daten im Ordner `%LOCALAPPDATA%\AndiGenerator.NET` und Ihre click-TT-Dateien bleiben erhalten.
 
+**Auf dem Mac**
+
+1. Auf der Seite [Releases](https://github.com/PBuchmann/AndiGenerator.NET/releases) das passende Disk-Image herunterladen: `AndiGeneratorNET-<Version>-macos-arm64.dmg` für Macs mit Apple-Chip (M1 und neuer), `…-macos-x64.dmg` für ältere Macs mit Intel-Prozessor. Welcher Chip eingebaut ist, steht unter * → Über diesen Mac*.
+2. Das Disk-Image öffnen und **AndiGenerator.NET** auf den Ordner **Programme** ziehen.
+3. Beim ersten Start meldet macOS, dass Apple das Programm nicht überprüfen konnte, und öffnet es nicht – das Programm ist noch nicht von Apple beglaubigt. Die Meldung mit **Fertig** schließen, dann *Systemeinstellungen → Datenschutz & Sicherheit* öffnen, nach unten blättern und bei AndiGenerator.NET **Dennoch öffnen** wählen und mit dem Passwort bestätigen. Danach startet das Programm normal.
+
+Statt **Strg** gilt auf dem Mac die Befehlstaste **⌘** (z. B. ⌘ + Plus zum Vergrößern). Die eigenen Daten liegen im Ordner `~/Library/Application Support/AndiGenerator.NET`. Neue Versionen werden auf dem Mac nicht selbst gesucht – zum Aktualisieren das neue Disk-Image herunterladen und das Programm genauso in *Programme* ziehen (ersetzen).
+
 **Auf einem Chromebook (und unter Linux)**
 
 Auf Chromebooks läuft das Programm in der Linux-Entwicklungsumgebung, die ChromeOS mitbringt.
 
 1. Einmalig Linux einschalten: *Einstellungen → Info zu ChromeOS → Entwickler → Linux-Entwicklungsumgebung → Aktivieren* (bei älteren Versionen *Einstellungen → Erweitert → Entwickler*).
 2. Auf der Seite [Releases](https://github.com/PBuchmann/AndiGenerator.NET/releases) das passende Paket herunterladen: `andigenerator-net_<Version>_amd64.deb` für Chromebooks mit Intel- oder AMD-Prozessor, `…_arm64.deb` für Chromebooks mit ARM-Prozessor (z. B. MediaTek oder Qualcomm). Welcher Prozessor eingebaut ist, steht unter *Einstellungen → Info zu ChromeOS → Weitere Details*, oder im Linux-Terminal mit `dpkg --print-architecture`.
-3. In der App *Dateien* doppelt auf die heruntergeladene Datei klicken und **Installieren** wählen. Das Programm erscheint danach im Launcher im Ordner *Linux-Apps*.
-4. Die click-TT-Dateien müssen für Linux sichtbar sein: entweder in den Ordner *Linux-Dateien* legen oder einen Ordner in *Dateien* mit der rechten Maustaste **Mit Linux teilen**.
+3. Die Datei in der App *Dateien* in den Ordner *Linux-Dateien* ziehen.
+4. Das *Terminal* öffnen (im Launcher unter *Linux-Apps*) und eingeben – mit dem Dateinamen der heruntergeladenen Datei:
+   `sudo apt install ./andigenerator-net_<Version>_amd64.deb`
+   ChromeOS bietet die Installation per Doppelklick nicht mehr an. Das Programm erscheint danach im Launcher im Ordner *Linux-Apps*.
+5. Die click-TT-Dateien müssen für Linux sichtbar sein: entweder in den Ordner *Linux-Dateien* legen oder einen Ordner in *Dateien* mit der rechten Maustaste **Mit Linux teilen**.
 
 Ohne Installation geht es mit `AndiGeneratorNET-<Version>-linux-x64.tar.gz` bzw. `…-linux-arm64.tar.gz`: entpacken und `./AndiGenerator.NET` starten. Unter Linux liegen die eigenen Daten im Ordner `~/.local/share/AndiGenerator.NET`. Neue Versionen werden hier nicht selbst gesucht – zum Aktualisieren das neue Paket genauso installieren.
 
@@ -169,7 +180,7 @@ Im Automodus entfällt die Kachel *Pflichtregeln*; die Ergebniskachel nimmt ihre
 
 ![Ergebniskachel im Automodus](Anleitung/Bilder/18-automodus.png)
 
-Den **Hauptbereich** füllen die Ansichten. Jede Ansicht öffnet sich als Reiter; Sie können mehrere öffnen, zwischen ihnen wechseln, sie per Maus nebeneinander anordnen und mit dem **×** am Reiter schließen. In vielen Ansichten vergrößert oder verkleinert **Strg + Mausrad** (oder der Zoomregler) die Darstellung.
+Den **Hauptbereich** füllen die Ansichten. Jede Ansicht öffnet sich als Reiter; Sie können mehrere öffnen, zwischen ihnen wechseln, sie per Maus nebeneinander anordnen und mit dem **×** am Reiter schließen. In vielen Ansichten vergrößert oder verkleinert **Strg + Mausrad** (auf dem Mac auch **⌘ + Mausrad**, oder der Zoomregler) die Darstellung.
 
 Ganz unten zeigt die **Statuszeile** den Stand in einer Zeile.
 

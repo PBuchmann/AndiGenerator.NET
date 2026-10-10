@@ -9,7 +9,10 @@ using Avalonia.Interactivity;
 
 namespace AndiGenerator.UI;
 
-/// <summary>Strg + Mausrad vergrößert bzw. verkleinert eine Ansicht, deren Datenkontext <see cref="IZoombar"/> ist.</summary>
+/// <summary>
+/// Strg + Mausrad (auf dem Mac auch ⌘ + Mausrad) vergrößert bzw. verkleinert eine Ansicht, deren Datenkontext
+/// <see cref="IZoombar"/> ist.
+/// </summary>
 internal static class Mausradzoom
 {
     /// <summary>Meldet die Ansicht an; das Mausrad wird abgefangen, bevor die Bildlaufleiste es verarbeitet.</summary>
@@ -19,7 +22,7 @@ internal static class Mausradzoom
 
     private static void Rad(object? sender, PointerWheelEventArgs e)
     {
-        if ((e.KeyModifiers & KeyModifiers.Control) == 0 || sender is not Control { DataContext: IZoombar ansicht })
+        if ((e.KeyModifiers & (KeyModifiers.Control | KeyModifiers.Meta)) == 0 || sender is not Control { DataContext: IZoombar ansicht })
         {
             return;
         }

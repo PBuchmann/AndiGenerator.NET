@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<!-- Beschreibung des App-Pakets für macOS; @VERSION@ und @KURZVERSION@ setzt paket-bauen.sh ein. -->
+<plist version="1.0">
+<dict>
+  <key>CFBundleName</key>
+  <string>AndiGenerator.NET</string>
+  <key>CFBundleDisplayName</key>
+  <string>AndiGenerator.NET</string>
+  <key>CFBundleIdentifier</key>
+  <string>io.github.pbuchmann.andigenerator-net</string>
+  <key>CFBundleExecutable</key>
+  <string>AndiGenerator.NET</string>
+  <key>CFBundleIconFile</key>
+  <string>AndiGenerator.NET.icns</string>
+  <key>CFBundlePackageType</key>
+  <string>APPL</string>
+  <key>CFBundleInfoDictionaryVersion</key>
+  <string>6.0</string>
+  <key>CFBundleDevelopmentRegion</key>
+  <string>de</string>
+  <key>CFBundleShortVersionString</key>
+  <string>@KURZVERSION@</string>
+  <key>CFBundleVersion</key>
+  <string>@VERSION@</string>
+  <key>LSMinimumSystemVersion</key>
+  <string>14.0</string>
+  <key>LSApplicationCategoryType</key>
+  <string>public.app-category.sports</string>
+  <key>NSHighResolutionCapable</key>
+  <true/>
+  <key>NSHumanReadableCopyright</key>
+  <string>© 2017 Andreas Hofmann, © 2026 Peter Buchmann · GPL-3.0</string>
+</dict>
+</plist>
