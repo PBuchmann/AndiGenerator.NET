@@ -646,6 +646,9 @@ Im Bayerischen TTV werden Hallenbelegung und Spiele der Nachbarmannschaften bei 
 **Wird mein Rechner während der Generierung langsam?**
 Das Programm lässt einen Prozessorkern frei und rechnet mit niedriger Priorität, damit andere Programme bedienbar bleiben. Wer den Rechner in Ruhe lassen möchte, pausiert die Generierung.
 
+**Das Programm meldet einen unerwarteten Fehler.**
+Dann ist etwas schiefgegangen, womit das Programm nicht gerechnet hat. Es beendet sich dabei nicht, sondern merkt den aktuellen Plan als **Notfallsicherung** (Sie finden ihn unter **Start mit** und in der Planauswahl der Ansichten) und schreibt die Einzelheiten in die Datei `fehlerprotokoll.txt` im Datenordner (unter Windows `%LOCALAPPDATA%\AndiGenerator.NET`); die Meldung nennt den genauen Pfad. Sie können weiterarbeiten, sicherer ist aber, den Plan zu exportieren oder zu merken und das Programm neu zu starten. Bricht eine laufende Generierung ab, steht das in der Statuszeile, und der beste Plan ist ebenso als Notfallsicherung gemerkt. Helfen Sie, den Fehler zu beheben: Schicken Sie das Fehlerprotokoll mit einer kurzen Beschreibung, was Sie gerade getan haben, über die [Fehlermeldungen auf GitHub](https://github.com/PBuchmann/AndiGenerator.NET/issues). Das Protokoll enthält keine Spielplandaten, kann aber Dateipfade Ihres Rechners nennen.
+
 ---
 
 *AndiGenerator.NET – Portierung des AndiGenerators von Andreas Hofmann. Freie Software unter der GNU General Public License Version 3.*

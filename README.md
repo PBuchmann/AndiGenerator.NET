@@ -25,6 +25,7 @@ AndiGenerator.NET ist die C#/.NET-Portierung des **AndiGenerators** von **Andrea
 ## Anleitung
 
 - [Anleitung lesen](Doku/ANLEITUNG.md) (auch als [PDF](Doku/Anleitung.pdf), im Programm unter **Anleitung**)
+- [Änderungen je Version](CHANGELOG.md)
 
 ## Installation
 

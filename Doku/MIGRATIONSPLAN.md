@@ -526,16 +526,16 @@ Funktional ist der Umfang des Originals portiert und um Automodus, Leitstand, ge
 
 **Muss vor 1.0**
 
-- [ ] **Stand abschließen:** Branch `feature/automodus-uebergang` committen und zusammenführen; Bildschirmfotos und `Doku/Anleitung.pdf` neu erzeugen (Leitstand, Start/Pause/Stopp, Spielplandaten-Seiten haben sich geändert).
-- [ ] **Absturzschutz:** globaler Fehlerfänger (`AppDomain.UnhandledException`, `TaskScheduler.UnobservedTaskException`, Fehler im UI-Thread): verständliche Meldung, Protokolldatei im Datenordner, vorher den laufenden Plan als gesicherten Plan ablegen.
+- [x] **Stand abschließen:** *(erledigt 11.10.2026, PR #11)* Branch `feature/automodus-uebergang` committen und zusammenführen; Bildschirmfotos und `Doku/Anleitung.pdf` neu erzeugen (Leitstand, Start/Pause/Stopp, Spielplandaten-Seiten haben sich geändert).
+- [x] **Absturzschutz:** *(erledigt 11.10.2026: `Fehlerprotokoll`, `Fehlerbehandlung`, `NotfallSichern`; statt den gesicherten Plan anzutasten, wird der Plan als gemerkter Plan „Notfallsicherung“ abgelegt)* globaler Fehlerfänger (`AppDomain.UnhandledException`, `TaskScheduler.UnobservedTaskException`, Fehler im UI-Thread): verständliche Meldung, Protokolldatei im Datenordner, vorher den laufenden Plan als gesicherten Plan ablegen.
 - [ ] **Klasse-3-Befunde entscheiden (E9):** #3, #4, #5, #6, #9, #10 und #33 – je Befund korrigieren (ggf. als Schalter) oder bewusst wie im Original lassen; Entscheidung in Abschnitt 6 eintragen.
 - [ ] **Signierung entscheiden (E12):** Zertifikat für Windows (SmartScreen-Warnung) bzw. Notarisierung für macOS – oder ein klarer Hinweis auf der Download-Seite.
 
 **Sollte vor 1.0**
 
 - [ ] **Beta mit echten Staffelleitern (Phase 9):** zwei bis drei Staffeln parallel mit Original und neuem Programm planen, Befunde sammeln.
-- [ ] **Sprache fest auf Deutsch:** `CultureInfo.DefaultThreadCurrentCulture`/`UICulture` beim Start auf de-DE setzen und auf einem englisch eingestellten Windows prüfen (Monatsnamen der Datumsauswahl, Zahlenformate, Standardtexte; vgl. Platzhalter „hour“/„minute“).
-- [ ] **Änderungsprotokoll für Anwender:** `CHANGELOG.md` bzw. Release Notes je GitHub-Release, mit 1.0 eine Übersicht „Was ist anders als im Original“.
+- [x] **Sprache fest auf Deutsch:** *(erledigt 11.10.2026 in `Program.Main`; Prüfung auf englischem Windows steht noch aus)* `CultureInfo.DefaultThreadCurrentCulture`/`UICulture` beim Start auf de-DE setzen und auf einem englisch eingestellten Windows prüfen (Monatsnamen der Datumsauswahl, Zahlenformate, Standardtexte; vgl. Platzhalter „hour“/„minute“).
+- [x] **Änderungsprotokoll für Anwender:** *(erledigt 11.10.2026: `CHANGELOG.md`; offen: Abschnitt der Version automatisch als Release Notes ins GitHub-Release übernehmen)* `CHANGELOG.md` bzw. Release Notes je GitHub-Release, mit 1.0 eine Übersicht „Was ist anders als im Original“.
 - [ ] **Testabdeckung der Oberfläche** neu messen (zuletzt 01.10.2026: gesamt 92,8 %, UI 76 %) und die neuen Abläufe absichern (Drag & Drop, Kalender, Sicherungsdialog, Einrichtung).
 
 **Abrundung (auch nach 1.0 möglich)**
@@ -801,3 +801,4 @@ Befund: Billigere Pläne nach der Kostenfunktion des Originals sind nicht automa
 | 11.10.2026 | Anleitung erweitert: eigene Abschnitte 4.1 *Der Leitstand* (Aufbau, Tabelle der Inselzustände nach `Schaubild.Zustand`, Automodus-Gewichte) und 4.2 *Der Verlauf*; neue Bildschirmfotos 20-leitstand-kosten, 21-verlauf, 22-sicherung (Vergleich beim zweiten Sichern), 23-spielfreie-tage, 24-setzliste, 25-wunschtermine (`Bildschirmfotos.cs`) |
 | 11.10.2026 | Nach Durchsicht der Bildschirmfotos: deutsche Platzhalter schon in `App.Initialize` (galten sonst nicht ohne Bildschirm), Koordinator und Automodus-Pult im Leitstand breiter (Text war abgeschnitten), Legende der Wunschtermine bricht um (Seite war breiter als der Dialog), Verlauf zeigt nach Wechsel von der Kostenoptimierung in den Automodus zusätzlich die Kosten (Zeit davor war leer) |
 | 11.10.2026 | Leitstand: Schaubild und Inselkarte widersprachen sich („kommt voran“ gegenüber „beginnt gleich neu“). Jetzt geht im Schaubild „beginnt gleich neu“ vor (schlechteste Insel über der Neustart-Grenze, auch nach frischer Verbesserung), wie auf der Karte; Test `Die_schlechteste_Insel_ueber_der_Grenze_beginnt_gleich_neu_auch_wenn_sie_eben_verbessert_hat` |
+| 11.10.2026 | Absturzschutz: unerwartete Fehler (Oberfläche, Programm, Hintergrundaufgaben, Abbruch eines Rechenthreads der Generierung) kommen in `fehlerprotokoll.txt` im Datenordner (ab 1 MB beginnt ein neues, das alte bleibt als `fehlerprotokoll.alt.txt`); bei Fehlern auf der Oberfläche und Abbrüchen wird der Plan als gemerkter Plan „Notfallsicherung“ abgelegt und einmal eine Meldung gezeigt, das Programm läuft weiter. Kultur der Anwendung fest de-DE (`Program.Main`) |
