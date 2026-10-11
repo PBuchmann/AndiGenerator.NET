@@ -17,7 +17,7 @@ case "$rid" in
 esac
 
 # Portables Archiv: entpacken und ./AndiGenerator.NET starten.
-tar -czf "$ziel/AndiGeneratorNET-$version-$rid.tar.gz" -C "$publish" .
+tar -czf "$ziel/AndiGeneratorNET-$rid.tar.gz" -C "$publish" .
 
 # Debian-Paket: Programm unter /opt, Aufruf andigenerator-net, Eintrag im Startmenü (auf dem Chromebook im Launcher).
 wurzel="$(mktemp -d)"
@@ -52,5 +52,7 @@ Description: Spielplan-Generator für Tischtennis-Staffeln
  aus den in click-TT gemeldeten Terminwünschen und exportiert sie für click-TT.
 STEUER
 
-dpkg-deb --root-owner-group --build "$wurzel" "$ziel/andigenerator-net_${debversion}_${arch}.deb"
+# Dateiname ohne Version: So bleibt der Link „releases/latest/download/…“ in README und Anleitung immer gültig;
+# die Version steht im Paket selbst.
+dpkg-deb --root-owner-group --build "$wurzel" "$ziel/andigenerator-net_${arch}.deb"
 rm -rf "$wurzel"
