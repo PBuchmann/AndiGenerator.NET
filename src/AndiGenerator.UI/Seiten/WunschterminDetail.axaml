@@ -4,59 +4,147 @@
              x:Class="AndiGenerator.UI.Seiten.WunschterminDetail"
              x:DataType="p:WunschterminDetailViewModel">
   <UserControl.Styles>
-    <Style Selector="TextBox.tag">
+    <!-- Ein Tag als Kärtchen: leer (weiß), Heimspiel (blau), Ausweichtermin (hellblau, kursiv), Sperrtermin (rot) -->
+    <Style Selector="Border.kaertchen">
       <Setter Property="Width" Value="88" />
-      <Setter Property="MinHeight" Value="34" />
-      <Setter Property="Padding" Value="4,2" />
+      <Setter Property="Height" Value="44" />
       <Setter Property="Margin" Value="1" />
-      <Setter Property="FontSize" Value="11" />
+      <Setter Property="Padding" Value="5,3" />
       <Setter Property="CornerRadius" Value="6" />
-      <Setter Property="VerticalContentAlignment" Value="Center" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="BorderBrush" Value="{StaticResource Linie}" />
+      <Setter Property="Background" Value="{StaticResource Flaeche}" />
+      <Setter Property="Cursor" Value="Hand" />
+    </Style>
+    <Style Selector="Border.kaertchen:pointerover">
+      <Setter Property="BorderBrush" Value="{StaticResource Akzent}" />
+    </Style>
+    <Style Selector="Border.kaertchen.heim">
+      <Setter Property="Background" Value="{StaticResource AkzentHell}" />
+      <Setter Property="BorderBrush" Value="#9DB5D3" />
+    </Style>
+    <Style Selector="Border.kaertchen.ausweich">
+      <Setter Property="Background" Value="#F3F7FC" />
+      <Setter Property="BorderBrush" Value="#C9D7E8" />
+    </Style>
+    <Style Selector="Border.ausweich TextBlock.haupt">
+      <Setter Property="FontStyle" Value="Italic" />
+      <Setter Property="FontWeight" Value="Normal" />
+    </Style>
+    <Style Selector="Border.kaertchen.sperre">
+      <Setter Property="Background" Value="#FBE9E7" />
+      <Setter Property="BorderBrush" Value="#E7A59D" />
+    </Style>
+    <!-- Beim Ziehen: der gezogene Termin blass, die Ablagestelle kräftig umrandet -->
+    <Style Selector="Border.kaertchen.quelle">
+      <Setter Property="Opacity" Value="0.35" />
+    </Style>
+    <Style Selector="Border.kaertchen.ziel">
+      <Setter Property="BorderBrush" Value="{StaticResource Akzent}" />
+      <Setter Property="BorderThickness" Value="2" />
+    </Style>
+    <Style Selector="Border.schwebend">
+      <Setter Property="BoxShadow" Value="0 6 18 0 #40000000" />
+      <Setter Property="Opacity" Value="0.95" />
+    </Style>
+    <Style Selector="TextBlock.haupt">
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="Foreground" Value="{StaticResource AkzentDunkel}" />
+    </Style>
+    <Style Selector="Border.sperre TextBlock.haupt">
+      <Setter Property="Foreground" Value="{StaticResource Schlecht}" />
+    </Style>
+    <Style Selector="TextBlock.zusatz">
+      <Setter Property="FontSize" Value="10" />
+      <Setter Property="Foreground" Value="{StaticResource Tinte2}" />
+      <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+    </Style>
+    <Style Selector="Border.legende">
+      <Setter Property="Width" Value="22" />
+      <Setter Property="Height" Value="14" />
+      <Setter Property="CornerRadius" Value="4" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="VerticalAlignment" Value="Center" />
     </Style>
   </UserControl.Styles>
-  <StackPanel>
-    <StackPanel Orientation="Horizontal" Margin="0,0,0,2">
-      <TextBlock Width="104" />
-      <ItemsControl ItemsSource="{x:Static p:WunschterminDetailViewModel.Wochentage}">
-        <ItemsControl.ItemsPanel>
-          <ItemsPanelTemplate>
-            <StackPanel Orientation="Horizontal" />
-          </ItemsPanelTemplate>
-        </ItemsControl.ItemsPanel>
+  <UserControl.Resources>
+    <DataTemplate x:Key="Kaertchenvorlage" x:DataType="p:WunschterminZelle">
+      <Border Classes="kaertchen" Classes.heim="{Binding IstHeimspiel}" Classes.ausweich="{Binding IstAusweich}" Classes.sperre="{Binding IstSperre}"
+              Classes.quelle="{Binding IstQuelle}" Classes.ziel="{Binding IstZiel}" ToolTip.Tip="{Binding Hinweis}">
+        <Border.ContextMenu>
+          <ContextMenu>
+            <MenuItem Header="Bearbeiten…" Click="Bearbeiten" />
+            <MenuItem Header="Löschen" Click="Loeschen" IsEnabled="{Binding HatTermin}" />
+          </ContextMenu>
+        </Border.ContextMenu>
+        <StackPanel VerticalAlignment="Center" Spacing="0">
+          <TextBlock Classes="haupt" Text="{Binding Hauptzeile}" />
+          <TextBlock Classes="zusatz" Text="{Binding Zusatz}" IsVisible="{Binding Zusatz, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+        </StackPanel>
+      </Border>
+    </DataTemplate>
+  </UserControl.Resources>
+  <Panel>
+    <StackPanel>
+      <!-- Legende -->
+      <WrapPanel Orientation="Horizontal" Margin="0,0,0,10">
+        <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,16,4">
+          <Border Classes="legende" Background="{StaticResource AkzentHell}" BorderBrush="#9DB5D3" />
+          <TextBlock Text="Heimspiel möglich (Uhrzeit)" Classes="klein" VerticalAlignment="Center" />
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,16,4">
+          <Border Classes="legende" Background="#F3F7FC" BorderBrush="#C9D7E8" />
+          <TextBlock Text="Ausweichtermin (nur im Notfall)" Classes="klein" VerticalAlignment="Center" />
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,16,4">
+          <Border Classes="legende" Background="#FBE9E7" BorderBrush="#E7A59D" />
+          <TextBlock Text="Sperrtermin (kein Spiel)" Classes="klein" VerticalAlignment="Center" />
+        </StackPanel>
+        <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,16,4">
+          <Border Classes="legende" Background="{StaticResource Flaeche}" BorderBrush="{StaticResource Linie}" />
+          <TextBlock Text="leer: kein Heimspiel, Auswärtsspiele möglich" Classes="klein" VerticalAlignment="Center" />
+        </StackPanel>
+      </WrapPanel>
+      <TextBlock Text="Klick auf einen Tag: Termin eintragen oder bearbeiten · Termin ziehen: auf einen anderen Tag verschieben (mit Strg kopieren; liegt dort schon einer, tauschen die beiden) · Rechtsklick: löschen · Ein leerer Tag wird als Heimspiel zur üblichen Uhrzeit vorgeschlagen"
+                 Classes="klein hinweis" TextWrapping="Wrap" Margin="0,0,0,10" MaxWidth="740" HorizontalAlignment="Left" />
+      <StackPanel Orientation="Horizontal" Margin="0,0,0,2">
+        <TextBlock Width="104" />
+        <ItemsControl ItemsSource="{x:Static p:WunschterminDetailViewModel.Wochentage}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+              <StackPanel Orientation="Horizontal" />
+            </ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="x:String">
+              <TextBlock Text="{Binding}" Width="90" Classes="spaltenkopf" TextAlignment="Center" />
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </StackPanel>
+      <ItemsControl x:Name="Raster" ItemsSource="{Binding Wochen}">
         <ItemsControl.ItemTemplate>
-          <DataTemplate x:DataType="x:String">
-            <TextBlock Text="{Binding}" Width="90" Classes="spaltenkopf" TextAlignment="Center" />
+          <DataTemplate x:DataType="p:WunschterminZeile">
+            <StackPanel Orientation="Horizontal">
+              <TextBlock Text="{Binding Beschriftung}" Width="104" FontSize="12" LineHeight="16" VerticalAlignment="Center" TextWrapping="Wrap" />
+              <ItemsControl ItemsSource="{Binding Tage}" ItemTemplate="{StaticResource Kaertchenvorlage}">
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate>
+                    <StackPanel Orientation="Horizontal" />
+                  </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+              </ItemsControl>
+            </StackPanel>
           </DataTemplate>
         </ItemsControl.ItemTemplate>
       </ItemsControl>
     </StackPanel>
-    <ItemsControl ItemsSource="{Binding Wochen}">
-      <ItemsControl.ItemTemplate>
-        <DataTemplate x:DataType="p:WunschterminZeile">
-          <StackPanel Orientation="Horizontal">
-            <TextBlock Text="{Binding Beschriftung}" Width="104" FontSize="12" LineHeight="16" VerticalAlignment="Center" TextWrapping="Wrap" />
-            <ItemsControl ItemsSource="{Binding Tage}">
-              <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                  <StackPanel Orientation="Horizontal" />
-                </ItemsPanelTemplate>
-              </ItemsControl.ItemsPanel>
-              <ItemsControl.ItemTemplate>
-                <DataTemplate x:DataType="p:WunschterminZelle">
-                  <TextBox Classes="tag" Text="{Binding Text, UpdateSourceTrigger=LostFocus}">
-                    <TextBox.ContextMenu>
-                      <ContextMenu>
-                        <MenuItem Header="Bearbeiten…" Click="Bearbeiten" />
-                        <MenuItem Header="Löschen" Click="Loeschen" IsEnabled="{Binding HatTermin}" />
-                      </ContextMenu>
-                    </TextBox.ContextMenu>
-                  </TextBox>
-                </DataTemplate>
-              </ItemsControl.ItemTemplate>
-            </ItemsControl>
-          </StackPanel>
-        </DataTemplate>
-      </ItemsControl.ItemTemplate>
-    </ItemsControl>
-  </StackPanel>
+    <!-- Ebene für das Kärtchen, das beim Ziehen am Mauszeiger hängt -->
+    <Canvas x:Name="Schwebeebene" IsHitTestVisible="False" ClipToBounds="False">
+      <Border x:Name="Schwebekarte" Classes="schwebend" CornerRadius="6" IsVisible="False">
+        <ContentControl x:Name="Schwebeinhalt" ContentTemplate="{StaticResource Kaertchenvorlage}" />
+      </Border>
+    </Canvas>
+  </Panel>
 </UserControl>

@@ -10,13 +10,15 @@ namespace AndiGenerator.Presentation;
 public sealed class HeimkoppelnSeiteViewModel : MehrMannschaftenSeiteViewModel
 {
     private const string Hinweis =
-        "Neue Heimkoppeltermine können nur in den Wunschterminen angelegt werden.\n"
-        + "Die zweite Anfangszeit kann ebenfalls nur in den Wunschterminen angegeben werden";
+        "Koppelspieltag: zwei Heimspiele am selben Tag (mit zweiter Anfangszeit). Doppelspieltag: zwei Heimspiele an zwei "
+        + "aufeinanderfolgenden Tagen, meist Samstag und Sonntag. Je Termin bzw. Terminpaar wählen Sie, ob das möglich, "
+        + "gewünscht oder mit hoher Priorität gewünscht ist.\n"
+        + "Neue Koppeltermine und die zweite Anfangszeit legen Sie in den Wunschterminen an.";
 
     /// <summary>Initialisiert die Seite.</summary>
     /// <param name="bearbeitung">Arbeitskopie.</param>
     public HeimkoppelnSeiteViewModel(Datenbearbeitung bearbeitung)
-        : base(bearbeitung, "Heimkoppel/Doppelspieltage (Kompakt)", Hinweis)
+        : base(bearbeitung, "Heimkoppel und Doppelspieltage", Hinweis)
     {
         Laden();
     }

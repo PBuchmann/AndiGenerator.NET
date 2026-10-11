@@ -61,6 +61,12 @@ internal sealed class TestOberflaeche : IOberflaeche
 
     public Func<VorgabespieldialogViewModel, bool>? Vorgabespiel { get; set; }
 
+    /// <summary>Holt oder setzt die Antwort auf die Frage, ob der gesicherte Plan ersetzt werden soll.</summary>
+    public Sicherungswahl Sicherung { get; set; } = Sicherungswahl.Behalten;
+
+    /// <summary>Holt den zuletzt gezeigten Vergleich beim Sichern.</summary>
+    public Planvergleich? Vergleich { get; private set; }
+
     /// <summary>Holt oder setzt die Antwort auf die Druckauswahl.</summary>
     public Func<DruckauswahlViewModel, bool>? Druckauswahl { get; set; }
 
@@ -108,6 +114,12 @@ internal sealed class TestOberflaeche : IOberflaeche
     public Task<string?> DateiSpeichernAsync(string titel, string vorschlag, Dateifilter filter) => Merken(titel, DateiZumSpeichern);
 
     public Task<bool> FragenAsync(string titel, string frage) => Merken(titel, Antwort);
+
+    public Task<Sicherungswahl> SicherungAbfragenAsync(Planvergleich vergleich)
+    {
+        Vergleich = vergleich;
+        return Merken("Plan sichern", Sicherung);
+    }
 
     public Task<bool> EntscheidenAsync(string titel, string text, IReadOnlyList<string> details, string ja, string nein) => Merken(titel, Antwort);
 

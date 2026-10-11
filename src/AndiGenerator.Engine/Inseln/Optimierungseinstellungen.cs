@@ -20,10 +20,12 @@ namespace AndiGenerator.Engine.Inseln;
 /// Sekunden reiner Rechenzeit; reproduzierbar werden sie aus den Durchläufen abgeleitet); 0 = 300 s.
 /// </param>
 /// <param name="Automodus">
-/// Automodus: Nach der Basisoptimierung (Grundlauf mit den Gewichtungen des Anwenders, bis die Suche 10 s keine
-/// Verbesserung findet, mindestens 10 s) lenkt die Suche über die Gewichte: erst A-, dann B-Verstöße herausdrängen, dann
-/// die C-Kriterien nach Wichtigkeit je Mannschaft glätten, bis A oder B wieder steigen. Ohne Zeitgrenzen: Der Automodus
-/// beobachtet, ob sich die Verstöße nach einer Gewichtsänderung noch ändern (10 s ohne Verbesserung, frühestens 8 s nach der letzten Änderung = nächster Schritt).
+/// Automodus: Nach der Basisoptimierung (Grundlauf mit den Gewichtungen des Anwenders, bis die Suche steht – siehe
+/// <paramref name="AutoDeutlich"/>, <paramref name="AutoStillstandPlaene"/> und <paramref name="AutoMaxGrundlauf"/>) lenkt die
+/// Suche über die Gewichte: erst A-, dann B-Verstöße herausdrängen, dann die C-Kriterien nach Wichtigkeit je Mannschaft
+/// glätten, bis A oder B wieder steigen. Ohne Zeitgrenzen: Der Automodus beobachtet, ob sich die Verstöße nach einer
+/// Gewichtsänderung noch ändern (Stillstand: mindestens 10 s und <paramref name="AutoStillstandPlaene"/> berechnete Pläne ohne
+/// Verbesserung, frühestens 8 s nach der letzten Änderung = nächster Schritt).
 /// Die Spezial-Insel ist dabei aus.
 /// </param>
 /// <param name="AutoSpielraum">Verstöße, die eine Mannschaft je C-Kriterium mehr haben darf als im Grundlauf, bevor sie als Ausreißer gilt.</param>
@@ -33,6 +35,15 @@ namespace AndiGenerator.Engine.Inseln;
 /// Automodus ohne Basisoptimierung: Der Ausgangsplan ist schon optimiert (Wechsel von der Kostenoptimierung), sein bester
 /// Plan wird sofort Maßstab, und die Optimierung der Stufe A beginnt gleich.
 /// </param>
+/// <param name="AutoDeutlich">
+/// Basisoptimierung: Nur Verbesserungen um mindestens diesen Anteil der Kosten (0,01 = 1 %) gegenüber der letzten deutlichen
+/// Verbesserung gelten als Fortschritt; kleinere halten die Basisoptimierung nicht fest.
+/// </param>
+/// <param name="AutoStillstandPlaene">
+/// Berechnete Pläne ohne (deutliche) Verbesserung, ab denen die Suche als festgefahren gilt – zusätzlich zu mindestens 10 s,
+/// damit langsame Rechner ebenso viel suchen wie schnelle, bevor der Automodus entscheidet.
+/// </param>
+/// <param name="AutoMaxGrundlauf">Höchstdauer der Basisoptimierung in Sekunden reiner Rechenzeit; danach beginnt in jedem Fall Stufe A.</param>
 public sealed record Optimierungseinstellungen(
     int Kerne,
     int Inseln,
@@ -49,7 +60,10 @@ public sealed record Optimierungseinstellungen(
     int AutoSpielraum = 2,
     double AutoKostenToleranz = 0.5,
     Stufeneinteilung? AutoStufen = null,
-    bool AutoOhneGrundlauf = false)
+    bool AutoOhneGrundlauf = false,
+    double AutoDeutlich = 0.01,
+    long AutoStillstandPlaene = 500_000,
+    double AutoMaxGrundlauf = 180)
 {
     /// <summary>Standard: Topologie des Originals (4 Inseln × 14 feste + 10 dynamische Suchplätze, Spezial-Insel), alle Kerne bis auf einen.</summary>
     public static Optimierungseinstellungen Standard { get; } = new(

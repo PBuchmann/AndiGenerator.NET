@@ -9,7 +9,7 @@ namespace AndiGenerator.Presentation;
 /// <summary>Auswählbare Planquelle einer Ansicht.</summary>
 /// <param name="Art">Art der Quelle.</param>
 /// <param name="Name">Anzeigename.</param>
-/// <param name="Eintrag">Gemerkter Plan bei <see cref="PlanQuellenArt.GemerkterPlan"/>, sonst <c>null</c>.</param>
+/// <param name="Eintrag">Gemerkter bzw. gesicherter Plan bei <see cref="PlanQuellenArt.GemerkterPlan"/> und <see cref="PlanQuellenArt.GesicherterPlan"/>, sonst <c>null</c>.</param>
 public sealed record PlanQuelle(PlanQuellenArt Art, string Name, GemerkterPlanEintrag? Eintrag)
 {
     /// <summary>Holt die Quelle „laufende Generierung“.</summary>
@@ -17,6 +17,15 @@ public sealed record PlanQuelle(PlanQuellenArt Art, string Name, GemerkterPlanEi
 
     /// <summary>Holt die Quelle „in click-TT vorhandener Plan“.</summary>
     public static PlanQuelle ClickTt { get; } = new(PlanQuellenArt.ClickTtPlan, "In click-TT vorhandener Plan", null);
+
+    /// <summary>Erzeugt die Quelle zum gesicherten Plan.</summary>
+    /// <param name="eintrag">Der gesicherte Plan.</param>
+    /// <returns>Die Quelle.</returns>
+    public static PlanQuelle Gesichert(GemerkterPlanEintrag eintrag)
+    {
+        ArgumentNullException.ThrowIfNull(eintrag);
+        return new PlanQuelle(PlanQuellenArt.GesicherterPlan, "Gesicherter Plan", eintrag);
+    }
 
     /// <summary>Erzeugt die Quelle zu einem gemerkten Plan.</summary>
     /// <param name="eintrag">Der gemerkte Plan.</param>

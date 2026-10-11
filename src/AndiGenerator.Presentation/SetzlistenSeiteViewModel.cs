@@ -16,6 +16,9 @@ public sealed class SetzlistenSeiteViewModel : DatenSeiteViewModel
 {
     private bool aktiv;
     private int auswahl = -1;
+    private int gezogen = -1;
+    private int ablage = -1;
+    private Setzlistenzeile? schwebend;
 
     /// <summary>Initialisiert die Seite.</summary>
     /// <param name="bearbeitung">Arbeitskopie.</param>
@@ -24,6 +27,7 @@ public sealed class SetzlistenSeiteViewModel : DatenSeiteViewModel
     {
         HochCommand = new RelayCommand(() => Verschieben(-1), () => Auswahl > 0);
         RunterCommand = new RelayCommand(() => Verschieben(1), () => Auswahl >= 0 && Auswahl < Reihenfolge.Count - 1);
+        Reihenfolge.CollectionChanged += (_, _) => ZeilenAufbauen();
         Laden();
     }
 
@@ -52,6 +56,19 @@ public sealed class SetzlistenSeiteViewModel : DatenSeiteViewModel
     /// <summary>Holt die erwartete Reihenfolge (Platz 1 zuerst).</summary>
     public ObservableCollection<string> Reihenfolge { get; } = [];
 
+    /// <summary>
+    /// Holt die Zeilen der Anzeige mit Platznummer; beim Ziehen schon in der Reihenfolge, die beim Ablegen entstünde, mit
+    /// einer Lücke an der Ablagestelle.
+    /// </summary>
+    public ObservableCollection<Setzlistenzeile> Zeilen { get; } = [];
+
+    /// <summary>Holt beim Ziehen die Zeile, die am Mauszeiger hängt; sonst <c>null</c>.</summary>
+    public Setzlistenzeile? Schwebend
+    {
+        get => schwebend;
+        private set => SetProperty(ref schwebend, value);
+    }
+
     /// <summary>Holt oder setzt den Index der gewählten Mannschaft.</summary>
     public int Auswahl
     {
@@ -62,6 +79,7 @@ public sealed class SetzlistenSeiteViewModel : DatenSeiteViewModel
             {
                 HochCommand.NotifyCanExecuteChanged();
                 RunterCommand.NotifyCanExecuteChanged();
+                ZeilenAufbauen();
             }
         }
     }
@@ -71,6 +89,9 @@ public sealed class SetzlistenSeiteViewModel : DatenSeiteViewModel
 
     /// <summary>Holt den Befehl „Nach unten“.</summary>
     public IRelayCommand RunterCommand { get; }
+
+    /// <inheritdoc/>
+    public override string Marke => Aktiv ? "an" : "aus";
 
     /// <inheritdoc/>
     public override bool IstStandard => !Aktiv;
@@ -113,6 +134,72 @@ public sealed class SetzlistenSeiteViewModel : DatenSeiteViewModel
         Auswahl = nach;
     }
 
+    /// <summary>Beginnt das Ziehen einer Mannschaft (am Griff ihrer Zeile).</summary>
+    /// <param name="index">Index der Mannschaft.</param>
+    /// <returns><c>true</c>, wenn gezogen wird.</returns>
+    public bool ZiehenBeginnen(int index)
+    {
+        if (index < 0 || index >= Reihenfolge.Count)
+        {
+            return false;
+        }
+
+        gezogen = index;
+        ablage = index;
+        ZeilenAufbauen();
+        return true;
+    }
+
+    /// <summary>
+    /// Die gezogene Mannschaft ist über der Zeile <paramref name="ziel"/> (Index in der angezeigten Vorschau): über deren
+    /// oberer Hälfte kommt sie davor, sonst dahinter. Die Anzeige zeigt die neue Reihenfolge schon mit der Lücke.
+    /// </summary>
+    /// <param name="ziel">Index der Zeile unter dem Zeiger in <see cref="Zeilen"/>.</param>
+    /// <param name="davor"><c>true</c> = obere Hälfte.</param>
+    public void ZiehenUeber(int ziel, bool davor)
+    {
+        if (gezogen < 0 || ziel < 0 || ziel >= Zeilen.Count || ziel == ablage)
+        {
+            return;
+        }
+
+        // In der Vorschau ohne die gezogene Mannschaft: vor bzw. hinter die Zeile unter dem Zeiger.
+        int ohne = ziel > ablage ? ziel - 1 : ziel;
+        int neu = davor ? ohne : ohne + 1;
+        if (neu != ablage)
+        {
+            ablage = neu;
+            ZeilenAufbauen();
+        }
+    }
+
+    /// <summary>Beendet das Ziehen: legt die Mannschaft an der Ablagestelle ab oder bricht ab (Escape).</summary>
+    /// <param name="uebernehmen"><c>true</c> = ablegen.</param>
+    public void ZiehenBeenden(bool uebernehmen)
+    {
+        int von = gezogen;
+        int nach = ablage;
+        gezogen = -1;
+        ablage = -1;
+        if (uebernehmen && von >= 0 && nach >= 0 && von != nach)
+        {
+            Reihenfolge.Move(von, nach);
+            Auswahl = nach;
+        }
+
+        ZeilenAufbauen();
+    }
+
+    /// <summary>Wählt eine Mannschaft (Klick auf ihre Zeile).</summary>
+    /// <param name="index">Index in <see cref="Zeilen"/>.</param>
+    public void Waehlen(int index)
+    {
+        if (gezogen < 0 && index >= 0 && index < Reihenfolge.Count)
+        {
+            Auswahl = index;
+        }
+    }
+
     /// <summary>Verschiebt die gewählte Mannschaft (Original <c>ButtonUpClick</c>/<c>ButtonDownClick</c>).</summary>
     /// <param name="richtung">-1 nach oben, 1 nach unten.</param>
     internal void Verschieben(int richtung)
@@ -126,5 +213,27 @@ public sealed class SetzlistenSeiteViewModel : DatenSeiteViewModel
 
         Reihenfolge.Move(von, nach);
         Auswahl = nach;
+    }
+
+    /// <summary>Baut die angezeigten Zeilen auf; beim Ziehen in der Reihenfolge nach dem Ablegen, mit Lücke.</summary>
+    private void ZeilenAufbauen()
+    {
+        List<string> namen = [.. Reihenfolge];
+        string? gezogenerName = null;
+        if (gezogen >= 0 && gezogen < namen.Count)
+        {
+            gezogenerName = namen[gezogen];
+            namen.RemoveAt(gezogen);
+            namen.Insert(Math.Clamp(ablage, 0, namen.Count), gezogenerName);
+        }
+
+        Zeilen.Clear();
+        for (int i = 0; i < namen.Count; i++)
+        {
+            bool luecke = gezogenerName is not null && i == ablage;
+            Zeilen.Add(new Setzlistenzeile(i + 1, namen[i], luecke, gezogenerName is null && i == Auswahl));
+        }
+
+        Schwebend = gezogenerName is null ? null : new Setzlistenzeile(ablage + 1, gezogenerName, false, false);
     }
 }

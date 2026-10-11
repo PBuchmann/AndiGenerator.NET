@@ -20,4 +20,18 @@ internal sealed record Tauschstrategie(Tauschtyp Typ, int Anzahl, double Prozent
         'M' => new Tauschstrategie(Tauschtyp.Mannschaft, text[1] - '0', double.Parse(text[3..], CultureInfo.InvariantCulture)),
         _ => new Tauschstrategie(Tauschtyp.Normal, 0, double.Parse(text, CultureInfo.InvariantCulture)),
     };
+
+    /// <summary>Kurzform wie beim Lesen (<c>R</c>, <c>15</c>, <c>S1,25</c>, <c>M2,10</c>) für die Anzeige.</summary>
+    /// <returns>Die Kurzform.</returns>
+    public string Kurz()
+    {
+        string prozent = Prozent.ToString("0.##", CultureInfo.InvariantCulture);
+        return Typ switch
+        {
+            Tauschtyp.Raster => "R",
+            Tauschtyp.Spieltag => $"S{Anzahl},{prozent}",
+            Tauschtyp.Mannschaft => $"M{Anzahl},{prozent}",
+            _ => prozent,
+        };
+    }
 }

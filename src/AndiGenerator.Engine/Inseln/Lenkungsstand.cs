@@ -20,6 +20,7 @@ namespace AndiGenerator.Engine.Inseln;
 /// Die Kriterien, an denen gerade gearbeitet wird, in der Reihenfolge der Einteilung: in Stufe A und B die zuletzt
 /// angehobenen, in Stufe C das, das geglättet wird; leer in der Basisoptimierung.
 /// </param>
+/// <param name="Gewichte">Die Gewichte, die der Automodus gegenüber den Gewichtungen des Anwenders geändert hat.</param>
 public sealed record Lenkungsstand(
     Stufenwert? Basis,
     Stufenwert Bester,
@@ -30,4 +31,5 @@ public sealed record Lenkungsstand(
     int Zurueckgezogen,
     Berechnungsoptionen Gewichtungen,
     IReadOnlyList<string> Aenderungen,
-    IReadOnlyList<Kostenkriterium>? Kriterien = null);
+    IReadOnlyList<Kostenkriterium>? Kriterien = null,
+    IReadOnlyList<Gewichtsanhebung>? Gewichte = null);

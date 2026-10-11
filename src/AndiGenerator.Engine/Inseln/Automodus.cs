@@ -42,11 +42,17 @@ internal sealed class Automodus
     /// <summary>Mindestdauer des Grundlaufs in Sekunden.</summary>
     private const double MinGrundlauf = 10;
 
-    /// <summary>Sekunden ohne Verbesserung der Suche, ab denen sie als festgefahren gilt.</summary>
+    /// <summary>Sekunden ohne Verbesserung der Suche, ab denen sie als festgefahren gilt (mit mindestens <see cref="stillstandPlaene"/> Plänen).</summary>
     private const double Stillstand = 10;
 
     /// <summary>Mindestabstand zweier Änderungen in Sekunden.</summary>
     private const double MinPhase = 8;
+
+    /// <summary>
+    /// Sekunden, die ein verschobenes Kriterium unter „In Arbeit“ stehen bleibt, auch wenn der Automodus schon weiter ist
+    /// (etwa weil es nichts zu verbessern gab): So sieht der Staffelleiter, dass die Verschiebung angekommen ist.
+    /// </summary>
+    private const double AnzeigeVerschoben = 5;
 
     /// <summary>Änderungen ohne weniger A/B-Verstöße im Plan der Suche, nach denen das Drängen endet.</summary>
     private const int DraengenOhneFortschritt = 3;
@@ -61,6 +67,9 @@ internal sealed class Automodus
     private readonly int spielraum;
     private readonly double kostenToleranz;
     private readonly Berechnungsoptionen original;
+    private readonly double deutlich;
+    private readonly long stillstandPlaene;
+    private readonly double maxGrundlauf;
     private readonly double[] anzahl = new double[Stufeneinteilung.AnzahlKriterien];
     private readonly double[] kosten = new double[Stufeneinteilung.AnzahlKriterien];
     private readonly double[] grenzeKosten = new double[Stufeneinteilung.AnzahlKriterien];
@@ -75,7 +84,9 @@ internal sealed class Automodus
     private (int A, int B) bezug;
     private double letzteAenderung;
     private double letzteSuche;
-    private double sucheKosten = -1;
+    private long plaeneLetzteSuche;
+    private long plaene;
+    private double deutlicheKosten = -1;
     private (int, int, int, int, int)? sucheVerstoesse;
     private double sekunden;
     private int zurueckgezogen;
@@ -85,6 +96,9 @@ internal sealed class Automodus
     private int[] reihenfolgeC;
     private Kostenkriterium[] draengKriterien = [];
     private Kostenkriterium? fokus;
+    private Kostenkriterium? verschoben;
+    private double verschobenBis;
+    private double zuletzt;
     private bool sofort;
 
     /// <summary>Legt den Automodus an.</summary>
@@ -103,6 +117,9 @@ internal sealed class Automodus
         reihenfolgeC = einteilung.C.Select(k => (int)k).ToArray();
         spielraum = einstellungen.AutoSpielraum;
         kostenToleranz = einstellungen.AutoKostenToleranz;
+        deutlich = einstellungen.AutoDeutlich;
+        stillstandPlaene = einstellungen.AutoStillstandPlaene;
+        maxGrundlauf = einstellungen.AutoMaxGrundlauf;
         original = referenz.Optionen;
         Optionen = referenz.Optionen;
         basisMannschaft = new int[ids.Length * KernDefinition.AnzahlArten];
@@ -155,7 +172,8 @@ internal sealed class Automodus
         zurueckgezogen,
         Optionen,
         aenderungen.ToArray(),
-        AktuelleKriterien);
+        AktuelleKriterien,
+        Anhebungsliste());
 
     /// <summary>Rang der laufenden Phase wie bei <see cref="ErsteAenderung"/>: Drängen A = 0, Drängen B = 1, Glätten des i-ten C-Kriteriums = 2 + i.</summary>
     private int Rang => phase switch
@@ -165,13 +183,23 @@ internal sealed class Automodus
         _ => -1,
     };
 
-    /// <summary>Die Kriterien, an denen gerade gearbeitet wird: beim Drängen die zuletzt angehobenen, beim Glätten das aktuelle C-Kriterium.</summary>
-    private Kostenkriterium[] AktuelleKriterien => phase switch
+    /// <summary>
+    /// Die Kriterien, an denen gerade gearbeitet wird: beim Drängen die zuletzt angehobenen, beim Glätten das aktuelle
+    /// C-Kriterium; ein eben verschobenes Kriterium steht noch <see cref="AnzeigeVerschoben"/> Sekunden vorn.
+    /// </summary>
+    private Kostenkriterium[] AktuelleKriterien
     {
-        Phase.Draengen => draengKriterien,
-        Phase.Glaetten when indexC < reihenfolgeC.Length => [(Kostenkriterium)reihenfolgeC[indexC]],
-        _ => [],
-    };
+        get
+        {
+            Kostenkriterium[] aktuell = phase switch
+            {
+                Phase.Draengen => draengKriterien,
+                Phase.Glaetten when indexC < reihenfolgeC.Length => [(Kostenkriterium)reihenfolgeC[indexC]],
+                _ => [],
+            };
+            return verschoben is Kostenkriterium v && zuletzt < verschobenBis && !aktuell.Contains(v) ? [v, .. aktuell] : aktuell;
+        }
+    }
 
     /// <summary>Bezeichnung der Phase für die Oberfläche: Basisoptimierung, dann Optimierung der Stufe A, B oder C.</summary>
     private string Bezeichnung => phase switch
@@ -188,28 +216,43 @@ internal sealed class Automodus
         _ => indexC < reihenfolgeC.Length ? $"Glätten {(Kostenkriterium)reihenfolgeC[indexC]}" : "Glätten",
     };
 
-    /// <summary>Merkt sich im Grundlauf, wann die Suche (Kostenoptimierung) zuletzt besser geworden ist.</summary>
+    /// <summary>Übernimmt die Zahl der bisher berechneten Pläne (für den Stillstand nach Rechenleistung statt nur nach Zeit).</summary>
+    /// <param name="berechnet">Berechnete Pläne seit dem Start.</param>
+    public void Zaehlen(long berechnet) => plaene = berechnet;
+
+    /// <summary>
+    /// Merkt sich im Grundlauf, wann die Suche (Kostenoptimierung) zuletzt deutlich besser geworden ist: um mindestens
+    /// <see cref="Optimierungseinstellungen.AutoDeutlich"/> gegenüber der letzten deutlichen Verbesserung. Kleine
+    /// Verbesserungen (etwa alle paar Sekunden ein paar Kosten weniger) halten die Basisoptimierung so nicht fest.
+    /// </summary>
     /// <param name="besteKosten">Beste Kosten der Suche mit den aktuellen Gewichten.</param>
     /// <param name="jetzt">Sekunden reiner Rechenzeit.</param>
     public void Beobachten(double besteKosten, double jetzt)
     {
-        if (Grundlauf && besteKosten >= 0 && (sucheKosten < 0 || besteKosten < sucheKosten))
+        if (Grundlauf && besteKosten >= 0 && (deutlicheKosten < 0 || besteKosten < deutlicheKosten * (1 - deutlich)))
         {
-            sucheKosten = besteKosten;
-            letzteSuche = jetzt;
+            deutlicheKosten = besteKosten;
+            UhrNeu(jetzt);
         }
     }
 
-    /// <summary>Der Grundlauf ist vorbei, wenn die Basisoptimierung steht (nach mindestens 10 s, 10 s ohne Verbesserung).</summary>
+    /// <summary>
+    /// Der Grundlauf ist vorbei, wenn die Basisoptimierung steht (nach mindestens 10 s; 10 s und
+    /// <see cref="Optimierungseinstellungen.AutoStillstandPlaene"/> Pläne ohne deutliche Verbesserung), spätestens nach
+    /// <see cref="Optimierungseinstellungen.AutoMaxGrundlauf"/>.
+    /// </summary>
     /// <param name="jetzt">Sekunden reiner Rechenzeit.</param>
     /// <returns><c>true</c>, wenn die Lenkung beginnen kann.</returns>
-    public bool GrundlaufVorbei(double jetzt) => jetzt >= MinGrundlauf && jetzt - letzteSuche >= Stillstand;
+    public bool GrundlaufVorbei(double jetzt) => jetzt >= MinGrundlauf && (Steht(jetzt) || jetzt >= maxGrundlauf);
 
-    /// <summary>Beendet den Grundlauf: der beste Plan wird Maßstab je Mannschaft und C-Kriterium.</summary>
+    /// <summary>
+    /// Beendet den Grundlauf: der beste Plan wird Maßstab je Mannschaft und C-Kriterium. Die erste Änderung der Gewichte
+    /// folgt sofort – die Suche steht ja schon (Ende der Basisoptimierung) bzw. der Plan ist schon optimiert (Wechsel von
+    /// der Kostenoptimierung); ein weiteres Abwarten zeigte nur lange „Stufe A“ ohne Kriterium.
+    /// </summary>
     /// <param name="beste">Bester Plan des Grundlaufs.</param>
     /// <param name="jetzt">Sekunden reiner Rechenzeit.</param>
-    /// <param name="sofortLenken"><c>true</c>, um gleich die erste Änderung der Gewichte zu machen (ohne auf Stillstand zu warten).</param>
-    public void GrundlaufBeenden(Loesung beste, double jetzt, bool sofortLenken = false)
+    public void GrundlaufBeenden(Loesung beste, double jetzt)
     {
         Stufenwert wert = Bewerten(beste, out double gesamt);
         for (int s = 0; s < basisMannschaft.Length; s++)
@@ -231,8 +274,8 @@ internal sealed class Automodus
         BesterWert = wert;
         BesteKosten = gesamt;
         letzteAenderung = jetzt;
-        letzteSuche = jetzt;
-        sofort = sofortLenken;
+        UhrNeu(jetzt);
+        sofort = true;
         sucheVerstoesse = null;
     }
 
@@ -292,8 +335,11 @@ internal sealed class Automodus
             fokus = null;
         }
 
-        // Sofort lenken: nicht erst warten, bis die Suche wieder steht.
+        // Sofort lenken: nicht erst warten, bis die Suche wieder steht. Das verschobene Kriterium bleibt eine Weile sichtbar.
         sofort = true;
+        verschoben = geaendert;
+        verschobenBis = jetzt + AnzeigeVerschoben;
+        zuletzt = jetzt;
         aenderungen.Add($"{jetzt:0} s Einteilung geändert, bester Plan {BesterWert}: weiter bei {PhaseText}{(fokus is { } f ? " ab " + f : string.Empty)}");
     }
 
@@ -304,19 +350,21 @@ internal sealed class Automodus
     {
         Stufenwert wert = Bewerten(suche, out _);
         Suche = wert;
+        zuletzt = jetzt;
 
         // Beobachtet wird, ob sich die Verstöße noch ändern: Jede Verbesserung der Anzahlen setzt die Uhr des Stillstands zurück.
         var verstoesse = (wert.Harte, wert.A, wert.B, wert.Ausreisser, wert.CAnzahl);
         if (!Grundlauf && (sucheVerstoesse is not { } bisher || verstoesse.CompareTo(bisher) < 0))
         {
             sucheVerstoesse = verstoesse;
-            letzteSuche = jetzt;
+            UhrNeu(jetzt);
         }
     }
 
     /// <summary>Übernimmt <paramref name="loesung"/> als besten Plan, wenn sie nach Stufen besser ist.</summary>
     /// <param name="loesung">Lösung einer Insel.</param>
-    public void Pruefen(Loesung loesung)
+    /// <returns>Ihre Bewertung nach Stufen (für den Maschinenraum).</returns>
+    public Stufenwert Pruefen(Loesung loesung)
     {
         Stufenwert wert = Bewerten(loesung, out double gesamt);
         if (wert.IstBesserAls(BesterWert))
@@ -326,6 +374,37 @@ internal sealed class Automodus
             BesteKosten = gesamt;
             Verbesserungen++;
         }
+
+        return wert;
+    }
+
+    /// <summary>
+    /// Die Kriterien mit den meisten Verstößen im zuletzt bewerteten Plan (<see cref="Pruefen"/>): wichtigste Stufe zuerst,
+    /// innerhalb der Stufe die meisten Verstöße zuerst.
+    /// </summary>
+    /// <param name="hoechstens">Höchstens so viele.</param>
+    /// <returns>Die Kriterien mit ihren Verstößen.</returns>
+    public Kostenverursacher[] Verursacher(int hoechstens)
+    {
+        int[] auswahl = Enumerable.Range(0, stufen.Length)
+            .Where(k => Stufeneinteilung.HatAnzahl((Kostenkriterium)k) && anzahl[k] > 0)
+            .OrderBy(k => stufen[k])
+            .ThenByDescending(k => anzahl[k])
+            .Take(hoechstens)
+            .ToArray();
+        double groesste = auswahl.Select(k => anzahl[k]).DefaultIfEmpty(1).Max();
+        return auswahl.Select(k => new Kostenverursacher((Kostenkriterium)k, anzahl[k] / groesste, (int)anzahl[k])).ToArray();
+    }
+
+    /// <summary>Die Verstöße je Kriterium im besten Plan nach Stufen mit der Stufe des Kriteriums.</summary>
+    /// <returns>Alle Kriterien, die Verstöße zählen.</returns>
+    public Kriterienwert[] BesteKriterien()
+    {
+        Bewerten(Beste, out _);
+        return Enumerable.Range(0, stufen.Length)
+            .Where(k => Stufeneinteilung.HatAnzahl((Kostenkriterium)k))
+            .Select(k => new Kriterienwert((Kostenkriterium)k, anzahl[k], stufen[k]))
+            .ToArray();
     }
 
     /// <summary>Entscheidet über die nächste Änderung der Gewichte, wenn die Suche steht (oder nach der Höchstdauer).</summary>
@@ -334,7 +413,7 @@ internal sealed class Automodus
     /// <returns>Die neuen Gewichtungen; <c>null</c> = keine Änderung.</returns>
     public Berechnungsoptionen? Lenken(Loesung suche, double jetzt)
     {
-        if (Grundlauf || (!sofort && (jetzt - letzteAenderung < MinPhase || jetzt - letzteSuche < Stillstand)))
+        if (Grundlauf || (!sofort && (jetzt - letzteAenderung < MinPhase || !Steht(jetzt))))
         {
             return null;
         }
@@ -354,7 +433,7 @@ internal sealed class Automodus
 
         Optionen = neu;
         sucheVerstoesse = null;
-        letzteSuche = jetzt;
+        UhrNeu(jetzt);
         return neu;
     }
 
@@ -399,6 +478,56 @@ internal sealed class Automodus
 
         return (i < neu.A.Count + neu.B.Count ? 1 : 2 + i - neu.A.Count - neu.B.Count, kriterium);
     }
+
+    /// <summary>
+    /// Die Gewichte, die gerade von denen des Anwenders abweichen: je Kriterium das Gewicht des ganzen Kriteriums und bei
+    /// Kriterien mit Anzahl das Gewicht je Mannschaft.
+    /// </summary>
+    /// <returns>Die geänderten Gewichte.</returns>
+    private Gewichtsanhebung[] Anhebungsliste()
+    {
+        var liste = new List<Gewichtsanhebung>();
+        foreach (Kostenkriterium k in Enum.GetValues<Kostenkriterium>())
+        {
+            Vergleichen(liste, k, null, Gesamtschluessel((int)k));
+            if (Stufeneinteilung.HatAnzahl(k) && (int)k < KernDefinition.AnzahlArten)
+            {
+                for (int m = 0; m < ids.Length; m++)
+                {
+                    Vergleichen(liste, k, namen[m], (m * KernDefinition.AnzahlArten) + (int)k);
+                }
+            }
+        }
+
+        return liste.ToArray();
+    }
+
+    private void Vergleichen(List<Gewichtsanhebung> liste, Kostenkriterium k, string? mannschaft, int schluessel)
+    {
+        Gewichtung vorher = Gewicht(original, schluessel);
+        Gewichtung jetzt = Gewicht(Optionen, schluessel);
+        if (vorher != jetzt)
+        {
+            liste.Add(new Gewichtsanhebung(k, mannschaft, vorher, jetzt));
+        }
+    }
+
+    /// <summary>Startet die Uhr des Stillstands neu: Zeit und Zahl der berechneten Pläne der letzten Verbesserung.</summary>
+    /// <param name="jetzt">Sekunden reiner Rechenzeit.</param>
+    private void UhrNeu(double jetzt)
+    {
+        letzteSuche = jetzt;
+        plaeneLetzteSuche = plaene;
+    }
+
+    /// <summary>
+    /// Die Suche steht: seit der letzten Verbesserung mindestens 10 s und
+    /// <see cref="Optimierungseinstellungen.AutoStillstandPlaene"/> berechnete Pläne. So sucht ein langsamer Rechner ebenso
+    /// viel wie ein schneller, bevor der Automodus entscheidet.
+    /// </summary>
+    /// <param name="jetzt">Sekunden reiner Rechenzeit.</param>
+    /// <returns><c>true</c>, wenn die Suche als festgefahren gilt.</returns>
+    private bool Steht(double jetzt) => jetzt - letzteSuche >= Stillstand && plaene - plaeneLetzteSuche >= stillstandPlaene;
 
     /// <summary>
     /// Drängen, erst Stufe A, dann Stufe B (die A-Gewichte bleiben stehen): Verstöße der Stufe im Plan der Suche herausdrängen,

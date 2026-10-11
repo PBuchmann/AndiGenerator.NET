@@ -98,12 +98,36 @@ public sealed class WunschterminDialogViewModel : ObservableObject
             if (SetProperty(ref art, value))
             {
                 OnPropertyChanged(nameof(IstHeimspiel));
+                OnPropertyChanged(nameof(ArtHeimspiel));
+                OnPropertyChanged(nameof(ArtKeinHeimspiel));
+                OnPropertyChanged(nameof(ArtSperrtermin));
             }
         }
     }
 
     /// <summary>Holt einen Wert, der angibt, ob die Heimspielangaben sichtbar sind.</summary>
     public bool IstHeimspiel => Art == 1;
+
+    /// <summary>Holt oder setzt, ob „Heimspiel möglich“ gewählt ist (Umschalter).</summary>
+    public bool ArtHeimspiel
+    {
+        get => Art == 1;
+        set => ArtWaehlen(value, 1);
+    }
+
+    /// <summary>Holt oder setzt, ob „kein Heimspiel, Auswärtsspiele möglich“ gewählt ist (Umschalter).</summary>
+    public bool ArtKeinHeimspiel
+    {
+        get => Art == 0;
+        set => ArtWaehlen(value, 0);
+    }
+
+    /// <summary>Holt oder setzt, ob „Sperrtermin“ gewählt ist (Umschalter).</summary>
+    public bool ArtSperrtermin
+    {
+        get => Art == 2;
+        set => ArtWaehlen(value, 2);
+    }
 
     /// <summary>Holt oder setzt die Uhrzeit.</summary>
     public TimeSpan? Uhrzeit
@@ -269,4 +293,12 @@ public sealed class WunschterminDialogViewModel : ObservableObject
     }
 
     private static TimeOnly Zeit(TimeSpan? wert) => wert is TimeSpan t ? new TimeOnly(t.Hours, t.Minutes) : TimeOnly.MinValue;
+
+    private void ArtWaehlen(bool gewaehlt, int wahl)
+    {
+        if (gewaehlt)
+        {
+            Art = wahl;
+        }
+    }
 }

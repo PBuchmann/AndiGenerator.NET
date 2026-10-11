@@ -93,6 +93,7 @@ internal static class OptimierenBefehl
         Optimierungseinstellungen einstellungen = Optimierungseinstellungen.Standard with
         {
             Kerne = a.Kerne ?? Optimierungseinstellungen.Standard.Kerne,
+            Inseln = a.Inseln ?? Optimierungseinstellungen.Standard.Inseln,
             Startwert = a.Startwert,
             SpezialInsel = !a.OhneSpezial,
         };

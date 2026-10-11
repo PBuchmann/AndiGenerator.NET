@@ -51,6 +51,10 @@ public sealed class AvaloniaOberflaeche(Window fenster) : IOberflaeche
         Zeigen<bool>(new Dialogfenster(titel, frage, eingabe: null, mitAbbrechen: true));
 
     /// <inheritdoc/>
+    public Task<Sicherungswahl> SicherungAbfragenAsync(Planvergleich vergleich) =>
+        Zeigen<Sicherungswahl>(new Sicherungsdialog(vergleich));
+
+    /// <inheritdoc/>
     public Task<bool> EntscheidenAsync(string titel, string text, IReadOnlyList<string> details, string ja, string nein) =>
         Zeigen<bool>(new Dialogfenster(titel, text, details, ja, nein));
 

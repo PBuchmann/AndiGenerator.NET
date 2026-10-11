@@ -14,7 +14,14 @@
   </Window.Styles>
   <StackPanel Margin="24" Spacing="10" MinWidth="520">
     <TextBlock Text="{Binding Datum}" FontWeight="SemiBold" />
-    <ComboBox ItemsSource="{x:Static p:WunschterminDialogViewModel.Arten}" SelectedIndex="{Binding Art}" MinWidth="300" />
+    <!-- Art des Tages als Umschalter: alle drei Möglichkeiten auf einen Blick -->
+    <Border Background="#ECEAE4" CornerRadius="12" Padding="4" HorizontalAlignment="Left">
+      <StackPanel Orientation="Horizontal" Spacing="4">
+        <RadioButton Classes="segment" GroupName="Art" Content="Heimspiel möglich" IsChecked="{Binding ArtHeimspiel}" />
+        <RadioButton Classes="segment" GroupName="Art" Content="kein Heimspiel (Auswärtsspiele möglich)" IsChecked="{Binding ArtKeinHeimspiel}" />
+        <RadioButton Classes="segment" GroupName="Art" Content="Sperrtermin (kein Spiel)" IsChecked="{Binding ArtSperrtermin}" />
+      </StackPanel>
+    </Border>
     <StackPanel Spacing="10" IsVisible="{Binding IstHeimspiel}">
       <Grid Classes="formular" ColumnDefinitions="170,*" RowDefinitions="Auto,Auto">
         <TextBlock Text="Uhrzeit:" />

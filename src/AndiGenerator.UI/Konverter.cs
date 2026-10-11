@@ -74,6 +74,14 @@ public static class Konverter
     public static IValueConverter Gleich { get; } =
         new FuncValueConverter<string, string, bool>((wert, vergleich) => string.Equals(wert, vergleich, StringComparison.Ordinal));
 
+    /// <summary>Holt den Namen eines Spiellokals an einem Termin: leer = das Standardspiellokal der Mannschaft.</summary>
+    public static IValueConverter Spiellokal { get; } =
+        new FuncValueConverter<string?, string>(nummer => string.IsNullOrEmpty(nummer) ? "Standard" : "Spiellokal " + nummer);
+
+    /// <summary>Holt den Namen des Standardspiellokals: leer = der Verein spielt nur in einem Spiellokal.</summary>
+    public static IValueConverter Standardlokal { get; } =
+        new FuncValueConverter<string?, string>(nummer => string.IsNullOrEmpty(nummer) ? "nur eines" : "Spiellokal " + nummer);
+
     /// <summary>Holt die Skalierung einer vergrößerbaren Ansicht zu ihrem Zoomfaktor (für <c>LayoutTransformControl</c>).</summary>
     public static IValueConverter Skalierung { get; } = new FuncValueConverter<double, ITransform>(faktor => new ScaleTransform(faktor, faktor));
 

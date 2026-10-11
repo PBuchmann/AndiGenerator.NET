@@ -19,7 +19,14 @@
           <Border Classes="zeile">
             <Grid ColumnDefinitions="260,*" Margin="0,2">
               <TextBlock Text="{Binding Gegner}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
-              <ComboBox Grid.Column="1" MinWidth="160" ItemsSource="{x:Static p:HeimrechtZeile.Auswahl}" SelectedIndex="{Binding Index}" />
+              <!-- Heimrecht der gegnerischen Mannschaft als Umschalter: Vorrunde, egal, Rückrunde -->
+            <Border Grid.Column="1" Background="#ECEAE4" CornerRadius="10" Padding="3" HorizontalAlignment="Left">
+              <StackPanel Orientation="Horizontal" Spacing="3">
+                <RadioButton Classes="segment" GroupName="{Binding Gegner}" Content="Vorrunde" IsChecked="{Binding IstVorrunde}" MinHeight="30" />
+                <RadioButton Classes="segment" GroupName="{Binding Gegner}" Content="egal" IsChecked="{Binding IstEgal}" MinHeight="30" />
+                <RadioButton Classes="segment" GroupName="{Binding Gegner}" Content="Rückrunde" IsChecked="{Binding IstRueckrunde}" MinHeight="30" />
+              </StackPanel>
+            </Border>
             </Grid>
           </Border>
         </DataTemplate>

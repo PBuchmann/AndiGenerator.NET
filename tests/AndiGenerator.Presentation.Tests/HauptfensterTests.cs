@@ -178,6 +178,76 @@ public sealed class HauptfensterTests : IDisposable
     }
 
     [Fact]
+    public async Task Maschinenraum_zeigt_Inseln_mit_bestem_Plan_und_Spezial_Insel()
+    {
+        await OeffnenAsync();
+        hf.MaschinenraumCommand.Execute(null);
+        MaschinenraumAnsichtViewModel raum = Assert.Single(Ansichten<MaschinenraumAnsichtViewModel>());
+        Assert.Equal("Keine Generierung aktiv", raum.Ueberschrift);
+        Assert.Empty(raum.Inseln);
+
+        Inselstand[] inseln =
+        [
+            new(1, false, true, 900, 500_000, 50_000, 2, ["R", "15"], null, Kostentreiber: [new Kostenverursacher(Kostenkriterium.Sperrtermine, 0.5), new Kostenverursacher(Kostenkriterium.Spielverteilung, 0.25)]),
+            new(2, false, true, 1200, 400_000, 100_000, 0, ["S1,25"]),
+            new(0, true, false, -1, 0, 0, 0, ["2"]),
+        ];
+        var stand = new Optimierungsstand(true, false, 900_000, 5000, 900, 3, TimeSpan.Zero, null, [], null, new Maschinenraum([600_000, 300_000], inseln, 100_000, null, 0));
+        raum.Uebernehmen(stand);
+
+        Assert.StartsWith("2 Rechenkerne · 2 Inseln und Spezial-Insel", raum.Ueberschrift, StringComparison.Ordinal);
+        Assert.Equal(3, raum.Inseln.Count);
+        Assert.True(raum.Inseln[0].IstBeste);
+        Assert.False(raum.Inseln[1].IstBeste);
+        Assert.Equal(50, raum.Inseln[0].Fortschritt);
+        Assert.StartsWith("Seit 50.000 Plänen nichts Besseres – Neustart frühestens nach", raum.Inseln[0].FortschrittText, StringComparison.Ordinal);
+        Assert.EndsWith("R · 15", raum.Inseln[0].Strategien, StringComparison.Ordinal);
+        Assert.Equal(2, raum.Inseln[0].Kostentreiber.Count);
+        Assert.Equal(Planqualitaet.Name(Kostenkriterium.Sperrtermine), raum.Inseln[0].Kostentreiber[0].Name);
+        Assert.Equal(45, raum.Inseln[0].Kostentreiber[0].Breite);
+        Assert.Equal("2 Neustarts", raum.Inseln[0].Neustarts);
+        Assert.True(raum.Inseln[2].IstSpezial);
+        Assert.StartsWith("Wartet", raum.Inseln[2].Hinweis, StringComparison.Ordinal);
+        Assert.False(raum.Automodus);
+
+        // Automodus: Verstöße statt Kosten, beste Insel nach Stufen, die geänderten Gewichte als Stufenleisten.
+        Inselstand[] auto =
+        [
+            new(1, false, true, 900, 500_000, 50_000, 2, ["R"], new Stufenwert(0, 1, 4, 0, 30, 1000)),
+            new(2, false, true, 800, 400_000, 10_000, 0, ["15"], new Stufenwert(0, 2, 0, 0, 10, 500)),
+        ];
+        var lenkung = new Lenkungsstand(
+            null,
+            new Stufenwert(0, 1, 4, 0, 30, 1000),
+            null,
+            "Drängen",
+            "Optimierung Stufe A",
+            1,
+            0,
+            Berechnungsoptionen.Standard,
+            [],
+            [Kostenkriterium.Sperrtermine],
+            [new Gewichtsanhebung(Kostenkriterium.Sperrtermine, "TSV A", Gewichtung.Normal, Gewichtung.SehrHoch)]);
+        raum.Uebernehmen(stand with { Lenkung = lenkung, Maschinenraum = stand.Maschinenraum! with { Inseln = auto } });
+
+        Assert.True(raum.Automodus);
+        Assert.True(raum.Inseln[0].ZeigtVerstoesse);
+        Assert.Equal("1", raum.Inseln[0].VerstossA);
+        Assert.True(raum.Inseln[0].IstBeste);
+        Assert.False(raum.Inseln[1].IstBeste);
+        Gewichtsgruppe gruppe = Assert.Single(raum.Gewichte);
+        Assert.Equal(Planqualitaet.Name(Kostenkriterium.Sperrtermine), gruppe.Kriterium);
+        Gewichtszeile zeile = Assert.Single(gruppe.Zeilen);
+        Assert.Equal("TSV A", zeile.Wer);
+
+        // Ring bei „normal“ (Stufe 3), Punkt bei „sehr hoch“ (Stufe 5), Linie dazwischen.
+        Assert.Equal(2, zeile.Segmente.ToList().FindIndex(x => x.Vorher));
+        Assert.Equal(4, zeile.Segmente.ToList().FindIndex(x => x.Jetzt));
+        bool[] linie = [false, false, true, true, false, false];
+        Assert.Equal(linie, zeile.Segmente.Select(x => x.RechtsWeg).ToArray());
+    }
+
+    [Fact]
     public async Task Nach_dem_Start_zeigen_die_Ansichten_des_Ausgangsplans_die_laufende_Generierung()
     {
         await OeffnenAsync();
@@ -186,7 +256,7 @@ public sealed class HauptfensterTests : IDisposable
         hf.QualitaetsansichtCommand.Execute(null);
         QualitaetAnsichtViewModel qualitaet = Assert.Single(Ansichten<QualitaetAnsichtViewModel>());
 
-        hf.StartenCommand.Execute(null);
+        await hf.StartenCommand.ExecuteAsync(null);
         try
         {
             Assert.Equal(PlanQuelle.Laufend, kosten.Quelle);
@@ -248,7 +318,7 @@ public sealed class HauptfensterTests : IDisposable
         Assert.False(File.Exists(Path.ChangeExtension(neu, ".modifications")));
         Assert.Equal("neu", hf.Staffelname);
 
-        hf.GenerierungCommand.Execute(null);
+        await hf.GenerierungCommand.ExecuteAsync(null);
         Assert.False(hf.Laeuft);
         Assert.Contains(o.Meldungen, m => m.StartsWith("Generierung starten: Die Staffel enthält weniger als zwei Mannschaften", StringComparison.Ordinal));
     }
@@ -527,35 +597,73 @@ public sealed class HauptfensterTests : IDisposable
     }
 
     [Fact]
-    public async Task Verfahren_wird_beim_Start_gewaehlt_und_laesst_sich_waehrend_der_Generierung_wechseln()
+    public async Task Verfahren_wird_vor_dem_Start_gewaehlt_und_laesst_sich_waehrend_der_Generierung_wechseln()
     {
         Assert.False(hf.AutomodusCommand.CanExecute(null));
         await OeffnenAsync();
-        Assert.Equal("Kostenoptimierung starten", hf.KostenoptimierungText);
-        Assert.Equal("Automodus starten", hf.AutomodusText);
+        Assert.Equal("Start", hf.GenerierungText);
 
+        // Der Umschalter wählt nur; gestartet wird mit dem Startknopf.
         hf.AutomodusCommand.Execute(null);
-        Assert.True(hf.Laeuft);
+        Assert.False(hf.Laeuft);
         Assert.True(hf.Automodus);
+        Assert.Equal("Start", hf.GenerierungText);
+        Assert.True(hf.AutomodusGewaehlt);
+        Assert.False(hf.KostenoptimierungGewaehlt);
+
+        // Ein Klick auf das schon gewählte Verfahren lässt es gewählt.
+        hf.AutomodusGewaehlt = false;
+        Assert.True(hf.Automodus);
+        Assert.StartsWith("Lenkt sich selbst", hf.VerfahrenErklaerung, StringComparison.Ordinal);
+
+        await hf.GenerierungCommand.ExecuteAsync(null);
+        Assert.True(hf.Laeuft);
         Assert.Single(Ansichten<QualitaetAnsichtViewModel>());
         Assert.Equal("Qualitaet", hf.AktiveAnsicht);
         Assert.Equal("Pausieren", hf.GenerierungText);
-        Assert.Equal("Automodus (läuft)", hf.AutomodusText);
-        Assert.Equal("Zur Kostenoptimierung wechseln", hf.KostenoptimierungText);
-        Assert.False(hf.AutomodusCommand.CanExecute(null));
+        Assert.StartsWith("Wechsel jederzeit", hf.VerfahrenErklaerung, StringComparison.Ordinal);
 
-        hf.GenerierungCommand.Execute(null);
+        hf.PauseCommand.Execute(null);
         Assert.True(hf.Pausiert);
         hf.KostenoptimierungCommand.Execute(null);
         Assert.True(hf.Laeuft);
         Assert.False(hf.Pausiert);
         Assert.False(hf.Automodus);
         Assert.Equal("Kosten", hf.AktiveAnsicht);
-        Assert.Equal("Zum Automodus wechseln", hf.AutomodusText);
-        Assert.True(hf.AutomodusCommand.CanExecute(null));
 
         hf.StoppenCommand.Execute(null);
-        Assert.Equal("Kostenoptimierung starten", hf.GenerierungText);
+        Assert.Equal("Start", hf.GenerierungText);
+    }
+
+    [Fact]
+    public async Task Vor_einem_Neustart_wird_der_Plan_gesichert_und_danach_gefragt()
+    {
+        await OeffnenAsync();
+        await PlanErrechnenAsync();
+        hf.StoppenCommand.Execute(null);
+
+        // Noch kein gesicherter Plan: Er wird gesichert, und eine Meldung sagt es.
+        await hf.GenerierungCommand.ExecuteAsync(null);
+        Assert.True(hf.Laeuft);
+        Assert.Contains(o.Meldungen, m => m.Contains("gesichert", StringComparison.Ordinal));
+        Assert.Contains(hf.Planquellen, q => q.Art == PlanQuellenArt.GesicherterPlan);
+
+        // Schon ein gesicherter Plan: Es wird gefragt, mit beiden im Vergleich; „Abbrechen“ verhindert den Neustart.
+        await PlanErrechnenAsync(weiter: true);
+        hf.StoppenCommand.Execute(null);
+        o.Sicherung = Sicherungswahl.Abbrechen;
+        await hf.GenerierungCommand.ExecuteAsync(null);
+        Assert.False(hf.Laeuft);
+        Assert.Contains("Plan sichern", o.Aufrufe);
+        Assert.NotNull(o.Vergleich);
+        Assert.Equal(4, o.Vergleich.Zeilen.Count);
+        Assert.NotEmpty(o.Vergleich.Empfehlung);
+
+        // „Gesicherten Plan behalten“: Der Neustart verwirft den aktuellen Plan, ohne nochmals zu fragen.
+        o.Sicherung = Sicherungswahl.Behalten;
+        await hf.GenerierungCommand.ExecuteAsync(null);
+        Assert.True(hf.Laeuft);
+        hf.StoppenCommand.Execute(null);
     }
 
     [Fact]
@@ -564,7 +672,7 @@ public sealed class HauptfensterTests : IDisposable
         Assert.False(hf.GenerierungCommand.CanExecute(null));
         await OeffnenAsync();
         Assert.False(hf.PlanMerkenCommand.CanExecute(null));
-        Assert.Equal("Kostenoptimierung starten", hf.GenerierungText);
+        Assert.Equal("Start", hf.GenerierungText);
         Assert.True(hf.ZeigtStart);
         Assert.Equal("–", hf.Anzeige.Kosten);
         Assert.False(hf.CsvExportierenCommand.CanExecute(null));
@@ -572,10 +680,11 @@ public sealed class HauptfensterTests : IDisposable
 
         // Meldungen der Generierung kommen aus einem Hintergrund-Thread; wie auf dem UI-Thread laufen sie nur hier.
         o.Sammeln = true;
-        hf.GenerierungCommand.Execute(null);
+        await hf.GenerierungCommand.ExecuteAsync(null);
         Assert.True(hf.Laeuft);
         Assert.Equal("Pausieren", hf.GenerierungText);
         Assert.True(hf.ZeigtPause);
+        Assert.True(hf.ZeigtStopp);
         for (int i = 0; i < 300 && !hf.PlanMerkenCommand.CanExecute(null); i++)
         {
             await Task.Delay(100);
@@ -585,7 +694,7 @@ public sealed class HauptfensterTests : IDisposable
         Assert.True(hf.PlanMerkenCommand.CanExecute(null));
         Assert.NotEqual("–", hf.Anzeige.Pflicht);
         Assert.NotEmpty(hf.Anzeige.PflichtHinweis);
-        hf.GenerierungCommand.Execute(null);
+        hf.PauseCommand.Execute(null);
         Assert.True(hf.Pausiert);
         Assert.Equal("Fortsetzen", hf.GenerierungText);
         Assert.True(hf.ZeigtStart);
@@ -624,7 +733,7 @@ public sealed class HauptfensterTests : IDisposable
         Assert.Contains(hf.Startplaene, p => p.Quelle == gemerkt);
 
         hf.Startplan = hf.Startplaene.Single(p => p.Quelle == gemerkt);
-        hf.StartenCommand.Execute(null);
+        await hf.StartenCommand.ExecuteAsync(null);
         Assert.True(hf.Laeuft);
         hf.StoppenCommand.Execute(null);
 
@@ -791,9 +900,9 @@ public sealed class HauptfensterTests : IDisposable
         Assert.False(hf.StartplanWaehlbar);
         await OeffnenAsync();
         Assert.True(hf.StartplanWaehlbar);
-        hf.GenerierungCommand.Execute(null);
+        await hf.GenerierungCommand.ExecuteAsync(null);
         Assert.False(hf.StartplanWaehlbar);
-        hf.GenerierungCommand.Execute(null);
+        hf.PauseCommand.Execute(null);
         Assert.True(hf.Pausiert);
         Assert.False(hf.StartplanWaehlbar);
         Assert.Equal("Fortsetzen", hf.GenerierungText);
@@ -802,7 +911,7 @@ public sealed class HauptfensterTests : IDisposable
 
         Assert.False(hf.Laeuft);
         Assert.False(hf.Pausiert);
-        Assert.Equal("Kostenoptimierung starten", hf.GenerierungText);
+        Assert.Equal("Start", hf.GenerierungText);
         Assert.False(hf.StoppenCommand.CanExecute(null));
         Assert.True(hf.StartplanWaehlbar);
     }
@@ -914,5 +1023,33 @@ public sealed class HauptfensterTests : IDisposable
         var liste = new List<T>();
         Sammeln(hf.Layout, liste);
         return liste;
+    }
+
+    /// <summary>
+    /// Startet die Generierung bzw. lässt sie weiterlaufen, bis sie einen Plan gemeldet hat; mit <paramref name="weiter"/>
+    /// zusätzlich bis zu einer weiteren Verbesserung (damit sich der Plan von einem früh gesicherten unterscheidet).
+    /// </summary>
+    private async Task PlanErrechnenAsync(bool weiter = false)
+    {
+        o.Sammeln = true;
+        if (!hf.Laeuft)
+        {
+            await hf.GenerierungCommand.ExecuteAsync(null);
+        }
+
+        for (int i = 0; i < 300 && !hf.PlanMerkenCommand.CanExecute(null); i++)
+        {
+            await Task.Delay(100);
+            o.Abarbeiten();
+        }
+
+        string verbesserungen = hf.Anzeige.Verbesserungen;
+        for (int i = 0; weiter && i < 300 && hf.Anzeige.Verbesserungen == verbesserungen; i++)
+        {
+            await Task.Delay(100);
+            o.Abarbeiten();
+        }
+
+        Assert.True(hf.PlanMerkenCommand.CanExecute(null));
     }
 }

@@ -14,6 +14,8 @@ namespace AndiGenerator.Presentation;
 /// </summary>
 public abstract class DatenSeiteViewModel : ObservableObject
 {
+    private bool bearbeitet;
+
     /// <summary>Initialisiert die Seite.</summary>
     /// <param name="bearbeitung">Arbeitskopie.</param>
     /// <param name="titel">Seitentitel in der Navigation.</param>
@@ -22,6 +24,15 @@ public abstract class DatenSeiteViewModel : ObservableObject
         ArgumentNullException.ThrowIfNull(bearbeitung);
         Bearbeitung = bearbeitung;
         Titel = titel;
+
+        // Die Marke in der Seitenliste (z. B. die Zahl der Einträge) folgt jeder Änderung der Seite.
+        PropertyChanged += (_, e) =>
+        {
+            if (e.PropertyName is not (nameof(Marke) or nameof(Bearbeitet)))
+            {
+                OnPropertyChanged(nameof(Marke));
+            }
+        };
     }
 
     /// <summary>Tritt ein, wenn der Benutzer etwas geändert hat (Original <c>FireOnChange</c>).</summary>
@@ -29,6 +40,16 @@ public abstract class DatenSeiteViewModel : ObservableObject
 
     /// <summary>Holt den Seitentitel.</summary>
     public string Titel { get; }
+
+    /// <summary>Holt die Marke in der Seitenliste, z. B. die Zahl der Einträge; leer = keine.</summary>
+    public virtual string Marke => string.Empty;
+
+    /// <summary>Holt einen Wert, der angibt, ob auf der Seite in diesem Dialog etwas geändert wurde (Punkt in der Seitenliste).</summary>
+    public bool Bearbeitet
+    {
+        get => bearbeitet;
+        private set => SetProperty(ref bearbeitet, value);
+    }
 
     /// <summary>Holt einen Wert, der angibt, ob die Seite dem click-TT-Stand entspricht; ohne Standard immer <c>true</c>.</summary>
     public abstract bool IstStandard { get; }
@@ -50,5 +71,19 @@ public abstract class DatenSeiteViewModel : ObservableObject
     public virtual string? Pruefen() => null;
 
     /// <summary>Meldet eine Änderung des Benutzers.</summary>
-    protected void AenderungMelden() => Geaendert?.Invoke(this, EventArgs.Empty);
+    protected void AenderungMelden()
+    {
+        Bearbeitet = true;
+        ZustandMelden();
+    }
+
+    /// <summary>
+    /// Meldet einen neuen Zustand der Seite, ohne dass der Benutzer etwas geändert hat (z. B. eine andere Mannschaft
+    /// gewählt): Der Dialog aktualisiert „Standard wiederherstellen“, die Seite gilt aber nicht als geändert.
+    /// </summary>
+    protected void ZustandMelden()
+    {
+        OnPropertyChanged(nameof(Marke));
+        Geaendert?.Invoke(this, EventArgs.Empty);
+    }
 }

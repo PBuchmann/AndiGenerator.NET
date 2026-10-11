@@ -19,6 +19,14 @@ public sealed partial class Datenbearbeitung
     /// <returns>Die Tage, sortiert.</returns>
     public IReadOnlyList<DateOnly> SpielfreieTage() => SpielfreieTageAus(Arbeitsstand);
 
+    /// <summary>
+    /// Liest alle eingetragenen spielfreien Tage, auch die, an denen keine Mannschaft einen Heimspielwunsch hat (sie
+    /// bleiben beim Speichern erhalten, sind aber nicht wählbar).
+    /// </summary>
+    /// <returns>Die Tage, sortiert.</returns>
+    public IReadOnlyList<DateOnly> EingetrageneSpielfreieTage() =>
+        Arbeitsstand.KinderMitNamen("nogameday").Select(k => Datum(k.Lesen("date"))).Distinct().Order().ToList();
+
     /// <summary>Liest die spielfreien Tage des click-TT-Stands.</summary>
     /// <returns>Die Tage oder <c>null</c> ohne Standard.</returns>
     public IReadOnlyList<DateOnly>? SpielfreieTageStandard() => standard is null ? null : SpielfreieTageAus(standard);

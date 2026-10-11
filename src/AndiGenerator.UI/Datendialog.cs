@@ -6,6 +6,7 @@ using System.ComponentModel;
 using AndiGenerator.Presentation;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Controls.Shapes;
 using Avalonia.Controls.Templates;
 using Avalonia.Layout;
 using Avalonia.Media;
@@ -48,7 +49,7 @@ internal sealed class Datendialog : Window
         {
             ItemsSource = dialog.Seiten,
             SelectedItem = dialog.Seite,
-            ItemTemplate = new FuncDataTemplate<DatenSeiteViewModel>((s, _) => new TextBlock { Text = s?.Titel, TextWrapping = TextWrapping.Wrap }),
+            ItemTemplate = new FuncDataTemplate<DatenSeiteViewModel>((s, _) => Seiteneintrag(s)),
             Width = 230,
         };
         liste.Classes.Add("seitenliste");
@@ -107,6 +108,48 @@ internal sealed class Datendialog : Window
         dialog.PropertyChanged -= Geaendert;
         base.OnClosed(e);
     }
+
+    /// <summary>
+    /// Eintrag der Seitenliste: Titel, rechts eine Marke (z. B. die Zahl der Einträge) und ein Punkt, wenn auf der Seite in
+    /// diesem Dialog etwas geändert wurde.
+    /// </summary>
+    private static Grid Seiteneintrag(DatenSeiteViewModel? seite)
+    {
+        var titel = new TextBlock { Text = seite?.Titel, TextWrapping = TextWrapping.Wrap, VerticalAlignment = VerticalAlignment.Center };
+        var marke = new TextBlock { FontSize = 11, VerticalAlignment = VerticalAlignment.Center };
+        var markenrahmen = new Border
+        {
+            Child = marke,
+            CornerRadius = new CornerRadius(8),
+            Padding = new Thickness(7, 1),
+            Margin = new Thickness(6, 0, 0, 0),
+            VerticalAlignment = VerticalAlignment.Center,
+            Background = Farbe("Schwebe"),
+        };
+        var punkt = new Ellipse { Width = 8, Height = 8, Margin = new Thickness(6, 0, 0, 0), VerticalAlignment = VerticalAlignment.Center, Fill = Farbe("Akzent") };
+        ToolTip.SetTip(punkt, "In diesem Dialog geändert");
+        var zeile = new Grid { ColumnDefinitions = new ColumnDefinitions("*,Auto,Auto") };
+        Grid.SetColumn(markenrahmen, 1);
+        Grid.SetColumn(punkt, 2);
+        zeile.Children.AddRange([titel, markenrahmen, punkt]);
+        if (seite is not null)
+        {
+            void Aktualisieren()
+            {
+                marke.Text = seite.Marke;
+                markenrahmen.IsVisible = seite.Marke.Length > 0;
+                punkt.IsVisible = seite.Bearbeitet;
+            }
+
+            Aktualisieren();
+            seite.PropertyChanged += (_, _) => Aktualisieren();
+        }
+
+        return zeile;
+    }
+
+    private static IBrush Farbe(string name) =>
+        global::Avalonia.Application.Current?.TryFindResource(name, out object? wert) == true && wert is IBrush b ? b : Brushes.Gray;
 
     /// <summary>Verkleinert den Dialog, falls er größer als der Arbeitsbereich des Bildschirms ist, und zentriert ihn neu.</summary>
     private void AnBildschirmAnpassen()

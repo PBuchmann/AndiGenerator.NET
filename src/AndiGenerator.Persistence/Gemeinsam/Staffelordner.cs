@@ -96,6 +96,16 @@ public static class Staffelordner
     public static string GemerkterPlanPfad(string staffelordner, string planName) =>
         Path.Combine(staffelordner, DateinameKodieren(planName) + ".xml");
 
+    /// <summary>
+    /// Dateipfad des gesicherten Plans einer Staffel: genau einer je Staffel, gesichert, bevor ein Plan durch einen Neustart
+    /// oder das Schließen verloren ginge. Die Endung <c>.sicherung</c> hält ihn aus den gemerkten Plänen heraus (auch im
+    /// Original, das nur <c>*.xml</c> liest); das Format ist das eines gemerkten Plans.
+    /// </summary>
+    /// <param name="staffelordner">Ordner der Staffel.</param>
+    /// <returns>Der Pfad.</returns>
+    public static string GesicherterPlanPfad(string staffelordner) =>
+        Path.Combine(staffelordner, "Gesicherter Plan.sicherung");
+
     /// <summary>Gemerkte Pläne im Staffelordner, neueste zuerst (Original <c>TSavedPlanComparer</c>).</summary>
     /// <param name="staffelordner">Ordner der Staffel.</param>
     /// <returns>Die gemerkten Pläne; leer, wenn der Ordner fehlt.</returns>

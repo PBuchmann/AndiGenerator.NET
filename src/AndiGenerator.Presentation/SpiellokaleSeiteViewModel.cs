@@ -15,7 +15,7 @@ public sealed class SpiellokaleSeiteViewModel : MehrMannschaftenSeiteViewModel
     /// <param name="bearbeitung">Arbeitskopie.</param>
     /// <param name="oberflaeche">Dienste der Oberfläche für den Dialog „Nachbarmannschaft“.</param>
     public SpiellokaleSeiteViewModel(Datenbearbeitung bearbeitung, IOberflaeche oberflaeche)
-        : base(bearbeitung, "Spiellokale (Kompaktansicht)", string.Empty)
+        : base(bearbeitung, "Spiellokale", string.Empty)
     {
         this.oberflaeche = oberflaeche;
         Laden();

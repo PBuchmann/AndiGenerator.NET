@@ -227,7 +227,7 @@ public sealed class Optimierungsdienst : IDisposable
             return Optimierungsstand.Leer;
         }
 
-        Optimierungsergebnis bester = optimierer.BesterStand();
+        (Optimierungsergebnis bester, Lenkungsstand? lenkung, Maschinenraum raum) = optimierer.Momentaufnahme();
         return new Optimierungsstand(
             true,
             pausiert,
@@ -238,7 +238,8 @@ public sealed class Optimierungsdienst : IDisposable
             seitVerbesserung.Elapsed,
             optimierer.SpezialKostenart,
             bester.Spiele,
-            optimierer.Lenkung);
+            lenkung,
+            raum);
     }
 
     private void NeuStarten(Staffel staffel, Berechnungsoptionen optionen, bool ausgangsplanMelden, bool ohneGrundlauf = false)
@@ -274,10 +275,11 @@ public sealed class Optimierungsdienst : IDisposable
                     continue;
                 }
 
-                // Im Automodus zählt die Bewertung nach Verstößen; dort kann der beste Plan auch teurer werden.
+                // Gemeldet wird jede Verbesserung des geltenden besten Plans (im Automodus nach Verstößen, dort kann er auch teurer
+                // werden) – dieselbe Zahl, die Kachel, Verlauf und Maschinenraum zeigen.
                 Optimierungsergebnis bester = optimierer.BesterStand();
                 double kosten = bester.Kosten;
-                bool besser = kosten < letzteKosten || letzteKosten < 0 || (optimierer.Lenkung is not null && bester.Verbesserungen != letzteVerbesserungen);
+                bool besser = letzteKosten < 0 || bester.Verbesserungen != letzteVerbesserungen;
                 if (kosten >= 0 && besser)
                 {
                     letzteKosten = kosten;

@@ -74,6 +74,8 @@ public sealed class HauptfensterTests : IDisposable
             Zeigen<TerminwunschAnsicht>(fenster, o, modell.TerminwunschansichtCommand);
             Zeigen<NachbarterminAnsicht>(fenster, o, modell.NachbarterminansichtCommand);
             Zeigen<OptionenAnsicht>(fenster, o, modell.EinstellungenCommand);
+            Zeigen<MaschinenraumAnsicht>(fenster, o, modell.MaschinenraumCommand);
+            Zeigen<VerlaufAnsicht>(fenster, o, modell.VerlaufCommand);
         }
         finally
         {

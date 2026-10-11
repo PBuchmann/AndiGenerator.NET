@@ -89,6 +89,62 @@ public sealed class DialogeTests : IDisposable
     }
 
     [Fact]
+    public async Task Ein_leerer_Tag_wird_als_Heimspiel_zur_ueblichen_Uhrzeit_vorgeschlagen()
+    {
+        var detail = Arbeitsplatz.Detail<WunschterminDetailViewModel>(a.Seite<WunschtermineSeiteViewModel>(), Namen.RheinduerkheimIV);
+        List<WunschterminZelle> zellen = [.. detail.Wochen.SelectMany(w => w.Tage)];
+        WunschterminZelle termin = zellen.First(z => z.IstHeimspiel);
+        WunschterminZelle leer = zellen.First(z => z.IstLeer && z.Tag.DayOfWeek == termin.Tag.DayOfWeek);
+        WunschterminDialogViewModel? gezeigt = null;
+        a.Oberflaeche.Wunschtermin = d =>
+        {
+            gezeigt = d;
+            return d.Bestaetigen();
+        };
+
+        await detail.BearbeitenCommand.ExecuteAsync(leer);
+
+        Assert.NotNull(gezeigt);
+        Assert.True(gezeigt.ArtHeimspiel);
+        Assert.NotNull(gezeigt.Uhrzeit);
+        Assert.True(leer.IstHeimspiel);
+    }
+
+    [Fact]
+    public void Wunschtermin_als_Kaertchen_und_per_Ziehen_verschieben()
+    {
+        var detail = Arbeitsplatz.Detail<WunschterminDetailViewModel>(a.Seite<WunschtermineSeiteViewModel>(), Namen.RheinduerkheimIV);
+        List<WunschterminZelle> zellen = [.. detail.Wochen.SelectMany(w => w.Tage)];
+        WunschterminZelle von = zellen.First(z => z.HatTermin && z.Text != "FREI");
+        WunschterminZelle leer = zellen.First(z => !z.HatTermin);
+        string termin = von.Text;
+
+        Assert.True(von.IstHeimspiel || von.IstAusweich);
+        Assert.Equal(termin[..5], von.Hauptzeile);
+        Assert.True(leer.IstLeer);
+        Assert.Contains("Termin eintragen", leer.Hinweis, StringComparison.Ordinal);
+
+        // Auf einen leeren Tag verschieben: dort steht er, am alten Tag nichts mehr.
+        WunschterminDetailViewModel.Verschieben(von, leer, kopieren: false);
+        Assert.Equal(termin, leer.Text);
+        Assert.False(von.HatTermin);
+        Assert.False(detail.IstStandard);
+
+        // Mit Strg kopieren: Der Termin bleibt am alten Tag stehen.
+        WunschterminDetailViewModel.Verschieben(leer, von, kopieren: true);
+        Assert.Equal(termin, von.Text);
+        Assert.Equal(termin, leer.Text);
+
+        // Auf einen belegten Tag: Die beiden tauschen.
+        von.Text = "FREI";
+        Assert.True(von.IstSperre);
+        Assert.Equal("gesperrt", von.Hauptzeile);
+        WunschterminDetailViewModel.Verschieben(von, leer, kopieren: false);
+        Assert.Equal("FREI", leer.Text);
+        Assert.Equal(termin, von.Text);
+    }
+
+    [Fact]
     public async Task Wunschtermine_per_Dialog_bearbeiten_loeschen_und_zuruecksetzen()
     {
         var detail = Arbeitsplatz.Detail<WunschterminDetailViewModel>(a.Seite<WunschtermineSeiteViewModel>(), Namen.RheinduerkheimIV);
@@ -279,6 +335,35 @@ public sealed class DialogeTests : IDisposable
     }
 
     [Fact]
+    public void Setzliste_zeigt_beim_Ziehen_die_neue_Reihenfolge_mit_Luecke()
+    {
+        SetzlistenSeiteViewModel seite = a.Seite<SetzlistenSeiteViewModel>();
+        List<string> vorher = [.. seite.Reihenfolge];
+        Assert.Equal("1.", seite.Zeilen[0].PlatzText);
+
+        // Die erste Mannschaft über die untere Hälfte der dritten Zeile ziehen: Sie käme auf Platz 3.
+        Assert.True(seite.ZiehenBeginnen(0));
+        seite.ZiehenUeber(2, davor: false);
+        Assert.True(seite.Zeilen[2].IstGezogen);
+        Assert.Equal(vorher[0], seite.Zeilen[2].Name);
+        Assert.Equal(3, seite.Schwebend!.Platz);
+        Assert.Equal(vorher, seite.Reihenfolge);
+
+        // Abbrechen lässt alles, wie es war.
+        seite.ZiehenBeenden(uebernehmen: false);
+        Assert.Null(seite.Schwebend);
+        Assert.Equal(vorher, seite.Reihenfolge);
+
+        // Ablegen übernimmt die Vorschau.
+        seite.ZiehenBeginnen(0);
+        seite.ZiehenUeber(2, davor: false);
+        seite.ZiehenBeenden(uebernehmen: true);
+        Assert.Equal(vorher[0], seite.Reihenfolge[2]);
+        Assert.Equal(2, seite.Auswahl);
+        Assert.True(seite.Zeilen[2].IstGewaehlt);
+    }
+
+    [Fact]
     public void Heimkoppeln_zuruecksetzen()
     {
         using var r26 = new Arbeitsplatz("datendialoge/D06_Heimkoppeln.xml");
@@ -297,6 +382,53 @@ public sealed class DialogeTests : IDisposable
 
         Assert.True(detail.IstStandard);
         Assert.Equal(bisher, detail.Zeilen[0].Index);
+    }
+
+    [Fact]
+    public void Allgemein_prueft_schon_beim_Eingeben_und_Heimrecht_per_Umschalter()
+    {
+        LigadatenSeiteViewModel liga = a.Seite<LigadatenSeiteViewModel>();
+        Assert.False(liga.HatPruefhinweis);
+        string name = liga.Name;
+        liga.Name = " ";
+        Assert.True(liga.HatPruefhinweis);
+        Assert.Contains("Liganame", liga.Pruefhinweis, StringComparison.Ordinal);
+
+        // Mit ungültiger Eingabe lässt sich die Seite nicht verlassen; nach der Korrektur ist der Hinweis wieder weg.
+        liga.Name = name;
+        Assert.False(liga.HatPruefhinweis);
+
+        // Nur das Wählen einer Mannschaft gilt nicht als Änderung (kein Punkt in der Seitenliste).
+        HeimrechtSeiteViewModel heimrecht = a.Seite<HeimrechtSeiteViewModel>();
+        var detail = Arbeitsplatz.Detail<HeimrechtDetailViewModel>(heimrecht, Namen.WsvWorms);
+        Assert.False(heimrecht.Bearbeitet);
+        HeimrechtZeile zeile = detail.Gegner[0];
+        zeile.IstRueckrunde = true;
+        Assert.Equal(2, zeile.Index);
+        Assert.False(zeile.IstVorrunde);
+        zeile.IstRueckrunde = false;
+        Assert.True(zeile.IstRueckrunde);
+        zeile.IstEgal = true;
+        Assert.Equal(1, zeile.Index);
+        Assert.True(heimrecht.Bearbeitet);
+    }
+
+    [Fact]
+    public void Spielfreie_Tage_im_Kalender_waehlen()
+    {
+        SpielfreieTageSeiteViewModel frei = a.Seite<SpielfreieTageSeiteViewModel>();
+        Assert.NotEmpty(frei.Monate);
+        Assert.False(frei.KeineTage);
+
+        // Jeder Monat beginnt am Montag; wählbar sind genau die möglichen Tage, und ein Klick wirkt auf deren Häkchen.
+        List<Kalendertag> waehlbar = [.. frei.Monate.SelectMany(m => m.Tage).Where(t => t.Waehlbar)];
+        Assert.Equal(frei.Zeilen.Count, waehlbar.Count);
+        Assert.All(frei.Monate, m => Assert.True(m.Tage.Count(t => t.IstTag) >= 28));
+        Assert.All(frei.Monate.SelectMany(m => m.Tage).Where(t => t.IstTag && !t.Waehlbar), t => Assert.Contains(" – ", t.Hinweis, StringComparison.Ordinal));
+        waehlbar[0].Zeile!.Gewaehlt = true;
+        Assert.True(frei.Zeilen[0].Gewaehlt);
+        Assert.Equal("1", frei.Marke);
+        Assert.True(frei.Bearbeitet);
     }
 
     [Fact]

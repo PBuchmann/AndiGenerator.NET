@@ -7,19 +7,13 @@ using Avalonia.Controls;
 
 namespace AndiGenerator.UI.Seiten;
 
-/// <summary>Seite „Pflichtspieltage“ des Dialogs „Spielplandaten bearbeiten“; Doppelklick bearbeitet wie im Original.</summary>
+/// <summary>Seite „Pflichtspieltage“ des Dialogs „Spielplandaten bearbeiten“; Doppelklick oder Eingabetaste bearbeitet, Entf löscht.</summary>
 public partial class PflichtspieltageSeite : UserControl
 {
     /// <summary>Initialisiert die Seite.</summary>
     public PflichtspieltageSeite()
     {
         InitializeComponent();
-        Liste.DoubleTapped += (_, _) =>
-        {
-            if (DataContext is PflichtspieltageSeiteViewModel seite && seite.BearbeitenCommand.CanExecute(null))
-            {
-                seite.BearbeitenCommand.Execute(null);
-            }
-        };
+        Listenbedienung.Anmelden(Liste, () => DataContext is PflichtspieltageSeiteViewModel seite ? (seite.BearbeitenCommand, seite.LoeschenCommand) : default);
     }
 }

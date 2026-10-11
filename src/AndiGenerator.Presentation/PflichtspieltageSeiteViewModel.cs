@@ -2,6 +2,7 @@
 // SPDX-FileCopyrightText: 2026 Peter Buchmann
 // SPDX-License-Identifier: GPL-3.0-only
 
+using System.Globalization;
 using AndiGenerator.Application;
 using CommunityToolkit.Mvvm.Input;
 
@@ -73,6 +74,9 @@ public sealed class PflichtspieltageSeiteViewModel : DatenSeiteViewModel
 
     /// <summary>Holt den Befehl „Löschen“.</summary>
     public IRelayCommand LoeschenCommand { get; }
+
+    /// <inheritdoc/>
+    public override string Marke => Zeilen.Count > 0 ? Zeilen.Count.ToString(CultureInfo.InvariantCulture) : string.Empty;
 
     /// <inheritdoc/>
     public override bool IstStandard =>

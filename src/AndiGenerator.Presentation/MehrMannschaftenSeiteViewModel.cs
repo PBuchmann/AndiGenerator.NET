@@ -131,7 +131,7 @@ public abstract class MehrMannschaftenSeiteViewModel : DatenSeiteViewModel
         Detail = neu;
         OnPropertyChanged(nameof(Mannschaft));
         OnPropertyChanged(nameof(Ueberschrift));
-        AenderungMelden();
+        ZustandMelden();
     }
 
     private void DetailGeaendert(object? sender, EventArgs e) => AenderungMelden();

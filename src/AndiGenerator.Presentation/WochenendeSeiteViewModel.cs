@@ -12,7 +12,7 @@ public sealed class WochenendeSeiteViewModel : MehrMannschaftenSeiteViewModel
     /// <summary>Initialisiert die Seite.</summary>
     /// <param name="bearbeitung">Arbeitskopie.</param>
     public WochenendeSeiteViewModel(Datenbearbeitung bearbeitung)
-        : base(bearbeitung, "60km Regel", "Wegen des langen Anfahrtsweges dürfen Spiele gegen diese Mannschaften nur am Wochenende stattfinden")
+        : base(bearbeitung, "Wochenende (60-km-Regel)", "Wegen des langen Anfahrtsweges dürfen Spiele gegen diese Mannschaften nur am Wochenende stattfinden")
     {
         Laden();
     }

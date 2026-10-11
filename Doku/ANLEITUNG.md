@@ -124,7 +124,7 @@ click-TT überträgt nicht alles, was für einen guten Plan nötig ist, und die 
 | **Setzliste** | Wenn Sie mit einer Setzliste arbeiten wollen, geben Sie hier die erwartete Abschlusstabelle vor. |
 | **Pflichtspieltage** | Die Staffel enthält Pflichtspieltage. Sie sind bei ungerader Mannschaftszahl problematisch (siehe [Pflichtspieltage](#pflichtspieltage)). |
 
-Jeder Punkt lässt sich direkt auf der Seite bearbeiten; mit **Auswahl übernehmen** ist er erledigt, mit **Überspringen** bleibt er, wie er ist. Unten beendet **Abschließen** die Einrichtung; die Generierung startet danach im Hauptfenster mit **Kostenoptimierung starten** bzw. **Automodus starten**, wo auch der Ausgangsplan gewählt wird. Bei Entscheidungen gilt dabei die angeklickte Wahl, auch ohne **Auswahl übernehmen**; Punkte, bei denen Sie nichts gewählt haben, bleiben unverändert. Die Wahlkacheln und Knöpfe stehen immer unten im Blick, auch wenn die Erklärung darüber lang ist. Alles lässt sich später unter **Spielplandaten**, **Einstellungen** und in der Ansicht **Qualität** ändern.
+Jeder Punkt lässt sich direkt auf der Seite bearbeiten; mit **Auswahl übernehmen** ist er erledigt, mit **Überspringen** bleibt er, wie er ist. Unten beendet **Abschließen** die Einrichtung; die Generierung startet danach im Hauptfenster mit **▶ Start** (Verfahren daneben wählen), wo auch der Ausgangsplan gewählt wird. Bei Entscheidungen gilt dabei die angeklickte Wahl, auch ohne **Auswahl übernehmen**; Punkte, bei denen Sie nichts gewählt haben, bleiben unverändert. Die Wahlkacheln und Knöpfe stehen immer unten im Blick, auch wenn die Erklärung darüber lang ist. Alles lässt sich später unter **Spielplandaten**, **Einstellungen** und in der Ansicht **Qualität** ändern.
 
 ### 3.4 Terminwünsche kontrollieren
 
@@ -132,14 +132,14 @@ Bevor Sie die Generierung starten, lohnt ein Blick in die Ansicht **Terminwünsc
 
 ### 3.5 Generierung starten und beobachten
 
-Mit dem blauen Startknopf oben rechts beginnt die Suche. Über den Pfeil rechts daneben wählen Sie das Verfahren:
+Oben rechts wählen Sie zuerst unter **Verfahren** eines der beiden Verfahren (zwei Optionsfelder nebeneinander, genau eines ist gewählt und hervorgehoben; der Tooltip sagt, was es tut). Mit dem blauen Knopf **▶** (Start) daneben beginnt die Suche.
 
 - **Kostenoptimierung** – wie im Original: Die Suche senkt die Gesamtkosten mit Ihren Gewichtungen.
 - **Automodus** – die Suche lenkt sich selbst über die Gewichte, so wie man es von Hand an den Reglern tun würde: Erst drängt sie die Verstöße der Stufen A und B heraus (Hallenbelegung, parallele Spiele, Pflichtspieltage, Koppel-, Sperr- und Ausweichtermine), dann glättet sie die übrigen Kriterien, ohne A und B wieder zu verschlechtern. Wie er arbeitet und wann er sich lohnt, steht in Abschnitt [5.1](#51-der-automodus).
 
 Beim Start des Automodus (und beim Wechsel zu ihm) springt das Programm in die Ansicht **Qualität**, beim Start der Kostenoptimierung (und beim Wechsel zu ihr) in die Ansicht **Kosten**; fehlt die Ansicht, wird sie geöffnet.
 
-Der Knopf merkt sich die Wahl und heißt danach **Kostenoptimierung starten** bzw. **Automodus starten**. Auch während der Generierung – laufend oder pausiert – lässt sich über den Pfeil zum anderen Verfahren wechseln; die Suche setzt beim bisher besten Plan fort.
+Vor dem Start wählt *Verfahren* nur, gestartet wird erst mit **▶**. Die Knöpfe zeigen nur Symbole (der Tooltip nennt sie): Vor dem Start stehen **▶ Start** und rechts daneben **✕ Staffel schließen**; während der Generierung wird ▶ zu **⏸ Pausieren** (in der Pause wieder ▶ *Fortsetzen*) und ✕ zu **■ Stopp**. Auch während der Generierung – laufend oder pausiert – wechselt ein Klick unter *Verfahren* zum anderen Verfahren; die Suche setzt beim bisher besten Plan fort.
 
 Das Programm rechnet mit allen Prozessorkernen bis auf einen, damit der Rechner bedienbar bleibt, und zeigt laufend den besten bisher gefundenen Plan.
 
@@ -165,7 +165,7 @@ Passt der Plan, **pausieren** Sie und exportieren ihn mit **Für click-TT export
 
 Die Abschnitte *Staffel*, *Ansichten* und *Ausgabe* lassen sich mit einem Klick auf ihre Überschrift zu- und wieder aufklappen; so bleibt die Leiste auch auf kleinen Bildschirmen übersichtlich.
 
-**Oben** stehen der Name der Staffel, die Datei und die Steuerung der Generierung: **Start mit**, **Plan merken**, **Kostenoptimierung starten / Automodus starten / Pausieren / Fortsetzen** (mit dem Pfeil zur Wahl des Verfahrens), **Beenden** und **Schließen**. *Schließen* führt zur Startseite zurück; läuft noch eine Generierung, fragt das Programm vorher nach. Wählen Sie unter **Start mit** einen vorhandenen Plan (gemerkt oder aus click-TT), zeigen alle Ansichten und die Kacheln sofort diesen Plan – mit Kosten und Qualität –, ohne dass eine Optimierung startet und ihn verändert.
+**Oben** stehen links der Name der Staffel und die Datei, rechts die Steuerung: **Start mit**, **Plan merken**, **Verfahren** (Kostenoptimierung oder Automodus), **▶ Start** bzw. **⏸ Pausieren** und daneben **✕ Staffel schließen** (führt zur Startseite zurück) bzw. während der Generierung **■ Stopp**. Wählen Sie unter **Start mit** einen vorhandenen Plan (gemerkt oder aus click-TT), zeigen alle Ansichten und die Kacheln sofort diesen Plan – mit Kosten und Qualität –, ohne dass eine Optimierung startet und ihn verändert.
 
 Darunter vier **Kacheln** mit dem Stand der Generierung:
 
@@ -173,12 +173,17 @@ Darunter vier **Kacheln** mit dem Stand der Generierung:
 |---|---|
 | **Gesamtkosten (bester Plan)** | Die Kosten des besten bisher gefundenen Plans; darunter, wie stark sie seit Beginn gesunken sind. Nach einer Änderung der Gewichtung gilt der Vergleich ab dieser Änderung, weil die Kosten davor anders berechnet wurden. **Details ›** öffnet die Kostenansicht. |
 | **Pflichtregeln (Stufe A)** | Ob der beste Plan die wichtigsten Regeln einhält (siehe [Qualität](#62-qualität)). **Details ›** öffnet die Qualitätsansicht. |
-| **Verbesserungen** | Wie oft ein besserer Plan gefunden wurde, und wann zuletzt. |
-| **Berechnete Pläne** | Anzahl der geprüften Pläne und die aktuelle Geschwindigkeit. |
+| **Verbesserungen** | Wie oft der beste Plan besser wurde, und wann zuletzt (im Automodus nach der Basisoptimierung zählt nur ein besserer Plan nach A, B und C; reine Kostensenkungen dazwischen nicht). Dieselbe Zahl zeigt der Leitstand: Zu jeder Verbesserung wandert dort ein grüner Punkt, und der Kasten unter dem besten Plan nennt ihre Nummer. Rechts daneben ein kleiner Verlauf (Kosten bzw. im Automodus die Verstöße der wichtigsten Stufe, die noch welche hat). **Details ›** öffnet die Ansicht **Verlauf**: formatfüllend die Kosten bzw. die Verstöße A, B und C seit dem Start, mit den Phasen des Automodus im Hintergrund, kleinen Strichen bei Gewichtsanhebungen und darunter den Plänen je Sekunde; mit der Maus erscheinen die Werte zu einem Zeitpunkt. |
+| **Berechnete Pläne** | Anzahl der geprüften Pläne und die aktuelle Geschwindigkeit. Rechts daneben steht je Rechenkern ein kleiner Balken, der mit seiner Arbeit wächst und schrumpft (bei mehr als 16 Kernen je Gruppe von Kernen). **Details ›** öffnet den Leitstand. |
 
 Im Automodus entfällt die Kachel *Pflichtregeln*; die Ergebniskachel nimmt ihren Platz mit ein, *Verbesserungen* und *Berechnete Pläne* bleiben an ihrer Stelle. Die breitere Ergebniskachel zeigt oben die Phase (z. B. „Automodus · Optimierung Stufe A“) und unten unter **In Arbeit** alle Kriterien, an denen gerade gearbeitet wird (in Stufe A und B die zuletzt angehobenen, in C das, das geglättet wird) und vor jeder Verstoßzahl klein den Stand am Ende der Basisoptimierung (z. B. „A 14 → 3“).
 
 ![Ergebniskachel im Automodus](Anleitung/Bilder/18-automodus.png)
+
+**Leitstand.** Ein Klick auf die Kachel *Berechnete Pläne* zeigt, was beim Rechnen geschieht: oben links je Rechenkern ein Balken mit seiner Last (bei sehr vielen Kernen ein Raster aus Kästchen, je kräftiger, desto mehr Last), oben rechts ein **Schaubild der Maschine**: Inseln → Koordinator → bester Plan. Jede Insel zeigt den Wert ihres besten Plans und grob, was sie gerade tut: *kommt voran* (sie hat in den letzten Sekunden einen besseren Plan gefunden), *sucht*, *findet lange nichts*, *beginnt gleich neu*, *steckt fest, rechnet weiter* oder *beginnt neu*; der schmale Balken daneben zeigt, wie nah sie der Neustart-Grenze ist. Gerechnet wird in den Inseln an vielen **Suchplätzen**, die bei jedem Schritt einen Teil der Spiele neu verteilen; die Rechenkerne rechnen reihum an allen. Das Bild bleibt ruhig und bewegt sich nur bei Ereignissen: Der Koordinator übernimmt den besten Plan aller Inseln – wird dieser besser, wandert ein grüner Punkt von der Insel, die ihn gefunden hat, über den Koordinator zu *Bester Plan*, und der leuchtet kurz auf. Direkt darunter erscheint dann ein Kasten mit der Nummer der Verbesserung (wie in der Kachel *Verbesserungen*, z. B. „Verbesserung 57“) und dem, was sich geändert hat; jede weitere Verbesserung aktualisiert ihn, und 10 Sekunden nach der letzten verschwindet er wieder – oft wird ein Kriterium besser und ein anderes dafür etwas schlechter: bei der Kostenoptimierung die Kriterien mit den größten Kostendifferenzen (grün mit „−“ besser, rot mit „+“ schlechter), im Automodus die Änderungen der Verstöße, wichtigste Stufe zuerst (z. B. „A · Hallenbelegung 2 → 1“). Ändert sich kein Kriterium sichtbar, steht dort *Feinschliff*. Eine Insel, die zu lange nichts findet, startet er neu (sie wird kurz grau). Bei der Kostenoptimierung gibt die Spezial-Insel ihren Plan über den Koordinator an eine Insel weiter; im Automodus hebt das Steuerpult *Automodus* die Gewichte an und wählt den besten Plan nach A, B und C aus. Darunter stehen die **Inseln**. Jede Insel sucht für sich und hat ihren eigenen besten Plan; die Insel mit dem besten Plan ist grün umrandet. Der Balken einer Insel zeigt, wie lange sie schon nichts Besseres gefunden hat, gemessen an der Neustart-Grenze (100 T Pläne). Neu beginnt nur die **schlechteste** Insel (die mit den höchsten Kosten, im Automodus mit den aktuellen Gewichten), und erst wenn ihr Balken voll ist – höchstens eine je Sekunde. Die anderen Inseln rechnen auch mit vollem Balken weiter, denn ihr Plan ist besser als der schlechteste; der Text darunter sagt das dann ausdrücklich („Seit 147 T Plänen nichts Besseres – rechnet weiter, neu beginnt nur die schlechteste Insel“). Darunter stehen die drei größten Kostenverursacher ihres besten Plans mit ihrem Anteil an den Kosten; im Automodus stattdessen die Kriterien mit den meisten Verstößen (wichtigste Stufe zuerst) und deren Anzahl. Bei der Kostenoptimierung kommt die **Spezial-Insel** hinzu: Sie gewichtet eine Kostenart extrem hoch und gibt gute Pläne an die anderen Inseln weiter. Im Automodus zeigen die Inseln statt ihrer Kosten die Verstöße A, B und C ihres besten Plans, und unten steht, welche **Gewichte** der Automodus gerade gegenüber Ihren angehoben hat – je Kriterium und Mannschaft auf einer Skala von „sehr wenig“ bis „extrem hoch“: der Ring ist Ihre Gewichtung, der blaue Punkt die aktuelle des Automodus, die blaue Linie der Weg dazwischen. Diese Gewichte stehen oberhalb der Inseln.
+
+![Leitstand](Anleitung/Bilder/19-leitstand.png)
+
 
 Den **Hauptbereich** füllen die Ansichten. Jede Ansicht öffnet sich als Reiter; Sie können mehrere öffnen, zwischen ihnen wechseln, sie per Maus nebeneinander anordnen und mit dem **×** am Reiter schließen. In vielen Ansichten vergrößert oder verkleinert **Strg + Mausrad** (auf dem Mac auch **⌘ + Mausrad**, oder der Zoomregler) die Darstellung.
 
@@ -188,20 +193,24 @@ Ganz unten zeigt die **Statuszeile** den Stand in einer Zeile.
 
 | Schaltfläche | Wirkung |
 |---|---|
-| **Kostenoptimierung starten** / **Automodus starten** | Beginnt die Suche mit dem Ausgangsplan aus **Start mit** und dem gewählten Verfahren. |
-| **Pfeil neben dem Startknopf** | Wählt das Verfahren; während der Generierung wechselt er zum anderen Verfahren, ab dem bisher besten Plan. |
-| **Pausieren** | Hält die Suche an. Der beste Plan bleibt erhalten; so können Sie ihn in Ruhe ansehen oder exportieren. |
+| **▶ Start** | Beginnt die Suche mit dem Ausgangsplan aus **Start mit** und dem gewählten Verfahren. |
+| **Verfahren** | Wählt das Verfahren für den nächsten Start; während der Generierung wechselt ein Klick zum anderen Verfahren, ab dem bisher besten Plan. |
+| **⏸ Pausieren** / **▶ Fortsetzen** (statt ▶ Start während der Generierung) | Hält die Suche an. Der beste Plan bleibt erhalten; so können Sie ihn in Ruhe ansehen oder exportieren. |
 | **Fortsetzen** | Setzt eine pausierte Suche mit ihrem besten Plan fort. |
-| **Beenden** | Beendet die Generierung. Danach kann mit einem anderen Ausgangsplan neu gestartet werden. |
+| **■ Stopp** (statt ✕ während der Generierung) | Beendet die Generierung. Ihr bester Plan bleibt erhalten (*bester Plan der letzten Generierung*); danach kann mit einem anderen Ausgangsplan neu gestartet werden. |
+| **✕ Staffel schließen** (neben ▶ Start, solange keine Generierung läuft) | Schließt die Staffel (eine laufende Generierung wird beendet) und führt zur Startseite. |
 
 **Start mit** legt fest, wovon die nächste Generierung ausgeht:
 
 - **leerem Plan** – das Programm plant von Grund auf neu (Standard);
-- **bestem Plan der letzten Generierung** – nach *Beenden* dort weitermachen;
+- **bestem Plan der letzten Generierung** – nach *Stopp* dort weitermachen;
+- **gesichertem Plan** – der automatisch gesicherte Plan (siehe unten);
 - **in click-TT vorhandenem Plan** – ein schon in click-TT eingetragener Plan wird verbessert;
 - **gemerktem Plan „…“** – ein früher gemerkter Plan (Abschnitt [8](#8-pläne-merken-und-vergleichen)).
 
-Solange eine Generierung läuft oder pausiert ist, ist *Start mit* gesperrt: Eine laufende Generierung setzt immer ihren eigenen besten Plan fort. Für einen anderen Ausgangsplan zuerst **Beenden**.
+Solange eine Generierung läuft oder pausiert ist, ist *Start mit* gesperrt: Eine laufende Generierung setzt immer ihren eigenen besten Plan fort. Für einen anderen Ausgangsplan zuerst **Stopp**.
+
+**Gesicherter Plan.** Je Staffel gibt es einen gesicherten Plan. Würde der aktuelle Plan verworfen – weil eine neue Generierung startet, die Staffel geschlossen, eine andere geöffnet oder das Programm beendet wird –, sichert das Programm ihn vorher: Gibt es noch keinen gesicherten Plan, geschieht das automatisch, und eine Meldung sagt es. Gibt es schon einen, fragt es, ob er durch den aktuellen ersetzt werden soll, und zeigt dazu beide nebeneinander: die Verstöße der Stufen A (mit den harten Fehlern), B und C, die Kosten und die einzelnen Kriterien, bei denen sie sich unterscheiden; der jeweils bessere Wert ist grün, und darunter steht, welcher Plan insgesamt besser ist (erst A, dann B, dann C, zuletzt die Kosten). Sie wählen **Aktuellen Plan sichern**, **Gesicherten Plan behalten** oder **Abbrechen** (dann unterbleibt der Neustart bzw. das Schließen). Der gesicherte Plan steht wie ein gemerkter unter **Start mit** und in der Planauswahl der Ansichten. Das Original kennt keine solche Sicherung; dort geht ein nicht gemerkter Plan beim Schließen verloren.
 
 Änderungen an den **Einstellungen** und **Spielplandaten** übernimmt eine laufende Generierung sofort; sie rechnet vom bisher besten Plan aus weiter.
 
@@ -211,19 +220,19 @@ Bei der **Kostenoptimierung** sucht das Programm den Plan mit den niedrigsten Ge
 
 Der Automodus arbeitet in **Phasen**; die laufende steht oben in der Ergebniskachel:
 
-1. **Basisoptimierung** – eine gewöhnliche Kostenoptimierung mit Ihren Gewichtungen, bis sie etwa 10 Sekunden lang nichts mehr verbessert. Ihr bester Plan ist der Maßstab für alles Weitere (in der Kachel die kleine Zahl vor dem Pfeil, z. B. „A 14 → 3“).
-2. **Optimierung Stufe A** – der Automodus beobachtet die Verstöße der Stufe A. Ändern sie sich 10 Sekunden lang nicht mehr, hebt er das Gewicht genau der Mannschaften und Kriterien um eine Stufe an, die noch Verstöße haben. Das wiederholt er, bis keine Verstöße mehr übrig sind, nichts mehr anzuheben ist oder es dreimal hintereinander nicht besser wird.
+1. **Basisoptimierung** – eine gewöhnliche Kostenoptimierung mit Ihren Gewichtungen, bis sie nicht mehr deutlich vorankommt: Gezählt werden nur Verbesserungen um mindestens 1 % der Kosten; bleiben sie mindestens 10 Sekunden und 500.000 berechnete Pläne lang aus, geht es weiter (ein langsamer Rechner sucht dafür entsprechend länger). Spätestens nach 3 Minuten beginnt in jedem Fall Stufe A. Ihr bester Plan ist der Maßstab für alles Weitere (in der Kachel die kleine Zahl vor dem Pfeil, z. B. „A 14 → 3“).
+2. **Optimierung Stufe A** – direkt nach der Basisoptimierung hebt der Automodus ein erstes Mal an. Danach beobachtet er die Verstöße der Stufe A. Ändern sie sich mindestens 10 Sekunden und 500.000 berechnete Pläne lang nicht mehr, hebt er das Gewicht genau der Mannschaften und Kriterien um eine Stufe an, die noch Verstöße haben. Das wiederholt er, bis keine Verstöße mehr übrig sind, nichts mehr anzuheben ist oder es dreimal hintereinander nicht besser wird.
 3. **Optimierung Stufe B** – ebenso für die Stufe B; die Gewichte der Stufe A bleiben dabei stehen.
 4. **Optimierung Stufe C** – nun glättet er die übrigen Kriterien der Reihe nach, wie sie in der Einteilung stehen, ausgehend vom besten Plan. Zuerst nimmt er sich Ausreißer vor: Mannschaften, die bei einem Kriterium mehr als zwei Verstöße mehr haben als nach der Basisoptimierung – ein, zwei mehr sind in Ordnung, viele bei einer Mannschaft wären unfair. Steigen dabei die Verstöße in A oder B wieder, nimmt er die letzte Anhebung zurück und macht beim nächsten Kriterium weiter. Sind alle Kriterien der Stufe C durch, beginnt er wieder mit dem Herausdrängen.
 
-Der Automodus hat keine Zeitgrenze; er läuft, bis Sie **Pausieren** oder **Beenden**. Unter **In Arbeit** zeigt die Ergebniskachel, an welchen Kriterien er gerade arbeitet (Abschnitt [4](#4-das-hauptfenster)).
+Der Automodus hat keine Zeitgrenze; er läuft, bis Sie **Pausieren** oder **Stopp** wählen. Unter **In Arbeit** zeigt die Ergebniskachel, an welchen Kriterien er gerade arbeitet (Abschnitt [4](#4-das-hauptfenster)).
 
 **Welcher Plan ist der beste?** Der Automodus vergleicht Pläne nicht nach den Gesamtkosten, sondern der Reihe nach: harte Fehler, Verstöße der Stufe A, Verstöße der Stufe B, Ausreißer in C, Verstöße in C und erst zuletzt die Kosten mit Ihren Gewichtungen. Ein Plan mit weniger Verstößen in A gewinnt also immer, auch wenn er teurer ist.
 
 **Eingreifen während der Generierung:**
 
-- **Einteilung ändern** – verschieben Sie in der Ansicht **Qualität** ein Kriterium, gilt das sofort, ohne neue Basisoptimierung. Rückt etwa ein Kriterium von B1 nach A2, drängt der Automodus zuerst genau dieses Kriterium heraus und danach wieder die ganze Stufe A.
-- **Verfahren wechseln** – über den Pfeil am Startknopf, auch in der Pause. Beim Wechsel von der Kostenoptimierung in den Automodus entfällt die Basisoptimierung: Der bisher beste Plan ist schon optimiert und gilt als Basis, der Automodus beginnt sofort mit Stufe A. Ein bewährter Weg ist deshalb, mit der Kostenoptimierung zu beginnen und, wenn sie kaum noch Fortschritte macht, in den Automodus zu wechseln.
+- **Einteilung ändern** – verschieben Sie in der Ansicht **Qualität** ein Kriterium, gilt das sofort, ohne neue Basisoptimierung. Rückt etwa ein Kriterium von B1 nach A2, drängt der Automodus zuerst genau dieses Kriterium heraus und danach wieder die ganze Stufe A. Das verschobene Kriterium steht danach einige Sekunden vorn unter **In Arbeit** – auch wenn der Automodus schon weiter ist, weil es dort gerade nichts zu verbessern gab.
+- **Verfahren wechseln** – unter **Verfahren**, auch in der Pause. Beim Wechsel von der Kostenoptimierung in den Automodus entfällt die Basisoptimierung: Der bisher beste Plan ist schon optimiert und gilt als Basis, der Automodus beginnt sofort mit Stufe A. Ein bewährter Weg ist deshalb, mit der Kostenoptimierung zu beginnen und, wenn sie kaum noch Fortschritte macht, in den Automodus zu wechseln.
 
 **Wann welches Verfahren?** Der Automodus lohnt sich, wenn Pflichtregeln und Terminwünsche der Vereine Vorrang haben und Sie nicht selbst an den Gewichten drehen wollen. Die Kostenoptimierung ist die richtige Wahl, wenn Sie die Gewichtungen gezielt einsetzen oder Ergebnisse mit dem alten AndiGenerator vergleichen wollen – sie rechnet wie das Original.
 
@@ -401,9 +410,11 @@ Unter **Spielplandaten** lassen sich alle Daten ändern, die click-TT geliefert 
 
 Weil die Änderungen getrennt von der XML-Datei gespeichert werden, können Sie die XML-Datei jederzeit neu aus click-TT herunterladen: Speichern Sie sie unter demselben Namen, bleiben Ihre Änderungen erhalten.
 
+Die Seiten werden überall gleich bedient: Die Knöpfe **Neu**, **Bearbeiten** und **Löschen** (bei der Setzliste **Nach oben**/**Nach unten**) stehen auf jeder Seite gleich: hellblau hervorgehoben, gleich breit und direkt rechts neben der Liste – auch wenn das Fenster breiter oder schmaler wird; ein **Doppelklick** oder die **Eingabetaste** bearbeitet den gewählten Eintrag, die **Entf**-Taste löscht ihn (mit Rückfrage). In der Seitenliste links steht bei manchen Seiten eine kleine Marke – die Zahl der Einträge (Mannschaften, spielfreie Tage, Pflichtspieltage, festgelegte Begegnungen) bzw. „an“/„aus“ bei der Setzliste –, und ein blauer Punkt zeigt, auf welchen Seiten Sie in diesem Dialog etwas geändert haben.
+
 ### Allgemein
 
-Die Stammdaten der Liga: Name, Liganummer, Art (Herren, Damen …) sowie Start der Vorrunde, Start der Rückrunde und Ende der Rückrunde. Die Art ist wichtig, um die Nachbarmannschaften richtig zu bestimmen. Der Start der Rückrunde wird bei Halbrunden nicht verwendet.
+Die Stammdaten der Liga: Name, Liganummer, Art (Herren, Damen …) sowie Start der Vorrunde, Start der Rückrunde und Ende der Rückrunde. Die Art ist wichtig, um die Nachbarmannschaften richtig zu bestimmen. Der Start der Rückrunde wird bei Halbrunden nicht verwendet. Beide Hinweise stehen direkt neben den Feldern; passt eine Eingabe nicht (z. B. leerer Name), steht das sofort rot darunter.
 
 ### Mannschaften
 
@@ -413,15 +424,15 @@ Mannschaften anlegen, bearbeiten und löschen. Über die **Vereins-ID** erkennt 
 
 Mit der Setzliste geben Sie die erwartete Abschlusstabelle vor. Ziel ist, dass die Spiele, in denen es um Auf- und Abstieg geht, am Ende der Saison stattfinden – und nicht Mannschaften beteiligt sind, für die es um nichts mehr geht. So bleibt die Spannung bis zum Schluss.
 
-Ordnen Sie die Mannschaften per Ziehen oder mit **Nach oben** / **Nach unten**. Mit **Setzliste aktivieren** schalten Sie sie ein oder aus.
+Ordnen Sie die Mannschaften per Ziehen am Griff **⋮⋮** – wie in der Qualitätsansicht hängt die Zeile am Mauszeiger, und die Liste zeigt schon die neuen Plätze mit einer Lücke an der Ablagestelle (Escape bricht ab) – oder wählen Sie eine Zeile und nutzen **Nach oben** / **Nach unten**. Mit **Setzliste aktivieren** schalten Sie sie ein oder aus; ausgeschaltet ist die Liste ausgegraut, die Reihenfolge bleibt aber erhalten.
 
-### Spiellokale (Kompaktansicht)
+### Spiellokale
 
 click-TT überträgt keine Spiellokale. Meist ist das egal, weil die Vereine nur eine Halle haben. Stehen mehrere Hallen zur Verfügung, braucht das Programm die Spiellokale, damit die maximale Zahl gleichzeitiger Heimspiele je Halle eingehalten wird.
 
-Je Mannschaft tragen Sie das **Standardspiellokal** ein und darunter, falls nötig, abweichende Spiellokale für einzelne Heimspieltage. Die Tabelle **Spiellokale der Nachbarmannschaften** enthält das Standardspiellokal jeder Nachbarmannschaft; spielt eine Nachbarmannschaft nur bei einzelnen Spielen woanders, öffnet ein Doppelklick auf ihren Namen die Bearbeitung.
+Je Mannschaft tragen Sie das **Standardspiellokal** ein („nur eines“, wenn der Verein nur in einer Halle spielt; sonst *Spiellokal 1* bis *5*, die Nummern der Spiellokale des Vereins in click-TT) und darunter, falls nötig, abweichende Spiellokale für einzelne Heimspieltage (*Standard* = das Standardspiellokal). Die Tabelle **Spiellokale der Nachbarmannschaften** enthält das Standardspiellokal jeder Nachbarmannschaft; spielt eine Nachbarmannschaft nur bei einzelnen Spielen woanders, öffnet ein Doppelklick auf ihren Namen die Bearbeitung.
 
-### Heimkoppel/Doppelspieltage (Kompakt)
+### Heimkoppel und Doppelspieltage
 
 Vor allem in höheren Ligen möchten Mannschaften an einem Wochenende zwei Spiele bestreiten. Die Meldungen dazu sind kompliziert und nicht immer eindeutig; das Programm leitet ab, was vermutlich gemeint ist. **Bitte immer kontrollieren.**
 
@@ -434,19 +445,22 @@ Diese Seite fasst die Koppeloptionen aller Wunschtermine zusammen. Neue Koppelte
 
 Hier geben Mannschaften an, bei welchen zwei Gegnern sie an einem Wochenende auswärts spielen möchten – meist, um eine lange Anfahrt nur einmal zu machen. Je Wunsch legen Sie fest, ob beide Spiele an **einem Tag**, an **zwei Tagen** (mit Übernachtung) oder wahlweise stattfinden sollen. Für einen Gegner sind auch mehrere Wünsche möglich.
 
-Sollen beide Spiele an einem Tag stattfinden, braucht es genug Abstand zwischen den Anfangszeiten. Meist spielen die Mannschaften aber zu festen Zeiten; das Programm darf deshalb bei einer der beteiligten Heimmannschaften die Anfangszeit verschieben. Unter **Alternative Anfangszeiten** legen Sie fest, an welchen Terminen welcher Mannschaft das erlaubt ist. Die genaue zweite Uhrzeit steht im jeweiligen Wunschtermin.
+Sollen beide Spiele an einem Tag stattfinden, braucht es genug Abstand zwischen den Anfangszeiten. Meist spielen die Mannschaften aber zu festen Zeiten; das Programm darf deshalb bei einer der beteiligten Heimmannschaften die Anfangszeit verschieben. Unter **Alternative Anfangszeiten** legen Sie fest, an welchen Terminen welcher Mannschaft das erlaubt ist; das leere Feld zeigt den Vorschlag (z. B. „z. B. 14:00“), **Vorschläge für alle eintragen** übernimmt ihn überall, **Alle Zeiten leeren** entfernt alle. Die genaue zweite Uhrzeit steht im jeweiligen Wunschtermin.
 
 ### Wunschtermine
 
 ![Wunschtermin bearbeiten](Anleitung/Bilder/13-wunschtermin.png)
 
-Je Mannschaft alle Tage der Saison, wochenweise:
+Je Mannschaft alle Tage der Saison, wochenweise, als Kärtchen (die Legende steht darüber):
 
-- eine **Uhrzeit** (z. B. `18:00`): an diesem Tag ist ein Heimspiel möglich;
-- **FREI**: Sperrtermin, die Mannschaft möchte an diesem Tag nicht spielen;
-- **leer**: an diesem Tag ist ein Auswärtsspiel möglich.
+- **blau mit Uhrzeit** (z. B. `18:00`): an diesem Tag ist ein Heimspiel möglich; darunter klein die Zusätze (Koppel, Doppel, max. Heimspiele, Spiellokal);
+- **hellblau, Uhrzeit kursiv**: Ausweichtermin, nur im Notfall;
+- **rot „gesperrt“**: Sperrtermin, die Mannschaft möchte an diesem Tag nicht spielen;
+- **leer (weiß)**: an diesem Tag ist ein Auswärtsspiel möglich.
 
-Ein **Doppelklick** auf einen Heimspieltermin – oder die **rechte Maustaste** und dann **Bearbeiten …** – öffnet seine weiteren Optionen:
+Ein **Klick** auf einen Tag – oder die **rechte Maustaste** und dann **Bearbeiten …** – öffnet den Termin. Oben wählen Sie mit einem Umschalter **Heimspiel möglich**, **kein Heimspiel (Auswärtsspiele möglich)** oder **Sperrtermin**; beim Heimspiel stehen darunter Uhrzeit, Halle, Koppel- und Auswärtskoppeloptionen. Ein **leerer** Tag ist dabei gleich als Heimspiel zur üblichen Uhrzeit der Mannschaft vorgeschlagen (der häufigsten an diesem Wochentag, sonst 18:00) – meist genügt dann **OK**. Einen Termin **ziehen** Sie einfach auf einen anderen Tag: Das Kärtchen hängt am Mauszeiger, der Zieltag ist umrandet. Mit gedrückter **Strg**-Taste wird kopiert statt verschoben; liegt am Zieltag schon ein Termin, tauschen die beiden; Escape bricht ab. Der Tooltip eines Kärtchens nennt Tag und Termin ausgeschrieben.
+
+Die Optionen eines Termins:
 
 | Option | Bedeutung |
 |---|---|
@@ -467,13 +481,13 @@ Die Spiele der Nachbarmannschaften braucht das Programm für die Hallenbelegung 
 
 dazu die einzelnen **Begegnungen** dieser Mannschaft.
 
-### 60km Regel
+### Wochenende (60-km-Regel)
 
 Ist die Anfahrt zu einem Gegner zu weit, sollen die Spiele gegen ihn am Wochenende stattfinden. Hier legen Sie fest, für welche Paarungen das gilt. Ob der Freitag zum Wochenende zählt, stellen Sie in den **Einstellungen** ein.
 
 ### Spielfreie Tage
 
-An einzelnen Tagen soll gar nicht gespielt werden – etwa weil die Relegationstermine noch nicht feststanden, weil nachträglich ein Spielverbot beschlossen wurde oder weil beim Anlegen der Spieltage ein Fehler passiert ist. Diese Tage tragen Sie hier ein. Die Auswertung der Terminwünsche berücksichtigt sie.
+An einzelnen Tagen soll gar nicht gespielt werden – etwa weil die Relegationstermine noch nicht feststanden, weil nachträglich ein Spielverbot beschlossen wurde oder weil beim Anlegen der Spieltage ein Fehler passiert ist. Diese Tage wählen Sie in einem **Monatskalender** der Saison: Ein Klick auf einen Tag macht ihn spielfrei (rot), ein zweiter gibt ihn wieder frei. Wählbar sind die Tage, an denen Mannschaften Heimspielwünsche haben. Grau sind Tage, die **nicht gesperrt** sind, an denen aber keine Mannschaft einen Heimspielwunsch hat – dort wird ohnehin nicht gespielt; ist ein solcher Tag trotzdem als spielfrei eingetragen (etwa aus click-TT), ist er rot unterstrichen. Der Tooltip eines Tages nennt den Grund, die Legende steht über dem Kalender; Wochenenden sind fett. Die Monate brechen um, wenn das Fenster schmaler ist. Die Auswertung der Terminwünsche berücksichtigt die spielfreien Tage.
 
 ### Pflichtspieltage
 
@@ -487,7 +501,7 @@ Stehen Spiele schon vor der Planung fest – etwa weil zwei befreundete Vereine 
 
 ### Heimrecht
 
-Manchmal soll die Zahl der Heimspiele in Vor- und Rückrunde nicht gleich sein, oder das Heimrecht gegen bestimmte Gegner soll in einer bestimmten Runde liegen – etwa weil eine Halle saniert wird oder weil Jugendligen zur Rückrunde neu zusammengestellt werden. Hier geben Sie je Mannschaft die Anzahl der Heimspiele und das Heimrecht gegen einzelne Gegner vor.
+Manchmal soll die Zahl der Heimspiele in Vor- und Rückrunde nicht gleich sein, oder das Heimrecht gegen bestimmte Gegner soll in einer bestimmten Runde liegen – etwa weil eine Halle saniert wird oder weil Jugendligen zur Rückrunde neu zusammengestellt werden. Hier geben Sie je Mannschaft die Anzahl der Heimspiele und das Heimrecht gegen einzelne Gegner vor – je Gegner mit dem Umschalter **Vorrunde / egal / Rückrunde**.
 
 Zu beachten:
 

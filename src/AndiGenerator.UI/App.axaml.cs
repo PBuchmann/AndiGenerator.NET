@@ -22,6 +22,7 @@ public partial class App : global::Avalonia.Application
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             Bildschirmfoto.Anmelden();
+            Platzhalterdeutsch.Anmelden();
             var fenster = new HauptfensterView();
             var oberflaeche = new AvaloniaOberflaeche(fenster);
             var modell = new HauptfensterViewModel(oberflaeche, () => new HostWindow());

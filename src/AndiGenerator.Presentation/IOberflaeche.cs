@@ -36,6 +36,13 @@ public interface IOberflaeche
     /// <returns><c>true</c> bei „Ja“.</returns>
     Task<bool> FragenAsync(string titel, string frage);
 
+    /// <summary>
+    /// Fragt, ob der gesicherte Plan durch den aktuellen ersetzt werden soll, und zeigt dazu beide im Vergleich.
+    /// </summary>
+    /// <param name="vergleich">Der Vergleich mit Frage und Urteil.</param>
+    /// <returns>Die Antwort.</returns>
+    Task<Sicherungswahl> SicherungAbfragenAsync(Planvergleich vergleich);
+
     /// <summary>Stellt eine Entscheidungsfrage mit Detailtext und eigenen Schaltflächen.</summary>
     /// <param name="titel">Titel des Dialogs.</param>
     /// <param name="text">Einleitender Text.</param>

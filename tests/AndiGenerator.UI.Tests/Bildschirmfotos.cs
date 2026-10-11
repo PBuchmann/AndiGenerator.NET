@@ -118,8 +118,9 @@ public sealed class Bildschirmfotos : IDisposable
             // Kostenoptimierung ab dem Plan aus click-TT, kurz rechnen lassen und anhalten.
             modell.Startplan = modell.Startplaene.Single(p => p.Quelle == PlanQuelle.ClickTt);
             modell.KostenoptimierungCommand.Execute(null);
+            await modell.GenerierungCommand.ExecuteAsync(null);
             await WartenAsync(o, TimeSpan.FromSeconds(8), () => false);
-            modell.GenerierungCommand.Execute(null);
+            modell.PauseCommand.Execute(null);
             Foto(ziel, "03-hauptfenster", fenster, o);
             Foto(ziel, "04-kostenansicht", Ansichten(fenster), o);
 
@@ -153,10 +154,17 @@ public sealed class Bildschirmfotos : IDisposable
             modell.AutomodusCommand.Execute(null);
             await WartenAsync(o, TimeSpan.FromSeconds(45), () => modell.Anzeige.Phase.Length > 0);
             await WartenAsync(o, TimeSpan.FromSeconds(3), () => false);
-            modell.GenerierungCommand.Execute(null);
+
+            // Maschinenraum, solange gerechnet wird (die Kerne zeigen ihre Last).
+            Zeigen(modell.MaschinenraumCommand, o);
+            await WartenAsync(o, TimeSpan.FromSeconds(2), () => false);
+            Foto(ziel, "19-leitstand", Ansichten(fenster), o);
+
+            modell.PauseCommand.Execute(null);
             Foto(ziel, "18-automodus", Kacheln(fenster), o);
 
             // Qualität im Automodus (mit Einstufung), gewählt die erste Zeile mit Verstößen je Mannschaft.
+            Zeigen(modell.QualitaetsansichtCommand, o);
             var qualitaet = (QualitaetAnsichtViewModel)Einzige<QualitaetAnsicht>(fenster).DataContext!;
             if (qualitaet.Zeilen.FirstOrDefault(z => z.Zustand != Qualitaetszustand.Erfuellt && z.Kriterium is not null) is { } zeile)
             {
@@ -224,8 +232,8 @@ public sealed class Bildschirmfotos : IDisposable
             Oberflaeche.Zeichnen(daten);
             WunschterminDetail detail = daten.GetVisualDescendants().OfType<WunschterminDetail>().Single();
             Point punkt = detail.GetVisualDescendants()
-                .OfType<TextBox>()
-                .Where(t => t.DataContext is WunschterminZelle)
+                .OfType<Border>()
+                .Where(t => t.Classes.Contains("kaertchen") && t.DataContext is WunschterminZelle)
                 .Select(t => t.TranslatePoint(new Point(t.Bounds.Width / 2, t.Bounds.Height / 2), daten))
                 .OfType<Point>()
                 .First(p => new Rect(daten.ClientSize).Contains(p));

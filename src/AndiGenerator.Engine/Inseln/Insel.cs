@@ -52,6 +52,9 @@ internal sealed class Insel
     /// <summary>Holt einen Zähler, der sich bei jeder neuen Lösung der Insel (Verbesserung oder Neustart) erhöht (Automodus).</summary>
     public int Stand { get; private set; }
 
+    /// <summary>Holt die Zahl der Abgleiche, bei denen ein Suchplatz der Insel einen besseren Plan geliefert hat.</summary>
+    public int Erfolge { get; private set; }
+
     /// <summary>Anzahl der Neustarts dieser Insel.</summary>
     public int Neustarts { get; private set; }
 
@@ -82,6 +85,8 @@ internal sealed class Insel
         {
             return;
         }
+
+        Erfolge++;
 
         verbesserungBei = durchlaeufe;
         Verteilen(new Auftrag(Loesung.Kopie(), Kosten));

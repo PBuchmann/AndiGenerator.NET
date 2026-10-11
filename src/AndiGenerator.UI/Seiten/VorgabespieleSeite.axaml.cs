@@ -7,19 +7,13 @@ using Avalonia.Controls;
 
 namespace AndiGenerator.UI.Seiten;
 
-/// <summary>Seite „Manuell festgelegte Begegnungen“ des Dialogs „Spielplandaten bearbeiten“; Doppelklick bearbeitet wie im Original.</summary>
+/// <summary>Seite „Manuell festgelegte Begegnungen“ des Dialogs „Spielplandaten bearbeiten“; Doppelklick oder Eingabetaste bearbeitet, Entf löscht.</summary>
 public partial class VorgabespieleSeite : UserControl
 {
     /// <summary>Initialisiert die Seite.</summary>
     public VorgabespieleSeite()
     {
         InitializeComponent();
-        Liste.DoubleTapped += (_, _) =>
-        {
-            if (DataContext is VorgabespieleSeiteViewModel seite && seite.BearbeitenCommand.CanExecute(null))
-            {
-                seite.BearbeitenCommand.Execute(null);
-            }
-        };
+        Listenbedienung.Anmelden(Liste, () => DataContext is VorgabespieleSeiteViewModel seite ? (seite.BearbeitenCommand, seite.LoeschenCommand) : default);
     }
 }

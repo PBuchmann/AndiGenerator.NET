@@ -7,19 +7,13 @@ using Avalonia.Controls;
 
 namespace AndiGenerator.UI.Seiten;
 
-/// <summary>Auswärtskoppelwünsche einer Mannschaft; Doppelklick bearbeitet wie im Original.</summary>
+/// <summary>Auswärtskoppelwünsche einer Mannschaft; Doppelklick oder Eingabetaste bearbeitet, Entf löscht.</summary>
 public partial class AuswaertskoppelDetail : UserControl
 {
     /// <summary>Initialisiert die Ansicht.</summary>
     public AuswaertskoppelDetail()
     {
         InitializeComponent();
-        Liste.DoubleTapped += (_, _) =>
-        {
-            if (DataContext is AuswaertskoppelDetailViewModel detail && detail.BearbeitenCommand.CanExecute(null))
-            {
-                detail.BearbeitenCommand.Execute(null);
-            }
-        };
+        Listenbedienung.Anmelden(Liste, () => DataContext is AuswaertskoppelDetailViewModel detail ? (detail.BearbeitenCommand, detail.LoeschenCommand) : default);
     }
 }
