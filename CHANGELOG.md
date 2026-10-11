@@ -2,7 +2,7 @@
 
 Was sich von Version zu Version für Anwender ändert. Die Einzelheiten stehen in der [Anleitung](Doku/ANLEITUNG.md), die technische Geschichte im [Migrationsplan](Doku/MIGRATIONSPLAN.md).
 
-## 0.9.6
+## 0.9.6 (12.10.2026)
 
 ### Neu
 
