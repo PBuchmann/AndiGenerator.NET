@@ -69,7 +69,9 @@ internal sealed partial class KernPlan
     /// <summary>Original <c>CalculateMannschaftsKosten</c> mit Cache: nur geänderte Mannschaften werden neu gerechnet.</summary>
     private double MannschaftsKostenGecacht(MannschaftsKostenart art)
     {
-        bool alle = !artBerechnet[(int)art];
+        // Mit der Regel für den Pflichtspieltag hängen die Kosten jeder Mannschaft von allen ab (Befund #33).
+        bool alle = !artBerechnet[(int)art]
+            || (art == MannschaftsKostenart.Pflichtspieltage && D.SpielfreiAmPflichtspieltag && Array.IndexOf(geaendert, true) >= 0);
         bool[] betroffen = art is MannschaftsKostenart.Hallenbelegung or MannschaftsKostenart.ParalleleSpiele ? vereinGeaendert : geaendert;
         double ergebnis = 0;
         for (int t = 0; t < D.N; t++)

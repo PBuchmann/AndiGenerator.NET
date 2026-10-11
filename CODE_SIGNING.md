@@ -7,7 +7,7 @@
 Die Programmdateien und das Setup von AndiGenerator.NET sollen künftig digital signiert werden, damit Windows sie als vertrauenswürdig erkennt.
 
 **Kostenlose Code-Signierung bereitgestellt von [SignPath.io](https://about.signpath.io), Zertifikat von der [SignPath Foundation](https://signpath.org).**
-*(Die Aufnahme in das Programm der SignPath Foundation ist beantragt. Bis zur Zusage sind die veröffentlichten Dateien noch nicht signiert.)*
+*(Die SignPath Foundation hat den ersten Antrag im Oktober 2026 abgelehnt: Das Projekt sei öffentlich noch nicht bekannt genug. Eine erneute Bewerbung ist ausdrücklich möglich, sobald es breiter genutzt wird. Bis dahin sind die veröffentlichten Dateien nicht signiert; eine bezahlte Signierung ist derzeit nicht vorgesehen. Die Herkunftsnachweise von GitHub (siehe unten) belegen trotzdem, dass jede Datei aus diesem Repository gebaut wurde.)*
 
 Signiert werden ausschließlich Dateien, die aus dem Quellcode dieses Repositorys gebaut werden:
 
@@ -44,4 +44,4 @@ Links, die Sie im Programm anklicken (z. B. zum Lizenztext), öffnen Ihren Brows
 
 ### English summary
 
-Free code signing provided by SignPath.io, certificate by SignPath Foundation (application pending; releases are unsigned until approval). Only binaries built from this repository by GitHub Actions are signed, and every signing request is approved manually. Committer, reviewer and approver: Peter Buchmann (@PBuchmann), using multi-factor authentication. Privacy: the program does not transfer any data to other networked systems, except for an update check against GitHub at startup, which sends no user data and can be turned off in the *About* dialog.
+Free code signing provided by SignPath.io, certificate by SignPath Foundation (first application declined in October 2026 for lack of public visibility; we will reapply once the project is more widely used – until then releases are unsigned, but carry GitHub build provenance attestations). Only binaries built from this repository by GitHub Actions are signed, and every signing request is approved manually. Committer, reviewer and approver: Peter Buchmann (@PBuchmann), using multi-factor authentication. Privacy: the program does not transfer any data to other networked systems, except for an update check against GitHub at startup, which sends no user data and can be turned off in the *About* dialog.

@@ -89,6 +89,9 @@
           <StackPanel Spacing="4">
             <TextBlock Text="Mannschaftskosten" Classes="bereichstitel" />
             <CheckBox Content="Freitagsspiele sind bei der 60km-Regel zulässig" IsChecked="{Binding FreitagZaehltZumWochenende}" />
+            <CheckBox Content="Bei ungerader Mannschaftszahl darf am Pflichtspieltag eine Mannschaft spielfrei sein, wenn sie in der Woche davor spielt"
+                      IsChecked="{Binding SpielfreiAmPflichtspieltag}"
+                      ToolTip.Tip="Bei ungerader Mannschaftszahl ist am Pflichtspieltag zwangsläufig eine Mannschaft spielfrei. Ohne Haken wird sie wie im Original immer bestraft." />
             <ItemsControl ItemsSource="{Binding KostenartGewichte}" ItemTemplate="{StaticResource GewichtungsZeile}" />
           </StackPanel>
         </Border>

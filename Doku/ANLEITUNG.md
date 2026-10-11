@@ -392,7 +392,7 @@ Gewichten lässt sich auf drei Ebenen, die sich addieren:
 
 ![Gewichtung im Detailfeld](Anleitung/Bilder/09-gewichtung.png)
 
-**In den Einstellungen** (links unter *Staffel*) finden Sie alle Gewichtungen auf einer Seite: die allgemeinen Plankosten, die Mannschaftskosten und die Gewichtung je Mannschaft. Auch hier gilt jede Änderung sofort. **Standard wiederherstellen …** setzt alles auf die Ausgangswerte zurück.
+**In den Einstellungen** (links unter *Staffel*) finden Sie alle Gewichtungen auf einer Seite: die allgemeinen Plankosten, die Mannschaftskosten und die Gewichtung je Mannschaft. Unter den Mannschaftskosten stehen außerdem die Freitagsregel für die 60-km-Regel und die Regel für den Pflichtspieltag bei ungerader Mannschaftszahl (siehe [Pflichtspieltage](#pflichtspieltage)). Auch hier gilt jede Änderung sofort. **Standard wiederherstellen …** setzt alles auf die Ausgangswerte zurück.
 
 ![Einstellungen](Anleitung/Bilder/10-einstellungen.png)
 
@@ -535,7 +535,7 @@ An einzelnen Tagen soll gar nicht gespielt werden – etwa weil die Relegationst
 
 Hier legen Sie fest, wie viele Spiele jede Mannschaft in einem Zeitraum mindestens machen muss – etwa mindestens ein Spiel zwischen dem 14. und 18. April oder mindestens drei Spiele im November.
 
-Setzen Sie Pflichtspieltage sparsam ein: Sie nehmen dem Programm Freiheit und verschlechtern den Plan meist. Sinnvoll sind sie vor allem für einen gemeinsamen letzten Spieltag, falls das Programm ihn nicht ohnehin so plant. Bei **ungerader Mannschaftszahl** muss am Pflichtspieltag zwangsläufig eine Mannschaft pausieren und bekäme sonst in einer Woche zwei Spiele. Verlängern Sie dann den Zeitraum, oder löschen Sie die Pflichtspieltage und lassen Sie das Programm den letzten Spieltag über die Kosten optimieren.
+Setzen Sie Pflichtspieltage sparsam ein: Sie nehmen dem Programm Freiheit und verschlechtern den Plan meist. Sinnvoll sind sie vor allem für einen gemeinsamen letzten Spieltag, falls das Programm ihn nicht ohnehin so plant. Bei **ungerader Mannschaftszahl** muss am Pflichtspieltag zwangsläufig eine Mannschaft pausieren. Das Original bestraft diese Mannschaft immer; AndiGenerator.NET lässt in einem Pflichtzeitraum mit einem Spiel genau eine fehlende Mannschaft zu, wenn sie in der Woche davor gespielt hat – sie spielt dann also am vorletzten Spieltag. Abschalten lässt sich das in den **Einstellungen** (*Bei ungerader Mannschaftszahl darf am Pflichtspieltag eine Mannschaft spielfrei sein …*); dann gilt die Strafe wie im Original.
 
 ### Manuell festgelegte Begegnungen
 
@@ -578,7 +578,7 @@ In der Standardgewichtung haben die Kostenarten schon ein sinnvolles Verhältnis
 
 **Länge Spieltage** – Ein Spieltag soll sich über möglichst wenige Tage erstrecken.
 
-**Überlappung letzter Spieltag** und **Länge letzter Spieltag** – dasselbe, nur für den letzten Spieltag. Er soll möglichst kurz sein und so liegen, dass alle Mannschaften zuletzt nur noch ein Spiel haben.
+**Überlappung letzter Spieltag** und **Länge letzter Spieltag** – dasselbe, nur für den letzten Spieltag. Er soll möglichst kurz sein und so liegen, dass alle Mannschaften zuletzt nur noch ein Spiel haben. Anders als im Original zählen beim letzten Spieltag alle Überlappungen mit früheren Spieltagen, nicht nur die mit dem ältesten; die Kosten können deshalb etwas höher sein als im alten AndiGenerator.
 
 **Vereinsinterne Spiele am Anfang** – Mannschaften desselben Vereins sollen zu Beginn jeder Halbrunde gegeneinander spielen.
 
@@ -645,6 +645,9 @@ Im Bayerischen TTV werden Hallenbelegung und Spiele der Nachbarmannschaften bei 
 
 **Wird mein Rechner während der Generierung langsam?**
 Das Programm lässt einen Prozessorkern frei und rechnet mit niedriger Priorität, damit andere Programme bedienbar bleiben. Wer den Rechner in Ruhe lassen möchte, pausiert die Generierung.
+
+**Das Programm meldet einen unerwarteten Fehler.**
+Dann ist etwas schiefgegangen, womit das Programm nicht gerechnet hat. Es beendet sich dabei nicht, sondern merkt den aktuellen Plan als **Notfallsicherung** (Sie finden ihn unter **Start mit** und in der Planauswahl der Ansichten) und schreibt die Einzelheiten in die Datei `fehlerprotokoll.txt` im Datenordner (unter Windows `%LOCALAPPDATA%\AndiGenerator.NET`); die Meldung nennt den genauen Pfad. Sie können weiterarbeiten, sicherer ist aber, den Plan zu exportieren oder zu merken und das Programm neu zu starten. Bricht eine laufende Generierung ab, steht das in der Statuszeile, und der beste Plan ist ebenso als Notfallsicherung gemerkt. Helfen Sie, den Fehler zu beheben: Schicken Sie das Fehlerprotokoll mit einer kurzen Beschreibung, was Sie gerade getan haben, über die [Fehlermeldungen auf GitHub](https://github.com/PBuchmann/AndiGenerator.NET/issues). Das Protokoll enthält keine Spielplandaten, kann aber Dateipfade Ihres Rechners nennen.
 
 ---
 

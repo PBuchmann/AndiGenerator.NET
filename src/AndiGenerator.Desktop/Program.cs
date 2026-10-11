@@ -2,6 +2,7 @@
 // SPDX-FileCopyrightText: 2026 Peter Buchmann
 // SPDX-License-Identifier: GPL-3.0-only
 
+using System.Globalization;
 using AndiGenerator.UI;
 using Avalonia;
 using Velopack;
@@ -18,6 +19,13 @@ internal static class Program
     {
         // Velopack erledigt hier Installation, Deinstallation und das Einspielen von Updates und beendet dann selbst.
         VelopackApp.Build().Run();
+
+        // Die Oberfläche ist deutsch – auch auf einem anders eingestellten System (Monatsnamen, Zahlen, Datumsformate).
+        var deutsch = CultureInfo.GetCultureInfo("de-DE");
+        CultureInfo.DefaultThreadCurrentCulture = deutsch;
+        CultureInfo.DefaultThreadCurrentUICulture = deutsch;
+        CultureInfo.CurrentCulture = deutsch;
+        CultureInfo.CurrentUICulture = deutsch;
         BuildAvaloniaApp().StartWithClassicDesktopLifetime(args);
     }
 

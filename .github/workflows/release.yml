@@ -118,6 +118,33 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release upload ${{ github.ref_name }} AndiGeneratorNET-${{ steps.version.outputs.version }}-sbom.spdx.json
 
+      # Der Abschnitt „## <Version>“ aus CHANGELOG.md wird zum Text des Releases. Fehlt er, bleibt der Text leer.
+      - name: Release Notes aus CHANGELOG.md
+        continue-on-error: true
+        shell: pwsh
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          $version = '${{ steps.version.outputs.version }}'
+          $zeilen = @(Get-Content CHANGELOG.md -Encoding utf8)
+          $start = -1
+          for ($i = 0; $i -lt $zeilen.Count; $i++) {
+            if ($zeilen[$i] -match ('^## ' + [regex]::Escape($version) + '(\s|$)')) { $start = $i; break }
+          }
+          if ($start -lt 0) {
+            Write-Host "Kein Abschnitt '## $version' in CHANGELOG.md - der Release-Text bleibt leer."
+            exit 0
+          }
+          $ende = $zeilen.Count
+          for ($i = $start + 1; $i -lt $zeilen.Count; $i++) {
+            if ($zeilen[$i] -match '^## ') { $ende = $i; break }
+          }
+          $text = ''
+          if ($ende -gt $start + 1) { $text = ($zeilen[($start + 1)..($ende - 1)] -join "`n").Trim() }
+          $text += "`n`nAlle Änderungen: [CHANGELOG.md](${{ github.server_url }}/${{ github.repository }}/blob/${{ github.ref_name }}/CHANGELOG.md)"
+          Set-Content -Path release-notes.md -Value $text -Encoding utf8
+          gh release edit ${{ github.ref_name }} --notes-file release-notes.md
+
   # Linux (Chromebooks mit Linux-Entwicklungsumgebung, auch andere Linux-Systeme): eigenständig veröffentlichen und als
   # Debian-Paket und tar.gz an das Release hängen, das der Windows-Job angelegt hat. Getestet wird im Windows-Job.
   linux:

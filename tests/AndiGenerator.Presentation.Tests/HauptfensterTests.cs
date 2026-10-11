@@ -667,6 +667,19 @@ public sealed class HauptfensterTests : IDisposable
     }
 
     [Fact]
+    public async Task Nach_einem_unerwarteten_Fehler_wird_der_Plan_als_Notfallsicherung_gemerkt()
+    {
+        Assert.Null(hf.NotfallSichern());
+        await OeffnenAsync();
+        Assert.Null(hf.NotfallSichern());
+
+        await PlanErrechnenAsync();
+        hf.StoppenCommand.Execute(null);
+        Assert.Equal(HauptfensterViewModel.NotfallsicherungName, hf.NotfallSichern());
+        Assert.Single(Directory.EnumerateFiles(Path.Combine(ordner, "basis"), "*" + HauptfensterViewModel.NotfallsicherungName + "*", SearchOption.AllDirectories));
+    }
+
+    [Fact]
     public async Task Generierung_Pause_Plan_merken_exportieren_und_entfernen()
     {
         Assert.False(hf.GenerierungCommand.CanExecute(null));

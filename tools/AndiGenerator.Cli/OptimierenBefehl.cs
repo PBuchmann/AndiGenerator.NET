@@ -84,6 +84,12 @@ internal static class OptimierenBefehl
     {
         Staffel staffel = StaffelLaden(a.Datei, a.Leer);
         (Berechnungsoptionen optionen, string herkunft) = OptionenLaden(a.Optionen, staffel);
+        if (a.Original)
+        {
+            optionen = optionen with { Korrekturen = Korrekturen.Keine, SpielfreiAmPflichtspieltag = false };
+            herkunft += ", wie im Original (ohne Korrekturen)";
+        }
+
         if (a.Rundenplanung is Rundenplanung runde)
         {
             optionen = optionen with { Rundenplanung = runde };

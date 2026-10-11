@@ -20,6 +20,7 @@ public sealed class OptionenAnsichtViewModel : Document
     private readonly HauptfensterViewModel hauptfenster;
     private bool laden;
     private bool freitag;
+    private bool spielfreiAmPflichtspieltag;
     private int rundenplanung;
     private bool doppelrunde;
     private bool automatischeMitte;
@@ -59,6 +60,22 @@ public sealed class OptionenAnsichtViewModel : Document
             if (SetProperty(ref freitag, value))
             {
                 Aendern(o => o with { FreitagZaehltZumWochenende = value });
+            }
+        }
+    }
+
+    /// <summary>
+    /// Holt oder setzt einen Wert, der angibt, ob bei ungerader Mannschaftszahl am Pflichtspieltag eine Mannschaft spielfrei
+    /// sein darf, wenn sie in der Woche davor gespielt hat (Befund #33).
+    /// </summary>
+    public bool SpielfreiAmPflichtspieltag
+    {
+        get => spielfreiAmPflichtspieltag;
+        set
+        {
+            if (SetProperty(ref spielfreiAmPflichtspieltag, value))
+            {
+                Aendern(o => o with { SpielfreiAmPflichtspieltag = value });
             }
         }
     }
@@ -180,6 +197,7 @@ public sealed class OptionenAnsichtViewModel : Document
         try
         {
             FreitagZaehltZumWochenende = o.FreitagZaehltZumWochenende;
+            SpielfreiAmPflichtspieltag = o.SpielfreiAmPflichtspieltag;
             RundenplanungIndex = (int)o.Rundenplanung;
             Doppelrunde = o.Doppelrunde;
             AutomatischeMitte = o.AutomatischeMitte;

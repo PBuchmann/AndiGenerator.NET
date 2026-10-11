@@ -29,6 +29,8 @@ internal sealed class KernDefinition
         Rundenplanung = Optionen.Rundenplanung;
         Doppelrunde = Optionen.Doppelrunde;
         FreitagZaehltZumWochenende = Optionen.FreitagZaehltZumWochenende;
+        Korrekturen = Optionen.Korrekturen;
+        SpielfreiAmPflichtspieltag = Optionen.SpielfreiAmPflichtspieltag && plan.Mannschaften.Count % 2 == 1;
 
         // Gleichheitsklassen der click-TT-Ids (das Original vergleicht Spiele und Paarungen über die Id).
         var idKlassen = new Dictionary<string, int>(StringComparer.Ordinal);
@@ -262,6 +264,21 @@ internal sealed class KernDefinition
     public bool Doppelrunde { get; }
 
     public bool FreitagZaehltZumWochenende { get; }
+
+    /// <summary>Korrekturen an Fehlern des Originals (Klasse-3-Befunde).</summary>
+    public Korrekturen Korrekturen { get; }
+
+    /// <summary>
+    /// Bei ungerader Mannschaftszahl darf in einem Pflichtzeitraum mit einem Spiel eine Mannschaft fehlen, die in der Woche
+    /// davor gespielt hat (Befund #33); nur gesetzt, wenn die Einstellung an und die Mannschaftszahl ungerade ist.
+    /// </summary>
+    public bool SpielfreiAmPflichtspieltag { get; }
+
+    /// <summary>
+    /// Spieltage des Rasters je Runde: beim Kreisverfahren n − 1 bei gerader, n bei ungerader Mannschaftszahl. Das Original
+    /// nimmt immer n − 1 (Befund #5).
+    /// </summary>
+    public int RasterSpieltage => N % 2 == 1 && Korrekturen.VollstaendigesRaster ? N : N - 1;
 
     public RefRunde[] Runden { get; }
 

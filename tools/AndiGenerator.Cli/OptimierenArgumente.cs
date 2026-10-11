@@ -21,6 +21,8 @@ internal sealed class OptimierenArgumente
           --rundenplanung R beide | halbrunde | vorrunde | rueckrunde (überschreibt die Optionsdatei)
           --leer            mit leerem Plan beginnen (sonst mit dem bestehenden Spielplan der Datei)
           --ohne-spezial    ohne Spezial-Insel
+          --original        Suche und Kosten wie im Original (ohne die Korrekturen der Klasse-3-Befunde
+                            und ohne die Regel für den Pflichtspieltag; zum Vergleich)
           --intervall N     Statuszeile alle N Sekunden (Standard 10)
           --protokoll DATEI Verlauf als CSV (Sekunden;Durchläufe;Pläne/s;Kosten;Verbesserungen;Neustarts;Spezial)
           --plan DATEI      besten Plan als gemerkten Plan (Format des Originals) speichern
@@ -47,6 +49,9 @@ internal sealed class OptimierenArgumente
     public bool Leer { get; private set; }
 
     public bool OhneSpezial { get; private set; }
+
+    /// <summary>Holt einen Wert, der angibt, ob ohne Korrekturen gerechnet wird (wie das Original).</summary>
+    public bool Original { get; private set; }
 
     public int Intervall { get; private set; } = 10;
 
@@ -120,6 +125,9 @@ internal sealed class OptimierenArgumente
                 return true;
             case "--ohne-spezial":
                 OhneSpezial = true;
+                return true;
+            case "--original":
+                Original = true;
                 return true;
             case "--sekunden" when Zahl(werte, arg, out zahl, out fehler):
                 Sekunden = (int)Math.Min(zahl, int.MaxValue);

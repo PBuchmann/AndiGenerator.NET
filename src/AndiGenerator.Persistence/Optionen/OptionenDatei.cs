@@ -168,7 +168,17 @@ public static class OptionenDatei
             }
         }
 
-        text.Append("/></andigenerator-options>\r\n");
+        text.Append("/>");
+
+        // Nur bei Abweichung vom Standard: So bleibt die Datei sonst byte-gleich zum Original, das das Element nicht kennt.
+        if (!optionen.SpielfreiAmPflichtspieltag)
+        {
+            text.Append("<mandatory-games");
+            Attribut(text, "odd-team-free", "false");
+            text.Append("/>");
+        }
+
+        text.Append("</andigenerator-options>\r\n");
         return Iso885915.GetBytes(text.ToString());
     }
 
@@ -258,6 +268,12 @@ public static class OptionenDatei
                 Mitte1 = mitte1.Length > 0 ? DelphiKompatibel.DateFromString(mitte1) : null,
                 Mitte2 = mitte2.Length > 0 ? DelphiKompatibel.DateFromString(mitte2) : null,
             };
+        }
+
+        XElement? pflicht = wurzel.Elements("mandatory-games").FirstOrDefault();
+        if (pflicht is not null)
+        {
+            o = o with { SpielfreiAmPflichtspieltag = AttributLesen(pflicht, "odd-team-free") != "false" };
         }
 
         return o;

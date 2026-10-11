@@ -29,6 +29,9 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
     /// <summary>Dateiname der Anleitung neben dem Programm.</summary>
     public const string Anleitungsdatei = "Anleitung.pdf";
 
+    /// <summary>Name des gemerkten Plans, unter dem nach einem unerwarteten Fehler der aktuelle Plan gesichert wird.</summary>
+    public const string NotfallsicherungName = "Notfallsicherung";
+
     private const string KeinExportplan = "Kein Plan zum Exportieren – erst eine Generierung starten oder einen Plan wählen.";
 
     private static readonly CultureInfo Deutsch = CultureInfo.GetCultureInfo("de-DE");
@@ -48,6 +51,9 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
     private readonly string? uebernahmeAus;
     private Plansitzung? sitzung;
     private Planstand? laufenderStand;
+
+    /// <summary>Abbruchfehler der Generierung, der schon gemeldet wurde (jeder wird nur einmal gemeldet).</summary>
+    private Exception? gemeldeterFehler;
 
     /// <summary>Spiele des Plans, über dessen Sicherung schon entschieden ist (gesichert oder bewusst verworfen).</summary>
     private IReadOnlyList<Spiel>? sicherungEntschieden;
@@ -565,6 +571,31 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
     /// <summary>Vor dem Beenden des Programms: Ein noch nicht gesicherter Plan wird gesichert (oder es wird gefragt).</summary>
     /// <returns><c>false</c>, wenn der Anwender abbricht und das Programm offen bleiben soll.</returns>
     public Task<bool> BeendenErlaubtAsync() => PlanSichernAsync("Das Programm wird beendet.");
+
+    /// <summary>
+    /// Sichert nach einem unerwarteten Fehler den aktuellen Plan als gemerkten Plan <see cref="NotfallsicherungName"/>, ohne
+    /// zu fragen und ohne den gesicherten Plan anzutasten. Darf von jedem Thread aus aufgerufen werden; die Planauswahl wird
+    /// auf der Oberfläche nachgezogen.
+    /// </summary>
+    /// <returns>Der Name des gemerkten Plans oder <c>null</c>, wenn es keinen Plan gab oder er sich nicht schreiben ließ.</returns>
+    public string? NotfallSichern()
+    {
+        if (Volatile.Read(ref sitzung) is not Plansitzung s || laufenderStand is not Planstand aktuell)
+        {
+            return null;
+        }
+
+        try
+        {
+            string name = s.PlanMerken(NotfallsicherungName, aktuell.Spiele).Name;
+            oberflaeche.AufOberflaeche(QuellenNeuAufbauen);
+            return name;
+        }
+        catch (Exception fehler) when (fehler is IOException or UnauthorizedAccessException)
+        {
+            return null;
+        }
+    }
 
     /// <summary>
     /// Legt die Vergrößerung fest, mit der die Ansichten starten (von der Oberfläche einmal nach der Größe des
@@ -2111,5 +2142,29 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
                 maschinenraumAnsicht?.Uebernehmen(stand);
             }
         });
+        if (fehler is not null && !ReferenceEquals(fehler, Interlocked.Exchange(ref gemeldeterFehler, fehler)))
+        {
+            oberflaeche.AufOberflaeche(() => _ = AbbruchMeldenAsync(fehler));
+        }
+    }
+
+    /// <summary>
+    /// Ein Rechenthread der Generierung ist an einem unerwarteten Fehler gescheitert: protokollieren, den besten Plan als
+    /// Notfallsicherung ablegen und den Anwender einmal informieren.
+    /// </summary>
+    private async Task AbbruchMeldenAsync(Exception fehler)
+    {
+        string? protokoll;
+        try
+        {
+            protokoll = Fehlerprotokoll.Schreiben(eigeneBasis, fehler, "Generierung");
+        }
+        catch (Exception schreibfehler) when (schreibfehler is IOException or UnauthorizedAccessException)
+        {
+            protokoll = null;
+        }
+
+        string? gesichert = NotfallSichern();
+        await oberflaeche.MeldenAsync("Generierung abgebrochen", Fehlerprotokoll.Meldung(fehler, gesichert, protokoll));
     }
 }

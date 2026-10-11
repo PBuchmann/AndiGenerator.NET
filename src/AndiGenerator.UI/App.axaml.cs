@@ -31,6 +31,7 @@ public partial class App : global::Avalonia.Application
             var fenster = new HauptfensterView();
             var oberflaeche = new AvaloniaOberflaeche(fenster);
             var modell = new HauptfensterViewModel(oberflaeche, () => new HostWindow());
+            Fehlerbehandlung.Anmelden(modell, oberflaeche);
             fenster.DataContext = modell;
             desktop.MainWindow = fenster;
 
