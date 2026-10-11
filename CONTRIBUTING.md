@@ -19,12 +19,16 @@ Auf `main` wird nicht direkt gepusht. Jede Änderung läuft über einen eigenen 
 
 Kleine, in sich abgeschlossene Pull Requests lassen sich schneller prüfen als große.
 
+## Neue Version
+
+Was sich für Anwender ändert, kommt mit jedem Pull Request in [CHANGELOG.md](CHANGELOG.md) unter **Unveröffentlicht**. Vor einer neuen Version wird diese Überschrift zu `## x.y.z (Datum)`; danach den Tag `vx.y.z` auf `main` setzen. Der Release-Workflow übernimmt den Abschnitt der Version als Text des Releases auf GitHub.
+
 ## Code-Stil
 
 - **Warnungen sind Fehler** – auch die von StyleCop und SonarAnalyzer. Einstellungen in `.editorconfig` und `stylecop.json`.
 - **Deutsche Fachbegriffe** für Klassen, Methoden und Variablen (`Mannschaft`, `Spieltag`, `Wunschtermin`), technische Begriffe englisch, wo sie üblich sind (`Command`, `ViewModel`). Kommentare und XML-Dokumentation auf Deutsch.
 - **Schichten einhalten:** Domain ← Engine ← Persistence ← Application ← Presentation ← UI ← Desktop; Rendering zeichnet für Bildschirm und PDF. Die Presentation-Schicht kennt Avalonia nicht. Die Architekturtests prüfen das.
-- **Referenzmodell:** `src/AndiGenerator.Engine/Referenz` ist eine bewusst wörtliche Portierung des Originals und dient als Maßstab der Paritätstests. Änderungen dort nur, wenn das Verhalten des Originals falsch übertragen wurde.
+- **Referenzmodell:** `src/AndiGenerator.Engine/Referenz` ist eine bewusst wörtliche Portierung des Originals und dient als Maßstab der Paritätstests. Änderungen dort nur, wenn das Verhalten des Originals falsch übertragen wurde, oder als abschaltbare Korrektur eines Fehlers des Originals (`Domain.Optionen.Korrekturen`; `Berechnungsoptionen.Original` rechnet weiter wie das Original).
 - **Fachliche Abweichungen vom Original** nur nach Absprache und als Eintrag im Migrationsplan (Abschnitt Befunde/Entscheidungen).
 
 ## Dateikopf und Lizenz
