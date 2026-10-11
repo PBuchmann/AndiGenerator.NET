@@ -639,6 +639,21 @@ Befund: Billigere Pläne nach der Kostenfunktion des Originals sind nicht automa
 - **Ergebnis:** der beste Plan nach Stufen, die angepassten Gewichtungen und die Liste der Änderungen (`Inseloptimierer.Lenkung`). Spezial-Insel im Automodus aus.
 - *Beispiel (Verbandsoberliga, 3 min):* A 18 → 3, B 13 → 4 bei etwa gleich vielen C-Verstößen; Peter: „arbeitet sehr gut“.
 
+## 12. Turnierrunden (Jugend, Stand 12.10.2026)
+
+**Anlass:** Die Jugend-Verbandsoberliga spielt nur an Turniertagen (Halbrunde, 6–10 Mannschaften). Die Vereine melden über eine Umfrage (Google Formulare, CSV) je Sonntag „möglicher Heimspieltag“ und/oder „möglicher Auswärtsspieltag“ oder „können nicht“, dazu Halle, ob zwei Spiele parallel möglich sind, und Bemerkungen (z. B. Zeitwünsche).
+
+- **3er-Turnier:** 3 Mannschaften, Ausrichter – Gast 1, Gast 1 – Gast 2, Ausrichter – Gast 2 (10, 13, 16 Uhr).
+- **4er-Turnier:** 4 Mannschaften in zwei Runden (11 und 14 Uhr): Ausrichter und eine zweite Mannschaft spielen je gegen die beiden übrigen. Die zweite „Heimmannschaft“ ist in Wahrheit Gast, ihr Spiel wird in click-TT in die Halle des Ausrichters verlegt. Die Halle muss zwei Spiele parallel erlauben.
+- **Bedingungen:** jede Paarung genau einmal, höchstens ein Turnier je Mannschaft und Tag, Ausrichter kann zuhause, alle anderen auswärts, jede Mannschaft richtet mindestens einmal aus.
+- **Rechnerische Grenze:** In beiden Formen spielt jede Mannschaft zwei Spiele je Turnier. Bei gerader Mannschaftszahl (6, 8, 10) hat jede Mannschaft eine ungerade Zahl von Gegnern – mit 3er und 4er allein geht der Plan dann nie ganz auf. Bisher bleibt dann für jede Mannschaft eine Paarung übrig, die als **Einzelbegegnung** mit möglichst kurzer Fahrt ausgetragen wird (Form `Einzel`; geprüft auf Heim/Auswärts, höchstens eine je Mannschaft, zählt nicht als ausgerichtetes Turnier).
+
+**Stufen:**
+
+- [x] **Prüfen** (`andigen turnier pruefen <xml> <csv>`): erkennt im Plan aus click-TT die Turniere (`Turniererkennung`), liest die Meldungen (`TurniermeldungenCsv`, repariert falsch kodierte Umlaute, letzte Meldung je Mannschaft gilt) und meldet alle Verstöße (`Turnierpruefung`); Bemerkungen werden zum Selbstprüfen ausgegeben.
+- [ ] **Planen:** selbst einen Plan aus 3er- und 4er-Turnieren suchen (vollständige Suche bzw. Constraint-Löser), Ausrichter möglichst gleichmäßig verteilen, Ausgabe als click-TT-CSV. Optional Entfernungen (Postleitzahlen bzw. Routenplaner).
+- [ ] **Oberfläche:** eigene Seite, sobald Prüfen und Planen tragen.
+
 ## Änderungsprotokoll
 | Datum | Änderung |
 |---|---|
@@ -805,3 +820,4 @@ Befund: Billigere Pläne nach der Kostenfunktion des Originals sind nicht automa
 | 11.10.2026 | Klasse-3-Befunde entschieden (E9): #3, #4, #5, #6 werden korrigiert (`Domain.Optionen.Korrekturen`, Standard `Alle`, in Kern- und Referenzmodell gleich, damit die Differenztests greifen), #33 als Einstellung „Bei ungerader Mannschaftszahl darf am Pflichtspieltag eine Mannschaft spielfrei sein“ (Standard an). `Berechnungsoptionen.Original` rechnet wie das Original (Paritätstests); `andigen optimieren --original` zum Vergleich. Mit der Regel hängt der Kostenwert Pflichtspieltage jeder Mannschaft von allen ab; der Cache rechnet diese Kostenart dann bei jeder Änderung für alle Mannschaften |
 | 11.10.2026 | Messung der Korrekturen (`korrekturvergleich.cmd`: drei Staffeln mit ungerader Mannschaftszahl, je Variante 2 × 120 s Kostenoptimierung aus leerem Plan, alle Pläne in beiden Kostenmodellen bewertet; Mittel im neuen Kostenmodell). **R3** (9 Mannschaften, Pflichtspieltage): neu 50 T, Original 98 T – das Original weicht der Pflichtspieltag-Strafe aus, indem eine Mannschaft zwei Spiele in einer Woche bekommt (je 40 T), mit der Regel spielt sie stattdessen in der Woche davor. **R19** (11): neu 481 T, Original 532 T. **3. Kreisklasse** (13): neu 438 T, Original 377 T. Die Streuung innerhalb einer Variante (z. B. 524 T / 352 T) ist größer als die Unterschiede; für die Suchkorrekturen #3, #5, #6 ist damit weder ein Vorteil noch ein Nachteil belegt. Die summierte Überlappung des letzten Spieltags (#4) änderte bei keinem der zwölf Pläne den Wert. Geschwindigkeit: bei R3 mit der Pflichtspieltag-Regel rund 3 % weniger Pläne/s (Kostenart wird für alle Mannschaften neu gerechnet), sonst gleich |
 | 11.10.2026 | E12 Signierung: SignPath Foundation hat abgelehnt; 1.0 erscheint unsigniert (kostenfrei), `CODE_SIGNING.md` angepasst. Release-Workflow übernimmt den Abschnitt der Version aus `CHANGELOG.md` als Release Notes |
+| 12.10.2026 | Abschnitt 12 Turnierrunden (Jugend): Stufe Prüfen umgesetzt (`andigen turnier pruefen`) |
