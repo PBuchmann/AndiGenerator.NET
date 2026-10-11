@@ -35,7 +35,7 @@ public class ParitaetTests
     {
         using JsonDocument json = JsonDocument.Parse(File.ReadAllText(Path.Combine(Referenzordner(), "werte", fall + ".json")));
         JsonElement erwartet = json.RootElement;
-        Planbewertung bewertung = Referenzbewertung.Bewerten(StaffelLaden(fall), Berechnungsoptionen.Standard);
+        Planbewertung bewertung = Referenzbewertung.Bewerten(StaffelLaden(fall), Berechnungsoptionen.Original);
         var fehler = new List<string>();
         int vorher = verglichen;
 
@@ -84,7 +84,7 @@ public class ParitaetTests
         Assert.True(verglichen - vorher >= 30, $"{fall}: nur {verglichen - vorher} Werte verglichen.");
     }
 
-    private static Staffel StaffelLaden(string fall)
+    internal static Staffel StaffelLaden(string fall)
     {
         string ordner = Path.Combine(Referenzordner(), "eingabe");
         string xml = Directory.GetFiles(ordner, fall + "_*.xml").Single();

@@ -226,7 +226,7 @@ internal sealed partial class RefMannschaft
                 }
             }
 
-            if (anzahl < zeit.AnzahlSpiele)
+            if (anzahl < zeit.AnzahlSpiele && !(zeit.AnzahlSpiele == 1 && ReferenceEquals(plan.SpielfreieMannschaft(zeit), this)))
             {
                 kosten.Werte[(int)art].Anzahl += zeit.AnzahlSpiele - anzahl;
                 if (meldungen)

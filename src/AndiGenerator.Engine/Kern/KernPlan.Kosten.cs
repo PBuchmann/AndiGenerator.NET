@@ -246,7 +246,7 @@ internal sealed partial class KernPlan
                 }
             }
 
-            if (anzahl < zeit.AnzahlSpiele)
+            if (anzahl < zeit.AnzahlSpiele && !(D.SpielfreiAmPflichtspieltag && zeit.AnzahlSpiele == 1 && SpielfreieMannschaft(zeit) == t))
             {
                 KostenAnzahl[k] += zeit.AnzahlSpiele - anzahl;
             }
@@ -255,6 +255,51 @@ internal sealed partial class KernPlan
         double wert = KostenAnzahl[k] * 1.0;
         KostenWert[k] = Math.Pow(wert, 2) * 1000 * faktor;
         KostenAlle[k] = alle;
+    }
+
+    /// <summary>
+    /// Befund #33: Bei ungerader Mannschaftszahl ist in einem Pflichtzeitraum mit einem Spiel eine Mannschaft zwangsläufig
+    /// spielfrei. Zulässig ist das für die erste Mannschaft, die im Zeitraum nicht, aber in der Woche davor gespielt hat.
+    /// </summary>
+    /// <returns>Die Mannschaft oder −1.</returns>
+    private int SpielfreieMannschaft(RefPflichtzeit zeit)
+    {
+        for (int u = 0; u < D.N; u++)
+        {
+            if (SpieleZwischen(u, zeit.Von, zeit.Bis) == 0 && SpieleZwischen(u, zeit.Von - 7, zeit.Von - 1) > 0)
+            {
+                return u;
+            }
+        }
+
+        return -1;
+    }
+
+    /// <summary>Terminierte Spiele einer Mannschaft zwischen zwei Tagen (einschließlich).</summary>
+    private int SpieleZwischen(int t, double von, double bis)
+    {
+        int anzahl = 0;
+        int[] liste = Spiele[t];
+        for (int i = ErsterIndexAb(t, von); i < SpieleAnzahl[t]; i++)
+        {
+            int s = liste[i];
+            if (Datum[s] == 0.0)
+            {
+                continue;
+            }
+
+            if (Tag[s] > bis)
+            {
+                break;
+            }
+
+            if (Tag[s] >= von)
+            {
+                anzahl++;
+            }
+        }
+
+        return anzahl;
     }
 
     /// <summary>Original <c>TGameList.getFirstGameRefIndexByDate</c>.</summary>

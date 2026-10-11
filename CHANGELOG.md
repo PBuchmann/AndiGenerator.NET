@@ -15,6 +15,8 @@ Was sich von Version zu Version für Anwender ändert. Die Einzelheiten stehen i
 
 ### Geändert
 
+- **Fehler des Originals korrigiert:** Ein Wunschtermin gilt beim Zurücksetzen eines Spiels nicht mehr fälschlich als frei; beim Füllen über die Auswärtskoppel wird kein schon terminiertes Spiel mehr umgesetzt; das Startraster legt bei ungerader Mannschaftszahl alle Spieltage an; beim letzten Spieltag zählen alle Überlappungen (die Kosten können dadurch etwas höher sein als im alten AndiGenerator).
+- **Pflichtspieltag bei ungerader Mannschaftszahl:** Die zwangsläufig spielfreie Mannschaft wird nicht mehr bestraft, wenn sie in der Woche davor spielt (abschaltbar in den Einstellungen).
 - Kopfzeile: ▶ Start / ⏸ Pausieren und ✕ Schließen / ■ Stopp; das Verfahren wird mit zwei Segmentknöpfen gewählt.
 - Die Frage „nur Rückrunde planen?“ nennt den Beginn der Rückrunde.
 

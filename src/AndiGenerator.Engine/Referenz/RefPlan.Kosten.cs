@@ -129,6 +129,22 @@ internal sealed partial class RefPlan
         return Math.Min(MaxKostenOhneHartenFehler, wert);
     }
 
+    /// <summary>
+    /// Befund #33: Bei ungerader Mannschaftszahl ist in einem Pflichtzeitraum mit einem Spiel eine Mannschaft zwangsläufig
+    /// spielfrei. Zulässig ist das für die erste Mannschaft, die im Zeitraum nicht, aber in der Woche davor gespielt hat.
+    /// </summary>
+    /// <param name="zeit">Der Pflichtzeitraum.</param>
+    /// <returns>Die Mannschaft oder <c>null</c> (auch, wenn die Regel nicht gilt).</returns>
+    public RefMannschaft? SpielfreieMannschaft(RefPflichtzeit zeit)
+    {
+        if (!Optionen.SpielfreiAmPflichtspieltag || Mannschaften.Count % 2 == 0)
+        {
+            return null;
+        }
+
+        return Mannschaften.FirstOrDefault(m => m.SpieleZwischen(zeit.Von, zeit.Bis) == 0 && m.SpieleZwischen(zeit.Von - 7, zeit.Von - 1) > 0);
+    }
+
     /// <summary>Original <c>CalculateSpielTagKosten</c>.</summary>
     public Spieltagskosten SpieltagsKosten()
     {
@@ -166,7 +182,8 @@ internal sealed partial class RefPlan
                         double wert = abstand * faktor;
                         if (spieltage - 1 == i)
                         {
-                            letzteUeberlappung = wert * 20.0;
+                            // Befund #4: Das Original behält nur den Wert des ältesten überlappenden Spieltags.
+                            letzteUeberlappung = Optionen.Korrekturen.LetzteUeberlappungSummieren ? letzteUeberlappung + (wert * 20.0) : wert * 20.0;
                         }
 
                         ueberlappung += wert;

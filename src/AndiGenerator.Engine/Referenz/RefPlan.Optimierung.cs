@@ -53,9 +53,10 @@ internal sealed partial class RefPlan
     /// <summary>Original <c>TransferRefDateToDate</c> (die Spiellisten der Mannschaften werden wie im Original nicht neu sortiert).</summary>
     public void Zuruecksetzen()
     {
+        bool nurEigene = Optionen.Korrekturen.WunschterminNurVomEigentuemerFreigeben;
         foreach (RefSpiel spiel in SpieleErlaubt)
         {
-            spiel.Zuruecksetzen();
+            spiel.Zuruecksetzen(nurEigene);
         }
     }
 
@@ -159,7 +160,7 @@ internal sealed partial class RefPlan
             }
         }
 
-        var spieltagIndexe = Enumerable.Range(0, mannschaften.Count - 1).ToList();
+        var spieltagIndexe = Enumerable.Range(0, RasterSpieltage()).ToList();
         for (int i = 0; i <= 100; i++)
         {
             int i1 = zufall.Zahl(spieltagIndexe.Count);
@@ -274,7 +275,9 @@ internal sealed partial class RefPlan
         {
             int i = zufall.Zahl(offen.Count);
             RefSpiel spiel = offen[i];
-            if (spiel.NichtNotwendig)
+
+            // Befund #6: Ein Spiel, das inzwischen über die Auswärtskoppel einen Termin bekam, wird nicht neu terminiert.
+            if (spiel.NichtNotwendig || (Optionen.Korrekturen.AuswaertskoppelNurOffeneSpiele && spiel.Datum != 0.0))
             {
                 offen.RemoveAt(i);
                 continue;
@@ -288,10 +291,11 @@ internal sealed partial class RefPlan
                 if (abhaengig is { Count: > 0 })
                 {
                     RefSpiel zweites = abhaengig[zufall.Zahl(abhaengig.Count)];
+                    bool zweitesOffen = !Optionen.Korrekturen.AuswaertskoppelNurOffeneSpiele || (zweites.Datum == 0.0 && !zweites.NichtNotwendig);
                     List<int> indexe = Enumerable.Range(0, zweites.Heim.Wunschtermine.Count)
                         .Where(k => Math.Abs(DelphiDatum.Trunc(spiel.Datum) - DelphiDatum.Trunc(zweites.Heim.Wunschtermine[k].Datum)) <= 1)
                         .ToList();
-                    if (indexe.Count > 0)
+                    if (zweitesOffen && indexe.Count > 0)
                     {
                         TerminFuellen(zweites, indexe, alleZweitzeitenGueltig, zufall);
                     }
@@ -352,11 +356,18 @@ internal sealed partial class RefPlan
         }
     }
 
+    /// <summary>
+    /// Spieltage des Rasters je Runde: beim Kreisverfahren n − 1 bei gerader, n bei ungerader Mannschaftszahl. Das Original
+    /// nimmt immer n − 1 (Befund #5).
+    /// </summary>
+    private int RasterSpieltage() =>
+        Mannschaften.Count % 2 == 1 && Optionen.Korrekturen.VollstaendigesRaster ? Mannschaften.Count : Mannschaften.Count - 1;
+
     /// <summary>Original <c>CreateRasterOneRound</c>.</summary>
     private void RasterEinerRunde(List<RefMannschaft> mannschaften, List<int> spieltagIndexe, RefRunde runde, bool rueckrunde, Zufall zufall)
     {
         List<double> montage = SpieltagMontage(runde.Von, runde.Bis);
-        while (montage.Count > mannschaften.Count - 1)
+        while (montage.Count > RasterSpieltage())
         {
             montage.RemoveAt(zufall.Zahl(montage.Count));
         }

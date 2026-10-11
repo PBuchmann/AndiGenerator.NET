@@ -365,6 +365,35 @@ internal sealed partial class RefMannschaft
         return anzahl;
     }
 
+    /// <summary>Terminierte Spiele dieser Mannschaft zwischen zwei Tagen (einschließlich).</summary>
+    /// <param name="von">Erster Tag.</param>
+    /// <param name="bis">Letzter Tag.</param>
+    /// <returns>Die Anzahl.</returns>
+    public int SpieleZwischen(double von, double bis)
+    {
+        int anzahl = 0;
+        for (int i = ErsterIndexAb(von); i < Spiele.Count; i++)
+        {
+            if (!Spiele[i].DatumGueltig)
+            {
+                continue;
+            }
+
+            int tag = DelphiDatum.Trunc(Spiele[i].Datum);
+            if (tag > bis)
+            {
+                break;
+            }
+
+            if (tag >= von)
+            {
+                anzahl++;
+            }
+        }
+
+        return anzahl;
+    }
+
     /// <summary>Original <c>TAuswaertsKoppelCachedTeams.AddTeamIdToTeamId</c>.</summary>
     private static void PartnerHinzufuegen(Dictionary<string, List<string>> partner, string von, string zu)
     {

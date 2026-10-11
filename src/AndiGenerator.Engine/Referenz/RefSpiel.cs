@@ -60,10 +60,18 @@ internal sealed class RefSpiel(RefMannschaft heim, RefMannschaft gast)
     public void Merken() => gemerkt = (Datum, DatumOptionen, DatumMaxHeim, Wunschtermin, NichtNotwendig);
 
     /// <summary>Original <c>TransferRefDateToDate</c> für dieses Spiel (feste Spiele bleiben).</summary>
-    public void Zuruecksetzen()
+    /// <param name="nurEigeneFreigeben">
+    /// Befund #3: Den bisherigen Wunschtermin nur freigeben, wenn er noch diesem Spiel gehört (das Original gibt ihn immer frei).
+    /// </param>
+    public void Zuruecksetzen(bool nurEigeneFreigeben)
     {
         if (!FestesDatum)
         {
+            if (nurEigeneFreigeben && Wunschtermin is not null && !ReferenceEquals(Wunschtermin.ZugeordnetesSpiel, this))
+            {
+                Wunschtermin = null;
+            }
+
             SetzeDatum(gemerkt.Datum, gemerkt.Optionen, gemerkt.MaxHeim, false, gemerkt.NichtNotwendig, gemerkt.Wunsch);
         }
     }

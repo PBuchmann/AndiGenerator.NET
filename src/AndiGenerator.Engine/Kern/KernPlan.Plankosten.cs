@@ -180,7 +180,8 @@ internal sealed partial class KernPlan
                         double wert = abstand * faktor;
                         if (spieltage - 1 == i)
                         {
-                            letzteUeberlappung = wert * 20.0;
+                            // Befund #4: Das Original behält nur den Wert des ältesten überlappenden Spieltags.
+                            letzteUeberlappung = optionen.Korrekturen.LetzteUeberlappungSummieren ? letzteUeberlappung + (wert * 20.0) : wert * 20.0;
                         }
 
                         ueberlappung += wert;

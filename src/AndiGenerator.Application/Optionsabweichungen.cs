@@ -36,6 +36,12 @@ public static class Optionsabweichungen
             ergebnis.Add(string.Empty);
         }
 
+        if (!optionen.SpielfreiAmPflichtspieltag)
+        {
+            ergebnis.Add("Bei ungerader Mannschaftszahl wird die am Pflichtspieltag spielfreie Mannschaft bestraft (wie im Original)");
+            ergebnis.Add(string.Empty);
+        }
+
         string? runde = optionen.Rundenplanung switch
         {
             Rundenplanung.Halbrunde => "Halbrunde wird generiert",

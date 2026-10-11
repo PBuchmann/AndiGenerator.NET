@@ -52,6 +52,22 @@ public sealed record Berechnungsoptionen(
         Mitte1: null,
         Mitte2: null);
 
+    /// <summary>Wie das Original: Standardeinstellungen ohne die Korrekturen und ohne die Regel für den Pflichtspieltag.</summary>
+    public static Berechnungsoptionen Original => Standard with { Korrekturen = Korrekturen.Keine, SpielfreiAmPflichtspieltag = false };
+
+    /// <summary>
+    /// Holt die Korrekturen an Fehlern des Originals in Suche und Kostenrechnung (nicht in der Optionsdatei; Standard: alle).
+    /// </summary>
+    public Korrekturen Korrekturen { get; init; } = Korrekturen.Alle;
+
+    /// <summary>
+    /// Holt einen Wert, der angibt, ob bei ungerader Mannschaftszahl in einem Pflichtzeitraum mit einem Spiel genau eine
+    /// Mannschaft fehlen darf, wenn sie in der Woche davor gespielt hat (Befund #33, MIGRATIONSPLAN E14/A5; Attribut
+    /// <c>odd-team-free</c> im Element <c>mandatory-games</c>, Standard <c>true</c>). Das Original bestraft diese
+    /// zwangsläufig spielfreie Mannschaft immer.
+    /// </summary>
+    public bool SpielfreiAmPflichtspieltag { get; init; } = true;
+
     /// <summary>Gewichtung einer Kostenart für alle Mannschaften.</summary>
     /// <param name="art">Kostenart.</param>
     /// <returns>Die Gewichtung dieser Kostenart.</returns>

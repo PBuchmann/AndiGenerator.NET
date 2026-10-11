@@ -31,6 +31,12 @@ internal sealed partial class KernPlan
         {
             if (!Fest[s])
             {
+                // Befund #3: Gehört der Wunschtermin inzwischen einem anderen Spiel, bleibt er dessen Termin.
+                if (D.Korrekturen.WunschterminNurVomEigentuemerFreigeben && Wunsch[s] >= 0 && WunschSpiel[Wunsch[s]] != s)
+                {
+                    Wunsch[s] = -1;
+                }
+
                 SetzeDatum(s, gemerktDatum[s], gemerktOptionen[s], gemerktMaxHeim[s], false, gemerktNichtNotwendig[s], gemerktWunsch[s]);
             }
         }
@@ -175,12 +181,13 @@ internal sealed partial class KernPlan
         }
 
         Mischen(reihenfolge, n, zufall);
-        for (int i = 0; i < n - 1; i++)
+        int spieltage = D.RasterSpieltage;
+        for (int i = 0; i < spieltage; i++)
         {
             spieltagIndexe[i] = i;
         }
 
-        Mischen(spieltagIndexe, n - 1, zufall);
+        Mischen(spieltagIndexe, spieltage, zufall);
         for (int i = 0; i < D.Runden.Length; i++)
         {
             RasterEinerRunde(i, i % 2 == 0, zufall);
@@ -353,7 +360,9 @@ internal sealed partial class KernPlan
         {
             int i = zufall.Zahl(anzahlOffen);
             int s = offen[i];
-            if (!NichtNotwendig[s])
+
+            // Befund #6: Ein Spiel, das inzwischen über die Auswärtskoppel einen Termin bekam, wird nicht neu terminiert.
+            if (!NichtNotwendig[s] && (!D.Korrekturen.AuswaertskoppelNurOffeneSpiele || Datum[s] == 0.0))
             {
                 SpielFuellen(s, alleZweitzeitenGueltig, zufall);
             }
@@ -388,6 +397,11 @@ internal sealed partial class KernPlan
         }
 
         int zweites = abhaengig[zufall.Zahl(abhaengig.Length)];
+        if (D.Korrekturen.AuswaertskoppelNurOffeneSpiele && (Datum[zweites] != 0.0 || NichtNotwendig[zweites]))
+        {
+            return;
+        }
+
         int zweitesHeim = Heim[zweites];
         int start = D.WunschStart[zweitesHeim];
         int passend = 0;
@@ -459,7 +473,7 @@ internal sealed partial class KernPlan
         double[] alle = D.RundenMontage[runde];
         int anzahlMontage = alle.Length;
         Array.Copy(alle, montage, anzahlMontage);
-        while (anzahlMontage > D.N - 1)
+        while (anzahlMontage > D.RasterSpieltage)
         {
             int index = zufall.Zahl(anzahlMontage);
             Array.Copy(montage, index + 1, montage, index, anzahlMontage - index - 1);
