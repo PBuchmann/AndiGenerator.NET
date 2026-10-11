@@ -27,11 +27,13 @@ public partial class HauptfensterView : Window
     private const double Ansichtskopf = 140;
 
     private bool startzoomGesetzt;
+    private bool beendenBestaetigt;
 
     /// <summary>Initialisiert das Fenster.</summary>
     public HauptfensterView()
     {
         InitializeComponent();
+        Closing += BeimSchliessen;
         SizeChanged += (_, e) =>
         {
             Navigation.Classes.Set("schmal", e.NewSize.Width < SchmaleBreite);
@@ -47,5 +49,24 @@ public partial class HauptfensterView : Window
                 modell.StartzoomFestlegen(Zoom.Vorschlag(e.NewSize.Width - 40, e.NewSize.Height - Ansichtskopf));
             }
         };
+    }
+
+    /// <summary>
+    /// Vor dem Beenden des Programms: Ein noch nicht gesicherter Plan wird gesichert bzw. es wird gefragt, ob er den
+    /// gesicherten ersetzen soll. Dafür wird das Schließen zunächst abgebrochen und nach der Antwort wiederholt.
+    /// </summary>
+    private async void BeimSchliessen(object? sender, WindowClosingEventArgs e)
+    {
+        if (beendenBestaetigt || DataContext is not HauptfensterViewModel modell)
+        {
+            return;
+        }
+
+        e.Cancel = true;
+        if (await modell.BeendenErlaubtAsync())
+        {
+            beendenBestaetigt = true;
+            Close();
+        }
     }
 }

@@ -2,6 +2,7 @@
 // SPDX-FileCopyrightText: 2026 Peter Buchmann
 // SPDX-License-Identifier: GPL-3.0-only
 
+using System.Globalization;
 using AndiGenerator.Application;
 using CommunityToolkit.Mvvm.Input;
 
@@ -57,6 +58,9 @@ public sealed class MannschaftenSeiteViewModel : DatenSeiteViewModel
 
     /// <summary>Holt den Befehl „Löschen“.</summary>
     public IAsyncRelayCommand LoeschenCommand { get; }
+
+    /// <inheritdoc/>
+    public override string Marke => Namen.Count.ToString(CultureInfo.InvariantCulture);
 
     /// <inheritdoc/>
     public override bool IstStandard => Bearbeitung.MannschaftenSindStandard;

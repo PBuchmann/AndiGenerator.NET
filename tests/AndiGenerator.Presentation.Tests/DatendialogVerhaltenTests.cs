@@ -19,8 +19,8 @@ public sealed class DatendialogVerhaltenTests : IDisposable
     {
         string[] titel =
         [
-            "Allgemein", "Mannschaften", "Setzliste", "Spiellokale (Kompaktansicht)", "Heimkoppel/Doppelspieltage (Kompakt)",
-            "Auswärtskoppeltermine", "Wunschtermine", "Spiele der Nachbarmannschaften", "60km Regel", "Spielfreie Tage", "Pflichtspieltage",
+            "Allgemein", "Mannschaften", "Setzliste", "Spiellokale", "Heimkoppel und Doppelspieltage",
+            "Auswärtskoppeltermine", "Wunschtermine", "Spiele der Nachbarmannschaften", "Wochenende (60-km-Regel)", "Spielfreie Tage", "Pflichtspieltage",
             "Manuell festgelegte Begegnungen", "Heimrecht",
         ];
         Assert.Equal(titel, a.Dialog.Seiten.Select(s => s.Titel));

@@ -69,6 +69,12 @@ public sealed class LigadatenSeiteViewModel : DatenSeiteViewModel
         set => Setzen(ref ende, value);
     }
 
+    /// <summary>Holt den Hinweis der Prüfung, sobald eine Eingabe nicht passt (z. B. Rückrunde vor Vorrunde); sonst leer.</summary>
+    public string Pruefhinweis => Pruefen() ?? string.Empty;
+
+    /// <summary>Holt einen Wert, der angibt, ob eine Eingabe nicht passt.</summary>
+    public bool HatPruefhinweis => Pruefhinweis.Length > 0;
+
     /// <inheritdoc/>
     public override bool IstStandard => Bearbeitung.StandardLigadaten is not Ligadaten standard || Werte() == standard;
 

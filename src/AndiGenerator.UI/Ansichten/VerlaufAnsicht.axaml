@@ -1,0 +1,13 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:p="using:AndiGenerator.Presentation"
+             xmlns:ui="using:AndiGenerator.UI"
+             x:Class="AndiGenerator.UI.Ansichten.VerlaufAnsicht"
+             x:DataType="p:VerlaufAnsichtViewModel">
+  <Border Classes="karte" Margin="18,14" Padding="18,14">
+    <DockPanel>
+      <TextBlock DockPanel.Dock="Top" Text="Verlauf der Suche seit dem Start – mit der Maus über das Diagramm für die Werte zu einem Zeitpunkt" Classes="klein" Margin="0,0,0,8" />
+      <ui:Verlaufsdiagramm Verlauf="{Binding Verlauf}" Version="{Binding Verlauf.Version}" />
+    </DockPanel>
+  </Border>
+</UserControl>

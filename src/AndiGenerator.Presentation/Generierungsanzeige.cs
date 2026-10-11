@@ -2,6 +2,8 @@
 // SPDX-FileCopyrightText: 2026 Peter Buchmann
 // SPDX-License-Identifier: GPL-3.0-only
 
+using System.Collections.ObjectModel;
+using System.Diagnostics;
 using System.Globalization;
 using AndiGenerator.Application;
 using AndiGenerator.Engine.Inseln;
@@ -24,7 +26,16 @@ public sealed class Generierungsanzeige : ObservableObject
     /// <summary>Ab diesen Kosten hat ein Plan mindestens einen harten Fehler (Original: 10 × <c>cMaxKostenNoHardError</c>).</summary>
     private const double HarteFehler = 10.0 * 1_000_000_000.0;
 
+    /// <summary>Höchstens so viele Säulen in der Kachel.</summary>
+    private const int KachelSaeulen = 16;
+
+    /// <summary>Bis zu so vielen Kernen zeigt der Maschinenraum Säulen, darüber ein Raster.</summary>
+    private const int EinzelneSaeulen = 32;
+
     private static readonly CultureInfo Deutsch = CultureInfo.GetCultureInfo("de-DE");
+
+    private readonly ObservableCollection<Kernanzeige> kerne = [];
+    private readonly ObservableCollection<Kernanzeige> kachelKerne = [];
 
     private double? startkosten;
     private string bezug = SeitStart;
@@ -47,6 +58,9 @@ public sealed class Generierungsanzeige : ObservableObject
     private string basisC = string.Empty;
     private string phase = string.Empty;
     private Stufenwert? verstoesse;
+    private long[] kernVorher = [];
+    private long zeitVorher;
+    private bool rechnet;
 
     /// <summary>Wird ausgelöst, wenn zwischen Kosten und Verstößen umgeschaltet wird (Ziel des Klicks auf die Kachel).</summary>
     public event EventHandler? ZeigtVerstoesseGeaendert;
@@ -186,6 +200,25 @@ public sealed class Generierungsanzeige : ObservableObject
         private set => SetProperty(ref phase, value);
     }
 
+    /// <summary>Holt die Rechenkerne mit ihrer Last (Blick in den Maschinenraum).</summary>
+    public IReadOnlyList<Kernanzeige> Kerne => kerne;
+
+    /// <summary>
+    /// Holt die Kerne für die Kachel: höchstens <see cref="KachelSaeulen"/> Säulen; bei mehr Kernen steht eine Säule für
+    /// eine Gruppe benachbarter Kerne (ihre durchschnittliche Last).
+    /// </summary>
+    public IReadOnlyList<Kernanzeige> KachelKerne => kachelKerne;
+
+    /// <summary>Holt einen Wert, der angibt, ob es so viele Kerne sind, dass der Maschinenraum sie als Raster zeigt.</summary>
+    public bool VieleKerne => kerne.Count > EinzelneSaeulen;
+
+    /// <summary>Holt einen Wert, der angibt, ob gerade gerechnet wird (die Kerne bewegen sich).</summary>
+    public bool Rechnet
+    {
+        get => rechnet;
+        private set => SetProperty(ref rechnet, value);
+    }
+
     /// <summary>
     /// Merkt sich, dass sich die Kostenfunktion geändert hat (Gewichte, Optionen oder Spielplandaten): Die alten Kosten
     /// sind nicht mehr vergleichbar, Bezug der prozentualen Verbesserung ist ab jetzt der erste gültige Plan danach.
@@ -201,6 +234,7 @@ public sealed class Generierungsanzeige : ObservableObject
     public void Uebernehmen(Optimierungsstand stand)
     {
         ArgumentNullException.ThrowIfNull(stand);
+        KerneZeigen(stand);
         Plaene = Kostenanzeige.Kurz(stand.Durchlaeufe);
         Tempo = stand.PlaeneProSekunde.ToString("N0", Deutsch) + " Pläne/s";
         ZeigtVerstoesse = stand.Lenkung is not null;
@@ -253,6 +287,20 @@ public sealed class Generierungsanzeige : ObservableObject
         VerstossB = Leer;
         VerstossC = Leer;
         LenkungZeigen(null);
+        kerne.Clear();
+        kachelKerne.Clear();
+        kernVorher = [];
+        Rechnet = false;
+    }
+
+    /// <summary>Die Generierung ist beendet: Die Kerne ruhen.</summary>
+    internal void KerneAnhalten()
+    {
+        Rechnet = false;
+        foreach (Kernanzeige kern in kerne.Concat(kachelKerne))
+        {
+            kern.Setzen(0, 0);
+        }
     }
 
     /// <summary>Zeigt vor dem Start einen gewählten Ausgangsplan: seine Kosten und Pflichtregeln, noch ohne Generierung.</summary>
@@ -289,6 +337,13 @@ public sealed class Generierungsanzeige : ObservableObject
 
     private static string Basiswert(int? wert) => wert is int w ? string.Create(Deutsch, $"{w} →") : string.Empty;
 
+    /// <summary>Kerne g einer Gruppeneinteilung: [von, bis) der Kerne.</summary>
+    /// <param name="g">Nummer der Gruppe (ab 0).</param>
+    /// <param name="gruppen">Anzahl der Gruppen.</param>
+    /// <param name="anzahl">Anzahl der Kerne.</param>
+    /// <returns>Erster und hinter dem letzten Kern der Gruppe.</returns>
+    private static (int Von, int Bis) Gruppe(int g, int gruppen, int anzahl) => (g * anzahl / gruppen, (g + 1) * anzahl / gruppen);
+
     /// <summary>Automodus: Verstöße am Ende der Basisoptimierung und die Kriterien, an denen gerade gearbeitet wird.</summary>
     private void LenkungZeigen(Lenkungsstand? lenkung)
     {
@@ -324,5 +379,66 @@ public sealed class Generierungsanzeige : ObservableObject
         return prozent < 1
             ? "−< 1 % " + bezug
             : string.Create(Deutsch, $"−{prozent:0} % {bezug}");
+    }
+
+    /// <summary>
+    /// Last je Rechenkern: Pläne seit der letzten Abfrage je Sekunde, im Verhältnis zum schnellsten Kern. Im Takt der
+    /// Statusabfrage wachsen und schrumpfen die Balken so mit der Arbeit der Kerne.
+    /// </summary>
+    /// <param name="stand">Der Stand.</param>
+    private void KerneZeigen(Optimierungsstand stand)
+    {
+        IReadOnlyList<long> jetzt = stand.Maschinenraum?.Kerne ?? [];
+        Rechnet = stand.Laeuft && !stand.Pausiert && jetzt.Count > 0;
+        if (kerne.Count != jetzt.Count)
+        {
+            KerneAnlegen(jetzt.Count);
+        }
+
+        long zeit = Stopwatch.GetTimestamp();
+        double sekunden = kernVorher.Length == jetzt.Count && zeitVorher > 0 ? Stopwatch.GetElapsedTime(zeitVorher, zeit).TotalSeconds : 0;
+        double[] jeSekunde = new double[jetzt.Count];
+        for (int k = 0; k < jetzt.Count; k++)
+        {
+            jeSekunde[k] = sekunden > 0 && Rechnet ? Math.Max(0, jetzt[k] - kernVorher[k]) / sekunden : 0;
+        }
+
+        double schnellster = jeSekunde.DefaultIfEmpty(0).Max();
+        double[] anteil = jeSekunde.Select(t => schnellster > 0 ? t / schnellster : 0).ToArray();
+        for (int k = 0; k < jetzt.Count; k++)
+        {
+            kerne[k].Setzen(anteil[k], jeSekunde[k]);
+        }
+
+        for (int g = 0; g < kachelKerne.Count; g++)
+        {
+            (int von, int bis) = Gruppe(g, kachelKerne.Count, jetzt.Count);
+            kachelKerne[g].Setzen(anteil[von..bis].Average(), jeSekunde[von..bis].Sum());
+        }
+
+        kernVorher = [.. jetzt];
+        zeitVorher = zeit;
+    }
+
+    /// <summary>Legt die Kerne und die Säulen der Kachel neu an.</summary>
+    /// <param name="anzahl">Anzahl der Kerne.</param>
+    private void KerneAnlegen(int anzahl)
+    {
+        kerne.Clear();
+        for (int k = 0; k < anzahl; k++)
+        {
+            kerne.Add(new Kernanzeige(string.Create(Deutsch, $"Kern {k + 1}")));
+        }
+
+        kachelKerne.Clear();
+        int gruppen = Math.Min(anzahl, KachelSaeulen);
+        for (int g = 0; g < gruppen; g++)
+        {
+            (int von, int bis) = Gruppe(g, gruppen, anzahl);
+            kachelKerne.Add(bis - von == 1 ? kerne[von] : new Kernanzeige(string.Create(Deutsch, $"Kerne {von + 1}–{bis}")));
+        }
+
+        kernVorher = [];
+        OnPropertyChanged(nameof(VieleKerne));
     }
 }

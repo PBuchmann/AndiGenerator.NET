@@ -118,8 +118,19 @@ public sealed class Bildschirmfotos : IDisposable
             // Kostenoptimierung ab dem Plan aus click-TT, kurz rechnen lassen und anhalten.
             modell.Startplan = modell.Startplaene.Single(p => p.Quelle == PlanQuelle.ClickTt);
             modell.KostenoptimierungCommand.Execute(null);
+            await modell.GenerierungCommand.ExecuteAsync(null);
             await WartenAsync(o, TimeSpan.FromSeconds(8), () => false);
-            modell.GenerierungCommand.Execute(null);
+
+            // Leitstand der Kostenoptimierung (mit Spezial-Insel), solange gerechnet wird; danach wieder die Kosten vorn.
+            Zeigen(modell.MaschinenraumCommand, o);
+            await WartenAsync(o, TimeSpan.FromSeconds(2), () => false);
+            Foto(ziel, "20-leitstand-kosten", Ansichten(fenster), o);
+            Zeigen(modell.KostenansichtCommand, o);
+            modell.PauseCommand.Execute(null);
+
+            // Erste Sicherung: Noch gibt es keinen gesicherten Plan, der Plan der Kostenoptimierung wird still gesichert.
+            Assert.True(await modell.BeendenErlaubtAsync());
+            o.Abarbeiten();
             Foto(ziel, "03-hauptfenster", fenster, o);
             Foto(ziel, "04-kostenansicht", Ansichten(fenster), o);
 
@@ -153,10 +164,32 @@ public sealed class Bildschirmfotos : IDisposable
             modell.AutomodusCommand.Execute(null);
             await WartenAsync(o, TimeSpan.FromSeconds(45), () => modell.Anzeige.Phase.Length > 0);
             await WartenAsync(o, TimeSpan.FromSeconds(3), () => false);
-            modell.GenerierungCommand.Execute(null);
+
+            // Maschinenraum, solange gerechnet wird (die Kerne zeigen ihre Last).
+            Zeigen(modell.MaschinenraumCommand, o);
+            await WartenAsync(o, TimeSpan.FromSeconds(2), () => false);
+            Foto(ziel, "19-leitstand", Ansichten(fenster), o);
+
+            modell.PauseCommand.Execute(null);
             Foto(ziel, "18-automodus", Kacheln(fenster), o);
 
+            // Verlauf von Kostenoptimierung und Automodus.
+            Zeigen(modell.VerlaufCommand, o);
+            Foto(ziel, "21-verlauf", Ansichten(fenster), o);
+
+            // Zweite Sicherung: Jetzt gibt es einen gesicherten Plan; die Rückfrage vergleicht ihn mit dem des Automodus.
+            Assert.True(await modell.BeendenErlaubtAsync());
+            o.Abarbeiten();
+            if (o.Vergleich is { } vergleich)
+            {
+                var sicherung = new Sicherungsdialog(vergleich);
+                sicherung.Show();
+                Foto(ziel, "22-sicherung", sicherung, o);
+                sicherung.Close();
+            }
+
             // Qualität im Automodus (mit Einstufung), gewählt die erste Zeile mit Verstößen je Mannschaft.
+            Zeigen(modell.QualitaetsansichtCommand, o);
             var qualitaet = (QualitaetAnsichtViewModel)Einzige<QualitaetAnsicht>(fenster).DataContext!;
             if (qualitaet.Zeilen.FirstOrDefault(z => z.Zustand != Qualitaetszustand.Erfuellt && z.Kriterium is not null) is { } zeile)
             {
@@ -218,14 +251,19 @@ public sealed class Bildschirmfotos : IDisposable
         daten.Show();
         try
         {
-            WunschtermineSeiteViewModel seite = a.Dialog.Seiten.OfType<WunschtermineSeiteViewModel>().Single();
-            daten.GetVisualDescendants().OfType<ListBox>().Single(l => l.Classes.Contains("seitenliste")).SelectedItem = seite;
+            SeiteWaehlen<SpielfreieTageSeiteViewModel>(daten, a.Dialog);
+            Foto(ziel, "23-spielfreie-tage", daten, o);
+            SeiteWaehlen<SetzlistenSeiteViewModel>(daten, a.Dialog).Aktiv = true;
+            Foto(ziel, "24-setzliste", daten, o);
+
+            WunschtermineSeiteViewModel seite = SeiteWaehlen<WunschtermineSeiteViewModel>(daten, a.Dialog);
             seite.Mannschaft = Namen.RheinduerkheimIV;
             Oberflaeche.Zeichnen(daten);
+            Foto(ziel, "25-wunschtermine", daten, o);
             WunschterminDetail detail = daten.GetVisualDescendants().OfType<WunschterminDetail>().Single();
             Point punkt = detail.GetVisualDescendants()
-                .OfType<TextBox>()
-                .Where(t => t.DataContext is WunschterminZelle)
+                .OfType<Border>()
+                .Where(t => t.Classes.Contains("kaertchen") && t.DataContext is WunschterminZelle)
                 .Select(t => t.TranslatePoint(new Point(t.Bounds.Width / 2, t.Bounds.Height / 2), daten))
                 .OfType<Point>()
                 .First(p => new Rect(daten.ClientSize).Contains(p));
@@ -239,6 +277,16 @@ public sealed class Bildschirmfotos : IDisposable
         {
             daten.Close();
         }
+    }
+
+    /// <summary>Wechselt im Dialog „Spielplandaten bearbeiten“ wie per Klick in der Seitenliste auf eine Seite.</summary>
+    private static T SeiteWaehlen<T>(Datendialog daten, DatenDialogViewModel dialog)
+        where T : DatenSeiteViewModel
+    {
+        T seite = dialog.Seiten.OfType<T>().Single();
+        daten.GetVisualDescendants().OfType<ListBox>().Single(l => l.Classes.Contains("seitenliste")).SelectedItem = seite;
+        Oberflaeche.Zeichnen(daten);
+        return seite;
     }
 
     /// <summary>

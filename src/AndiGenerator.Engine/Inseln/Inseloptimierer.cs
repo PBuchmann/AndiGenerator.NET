@@ -22,6 +22,9 @@ public sealed class Inseloptimierer : IDisposable
     private const int AbgleicheJeOptimiererSchritt = 5;
     private const int SchritteJeAbgleich = 2_000;
 
+    /// <summary>So viele größte Verursacher zeigt der Maschinenraum je Insel.</summary>
+    private const int Verursacher = 3;
+
     private readonly Lock sperre = new();
     private readonly Optimierungseinstellungen einstellungen;
     private readonly Staffel staffel;
@@ -33,6 +36,8 @@ public sealed class Inseloptimierer : IDisposable
     private readonly Automodus? auto;
     private readonly double autoBudget;
     private readonly int[] autoStand;
+    private readonly Stufenwert?[] autoWerte;
+    private readonly Kostenverursacher[][] autoVerursacher;
     private readonly Random koordinatorZufall;
     private readonly ManualResetEventSlim laufen = new(true);
     private readonly Stopwatch uhr = new();
@@ -40,6 +45,7 @@ public sealed class Inseloptimierer : IDisposable
     /// <summary>Reine Rechenzeit ohne Pausen (für den Automodus, der nach Sekunden lenkt).</summary>
     private readonly Stopwatch laufzeit = new();
     private readonly List<Thread> threads = [];
+    private Suchplatz[][] kernPlaetze = [];
     private CancellationTokenSource? abbruch;
     private KernDefinition definition;
     private Berechnungsoptionen optionen;
@@ -47,6 +53,10 @@ public sealed class Inseloptimierer : IDisposable
     private long rechnenZiel;
     private double besteKosten;
     private int verbesserungen;
+    private (int Verbesserungen, bool Gelenkt) zaehlStand;
+    private int planVerbesserungen;
+    private (int Verbesserungen, bool Gelenkt)? besteKriterienStand;
+    private Kriterienwert[] besteKriterien = [];
     private int abgleiche;
     private bool spezialLaeuft;
     private int spezialVerwendet;
@@ -88,6 +98,8 @@ public sealed class Inseloptimierer : IDisposable
         koordinatorZufall = new Random(samen.Next());
         inseln = new Insel[this.einstellungen.Inseln];
         autoStand = new int[inseln.Length];
+        autoWerte = new Stufenwert?[inseln.Length];
+        autoVerursacher = new Kostenverursacher[inseln.Length][];
         Array.Fill(autoStand, -1);
         for (int i = 0; i < inseln.Length; i++)
         {
@@ -164,6 +176,39 @@ public sealed class Inseloptimierer : IDisposable
         }
     }
 
+    /// <summary>Blick in den Maschinenraum: Pläne je Rechenkern und der Stand jeder Insel.</summary>
+    public Maschinenraum Maschinenraum
+    {
+        get
+        {
+            long[] kerne = kernPlaetze.Select(eigene => eigene.Sum(p => p.Durchlaeufe)).ToArray();
+            lock (sperre)
+            {
+                // Die schlechteste Insel wie beim Neustart im Optimierer-Schritt: die mit den höchsten Kosten.
+                int schlechteste = -1;
+                for (int i = 0; i < inseln.Length; i++)
+                {
+                    if (inseln[i].Kosten >= 0 && (schlechteste < 0 || inseln[i].Kosten > inseln[schlechteste].Kosten))
+                    {
+                        schlechteste = i;
+                    }
+                }
+
+                IEnumerable<Inselstand> stand = inseln.Select((insel, i) =>
+                    StandVon(insel, spezial: false, laeuft: true, autoWerte[i], autoWerte[i] is null ? Kostentreiber(insel) : autoVerursacher[i]) with
+                    {
+                        Schlechteste = i == schlechteste && inseln.Length > 1,
+                    });
+                if (spezial is not null)
+                {
+                    stand = stand.Append(StandVon(spezial, spezial: true, laeuft: spezialLaeuft));
+                }
+
+                return new Maschinenraum(kerne, stand.ToArray(), einstellungen.DurchlaeufeVorNeustart, spezialKostenart, spezialVerwendet, BesteKriterien(), planVerbesserungen);
+            }
+        }
+    }
+
     /// <summary>Stand des Automodus; <c>null</c>, wenn er nicht eingeschaltet ist.</summary>
     public Lenkungsstand? Lenkung
     {
@@ -236,11 +281,15 @@ public sealed class Inseloptimierer : IDisposable
         abbruch = new CancellationTokenSource();
         CancellationToken token = abbruch.Token;
         int kerne = einstellungen.Kerne;
+        var plaetze = new Suchplatz[kerne][];
         for (int k = 0; k < kerne; k++)
         {
             Suchplatz[] eigene = alle.Where((_, index) => index % kerne == k).ToArray();
+            plaetze[k] = eigene;
             threads.Add(ThreadStarten(() => Arbeiten(eigene, token), $"Suche {k + 1}", ThreadPriority.BelowNormal));
         }
+
+        kernPlaetze = plaetze;
 
         threads.Add(ThreadStarten(() => Koordinieren(token), "Koordinator", ThreadPriority.Normal));
         uhr.Restart();
@@ -266,6 +315,7 @@ public sealed class Inseloptimierer : IDisposable
         }
 
         threads.Clear();
+        kernPlaetze = [];
         abbruch.Dispose();
         abbruch = null;
         uhr.Stop();
@@ -317,6 +367,19 @@ public sealed class Inseloptimierer : IDisposable
         }
     }
 
+    /// <summary>
+    /// Bester Plan, Stand des Automodus und Maschinenraum aus demselben Augenblick (unter einer Sperre), damit Kacheln,
+    /// Verlauf und Maschinenraum dieselben Verbesserungen zeigen.
+    /// </summary>
+    /// <returns>Die drei Angaben.</returns>
+    public (Optimierungsergebnis Bester, Lenkungsstand? Lenkung, Maschinenraum Raum) Momentaufnahme()
+    {
+        lock (sperre)
+        {
+            return (BesterStand(), Lenkung, Maschinenraum);
+        }
+    }
+
     /// <summary>Bester bisher gefundener Plan (Original <c>copyPlanDates</c>).</summary>
     /// <returns>Kosten, Anzahl der Verbesserungen des Gesamtergebnisses und alle Spiele.</returns>
     public Optimierungsergebnis BesterStand()
@@ -333,7 +396,7 @@ public sealed class Inseloptimierer : IDisposable
                 spiele.Add(new Spiel(zeitpunkt, definition.Name[definition.SpielHeim[s]], definition.Name[definition.SpielGast[s]], string.Empty));
             }
 
-            return new Optimierungsergebnis(gelenkt ? auto!.BesteKosten : besteKosten, verbesserungen + (auto?.Verbesserungen ?? 0), spiele);
+            return new Optimierungsergebnis(gelenkt ? auto!.BesteKosten : besteKosten, planVerbesserungen, spiele);
         }
     }
 
@@ -343,6 +406,26 @@ public sealed class Inseloptimierer : IDisposable
         Stoppen();
         laufen.Dispose();
     }
+
+    /// <summary>Stand einer Insel für den Maschinenraum (unter der Sperre des Koordinators).</summary>
+    /// <param name="insel">Die Insel.</param>
+    /// <param name="spezial">Ist die Spezial-Insel.</param>
+    /// <param name="laeuft">Rechnet gerade.</param>
+    /// <param name="verstoesse">Im Automodus: ihre Verstöße nach Stufen.</param>
+    /// <param name="kostentreiber">Ihre größten Kostenverursacher.</param>
+    /// <returns>Der Stand.</returns>
+    private static Inselstand StandVon(Insel insel, bool spezial, bool laeuft, Stufenwert? verstoesse = null, IReadOnlyList<Kostenverursacher>? kostentreiber = null) => new(
+        insel.Nummer,
+        spezial,
+        laeuft,
+        insel.Kosten,
+        insel.Plaetze.Sum(p => p.Durchlaeufe),
+        insel.OhneVerbesserung,
+        insel.Neustarts,
+        insel.Plaetze.Select(p => p.Strategie.Kurz()).ToArray(),
+        verstoesse,
+        insel.Erfolge,
+        kostentreiber);
 
     private static Thread ThreadStarten(ThreadStart arbeit, string name, ThreadPriority prioritaet)
     {
@@ -368,6 +451,89 @@ public sealed class Inseloptimierer : IDisposable
         plan.Sortieren();
         return plan.Kosten();
     }
+
+    /// <summary>
+    /// Die drei größten Kostenverursacher des besten Plans einer Insel mit den aktuellen Gewichten (unter der Sperre des
+    /// Koordinators; bewertet mit dem gemeinsamen Bewerter).
+    /// </summary>
+    /// <param name="insel">Die Insel.</param>
+    /// <returns>Kriterium und Anteil an den Kosten aller Kriterien, größter zuerst.</returns>
+    private Kostenverursacher[] Kostentreiber(Insel insel)
+    {
+        if (insel.Kosten < 0)
+        {
+            return [];
+        }
+
+        List<Kriterienwert> kosten = Kriterienkosten(insel.Loesung);
+        double summe = kosten.Sum(k => k.Wert);
+        return summe <= 0
+            ? []
+            : kosten.Where(k => k.Wert > 0).OrderByDescending(k => k.Wert).Take(Verursacher).Select(k => new Kostenverursacher(k.Kriterium, k.Wert / summe)).ToArray();
+    }
+
+    /// <summary>
+    /// Die Kosten je Kriterium einer Lösung mit den aktuellen Gewichten (unter der Sperre des Koordinators; bewertet mit dem
+    /// gemeinsamen Bewerter).
+    /// </summary>
+    private List<Kriterienwert> Kriterienkosten(Loesung loesung)
+    {
+        Bewerten(bewerter, loesung);
+        var kosten = new List<Kriterienwert>();
+        foreach (MannschaftsKostenart art in Enum.GetValues<MannschaftsKostenart>())
+        {
+            if (optionen.Fuer(art) != Gewichtung.NichtBeruecksichtigen)
+            {
+                kosten.Add(new Kriterienwert((Kostenkriterium)(int)art, bewerter.MannschaftsKosten(art)));
+            }
+        }
+
+        if (optionen.Spieltag != Gewichtung.NichtBeruecksichtigen || optionen.SpieltagUeberlappung != Gewichtung.NichtBeruecksichtigen)
+        {
+            RefPlan.Spieltagskosten s = bewerter.SpieltagsKosten();
+            kosten.Add(new Kriterienwert(Kostenkriterium.Spieltaglaenge, s.Breite + s.LetzteBreite));
+            kosten.Add(new Kriterienwert(Kostenkriterium.Spieltagueberlappung, s.Ueberlappung + s.LetzteUeberlappung));
+        }
+
+        return kosten;
+    }
+
+    /// <summary>
+    /// Die Kriterien des besten Plans (unter der Sperre des Koordinators): bei der Kostenoptimierung und im Grundlauf seine
+    /// Kosten je Kriterium, im Automodus danach die Verstöße je Kriterium. Neu berechnet nur, wenn sich der beste Plan geändert
+    /// hat, der gerade gilt (im Automodus nach dem Grundlauf der beste nach Stufen), oder die Bewertung wechselt.
+    /// </summary>
+    private Kriterienwert[] BesteKriterien()
+    {
+        bool gelenkt = auto is { Grundlauf: false };
+        (int, bool) stand = (planVerbesserungen, gelenkt);
+        if (besteKriterienStand != stand)
+        {
+            besteKriterienStand = stand;
+            besteKriterien = gelenkt ? auto!.BesteKriterien() : KostenDesBesten();
+        }
+
+        return besteKriterien;
+    }
+
+    /// <summary>
+    /// Zählt die Verbesserungen des geltenden besten Plans: höchstens eine je Optimierer-Schritt, bei der Kostenoptimierung und
+    /// im Grundlauf nach Kosten, im Automodus danach nach Stufen. Der Wechsel vom Grundlauf zur Lenkung zählt nicht. Diese Zahl
+    /// zeigen die Kachel „Verbesserungen“, der Verlauf und der Maschinenraum (ein grüner Punkt je Verbesserung).
+    /// </summary>
+    private void PlanVerbesserungenZaehlen()
+    {
+        bool gelenkt = auto is { Grundlauf: false };
+        (int Verbesserungen, bool Gelenkt) stand = gelenkt ? (auto!.Verbesserungen, true) : (verbesserungen, false);
+        if (stand.Gelenkt == zaehlStand.Gelenkt && stand.Verbesserungen > zaehlStand.Verbesserungen)
+        {
+            planVerbesserungen++;
+        }
+
+        zaehlStand = stand;
+    }
+
+    private Kriterienwert[] KostenDesBesten() => besteKosten >= 0 ? Kriterienkosten(beste).ToArray() : [];
 
     private Insel InselAnlegen(int nummer, RefPlan referenz, Random samen, bool aktiv)
     {
@@ -505,6 +671,7 @@ public sealed class Inseloptimierer : IDisposable
         }
 
         Insel? schlechteste = null;
+        bool besser = false;
         foreach (Insel insel in inseln)
         {
             if (insel.Kosten < 0)
@@ -516,7 +683,7 @@ public sealed class Inseloptimierer : IDisposable
             {
                 insel.Loesung.KopierenNach(beste);
                 besteKosten = insel.Kosten;
-                verbesserungen++;
+                besser = true;
             }
 
             if (schlechteste is null || insel.Kosten > schlechteste.Kosten)
@@ -525,10 +692,17 @@ public sealed class Inseloptimierer : IDisposable
             }
         }
 
+        if (besser)
+        {
+            verbesserungen++;
+        }
+
         if (auto is not null)
         {
             AutoSchritt();
         }
+
+        PlanVerbesserungenZaehlen();
 
         if (spezial is not null && !spezialLaeuft && Durchlaeufe > einstellungen.DurchlaeufeVorSpezialInsel)
         {
@@ -565,13 +739,14 @@ public sealed class Inseloptimierer : IDisposable
         // Der Automodus beobachtet die Verstöße über die reine Rechenzeit (ohne Pausen); er kennt keine Zeitgrenzen. Bei einer
         // festen Zahl von Durchläufen (reproduzierbar) entspricht der ganze Lauf dem Zeitbudget bzw. 300 s.
         double f = AutoSekunden();
-        auto!.Beobachten(besteKosten, f);
+        auto!.Zaehlen(Durchlaeufe);
+        auto.Beobachten(besteKosten, f);
         if (auto.Grundlauf)
         {
             // Nach einem Wechsel von der Kostenoptimierung ist der Plan schon optimiert: gleich mit Stufe A beginnen.
             if (besteKosten >= 0 && (einstellungen.AutoOhneGrundlauf || auto.GrundlaufVorbei(f)))
             {
-                auto.GrundlaufBeenden(beste, f, sofortLenken: einstellungen.AutoOhneGrundlauf);
+                auto.GrundlaufBeenden(beste, f);
             }
 
             return;
@@ -583,7 +758,8 @@ public sealed class Inseloptimierer : IDisposable
             if (insel.Kosten >= 0 && insel.Stand != autoStand[i])
             {
                 autoStand[i] = insel.Stand;
-                auto.Pruefen(insel.Loesung);
+                autoWerte[i] = auto.Pruefen(insel.Loesung);
+                autoVerursacher[i] = auto.Verursacher(Verursacher);
             }
         }
 

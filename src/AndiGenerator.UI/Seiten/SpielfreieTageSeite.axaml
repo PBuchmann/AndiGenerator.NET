@@ -3,12 +3,121 @@
              xmlns:p="using:AndiGenerator.Presentation"
              x:Class="AndiGenerator.UI.Seiten.SpielfreieTageSeite"
              x:DataType="p:SpielfreieTageSeiteViewModel">
-  <DockPanel Margin="12">
-    <TextBlock DockPanel.Dock="Top" Classes="erklaerung" Text="An diesen Tagen sollen keine Spiele stattfinden:" TextWrapping="Wrap" Margin="0,0,0,8" />
-    <ItemsControl ItemsSource="{Binding Zeilen}">
+  <UserControl.Styles>
+    <!-- Ein Tag im Kalender: wählbar (Rahmen), spielfrei (rot), nicht wählbar (grau), Wochenende etwas kräftiger -->
+    <Style Selector="ToggleButton.kalendertag">
+      <Setter Property="Width" Value="34" />
+      <Setter Property="Height" Value="30" />
+      <Setter Property="Margin" Value="1" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="CornerRadius" Value="6" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+      <Setter Property="Background" Value="{StaticResource Flaeche}" />
+      <Setter Property="BorderBrush" Value="{StaticResource Rand}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="Foreground" Value="{StaticResource Tinte}" />
+    </Style>
+    <Style Selector="ToggleButton.kalendertag.wochenende">
+      <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector="ToggleButton.kalendertag:checked /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{StaticResource Schlecht}" />
+      <Setter Property="BorderBrush" Value="{StaticResource Schlecht}" />
+      <Setter Property="Foreground" Value="White" />
+    </Style>
+    <!-- Eingetragen, aber ohne Heimspielwünsche (nicht wählbar): grau mit rotem Strich -->
+    <Style Selector="Border.eingetragen">
+      <Setter Property="BorderBrush" Value="{StaticResource Schlecht}" />
+      <Setter Property="BorderThickness" Value="0,0,0,2" />
+    </Style>
+    <Style Selector="Border.legende">
+      <Setter Property="Width" Value="22" />
+      <Setter Property="Height" Value="16" />
+      <Setter Property="CornerRadius" Value="4" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style Selector="TextBlock.nichtwaehlbar">
+      <Setter Property="Width" Value="34" />
+      <Setter Property="Height" Value="28" />
+      <Setter Property="Margin" Value="0" />
+      <Setter Property="Padding" Value="0,7,0,0" />
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="TextAlignment" Value="Center" />
+      <Setter Property="Foreground" Value="#B0B5BC" />
+    </Style>
+  </UserControl.Styles>
+  <DockPanel x:Name="Seite" Margin="12" HorizontalAlignment="Left">
+    <TextBlock DockPanel.Dock="Top" Classes="erklaerung" TextWrapping="Wrap" Margin="0,0,0,4"
+               Text="An diesen Tagen sollen keine Spiele stattfinden. Klicken Sie auf einen Tag, um ihn spielfrei zu machen (rot) oder wieder freizugeben." />
+    <!-- Legende; der Tooltip eines Tages nennt den Grund, warum er nicht wählbar ist -->
+    <WrapPanel DockPanel.Dock="Top" Orientation="Horizontal" Margin="0,0,0,12">
+      <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,18,4">
+        <Border Classes="legende" Background="{StaticResource Flaeche}" BorderBrush="{StaticResource Rand}" />
+        <TextBlock Text="wählbar" Classes="klein" VerticalAlignment="Center" />
+      </StackPanel>
+      <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,18,4">
+        <Border Classes="legende" Background="{StaticResource Schlecht}" BorderBrush="{StaticResource Schlecht}" />
+        <TextBlock Text="spielfrei" Classes="klein" VerticalAlignment="Center" />
+      </StackPanel>
+      <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,18,4">
+        <TextBlock Text="16" Classes="klein" Foreground="#B0B5BC" VerticalAlignment="Center" />
+        <TextBlock Text="kein Heimspielwunsch (nicht gesperrt, es wird ohnehin nicht gespielt)" Classes="klein" VerticalAlignment="Center" />
+      </StackPanel>
+      <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,18,4">
+        <Border Classes="eingetragen" Padding="2,0">
+          <TextBlock Text="6" Classes="klein" Foreground="#B0B5BC" />
+        </Border>
+        <TextBlock Text="spielfrei eingetragen, ohne Heimspielwunsch" Classes="klein" VerticalAlignment="Center" />
+      </StackPanel>
+    </WrapPanel>
+    <TextBlock DockPanel.Dock="Top" Classes="leer" Text="Keine Tage mit Heimspielwünschen vorhanden" IsVisible="{Binding KeineTage}" />
+    <!-- Die Monate brechen um; die Breite der Seite folgt dem sichtbaren Bereich des Dialogs (siehe Code) -->
+    <ItemsControl ItemsSource="{Binding Monate}" HorizontalAlignment="Left">
+      <ItemsControl.ItemsPanel>
+        <ItemsPanelTemplate>
+          <WrapPanel Orientation="Horizontal" />
+        </ItemsPanelTemplate>
+      </ItemsControl.ItemsPanel>
       <ItemsControl.ItemTemplate>
-        <DataTemplate x:DataType="p:AuswahlZeile">
-          <CheckBox Content="{Binding Name}" IsChecked="{Binding Gewaehlt}" Margin="0,1" />
+        <DataTemplate x:DataType="p:Kalendermonat">
+          <Border Classes="karte" Padding="10,8" Margin="0,0,12,12" VerticalAlignment="Top">
+            <StackPanel Spacing="4">
+              <TextBlock Text="{Binding Titel}" FontWeight="SemiBold" />
+              <ItemsControl ItemsSource="{x:Static p:SpielfreieTageSeiteViewModel.Wochentage}">
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate>
+                    <UniformGrid Columns="7" />
+                  </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="x:String">
+                    <TextBlock Text="{Binding}" Width="36" Classes="spaltenkopf" TextAlignment="Center" />
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+              <ItemsControl ItemsSource="{Binding Tage}">
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate>
+                    <UniformGrid Columns="7" />
+                  </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="p:Kalendertag">
+                    <Panel ToolTip.Tip="{Binding Hinweis}">
+                      <ToggleButton Classes="kalendertag" Classes.wochenende="{Binding Wochenende}" Content="{Binding Nummer}"
+                                    IsVisible="{Binding Waehlbar}" IsChecked="{Binding Zeile.Gewaehlt, FallbackValue=False}" />
+                      <Border Classes.eingetragen="{Binding Eingetragen}" IsVisible="{Binding !Waehlbar}" Background="Transparent" Margin="1">
+                        <TextBlock Classes="nichtwaehlbar" Text="{Binding Nummer}" />
+                      </Border>
+                    </Panel>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+          </Border>
         </DataTemplate>
       </ItemsControl.ItemTemplate>
     </ItemsControl>

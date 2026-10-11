@@ -62,6 +62,7 @@ public class InseloptimiererTests
             Startwert = 37,
             DurchlaeufeVorNeustart = 2_000,
             Automodus = true,
+            AutoStillstandPlaene = 2_000,
 
             // Der Automodus beobachtet Sekunden ohne Verbesserung; bei Rechnen entspricht der ganze Lauf dem Zeitbudget. Ein
             // großes Budget lässt zwischen zwei Abgleichen genug „Zeit“, damit Grundlauf und Lenkung in wenigen Durchläufen ablaufen.
@@ -106,6 +107,51 @@ public class InseloptimiererTests
         Lenkungsstand ohneGrundlauf = Assert.IsType<Lenkungsstand>(direkt.Lenkung);
         Assert.NotNull(ohneGrundlauf.Basis);
         Assert.NotEqual("Basisoptimierung", ohneGrundlauf.Bezeichnung);
+    }
+
+    [Fact]
+    public void Basisoptimierung_endet_trotz_kleiner_Verbesserungen()
+    {
+        // Alle 9 s ein paar Kosten weniger (unter 1 %): Das hielt die Basisoptimierung früher beliebig lange fest.
+        Automodus auto = NeuerAutomodus();
+        Assert.False(Schritt(auto, 0, 0, 1000));
+        Assert.False(Schritt(auto, 9, 9_000_000, 999));
+        Assert.True(Schritt(auto, 18, 18_000_000, 998));
+    }
+
+    [Fact]
+    public void Deutliche_Verbesserung_verlaengert_die_Basisoptimierung()
+    {
+        Automodus auto = NeuerAutomodus();
+        Assert.False(Schritt(auto, 0, 0, 1000));
+        Assert.False(Schritt(auto, 9, 9_000_000, 950));
+        Assert.False(Schritt(auto, 18, 18_000_000, 949));
+        Assert.True(Schritt(auto, 19.5, 19_500_000, 949));
+    }
+
+    [Fact]
+    public void Auf_einem_langsamen_Rechner_zaehlen_die_berechneten_Plaene()
+    {
+        // 10.000 Pläne/s: Nach 20 s sind erst 200.000 Pläne berechnet, der Stillstand braucht 500.000.
+        Automodus auto = NeuerAutomodus();
+        Assert.False(Schritt(auto, 0, 0, 1000));
+        Assert.False(Schritt(auto, 20, 200_000, 1000));
+        Assert.True(Schritt(auto, 50, 500_000, 1000));
+    }
+
+    [Fact]
+    public void Basisoptimierung_endet_spaetestens_nach_der_Hoechstdauer()
+    {
+        // Alle 5 s eine deutliche Verbesserung: Die Suche steht nie, nach 180 s geht es trotzdem mit Stufe A weiter.
+        Automodus auto = NeuerAutomodus();
+        double kosten = 1000;
+        for (int sekunden = 0; sekunden < 180; sekunden += 5)
+        {
+            Assert.False(Schritt(auto, sekunden, sekunden * 1_000_000L, kosten));
+            kosten *= 0.95;
+        }
+
+        Assert.True(Schritt(auto, 180, 180_000_000, kosten));
     }
 
     [Fact]
@@ -222,6 +268,25 @@ public class InseloptimiererTests
         using var optimierer = new Inseloptimierer(staffel, Berechnungsoptionen.Standard, einstellungen);
         optimierer.Rechnen(durchlaeufe);
         return optimierer.BesterStand();
+    }
+
+    private static Automodus NeuerAutomodus()
+    {
+        RefPlan referenz = RefPlan.Laden(LeereStaffel(R2), Berechnungsoptionen.Standard);
+        return new Automodus(referenz, new KernDefinition(referenz), Optimierungseinstellungen.Standard with { Automodus = true });
+    }
+
+    /// <summary>Ein Schritt der Basisoptimierung.</summary>
+    /// <param name="auto">Der Automodus.</param>
+    /// <param name="sekunden">Sekunden reiner Rechenzeit.</param>
+    /// <param name="plaene">Berechnete Pläne seit dem Start.</param>
+    /// <param name="kosten">Beste Kosten der Suche.</param>
+    /// <returns><c>true</c>, wenn die Basisoptimierung vorbei ist.</returns>
+    private static bool Schritt(Automodus auto, double sekunden, long plaene, double kosten)
+    {
+        auto.Zaehlen(plaene);
+        auto.Beobachten(kosten, sekunden);
+        return auto.GrundlaufVorbei(sekunden);
     }
 
     private static (Optimierungsergebnis Ergebnis, Lenkungsstand? Lenkung) MitLenkung(Staffel staffel, Optimierungseinstellungen einstellungen, long durchlaeufe)

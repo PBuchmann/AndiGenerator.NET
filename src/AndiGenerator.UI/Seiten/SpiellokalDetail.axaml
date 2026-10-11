@@ -1,13 +1,20 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:p="using:AndiGenerator.Presentation"
+             xmlns:ui="using:AndiGenerator.UI"
              x:Class="AndiGenerator.UI.Seiten.SpiellokalDetail"
              x:DataType="p:SpiellokalDetailViewModel">
   <StackPanel Spacing="8">
     <StackPanel Orientation="Horizontal" Spacing="12">
       <TextBlock Text="Standardspiellokal:" VerticalAlignment="Center" />
-      <ComboBox MinWidth="80" ItemsSource="{x:Static p:SpiellokalDetailViewModel.Spiellokale}" SelectedItem="{Binding Standardlokal}" />
-      <TextBlock Classes="leer" Text="leer, falls Verein nur in einem Spiellokal spielt" VerticalAlignment="Center" />
+      <ComboBox MinWidth="140" ItemsSource="{x:Static p:SpiellokalDetailViewModel.Spiellokale}" SelectedItem="{Binding Standardlokal}">
+        <ComboBox.ItemTemplate>
+          <DataTemplate x:DataType="x:String">
+            <TextBlock Text="{Binding Converter={x:Static ui:Konverter.Standardlokal}}" />
+          </DataTemplate>
+        </ComboBox.ItemTemplate>
+      </ComboBox>
+      <TextBlock Classes="leer" Text="„nur eines“, falls der Verein nur in einem Spiellokal spielt; die Nummern sind die Spiellokale des Vereins in click-TT" VerticalAlignment="Center" />
     </StackPanel>
     <TextBlock Classes="abschnitt" Text="Spiellokale an den konkreten Heimspieltagen" />
     <TextBlock Classes="leer" Text="Keine Wunschtermine vorhanden" IsVisible="{Binding KeineHeimtage}" />
@@ -17,7 +24,13 @@
           <Border Classes="zeile">
             <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,2">
               <TextBlock Text="{Binding Beschriftung}" Width="220" VerticalAlignment="Center" />
-              <ComboBox MinWidth="80" ItemsSource="{x:Static p:SpiellokalDetailViewModel.Spiellokale}" SelectedItem="{Binding Spiellokal}" />
+              <ComboBox MinWidth="140" ItemsSource="{x:Static p:SpiellokalDetailViewModel.Spiellokale}" SelectedItem="{Binding Spiellokal}">
+                <ComboBox.ItemTemplate>
+                  <DataTemplate x:DataType="x:String">
+                    <TextBlock Text="{Binding Converter={x:Static ui:Konverter.Spiellokal}}" />
+                  </DataTemplate>
+                </ComboBox.ItemTemplate>
+              </ComboBox>
             </StackPanel>
           </Border>
         </DataTemplate>
@@ -32,7 +45,13 @@
             <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,2">
               <TextBlock Text="{Binding Beschriftung}" Width="320" VerticalAlignment="Center" TextTrimming="CharacterEllipsis"
                          Background="Transparent" DoubleTapped="NachbarDoppelklick" ToolTip.Tip="Doppelklick: Nachbarmannschaft bearbeiten" />
-              <ComboBox MinWidth="80" ItemsSource="{x:Static p:SpiellokalDetailViewModel.Spiellokale}" SelectedItem="{Binding Spiellokal}" />
+              <ComboBox MinWidth="140" ItemsSource="{x:Static p:SpiellokalDetailViewModel.Spiellokale}" SelectedItem="{Binding Spiellokal}">
+                <ComboBox.ItemTemplate>
+                  <DataTemplate x:DataType="x:String">
+                    <TextBlock Text="{Binding Converter={x:Static ui:Konverter.Spiellokal}}" />
+                  </DataTemplate>
+                </ComboBox.ItemTemplate>
+              </ComboBox>
             </StackPanel>
           </Border>
         </DataTemplate>

@@ -1,0 +1,65 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:p="using:AndiGenerator.Presentation"
+        x:Class="AndiGenerator.UI.Sicherungsdialog"
+        x:DataType="p:Planvergleich"
+        Title="Plan sichern"
+        SizeToContent="WidthAndHeight" CanResize="False" ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner" Classes="dialog">
+  <Window.Styles>
+    <Style Selector="TextBlock.wert">
+      <Setter Property="HorizontalAlignment" Value="Right" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style Selector="TextBlock.wert.besser">
+      <Setter Property="Foreground" Value="{StaticResource Gut}" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+  </Window.Styles>
+  <!-- Aktueller und gesicherter Plan im Vergleich: Verstöße je Stufe, Kosten, dann die einzelnen Kriterien mit Unterschieden;
+       der jeweils bessere Wert ist grün. -->
+  <StackPanel Margin="24" Spacing="12" Width="560">
+    <TextBlock Text="{Binding Frage}" TextWrapping="Wrap" />
+    <Border Classes="karte" Padding="14,10">
+      <StackPanel Spacing="4">
+        <Grid ColumnDefinitions="*,130,130">
+          <TextBlock Grid.Column="1" Text="Aktueller Plan" FontWeight="SemiBold" HorizontalAlignment="Right" />
+          <TextBlock Grid.Column="2" Text="Gesicherter Plan" FontWeight="SemiBold" HorizontalAlignment="Right" />
+        </Grid>
+        <ItemsControl ItemsSource="{Binding Zeilen}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="p:Vergleichszeile">
+              <Grid ColumnDefinitions="*,130,130" Margin="0,2">
+                <TextBlock Text="{Binding Bezeichnung}" VerticalAlignment="Center" />
+                <TextBlock Grid.Column="1" Text="{Binding Aktuell}" Classes="wert ziffer" Classes.besser="{Binding AktuellBesser}" />
+                <TextBlock Grid.Column="2" Text="{Binding Gesichert}" Classes="wert ziffer" Classes.besser="{Binding GesichertBesser}" />
+              </Grid>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+        <TextBlock Text="Verstöße bei einzelnen Kriterien" Classes="klein" Margin="0,8,0,0" IsVisible="{Binding HatUnterschiede}" />
+        <ItemsControl ItemsSource="{Binding Unterschiede}" IsVisible="{Binding HatUnterschiede}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="p:Vergleichszeile">
+              <Grid ColumnDefinitions="*,130,130" Margin="0,1">
+                <TextBlock Text="{Binding Bezeichnung}" Classes="klein" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                <TextBlock Grid.Column="1" Text="{Binding Aktuell}" Classes="wert ziffer klein" Classes.besser="{Binding AktuellBesser}" />
+                <TextBlock Grid.Column="2" Text="{Binding Gesichert}" Classes="wert ziffer klein" Classes.besser="{Binding GesichertBesser}" />
+              </Grid>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </StackPanel>
+    </Border>
+    <TextBlock Text="{Binding Empfehlung}" FontWeight="SemiBold" />
+    <TextBlock Text="Bewertet wie im Automodus: erst die Verstöße der Stufe A, dann B, dann C, zuletzt die Kosten."
+               Classes="klein hinweis" TextWrapping="Wrap" />
+    <Border Classes="dialogfuss">
+      <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right">
+        <Button x:Name="Abbrechen" Classes="gross" Content="Abbrechen" IsCancel="True" />
+        <Button x:Name="Behalten" Classes="gross" Classes.primaer="{Binding GesichertBesser}" Content="Gesicherten Plan behalten" IsDefault="{Binding GesichertBesser}" />
+        <Button x:Name="Ueberschreiben" Classes="gross" Classes.primaer="{Binding !GesichertBesser}" Content="Aktuellen Plan sichern" IsDefault="{Binding !GesichertBesser}" />
+      </StackPanel>
+    </Border>
+  </StackPanel>
+</Window>

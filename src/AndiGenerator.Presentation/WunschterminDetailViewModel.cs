@@ -8,8 +8,9 @@ using CommunityToolkit.Mvvm.Input;
 namespace AndiGenerator.Presentation;
 
 /// <summary>
-/// Wunschtermine einer Mannschaft (Original <c>TDialogPanelHomeDaysDetail</c>): Wochenübersicht mit einem Kurztext je Tag,
-/// Bearbeiten per Doppelklick oder Kontextmenü im Dialog „Wunschtermin“.
+/// Wunschtermine einer Mannschaft (Original <c>TDialogPanelHomeDaysDetail</c>): Wochenübersicht mit einem Kärtchen je Tag
+/// (Heimspiel, Ausweichtermin, Sperrtermin); Klick oder Kontextmenü öffnet den Dialog „Wunschtermin“, Ziehen verschiebt
+/// einen Termin auf einen anderen Tag.
 /// </summary>
 public sealed class WunschterminDetailViewModel : DatenSeiteViewModel
 {
@@ -51,6 +52,30 @@ public sealed class WunschterminDetailViewModel : DatenSeiteViewModel
     /// <inheritdoc/>
     public override bool IstStandard => Bearbeitung.WunschtermineSindStandard(mannschaft, Werte());
 
+    /// <summary>
+    /// Verschiebt den Termin eines Tages auf einen anderen (Ziehen im Wochenraster). Steht dort schon ein Termin, tauschen
+    /// die beiden; mit <paramref name="kopieren"/> bleibt der Termin am alten Tag stehen und ersetzt den am neuen.
+    /// </summary>
+    /// <param name="von">Der Tag, dessen Termin gezogen wird.</param>
+    /// <param name="nach">Der Tag, auf den er gelegt wird.</param>
+    /// <param name="kopieren"><c>true</c> = kopieren statt verschieben (Strg).</param>
+    public static void Verschieben(WunschterminZelle von, WunschterminZelle nach, bool kopieren)
+    {
+        ArgumentNullException.ThrowIfNull(von);
+        ArgumentNullException.ThrowIfNull(nach);
+        if (ReferenceEquals(von, nach) || !von.HatTermin)
+        {
+            return;
+        }
+
+        string bisher = nach.Text;
+        nach.Text = von.Text;
+        if (!kopieren)
+        {
+            von.Text = bisher;
+        }
+    }
+
     /// <inheritdoc/>
     public override void Laden() => Anzeigen(Bearbeitung.Wunschtermine(mannschaft));
 
@@ -79,6 +104,20 @@ public sealed class WunschterminDetailViewModel : DatenSeiteViewModel
         }
     }
 
+    /// <summary>
+    /// Die übliche Uhrzeit der Mannschaft: die häufigste ihrer Heimspielzeiten am selben Wochentag, sonst an allen Tagen,
+    /// sonst 18:00.
+    /// </summary>
+    private TimeSpan UeblicheUhrzeit(DayOfWeek wochentag)
+    {
+        List<(DayOfWeek Tag, TimeSpan Zeit)> zeiten = [.. Wochen.SelectMany(w => w.Tage)
+            .Where(z => z.IstHeimspiel || z.IstAusweich)
+            .Select(z => (z.Tag.DayOfWeek, TimeSpan.Parse(z.Hauptzeile, System.Globalization.CultureInfo.InvariantCulture)))];
+        List<(DayOfWeek Tag, TimeSpan Zeit)> amTag = [.. zeiten.Where(z => z.Tag == wochentag)];
+        List<(DayOfWeek Tag, TimeSpan Zeit)> basis = amTag.Count > 0 ? amTag : zeiten;
+        return basis.Count == 0 ? new TimeSpan(18, 0, 0) : basis.GroupBy(z => z.Zeit).OrderByDescending(g => g.Count()).First().Key;
+    }
+
     private List<Wunschterminwoche> Werte() => Wochen.Select(w => w.Wert()).ToList();
 
     private void Anzeigen(IReadOnlyList<Wunschterminwoche> daten) =>
@@ -98,6 +137,13 @@ public sealed class WunschterminDetailViewModel : DatenSeiteViewModel
         }
 
         var dialog = new WunschterminDialogViewModel(zelle.Tag, zelle.Text);
+        if (!zelle.HatTermin)
+        {
+            // Ein leerer Tag wird angeklickt, um einen Termin einzutragen: gleich als Heimspiel zur üblichen Uhrzeit vorschlagen.
+            dialog.Art = 1;
+            dialog.Uhrzeit = UeblicheUhrzeit(zelle.Tag.DayOfWeek);
+        }
+
         if (await oberflaeche.WunschterminBearbeitenAsync(dialog))
         {
             zelle.Text = dialog.Ergebnis;

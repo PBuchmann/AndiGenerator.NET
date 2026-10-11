@@ -26,6 +26,9 @@ public sealed class Plansitzung
     /// <summary>Früherer Name des eigenen Ordners (bis zur Umbenennung in AndiGenerator.NET am 29.09.2026).</summary>
     public const string FruehererOrdnername = "AndiGeneratorNeu";
 
+    /// <summary>Anzeigename des gesicherten Plans.</summary>
+    public const string GesicherterPlanName = "Gesicherter Plan";
+
     /// <summary>Kosten je hartem Fehler im Original (10 × cMaxKostenNoHardError).</summary>
     private const double KostenJeHartemFehler = 10.0 * 1_000_000_000.0;
     private const string Uebernahmevermerk = "uebernommen-aus-AndiGeneratorNeu.txt";
@@ -294,6 +297,26 @@ public sealed class Plansitzung
         string pfad = Persistence.Gemeinsam.Staffelordner.GemerkterPlanPfad(Staffelordner, name.Trim());
         GespeicherterPlanDatei.Speichern(pfad, spiele.Select(s => new GespeichertesSpiel(s.Zeitpunkt, s.Heim, s.Gast)));
         return new GemerkterPlanEintrag(name.Trim(), pfad, File.GetLastWriteTime(pfad));
+    }
+
+    /// <summary>Der gesicherte Plan der Staffel, sofern es ihn gibt.</summary>
+    /// <returns>Der Eintrag (Name „Gesicherter Plan“) oder <c>null</c>.</returns>
+    public GemerkterPlanEintrag? GesicherterPlan()
+    {
+        string pfad = Persistence.Gemeinsam.Staffelordner.GesicherterPlanPfad(Staffelordner);
+        return File.Exists(pfad) ? new GemerkterPlanEintrag(GesicherterPlanName, pfad, File.GetLastWriteTime(pfad)) : null;
+    }
+
+    /// <summary>Sichert einen Plan als gesicherten Plan der Staffel (ein bisher gesicherter wird ersetzt).</summary>
+    /// <param name="spiele">Spiele des Plans.</param>
+    /// <returns>Der Eintrag.</returns>
+    public GemerkterPlanEintrag PlanSichern(IEnumerable<Spiel> spiele)
+    {
+        ArgumentNullException.ThrowIfNull(spiele);
+        Directory.CreateDirectory(Staffelordner);
+        string pfad = Persistence.Gemeinsam.Staffelordner.GesicherterPlanPfad(Staffelordner);
+        GespeicherterPlanDatei.Speichern(pfad, spiele.Select(s => new GespeichertesSpiel(s.Zeitpunkt, s.Heim, s.Gast)));
+        return new GemerkterPlanEintrag(GesicherterPlanName, pfad, File.GetLastWriteTime(pfad));
     }
 
     /// <summary>Lädt die Spiele eines gemerkten Plans.</summary>

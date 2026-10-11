@@ -87,11 +87,11 @@ public sealed class DialogTests
             seite.Mannschaft = Namen.RheinduerkheimIV;
             Oberflaeche.Zeichnen(fenster);
 
-            // Regression: Das Textfeld schluckte den Doppelklick (Wort markieren), der Dialog ging nicht auf.
+            // Ein Klick auf ein Kärtchen öffnet den Dialog „Wunschtermin“ (früher schluckte das Textfeld den Doppelklick).
             WunschterminDetail detail = Assert.Single(fenster.GetVisualDescendants().OfType<WunschterminDetail>());
             Point punkt = Assert.IsType<Point>(detail.GetVisualDescendants()
-                .OfType<TextBox>()
-                .Where(t => t.DataContext is WunschterminZelle)
+                .OfType<Border>()
+                .Where(t => t.Classes.Contains("kaertchen") && t.DataContext is WunschterminZelle)
                 .Select(t => t.TranslatePoint(new Point(t.Bounds.Width / 2, t.Bounds.Height / 2), fenster))
                 .FirstOrDefault(p => p is Point q && new Rect(fenster.ClientSize).Contains(q)));
             fenster.MouseDown(punkt, MouseButton.Left);

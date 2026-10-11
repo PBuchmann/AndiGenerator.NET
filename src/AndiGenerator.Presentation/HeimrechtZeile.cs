@@ -39,9 +39,31 @@ public sealed class HeimrechtZeile : ObservableObject
         {
             if (value >= 0 && SetProperty(ref index, value))
             {
+                WahlGeaendert();
                 geaendert();
             }
         }
+    }
+
+    /// <summary>Holt oder setzt, ob die gegnerische Mannschaft in der Vorrunde Heimrecht hat (Umschalter).</summary>
+    public bool IstVorrunde
+    {
+        get => index == 0;
+        set => Waehlen(value, 0);
+    }
+
+    /// <summary>Holt oder setzt, ob das Heimrecht egal ist (Umschalter).</summary>
+    public bool IstEgal
+    {
+        get => index == 1;
+        set => Waehlen(value, 1);
+    }
+
+    /// <summary>Holt oder setzt, ob die gegnerische Mannschaft in der Rückrunde Heimrecht hat (Umschalter).</summary>
+    public bool IstRueckrunde
+    {
+        get => index == 2;
+        set => Waehlen(value, 2);
     }
 
     /// <summary>Holt das Heimrecht (0 = egal, 1 = Vorrunde, 2 = Rückrunde).</summary>
@@ -49,7 +71,28 @@ public sealed class HeimrechtZeile : ObservableObject
 
     /// <summary>Setzt das Heimrecht ohne Änderungsmeldung (Standard).</summary>
     /// <param name="wert">Neues Heimrecht.</param>
-    internal void Setzen(int wert) => SetProperty(ref index, IndexVon(wert), nameof(Index));
+    internal void Setzen(int wert)
+    {
+        if (SetProperty(ref index, IndexVon(wert), nameof(Index)))
+        {
+            WahlGeaendert();
+        }
+    }
 
     private static int IndexVon(int wert) => Math.Max(0, Array.IndexOf(Werte, wert));
+
+    private void Waehlen(bool gewaehlt, int wahl)
+    {
+        if (gewaehlt)
+        {
+            Index = wahl;
+        }
+    }
+
+    private void WahlGeaendert()
+    {
+        OnPropertyChanged(nameof(IstVorrunde));
+        OnPropertyChanged(nameof(IstEgal));
+        OnPropertyChanged(nameof(IstRueckrunde));
+    }
 }

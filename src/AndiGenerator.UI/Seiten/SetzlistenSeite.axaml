@@ -4,25 +4,96 @@
              xmlns:ui="using:AndiGenerator.UI"
              x:Class="AndiGenerator.UI.Seiten.SetzlistenSeite"
              x:DataType="p:SetzlistenSeiteViewModel">
+  <UserControl.Styles>
+    <Style Selector="Border.griff">
+      <Setter Property="Width" Value="26" />
+      <Setter Property="Height" Value="30" />
+      <Setter Property="CornerRadius" Value="6" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Cursor" Value="SizeNorthSouth" />
+    </Style>
+    <Style Selector="Border.griff:pointerover">
+      <Setter Property="Background" Value="{StaticResource Schwebe}" />
+    </Style>
+    <Style Selector="Border.setzzeile">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="Cursor" Value="Hand" />
+      <Setter Property="CornerRadius" Value="8" />
+    </Style>
+    <Style Selector="Border.setzzeile:pointerover">
+      <Setter Property="Background" Value="{StaticResource Schwebe}" />
+    </Style>
+    <Style Selector="Border.setzzeile.gewaehlt">
+      <Setter Property="Background" Value="{StaticResource AkzentHell}" />
+    </Style>
+    <!-- Beim Ziehen: an der Ablagestelle eine Lücke, die Zeile selbst hängt am Mauszeiger -->
+    <Style Selector="Border.setzzeile.gezogen">
+      <Setter Property="Background" Value="{StaticResource AkzentHell}" />
+      <Setter Property="BorderBrush" Value="{StaticResource Akzent}" />
+      <Setter Property="BorderThickness" Value="1" />
+    </Style>
+    <Style Selector="Border.setzzeile.gezogen > Grid">
+      <Setter Property="Opacity" Value="0" />
+    </Style>
+    <Style Selector="Border.schwebend">
+      <Setter Property="Background" Value="{StaticResource Flaeche}" />
+      <Setter Property="BorderBrush" Value="{StaticResource Akzent}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="BoxShadow" Value="0 8 24 0 #40000000" />
+      <Setter Property="Opacity" Value="0.96" />
+    </Style>
+    <Style Selector="Border.karte.ruht">
+      <Setter Property="Opacity" Value="0.5" />
+    </Style>
+  </UserControl.Styles>
+  <UserControl.Resources>
+    <!-- Eine Zeile: Griff, Platz, Mannschaft; auch für die Zeile, die beim Ziehen am Mauszeiger hängt -->
+    <DataTemplate x:Key="Setzvorlage" x:DataType="p:Setzlistenzeile">
+      <Border Classes="setzzeile" Classes.gezogen="{Binding IstGezogen}" Classes.gewaehlt="{Binding IstGewaehlt}" MinHeight="38" Padding="4,0">
+        <Grid ColumnDefinitions="30,44,*">
+          <Border Classes="griff" ToolTip.Tip="Ziehen: an die gewünschte Stelle legen – der Platz ergibt sich aus der Stelle">
+            <TextBlock Text="⋮⋮" FontSize="16" FontWeight="Bold" Foreground="{StaticResource Tinte2}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+          </Border>
+          <TextBlock Grid.Column="1" Text="{Binding PlatzText}" Classes="ziffer" FontWeight="SemiBold" Foreground="{StaticResource Tinte2}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,12,0" />
+          <TextBlock Grid.Column="2" Text="{Binding Name}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+        </Grid>
+      </Border>
+    </DataTemplate>
+  </UserControl.Resources>
   <DockPanel Margin="12">
     <TextBlock DockPanel.Dock="Top" Classes="erklaerung doppelt" Text="{x:Static p:SetzlistenSeiteViewModel.Erklaerung}" TextWrapping="Wrap" MaxWidth="700" HorizontalAlignment="Left" />
     <CheckBox DockPanel.Dock="Top" Content="Setzliste aktivieren" IsChecked="{Binding Aktiv}" Margin="0,12" />
     <TextBlock DockPanel.Dock="Top" Classes="abschnitt" Text="Erwartete Reihenfolge" />
-    <TextBlock DockPanel.Dock="Top" Classes="leer" Text="Mannschaft auf eine andere ziehen oder die Knöpfe nutzen" TextWrapping="Wrap" Margin="0,0,0,8" />
-    <StackPanel DockPanel.Dock="Right" Spacing="6" Margin="12,0,0,0">
-      <Button Command="{Binding HochCommand}" MinWidth="140" HorizontalContentAlignment="Left">
-        <StackPanel Orientation="Horizontal" Spacing="8">
-          <ui:Symbol Daten="{StaticResource SymbolHoch}" Groesse="18" />
-          <TextBlock Text="Nach oben" VerticalAlignment="Center" />
-        </StackPanel>
-      </Button>
-      <Button Command="{Binding RunterCommand}" MinWidth="140" HorizontalContentAlignment="Left">
-        <StackPanel Orientation="Horizontal" Spacing="8">
-          <ui:Symbol Daten="{StaticResource SymbolRunter}" Groesse="18" />
-          <TextBlock Text="Nach unten" VerticalAlignment="Center" />
-        </StackPanel>
-      </Button>
-    </StackPanel>
-    <ListBox x:Name="Liste" ItemsSource="{Binding Reihenfolge}" SelectedIndex="{Binding Auswahl}" MinHeight="260" MaxWidth="500" HorizontalAlignment="Left" MinWidth="320" />
+    <TextBlock DockPanel.Dock="Top" Classes="leer" Text="Mannschaft am Griff ⋮⋮ an ihren erwarteten Platz ziehen (Escape bricht ab) oder wählen und die Knöpfe nutzen" TextWrapping="Wrap" MaxWidth="700" HorizontalAlignment="Left" Margin="0,0,0,8" />
+    <DockPanel HorizontalAlignment="Left" VerticalAlignment="Top">
+      <StackPanel DockPanel.Dock="Right" Classes="seitenknoepfe" IsEnabled="{Binding Aktiv}">
+        <Button Classes="seitenknopf" Command="{Binding HochCommand}">
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <ui:Symbol Daten="{StaticResource SymbolHoch}" Groesse="18" />
+            <TextBlock Text="Nach oben" VerticalAlignment="Center" />
+          </StackPanel>
+        </Button>
+        <Button Classes="seitenknopf" Command="{Binding RunterCommand}">
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <ui:Symbol Daten="{StaticResource SymbolRunter}" Groesse="18" />
+            <TextBlock Text="Nach unten" VerticalAlignment="Center" />
+          </StackPanel>
+        </Button>
+      </StackPanel>
+      <!-- Solange die Setzliste aus ist, bleibt die Reihenfolge ausgegraut (sie wird aber aufbewahrt) -->
+      <Panel Width="500" VerticalAlignment="Top">
+        <Border Classes="karte" Padding="6" IsEnabled="{Binding Aktiv}" Classes.ruht="{Binding !Aktiv}">
+          <ItemsControl x:Name="Liste" ItemsSource="{Binding Zeilen}" Background="Transparent" ItemTemplate="{StaticResource Setzvorlage}"
+                        PointerPressed="ListeGedrueckt" PointerMoved="ListeBewegt" PointerReleased="ListeLosgelassen" PointerCaptureLost="ListeVerloren" />
+        </Border>
+        <!-- Ebene über der Liste für die Zeile am Mauszeiger -->
+        <Canvas x:Name="Schwebeebene" IsHitTestVisible="False" ClipToBounds="False">
+          <Border x:Name="Schwebezeile" Classes="schwebend" IsVisible="{Binding Schwebend, Converter={x:Static ObjectConverters.IsNotNull}}">
+            <ContentControl Content="{Binding Schwebend}" ContentTemplate="{StaticResource Setzvorlage}" />
+          </Border>
+        </Canvas>
+      </Panel>
+    </DockPanel>
   </DockPanel>
 </UserControl>

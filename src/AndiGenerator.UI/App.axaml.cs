@@ -14,7 +14,13 @@ namespace AndiGenerator.UI;
 public partial class App : global::Avalonia.Application
 {
     /// <inheritdoc/>
-    public override void Initialize() => AvaloniaXamlLoader.Load(this);
+    public override void Initialize()
+    {
+        AvaloniaXamlLoader.Load(this);
+
+        // Hier statt beim Fensteraufbau, damit es auch ohne Bildschirm gilt (Tests, Bildschirmfotos).
+        Platzhalterdeutsch.Anmelden();
+    }
 
     /// <inheritdoc/>
     public override void OnFrameworkInitializationCompleted()

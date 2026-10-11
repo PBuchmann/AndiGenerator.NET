@@ -7,19 +7,13 @@ using Avalonia.Controls;
 
 namespace AndiGenerator.UI.Seiten;
 
-/// <summary>Nachbarmannschaften einer Mannschaft; Doppelklick bearbeitet wie im Original.</summary>
+/// <summary>Nachbarmannschaften einer Mannschaft; Doppelklick oder Eingabetaste bearbeitet, Entf löscht.</summary>
 public partial class NachbarmannschaftDetail : UserControl
 {
     /// <summary>Initialisiert die Ansicht.</summary>
     public NachbarmannschaftDetail()
     {
         InitializeComponent();
-        Liste.DoubleTapped += (_, _) =>
-        {
-            if (DataContext is NachbarmannschaftDetailViewModel detail && detail.BearbeitenCommand.CanExecute(null))
-            {
-                detail.BearbeitenCommand.Execute(null);
-            }
-        };
+        Listenbedienung.Anmelden(Liste, () => DataContext is NachbarmannschaftDetailViewModel detail ? (detail.BearbeitenCommand, detail.LoeschenCommand) : default);
     }
 }

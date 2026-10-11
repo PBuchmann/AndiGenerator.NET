@@ -77,10 +77,10 @@
     <Style Selector="Grid.kacheln > Button.pflichtkachel">
       <Setter Property="Grid.Column" Value="1" />
     </Style>
-    <Style Selector="Grid.kacheln > Border.verbesserungen">
+    <Style Selector="Grid.kacheln > Button.verbesserungen">
       <Setter Property="Grid.Column" Value="2" />
     </Style>
-    <Style Selector="Grid.kacheln > Border.plaene">
+    <Style Selector="Grid.kacheln > Button.plaene">
       <Setter Property="Grid.Column" Value="3" />
     </Style>
     <Style Selector="Window.eng Grid.kacheln > Button.ergebnis">
@@ -93,15 +93,30 @@
       <Setter Property="Grid.Column" Value="2" />
       <Setter Property="Grid.ColumnSpan" Value="2" />
     </Style>
-    <Style Selector="Window.eng Grid.kacheln > Border.verbesserungen">
+    <Style Selector="Window.eng Grid.kacheln > Button.verbesserungen">
       <Setter Property="Grid.Row" Value="1" />
       <Setter Property="Grid.Column" Value="0" />
       <Setter Property="Grid.ColumnSpan" Value="2" />
     </Style>
-    <Style Selector="Window.eng Grid.kacheln > Border.plaene">
+    <Style Selector="Window.eng Grid.kacheln > Button.plaene">
       <Setter Property="Grid.Row" Value="1" />
       <Setter Property="Grid.Column" Value="2" />
       <Setter Property="Grid.ColumnSpan" Value="2" />
+    </Style>
+    <!-- Maschinenraum in der Kachel „Berechnete Pläne“: je Rechenkern ein Balken, der mit seiner Last wächst. -->
+    <Style Selector="Border.kernbalken">
+      <Setter Property="Width" Value="5" />
+      <Setter Property="CornerRadius" Value="2" />
+      <Setter Property="VerticalAlignment" Value="Bottom" />
+      <Setter Property="Background" Value="{StaticResource Akzent}" />
+      <Setter Property="Transitions">
+        <Transitions>
+          <DoubleTransition Property="Height" Duration="0:0:0.45" Easing="CubicEaseOut" />
+        </Transitions>
+      </Setter>
+    </Style>
+    <Style Selector="ItemsControl.kerne:not(.rechnet) Border.kernbalken">
+      <Setter Property="Background" Value="{StaticResource Rand}" />
     </Style>
     <Style Selector="TextBlock.wert">
       <Setter Property="FontSize" Value="26" />
@@ -282,7 +297,7 @@
             <StackPanel Spacing="4" Margin="0,0,8,0">
               <TextBlock Text="Start mit" Classes="klein" FontSize="11" />
               <ComboBox Classes="gross" MinWidth="170" MaxWidth="260" ItemsSource="{Binding Startplaene}" SelectedItem="{Binding Startplan}" IsEnabled="{Binding StartplanWaehlbar}"
-                        ToolTip.Tip="Ausgangsplan für den nächsten Start. Eine laufende oder angehaltene Generierung setzt ihren eigenen besten Plan fort – für einen anderen Ausgangsplan zuerst „Beenden“."
+                        ToolTip.Tip="Ausgangsplan für den nächsten Start. Eine laufende oder angehaltene Generierung setzt ihren eigenen besten Plan fort – für einen anderen Ausgangsplan zuerst „Stopp“."
                         ToolTip.ShowOnDisabled="True">
                 <ComboBox.ItemTemplate>
                   <DataTemplate x:DataType="p:Startplan">
@@ -300,52 +315,35 @@
                 <StackPanel Orientation="Horizontal" Spacing="10"><ui:Symbol Daten="{StaticResource SymbolLoeschen}" Groesse="20" /><TextBlock Text="Plan löschen" VerticalAlignment="Center" /></StackPanel>
               </Button>
             </Panel>
-            <!-- Starten/Pausieren mit Auswahl des Verfahrens: Pfeil rechts öffnet Kostenoptimierung bzw. Automodus (starten oder wechseln) -->
-            <StackPanel Orientation="Horizontal" Spacing="1" VerticalAlignment="Bottom" Margin="0,0,10,0">
-              <Button Classes="gross primaer" Command="{Binding GenerierungCommand}" MinWidth="200" CornerRadius="12,0,0,12" HorizontalContentAlignment="Center"
-                      ToolTip.Tip="{Binding VerfahrenHinweis}">
-                <StackPanel Orientation="Horizontal" Spacing="10">
-                  <ui:Symbol Daten="{StaticResource SymbolPause}" Gefuellt="True" Groesse="20" IsVisible="{Binding ZeigtPause}" />
-                  <ui:Symbol Daten="{StaticResource SymbolStart}" Gefuellt="True" Groesse="20" IsVisible="{Binding ZeigtStart}" />
-                  <TextBlock Text="{Binding GenerierungText}" VerticalAlignment="Center" />
+            <!-- Verfahren: zwei Optionsfelder nebeneinander, gestaltet wie die Umschalter der Ansichten (genau eines ist gewählt); vor dem Start wählen sie, während der Generierung wechseln sie -->
+            <StackPanel Spacing="4" Margin="0,0,12,0" VerticalAlignment="Bottom">
+              <TextBlock Text="Verfahren" Classes="klein" FontSize="11" />
+              <Border Background="#ECEAE4" CornerRadius="12" Padding="4" ToolTip.Tip="{Binding VerfahrenErklaerung}">
+                <StackPanel Orientation="Horizontal" Spacing="4">
+                  <RadioButton Classes="segment" GroupName="Verfahren" Content="Kostenoptimierung" IsChecked="{Binding KostenoptimierungGewaehlt}" IsEnabled="{Binding IstGeoeffnet}" />
+                  <RadioButton Classes="segment" GroupName="Verfahren" Content="Automodus" IsChecked="{Binding AutomodusGewaehlt}" IsEnabled="{Binding IstGeoeffnet}" />
                 </StackPanel>
-              </Button>
-              <Button Classes="gross primaer" CornerRadius="0,12,12,0" Padding="10,0" IsEnabled="{Binding IstGeoeffnet}" ToolTip.Tip="Verfahren wählen: Kostenoptimierung oder Automodus – vor dem Start oder während der Generierung">
-                <ui:Symbol Daten="{StaticResource SymbolAuswahl}" Farbe="White" Groesse="18" />
-                <Button.Flyout>
-                  <MenuFlyout Placement="BottomEdgeAlignedRight" FlyoutPresenterClasses="verfahren">
-                    <MenuItem Command="{Binding KostenoptimierungCommand}">
-                      <MenuItem.Icon>
-                        <ui:Symbol Daten="{StaticResource SymbolHaken}" Farbe="{StaticResource Akzent}" Groesse="18" IsVisible="{Binding !Automodus}" />
-                      </MenuItem.Icon>
-                      <MenuItem.Header>
-                        <StackPanel Spacing="2">
-                          <TextBlock Classes="verfahrenstitel" Text="{Binding KostenoptimierungText}" />
-                          <TextBlock Classes="verfahrenstext" Text="Wie im Original: Die Suche senkt die Gesamtkosten mit Ihren Gewichtungen." />
-                        </StackPanel>
-                      </MenuItem.Header>
-                    </MenuItem>
-                    <MenuItem Command="{Binding AutomodusCommand}">
-                      <MenuItem.Icon>
-                        <ui:Symbol Daten="{StaticResource SymbolHaken}" Farbe="{StaticResource Akzent}" Groesse="18" IsVisible="{Binding Automodus}" />
-                      </MenuItem.Icon>
-                      <MenuItem.Header>
-                        <StackPanel Spacing="2">
-                          <TextBlock Classes="verfahrenstitel" Text="{Binding AutomodusText}" />
-                          <TextBlock Classes="verfahrenstext" Text="Die Suche lenkt sich selbst: erst Verstöße der Stufen A und B herausdrängen, dann die übrigen Kriterien glätten." />
-                        </StackPanel>
-                      </MenuItem.Header>
-                    </MenuItem>
-                  </MenuFlyout>
-                </Button.Flyout>
-              </Button>
+              </Border>
             </StackPanel>
-            <Button Classes="gross" Command="{Binding StoppenCommand}" VerticalAlignment="Bottom" Margin="0,0,10,0" ToolTip.Tip="Generierung beenden">
-              <StackPanel Orientation="Horizontal" Spacing="10"><ui:Symbol Daten="{StaticResource SymbolStopp}" Groesse="20" /><TextBlock Text="Beenden" VerticalAlignment="Center" /></StackPanel>
+            <!-- Hauptknopf: Play vor dem Start und in der Pause, Pause während der Generierung; rechts daneben vor dem Start
+                 „Staffel schließen“ (✕), während der Generierung „Stopp“ (■) -->
+            <Button Classes="gross primaer" Command="{Binding GenerierungCommand}" Width="56" Padding="0" HorizontalContentAlignment="Center" VerticalAlignment="Bottom"
+                    ToolTip.Tip="{Binding GenerierungText}">
+              <Panel>
+                <ui:Symbol Daten="{StaticResource SymbolStart}" Gefuellt="True" Groesse="22" IsVisible="{Binding ZeigtStart}" />
+                <ui:Symbol Daten="{StaticResource SymbolPause}" Gefuellt="True" Groesse="22" IsVisible="{Binding ZeigtPause}" />
+              </Panel>
             </Button>
-            <Button Classes="gross" Command="{Binding SchliessenCommand}" VerticalAlignment="Bottom" ToolTip.Tip="Staffel schließen und zur Startseite zurückkehren">
-              <StackPanel Orientation="Horizontal" Spacing="10"><ui:Symbol Daten="{StaticResource SymbolSchliessen}" Groesse="20" /><TextBlock Text="Schließen" VerticalAlignment="Center" /></StackPanel>
-            </Button>
+            <Panel VerticalAlignment="Bottom" Margin="8,0,0,0">
+              <Button Classes="gross" Command="{Binding StoppenCommand}" IsVisible="{Binding ZeigtStopp}" Width="56" Padding="0" HorizontalContentAlignment="Center"
+                      ToolTip.Tip="Stopp: Generierung beenden. Ihr bester Plan bleibt erhalten („bester Plan der letzten Generierung“).">
+                <ui:Symbol Daten="{StaticResource SymbolStopp}" Gefuellt="True" Groesse="22" />
+              </Button>
+              <Button Classes="gross" Command="{Binding SchliessenCommand}" IsVisible="{Binding !ZeigtStopp}" Width="56" Padding="0" HorizontalContentAlignment="Center"
+                      ToolTip.Tip="Staffel schließen und zur Startseite zurückkehren. Ein noch nicht gesicherter Plan wird vorher gesichert.">
+                <ui:Symbol Daten="{StaticResource SymbolSchliessen}" Groesse="22" />
+              </Button>
+            </Panel>
           </WrapPanel>
         </Grid>
       </Border>
@@ -403,20 +401,46 @@
             <TextBlock Text="{Binding Anzeige.PflichtHinweis}" Classes="klein hinweis" TextWrapping="Wrap" MaxLines="2" TextTrimming="CharacterEllipsis" />
           </StackPanel>
         </Button>
-        <Border Classes="karte verbesserungen" Margin="6">
-          <StackPanel Spacing="2">
-            <TextBlock Text="Verbesserungen" Classes="klein" />
-            <TextBlock Text="{Binding Anzeige.Verbesserungen}" Classes="ziffer wert" />
-            <TextBlock Text="{Binding Anzeige.LetzteVerbesserung}" Classes="klein hinweis" />
-          </StackPanel>
-        </Border>
-        <Border Classes="karte plaene" Margin="6">
-          <StackPanel Spacing="2">
-            <TextBlock Text="Berechnete Pläne" Classes="klein" />
-            <TextBlock Text="{Binding Anzeige.Plaene}" Classes="ziffer wert" />
-            <TextBlock Text="{Binding Anzeige.Tempo}" Classes="klein hinweis" />
-          </StackPanel>
-        </Border>
+        <Button Classes="kartenknopf verbesserungen" Margin="6" Command="{Binding VerlaufCommand}" ToolTip.Tip="Verlauf der Suche öffnen: Kosten bzw. Verstöße seit dem Start">
+          <Grid ColumnDefinitions="*,Auto">
+            <StackPanel Spacing="2">
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Text="Verbesserungen" Classes="klein" TextTrimming="CharacterEllipsis" />
+                <TextBlock Grid.Column="1" Text="Details ›" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource Akzent}" Margin="8,0,0,0" />
+              </Grid>
+              <TextBlock Text="{Binding Anzeige.Verbesserungen}" Classes="ziffer wert" />
+              <TextBlock Text="{Binding Anzeige.LetzteVerbesserung}" Classes="klein hinweis" />
+            </StackPanel>
+            <!-- Kleiner Verlauf: Kosten bzw. Verstöße der wichtigsten Stufe, die noch welche hat -->
+            <ui:Verlaufsdiagramm Grid.Column="1" Kompakt="True" Verlauf="{Binding Verlauf}" Version="{Binding Verlauf.Version}"
+                                 Width="96" Height="34" VerticalAlignment="Bottom" Margin="12,0,0,4" />
+          </Grid>
+        </Button>
+        <Button Classes="kartenknopf plaene" Margin="6" Command="{Binding MaschinenraumCommand}" ToolTip.Tip="Leitstand öffnen: was die Rechenkerne und Inseln gerade tun">
+          <Grid ColumnDefinitions="*,Auto">
+            <StackPanel Spacing="2">
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Text="Berechnete Pläne" Classes="klein" TextTrimming="CharacterEllipsis" />
+                <TextBlock Grid.Column="1" Text="Details ›" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource Akzent}" Margin="8,0,0,0" />
+              </Grid>
+              <TextBlock Text="{Binding Anzeige.Plaene}" Classes="ziffer wert" />
+              <TextBlock Text="{Binding Anzeige.Tempo}" Classes="klein hinweis" />
+            </StackPanel>
+            <ItemsControl Grid.Column="1" Classes="kerne" Classes.rechnet="{Binding Anzeige.Rechnet}" ItemsSource="{Binding Anzeige.KachelKerne}"
+                          Height="22" VerticalAlignment="Bottom" Margin="12,0,0,4">
+              <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                  <StackPanel Orientation="Horizontal" Spacing="2" />
+                </ItemsPanelTemplate>
+              </ItemsControl.ItemsPanel>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="p:Kernanzeige">
+                  <Border Classes="kernbalken" Height="{Binding Hoehe}" />
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </Grid>
+        </Button>
       </Grid>
 
       <!-- Ansichten -->

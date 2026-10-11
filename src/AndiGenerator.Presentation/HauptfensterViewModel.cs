@@ -48,6 +48,9 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
     private readonly string? uebernahmeAus;
     private Plansitzung? sitzung;
     private Planstand? laufenderStand;
+
+    /// <summary>Spiele des Plans, über dessen Sicherung schon entschieden ist (gesichert oder bewusst verworfen).</summary>
+    private IReadOnlyList<Spiel>? sicherungEntschieden;
     private Planstand? clickTtStand;
     private IReadOnlyList<PlanQuelle> planquellen = [PlanQuelle.Laufend];
     private IReadOnlyList<Startplan> startplaene = [Startplan.Leer];
@@ -57,6 +60,8 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
     private OptionenAnsichtViewModel? optionenAnsicht;
     private TerminwunschAnsichtViewModel? terminwunschAnsicht;
     private NachbarterminAnsichtViewModel? nachbarterminAnsicht;
+    private MaschinenraumAnsichtViewModel? maschinenraumAnsicht;
+    private VerlaufAnsichtViewModel? verlaufAnsicht;
     private string titel = UeberViewModel.Programm;
     private string statuszeile = "Bitte eine click-TT-Datei oder Plandatei öffnen.";
     private bool laeuft;
@@ -122,6 +127,16 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
             {
                 nachbarterminAnsicht = null;
             }
+
+            if (ReferenceEquals(e.Dockable, maschinenraumAnsicht))
+            {
+                maschinenraumAnsicht = null;
+            }
+
+            if (ReferenceEquals(e.Dockable, verlaufAnsicht))
+            {
+                verlaufAnsicht = null;
+            }
         };
         IRootDock layout = fabrik.CreateLayout();
         fabrik.InitLayout(layout);
@@ -131,15 +146,15 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         OeffnenCommand = new AsyncRelayCommand(OeffnenAsync);
         NeuCommand = new AsyncRelayCommand(NeueDateiAsync);
         SchliessenCommand = new AsyncRelayCommand(SchliessenAsync, () => IstGeoeffnet);
-        GenerierungCommand = new RelayCommand(GenerierungUmschalten, () => IstGeoeffnet);
-        KostenoptimierungCommand = new RelayCommand(() => VerfahrenWaehlen(false), () => IstGeoeffnet && !(Laeuft && !Automodus));
-        AutomodusCommand = new RelayCommand(() => VerfahrenWaehlen(true), () => IstGeoeffnet && !(Laeuft && Automodus));
+        GenerierungCommand = new AsyncRelayCommand(GenerierungUmschaltenAsync, () => IstGeoeffnet);
+        KostenoptimierungCommand = new RelayCommand(() => VerfahrenWaehlen(false), () => IstGeoeffnet);
+        AutomodusCommand = new RelayCommand(() => VerfahrenWaehlen(true), () => IstGeoeffnet);
         ZuletztOeffnenCommand = new AsyncRelayCommand<string>(ZuletztOeffnenAsync);
         ZuletztEntfernenCommand = new RelayCommand<string>(ZuletztEntfernen);
         ZoomGroesserCommand = new RelayCommand(() => ZoombareAnsicht()?.Zoom.Groesser());
         ZoomKleinerCommand = new RelayCommand(() => ZoombareAnsicht()?.Zoom.Kleiner());
         ZoomZuruecksetzenCommand = new RelayCommand(() => ZoombareAnsicht()?.Zoom.Zuruecksetzen());
-        StartenCommand = new RelayCommand(Starten, () => IstGeoeffnet);
+        StartenCommand = new AsyncRelayCommand(StartenAsync, () => IstGeoeffnet);
         PauseCommand = new RelayCommand(PauseUmschalten, () => Laeuft);
         StoppenCommand = new RelayCommand(Stoppen, () => Laeuft);
         PlanMerkenCommand = new AsyncRelayCommand(PlanMerkenAsync, () => laufenderStand is not null);
@@ -162,6 +177,8 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         DatenCommand = new AsyncRelayCommand(DatenBearbeitenAsync, () => ZeigtArbeitsbereich);
         TerminwunschansichtCommand = new RelayCommand(TerminwuenscheOeffnen, () => ZeigtArbeitsbereich);
         NachbarterminansichtCommand = new RelayCommand(NachbartermineOeffnen, () => ZeigtArbeitsbereich);
+        MaschinenraumCommand = new RelayCommand(MaschinenraumOeffnen, () => ZeigtArbeitsbereich);
+        VerlaufCommand = new RelayCommand(VerlaufOeffnen, () => ZeigtArbeitsbereich);
 
         Zuletzt = Zeilen(Zuletztlesen());
         statusTakt = new Timer(_ => StatusAbfragen(), null, TimeSpan.FromMilliseconds(500), TimeSpan.FromMilliseconds(500));
@@ -194,6 +211,9 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
     /// <summary>Holt die Kacheln mit dem Stand der Generierung.</summary>
     public Generierungsanzeige Anzeige { get; } = new();
 
+    /// <summary>Holt den Verlauf der laufenden Suche (Maschinenraum).</summary>
+    public Suchverlauf Verlauf { get; } = new();
+
     /// <summary>Holt die zuletzt geöffneten Staffeln für die Startseite.</summary>
     public IReadOnlyList<Zuletztzeile> Zuletzt
     {
@@ -215,7 +235,7 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
     /// gemerkter Plan). Ohne Plan sind die Planansichten links deaktiviert.
     /// </summary>
     public bool HatPlan =>
-        sitzung is Plansitzung s && (laufenderStand is not null || s.Staffel.BestehenderSpielplan.Count > 0 || Planquellen.Any(q => q.Art == PlanQuellenArt.GemerkterPlan));
+        sitzung is Plansitzung s && (laufenderStand is not null || s.Staffel.BestehenderSpielplan.Count > 0 || Planquellen.Any(q => q.Eintrag is not null));
 
     /// <summary>
     /// Holt die Art der vorn liegenden Ansicht (z. B. „Kosten“), für die Hervorhebung links; leer, solange keine Staffel
@@ -256,19 +276,25 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
     /// <summary>Holt die Vergrößerung, mit der Ansichten geöffnet werden (siehe <see cref="StartzoomFestlegen"/>).</summary>
     public int Startzoom => startzoom;
 
-    /// <summary>Holt die Beschriftung des Knopfs, der die Generierung startet, anhält und fortsetzt.</summary>
+    /// <summary>
+    /// Holt, was der Hauptknopf tut (sein Tooltip): „Start“, während der Generierung „Pausieren“, in der Pause
+    /// „Fortsetzen“. Der Knopf rechts daneben schließt vor dem Start die Staffel und stoppt während der Generierung.
+    /// </summary>
     public string GenerierungText => (Laeuft, Pausiert) switch
     {
-        (false, _) => Automodus ? "Automodus starten" : "Kostenoptimierung starten",
+        (false, _) => "Start",
         (true, true) => "Fortsetzen",
         _ => "Pausieren",
     };
 
-    /// <summary>Holt einen Wert, der angibt, ob der Knopf das Pause-Symbol zeigt (Generierung läuft).</summary>
+    /// <summary>Holt einen Wert, der angibt, ob der Hauptknopf das Play-Symbol zeigt (vor dem Start und in der Pause).</summary>
+    public bool ZeigtStart => !ZeigtPause;
+
+    /// <summary>Holt einen Wert, der angibt, ob der Hauptknopf das Pause-Symbol zeigt (Generierung läuft).</summary>
     public bool ZeigtPause => Laeuft && !Pausiert;
 
-    /// <summary>Holt einen Wert, der angibt, ob der Knopf das Start-Symbol zeigt.</summary>
-    public bool ZeigtStart => !ZeigtPause;
+    /// <summary>Holt einen Wert, der angibt, ob rechts daneben „Stopp“ steht (Generierung läuft oder ruht; sonst „Schließen“).</summary>
+    public bool ZeigtStopp => Laeuft;
 
     /// <summary>
     /// Holt einen Wert, der angibt, ob „Start mit“ gewählt werden kann: nur vor dem Start. Eine laufende oder angehaltene
@@ -315,14 +341,10 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         {
             if (SetProperty(ref pausiert, value))
             {
-                OnPropertyChanged(nameof(PauseText));
                 GenerierungGeaendert();
             }
         }
     }
-
-    /// <summary>Holt die Beschriftung der Pause-Schaltfläche.</summary>
-    public string PauseText => Pausiert ? "Weiter" : "Pause";
 
     /// <summary>Holt die auswählbaren Planquellen aller Ansichten.</summary>
     public IReadOnlyList<PlanQuelle> Planquellen
@@ -340,8 +362,8 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
     /// <summary>Holt den Befehl „Schließen“: Staffel schließen und zur Startseite zurückkehren.</summary>
     public IAsyncRelayCommand SchliessenCommand { get; }
 
-    /// <summary>Holt den Befehl, der die Generierung startet, anhält oder fortsetzt (ein Knopf, der umschaltet).</summary>
-    public IRelayCommand GenerierungCommand { get; }
+    /// <summary>Holt den Befehl des Hauptknopfs: startet die Generierung, hält sie an oder setzt sie fort.</summary>
+    public IAsyncRelayCommand GenerierungCommand { get; }
 
     /// <summary>Holt den Befehl, der eine zuletzt geöffnete Staffel öffnet (Parameter: Pfad).</summary>
     public IAsyncRelayCommand<string> ZuletztOeffnenCommand { get; }
@@ -359,7 +381,7 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
     public IRelayCommand ZoomZuruecksetzenCommand { get; }
 
     /// <summary>Holt den Befehl „Generierung starten“ (mit leerem Plan wie im Original).</summary>
-    public IRelayCommand StartenCommand { get; }
+    public IAsyncRelayCommand StartenCommand { get; }
 
     /// <summary>Holt den Befehl „Pause/Weiter“.</summary>
     public IRelayCommand PauseCommand { get; }
@@ -410,6 +432,12 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
 
     /// <summary>Holt den Befehl „Nachbarmannschaften“ (gemeldete Spiele der Nachbarmannschaften, als andockbares Dokument).</summary>
     public IRelayCommand NachbarterminansichtCommand { get; }
+
+    /// <summary>Holt den Befehl „Maschinenraum“ (Rechenkerne und Inseln der laufenden Generierung, als andockbares Dokument).</summary>
+    public IRelayCommand MaschinenraumCommand { get; }
+
+    /// <summary>Holt den Befehl „Verlauf“ (Verlauf der Suche seit dem Start, als andockbares Dokument).</summary>
+    public IRelayCommand VerlaufCommand { get; }
 
     /// <summary>Holt den Befehl „Einstellungen“ (Optionen der Staffel, als andockbares Dokument).</summary>
     public IRelayCommand EinstellungenCommand { get; }
@@ -478,21 +506,40 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         }
     }
 
-    /// <summary>Holt den Eintrag „Kostenoptimierung“ im Auswahlmenü des Startknopfs.</summary>
-    public string KostenoptimierungText => Menueeintrag("Kostenoptimierung", !Automodus);
-
-    /// <summary>Holt den Eintrag „Automodus“ im Auswahlmenü des Startknopfs.</summary>
-    public string AutomodusText => Menueeintrag("Automodus", Automodus);
+    /// <summary>Holt den Hinweis zur Wahl des Verfahrens: was das gewählte tut und wie gewechselt wird.</summary>
+    public string VerfahrenErklaerung => (Automodus, Laeuft) switch
+    {
+        (true, false) => "Lenkt sich selbst: erst Verstöße der Stufen A und B herausdrängen, dann die übrigen Kriterien glätten.",
+        (false, false) => "Wie im Original: senkt die Gesamtkosten mit Ihren Gewichtungen.",
+        _ => "Wechsel jederzeit möglich – die Suche macht mit dem bisher besten Plan weiter.",
+    };
 
     /// <summary>Holt den Hinweis zum Startknopf: welches Verfahren läuft bzw. startet.</summary>
     public string VerfahrenHinweis => Automodus
-        ? "Automodus: Die Suche lenkt sich selbst über die Gewichte. Über den Pfeil rechts lässt sich zur Kostenoptimierung wechseln."
-        : "Kostenoptimierung wie im Original. Über den Pfeil rechts lässt sich zum Automodus wechseln.";
+        ? "Automodus: Die Suche lenkt sich selbst über die Gewichte. Mit „Verfahren“ links daneben lässt sich zur Kostenoptimierung wechseln, auch während der Generierung. Während der Generierung hält der Knopf sie an; „Stopp“ rechts daneben beendet sie."
+        : "Kostenoptimierung wie im Original. Mit „Verfahren“ links daneben lässt sich zum Automodus wechseln, auch während der Generierung. Während der Generierung hält der Knopf sie an; „Stopp“ rechts daneben beendet sie.";
 
-    /// <summary>Holt den Befehl „Kostenoptimierung starten“ bzw. während der Generierung „zur Kostenoptimierung wechseln“.</summary>
+    /// <summary>
+    /// Holt oder setzt, ob unter „Verfahren“ die Kostenoptimierung gewählt ist (Umschalter im Kopf). Setzen wählt das
+    /// Verfahren bzw. wechselt während der Generierung; ein Klick auf das schon gewählte lässt es gewählt.
+    /// </summary>
+    public bool KostenoptimierungGewaehlt
+    {
+        get => !Automodus;
+        set => VerfahrenUmschalten(value, auto: false);
+    }
+
+    /// <summary>Holt oder setzt, ob unter „Verfahren“ der Automodus gewählt ist (siehe <see cref="KostenoptimierungGewaehlt"/>).</summary>
+    public bool AutomodusGewaehlt
+    {
+        get => Automodus;
+        set => VerfahrenUmschalten(value, auto: true);
+    }
+
+    /// <summary>Holt den Befehl „Kostenoptimierung“ der Verfahrenswahl: wählen bzw. während der Generierung dorthin wechseln.</summary>
     public IRelayCommand KostenoptimierungCommand { get; }
 
-    /// <summary>Holt den Befehl „Automodus starten“ bzw. während der Generierung „zum Automodus wechseln“.</summary>
+    /// <summary>Holt den Befehl „Automodus“ der Verfahrenswahl: wählen bzw. während der Generierung dorthin wechseln.</summary>
     public IRelayCommand AutomodusCommand { get; }
 
     /// <summary>Holt die Einteilung der Kriterien in die Stufen A, B und C der geöffneten Staffel (sonst den Standard).</summary>
@@ -514,6 +561,10 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         dienst.Verbessert -= BeiVerbesserung;
         dienst.Dispose();
     }
+
+    /// <summary>Vor dem Beenden des Programms: Ein noch nicht gesicherter Plan wird gesichert (oder es wird gefragt).</summary>
+    /// <returns><c>false</c>, wenn der Anwender abbricht und das Programm offen bleiben soll.</returns>
+    public Task<bool> BeendenErlaubtAsync() => PlanSichernAsync("Das Programm wird beendet.");
 
     /// <summary>
     /// Legt die Vergrößerung fest, mit der die Ansichten starten (von der Oberfläche einmal nach der Größe des
@@ -915,6 +966,7 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
     {
         PlanQuellenArt.LaufendeGenerierung => "bestem Plan der letzten Generierung",
         PlanQuellenArt.ClickTtPlan => "in click-TT vorhandenem Plan",
+        PlanQuellenArt.GesicherterPlan => "gesichertem Plan",
         _ => "gemerktem Plan „" + quelle.Eintrag!.Name + "“",
     };
 
@@ -941,6 +993,14 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
 
         return stand.Pausiert ? "Angehalten – " + text : text;
     }
+
+    /// <summary>
+    /// Frage zum Vorschlag „nur Rückrunde“ (Original: „Die Vorrunde liegt in der Vergangenheit. Soll nur die Rückrunde
+    /// generiert werden?“). Das Original fragt schon ab 60 Tagen vor Beginn der Rückrunde; deshalb nennt die Frage das Datum.
+    /// </summary>
+    private static string RueckrundenFrage(DateOnly? rueckrunde) => rueckrunde is DateOnly beginn
+        ? $"Die Rückrunde beginnt am {beginn.ToString("dd.MM.yyyy", Deutsch)}, die Vorrunde ist also (fast) vorbei. Soll nur die Rückrunde generiert werden?"
+        : "Die Vorrunde liegt in der Vergangenheit. Soll nur die Rückrunde generiert werden?";
 
     /// <summary>Die Ansicht mit dem Fokus, sonst die aktive Ansicht des Hauptbereichs, sofern sie vergrößert werden kann.</summary>
     private IZoombar? ZoombareAnsicht() =>
@@ -1011,8 +1071,7 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
             return;
         }
 
-        const string Frage = "Die Generierung wird beendet; nicht gemerkte Pläne gehen verloren. Staffel trotzdem schließen?";
-        if (laufenderStand is not null && !await oberflaeche.FragenAsync("Staffel schließen", Frage))
+        if (!await PlanSichernAsync("Die Staffel wird geschlossen."))
         {
             return;
         }
@@ -1024,7 +1083,7 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         gemerkteStaende.Clear();
         Einrichtung = null;
         var offen = new List<IDockable>(ansichten);
-        offen.AddRange(new IDockable?[] { optionenAnsicht, terminwunschAnsicht, nachbarterminAnsicht }.OfType<IDockable>());
+        offen.AddRange(new IDockable?[] { optionenAnsicht, terminwunschAnsicht, nachbarterminAnsicht, maschinenraumAnsicht, verlaufAnsicht }.OfType<IDockable>());
         foreach (IDockable ansicht in offen)
         {
             fabrik.CloseDockable(ansicht);
@@ -1034,6 +1093,8 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         optionenAnsicht = null;
         terminwunschAnsicht = null;
         nachbarterminAnsicht = null;
+        maschinenraumAnsicht = null;
+        verlaufAnsicht = null;
         AnsichtOeffnen(new KostenAnsichtViewModel(this, NaechsteId()));
 
         Titel = UeberViewModel.Programm;
@@ -1054,6 +1115,8 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         DruckenCommand.NotifyCanExecuteChanged();
         TerminwunschansichtCommand.NotifyCanExecuteChanged();
         NachbarterminansichtCommand.NotifyCanExecuteChanged();
+        MaschinenraumCommand.NotifyCanExecuteChanged();
+        VerlaufCommand.NotifyCanExecuteChanged();
         SchliessenCommand.NotifyCanExecuteChanged();
         BefehleAktualisieren();
         QuellenNeuAufbauen();
@@ -1062,6 +1125,11 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
 
     private async Task<bool> StaffelOeffnenAsync(string pfad)
     {
+        if (!await PlanSichernAsync("Eine andere Staffel wird geöffnet."))
+        {
+            return false;
+        }
+
         Plansitzung neu;
         try
         {
@@ -1158,7 +1226,7 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
             rundenschritt = new Einrichtungsschritt(
                 schritte.Count + 1,
                 "Rundenplanung",
-                halb ? "Die Runde ist kürzer als 6 Monate. Welche Spiele sollen generiert werden?" : "Die Vorrunde liegt in der Vergangenheit. Welche Spiele sollen generiert werden?",
+                halb ? "Die Runde ist kürzer als 6 Monate. Welche Spiele sollen generiert werden?" : RueckrundenFrage(neu.Staffel.Rueckrundenbeginn),
                 [],
                 [
                     halb ? new Einrichtungsoption("Nur eine Halbrunde", "Vorschlag für kurze Runden") : new Einrichtungsoption("Nur die Rückrunde", "Vorschlag – die Vorrunde bleibt, wie sie ist"),
@@ -1333,6 +1401,7 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         dienst.Pausiert = false;
         dienst.Automodus = Automodus;
         Anzeige.Zuruecksetzen("erster Plan wird gesucht …");
+        Verlauf.Zuruecksetzen();
         dienst.Starten(s.Staffel, s.Optionen, ausgangsplan);
         StartplaeneAufbauen();
         Laeuft = true;
@@ -1343,7 +1412,8 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         VerfahrensansichtZeigen();
     }
 
-    private void GenerierungUmschalten()
+    /// <summary>Hauptknopf: startet eine neue Generierung bzw. hält die laufende an und setzt sie fort.</summary>
+    private async Task GenerierungUmschaltenAsync()
     {
         if (Laeuft)
         {
@@ -1351,20 +1421,42 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         }
         else
         {
+            await StartenAsync();
+        }
+    }
+
+    /// <summary>Startet eine neue Generierung; ein noch nicht gesicherter Plan wird vorher gesichert (oder es wird gefragt).</summary>
+    private async Task StartenAsync()
+    {
+        if (await PlanSichernAsync("Eine neue Generierung startet."))
+        {
             Starten();
         }
     }
 
+    /// <summary>Umschalter: Wählen eines Verfahrens; das Abwählen des gewählten stellt nur die Anzeige wieder her.</summary>
+    private void VerfahrenUmschalten(bool gewaehlt, bool auto)
+    {
+        if (gewaehlt)
+        {
+            VerfahrenWaehlen(auto);
+        }
+        else
+        {
+            OnPropertyChanged(auto ? nameof(AutomodusGewaehlt) : nameof(KostenoptimierungGewaehlt));
+        }
+    }
+
     /// <summary>
-    /// Auswahl im Menü des Startknopfs: vor dem Start wird mit diesem Verfahren gestartet; während der Generierung wird zu
-    /// ihm gewechselt, und die Suche setzt beim bisher besten Plan fort (auch aus der Pause heraus).
+    /// Wahl des Verfahrens: vor dem Start wird das Verfahren nur gewählt (gestartet wird mit dem Startknopf); während
+    /// der Generierung wird zu ihm gewechselt, und die Suche setzt beim bisher besten Plan fort (auch aus der Pause heraus).
     /// </summary>
     private void VerfahrenWaehlen(bool auto)
     {
+        bool wechsel = Automodus != auto;
         Automodus = auto;
-        if (!Laeuft)
+        if (!Laeuft || !wechsel)
         {
-            Starten();
             return;
         }
 
@@ -1400,19 +1492,13 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         }
     }
 
-    private string Menueeintrag(string verfahren, bool gewaehlt) => (Laeuft, gewaehlt) switch
-    {
-        (false, _) => verfahren + " starten",
-        (true, true) => verfahren + " (läuft)",
-        _ => (verfahren == "Automodus" ? "Zum " : "Zur ") + verfahren + " wechseln",
-    };
-
     private void VerfahrenGeaendert()
     {
         OnPropertyChanged(nameof(GenerierungText));
-        OnPropertyChanged(nameof(KostenoptimierungText));
-        OnPropertyChanged(nameof(AutomodusText));
+        OnPropertyChanged(nameof(VerfahrenErklaerung));
         OnPropertyChanged(nameof(VerfahrenHinweis));
+        OnPropertyChanged(nameof(KostenoptimierungGewaehlt));
+        OnPropertyChanged(nameof(AutomodusGewaehlt));
         KostenoptimierungCommand.NotifyCanExecuteChanged();
         AutomodusCommand.NotifyCanExecuteChanged();
     }
@@ -1423,6 +1509,7 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         OnPropertyChanged(nameof(GenerierungText));
         OnPropertyChanged(nameof(ZeigtPause));
         OnPropertyChanged(nameof(ZeigtStart));
+        OnPropertyChanged(nameof(ZeigtStopp));
         OnPropertyChanged(nameof(StartplanWaehlbar));
         PlanLoeschenAktualisieren();
     }
@@ -1485,6 +1572,74 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         }
     }
 
+    /// <summary>
+    /// Sichert den aktuellen Plan, bevor er durch einen Neustart oder das Schließen verloren ginge: Gibt es noch keinen
+    /// gesicherten Plan, wird er gesichert und eine Meldung gezeigt; sonst wird gefragt, ob der gesicherte ersetzt werden
+    /// soll, mit beiden Plänen im Vergleich. Über einen Plan wird nur einmal entschieden; ist er schon gesichert, geschieht
+    /// nichts. Während der Frage ruht die Generierung.
+    /// </summary>
+    /// <param name="anlass">Was geschieht, z. B. „Die Staffel wird geschlossen.“.</param>
+    /// <returns><c>false</c>, wenn der Anwender abbricht (der Neustart bzw. das Schließen unterbleibt).</returns>
+    private async Task<bool> PlanSichernAsync(string anlass)
+    {
+        if (sitzung is not Plansitzung s || laufenderStand is not Planstand aktuell || ReferenceEquals(aktuell.Spiele, sicherungEntschieden))
+        {
+            return true;
+        }
+
+        using IDisposable? pause = dienst.Laeuft ? dienst.Anhalten() : null;
+        GemerkterPlanEintrag? eintrag = s.GesicherterPlan();
+        Planstand? gesichert = eintrag is null ? null : GemerktenStandLaden(s, eintrag);
+        if (eintrag is null || gesichert is null)
+        {
+            if (!await SichernAsync(s, aktuell))
+            {
+                return false;
+            }
+
+            await oberflaeche.MeldenAsync(
+                "Plan gesichert",
+                $"{anlass} Der aktuelle Plan wurde deshalb als „{Plansitzung.GesicherterPlanName}“ gesichert. Sie finden ihn unter „Start mit“ und in der Planauswahl der Ansichten.");
+            return true;
+        }
+
+        if (gesichert.Spiele.SequenceEqual(aktuell.Spiele))
+        {
+            sicherungEntschieden = aktuell.Spiele;
+            return true;
+        }
+
+        var vergleich = new Planvergleich(anlass, aktuell.Bewertung, gesichert.Bewertung, Einteilung, eintrag.Geaendert);
+        switch (await oberflaeche.SicherungAbfragenAsync(vergleich))
+        {
+            case Sicherungswahl.Ueberschreiben:
+                return await SichernAsync(s, aktuell);
+            case Sicherungswahl.Behalten:
+                sicherungEntschieden = aktuell.Spiele;
+                return true;
+            default:
+                return false;
+        }
+    }
+
+    /// <summary>Schreibt den gesicherten Plan; bei einem Fehler wird gefragt, ob trotzdem fortgefahren werden soll.</summary>
+    private async Task<bool> SichernAsync(Plansitzung s, Planstand aktuell)
+    {
+        try
+        {
+            GemerkterPlanEintrag eintrag = s.PlanSichern(aktuell.Spiele);
+            gemerkteStaende.Remove(eintrag.Pfad);
+        }
+        catch (Exception fehler) when (fehler is IOException or UnauthorizedAccessException)
+        {
+            return await oberflaeche.FragenAsync("Plan sichern", $"Der Plan konnte nicht gesichert werden:{Environment.NewLine}{fehler.Message}{Environment.NewLine}Trotzdem fortfahren? Der Plan geht dann verloren.");
+        }
+
+        sicherungEntschieden = aktuell.Spiele;
+        QuellenNeuAufbauen();
+        return true;
+    }
+
     private void PauseUmschalten()
     {
         dienst.Pausiert = !dienst.Pausiert;
@@ -1494,6 +1649,8 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
     private void Stoppen()
     {
         dienst.Stoppen();
+        Anzeige.KerneAnhalten();
+        maschinenraumAnsicht?.Uebernehmen(Optimierungsstand.Leer);
         Laeuft = false;
         Pausiert = false;
         StartplaeneAufbauen();
@@ -1605,6 +1762,33 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         else
         {
             fabrik.SetActiveDockable(terminwunschAnsicht);
+        }
+    }
+
+    private void VerlaufOeffnen()
+    {
+        if (verlaufAnsicht is null)
+        {
+            verlaufAnsicht = new VerlaufAnsichtViewModel(this);
+            fabrik.AnsichtHinzufuegen(verlaufAnsicht);
+        }
+        else
+        {
+            fabrik.SetActiveDockable(verlaufAnsicht);
+        }
+    }
+
+    private void MaschinenraumOeffnen()
+    {
+        if (maschinenraumAnsicht is null)
+        {
+            maschinenraumAnsicht = new MaschinenraumAnsichtViewModel(this);
+            maschinenraumAnsicht.Uebernehmen(Laeuft ? dienst.Stand() : Optimierungsstand.Leer);
+            fabrik.AnsichtHinzufuegen(maschinenraumAnsicht);
+        }
+        else
+        {
+            fabrik.SetActiveDockable(maschinenraumAnsicht);
         }
     }
 
@@ -1729,6 +1913,11 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
                 neu.Add(PlanQuelle.ClickTt);
             }
 
+            if (s.GesicherterPlan() is GemerkterPlanEintrag gesichert)
+            {
+                neu.Add(PlanQuelle.Gesichert(gesichert));
+            }
+
             neu.AddRange(s.GemerktePlaene().Select(PlanQuelle.Gemerkt));
         }
 
@@ -1849,6 +2038,8 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         DiagrammansichtCommand.NotifyCanExecuteChanged();
         TerminwunschansichtCommand.NotifyCanExecuteChanged();
         NachbarterminansichtCommand.NotifyCanExecuteChanged();
+        MaschinenraumCommand.NotifyCanExecuteChanged();
+        VerlaufCommand.NotifyCanExecuteChanged();
     }
 
     /// <summary>Zeigt die Ansicht dieser Art: holt eine offene nach vorn oder öffnet sie neu.</summary>
@@ -1916,6 +2107,8 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
             {
                 Statuszeile = text;
                 Anzeige.Uebernehmen(stand);
+                Verlauf.Hinzufuegen(stand);
+                maschinenraumAnsicht?.Uebernehmen(stand);
             }
         });
     }

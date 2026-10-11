@@ -13,6 +13,9 @@ public enum PlanQuellenArt
     /// <summary>In click-TT vorhandener Plan (bestehender Spielplan der Datei).</summary>
     ClickTtPlan,
 
+    /// <summary>Gesicherter Plan der Staffel (gesichert, bevor ein Plan durch Neustart oder Schließen verloren ginge).</summary>
+    GesicherterPlan,
+
     /// <summary>Gemerkter Plan aus dem Staffelordner.</summary>
     GemerkterPlan,
 }

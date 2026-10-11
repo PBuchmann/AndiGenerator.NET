@@ -1,0 +1,234 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:p="using:AndiGenerator.Presentation"
+             xmlns:ui="using:AndiGenerator.UI"
+             x:Class="AndiGenerator.UI.Ansichten.MaschinenraumAnsicht"
+             x:DataType="p:MaschinenraumAnsichtViewModel">
+  <UserControl.Styles>
+    <!-- Ein Rechenkern: Balken wächst und schrumpft mit seiner Last, sanft im Takt der Statusabfrage. -->
+    <Style Selector="Border.kern">
+      <Setter Property="Background" Value="{StaticResource Akzent}" />
+      <Setter Property="CornerRadius" Value="3" />
+      <Setter Property="Margin" Value="2,0" />
+      <Setter Property="MaxWidth" Value="22" />
+      <Setter Property="VerticalAlignment" Value="Bottom" />
+      <Setter Property="Transitions">
+        <Transitions>
+          <DoubleTransition Property="Height" Duration="0:0:0.45" Easing="CubicEaseOut" />
+        </Transitions>
+      </Setter>
+    </Style>
+    <Style Selector="Border.insel">
+      <Setter Property="BorderBrush" Value="{StaticResource Linie}" />
+    </Style>
+    <Style Selector="Border.insel.beste">
+      <Setter Property="BorderBrush" Value="{StaticResource Gut}" />
+      <Setter Property="BorderThickness" Value="2" />
+    </Style>
+    <Style Selector="Border.insel.ruht">
+      <Setter Property="Opacity" Value="0.55" />
+    </Style>
+    <!-- Gewichtsskala: Ring = Ihre Gewichtung, Punkt = aktuelle Gewichtung des Automodus, blaue Linie dazwischen. -->
+    <Style Selector="Rectangle.spur">
+      <Setter Property="Height" Value="2" />
+      <Setter Property="Fill" Value="{StaticResource Linie}" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Rectangle.spur.weg">
+      <Setter Property="Height" Value="3" />
+      <Setter Property="Fill" Value="{StaticResource Akzent}" />
+    </Style>
+    <Style Selector="Ellipse.marke">
+      <Setter Property="Width" Value="6" />
+      <Setter Property="Height" Value="6" />
+      <Setter Property="Fill" Value="{StaticResource Rand}" />
+      <Setter Property="HorizontalAlignment" Value="Center" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Ellipse.marke.vorher">
+      <Setter Property="Width" Value="12" />
+      <Setter Property="Height" Value="12" />
+      <Setter Property="Fill" Value="{StaticResource Flaeche}" />
+      <Setter Property="Stroke" Value="{StaticResource Grau}" />
+      <Setter Property="StrokeThickness" Value="2" />
+    </Style>
+    <Style Selector="Ellipse.marke.jetzt">
+      <Setter Property="Width" Value="14" />
+      <Setter Property="Height" Value="14" />
+      <Setter Property="Fill" Value="{StaticResource Akzent}" />
+      <Setter Property="StrokeThickness" Value="0" />
+    </Style>
+    <Style Selector="Border.stufenmarke">
+      <Setter Property="Background" Value="{StaticResource AkzentHell}" />
+      <Setter Property="CornerRadius" Value="6" />
+      <Setter Property="Padding" Value="7,1" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+  </UserControl.Styles>
+  <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+    <StackPanel Margin="18,14" Spacing="16" MaxWidth="1200" HorizontalAlignment="Left">
+      <TextBlock Text="{Binding Ueberschrift}" FontSize="18" FontWeight="SemiBold" />
+
+      <!-- Rechenkerne (links) und Schaubild der Maschine (rechts) -->
+      <Grid ColumnDefinitions="360,12,*">
+        <Border Classes="karte" Padding="16,12">
+          <DockPanel>
+            <TextBlock DockPanel.Dock="Top" Text="Rechenkerne – Last im Verhältnis zum schnellsten" Classes="klein" Margin="0,0,0,8" />
+            <!-- Bis 32 Kerne Säulen, die sich die Breite teilen; darüber ein Raster aus Kästchen (kräftig = volle Last). -->
+            <Panel>
+              <ItemsControl ItemsSource="{Binding Anzeige.Kerne}" Height="150" VerticalAlignment="Bottom" IsVisible="{Binding !Anzeige.VieleKerne}">
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate>
+                    <UniformGrid Rows="1" />
+                  </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="p:Kernanzeige">
+                    <Border Classes="kern" Height="{Binding HoeheGross}" ToolTip.Tip="{Binding Tempo}" />
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+              <ItemsControl ItemsSource="{Binding Anzeige.Kerne}" IsVisible="{Binding Anzeige.VieleKerne}">
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate>
+                    <WrapPanel Orientation="Horizontal" ItemWidth="12" ItemHeight="12" />
+                  </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="p:Kernanzeige">
+                    <Border Width="10" Height="10" CornerRadius="2" Background="{StaticResource Akzent}" Opacity="{Binding Deckkraft}" ToolTip.Tip="{Binding Tempo}" />
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </Panel>
+          </DockPanel>
+        </Border>
+        <Border Grid.Column="2" Classes="karte" Padding="16,12">
+          <DockPanel>
+            <TextBlock DockPanel.Dock="Top" Text="So arbeitet die Maschine gerade" Classes="klein" Margin="0,0,0,4" />
+            <ui:Maschinenschaubild Schaubild="{Binding Schaubild}" Version="{Binding Schaubild.Version}" />
+          </DockPanel>
+        </Border>
+      </Grid>
+
+      <!-- Automodus: welche Gewichte er gerade gegenüber den eigenen geändert hat (oberhalb der Inseln) -->
+      <Border Classes="karte" Padding="16,12" IsVisible="{Binding Automodus}">
+        <StackPanel Spacing="10">
+          <Grid ColumnDefinitions="*,Auto">
+            <TextBlock Text="Gewichte des Automodus" FontWeight="SemiBold" />
+            <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="14">
+              <StackPanel Orientation="Horizontal" Spacing="6">
+                <Ellipse Classes="marke vorher" />
+                <TextBlock Text="Ihre Gewichtung" Classes="klein" VerticalAlignment="Center" />
+              </StackPanel>
+              <StackPanel Orientation="Horizontal" Spacing="6">
+                <Ellipse Classes="marke jetzt" />
+                <TextBlock Text="aktuell im Automodus" Classes="klein" VerticalAlignment="Center" />
+              </StackPanel>
+            </StackPanel>
+          </Grid>
+          <TextBlock Text="Noch keine Gewichte geändert – der Automodus rechnet mit Ihren Gewichtungen." Classes="klein hinweis" IsVisible="{Binding KeineGewichte}" />
+          <ItemsControl ItemsSource="{Binding Gewichte}">
+            <ItemsControl.ItemTemplate>
+              <DataTemplate x:DataType="p:Gewichtsgruppe">
+                <StackPanel Spacing="4" Margin="0,4">
+                  <StackPanel Orientation="Horizontal" Spacing="8">
+                    <Border Classes="stufenmarke">
+                      <TextBlock Text="{Binding Stufe}" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource AkzentDunkel}" />
+                    </Border>
+                    <TextBlock Text="{Binding Kriterium}" FontWeight="SemiBold" VerticalAlignment="Center" />
+                  </StackPanel>
+                  <ItemsControl ItemsSource="{Binding Zeilen}" Margin="40,0,0,0">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate x:DataType="p:Gewichtszeile">
+                        <Grid ColumnDefinitions="220,Auto,*" Margin="0,2">
+                          <TextBlock Text="{Binding Wer}" FontSize="13" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                          <ItemsControl Grid.Column="1" ItemsSource="{Binding Segmente}" VerticalAlignment="Center">
+                            <ItemsControl.ItemsPanel>
+                              <ItemsPanelTemplate>
+                                <StackPanel Orientation="Horizontal" />
+                              </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
+                            <ItemsControl.ItemTemplate>
+                              <DataTemplate x:DataType="p:Gewichtssegment">
+                                <Grid Width="26" Height="16" ColumnDefinitions="*,*">
+                                  <Rectangle Grid.Column="0" Classes="spur" Classes.weg="{Binding LinksWeg}" />
+                                  <Rectangle Grid.Column="1" Classes="spur" Classes.weg="{Binding RechtsWeg}" />
+                                  <Ellipse Grid.ColumnSpan="2" Classes="marke" Classes.vorher="{Binding Vorher}" Classes.jetzt="{Binding Jetzt}" />
+                                </Grid>
+                              </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                          </ItemsControl>
+                          <TextBlock Grid.Column="2" Text="{Binding Text}" Classes="klein" VerticalAlignment="Center" Margin="12,0,0,0" />
+                        </Grid>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </StackPanel>
+              </DataTemplate>
+            </ItemsControl.ItemTemplate>
+          </ItemsControl>
+        </StackPanel>
+      </Border>
+
+      <!-- Inseln -->
+      <ItemsControl ItemsSource="{Binding Inseln}">
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate>
+            <WrapPanel Orientation="Horizontal" ItemWidth="290" />
+          </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="p:Inselanzeige">
+            <Border Classes="karte insel" Classes.beste="{Binding IstBeste}" Classes.ruht="{Binding !Laeuft}" Padding="14,10" Margin="0,0,10,10">
+              <StackPanel Spacing="6">
+                <Grid ColumnDefinitions="*,Auto">
+                  <TextBlock Text="{Binding Titel}" FontWeight="SemiBold" />
+                  <TextBlock Grid.Column="1" Text="bester Plan" Classes="klein" Foreground="{StaticResource Gut}" IsVisible="{Binding IstBeste}" />
+                </Grid>
+                <TextBlock Text="{Binding Kosten}" Classes="ziffer wert" IsVisible="{Binding !ZeigtVerstoesse}" />
+                <!-- Automodus: Verstöße des besten Plans der Insel nach Stufen statt ihrer Kosten -->
+                <Grid ColumnDefinitions="*,*,*" IsVisible="{Binding ZeigtVerstoesse}">
+                  <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="5">
+                    <TextBlock Text="A" Classes="klein" VerticalAlignment="Bottom" Margin="0,0,0,4" />
+                    <TextBlock Text="{Binding VerstossA}" Classes="ziffer wert" />
+                  </StackPanel>
+                  <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="5">
+                    <TextBlock Text="B" Classes="klein" VerticalAlignment="Bottom" Margin="0,0,0,4" />
+                    <TextBlock Text="{Binding VerstossB}" Classes="ziffer wert" />
+                  </StackPanel>
+                  <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="5">
+                    <TextBlock Text="C" Classes="klein" VerticalAlignment="Bottom" Margin="0,0,0,4" />
+                    <TextBlock Text="{Binding VerstossC}" Classes="ziffer wert" />
+                  </StackPanel>
+                </Grid>
+                <StackPanel Spacing="3" IsVisible="{Binding !IstSpezial}">
+                  <ProgressBar Value="{Binding Fortschritt}" Maximum="100" Height="6" MinHeight="6" ToolTip.Tip="Weg bis zur Neustart-Grenze. Neu beginnt nur die schlechteste Insel, und erst wenn ihr Balken voll ist; die anderen rechnen auch mit vollem Balken weiter." />
+                  <TextBlock Text="{Binding FortschrittText}" Classes="klein hinweis" TextWrapping="Wrap" />
+                </StackPanel>
+                <TextBlock Text="{Binding Hinweis}" Classes="klein hinweis" TextWrapping="Wrap" IsVisible="{Binding IstSpezial}" />
+                <TextBlock Text="{Binding Neustarts}" Classes="klein" />
+                <!-- Die größten Kostenverursacher des besten Plans der Insel -->
+                <ItemsControl ItemsSource="{Binding Kostentreiber}" ToolTip.Tip="{Binding Strategien}">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="p:Kostentreiberzeile">
+                      <Grid ColumnDefinitions="*,96,36" Margin="0,1">
+                        <TextBlock Text="{Binding Name}" Classes="klein" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                        <Border Grid.Column="1" Height="6" CornerRadius="3" Background="{StaticResource Schwebe}" VerticalAlignment="Center">
+                          <Border Width="{Binding Breite}" CornerRadius="3" Background="{StaticResource Rand}" HorizontalAlignment="Left" />
+                        </Border>
+                        <TextBlock Grid.Column="2" Text="{Binding Prozent}" Classes="klein ziffer" HorizontalAlignment="Right" VerticalAlignment="Center" />
+                      </Grid>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </StackPanel>
+            </Border>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+
+      <TextBlock Text="{x:Static p:MaschinenraumAnsichtViewModel.Erklaerung}" Classes="klein hinweis" TextWrapping="Wrap" />
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

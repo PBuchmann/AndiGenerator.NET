@@ -42,6 +42,9 @@ public sealed class ZweitzeitZeile : ObservableObject
         }
     }
 
+    /// <summary>Holt den Platzhalter des leeren Feldes: der Vorschlag, z. B. „z. B. 14:00“.</summary>
+    public string Platzhalter => "z. B. " + Format(Vorschlag);
+
     /// <summary>Holt den Termin mit der eingegebenen Zeit (ungültige Eingaben gelten wie im Original als keine Zeit).</summary>
     public Zweitzeit Wert => new(Termin, Zweitzeit.Lesen(text));
 
