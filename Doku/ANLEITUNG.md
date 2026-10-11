@@ -117,7 +117,7 @@ click-TT überträgt nicht alles, was für einen guten Plan nötig ist, und die 
 |---|---|
 | **Gespeicherte Einstellungen** | Sie haben die Staffel schon einmal bearbeitet und dabei Gewichtungen geändert. Wählen Sie, ob Sie diese weiterverwenden oder für diese Sitzung mit den Standardeinstellungen rechnen wollen (die gespeicherten bleiben erhalten). |
 | **Gespeicherte Kriterienreihenfolge** | Sie haben für diese Staffel in der Ansicht **Qualität** eine eigene Einteilung der Kriterien in die Stufen A, B und C festgelegt (danach richtet sich der Automodus). Die Seite zeigt sie; wählen Sie, ob Sie sie weiterverwenden oder für diese Sitzung die Standardreihenfolge nehmen (die gespeicherte bleibt erhalten, bis Sie die Einteilung wieder ändern). |
-| **Rundenplanung** | Ist die Runde kürzer als sechs Monate, schlägt das Programm eine Halbrunde vor. Liegt die Vorrunde schon in der Vergangenheit, schlägt es vor, nur die Rückrunde zu planen. |
+| **Rundenplanung** | Ist die Runde kürzer als sechs Monate, schlägt das Programm eine Halbrunde vor. Beginnt die Rückrunde in weniger als 60 Tagen (oder hat sie vor weniger als 60 Tagen begonnen), schlägt es vor, nur die Rückrunde zu planen; die Frage nennt dazu den Beginn der Rückrunde. |
 | **Spiellokale** | click-TT überträgt keine Spiellokale. Haben Vereine mehrere Hallen, tragen Sie hier ein, welche Mannschaft wo spielt – sonst stimmt die Berechnung der Hallenbelegung nicht. Haben alle Vereine nur eine Halle, können Sie den Punkt überspringen. |
 | **Koppeltermine** | Die Staffel enthält Koppelwünsche oder mögliche Doppelspieltage. Das Programm leitet sie aus den Meldungen ab; bitte kontrollieren. |
 | **Auswärtskoppelwünsche** | Mannschaften möchten zwei Auswärtsspiele an einem Wochenende zusammenlegen. Bitte kontrollieren. |
@@ -205,8 +205,8 @@ Von oben nach unten:
 | *kommt voran* | Sie hat in den letzten 5 Sekunden einen besseren Plan gefunden. |
 | *sucht* | Sie rechnet; ihr Balken ist noch nicht weit gefüllt. |
 | *findet lange nichts* | Ihr Balken ist über 60 % gefüllt. |
-| *beginnt gleich neu* | Ihr Balken ist voll, und sie hat den schlechtesten Plan aller Inseln – sie wird als nächste neu begonnen. |
 | *steckt fest, rechnet weiter* | Ihr Balken ist voll, ihr Plan ist aber besser als der schlechteste – sie rechnet weiter. |
+| *beginnt gleich neu* | Ihr Balken ist voll, und sie hat den schlechtesten Plan aller Inseln – sie wird als nächste neu begonnen, auch wenn sie eben noch verbessert hat. Bei vielen Plänen je Sekunde ist die Grenze schnell wieder erreicht. |
 | *beginnt neu* | Sie wird gerade mit einem neuen Plan begonnen (kurz grau). |
 
 Neu beginnt also nur die **schlechteste** Insel, und erst wenn ihr Balken voll ist – höchstens eine je Sekunde. Bei der Kostenoptimierung kommt die **Spezial-Insel** hinzu: Sie gewichtet eine Kostenart extrem hoch und gibt gute Pläne über den Koordinator an die anderen Inseln weiter.

@@ -242,9 +242,11 @@ public sealed class Schaubild : ObservableObject
         bool voran = zuletztVoran[index] != 0 && Stopwatch.GetElapsedTime(zuletztVoran[index], jetzt).TotalSeconds < Voran;
         string taetigkeit = (neu, voran, stillstand) switch
         {
+            // Wie die Karte der Insel: Wer über der Grenze die schlechteste ist, beginnt gleich neu, auch wenn sie eben
+            // noch verbessert hat (bei vielen Plänen je Sekunde ist die Grenze schnell wieder erreicht).
             (true, _, _) => "beginnt neu",
-            (_, true, _) => "kommt voran",
             (_, _, >= 1) when insel.Schlechteste => "beginnt gleich neu",
+            (_, true, _) => "kommt voran",
             (_, _, >= 1) => "steckt fest, rechnet weiter",
             (_, _, >= Fest) => "findet lange nichts",
             _ => "sucht",

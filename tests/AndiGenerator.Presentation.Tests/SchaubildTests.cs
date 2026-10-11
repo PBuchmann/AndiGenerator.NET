@@ -59,6 +59,18 @@ public sealed class SchaubildTests
     }
 
     [Fact]
+    public void Die_schlechteste_Insel_ueber_der_Grenze_beginnt_gleich_neu_auch_wenn_sie_eben_verbessert_hat()
+    {
+        var bild = new Schaubild();
+        Inselstand schlechteste = Insel(1, 0, 3, ohneVerbesserung: 150_000) with { Schlechteste = true };
+        Inselstand andere = Insel(2, 0, 3, ohneVerbesserung: 150_000);
+        bild.Uebernehmen(Stand(1, [schlechteste, andere]), []);
+        bild.Uebernehmen(Stand(1, [schlechteste with { Erfolge = 4 }, andere with { Erfolge = 4 }]), []);
+        Assert.Equal("beginnt gleich neu", bild.Inseln[0].Taetigkeit);
+        Assert.Equal("kommt voran", bild.Inseln[1].Taetigkeit);
+    }
+
+    [Fact]
     public void In_der_Pause_entstehen_keine_Ereignisse()
     {
         var bild = new Schaubild();
