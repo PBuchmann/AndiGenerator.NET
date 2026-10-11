@@ -88,7 +88,7 @@
   <Panel>
     <StackPanel>
       <!-- Legende -->
-      <WrapPanel Orientation="Horizontal" Margin="0,0,0,10">
+      <WrapPanel Orientation="Horizontal" Margin="0,0,0,10" MaxWidth="740" HorizontalAlignment="Left">
         <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,16,4">
           <Border Classes="legende" Background="{StaticResource AkzentHell}" BorderBrush="#9DB5D3" />
           <TextBlock Text="Heimspiel möglich (Uhrzeit)" Classes="klein" VerticalAlignment="Center" />

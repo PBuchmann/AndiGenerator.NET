@@ -144,9 +144,9 @@ public sealed class Maschinenschaubild : Control
             double w = groesse.Width;
             double h = groesse.Height;
             double mitte = bild.Automodus ? h * 0.6 : h / 2;
-            koordinator = Kasten(w * 0.72, mitte, w * 0.15, KastenHoehe);
+            koordinator = Kasten(w * 0.70, mitte, w * 0.20, KastenHoehe);
             bester = Kasten(w * 0.905, mitte, w * 0.17, KastenHoehe + 8);
-            steuerpult = bild.Automodus ? Kasten(w * 0.72, Rand + 20, w * 0.17, 36) : null;
+            steuerpult = bild.Automodus ? Kasten(w * 0.70, Rand + 20, w * 0.20, 36) : null;
             (inseln, spezial) = Inselkaesten(w, h, mitte);
         }
 

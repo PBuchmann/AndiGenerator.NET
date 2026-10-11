@@ -227,19 +227,18 @@ public sealed class Verlaufsdiagramm : Control
 
         public void Zeichnen(double? zeiger)
         {
-            Teil[] teile = automodus
-                ?
-                [
-                    new("Verstöße A", p => p.A, Ganz, true, 1),
-                    new("Verstöße B", p => p.B, Ganz, true, 1),
-                    new("Verstöße C", p => p.C, Ganz, true, 1),
-                    new("Pläne/s", p => p.PlaeneProSekunde, Ganz, true, HoeheTempo),
-                ]
-                :
-                [
-                    new("Kosten des besten Plans", p => p.Kosten is >= 0 and < 1e10 ? p.Kosten : null, Kostenanzeige.Kurz, false, 2),
-                    new("Pläne/s", p => p.PlaeneProSekunde, Ganz, true, HoeheTempo),
-                ];
+            var kosten = new Teil("Kosten des besten Plans", p => p.Kosten is >= 0 and < 1e10 ? p.Kosten : null, Kostenanzeige.Kurz, false, automodus ? 1 : 2);
+            var tempo = new Teil("Pläne/s", p => p.PlaeneProSekunde, Ganz, true, HoeheTempo);
+
+            // Ging der Automodus aus einer Kostenoptimierung hervor, gibt es für die Zeit davor keine Verstöße:
+            // dann zusätzlich die Kosten, damit der ganze Verlauf zu sehen ist.
+            bool vorher = automodus && punkte.Any(p => p.A is null && p.Kosten is >= 0 and < 1e10);
+            Teil[] teile = (automodus, vorher) switch
+            {
+                (true, true) => [Verstoesse("A", p => p.A), Verstoesse("B", p => p.B), Verstoesse("C", p => p.C), kosten, tempo],
+                (true, false) => [Verstoesse("A", p => p.A), Verstoesse("B", p => p.B), Verstoesse("C", p => p.C), tempo],
+                _ => [kosten, tempo],
+            };
             Rect[] bereiche = Bereiche(teile);
             Rect alle = new(bereiche[0].TopLeft, bereiche[^2].BottomRight);
             if (automodus)
@@ -261,6 +260,8 @@ public sealed class Verlaufsdiagramm : Control
                 Fadenkreuz(x, teile, new Rect(bereiche[0].TopLeft, bereiche[^1].BottomRight));
             }
         }
+
+        private static Teil Verstoesse(string stufe, Func<Verlaufspunkt, double?> wert) => new("Verstöße " + stufe, wert, Ganz, true, 1);
 
         private static string Ganz(double wert) => wert.ToString("N0", Deutsch);
 

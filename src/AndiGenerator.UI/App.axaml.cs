@@ -14,7 +14,13 @@ namespace AndiGenerator.UI;
 public partial class App : global::Avalonia.Application
 {
     /// <inheritdoc/>
-    public override void Initialize() => AvaloniaXamlLoader.Load(this);
+    public override void Initialize()
+    {
+        AvaloniaXamlLoader.Load(this);
+
+        // Hier statt beim Fensteraufbau, damit es auch ohne Bildschirm gilt (Tests, Bildschirmfotos).
+        Platzhalterdeutsch.Anmelden();
+    }
 
     /// <inheritdoc/>
     public override void OnFrameworkInitializationCompleted()
@@ -22,7 +28,6 @@ public partial class App : global::Avalonia.Application
         if (ApplicationLifetime is IClassicDesktopStyleApplicationLifetime desktop)
         {
             Bildschirmfoto.Anmelden();
-            Platzhalterdeutsch.Anmelden();
             var fenster = new HauptfensterView();
             var oberflaeche = new AvaloniaOberflaeche(fenster);
             var modell = new HauptfensterViewModel(oberflaeche, () => new HostWindow());

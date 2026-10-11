@@ -9,7 +9,7 @@ AndiGenerator.NET ist die Weiterentwicklung des **AndiGenerators** von Andreas H
 1. [Allgemeines](#1-allgemeines)
 2. [Installation](#2-installation)
 3. [Erste Schritte](#3-erste-schritte)
-4. [Das Hauptfenster](#4-das-hauptfenster)
+4. [Das Hauptfenster](#4-das-hauptfenster) – mit [Leitstand](#41-der-leitstand) und [Verlauf](#42-der-verlauf)
 5. [Die Generierung steuern](#5-die-generierung-steuern) – mit [Der Automodus](#51-der-automodus)
 6. [Pläne beurteilen: die Ansichten](#6-pläne-beurteilen-die-ansichten)
 7. [Gewichtungen anpassen](#7-gewichtungen-anpassen)
@@ -173,21 +173,55 @@ Darunter vier **Kacheln** mit dem Stand der Generierung:
 |---|---|
 | **Gesamtkosten (bester Plan)** | Die Kosten des besten bisher gefundenen Plans; darunter, wie stark sie seit Beginn gesunken sind. Nach einer Änderung der Gewichtung gilt der Vergleich ab dieser Änderung, weil die Kosten davor anders berechnet wurden. **Details ›** öffnet die Kostenansicht. |
 | **Pflichtregeln (Stufe A)** | Ob der beste Plan die wichtigsten Regeln einhält (siehe [Qualität](#62-qualität)). **Details ›** öffnet die Qualitätsansicht. |
-| **Verbesserungen** | Wie oft der beste Plan besser wurde, und wann zuletzt (im Automodus nach der Basisoptimierung zählt nur ein besserer Plan nach A, B und C; reine Kostensenkungen dazwischen nicht). Dieselbe Zahl zeigt der Leitstand: Zu jeder Verbesserung wandert dort ein grüner Punkt, und der Kasten unter dem besten Plan nennt ihre Nummer. Rechts daneben ein kleiner Verlauf (Kosten bzw. im Automodus die Verstöße der wichtigsten Stufe, die noch welche hat). **Details ›** öffnet die Ansicht **Verlauf**: formatfüllend die Kosten bzw. die Verstöße A, B und C seit dem Start, mit den Phasen des Automodus im Hintergrund, kleinen Strichen bei Gewichtsanhebungen und darunter den Plänen je Sekunde; mit der Maus erscheinen die Werte zu einem Zeitpunkt. |
-| **Berechnete Pläne** | Anzahl der geprüften Pläne und die aktuelle Geschwindigkeit. Rechts daneben steht je Rechenkern ein kleiner Balken, der mit seiner Arbeit wächst und schrumpft (bei mehr als 16 Kernen je Gruppe von Kernen). **Details ›** öffnet den Leitstand. |
+| **Verbesserungen** | Wie oft der beste Plan besser wurde, und wann zuletzt (im Automodus nach der Basisoptimierung zählt nur ein besserer Plan nach A, B und C; reine Kostensenkungen dazwischen nicht). Dieselbe Zahl zeigt der Leitstand: Zu jeder Verbesserung wandert dort ein grüner Punkt, und der Kasten unter dem besten Plan nennt ihre Nummer. Rechts daneben ein kleiner Verlauf (Kosten bzw. im Automodus die Verstöße der wichtigsten Stufe, die noch welche hat). **Details ›** öffnet die Ansicht **Verlauf** (Abschnitt [4.2](#42-der-verlauf)). |
+| **Berechnete Pläne** | Anzahl der geprüften Pläne und die aktuelle Geschwindigkeit. Rechts daneben steht je Rechenkern ein kleiner Balken, der mit seiner Arbeit wächst und schrumpft (bei mehr als 16 Kernen je Gruppe von Kernen). **Details ›** öffnet den **Leitstand** (Abschnitt [4.1](#41-der-leitstand)). |
 
 Im Automodus entfällt die Kachel *Pflichtregeln*; die Ergebniskachel nimmt ihren Platz mit ein, *Verbesserungen* und *Berechnete Pläne* bleiben an ihrer Stelle. Die breitere Ergebniskachel zeigt oben die Phase (z. B. „Automodus · Optimierung Stufe A“) und unten unter **In Arbeit** alle Kriterien, an denen gerade gearbeitet wird (in Stufe A und B die zuletzt angehobenen, in C das, das geglättet wird) und vor jeder Verstoßzahl klein den Stand am Ende der Basisoptimierung (z. B. „A 14 → 3“).
 
 ![Ergebniskachel im Automodus](Anleitung/Bilder/18-automodus.png)
 
-**Leitstand.** Ein Klick auf die Kachel *Berechnete Pläne* zeigt, was beim Rechnen geschieht: oben links je Rechenkern ein Balken mit seiner Last (bei sehr vielen Kernen ein Raster aus Kästchen, je kräftiger, desto mehr Last), oben rechts ein **Schaubild der Maschine**: Inseln → Koordinator → bester Plan. Jede Insel zeigt den Wert ihres besten Plans und grob, was sie gerade tut: *kommt voran* (sie hat in den letzten Sekunden einen besseren Plan gefunden), *sucht*, *findet lange nichts*, *beginnt gleich neu*, *steckt fest, rechnet weiter* oder *beginnt neu*; der schmale Balken daneben zeigt, wie nah sie der Neustart-Grenze ist. Gerechnet wird in den Inseln an vielen **Suchplätzen**, die bei jedem Schritt einen Teil der Spiele neu verteilen; die Rechenkerne rechnen reihum an allen. Das Bild bleibt ruhig und bewegt sich nur bei Ereignissen: Der Koordinator übernimmt den besten Plan aller Inseln – wird dieser besser, wandert ein grüner Punkt von der Insel, die ihn gefunden hat, über den Koordinator zu *Bester Plan*, und der leuchtet kurz auf. Direkt darunter erscheint dann ein Kasten mit der Nummer der Verbesserung (wie in der Kachel *Verbesserungen*, z. B. „Verbesserung 57“) und dem, was sich geändert hat; jede weitere Verbesserung aktualisiert ihn, und 10 Sekunden nach der letzten verschwindet er wieder – oft wird ein Kriterium besser und ein anderes dafür etwas schlechter: bei der Kostenoptimierung die Kriterien mit den größten Kostendifferenzen (grün mit „−“ besser, rot mit „+“ schlechter), im Automodus die Änderungen der Verstöße, wichtigste Stufe zuerst (z. B. „A · Hallenbelegung 2 → 1“). Ändert sich kein Kriterium sichtbar, steht dort *Feinschliff*. Eine Insel, die zu lange nichts findet, startet er neu (sie wird kurz grau). Bei der Kostenoptimierung gibt die Spezial-Insel ihren Plan über den Koordinator an eine Insel weiter; im Automodus hebt das Steuerpult *Automodus* die Gewichte an und wählt den besten Plan nach A, B und C aus. Darunter stehen die **Inseln**. Jede Insel sucht für sich und hat ihren eigenen besten Plan; die Insel mit dem besten Plan ist grün umrandet. Der Balken einer Insel zeigt, wie lange sie schon nichts Besseres gefunden hat, gemessen an der Neustart-Grenze (100 T Pläne). Neu beginnt nur die **schlechteste** Insel (die mit den höchsten Kosten, im Automodus mit den aktuellen Gewichten), und erst wenn ihr Balken voll ist – höchstens eine je Sekunde. Die anderen Inseln rechnen auch mit vollem Balken weiter, denn ihr Plan ist besser als der schlechteste; der Text darunter sagt das dann ausdrücklich („Seit 147 T Plänen nichts Besseres – rechnet weiter, neu beginnt nur die schlechteste Insel“). Darunter stehen die drei größten Kostenverursacher ihres besten Plans mit ihrem Anteil an den Kosten; im Automodus stattdessen die Kriterien mit den meisten Verstößen (wichtigste Stufe zuerst) und deren Anzahl. Bei der Kostenoptimierung kommt die **Spezial-Insel** hinzu: Sie gewichtet eine Kostenart extrem hoch und gibt gute Pläne an die anderen Inseln weiter. Im Automodus zeigen die Inseln statt ihrer Kosten die Verstöße A, B und C ihres besten Plans, und unten steht, welche **Gewichte** der Automodus gerade gegenüber Ihren angehoben hat – je Kriterium und Mannschaft auf einer Skala von „sehr wenig“ bis „extrem hoch“: der Ring ist Ihre Gewichtung, der blaue Punkt die aktuelle des Automodus, die blaue Linie der Weg dazwischen. Diese Gewichte stehen oberhalb der Inseln.
-
-![Leitstand](Anleitung/Bilder/19-leitstand.png)
+Was die Kacheln *Berechnete Pläne* und *Verbesserungen* hinter **Details ›** zeigen, beschreiben die Abschnitte [4.1 Der Leitstand](#41-der-leitstand) und [4.2 Der Verlauf](#42-der-verlauf).
 
 
 Den **Hauptbereich** füllen die Ansichten. Jede Ansicht öffnet sich als Reiter; Sie können mehrere öffnen, zwischen ihnen wechseln, sie per Maus nebeneinander anordnen und mit dem **×** am Reiter schließen. In vielen Ansichten vergrößert oder verkleinert **Strg + Mausrad** (auf dem Mac auch **⌘ + Mausrad**, oder der Zoomregler) die Darstellung.
 
 Ganz unten zeigt die **Statuszeile** den Stand in einer Zeile.
+
+### 4.1 Der Leitstand
+
+Der Leitstand zeigt, was beim Rechnen geschieht. Sie öffnen ihn mit **Details ›** in der Kachel *Berechnete Pläne*. Für die Planung selbst brauchen Sie ihn nicht; er hilft aber zu verstehen, warum es gerade vorangeht oder nicht. Das Bild bleibt ruhig und bewegt sich nur, wenn etwas geschieht.
+
+![Leitstand bei der Kostenoptimierung](Anleitung/Bilder/20-leitstand-kosten.png)
+
+Von oben nach unten:
+
+- **Rechenkerne** (oben links): je Kern ein Balken mit seiner Last. Bei sehr vielen Kernen ist es ein Raster aus Kästchen – je kräftiger, desto mehr Last.
+- **Schaubild der Maschine** (oben rechts): *Inseln → Koordinator → Bester Plan*. Gerechnet wird in den Inseln, jeweils an vielen **Suchplätzen**, die bei jedem Schritt einen Teil der Spiele neu verteilen; die Rechenkerne rechnen reihum an allen. Der Koordinator übernimmt den besten Plan aller Inseln. Wird dieser besser, wandert ein **grüner Punkt** von der Insel, die ihn gefunden hat, über den Koordinator zu *Bester Plan*, und der leuchtet kurz auf.
+- **Kasten unter dem besten Plan:** Bei jedem grünen Punkt erscheint bzw. aktualisiert sich ein Kasten mit der Nummer der Verbesserung – dieselbe Zahl wie in der Kachel *Verbesserungen*, z. B. „Verbesserung 57“ – und dem, was sich geändert hat. Oft wird ein Kriterium besser und ein anderes dafür etwas schlechter. Bei der Kostenoptimierung stehen dort die Kriterien mit den größten Kostendifferenzen (grün mit „−“ besser, rot mit „+“ schlechter), im Automodus die Änderungen der Verstöße, wichtigste Stufe zuerst (z. B. „A · Hallenbelegung 2 → 1“). Ändert sich kein Kriterium sichtbar, steht dort *Feinschliff*. 10 Sekunden nach der letzten Verbesserung verschwindet der Kasten.
+- **Inseln:** Jede Insel sucht für sich und hat ihren eigenen besten Plan. Ihre Karte zeigt den Wert dieses Plans (Kosten, im Automodus die Verstöße A · B · C), was sie gerade tut (Tabelle unten) und einen Balken: Er zeigt, wie lange sie schon nichts Besseres gefunden hat, gemessen an der Neustart-Grenze (100 T Pläne). Darunter stehen die drei größten Kostenverursacher ihres Plans mit ihrem Anteil an den Kosten, im Automodus die Kriterien mit den meisten Verstößen (wichtigste Stufe zuerst). Die Insel mit dem besten Plan ist grün umrandet.
+
+| Die Insel … | Bedeutung |
+|---|---|
+| *kommt voran* | Sie hat in den letzten 5 Sekunden einen besseren Plan gefunden. |
+| *sucht* | Sie rechnet; ihr Balken ist noch nicht weit gefüllt. |
+| *findet lange nichts* | Ihr Balken ist über 60 % gefüllt. |
+| *beginnt gleich neu* | Ihr Balken ist voll, und sie hat den schlechtesten Plan aller Inseln – sie wird als nächste neu begonnen. |
+| *steckt fest, rechnet weiter* | Ihr Balken ist voll, ihr Plan ist aber besser als der schlechteste – sie rechnet weiter. |
+| *beginnt neu* | Sie wird gerade mit einem neuen Plan begonnen (kurz grau). |
+
+Neu beginnt also nur die **schlechteste** Insel, und erst wenn ihr Balken voll ist – höchstens eine je Sekunde. Bei der Kostenoptimierung kommt die **Spezial-Insel** hinzu: Sie gewichtet eine Kostenart extrem hoch und gibt gute Pläne über den Koordinator an die anderen Inseln weiter.
+
+![Leitstand im Automodus](Anleitung/Bilder/19-leitstand.png)
+
+Im **Automodus** steuert das Pult *Automodus* im Schaubild die Suche: Es hebt die Gewichte an und wählt den besten Plan nach A, B und C aus (Abschnitt [5.1](#51-der-automodus)). Oberhalb der Inseln steht dann, welche **Gewichte** der Automodus gegenüber Ihren angehoben hat – je Kriterium und Mannschaft auf einer Skala von „sehr wenig“ bis „extrem hoch“: Der Ring ist Ihre Gewichtung, der blaue Punkt die aktuelle des Automodus, die blaue Linie der Weg dazwischen.
+
+### 4.2 Der Verlauf
+
+Die Ansicht **Verlauf** öffnen Sie mit **Details ›** in der Kachel *Verbesserungen*. Sie zeigt formatfüllend, wie sich der beste Plan seit dem Start entwickelt hat: bei der Kostenoptimierung die Kosten, im Automodus die Verstöße der Stufen A, B und C. Im Hintergrund sind die Phasen des Automodus farbig hinterlegt, kleine Striche markieren die Gewichtsanhebungen, und darunter stehen die berechneten Pläne je Sekunde. Fahren Sie mit der Maus über das Diagramm, erscheinen die Werte zu diesem Zeitpunkt. Haben Sie mit der Kostenoptimierung begonnen und dann in den Automodus gewechselt, steht unter den Verstößen zusätzlich die Kurve der Kosten: Verstöße zeichnet das Programm erst ab dem Automodus auf, die Kosten dagegen von Anfang an. Dass die Kosten im Automodus wieder steigen, ist kein Rückschritt: Er hebt Gewichte an, und mit höheren Gewichten kostet derselbe Plan mehr.
+
+![Verlauf](Anleitung/Bilder/21-verlauf.png)
+
+Am Verlauf sehen Sie, ob sich weiteres Rechnen noch lohnt: Wird die Kurve flach, findet das Programm nur noch selten etwas Besseres.
 
 ## 5. Die Generierung steuern
 
@@ -211,6 +245,8 @@ Ganz unten zeigt die **Statuszeile** den Stand in einer Zeile.
 Solange eine Generierung läuft oder pausiert ist, ist *Start mit* gesperrt: Eine laufende Generierung setzt immer ihren eigenen besten Plan fort. Für einen anderen Ausgangsplan zuerst **Stopp**.
 
 **Gesicherter Plan.** Je Staffel gibt es einen gesicherten Plan. Würde der aktuelle Plan verworfen – weil eine neue Generierung startet, die Staffel geschlossen, eine andere geöffnet oder das Programm beendet wird –, sichert das Programm ihn vorher: Gibt es noch keinen gesicherten Plan, geschieht das automatisch, und eine Meldung sagt es. Gibt es schon einen, fragt es, ob er durch den aktuellen ersetzt werden soll, und zeigt dazu beide nebeneinander: die Verstöße der Stufen A (mit den harten Fehlern), B und C, die Kosten und die einzelnen Kriterien, bei denen sie sich unterscheiden; der jeweils bessere Wert ist grün, und darunter steht, welcher Plan insgesamt besser ist (erst A, dann B, dann C, zuletzt die Kosten). Sie wählen **Aktuellen Plan sichern**, **Gesicherten Plan behalten** oder **Abbrechen** (dann unterbleibt der Neustart bzw. das Schließen). Der gesicherte Plan steht wie ein gemerkter unter **Start mit** und in der Planauswahl der Ansichten. Das Original kennt keine solche Sicherung; dort geht ein nicht gemerkter Plan beim Schließen verloren.
+
+![Rückfrage beim Sichern: aktueller und gesicherter Plan im Vergleich](Anleitung/Bilder/22-sicherung.png)
 
 Änderungen an den **Einstellungen** und **Spielplandaten** übernimmt eine laufende Generierung sofort; sie rechnet vom bisher besten Plan aus weiter.
 
@@ -426,6 +462,8 @@ Mit der Setzliste geben Sie die erwartete Abschlusstabelle vor. Ziel ist, dass d
 
 Ordnen Sie die Mannschaften per Ziehen am Griff **⋮⋮** – wie in der Qualitätsansicht hängt die Zeile am Mauszeiger, und die Liste zeigt schon die neuen Plätze mit einer Lücke an der Ablagestelle (Escape bricht ab) – oder wählen Sie eine Zeile und nutzen **Nach oben** / **Nach unten**. Mit **Setzliste aktivieren** schalten Sie sie ein oder aus; ausgeschaltet ist die Liste ausgegraut, die Reihenfolge bleibt aber erhalten.
 
+![Setzliste](Anleitung/Bilder/24-setzliste.png)
+
 ### Spiellokale
 
 click-TT überträgt keine Spiellokale. Meist ist das egal, weil die Vereine nur eine Halle haben. Stehen mehrere Hallen zur Verfügung, braucht das Programm die Spiellokale, damit die maximale Zahl gleichzeitiger Heimspiele je Halle eingehalten wird.
@@ -449,7 +487,7 @@ Sollen beide Spiele an einem Tag stattfinden, braucht es genug Abstand zwischen 
 
 ### Wunschtermine
 
-![Wunschtermin bearbeiten](Anleitung/Bilder/13-wunschtermin.png)
+![Wunschtermine einer Mannschaft](Anleitung/Bilder/25-wunschtermine.png)
 
 Je Mannschaft alle Tage der Saison, wochenweise, als Kärtchen (die Legende steht darüber):
 
@@ -459,6 +497,8 @@ Je Mannschaft alle Tage der Saison, wochenweise, als Kärtchen (die Legende steh
 - **leer (weiß)**: an diesem Tag ist ein Auswärtsspiel möglich.
 
 Ein **Klick** auf einen Tag – oder die **rechte Maustaste** und dann **Bearbeiten …** – öffnet den Termin. Oben wählen Sie mit einem Umschalter **Heimspiel möglich**, **kein Heimspiel (Auswärtsspiele möglich)** oder **Sperrtermin**; beim Heimspiel stehen darunter Uhrzeit, Halle, Koppel- und Auswärtskoppeloptionen. Ein **leerer** Tag ist dabei gleich als Heimspiel zur üblichen Uhrzeit der Mannschaft vorgeschlagen (der häufigsten an diesem Wochentag, sonst 18:00) – meist genügt dann **OK**. Einen Termin **ziehen** Sie einfach auf einen anderen Tag: Das Kärtchen hängt am Mauszeiger, der Zieltag ist umrandet. Mit gedrückter **Strg**-Taste wird kopiert statt verschoben; liegt am Zieltag schon ein Termin, tauschen die beiden; Escape bricht ab. Der Tooltip eines Kärtchens nennt Tag und Termin ausgeschrieben.
+
+![Wunschtermin bearbeiten](Anleitung/Bilder/13-wunschtermin.png)
 
 Die Optionen eines Termins:
 
@@ -488,6 +528,8 @@ Ist die Anfahrt zu einem Gegner zu weit, sollen die Spiele gegen ihn am Wochenen
 ### Spielfreie Tage
 
 An einzelnen Tagen soll gar nicht gespielt werden – etwa weil die Relegationstermine noch nicht feststanden, weil nachträglich ein Spielverbot beschlossen wurde oder weil beim Anlegen der Spieltage ein Fehler passiert ist. Diese Tage wählen Sie in einem **Monatskalender** der Saison: Ein Klick auf einen Tag macht ihn spielfrei (rot), ein zweiter gibt ihn wieder frei. Wählbar sind die Tage, an denen Mannschaften Heimspielwünsche haben. Grau sind Tage, die **nicht gesperrt** sind, an denen aber keine Mannschaft einen Heimspielwunsch hat – dort wird ohnehin nicht gespielt; ist ein solcher Tag trotzdem als spielfrei eingetragen (etwa aus click-TT), ist er rot unterstrichen. Der Tooltip eines Tages nennt den Grund, die Legende steht über dem Kalender; Wochenenden sind fett. Die Monate brechen um, wenn das Fenster schmaler ist. Die Auswertung der Terminwünsche berücksichtigt die spielfreien Tage.
+
+![Spielfreie Tage](Anleitung/Bilder/23-spielfreie-tage.png)
 
 ### Pflichtspieltage
 
