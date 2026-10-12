@@ -2,10 +2,19 @@
 
 Was sich von Version zu Version für Anwender ändert. Die Einzelheiten stehen in der [Anleitung](Doku/ANLEITUNG.md), die technische Geschichte im [Migrationsplan](Doku/MIGRATIONSPLAN.md).
 
-## Unveröffentlicht
+## 0.9.7 (12.10.2026)
+
+### Neu
+
+- **Daten aus click-TT ergänzen** (erster Punkt der Einrichtung): Die **Mannschaftsmeldung** (CSV) ergibt aus den TTR-Werten der Stammspieler einen Vorschlag für die Setzliste. Der Bericht **Terminwünsche** (PDF) liefert die Spiellokal-Nummern für den Export, die Adressen der Hallen und die Bemerkungen der Vereine und zeigt Unterschiede zu den Spielplandaten. Erledigt ist der Punkt, wenn beide Dateien übernommen sind – auch in verschiedenen Sitzungen. Die Einrichtung lässt sich abbrechen.
+- **Prüfung der 60-km-Regel:** Entfernung der Hallen in Luftlinie (aus Postleitzahl und Ort, deutschlandweit und ohne Internet, oder aus der GPS-Angabe des Vereins). Hinweise „Sperre fehlt vermutlich“ und „Sperre vermutlich unnötig“ für Gastgeber mit Heimterminen unter der Woche und am Wochenende; fehlende Sperren lassen sich mit einer Rückfrage setzen, ein Protokoll zeigt welche.
+- Seite **Wochenende (60-km-Regel)**: Entfernung je Gegner, Marken „weit“ und „nah“ und die Summe aller Entfernungen.
+- **Hallenbelegung nach Hallennamen:** Ein Heimspiel einer Nachbarmannschaft in einer anderen Halle belegt die eigene Halle nicht mehr.
 
 ### Geändert
 
+- Nach dem Laden einer Datei erscheint eine deutlich sichtbare Meldung direkt unter dem Knopf.
+- In den Kacheln *Verbesserungen* und *Berechnete Pläne* steht „Details ›“ wie in der Ergebniskachel oben rechts.
 - **Download einfacher:** Oben im Release steht, welche Datei man für welchen Rechner braucht; README und Anleitung haben dieselbe Tabelle mit festen Links auf die jeweils neueste Version. Dafür tragen die Dateien für Mac und Linux keine Versionsnummer mehr im Namen.
 
 ## 0.9.6 (12.10.2026)

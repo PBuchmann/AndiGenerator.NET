@@ -142,13 +142,17 @@ Jeder Punkt lässt sich direkt auf der Seite bearbeiten; mit **Auswahl übernehm
 
 **Daten aus click-TT ergänzen.** Hier gibt es zwei Dateien. Die **Mannschaftsmeldung**: In click-TT stehen bei den Downloads der Staffel die Dateien **Mannschaftsmeldung Vorrunde (csv)** bzw. **Rückrunde (csv)**. Nach **Mannschaftsmeldung laden…** zeigt das Programm je Mannschaft den Schnitt der TTR-Werte ihrer besten Stammspieler – bei Vierer-Mannschaften der besten vier, bei Sechser-Mannschaften der besten sechs; Reservespieler zählen nicht – und ordnet die Mannschaften danach, die stärkste zuerst. Mit dem Haken **Als Setzliste übernehmen** wird diese Reihenfolge die Setzliste (und die Setzliste eingeschaltet); im Punkt **Setzliste** können Sie sie danach wie gewohnt verschieben. Gelesen werden nur Mannschaft, Rang, Status und TTR-Wert – keine Namen oder Geburtsdaten.
 
+![Daten aus click-TT: Mannschaftsmeldung als Vorschlag für die Setzliste](Anleitung/Bilder/26-daten-aus-clicktt.png)
+
 Die **Terminwünsche** (PDF): In click-TT bei den Downloads der Staffel **Terminmeldungen (pdf)**. Der Bericht nennt die Spiellokale 1 bis 3 jedes Vereins mit Adresse. Nach **Terminwünsche laden…** setzt das Programm bei jedem Heimtermin die Nummer des Spiellokals, dessen Name zur Halle aus click-TT passt – die Nummern braucht der Export nach click-TT, und von Hand eingetragene Nummern bleiben unverändert. Außerdem merkt es sich die Adressen (für die Entfernungen zwischen den Hallen, siehe unten), zeigt die **Bemerkungen der Vereine** – Wünsche, die click-TT nicht strukturiert überträgt, etwa „alle Spiele nur samstags“ – und listet **Unterschiede** zwischen Bericht und Spielplandaten, z. B. Heim- oder Sperrtermine, die ein Verein nach dem Herunterladen der XML-Datei geändert hat oder die Sie selbst angepasst haben. Termine und Sperren selbst ändert der Bericht nicht. Kontaktdaten werden nicht gelesen.
 
-Nach dem Laden erscheint direkt unter dem jeweiligen Knopf eine grün markierte Meldung mit dem Wichtigsten (z. B. wie viele Mannschaften gefunden wurden und wie viele Unterschiede es gibt), und die Seite rollt dorthin; die Einzelheiten stehen darunter.
+Nach dem Laden erscheint direkt unter dem jeweiligen Knopf eine hervorgehobene Meldung mit grünem Haken und dem Wichtigsten (z. B. wie viele Mannschaften gefunden wurden und wie viele Unterschiede es gibt), und die Seite rollt dorthin; die Einzelheiten stehen darunter.
 
-![Daten aus click-TT](Anleitung/Bilder/26-daten-aus-clicktt.png)
+![Terminwünsche geladen: Meldung, Kennzahlen und eine Karte je Mannschaft](Anleitung/Bilder/27-terminwuensche-pdf.png)
 
 **Wochenspiele (60-km-Regel).** Sobald Hallenadressen bekannt sind, prüft die Seite die Liste „keine Auswärtsspiele unter der Woche“ (Spielplandaten, Seite [Wochenende (60-km-Regel)](#wochenende-60-km-regel)). Gemessen wird die **Luftlinie** zwischen den Hallen, aus Postleitzahl und Ort – deutschlandweit und ohne Internet. Die Prüfung läuft sofort auf der Seite, sobald Hallenadressen bekannt sind, und erneut, wenn Sie die Grenze ändern (Vorgabe 60 km); sie ändert nichts an den Daten. Für den Plan zählen allein die Häkchen auf der Seite *Wochenende (60-km-Regel)*. Geprüft wird ein Paar nur, wenn der Gastgeber Heimtermine **unter der Woche und am Wochenende** gemeldet hat – nur dann entscheidet die Sperre, wann gespielt wird. Unter der Woche heißt Montag bis Donnerstag, der Freitag nur, wenn er in den **Einstellungen** nicht zum Wochenende zählt. Hat in der Staffel niemand solche Termine (etwa in einer Verbandsliga, die nur samstags und sonntags spielt), sagt die Seite das, und es gibt nichts zu prüfen. **Sperre fehlt vermutlich:** Die Hallen liegen weiter auseinander als die Grenze, aber der Gast hat den Gastgeber nicht gesperrt. **Sperre vermutlich unnötig:** gesperrt, obwohl die Hallen höchstens so weit auseinander liegen. Sperrt ein Verein pauschal alle Gegner, ist das sein Wunsch – die Seite nennt ihn, bewertet ihn aber nicht. Da die Wettspielordnung kein festes Maß vorgibt, sind das zunächst nur Hinweise. Mit **Fehlende Sperren setzen…** setzen Sie nach einer einzigen Rückfrage (sie listet alle Treffer) alle fehlenden Sperren auf einmal; vorhandene bleiben. Danach zeigt das **Protokoll** auf der Seite Zeitpunkt, Grenze und je Sperre „Gast spielt bei Gastgeber nur am Wochenende (km)“. Gespeichert wird mit der Seite; **Standard** nimmt die gesetzten Sperren wieder zurück. Unnötige Sperren ändert das Programm nicht.
+
+![Wochenspiele – Prüfung der 60-km-Regel](Anleitung/Bilder/28-wochenspiele.png)
 
 ### 3.4 Terminwünsche kontrollieren
 
@@ -550,6 +554,8 @@ dazu die einzelnen **Begegnungen** dieser Mannschaft.
 Ist die Anfahrt zu einem Gegner zu weit, sollen die Spiele gegen ihn am Wochenende stattfinden. Hier legen Sie fest, für welche Paarungen das gilt. Ob der Freitag zum Wochenende zählt, stellen Sie in den **Einstellungen** ein.
 
 Sind die Terminwünsche (PDF) übernommen (siehe [3.3](#33-die-staffel-einrichten)), steht neben jedem Gegner die Entfernung der Hallen in Luftlinie. Die Marke **weit** zeigt einen Gegner über 60 km ohne Häkchen, der auch unter der Woche Heimspiele hat; **nah** ein Häkchen bei höchstens 60 km. Beides sind nur Hinweise. Unter der Liste steht die Summe der Entfernungen zu allen Gegnern (je einfache Strecke).
+
+![Wochenende (60-km-Regel) mit Entfernungen](Anleitung/Bilder/29-wochenende-entfernungen.png)
 
 ### Spielfreie Tage
 

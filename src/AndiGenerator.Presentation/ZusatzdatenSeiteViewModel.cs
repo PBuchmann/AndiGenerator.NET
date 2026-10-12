@@ -93,9 +93,10 @@ public sealed class ZusatzdatenSeiteViewModel : DatenSeiteViewModel
             }
 
             List<Mannschaftsabgleich> m = abgleich.Mannschaften.ToList();
+            static string Anzahl(int n, string eins, string mehr) => n.ToString(CultureInfo.InvariantCulture) + " " + (n == 1 ? eins : mehr);
             return string.Create(
                 CultureInfo.InvariantCulture,
-                $"„{pdfDatei}“ geladen: {m.Count(x => x.Gefunden)} von {m.Count} Mannschaften gefunden, {m.Sum(x => x.Abweichungen.Count)} Unterschiede, {m.Count(x => x.Bemerkung.Length > 0)} Bemerkungen. Einzelheiten und die Prüfung der Wochenspiele stehen darunter.");
+                $"„{pdfDatei}“ geladen: {m.Count(x => x.Gefunden)} von {m.Count} Mannschaften gefunden, {Anzahl(m.Sum(x => x.Abweichungen.Count), "Unterschied", "Unterschiede")}, {Anzahl(m.Count(x => x.Bemerkung.Length > 0), "Bemerkung", "Bemerkungen")}. Einzelheiten und die Prüfung der Wochenspiele stehen darunter.");
         }
     }
 
@@ -298,9 +299,10 @@ public sealed class ZusatzdatenSeiteViewModel : DatenSeiteViewModel
     /// <param name="pfad">Pfad der PDF-Datei.</param>
     public void TerminwuenscheLaden(string pfad)
     {
+        Terminwunschabgleich neu;
         try
         {
-            Abgleichen(Bearbeitung.TerminwuenscheAbgleichen(pfad), Path.GetFileName(pfad));
+            neu = Bearbeitung.TerminwuenscheAbgleichen(pfad);
         }
         catch (Exception ex) when (ex is FormatException or IOException or UnauthorizedAccessException)
         {
@@ -308,7 +310,17 @@ public sealed class ZusatzdatenSeiteViewModel : DatenSeiteViewModel
             return;
         }
 
+        TerminwuenscheAnzeigen(neu, Path.GetFileName(pfad));
+    }
+
+    /// <summary>Zeigt einen fertigen Abgleich an, als wäre der Bericht gerade geladen worden (auch für die Bildschirmfotos).</summary>
+    /// <param name="neu">Der Abgleich.</param>
+    /// <param name="dateiname">Name der PDF-Datei für die Anzeige.</param>
+    public void TerminwuenscheAnzeigen(Terminwunschabgleich neu, string dateiname)
+    {
+        ArgumentNullException.ThrowIfNull(neu);
         Fehler = string.Empty;
+        Abgleichen(neu, dateiname);
         AenderungMelden();
     }
 

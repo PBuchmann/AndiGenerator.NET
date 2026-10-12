@@ -159,12 +159,12 @@
             <ItemsControl ItemsSource="{Binding FehlendeSperren}">
               <ItemsControl.ItemTemplate>
                 <DataTemplate x:DataType="p:Wochenspielzeile">
-                  <Grid ColumnDefinitions="18,260,30,260,70" Margin="0,1">
+                  <Grid ColumnDefinitions="18,*,Auto,*,Auto" Margin="0,1">
                     <TextBlock Text="!" FontWeight="Bold" Foreground="{StaticResource Schlecht}" />
                     <TextBlock Grid.Column="1" Text="{Binding Gast}" TextTrimming="CharacterEllipsis" />
-                    <TextBlock Grid.Column="2" Text="bei" Foreground="{StaticResource Tinte2}" />
+                    <TextBlock Grid.Column="2" Text="bei" Foreground="{StaticResource Tinte2}" Margin="8,0" />
                     <TextBlock Grid.Column="3" Text="{Binding Heim}" TextTrimming="CharacterEllipsis" />
-                    <TextBlock Grid.Column="4" Text="{Binding Entfernung}" Classes="ziffer" HorizontalAlignment="Right" />
+                    <TextBlock Grid.Column="4" Text="{Binding Entfernung}" Classes="ziffer" HorizontalAlignment="Right" MinWidth="64" TextAlignment="Right" Margin="8,0,0,0" />
                   </Grid>
                 </DataTemplate>
               </ItemsControl.ItemTemplate>
@@ -194,12 +194,12 @@
             <ItemsControl ItemsSource="{Binding UnnoetigeSperren}">
               <ItemsControl.ItemTemplate>
                 <DataTemplate x:DataType="p:Wochenspielzeile">
-                  <Grid ColumnDefinitions="18,260,30,260,70" Margin="0,1">
+                  <Grid ColumnDefinitions="18,*,Auto,*,Auto" Margin="0,1">
                     <TextBlock Text="!" FontWeight="Bold" Foreground="{StaticResource Tinte2}" />
                     <TextBlock Grid.Column="1" Text="{Binding Gast}" TextTrimming="CharacterEllipsis" />
-                    <TextBlock Grid.Column="2" Text="bei" Foreground="{StaticResource Tinte2}" />
+                    <TextBlock Grid.Column="2" Text="bei" Foreground="{StaticResource Tinte2}" Margin="8,0" />
                     <TextBlock Grid.Column="3" Text="{Binding Heim}" TextTrimming="CharacterEllipsis" />
-                    <TextBlock Grid.Column="4" Text="{Binding Entfernung}" Classes="ziffer" HorizontalAlignment="Right" />
+                    <TextBlock Grid.Column="4" Text="{Binding Entfernung}" Classes="ziffer" HorizontalAlignment="Right" MinWidth="64" TextAlignment="Right" Margin="8,0,0,0" />
                   </Grid>
                 </DataTemplate>
               </ItemsControl.ItemTemplate>

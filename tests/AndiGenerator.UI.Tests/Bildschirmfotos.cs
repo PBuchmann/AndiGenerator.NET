@@ -4,6 +4,8 @@
 
 using AndiGenerator.Application;
 using AndiGenerator.Domain.Optionen;
+using AndiGenerator.Domain.Stammdaten;
+using AndiGenerator.Persistence.Terminwuensche;
 using AndiGenerator.Presentation;
 using AndiGenerator.Presentation.Tests;
 using AndiGenerator.Rendering;
@@ -68,7 +70,9 @@ public sealed class Bildschirmfotos : IDisposable
         }
 
         Directory.CreateDirectory(ziel);
-        await EinrichtungAsync(ziel, StaffelKopieren("erststart", mitAenderungen: false));
+        IReadOnlyList<Vereinsmeldung> bericht = Terminmeldungen(
+            Plansitzung.Oeffnen(StaffelKopieren("bericht", mitAenderungen: false), Path.Combine(ordner, "basis-bericht")).Staffel.Mannschaften);
+        await EinrichtungAsync(ziel, StaffelKopieren("erststart", mitAenderungen: false), bericht);
         string datei = StaffelKopieren("daten", mitAenderungen: true);
         await HauptfensterAsync(ziel, datei);
         Dialoge(ziel, datei);
@@ -78,7 +82,7 @@ public sealed class Bildschirmfotos : IDisposable
     /// Startseite und Einrichtung: Die Einrichtung erscheint nur, wenn es etwas zu klären gibt – sicher beim ersten Öffnen
     /// einer click-TT-Datei (ohne <c>.modifications</c>).
     /// </summary>
-    private static async Task EinrichtungAsync(string ziel, string datei)
+    private static async Task EinrichtungAsync(string ziel, string datei, IReadOnlyList<Vereinsmeldung> bericht)
     {
         string basis = Path.Combine(Path.GetDirectoryName(datei)!, "..", "basis");
         var o = new TestOberflaeche { DateiZumOeffnen = datei, Sammeln = true };
@@ -104,12 +108,75 @@ public sealed class Bildschirmfotos : IDisposable
 
                 Oberflaeche.Zeichnen(fenster);
                 Foto(ziel, "26-daten-aus-clicktt", fenster, o);
+
+                // Terminwünsche (PDF): erfundene Spiellokale mit echten Postleitzahlen; die Seite rollt zur Meldung.
+                if (zusatz.Seite is { Seiten: [ZusatzdatenSeiteViewModel seite2] } dialog2)
+                {
+                    seite2.TerminwuenscheAnzeigen(dialog2.Bearbeitung.TerminwuenscheAbgleichen(bericht), "Terminmeldungen.pdf");
+                    Oberflaeche.Zeichnen(fenster);
+                    Foto(ziel, "27-terminwuensche-pdf", fenster, o);
+
+                    // Bis zur Liste „Sperre fehlt vermutlich“ mit dem Knopf rollen, die Kacheln darüber bleiben im Bild.
+                    Button setzen = fenster.GetVisualDescendants().OfType<Button>().First(b => Equals(b.Content, "Fehlende Sperren setzen…"));
+                    setzen.BringIntoView(new Rect(0, 0, setzen.Bounds.Width, setzen.Bounds.Height + 40));
+                    Oberflaeche.Zeichnen(fenster);
+                    Foto(ziel, "28-wochenspiele", fenster, o);
+                }
             }
         }
         finally
         {
             fenster.Close();
         }
+    }
+
+    /// <summary>
+    /// Bericht „Terminwünsche“ wie aus click-TT: je Verein erfundene Spiellokale an echten Orten (Postleitzahl und Ort, für
+    /// die Entfernungen), die Termine der Staffel, zwei Bemerkungen und ein absichtlicher Unterschied.
+    /// </summary>
+    private static List<Vereinsmeldung> Terminmeldungen(IReadOnlyList<Mannschaft> mannschaften)
+    {
+        (string Plz, string Ort)[] orte =
+        [
+            ("55116", "Mainz"), ("55232", "Alzey"), ("56068", "Koblenz"), ("67547", "Worms"), ("55543", "Bad Kreuznach"),
+            ("55218", "Ingelheim am Rhein"), ("55276", "Oppenheim"), ("55286", "Wörrstadt"), ("55411", "Bingen am Rhein"),
+            ("54290", "Trier"), ("55469", "Simmern"), ("55606", "Kirn"),
+        ];
+        string[] roemisch = [string.Empty, string.Empty, " II", " III", " IV", " V", " VI", " VII", " VIII", " IX", " X"];
+        List<string> vereine = mannschaften.Select(m => m.VereinsId).Distinct().ToList();
+        var meldungen = new List<Vereinsmeldung>();
+        for (int i = 0; i < mannschaften.Count; i++)
+        {
+            Mannschaft m = mannschaften[i];
+            (string plz, string ort) = orte[vereine.IndexOf(m.VereinsId) % orte.Length];
+            string halle = m.Heimspieltermine.Select(t => t.Halle).FirstOrDefault(h => h.Length > 0) ?? ("Sporthalle " + ort);
+            List<GemeldeterHeimtermin> termine = m.Heimspieltermine.Select(t => new GemeldeterHeimtermin(t.Zeitpunkt, halle, "2", "-")).ToList();
+            if (i == 0 && termine.Count > 1)
+            {
+                termine.RemoveAt(termine.Count - 1);
+            }
+
+            string bemerkung = (i % 4) switch
+            {
+                1 => "Bitte möglichst keine Spiele vor 19:30 Uhr.",
+                3 => "Heimspiele bevorzugt freitags.",
+                _ => string.Empty,
+            };
+            meldungen.Add(new Vereinsmeldung(
+                "Verein " + ort,
+                int.Parse(m.VereinsId, System.Globalization.CultureInfo.InvariantCulture),
+                "Erwachsene" + roemisch[Math.Min(m.Nummer, roemisch.Length - 1)],
+                new Dictionary<int, Spiellokaladresse>
+                {
+                    [1] = new(halle, "Schulstraße " + (i + 3).ToString(System.Globalization.CultureInfo.InvariantCulture), plz, ort),
+                    [2] = new("Turnhalle " + ort, "Am Sportplatz 1", plz, ort),
+                },
+                bemerkung,
+                termine,
+                m.Sperrtermine));
+        }
+
+        return meldungen;
     }
 
     /// <summary>Mannschaftsmeldung im Format von click-TT mit erfundenen TTR-Werten (je Mannschaft 4 oder 5 Stammspieler).</summary>
@@ -305,6 +372,13 @@ public sealed class Bildschirmfotos : IDisposable
             daten.MouseDown(punkt, MouseButton.Left);
             daten.MouseUp(punkt, MouseButton.Left);
             Oberflaeche.Zeichnen(daten);
+
+            // Wochenende (60-km-Regel) mit Entfernungen, nachdem die Terminwünsche übernommen sind.
+            a.Bearbeitung.TerminwuenscheUebernehmen(a.Bearbeitung.TerminwuenscheAbgleichen(Terminmeldungen(a.Sitzung.Staffel.Mannschaften)), "Terminmeldungen.pdf");
+            WochenendeSeiteViewModel wochenende = SeiteWaehlen<WochenendeSeiteViewModel>(daten, a.Dialog);
+            wochenende.Mannschaft = wochenende.Namen.First(n => n != wochenende.Mannschaft);
+            Oberflaeche.Zeichnen(daten);
+            Foto(ziel, "29-wochenende-entfernungen", daten, o);
         }
         finally
         {
