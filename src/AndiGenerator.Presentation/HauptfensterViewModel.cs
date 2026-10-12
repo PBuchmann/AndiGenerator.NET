@@ -149,13 +149,13 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         Layout = layout;
         AlleAnsichtenAktualisieren();
 
-        OeffnenCommand = new AsyncRelayCommand(OeffnenAsync);
-        NeuCommand = new AsyncRelayCommand(NeueDateiAsync);
+        OeffnenCommand = new AsyncRelayCommand(OeffnenAsync, () => !ZeigtEinrichtung);
+        NeuCommand = new AsyncRelayCommand(NeueDateiAsync, () => !ZeigtEinrichtung);
         SchliessenCommand = new AsyncRelayCommand(SchliessenAsync, () => IstGeoeffnet);
         GenerierungCommand = new AsyncRelayCommand(GenerierungUmschaltenAsync, () => IstGeoeffnet);
         KostenoptimierungCommand = new RelayCommand(() => VerfahrenWaehlen(false), () => IstGeoeffnet);
         AutomodusCommand = new RelayCommand(() => VerfahrenWaehlen(true), () => IstGeoeffnet);
-        ZuletztOeffnenCommand = new AsyncRelayCommand<string>(ZuletztOeffnenAsync);
+        ZuletztOeffnenCommand = new AsyncRelayCommand<string>(ZuletztOeffnenAsync, _ => !ZeigtEinrichtung);
         ZuletztEntfernenCommand = new RelayCommand<string>(ZuletztEntfernen);
         ZoomGroesserCommand = new RelayCommand(() => ZoombareAnsicht()?.Zoom.Groesser());
         ZoomKleinerCommand = new RelayCommand(() => ZoombareAnsicht()?.Zoom.Kleiner());
@@ -261,13 +261,16 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         {
             if (SetProperty(ref einrichtung, value))
             {
-                // Während der Einrichtung sind Ansichten, Spielplandaten, Einstellungen und Drucken links gesperrt.
+                // Während der Einrichtung sind Öffnen, Neu, Ansichten, Spielplandaten, Einstellungen und Drucken links gesperrt.
                 OnPropertyChanged(nameof(ZeigtEinrichtung));
                 OnPropertyChanged(nameof(ZeigtArbeitsbereich));
                 OnPropertyChanged(nameof(AktiveAnsicht));
                 EinstellungenCommand.NotifyCanExecuteChanged();
                 DatenCommand.NotifyCanExecuteChanged();
                 DruckenCommand.NotifyCanExecuteChanged();
+                OeffnenCommand.NotifyCanExecuteChanged();
+                NeuCommand.NotifyCanExecuteChanged();
+                ZuletztOeffnenCommand.NotifyCanExecuteChanged();
                 AnsichtsbefehleAktualisieren();
             }
         }
@@ -1217,6 +1220,20 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
     private EinrichtungViewModel? EinrichtungErstellen(Plansitzung neu)
     {
         var schritte = new List<Einrichtungsschritt>();
+
+        // Als erster Punkt weitere Exporte aus click-TT (nicht im Original); schon übernommen: als erledigt markiert.
+        string vermerk = neu.DatenBearbeiten().MannschaftsmeldungVermerk;
+        string zusatztext = vermerk.Length == 0
+            ? ZusatzdatenSeiteViewModel.Einrichtungstext
+            : ZusatzdatenSeiteViewModel.Einrichtungstext + "\n\nSchon erledigt: Mannschaftsmeldung " + vermerk + ". Sie können sie hier erneut laden.";
+        var zusatzschritt = new Einrichtungsschritt(1, "Daten aus click-TT ergänzen", zusatztext, [], []);
+        if (vermerk.Length > 0)
+        {
+            zusatzschritt.Zustand = Schrittzustand.Erledigt;
+        }
+
+        schritte.Add(zusatzschritt);
+
         IReadOnlyList<string> abweichungen = neu.AbweichungenVomStandard();
         if (abweichungen.Count > 0)
         {
@@ -1272,14 +1289,21 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
             schritte.AddRange(neu.Erststarthinweise().Select((h, i) => new Einrichtungsschritt(bisher + i + 1, h)));
         }
 
-        return schritte.Count == 0
+        return schritte.TrueForAll(s => s.Zustand == Schrittzustand.Erledigt)
             ? null
             : new EinrichtungViewModel(
                 neu.Staffel.Name + " einrichten",
                 schritte,
                 schritt => EinrichtungsschrittUebernehmenAsync(neu, schritt, stufenschritt, rundenschritt, vorschlag),
-                schritt => SeiteErzeugen(neu, schritt),
-                EinrichtungAbschliessen);
+                schritt => ReferenceEquals(schritt, zusatzschritt) ? ZusatzseiteErzeugen(neu) : SeiteErzeugen(neu, schritt),
+                EinrichtungAbschliessen,
+                SchliessenAsync);
+    }
+
+    private DatenDialogViewModel ZusatzseiteErzeugen(Plansitzung s)
+    {
+        Datenbearbeitung bearbeitung = s.DatenBearbeiten();
+        return new DatenDialogViewModel(bearbeitung, [new ZusatzdatenSeiteViewModel(bearbeitung, oberflaeche)]);
     }
 
     private DatenDialogViewModel? SeiteErzeugen(Plansitzung s, Einrichtungsschritt schritt)

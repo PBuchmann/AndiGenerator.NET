@@ -90,11 +90,44 @@ public sealed class Bildschirmfotos : IDisposable
             Foto(ziel, "01-startseite", fenster, o);
             await modell.OeffnenCommand.ExecuteAsync(null);
             Foto(ziel, "02-einrichtung", fenster, o);
+
+            // Daten aus click-TT: Mannschaftsmeldung mit erfundenen TTR-Werten als Vorschlag für die Setzliste.
+            if (modell.Einrichtung is { } einrichtung && einrichtung.Schritte.FirstOrDefault(s => s.Titel == "Daten aus click-TT ergänzen") is { } zusatz)
+            {
+                einrichtung.Aktiv = zusatz;
+                if (zusatz.Seite is { Seiten: [ZusatzdatenSeiteViewModel seite] } dialog)
+                {
+                    string csv = Path.Combine(Path.GetDirectoryName(datei)!, "Mannschaftsmeldung.csv");
+                    await File.WriteAllTextAsync(csv, Mannschaftsmeldung(dialog.Bearbeitung.Setzliste().Reihenfolge));
+                    seite.AufstellungenLaden(csv);
+                }
+
+                Oberflaeche.Zeichnen(fenster);
+                Foto(ziel, "26-daten-aus-clicktt", fenster, o);
+            }
         }
         finally
         {
             fenster.Close();
         }
+    }
+
+    /// <summary>Mannschaftsmeldung im Format von click-TT mit erfundenen TTR-Werten (je Mannschaft 4 oder 5 Stammspieler).</summary>
+    private static string Mannschaftsmeldung(IReadOnlyList<string> mannschaften)
+    {
+        var text = new System.Text.StringBuilder("MannschaftName;SpielerMannschaftNr;SpielerRang;TTR;SpielerStatus\n");
+        for (int i = 0; i < mannschaften.Count; i++)
+        {
+            string name = mannschaften[i];
+            int nummer = name.Split(' ')[^1] switch { "II" => 2, "III" => 3, "IV" => 4, "V" => 5, "VI" => 6, _ => 1 };
+            int basis = 1350 + ((i * 137) % 400);
+            for (int rang = 1; rang <= 4 + (i % 2); rang++)
+            {
+                text.Append(System.Globalization.CultureInfo.InvariantCulture, $"{name};{nummer};{rang};{basis - (rang * 23)};\n");
+            }
+        }
+
+        return text.ToString();
     }
 
     /// <summary>Hauptfenster mit Kostenoptimierung und Automodus, alle Ansichten, Spielplandaten.</summary>

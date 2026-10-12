@@ -1,0 +1,36 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:p="using:AndiGenerator.Presentation"
+             xmlns:ui="using:AndiGenerator.UI"
+             x:Class="AndiGenerator.UI.Seiten.ZusatzdatenSeite"
+             x:DataType="p:ZusatzdatenSeiteViewModel">
+  <StackPanel Margin="12" Spacing="8" HorizontalAlignment="Left">
+    <TextBlock Classes="abschnitt" Text="Mannschaftsmeldung – Vorschlag für die Setzliste" />
+    <TextBlock Classes="erklaerung" Text="{x:Static p:ZusatzdatenSeiteViewModel.AufstellungsErklaerung}" TextWrapping="Wrap" MaxWidth="700" />
+    <Button Classes="seitenknopf" Command="{Binding AufstellungenLadenCommand}" HorizontalAlignment="Left">
+      <StackPanel Orientation="Horizontal" Spacing="8">
+        <ui:Symbol Daten="{StaticResource SymbolOeffnen}" Groesse="18" />
+        <TextBlock Text="Mannschaftsmeldung laden…" VerticalAlignment="Center" />
+      </StackPanel>
+    </Button>
+    <TextBlock Text="{Binding Fehler}" Classes="fehler" TextWrapping="Wrap" MaxWidth="700" IsVisible="{Binding HatFehler}" />
+    <StackPanel Spacing="8" IsVisible="{Binding HatAufstellungen}">
+      <TextBlock Text="{Binding AufstellungsHinweis}" Classes="leer" TextWrapping="Wrap" MaxWidth="700" />
+      <Border Classes="karte" Padding="6" Width="560" HorizontalAlignment="Left">
+        <ItemsControl ItemsSource="{Binding Staerken}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="p:Staerkezeile">
+              <Grid ColumnDefinitions="44,*,110,130" MinHeight="32">
+                <TextBlock Text="{Binding PlatzText}" Classes="ziffer" FontWeight="SemiBold" Foreground="{StaticResource Tinte2}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,12,0" />
+                <TextBlock Grid.Column="1" Text="{Binding Mannschaft}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                <TextBlock Grid.Column="2" Text="{Binding SchnittText}" Classes="ziffer" VerticalAlignment="Center" />
+                <TextBlock Grid.Column="3" Text="{Binding SpielerText}" Foreground="{StaticResource Tinte2}" VerticalAlignment="Center" />
+              </Grid>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </Border>
+      <CheckBox Content="Als Setzliste übernehmen und die Setzliste aktivieren" IsChecked="{Binding AlsSetzliste}" />
+    </StackPanel>
+  </StackPanel>
+</UserControl>

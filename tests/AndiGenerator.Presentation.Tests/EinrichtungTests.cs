@@ -36,7 +36,8 @@ public sealed class EinrichtungTests
             {
                 abgeschlossen++;
                 return Task.CompletedTask;
-            });
+            },
+            () => Task.CompletedTask);
 
         Assert.Same(entscheidung, einrichtung.Aktiv);
         Assert.True(entscheidung.IstEntscheidung);
@@ -104,7 +105,8 @@ public sealed class EinrichtungTests
             {
                 abgeschlossen++;
                 return Task.CompletedTask;
-            });
+            },
+            () => Task.CompletedTask);
 
         Assert.False(angeklickt.IstGewaehlt);
         angeklickt.Auswahl = 0;

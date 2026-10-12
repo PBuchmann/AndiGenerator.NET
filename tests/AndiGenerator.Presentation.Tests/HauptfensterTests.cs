@@ -930,6 +930,23 @@ public sealed class HauptfensterTests : IDisposable
     }
 
     [Fact]
+    public async Task Abbrechen_der_Einrichtung_schliesst_die_Staffel_und_Oeffnen_ist_solange_gesperrt()
+    {
+        await hf.OeffnenCommand.ExecuteAsync(null);
+        EinrichtungViewModel einrichtung = Assert.IsType<EinrichtungViewModel>(hf.Einrichtung);
+        Assert.Equal("Daten aus click-TT ergänzen", einrichtung.Schritte[0].Titel);
+        Assert.False(hf.OeffnenCommand.CanExecute(null));
+        Assert.False(hf.NeuCommand.CanExecute(null));
+
+        await einrichtung.AbbrechenCommand.ExecuteAsync(null);
+
+        Assert.False(hf.IstGeoeffnet);
+        Assert.Null(hf.Einrichtung);
+        Assert.True(hf.OeffnenCommand.CanExecute(null));
+        Assert.True(hf.NeuCommand.CanExecute(null));
+    }
+
+    [Fact]
     public async Task Schliessen_fuehrt_zur_Startseite_zurueck()
     {
         Assert.False(hf.SchliessenCommand.CanExecute(null));

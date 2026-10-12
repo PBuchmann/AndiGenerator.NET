@@ -90,6 +90,7 @@
     <Grid DockPanel.Dock="Bottom" ColumnDefinitions="*,Auto" Margin="28,0,28,20">
       <TextBlock Text="Beim Abschließen gilt bei Entscheidungen die angeklickte Wahl; Punkte ohne Wahl bleiben unverändert. Alles lässt sich später unter „Spielplandaten“, „Einstellungen“ und in der Qualitätsansicht ändern." Classes="klein" FontSize="13" TextWrapping="Wrap" VerticalAlignment="Center" Margin="0,0,16,0" />
       <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
+        <Button Classes="gross" Content="Abbrechen" Command="{Binding AbbrechenCommand}" ToolTip.Tip="Staffel schließen – schon übernommene Punkte bleiben gespeichert" />
         <Button Classes="gross primaer" Content="Abschließen" Command="{Binding AbschliessenCommand}" />
       </StackPanel>
     </Grid>
