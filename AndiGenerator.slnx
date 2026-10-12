@@ -3,6 +3,7 @@
     <Project Path="src/AndiGenerator.Domain/AndiGenerator.Domain.csproj" />
     <Project Path="src/AndiGenerator.Engine/AndiGenerator.Engine.csproj" />
     <Project Path="src/AndiGenerator.Persistence/AndiGenerator.Persistence.csproj" />
+    <Project Path="src/AndiGenerator.Import/AndiGenerator.Import.csproj" />
     <Project Path="src/AndiGenerator.Rendering/AndiGenerator.Rendering.csproj" />
     <Project Path="src/AndiGenerator.Application/AndiGenerator.Application.csproj" />
     <Project Path="src/AndiGenerator.Presentation/AndiGenerator.Presentation.csproj" />

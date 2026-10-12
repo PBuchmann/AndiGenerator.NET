@@ -17,6 +17,10 @@
     <PackageVersion Include="Dock.Avalonia.Themes.Fluent" Version="12.1.0.6" />
     <PackageVersion Include="Dock.Model.Mvvm" Version="12.1.0.6" />
   </ItemGroup>
+  <!-- PDF lesen (Bericht „Terminwünsche“ aus click-TT, nur im Baustein Import), Apache-2.0. -->
+  <ItemGroup>
+    <PackageVersion Include="PdfPig" Version="0.1.16" />
+  </ItemGroup>
   <!-- Installation und Updates über GitHub Releases (MIGRATIONSPLAN E12), MIT. Version wie das Werkzeug vpk im Release-Workflow. -->
   <ItemGroup>
     <PackageVersion Include="Velopack" Version="0.0.1298" />

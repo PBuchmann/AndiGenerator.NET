@@ -11,6 +11,7 @@ Ausnahme Schriften: Die SIL Open Font License (OFL 1.1) erlaubt das Einbetten un
 | Avalonia.Skia (mit SkiaSharp, HarfBuzzSharp) | MIT | PDF-Ausdruck (`SKDocument`, Phase 7) |
 | Dock.Avalonia, Dock.Avalonia.Themes.Fluent, Dock.Model.Mvvm | MIT | Andock-Layout der Ansichten (E15) |
 | CommunityToolkit.Mvvm | MIT | ViewModels (E3) |
+| PdfPig (UglyToad.PdfPig) | Apache-2.0 | Bericht „Terminwünsche“ aus click-TT lesen (nur im Baustein `AndiGenerator.Import`) |
 | Velopack | MIT | Installation und Updates über GitHub Releases (E12); Version gemeinsam mit `VPK_VERSION` in `release.yml` |
 | Schriften IBM Plex Sans und IBM Plex Mono (je Regular, Medium, SemiBold, Bold), © 2017 IBM Corp. | SIL OFL 1.1 | Schrift der Oberfläche, eingebettet unter `src/AndiGenerator.UI/Assets/Fonts` mit `OFL.txt` |
 | xunit | Apache-2.0 | nur Tests |

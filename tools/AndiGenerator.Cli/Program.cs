@@ -25,6 +25,11 @@ try
         return await TurnierBefehl.Ausfuehren(args[1..]);
     }
 
+    if (args.Length is 2 or 3 && args[0] == "pdftext")
+    {
+        return PdfTextBefehl.Ausfuehren(args[1], args.Length == 3 ? args[2] : null);
+    }
+
     if (args.Length == 2 && args[0] == "info")
     {
         return InfoBefehl.Ausfuehren(args[1]);

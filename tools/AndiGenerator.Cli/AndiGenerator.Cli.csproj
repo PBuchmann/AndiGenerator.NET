@@ -10,5 +10,6 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\AndiGenerator.Persistence\AndiGenerator.Persistence.csproj" />
     <ProjectReference Include="..\..\src\AndiGenerator.Engine\AndiGenerator.Engine.csproj" />
+    <ProjectReference Include="..\..\src\AndiGenerator.Import\AndiGenerator.Import.csproj" />
   </ItemGroup>
 </Project>

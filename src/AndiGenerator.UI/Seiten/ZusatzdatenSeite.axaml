@@ -32,5 +32,53 @@
       </Border>
       <CheckBox Content="Als Setzliste übernehmen und die Setzliste aktivieren" IsChecked="{Binding AlsSetzliste}" />
     </StackPanel>
+
+    <TextBlock Classes="abschnitt" Text="Terminwünsche – Spiellokale, Adressen und Bemerkungen" Margin="0,16,0,0" />
+    <TextBlock Classes="erklaerung" Text="{x:Static p:ZusatzdatenSeiteViewModel.TerminwunschErklaerung}" TextWrapping="Wrap" MaxWidth="700" />
+    <Button Classes="seitenknopf" Command="{Binding TerminwuenscheLadenCommand}" HorizontalAlignment="Left">
+      <StackPanel Orientation="Horizontal" Spacing="8">
+        <ui:Symbol Daten="{StaticResource SymbolOeffnen}" Groesse="18" />
+        <TextBlock Text="Terminwünsche laden…" VerticalAlignment="Center" />
+      </StackPanel>
+    </Button>
+    <StackPanel Spacing="8" IsVisible="{Binding HatTerminwuensche}">
+      <TextBlock Text="{Binding TerminwunschZusammenfassung}" Classes="leer" TextWrapping="Wrap" MaxWidth="700" />
+      <TextBlock Classes="spaltenkopf" Text="BEMERKUNGEN DER VEREINE" IsVisible="{Binding HatBemerkungen}" />
+      <ItemsControl ItemsSource="{Binding Bemerkungen}" IsVisible="{Binding HatBemerkungen}" MaxWidth="700" HorizontalAlignment="Left">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="p:Hinweiszeile">
+            <TextBlock TextWrapping="Wrap" Margin="0,2">
+              <Run Text="{Binding Mannschaft}" FontWeight="SemiBold" />
+              <Run Text=": " />
+              <Run Text="{Binding Text}" />
+            </TextBlock>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+      <TextBlock Classes="spaltenkopf" Text="UNTERSCHIEDE ZU DEN SPIELPLANDATEN" IsVisible="{Binding HatAbweichungen}" />
+      <ItemsControl ItemsSource="{Binding Abweichungen}" IsVisible="{Binding HatAbweichungen}" MaxWidth="700" HorizontalAlignment="Left">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="p:Hinweiszeile">
+            <TextBlock TextWrapping="Wrap" Margin="0,2">
+              <Run Text="{Binding Mannschaft}" FontWeight="SemiBold" />
+              <Run Text=": " />
+              <Run Text="{Binding Text}" />
+            </TextBlock>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+      <TextBlock Classes="spaltenkopf" Text="SPIELLOKALE" />
+      <ItemsControl ItemsSource="{Binding Spiellokale}" MaxWidth="700" HorizontalAlignment="Left">
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="p:Hinweiszeile">
+            <TextBlock TextWrapping="Wrap" Margin="0,1">
+              <Run Text="{Binding Mannschaft}" FontWeight="SemiBold" />
+              <Run Text=" – " />
+              <Run Text="{Binding Text}" />
+            </TextBlock>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+    </StackPanel>
   </StackPanel>
 </UserControl>
