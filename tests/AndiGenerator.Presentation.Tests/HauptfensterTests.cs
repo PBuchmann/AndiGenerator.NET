@@ -256,6 +256,8 @@ public sealed class HauptfensterTests : IDisposable
         hf.QualitaetsansichtCommand.Execute(null);
         QualitaetAnsichtViewModel qualitaet = Assert.Single(Ansichten<QualitaetAnsichtViewModel>());
 
+        // Wie auf dem UI-Thread: Statusabfragen der laufenden Suche nicht gleichzeitig mit dem Test (sonst Wettlauf mit Stoppen).
+        o.Sammeln = true;
         await hf.StartenCommand.ExecuteAsync(null);
         try
         {
