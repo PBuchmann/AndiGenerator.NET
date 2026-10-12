@@ -16,6 +16,12 @@
         <TextBlock Text="Mannschaftsmeldung laden…" VerticalAlignment="Center" />
       </StackPanel>
     </Button>
+    <Border x:Name="AufstellungsBanner" IsVisible="{Binding HatAufstellungen}" Background="{StaticResource AkzentHell}" BorderBrush="{StaticResource Gut}" BorderThickness="4,0,0,0" CornerRadius="4" Padding="12,10" MaxWidth="700" HorizontalAlignment="Left">
+      <Grid ColumnDefinitions="Auto,*">
+        <ui:Symbol Daten="{StaticResource SymbolHaken}" Farbe="{StaticResource Gut}" Groesse="22" VerticalAlignment="Top" Margin="0,0,10,0" />
+        <TextBlock Grid.Column="1" Text="{Binding AufstellungsErgebnis}" FontWeight="SemiBold" TextWrapping="Wrap" VerticalAlignment="Center" />
+      </Grid>
+    </Border>
     <TextBlock Text="{Binding Fehler}" Classes="fehler" TextWrapping="Wrap" MaxWidth="700" IsVisible="{Binding HatFehler}" />
     <StackPanel Spacing="8" IsVisible="{Binding HatAufstellungen}">
       <TextBlock Text="{Binding AufstellungsHinweis}" Classes="leer" TextWrapping="Wrap" MaxWidth="700" />
@@ -45,6 +51,12 @@
         <TextBlock Text="Terminwünsche laden…" VerticalAlignment="Center" />
       </StackPanel>
     </Button>
+    <Border x:Name="TerminwunschBanner" IsVisible="{Binding HatTerminwuensche}" Background="{StaticResource AkzentHell}" BorderBrush="{StaticResource Gut}" BorderThickness="4,0,0,0" CornerRadius="4" Padding="12,10" MaxWidth="700" HorizontalAlignment="Left">
+      <Grid ColumnDefinitions="Auto,*">
+        <ui:Symbol Daten="{StaticResource SymbolHaken}" Farbe="{StaticResource Gut}" Groesse="22" VerticalAlignment="Top" Margin="0,0,10,0" />
+        <TextBlock Grid.Column="1" Text="{Binding TerminwunschErgebnis}" FontWeight="SemiBold" TextWrapping="Wrap" VerticalAlignment="Center" />
+      </Grid>
+    </Border>
     <StackPanel Spacing="10" IsVisible="{Binding HatTerminwuensche}" MaxWidth="760" HorizontalAlignment="Left">
       <TextBlock Text="{Binding TerminwunschDatei}" Classes="leer" />
       <!-- Kennzahlen als Kacheln -->
@@ -110,6 +122,90 @@
           </DataTemplate>
         </ItemsControl.ItemTemplate>
       </ItemsControl>
+    </StackPanel>
+
+    <TextBlock Classes="abschnitt" Text="Wochenspiele – Prüfung der 60-km-Regel" Margin="0,16,0,0" />
+    <TextBlock Classes="erklaerung" Text="{x:Static p:ZusatzdatenSeiteViewModel.WochenspielErklaerung}" TextWrapping="Wrap" MaxWidth="700" />
+    <TextBlock Classes="leer" Text="Für die Prüfung fehlen die Hallenadressen – bitte zuerst die Terminwünsche laden." TextWrapping="Wrap" MaxWidth="700" IsVisible="{Binding !HatWochenspielpruefung}" />
+    <StackPanel Spacing="10" IsVisible="{Binding HatWochenspielpruefung}" MaxWidth="760" HorizontalAlignment="Left">
+      <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding HatWochentagsgastgeber}">
+        <TextBlock Text="Grenze (km Luftlinie):" VerticalAlignment="Center" />
+        <NumericUpDown Value="{Binding Grenze}" Minimum="10" Maximum="500" Increment="5" FormatString="0" Width="120" />
+      </StackPanel>
+      <ItemsControl ItemsSource="{Binding WochenspielKennzahlen}" IsVisible="{Binding HatWochentagsgastgeber}">
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate>
+            <WrapPanel />
+          </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="p:Kachelwert">
+            <Border Classes="karte" Padding="14,10" Margin="0,0,10,10" Width="175">
+              <StackPanel Spacing="2">
+                <TextBlock Text="{Binding Wert}" Classes="ziffer" FontSize="22" FontWeight="SemiBold" Foreground="{StaticResource Akzent}" />
+                <TextBlock Text="{Binding Text}" FontSize="12" Foreground="{StaticResource Tinte2}" TextWrapping="Wrap" />
+              </StackPanel>
+            </Border>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+      <Border BorderBrush="{StaticResource Akzent}" BorderThickness="3,0,0,0" Padding="10,6" Background="{StaticResource Schwebe}">
+        <TextBlock Text="{Binding WochenspielStatus}" TextWrapping="Wrap" />
+      </Border>
+      <TextBlock Text="{Binding WochenspielText}" Classes="leer" TextWrapping="Wrap" IsVisible="{Binding WochenspielText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+        <Border Classes="karte" Padding="16,12" IsVisible="{Binding HatFehlendeSperren}">
+          <StackPanel Spacing="6">
+            <TextBlock Text="Sperre fehlt vermutlich – weiter als die Grenze, aber keine Sperre" FontSize="15" FontWeight="SemiBold" />
+            <ItemsControl ItemsSource="{Binding FehlendeSperren}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="p:Wochenspielzeile">
+                  <Grid ColumnDefinitions="18,260,30,260,70" Margin="0,1">
+                    <TextBlock Text="!" FontWeight="Bold" Foreground="{StaticResource Schlecht}" />
+                    <TextBlock Grid.Column="1" Text="{Binding Gast}" TextTrimming="CharacterEllipsis" />
+                    <TextBlock Grid.Column="2" Text="bei" Foreground="{StaticResource Tinte2}" />
+                    <TextBlock Grid.Column="3" Text="{Binding Heim}" TextTrimming="CharacterEllipsis" />
+                    <TextBlock Grid.Column="4" Text="{Binding Entfernung}" Classes="ziffer" HorizontalAlignment="Right" />
+                  </Grid>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <Button Classes="seitenknopf" Command="{Binding SperrenSetzenCommand}" HorizontalAlignment="Left" Margin="0,6,0,0" Content="Fehlende Sperren setzen…" />
+          </StackPanel>
+        </Border>
+        <Border Classes="karte" Padding="16,12" IsVisible="{Binding HatSperrenProtokoll}">
+          <StackPanel Spacing="6">
+            <TextBlock Text="Protokoll – gesetzte Sperren" FontSize="15" FontWeight="SemiBold" />
+            <TextBlock Text="{Binding SperrenProtokollKopf}" Classes="leer" TextWrapping="Wrap" />
+            <ItemsControl ItemsSource="{Binding SperrenProtokoll}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="sys:String">
+                  <Grid ColumnDefinitions="18,*" Margin="0,1">
+                    <TextBlock Text="•" FontWeight="Bold" Foreground="{StaticResource Akzent}" />
+                    <SelectableTextBlock Grid.Column="1" Text="{Binding}" TextWrapping="Wrap" />
+                  </Grid>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </Border>
+        <Border Classes="karte" Padding="16,12" IsVisible="{Binding HatUnnoetigeSperren}">
+          <StackPanel Spacing="6">
+            <TextBlock Text="Sperre vermutlich unnötig – Sperre, obwohl höchstens so weit wie die Grenze" FontSize="15" FontWeight="SemiBold" />
+            <ItemsControl ItemsSource="{Binding UnnoetigeSperren}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="p:Wochenspielzeile">
+                  <Grid ColumnDefinitions="18,260,30,260,70" Margin="0,1">
+                    <TextBlock Text="!" FontWeight="Bold" Foreground="{StaticResource Tinte2}" />
+                    <TextBlock Grid.Column="1" Text="{Binding Gast}" TextTrimming="CharacterEllipsis" />
+                    <TextBlock Grid.Column="2" Text="bei" Foreground="{StaticResource Tinte2}" />
+                    <TextBlock Grid.Column="3" Text="{Binding Heim}" TextTrimming="CharacterEllipsis" />
+                    <TextBlock Grid.Column="4" Text="{Binding Entfernung}" Classes="ziffer" HorizontalAlignment="Right" />
+                  </Grid>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </Border>
     </StackPanel>
   </StackPanel>
 </UserControl>

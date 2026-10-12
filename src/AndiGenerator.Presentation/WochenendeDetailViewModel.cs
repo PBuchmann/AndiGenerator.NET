@@ -2,6 +2,7 @@
 // SPDX-FileCopyrightText: 2026 Peter Buchmann
 // SPDX-License-Identifier: GPL-3.0-only
 
+using System.Globalization;
 using AndiGenerator.Application;
 
 namespace AndiGenerator.Presentation;
@@ -21,12 +22,37 @@ public sealed class WochenendeDetailViewModel : DatenSeiteViewModel
         : base(bearbeitung, "60km Regel")
     {
         this.mannschaft = mannschaft;
-        Gegner = bearbeitung.Mannschaftsnamen().Where(n => n != mannschaft).Select(n => new AuswahlZeile(n, false, AenderungMelden)).ToList();
+        IReadOnlyList<Hallenentfernung> entfernungen = bearbeitung.Hallenentfernungen(mannschaft);
+        Gegner = entfernungen.Select(e => new Gegnerzeile(e, AenderungMelden)).ToList();
+        HatEntfernungen = Gegner.Any(g => g.Entfernung.Length > 0);
+        List<Hallenentfernung> bekannt = entfernungen.Where(e => e.Luftlinie is not null).ToList();
+        Gesamt = bekannt.Sum(e => e.Luftlinie ?? 0).ToString("0", CultureInfo.InvariantCulture) + " km";
+        GesamtText = bekannt.Count == Gegner.Count
+            ? string.Create(CultureInfo.InvariantCulture, $"Gesamt zu allen {bekannt.Count} Gegnern (je einfache Strecke)")
+            : string.Create(CultureInfo.InvariantCulture, $"Gesamt zu {bekannt.Count} von {Gegner.Count} Gegnern (je einfache Strecke; ohne Adresse: {string.Join(", ", Gegner.Where(g => g.Entfernung.Length == 0).Select(g => g.Name))})");
         Laden();
     }
 
+    /// <summary>Holt die Erklärung zu Entfernungen und Hinweisen.</summary>
+    public static string Entfernungserklaerung =>
+        "Entfernung in Luftlinie zwischen den Hallen. „weit“: über 60 km ohne Häkchen, obwohl der Gegner auch unter der "
+        + "Woche Heimspiele hat. „nah“: Häkchen bei höchstens 60 km. Die Wettspielordnung legt kein Maß fest – nur Hinweise.";
+
+    /// <summary>Holt den Hinweis, woher die Entfernungen kommen.</summary>
+    public static string OhneEntfernungen =>
+        "Entfernungen erscheinen, wenn die Terminwünsche (PDF) aus click-TT übernommen sind – in der Einrichtung unter „Daten aus click-TT ergänzen“.";
+
     /// <summary>Holt alle anderen Mannschaften mit Häkchen.</summary>
-    public IReadOnlyList<AuswahlZeile> Gegner { get; }
+    public IReadOnlyList<Gegnerzeile> Gegner { get; }
+
+    /// <summary>Holt einen Wert, der angibt, ob Entfernungen bekannt sind (Hallenadressen aus den Terminwünschen).</summary>
+    public bool HatEntfernungen { get; }
+
+    /// <summary>Holt die Summe der Entfernungen zu allen Gegnern mit bekannter Halle, z. B. „612 km“.</summary>
+    public string Gesamt { get; }
+
+    /// <summary>Holt die Beschriftung der Summe (wie viele Gegner, einfache Strecke).</summary>
+    public string GesamtText { get; }
 
     /// <inheritdoc/>
     public override bool IstStandard =>
@@ -51,7 +77,7 @@ public sealed class WochenendeDetailViewModel : DatenSeiteViewModel
 
     private void Anzeigen(IReadOnlyList<string> gewaehlt)
     {
-        foreach (AuswahlZeile g in Gegner)
+        foreach (Gegnerzeile g in Gegner)
         {
             g.Setzen(gewaehlt.Contains(g.Name, StringComparer.OrdinalIgnoreCase));
         }

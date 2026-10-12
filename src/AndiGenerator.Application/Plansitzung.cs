@@ -190,7 +190,7 @@ public sealed class Plansitzung
     /// <summary>Erzeugt eine Arbeitskopie der Spielplandaten für den Dialog „Spielplandaten bearbeiten“.</summary>
     /// <returns>Die Arbeitskopie; der Standard ist bei click-TT-Dateien der unveränderte Import.</returns>
     public Datenbearbeitung DatenBearbeiten() =>
-        new(stand, IstClickTtDatei ? ClickTtNachPlanDaten.Laden(Pfad) : null);
+        new(stand, IstClickTtDatei ? ClickTtNachPlanDaten.Laden(Pfad) : null) { FreitagZaehltZumWochenende = Optionen.FreitagZaehltZumWochenende };
 
     /// <summary>
     /// Übernimmt eine bearbeitete Arbeitskopie wie das Original (<c>DoOnAfterPlanChanged</c> mit <c>SavePlan</c>): Bei

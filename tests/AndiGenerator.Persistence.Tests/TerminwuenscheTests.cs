@@ -91,6 +91,17 @@ public sealed class TerminwuenscheTests : IDisposable
     }
 
     [Fact]
+    public void Fax_und_GPS_hinter_dem_Ort_werden_erkannt()
+    {
+        Spiellokaladresse a = Spiellokaladresse.Aus("Dreifachhalle Nord, Hallenweg 10, 12345 Nordstadt, Fax: GPS:50.63599°N 7.35227 °E");
+
+        Assert.Equal(("Dreifachhalle Nord", "Hallenweg 10", "12345", "Nordstadt"), (a.Name, a.Strasse, a.Postleitzahl, a.Ort));
+        Assert.Equal(new AndiGenerator.Domain.Geo.Koordinate(50.63599, 7.35227), a.Lage);
+        Assert.Equal(a, Spiellokaladresse.Aus(a.Text));
+        Assert.Null(Spiellokaladresse.Aus("Halle Süd, 54321 Südstadt").Lage);
+    }
+
+    [Fact]
     public void Anderer_Text_wird_abgelehnt() =>
         Assert.Throws<FormatException>(() => TerminwunschBericht.Lesen([new Textzeile(0, 120, [new Textwort(28, "Spielplan")])]));
 

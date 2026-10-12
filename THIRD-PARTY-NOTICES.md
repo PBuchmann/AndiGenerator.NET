@@ -4,6 +4,8 @@ Für alles, was mit dem Programm ausgeliefert oder im Quellcode als Bibliothek v
 
 Ausnahme Schriften: Die SIL Open Font License (OFL 1.1) erlaubt das Einbetten und Weitergeben mit GPL-Software; der Lizenztext liegt neben den Schriftdateien, der reservierte Name „Plex“ wird nicht für veränderte Schriften verwendet.
 
+Ausnahme Daten: Die Postleitzahlen-Tabelle `src/AndiGenerator.Persistence/Geo/plz-de.csv.gz` (Postleitzahl, Ort, Breite, Länge) ist aus `DE.zip` von **GeoNames** (https://www.geonames.org, Postleitzahlen-Export https://download.geonames.org/export/zip/) abgeleitet: auf diese vier Spalten gekürzt und komprimiert (`tools/geonames/plz_tabelle.py`). Die Daten stehen unter **Creative Commons Attribution 4.0** (CC BY 4.0, https://creativecommons.org/licenses/by/4.0/); Namensnennung: „Postleitzahlen-Daten: GeoNames (geonames.org), CC BY 4.0, gekürzt“. Sie dienen nur der Entfernung in Luftlinie zwischen Hallen (Prüfung der 60-km-Regel) und sind keine Programmbibliothek.
+
 | Paket | Lizenz | Verwendung |
 |---|---|---|
 | .NET 10 Runtime/BCL | MIT | Laufzeit |

@@ -88,8 +88,9 @@ public sealed class UeberViewModel
 
     /// <summary>Holt den Hinweis auf die verwendeten Bibliotheken.</summary>
     public static string Drittbibliotheken =>
-        "Verwendet Avalonia, Dock, CommunityToolkit.Mvvm, SkiaSharp und Velopack (jeweils MIT-Lizenz) sowie die Schriften IBM Plex Sans und Mono "
-        + "(SIL Open Font License 1.1); Einzelheiten in THIRD-PARTY-NOTICES.md.";
+        "Verwendet Avalonia, Dock, CommunityToolkit.Mvvm, SkiaSharp und Velopack (jeweils MIT-Lizenz), PdfPig (Apache-2.0) sowie die "
+        + "Schriften IBM Plex Sans und Mono (SIL Open Font License 1.1). Postleitzahlen-Daten: GeoNames (geonames.org), CC BY 4.0, "
+        + "gekürzt. Einzelheiten in THIRD-PARTY-NOTICES.md.";
 
     /// <summary>Holt die Programmversion.</summary>
     public string Version { get; }
