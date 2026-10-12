@@ -147,6 +147,49 @@ public class TurniereTests
     }
 
     [Fact]
+    public void Jede_Mannschaft_richtet_aus_hat_Vorrang_vor_den_Meldungen()
+    {
+        // Ohne Verstoß müssten A am 3. und B am 4. Tag ausrichten; dann bliebe C oder D ohne Turnier.
+        DateOnly tag3 = new(2026, 11, 29);
+        DateOnly tag4 = new(2026, 12, 6);
+        Turnierbereitschaft beides = Turnierbereitschaft.Heim | Turnierbereitschaft.Auswaerts;
+        Turniermeldung Mit(string name, DateOnly? nurHeim) => new(
+            name,
+            new[] { Tag1, Tag2, tag3, tag4 }.ToDictionary(t => t, t => t == nurHeim ? Turnierbereitschaft.Heim : beides),
+            "Halle " + name,
+            true,
+            string.Empty);
+
+        Turnierpruefungsergebnis ergebnis = Pruefen(
+            [.. Vierer(Tag1, "A", "B", "C", "D"), .. Vierer(Tag2, "C", "D", "A", "B"), .. Vierer(tag3, "A", "C", "B", "D"), .. Vierer(tag4, "B", "D", "A", "C")],
+            Mit("A", tag3),
+            Mit("B", tag4),
+            Mit("C", null),
+            Mit("D", null));
+
+        Assert.All(ergebnis.Ausgerichtet.Values, n => Assert.Equal(1, n));
+        Assert.Single(ergebnis.Turniere.SelectMany(t => t.Hinweise));
+    }
+
+    [Fact]
+    public void Spieltagssperren_und_spielfreie_Tage_der_Staffel_werden_gemeldet()
+    {
+        static Mannschaft Team(string name, params DateOnly[] sperren) => new(name, string.Empty, string.Empty, string.Empty, 1, string.Empty, -1, [], sperren, [], [], [], []);
+        Staffel staffel = Staffel.Leer with
+        {
+            Mannschaften = [Team("A"), Team("B", Tag1), Team("C")],
+            SpielfreieTage = [Tag1],
+        };
+        Turniermeldung[] meldungen = [Meldung("A", Turnierbereitschaft.Heim), Meldung("B", Turnierbereitschaft.Auswaerts), Meldung("C", Turnierbereitschaft.Auswaerts)];
+
+        Turnierpruefungsergebnis ergebnis = Turnierpruefung.Pruefen(Turniererkennung.Erkennen(Dreier(Tag1, "A", "B", "C")), staffel, meldungen);
+
+        Assert.Equal("15.11.2026: In der Staffel ist dieser Tag spielfrei.", ergebnis.Befunde[0]);
+        Assert.Contains("15.11.2026: B hat an diesem Tag eine Spieltagssperre.", ergebnis.Befunde);
+        Assert.Equal([Tag2], ergebnis.Turniere[0].Ausweichtage);
+    }
+
+    [Fact]
     public void Fehlende_und_doppelte_Paarungen_werden_gemeldet()
     {
         List<Spiel> spiele = [.. Dreier(Tag1, "A", "B", "C"), Partie(Tag2, 10, "A", "B")];

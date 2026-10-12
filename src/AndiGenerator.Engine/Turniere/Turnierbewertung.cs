@@ -8,4 +8,5 @@ namespace AndiGenerator.Engine.Turniere;
 /// <param name="Turnier">Das Turnier.</param>
 /// <param name="Ausrichter">Gewählter Ausrichter oder <c>null</c>, wenn keiner der möglichen ausrichten kann.</param>
 /// <param name="Hinweise">Verstöße gegen die Meldungen.</param>
-public sealed record Turnierbewertung(Turnier Turnier, string? Ausrichter, IReadOnlyList<string> Hinweise);
+/// <param name="Ausweichtage">Bei Befunden: Tage, an denen das Turnier ohne Befund stattfinden könnte.</param>
+public sealed record Turnierbewertung(Turnier Turnier, string? Ausrichter, IReadOnlyList<string> Hinweise, IReadOnlyList<DateOnly> Ausweichtage);

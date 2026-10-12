@@ -4,7 +4,7 @@
 
 namespace AndiGenerator.Engine.Turniere;
 
-/// <summary>Ergebnis von <see cref="Turnierpruefung.Pruefen"/>.</summary>
+/// <summary>Ergebnis von <see cref="Turnierpruefung"/>.</summary>
 /// <param name="Turniere">Die Turniere mit Ausrichter und Hinweisen.</param>
 /// <param name="Befunde">Alle Verstöße und Auffälligkeiten.</param>
 /// <param name="Ausgerichtet">Wie oft jede Mannschaft ausrichtet.</param>

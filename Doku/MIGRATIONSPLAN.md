@@ -645,12 +645,13 @@ Befund: Billigere Pläne nach der Kostenfunktion des Originals sind nicht automa
 
 - **3er-Turnier:** 3 Mannschaften, Ausrichter – Gast 1, Gast 1 – Gast 2, Ausrichter – Gast 2 (10, 13, 16 Uhr).
 - **4er-Turnier:** 4 Mannschaften in zwei Runden (11 und 14 Uhr): Ausrichter und eine zweite Mannschaft spielen je gegen die beiden übrigen. Die zweite „Heimmannschaft“ ist in Wahrheit Gast, ihr Spiel wird in click-TT in die Halle des Ausrichters verlegt. Die Halle muss zwei Spiele parallel erlauben.
-- **Bedingungen:** jede Paarung genau einmal, höchstens ein Turnier je Mannschaft und Tag, Ausrichter kann zuhause, alle anderen auswärts, jede Mannschaft richtet mindestens einmal aus.
+- **Bedingungen:** jede Paarung genau einmal, höchstens ein Turnier je Mannschaft und Tag, keine Spieltagssperre (Sperrtermine der Mannschaften, spielfreie Tage der Staffel), Ausrichter kann zuhause, alle anderen auswärts. **Vorrang** hat: jede Mannschaft richtet mindestens ein Turnier (mit zwei eigenen Begegnungen) aus – lieber ein Verstoß gegen eine Meldung als eine Mannschaft ohne Heimspieltag.
+- **Wünsche als Freitext** (z. B. „erst ab 12 Uhr“, „Prio für Heimspieltag am 6.12.“): werden vorerst nur angezeigt. Besser als eine KI: feste Felder in der Umfrage (frühester Beginn, Wunschtermin für den Heimspieltag), der Freitext bleibt für Sonderfälle.
 - **Rechnerische Grenze:** In beiden Formen spielt jede Mannschaft zwei Spiele je Turnier. Bei gerader Mannschaftszahl (6, 8, 10) hat jede Mannschaft eine ungerade Zahl von Gegnern – mit 3er und 4er allein geht der Plan dann nie ganz auf. Bisher bleibt dann für jede Mannschaft eine Paarung übrig, die als **Einzelbegegnung** mit möglichst kurzer Fahrt ausgetragen wird (Form `Einzel`; geprüft auf Heim/Auswärts, höchstens eine je Mannschaft, zählt nicht als ausgerichtetes Turnier).
 
 **Stufen:**
 
-- [x] **Prüfen** (`andigen turnier pruefen <xml> <csv>`): erkennt im Plan aus click-TT die Turniere (`Turniererkennung`), liest die Meldungen (`TurniermeldungenCsv`, repariert falsch kodierte Umlaute, letzte Meldung je Mannschaft gilt) und meldet alle Verstöße (`Turnierpruefung`); Bemerkungen werden zum Selbstprüfen ausgegeben.
+- [x] **Prüfen** (`andigen turnier pruefen <xml> <csv>`): erkennt im Plan aus click-TT die Turniere (`Turniererkennung`), liest die Meldungen (`TurniermeldungenCsv`, repariert falsch kodierte Umlaute, letzte Meldung je Mannschaft gilt) und meldet alle Verstöße (`Turnierpruefung`); Bemerkungen werden zum Selbstprüfen ausgegeben. Für Turniere mit Befund schlägt die Prüfung passende Ausweichtage vor (Beispiel 2026: das Turnier in Trier-Olewig, nachträglich vom 08.11. auf den 01.11. verlegt).
 - [ ] **Planen:** selbst einen Plan aus 3er- und 4er-Turnieren suchen (vollständige Suche bzw. Constraint-Löser), Ausrichter möglichst gleichmäßig verteilen, Ausgabe als click-TT-CSV. Optional Entfernungen (Postleitzahlen bzw. Routenplaner).
 - [ ] **Oberfläche:** eigene Seite, sobald Prüfen und Planen tragen.
 

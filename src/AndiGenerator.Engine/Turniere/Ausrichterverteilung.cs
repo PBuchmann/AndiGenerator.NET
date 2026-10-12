@@ -5,8 +5,8 @@
 namespace AndiGenerator.Engine.Turniere;
 
 /// <summary>
-/// Verteilt die Ausrichter über alle Turniere zugleich: zuerst möglichst wenige Gäste, die an dem Tag nicht auswärts
-/// können, dann möglichst wenige Mannschaften ohne ausgerichtetes Turnier, dann möglichst gleichmäßig. Bis zu rund einer
+/// Verteilt die Ausrichter über alle Turniere zugleich: Vorrang hat, dass jede Mannschaft ein Turnier ausrichtet; dann
+/// möglichst wenige Gäste, die an dem Tag nicht auswärts können; dann möglichst gleichmäßig. Bis zu rund einer
 /// Million Möglichkeiten wird vollständig gesucht, sonst Turnier für Turnier.
 /// </summary>
 internal static class Ausrichterverteilung
@@ -54,7 +54,7 @@ internal static class Ausrichterverteilung
     {
         private readonly string?[] aktuell = new string?[turniere.Count];
         private readonly Dictionary<string, int> zaehler = mannschaften.Distinct(StringComparer.Ordinal).ToDictionary(m => m, _ => 0, StringComparer.Ordinal);
-        private (int Verstoesse, int OhneAusrichtung, int Streuung) besteWertung = (int.MaxValue, int.MaxValue, int.MaxValue);
+        private (int OhneAusrichtung, int Verstoesse, int Streuung) besteWertung = (int.MaxValue, int.MaxValue, int.MaxValue);
 
         /// <summary>Holt die beste gefundene Verteilung.</summary>
         public string?[] Beste { get; } = new string?[turniere.Count];
@@ -64,11 +64,6 @@ internal static class Ausrichterverteilung
         /// <param name="verstoesseBisher">Verstöße der Turniere vor <paramref name="index"/>.</param>
         public void Weiter(int index, int verstoesseBisher)
         {
-            if (verstoesseBisher > besteWertung.Verstoesse)
-            {
-                return;
-            }
-
             if (index == turniere.Count)
             {
                 Abschliessen(verstoesseBisher);
@@ -85,15 +80,15 @@ internal static class Ausrichterverteilung
             }
         }
 
-        /// <summary>Turnier für Turnier: wenigste Verstöße, dann bisher am seltensten ausgerichtet.</summary>
+        /// <summary>Turnier für Turnier: bisher am seltensten ausgerichtet, dann wenigste Verstöße.</summary>
         public void Schrittweise()
         {
             for (int i = 0; i < turniere.Count; i++)
             {
                 Turnier turnier = turniere[i];
                 string? gewaehlt = optionen[i]
-                    .OrderBy(a => verstoesse(turnier, a))
-                    .ThenBy(a => a is null ? 0 : zaehler.GetValueOrDefault(a))
+                    .OrderBy(a => a is null ? int.MaxValue : zaehler.GetValueOrDefault(a))
+                    .ThenBy(a => verstoesse(turnier, a))
                     .First();
                 Beste[i] = gewaehlt;
                 Zaehlen(turnier, gewaehlt, 1);
@@ -110,7 +105,7 @@ internal static class Ausrichterverteilung
 
         private void Abschliessen(int verstoesseGesamt)
         {
-            (int, int, int) wertung = (verstoesseGesamt, zaehler.Values.Count(n => n == 0), zaehler.Values.Sum(n => n * n));
+            (int, int, int) wertung = (zaehler.Values.Count(n => n == 0), verstoesseGesamt, zaehler.Values.Sum(n => n * n));
             if (wertung.CompareTo(besteWertung) < 0)
             {
                 besteWertung = wertung;

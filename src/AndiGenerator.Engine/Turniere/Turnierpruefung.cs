@@ -4,20 +4,40 @@
 
 using System.Globalization;
 using System.Text;
+using AndiGenerator.Domain.Stammdaten;
 using AndiGenerator.Domain.Turniere;
 
 namespace AndiGenerator.Engine.Turniere;
 
 /// <summary>
 /// Prüft einen Plan aus Turniertagen gegen die Meldungen der Mannschaften: Form der Turniere, jede Paarung genau einmal,
-/// höchstens ein Turnier je Mannschaft und Tag, Ausrichter kann zuhause (und beim Vierer zwei Spiele parallel), die
+/// höchstens ein Turnier je Mannschaft und Tag, keine Spieltagssperre, Ausrichter kann zuhause (und beim Vierer zwei Spiele parallel), die
 /// übrigen können auswärts, jede Mannschaft richtet mindestens einmal ein Turnier aus. Einzelbegegnungen (bei gerader
 /// Mannschaftszahl) werden ebenso auf Heim und Auswärts geprüft, zählen aber nicht als ausgerichtetes Turnier; mehr als
-/// eine je Mannschaft wird gemeldet.
+/// eine je Mannschaft wird gemeldet. Für Turniere mit Befund werden Ausweichtage vorgeschlagen.
 /// </summary>
 public static class Turnierpruefung
 {
-    /// <summary>Prüft die Turniere.</summary>
+    /// <summary>Prüft die Turniere einer Staffel, auch gegen ihre spielfreien Tage und die Sperrtermine der Mannschaften.</summary>
+    /// <param name="turniere">Die Turniere des Plans.</param>
+    /// <param name="staffel">Die Staffel.</param>
+    /// <param name="meldungen">Die Meldungen.</param>
+    /// <returns>Das Ergebnis mit dem gewählten Ausrichter je Turnier und allen Befunden.</returns>
+    public static Turnierpruefungsergebnis Pruefen(
+        IReadOnlyList<Turnier> turniere,
+        Staffel staffel,
+        IReadOnlyList<Turniermeldung> meldungen)
+    {
+        ArgumentNullException.ThrowIfNull(staffel);
+        Dictionary<string, HashSet<DateOnly>> gesperrt = staffel.Mannschaften
+            .GroupBy(m => m.Name, StringComparer.Ordinal)
+            .ToDictionary(g => g.Key, g => g.SelectMany(m => m.Sperrtermine).ToHashSet(), StringComparer.Ordinal);
+        bool Gesperrt(string mannschaft, DateOnly tag) => gesperrt.TryGetValue(mannschaft, out HashSet<DateOnly>? tage) && tage.Contains(tag);
+
+        return Auswerten(turniere, staffel.Mannschaften.Select(m => m.Name).ToList(), meldungen, Gesperrt, staffel.SpielfreieTage.ToHashSet());
+    }
+
+    /// <summary>Prüft die Turniere ohne Sperrtermine und spielfreie Tage.</summary>
     /// <param name="turniere">Die Turniere des Plans.</param>
     /// <param name="mannschaften">Alle Mannschaften der Staffel.</param>
     /// <param name="meldungen">Die Meldungen.</param>
@@ -25,59 +45,8 @@ public static class Turnierpruefung
     public static Turnierpruefungsergebnis Pruefen(
         IReadOnlyList<Turnier> turniere,
         IReadOnlyList<string> mannschaften,
-        IReadOnlyList<Turniermeldung> meldungen)
-    {
-        ArgumentNullException.ThrowIfNull(turniere);
-        ArgumentNullException.ThrowIfNull(mannschaften);
-        ArgumentNullException.ThrowIfNull(meldungen);
-        var befunde = new List<string>();
-        Dictionary<string, Turniermeldung?> meldungJe = mannschaften.ToDictionary(m => m, m => Meldung(m, meldungen), StringComparer.Ordinal);
-        befunde.AddRange(mannschaften.Where(m => meldungJe[m] is null).Select(m => $"{m}: keine Meldung gefunden – an allen Tagen als möglich angenommen."));
-        befunde.AddRange(Paarungen(turniere, mannschaften));
-        befunde.AddRange(Doppelte(turniere));
-        befunde.AddRange(turniere.Where(t => t.Form == Turnierform.Einzel).SelectMany(t => t.Mannschaften)
-            .GroupBy(m => m, StringComparer.Ordinal).Where(g => g.Count() > 1)
-            .Select(g => $"{g.Key} hat {g.Count()} Einzelbegegnungen."));
-
-        string?[] gewaehlt = Ausrichterverteilung.Verteilen(
-            turniere,
-            mannschaften,
-            (t, m) => Kann(t, m, meldungJe),
-            (t, a) => t.Mannschaften.Count(m => m != a && !KannAuswaerts(t, m, meldungJe)));
-        var ergebnis = new List<Turnierbewertung>();
-        var ausgerichtet = mannschaften.ToDictionary(m => m, _ => 0, StringComparer.Ordinal);
-        for (int i = 0; i < turniere.Count; i++)
-        {
-            Turnier turnier = turniere[i];
-            string? ausrichter = gewaehlt[i];
-            var hinweise = new List<string>();
-            if (turnier.Form == Turnierform.Unbekannt)
-            {
-                hinweise.Add($"Keine bekannte Form ({turnier.Mannschaften.Count} Mannschaften, {turnier.Spiele.Count} Spiele).");
-            }
-
-            if (ausrichter is null)
-            {
-                string gruende = string.Join("; ", turnier.MoeglicheAusrichter.Select(m => $"{m}: {Grund(m, turnier, meldungJe)}"));
-                hinweise.Add($"Kein möglicher Ausrichter ({gruende}).");
-            }
-            else if (turnier.Form != Turnierform.Einzel)
-            {
-                ausgerichtet[ausrichter] = ausgerichtet.GetValueOrDefault(ausrichter) + 1;
-            }
-
-            foreach (string gast in turnier.Mannschaften.Where(m => m != ausrichter && !KannAuswaerts(turnier, m, meldungJe)))
-            {
-                hinweise.Add($"{gast} kann an diesem Tag nicht auswärts spielen ({Text(meldungJe[gast]!.An(turnier.Tag))}).");
-            }
-
-            befunde.AddRange(hinweise.Select(h => $"{Datum(turnier.Tag)}: {h}"));
-            ergebnis.Add(new Turnierbewertung(turnier, ausrichter, hinweise));
-        }
-
-        befunde.AddRange(mannschaften.Where(m => ausgerichtet[m] == 0).Select(m => $"{m} richtet kein Turnier aus."));
-        return new Turnierpruefungsergebnis(ergebnis, befunde, ausgerichtet);
-    }
+        IReadOnlyList<Turniermeldung> meldungen) =>
+        Auswerten(turniere, mannschaften, meldungen, (_, _) => false, []);
 
     /// <summary>Sucht die Meldung zu einer Mannschaft: gleicher Name, sonst ohne Satz- und Leerzeichen, sonst Teil des Namens.</summary>
     /// <param name="mannschaft">Name aus der click-TT-Datei.</param>
@@ -102,6 +71,94 @@ public static class Turnierpruefung
         Turnierbereitschaft.Auswaerts => "nur auswärts",
         _ => "kann nicht",
     };
+
+    private static Turnierpruefungsergebnis Auswerten(
+        IReadOnlyList<Turnier> turniere,
+        IReadOnlyList<string> mannschaften,
+        IReadOnlyList<Turniermeldung> meldungen,
+        Func<string, DateOnly, bool> gesperrt,
+        HashSet<DateOnly> spielfrei)
+    {
+        ArgumentNullException.ThrowIfNull(turniere);
+        ArgumentNullException.ThrowIfNull(mannschaften);
+        ArgumentNullException.ThrowIfNull(meldungen);
+        var kontext = new Kontext(
+            turniere,
+            mannschaften.ToDictionary(m => m, m => Meldung(m, meldungen), StringComparer.Ordinal),
+            gesperrt,
+            spielfrei,
+            meldungen.SelectMany(m => m.Tage.Keys).Distinct().Order().ToList());
+        var befunde = new List<string>();
+        befunde.AddRange(turniere.Select(t => t.Tag).Distinct().Where(spielfrei.Contains).Select(t => $"{Datum(t)}: In der Staffel ist dieser Tag spielfrei."));
+        befunde.AddRange(mannschaften.Where(m => kontext.MeldungJe[m] is null).Select(m => $"{m}: keine Meldung gefunden – an allen Tagen als möglich angenommen."));
+        befunde.AddRange(Paarungen(turniere, mannschaften));
+        befunde.AddRange(Doppelte(turniere));
+        befunde.AddRange(turniere.Where(t => t.Form == Turnierform.Einzel).SelectMany(t => t.Mannschaften)
+            .GroupBy(m => m, StringComparer.Ordinal).Where(g => g.Count() > 1)
+            .Select(g => $"{g.Key} hat {g.Count()} Einzelbegegnungen."));
+
+        string?[] gewaehlt = Ausrichterverteilung.Verteilen(
+            turniere,
+            mannschaften,
+            (t, m) => Kann(t, m, kontext.MeldungJe),
+            (t, a) => t.Mannschaften.Count(m => m != a && !KannAuswaerts(t, m, kontext.MeldungJe)));
+        var ergebnis = new List<Turnierbewertung>();
+        var ausgerichtet = mannschaften.ToDictionary(m => m, _ => 0, StringComparer.Ordinal);
+        for (int i = 0; i < turniere.Count; i++)
+        {
+            Turnierbewertung bewertung = Bewerten(turniere[i], gewaehlt[i], kontext);
+            if (bewertung.Ausrichter is { } ausrichter && turniere[i].Form != Turnierform.Einzel)
+            {
+                ausgerichtet[ausrichter] = ausgerichtet.GetValueOrDefault(ausrichter) + 1;
+            }
+
+            befunde.AddRange(bewertung.Hinweise.Select(h => $"{Datum(turniere[i].Tag)}: {h}"));
+            ergebnis.Add(bewertung);
+        }
+
+        befunde.AddRange(mannschaften.Where(m => ausgerichtet[m] == 0).Select(m => $"{m} richtet kein Turnier aus."));
+        return new Turnierpruefungsergebnis(ergebnis, befunde, ausgerichtet);
+    }
+
+    private static Turnierbewertung Bewerten(Turnier turnier, string? ausrichter, Kontext kontext)
+    {
+        var hinweise = new List<string>();
+        if (turnier.Form == Turnierform.Unbekannt)
+        {
+            hinweise.Add($"Keine bekannte Form ({turnier.Mannschaften.Count} Mannschaften, {turnier.Spiele.Count} Spiele).");
+        }
+
+        if (ausrichter is null)
+        {
+            string gruende = string.Join("; ", turnier.MoeglicheAusrichter.Select(m => $"{m}: {Grund(m, turnier, kontext.MeldungJe)}"));
+            hinweise.Add($"Kein möglicher Ausrichter ({gruende}).");
+        }
+
+        hinweise.AddRange(turnier.Mannschaften.Where(m => kontext.Gesperrt(m, turnier.Tag)).Select(m => $"{m} hat an diesem Tag eine Spieltagssperre."));
+        hinweise.AddRange(turnier.Mannschaften.Where(m => m != ausrichter && !KannAuswaerts(turnier, m, kontext.MeldungJe))
+            .Select(m => $"{m} kann an diesem Tag nicht auswärts spielen ({Text(kontext.MeldungJe[m]!.An(turnier.Tag))})."));
+        bool befund = hinweise.Count > 0 || kontext.Spielfrei.Contains(turnier.Tag);
+        return new Turnierbewertung(turnier, ausrichter, hinweise, befund ? Ausweichtage(turnier, kontext) : []);
+    }
+
+    /// <summary>
+    /// Tage aus den Meldungen, an denen das Turnier ohne Befund stattfinden könnte: kein spielfreier Tag, keine Sperre,
+    /// keine der Mannschaften in einem anderen Turnier, ein möglicher Ausrichter kann zuhause und alle anderen auswärts.
+    /// </summary>
+    private static List<DateOnly> Ausweichtage(Turnier turnier, Kontext kontext)
+    {
+        var belegt = kontext.Turniere.Where(t => !ReferenceEquals(t, turnier))
+            .SelectMany(t => t.Mannschaften.Select(m => (t.Tag, m)))
+            .ToHashSet();
+        return kontext.Tage
+            .Where(tag => tag != turnier.Tag && !kontext.Spielfrei.Contains(tag))
+            .Where(tag => turnier.Mannschaften.All(m => !belegt.Contains((tag, m)) && !kontext.Gesperrt(m, tag)))
+            .Where(tag => Ausrichtbar(turnier with { Tag = tag }, kontext.MeldungJe))
+            .ToList();
+    }
+
+    private static bool Ausrichtbar(Turnier turnier, Dictionary<string, Turniermeldung?> meldungJe) =>
+        turnier.MoeglicheAusrichter.Any(a => Kann(turnier, a, meldungJe) && turnier.Mannschaften.All(m => m == a || KannAuswaerts(turnier, m, meldungJe)));
 
     /// <summary>Ausrichter muss zuhause können, beim Vierer mit zwei Spielen parallel; ohne Meldung gilt alles als möglich.</summary>
     private static bool Kann(Turnier turnier, string mannschaft, Dictionary<string, Turniermeldung?> meldungJe) =>
@@ -164,4 +221,17 @@ public static class Turnierpruefung
 
         return text.ToString();
     }
+
+    /// <summary>Was alle Turniere einer Prüfung gemeinsam brauchen.</summary>
+    /// <param name="Turniere">Alle Turniere des Plans.</param>
+    /// <param name="MeldungJe">Meldung je Mannschaft der Staffel oder <c>null</c>.</param>
+    /// <param name="Gesperrt">Ob eine Mannschaft an einem Tag eine Spieltagssperre hat.</param>
+    /// <param name="Spielfrei">Spielfreie Tage der Staffel.</param>
+    /// <param name="Tage">Alle Tage der Meldungen, aufsteigend.</param>
+    private sealed record Kontext(
+        IReadOnlyList<Turnier> Turniere,
+        Dictionary<string, Turniermeldung?> MeldungJe,
+        Func<string, DateOnly, bool> Gesperrt,
+        HashSet<DateOnly> Spielfrei,
+        IReadOnlyList<DateOnly> Tage);
 }
