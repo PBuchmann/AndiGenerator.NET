@@ -37,5 +37,6 @@ codesign --verify --deep --strict "$app"
 
 # Disk-Image: App-Paket und Verknüpfung zu /Applications zum Hineinziehen.
 ln -s /Applications "$inhalt/Programme"
-hdiutil create -volname "AndiGenerator.NET" -srcfolder "$inhalt" -ov -format UDZO "$ziel/AndiGeneratorNET-$version-$name.dmg"
+# Dateiname ohne Version, damit der Link „releases/latest/download/…“ immer gültig bleibt.
+hdiutil create -volname "AndiGenerator.NET" -srcfolder "$inhalt" -ov -format UDZO "$ziel/AndiGeneratorNET-$name.dmg"
 rm -rf "$arbeit"

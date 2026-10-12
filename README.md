@@ -29,7 +29,18 @@ AndiGenerator.NET ist die C#/.NET-Portierung des **AndiGenerators** von **Andrea
 
 ## Installation
 
-Die neueste Version gibt es unter [Releases](https://github.com/PBuchmann/AndiGenerator.NET/releases): `AndiGeneratorNET-win-Setup.exe` installiert das Programm für den eigenen Benutzer (ohne Administratorrechte) und hält es danach selbst aktuell; `AndiGeneratorNET-win-Portable.zip` läuft ohne Installation. Windows 10/11, 64 Bit; für Windows-Laptops mit ARM-Prozessor (Snapdragon) `AndiGeneratorNET-win-arm64-Setup.exe` bzw. `-win-arm64-Portable.zip`. Für Macs (macOS 14 oder neuer) gibt es Disk-Images `AndiGeneratorNET-<Version>-macos-arm64.dmg` (Apple-Chip) bzw. `-macos-x64.dmg` (Intel). Für Chromebooks (Linux-Entwicklungsumgebung) und Linux gibt es Debian-Pakete `andigenerator-net_<Version>_amd64.deb` bzw. `_arm64.deb` und portable `tar.gz`. Bis zur digitalen Signierung warnt Windows beim ersten Start – Einzelheiten in der [Anleitung](Doku/ANLEITUNG.md#2-installation).
+Die neueste Version – ein Klick lädt die passende Datei:
+
+| Ihr Rechner | Datei |
+|---|---|
+| Windows-PC oder -Laptop (Intel/AMD – der Normalfall) | [AndiGeneratorNET-win-Setup.exe](https://github.com/PBuchmann/AndiGenerator.NET/releases/latest/download/AndiGeneratorNET-win-Setup.exe) |
+| Windows-Laptop mit ARM-Prozessor (z. B. Snapdragon) | [AndiGeneratorNET-win-arm64-Setup.exe](https://github.com/PBuchmann/AndiGenerator.NET/releases/latest/download/AndiGeneratorNET-win-arm64-Setup.exe) |
+| Mac mit Apple-Chip (M1 und neuer) | [AndiGeneratorNET-macos-arm64.dmg](https://github.com/PBuchmann/AndiGenerator.NET/releases/latest/download/AndiGeneratorNET-macos-arm64.dmg) |
+| Mac mit Intel-Prozessor | [AndiGeneratorNET-macos-x64.dmg](https://github.com/PBuchmann/AndiGenerator.NET/releases/latest/download/AndiGeneratorNET-macos-x64.dmg) |
+| Chromebook oder Linux mit Intel/AMD | [andigenerator-net_amd64.deb](https://github.com/PBuchmann/AndiGenerator.NET/releases/latest/download/andigenerator-net_amd64.deb) |
+| Chromebook oder Linux mit ARM-Prozessor | [andigenerator-net_arm64.deb](https://github.com/PBuchmann/AndiGenerator.NET/releases/latest/download/andigenerator-net_arm64.deb) |
+
+Das Windows-Setup installiert ohne Administratorrechte und hält das Programm danach selbst aktuell. Weitere Dateien (ohne Installation, ältere Versionen) gibt es unter [Releases](https://github.com/PBuchmann/AndiGenerator.NET/releases). Bis zur digitalen Signierung warnt Windows beim ersten Start – Einzelheiten in der [Anleitung](Doku/ANLEITUNG.md#2-installation).
 
 ## Selbst bauen
 

@@ -40,6 +40,19 @@ Wenn Sie vorher mit dem Original-AndiGenerator gearbeitet haben, übernimmt Andi
 
 AndiGenerator.NET läuft unter Windows 10 und 11 (64 Bit), auf dem Mac (macOS 14 oder neuer), auf Chromebooks und unter Linux (siehe unten). Administratorrechte sind nicht nötig, und .NET muss nicht installiert sein – alles Nötige ist dabei.
 
+**Welche Datei?** Ein Klick lädt jeweils die neueste Version:
+
+| Ihr Rechner | Datei |
+|---|---|
+| Windows-PC oder -Laptop (Intel/AMD – der Normalfall) | [AndiGeneratorNET-win-Setup.exe](https://github.com/PBuchmann/AndiGenerator.NET/releases/latest/download/AndiGeneratorNET-win-Setup.exe) |
+| Windows-Laptop mit ARM-Prozessor (z. B. Snapdragon) | [AndiGeneratorNET-win-arm64-Setup.exe](https://github.com/PBuchmann/AndiGenerator.NET/releases/latest/download/AndiGeneratorNET-win-arm64-Setup.exe) |
+| Mac mit Apple-Chip (M1 und neuer) | [AndiGeneratorNET-macos-arm64.dmg](https://github.com/PBuchmann/AndiGenerator.NET/releases/latest/download/AndiGeneratorNET-macos-arm64.dmg) |
+| Mac mit Intel-Prozessor | [AndiGeneratorNET-macos-x64.dmg](https://github.com/PBuchmann/AndiGenerator.NET/releases/latest/download/AndiGeneratorNET-macos-x64.dmg) |
+| Chromebook oder Linux mit Intel/AMD | [andigenerator-net_amd64.deb](https://github.com/PBuchmann/AndiGenerator.NET/releases/latest/download/andigenerator-net_amd64.deb) |
+| Chromebook oder Linux mit ARM-Prozessor | [andigenerator-net_arm64.deb](https://github.com/PBuchmann/AndiGenerator.NET/releases/latest/download/andigenerator-net_arm64.deb) |
+
+Im Zweifel bei Windows die erste Datei nehmen: Sie läuft auch auf ARM-Laptops mit Windows 11, nur langsamer. Die übrigen Dateien auf der Release-Seite (`.nupkg`, `RELEASES`, `releases.*.json`, Stückliste) braucht das Programm für seine Updates bzw. dienen als Nachweis – sie müssen Sie nicht herunterladen.
+
 **Mit Setup (empfohlen)**
 
 1. Auf der Seite [Releases](https://github.com/PBuchmann/AndiGenerator.NET/releases) bei der neuesten Version die Datei `AndiGeneratorNET-win-Setup.exe` herunterladen. Für Windows-Laptops mit ARM-Prozessor (z. B. Snapdragon) gibt es `AndiGeneratorNET-win-arm64-Setup.exe`; sie rechnet dort deutlich schneller. Welcher Prozessor eingebaut ist, steht unter *Einstellungen → System → Info → Systemtyp* („ARM-basierter Prozessor“).
@@ -63,7 +76,7 @@ Das installierte Programm sucht nach dem Start selbst nach einer neuen Version u
 
 **Auf dem Mac**
 
-1. Auf der Seite [Releases](https://github.com/PBuchmann/AndiGenerator.NET/releases) das passende Disk-Image herunterladen: `AndiGeneratorNET-<Version>-macos-arm64.dmg` für Macs mit Apple-Chip (M1 und neuer), `…-macos-x64.dmg` für ältere Macs mit Intel-Prozessor. Welcher Chip eingebaut ist, steht unter * → Über diesen Mac*.
+1. Auf der Seite [Releases](https://github.com/PBuchmann/AndiGenerator.NET/releases) das passende Disk-Image herunterladen: `AndiGeneratorNET-macos-arm64.dmg` für Macs mit Apple-Chip (M1 und neuer), `AndiGeneratorNET-macos-x64.dmg` für ältere Macs mit Intel-Prozessor. Welcher Chip eingebaut ist, steht unter * → Über diesen Mac*.
 2. Das Disk-Image öffnen und **AndiGenerator.NET** auf den Ordner **Programme** ziehen.
 3. Beim ersten Start meldet macOS, dass Apple das Programm nicht überprüfen konnte, und öffnet es nicht – das Programm ist noch nicht von Apple beglaubigt. Die Meldung mit **Fertig** schließen, dann *Systemeinstellungen → Datenschutz & Sicherheit* öffnen, nach unten blättern und bei AndiGenerator.NET **Dennoch öffnen** wählen und mit dem Passwort bestätigen. Danach startet das Programm normal.
 
@@ -74,14 +87,14 @@ Statt **Strg** gilt auf dem Mac die Befehlstaste **⌘** (z. B. ⌘ + Plus zum V
 Auf Chromebooks läuft das Programm in der Linux-Entwicklungsumgebung, die ChromeOS mitbringt.
 
 1. Einmalig Linux einschalten: *Einstellungen → Info zu ChromeOS → Entwickler → Linux-Entwicklungsumgebung → Aktivieren* (bei älteren Versionen *Einstellungen → Erweitert → Entwickler*).
-2. Auf der Seite [Releases](https://github.com/PBuchmann/AndiGenerator.NET/releases) das passende Paket herunterladen: `andigenerator-net_<Version>_amd64.deb` für Chromebooks mit Intel- oder AMD-Prozessor, `…_arm64.deb` für Chromebooks mit ARM-Prozessor (z. B. MediaTek oder Qualcomm). Welcher Prozessor eingebaut ist, steht unter *Einstellungen → Info zu ChromeOS → Weitere Details*, oder im Linux-Terminal mit `dpkg --print-architecture`.
+2. Auf der Seite [Releases](https://github.com/PBuchmann/AndiGenerator.NET/releases) das passende Paket herunterladen: `andigenerator-net_amd64.deb` für Chromebooks mit Intel- oder AMD-Prozessor, `andigenerator-net_arm64.deb` für Chromebooks mit ARM-Prozessor (z. B. MediaTek oder Qualcomm). Welcher Prozessor eingebaut ist, steht unter *Einstellungen → Info zu ChromeOS → Weitere Details*, oder im Linux-Terminal mit `dpkg --print-architecture`.
 3. Die Datei in der App *Dateien* in den Ordner *Linux-Dateien* ziehen.
 4. Das *Terminal* öffnen (im Launcher unter *Linux-Apps*) und eingeben – mit dem Dateinamen der heruntergeladenen Datei:
-   `sudo apt install ./andigenerator-net_<Version>_amd64.deb`
+   `sudo apt install ./andigenerator-net_amd64.deb` (bzw. `…_arm64.deb`)
    ChromeOS bietet die Installation per Doppelklick nicht mehr an. Das Programm erscheint danach im Launcher im Ordner *Linux-Apps*.
 5. Die click-TT-Dateien müssen für Linux sichtbar sein: entweder in den Ordner *Linux-Dateien* legen oder einen Ordner in *Dateien* mit der rechten Maustaste **Mit Linux teilen**.
 
-Ohne Installation geht es mit `AndiGeneratorNET-<Version>-linux-x64.tar.gz` bzw. `…-linux-arm64.tar.gz`: entpacken und `./AndiGenerator.NET` starten. Unter Linux liegen die eigenen Daten im Ordner `~/.local/share/AndiGenerator.NET`. Neue Versionen werden hier nicht selbst gesucht – zum Aktualisieren das neue Paket genauso installieren.
+Ohne Installation geht es mit `AndiGeneratorNET-linux-x64.tar.gz` bzw. `AndiGeneratorNET-linux-arm64.tar.gz`: entpacken und `./AndiGenerator.NET` starten. Unter Linux liegen die eigenen Daten im Ordner `~/.local/share/AndiGenerator.NET`. Neue Versionen werden hier nicht selbst gesucht – zum Aktualisieren das neue Paket genauso installieren.
 
 ## 3. Erste Schritte
 

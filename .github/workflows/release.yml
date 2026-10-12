@@ -118,8 +118,8 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: gh release upload ${{ github.ref_name }} AndiGeneratorNET-${{ steps.version.outputs.version }}-sbom.spdx.json
 
-      # Der Abschnitt „## <Version>“ aus CHANGELOG.md wird zum Text des Releases. Fehlt er, bleibt der Text leer.
-      - name: Release Notes aus CHANGELOG.md
+      # Text des Releases: oben ein Wegweiser „Welche Datei?“, darunter der Abschnitt „## <Version>“ aus CHANGELOG.md.
+      - name: Release-Text (Wegweiser und Änderungen)
         continue-on-error: true
         shell: pwsh
         env:
@@ -131,16 +131,33 @@ jobs:
           for ($i = 0; $i -lt $zeilen.Count; $i++) {
             if ($zeilen[$i] -match ('^## ' + [regex]::Escape($version) + '(\s|$)')) { $start = $i; break }
           }
-          if ($start -lt 0) {
-            Write-Host "Kein Abschnitt '## $version' in CHANGELOG.md - der Release-Text bleibt leer."
-            exit 0
+          $aenderungen = ''
+          if ($start -ge 0) {
+            $ende = $zeilen.Count
+            for ($i = $start + 1; $i -lt $zeilen.Count; $i++) {
+              if ($zeilen[$i] -match '^## ') { $ende = $i; break }
+            }
+            if ($ende -gt $start + 1) { $aenderungen = ($zeilen[($start + 1)..($ende - 1)] -join "`n").Trim() }
+          } else {
+            Write-Host "Kein Abschnitt '## $version' in CHANGELOG.md - nur der Wegweiser."
           }
-          $ende = $zeilen.Count
-          for ($i = $start + 1; $i -lt $zeilen.Count; $i++) {
-            if ($zeilen[$i] -match '^## ') { $ende = $i; break }
-          }
-          $text = ''
-          if ($ende -gt $start + 1) { $text = ($zeilen[($start + 1)..($ende - 1)] -join "`n").Trim() }
+          $basis = '${{ github.server_url }}/${{ github.repository }}/releases/download/${{ github.ref_name }}/'
+          $wegweiser = @(
+            '## Welche Datei brauche ich?',
+            '',
+            '| Ihr Rechner | Datei |',
+            '|---|---|',
+            "| Windows-PC oder -Laptop (Intel/AMD – der Normalfall) | [AndiGeneratorNET-win-Setup.exe]($($basis)AndiGeneratorNET-win-Setup.exe) |",
+            "| Windows-Laptop mit ARM-Prozessor (z. B. Snapdragon) | [AndiGeneratorNET-win-arm64-Setup.exe]($($basis)AndiGeneratorNET-win-arm64-Setup.exe) |",
+            "| Mac mit Apple-Chip (M1 und neuer) | [AndiGeneratorNET-macos-arm64.dmg]($($basis)AndiGeneratorNET-macos-arm64.dmg) |",
+            "| Mac mit Intel-Prozessor | [AndiGeneratorNET-macos-x64.dmg]($($basis)AndiGeneratorNET-macos-x64.dmg) |",
+            "| Chromebook oder Linux mit Intel/AMD | [andigenerator-net_amd64.deb]($($basis)andigenerator-net_amd64.deb) |",
+            "| Chromebook oder Linux mit ARM-Prozessor | [andigenerator-net_arm64.deb]($($basis)andigenerator-net_arm64.deb) |",
+            '',
+            'Im Zweifel bei Windows die erste Datei: Sie läuft auch auf ARM-Laptops mit Windows 11, nur langsamer. Ohne Installation: `…-Portable.zip` (Windows) bzw. `….tar.gz` (Linux). Die übrigen Dateien (`.nupkg`, `RELEASES`, `releases.*.json`, Stückliste) braucht das Programm für seine Updates bzw. dienen als Nachweis – nicht herunterladen. Installation und Warnungen beim ersten Start: [Anleitung, Abschnitt 2](${{ github.server_url }}/${{ github.repository }}/blob/${{ github.ref_name }}/Doku/ANLEITUNG.md#2-installation).'
+          ) -join "`n"
+          $text = $wegweiser
+          if ($aenderungen.Length -gt 0) { $text += "`n`n## Änderungen`n`n" + $aenderungen }
           $text += "`n`nAlle Änderungen: [CHANGELOG.md](${{ github.server_url }}/${{ github.repository }}/blob/${{ github.ref_name }}/CHANGELOG.md)"
           Set-Content -Path release-notes.md -Value $text -Encoding utf8
           gh release edit ${{ github.ref_name }} --notes-file release-notes.md
