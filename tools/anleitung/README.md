@@ -5,7 +5,8 @@ Quelle ist `Doku/ANLEITUNG.md` mit den Bildern unter `Doku/Anleitung/Bilder`. Da
 Benötigt: [pandoc](https://pandoc.org), Node.js mit Playwright (Chromium) und die IBM-Plex-Schriften aus `src/AndiGenerator.UI/Assets/Fonts`.
 
 ```sh
-# im Ordner Doku ausführen
+# im Ordner Doku ausführen; die Shell muss UTF-8 sprechen, sonst wird der Gedankenstrich im Titel verstümmelt
+export LANG=C.UTF-8
 mkdir -p fonts && cp ../src/AndiGenerator.UI/Assets/Fonts/IBMPlex*.ttf fonts/
 cp ../tools/anleitung/anleitung.css ../tools/anleitung/pdf.js .
 pandoc -f gfm -t html5 -s --metadata pagetitle="AndiGenerator.NET – Anleitung" --css anleitung.css -o anleitung.html ANLEITUNG.md
