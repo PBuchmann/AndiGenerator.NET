@@ -33,6 +33,9 @@ internal sealed class RefSpiel(RefMannschaft heim, RefMannschaft gast)
     /// <summary>Original <c>getLocation</c>.</summary>
     public string Lokal => UeberschriebenesLokal.Length > 0 ? UeberschriebenesLokal : Wunschtermin?.Spiellokal ?? string.Empty;
 
+    /// <summary>Halle aus click-TT wie <see cref="Lokal"/>: unbekannt (leer), wenn das Spiellokal vorgegeben ist.</summary>
+    public string Halle => UeberschriebenesLokal.Length > 0 ? string.Empty : Wunschtermin?.Halle ?? string.Empty;
+
     /// <summary>Original <c>setDate</c>.</summary>
     public void SetzeDatum(double datum, Wunschterminoptionen optionen, int maxHeim, bool festesDatum, bool nichtNotwendig, RefWunschtermin? wunschtermin)
     {

@@ -256,6 +256,8 @@ public sealed class HauptfensterTests : IDisposable
         hf.QualitaetsansichtCommand.Execute(null);
         QualitaetAnsichtViewModel qualitaet = Assert.Single(Ansichten<QualitaetAnsichtViewModel>());
 
+        // Wie auf dem UI-Thread: Statusabfragen der laufenden Suche nicht gleichzeitig mit dem Test (sonst Wettlauf mit Stoppen).
+        o.Sammeln = true;
         await hf.StartenCommand.ExecuteAsync(null);
         try
         {
@@ -927,6 +929,23 @@ public sealed class HauptfensterTests : IDisposable
         Assert.Equal("Start", hf.GenerierungText);
         Assert.False(hf.StoppenCommand.CanExecute(null));
         Assert.True(hf.StartplanWaehlbar);
+    }
+
+    [Fact]
+    public async Task Abbrechen_der_Einrichtung_schliesst_die_Staffel_und_Oeffnen_ist_solange_gesperrt()
+    {
+        await hf.OeffnenCommand.ExecuteAsync(null);
+        EinrichtungViewModel einrichtung = Assert.IsType<EinrichtungViewModel>(hf.Einrichtung);
+        Assert.Equal("Daten aus click-TT ergänzen", einrichtung.Schritte[0].Titel);
+        Assert.False(hf.OeffnenCommand.CanExecute(null));
+        Assert.False(hf.NeuCommand.CanExecute(null));
+
+        await einrichtung.AbbrechenCommand.ExecuteAsync(null);
+
+        Assert.False(hf.IstGeoeffnet);
+        Assert.Null(hf.Einrichtung);
+        Assert.True(hf.OeffnenCommand.CanExecute(null));
+        Assert.True(hf.NeuCommand.CanExecute(null));
     }
 
     [Fact]

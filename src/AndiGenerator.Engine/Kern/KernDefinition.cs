@@ -17,6 +17,7 @@ internal sealed class KernDefinition
     public const int AnzahlArten = 16;
 
     private readonly Dictionary<string, int> lokale = new(StringComparer.Ordinal) { [string.Empty] = 0 };
+    private readonly Dictionary<string, int> hallen = new(StringComparer.OrdinalIgnoreCase) { [string.Empty] = 0 };
     private readonly int[][] sollJeTag;
 
     public KernDefinition(RefPlan plan)
@@ -59,6 +60,7 @@ internal sealed class KernDefinition
         WunschParallele = termine.Select(w => w.ParalleleSpiele).ToArray();
         WunschOptionen = termine.Select(w => w.Optionen).ToArray();
         WunschLokal = termine.Select(w => LokalId(w.Spiellokal)).ToArray();
+        WunschHalle = termine.Select(w => HalleId(w.Halle)).ToArray();
         WunschRef = termine.ToArray();
 
         Sperrtage = plan.Mannschaften.Select(m => m.Sperrtermine.ToArray()).ToArray();
@@ -130,7 +132,8 @@ internal sealed class KernDefinition
                     s.Geschlecht == plan.Geschlecht,
                     s.KeineParallelenSpiele,
                     s.ParalleleHeimspiele,
-                    Schluessel(zwangsSchluessel, s.Geschlecht + "\n" + s.Mannschaftsname))).ToArray());
+                    Schluessel(zwangsSchluessel, s.Geschlecht + "\n" + s.Mannschaftsname),
+                    HalleId(s.Halle))).ToArray());
             GleicheHeimtageTeams[t] = m.TeamsFuerGleicheHeimspieltage().Select(k => Schluessel(zwangsSchluessel, k)).ToArray();
         }
 
@@ -299,6 +302,9 @@ internal sealed class KernDefinition
 
     public int[] WunschLokal { get; }
 
+    /// <summary>Holt die Halle je Wunschtermin (0 = unbekannt).</summary>
+    public int[] WunschHalle { get; }
+
     public RefWunschtermin[] WunschRef { get; }
 
     public double[] WunschMontag { get; }
@@ -425,6 +431,21 @@ internal sealed class KernDefinition
         {
             id = lokale.Count;
             lokale.Add(lokal, id);
+        }
+
+        return id;
+    }
+
+    /// <summary>Nummer einer Halle aus click-TT (0 = unbekannt); nur beim Aufbau verwenden (nicht threadsicher).</summary>
+    /// <param name="halle">Hallenname.</param>
+    /// <returns>Die Nummer.</returns>
+    public int HalleId(string halle)
+    {
+        string name = halle.Trim();
+        if (!hallen.TryGetValue(name, out int id))
+        {
+            id = hallen.Count;
+            hallen.Add(name, id);
         }
 
         return id;

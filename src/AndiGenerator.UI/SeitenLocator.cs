@@ -29,6 +29,7 @@ public sealed class SeitenLocator : IDataTemplate
         PflichtspieltageSeiteViewModel => new PflichtspieltageSeite(),
         VorgabespieleSeiteViewModel => new VorgabespieleSeite(),
         HeimrechtDetailViewModel => new HeimrechtDetail(),
+        ZusatzdatenSeiteViewModel => new ZusatzdatenSeite(),
         _ => null,
     };
 

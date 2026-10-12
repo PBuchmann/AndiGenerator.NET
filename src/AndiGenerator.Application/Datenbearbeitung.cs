@@ -27,6 +27,12 @@ public sealed partial class Datenbearbeitung
         this.standard = standard;
     }
 
+    /// <summary>
+    /// Holt einen Wert, der angibt, ob der Freitag bei der 60-km-Regel zum Wochenende zählt (aus den Einstellungen der
+    /// Staffel, Vorgabe ja); dann zählen für die Prüfung der Wochenspiele nur Heimtermine von Montag bis Donnerstag.
+    /// </summary>
+    public bool FreitagZaehltZumWochenende { get; init; } = true;
+
     /// <summary>Holt einen Wert, der angibt, ob es einen Standard (click-TT-Import) gibt („Standard wiederherstellen“).</summary>
     public bool HatStandard => standard is not null;
 

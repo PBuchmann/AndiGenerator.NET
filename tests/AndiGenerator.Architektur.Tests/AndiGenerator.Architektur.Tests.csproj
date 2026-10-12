@@ -16,6 +16,7 @@
     <ProjectReference Include="..\..\src\AndiGenerator.Domain\AndiGenerator.Domain.csproj" />
     <ProjectReference Include="..\..\src\AndiGenerator.Engine\AndiGenerator.Engine.csproj" />
     <ProjectReference Include="..\..\src\AndiGenerator.Persistence\AndiGenerator.Persistence.csproj" />
+    <ProjectReference Include="..\..\src\AndiGenerator.Import\AndiGenerator.Import.csproj" />
     <ProjectReference Include="..\..\src\AndiGenerator.Rendering\AndiGenerator.Rendering.csproj" />
     <ProjectReference Include="..\..\src\AndiGenerator.Application\AndiGenerator.Application.csproj" />
     <ProjectReference Include="..\..\src\AndiGenerator.Presentation\AndiGenerator.Presentation.csproj" />

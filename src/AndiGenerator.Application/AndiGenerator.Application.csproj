@@ -6,6 +6,7 @@
   <ItemGroup>
     <ProjectReference Include="..\AndiGenerator.Domain\AndiGenerator.Domain.csproj" />
     <ProjectReference Include="..\AndiGenerator.Engine\AndiGenerator.Engine.csproj" />
+    <ProjectReference Include="..\AndiGenerator.Import\AndiGenerator.Import.csproj" />
     <ProjectReference Include="..\AndiGenerator.Persistence\AndiGenerator.Persistence.csproj" />
     <ProjectReference Include="..\AndiGenerator.Rendering\AndiGenerator.Rendering.csproj" />
   </ItemGroup>

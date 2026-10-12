@@ -36,7 +36,8 @@ public sealed class EinrichtungTests
             {
                 abgeschlossen++;
                 return Task.CompletedTask;
-            });
+            },
+            () => Task.CompletedTask);
 
         Assert.Same(entscheidung, einrichtung.Aktiv);
         Assert.True(entscheidung.IstEntscheidung);
@@ -104,7 +105,8 @@ public sealed class EinrichtungTests
             {
                 abgeschlossen++;
                 return Task.CompletedTask;
-            });
+            },
+            () => Task.CompletedTask);
 
         Assert.False(angeklickt.IstGewaehlt);
         angeklickt.Auswahl = 0;
@@ -134,5 +136,23 @@ public sealed class EinrichtungTests
             zeilen);
         Assert.False(zeilen[0].IstPunkt);
         Assert.True(zeilen[1].IstUnterpunkt);
+    }
+
+    [Fact]
+    public async Task Punkt_mit_mehreren_Teilen_bleibt_bis_zum_letzten_offen()
+    {
+        bool vollstaendig = false;
+        var teile = new Einrichtungsschritt(1, "Dateien", "?", [], []) { IstVollstaendig = () => vollstaendig };
+        var andere = new Einrichtungsschritt(2, "Runde", "?", [], [new Einrichtungsoption("Rückrunde", "x"), new Einrichtungsoption("Ganz", "y")]);
+        var einrichtung = new EinrichtungViewModel("Staffel einrichten", [teile, andere], _ => Task.FromResult(true), _ => null, () => Task.CompletedTask, () => Task.CompletedTask);
+
+        await einrichtung.UebernehmenCommand.ExecuteAsync(null);
+        Assert.Equal(Schrittzustand.Offen, teile.Zustand);
+        Assert.Same(andere, einrichtung.Aktiv);
+
+        vollstaendig = true;
+        einrichtung.Aktiv = teile;
+        await einrichtung.UebernehmenCommand.ExecuteAsync(null);
+        Assert.Equal(Schrittzustand.Erledigt, teile.Zustand);
     }
 }

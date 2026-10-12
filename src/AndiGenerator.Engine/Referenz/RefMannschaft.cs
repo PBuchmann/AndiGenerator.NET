@@ -313,13 +313,14 @@ internal sealed partial class RefMannschaft
     }
 
     /// <summary>Original <c>GetHallenBelegung</c>.</summary>
-    public int Hallenbelegung(double datum, string lokal, RefPlan plan, List<string>? belegtVon)
+    public int Hallenbelegung(double datum, string lokal, string halle, RefPlan plan, List<string>? belegtVon)
     {
         int anzahl = 0;
         double fenster = DelphiDatum.EncodeTime(1, 29);
+        bool nachNamen = plan.Optionen.Korrekturen.HallenNachNamen;
         if (Nachbarspiele.TryGetValue(DelphiDatum.Trunc(datum), out List<RefNachbarspiel>? liste))
         {
-            foreach (RefNachbarspiel spiel in liste.Where(s => s.IstHeimspiel && Math.Abs(s.Datum - datum) <= fenster && lokal == s.Lokal))
+            foreach (RefNachbarspiel spiel in liste.Where(s => s.IstHeimspiel && Math.Abs(s.Datum - datum) <= fenster && Hallenvergleich.Gleich(nachNamen, lokal, halle, s.Lokal, s.Halle)))
             {
                 anzahl++;
                 belegtVon?.Add(spiel.Heim + " (" + spiel.Geschlecht + ")");
@@ -328,14 +329,12 @@ internal sealed partial class RefMannschaft
 
         foreach (RefMannschaft verein in VereinsteamsImPlan)
         {
-            foreach (RefSpiel spiel in verein.Spiele)
+            int gleich = verein.Spiele.Count(spiel => ReferenceEquals(spiel.Heim, verein) && !ReferenceEquals(spiel.Gast, this)
+                && Math.Abs(spiel.Datum - datum) <= fenster && Hallenvergleich.Gleich(nachNamen, spiel.Lokal, spiel.Halle, lokal, halle));
+            anzahl += gleich;
+            for (int i = 0; i < gleich && belegtVon is not null; i++)
             {
-                if (ReferenceEquals(spiel.Heim, verein) && !ReferenceEquals(spiel.Gast, this)
-                    && Math.Abs(spiel.Datum - datum) <= fenster && spiel.Lokal == lokal)
-                {
-                    anzahl++;
-                    belegtVon?.Add(verein.TeamName + " (" + plan.Geschlecht + ")");
-                }
+                belegtVon.Add(verein.TeamName + " (" + plan.Geschlecht + ")");
             }
         }
 
@@ -479,6 +478,7 @@ internal sealed partial class RefMannschaft
             Datum = datum,
             ParalleleSpiele = termin.MaxParalleleSpiele,
             Spiellokal = termin.Spiellokal.Length > 0 ? termin.Spiellokal : StandardLokal,
+            Halle = termin.Halle,
         };
         Wunschtermine.Add(wunsch);
 
@@ -540,6 +540,7 @@ internal sealed partial class RefMannschaft
                 Heim = spiel.Heim,
                 Gast = spiel.Gast,
                 Lokal = lokal,
+                Halle = spiel.Halle,
                 KeineParallelenSpiele = nachbar.KeineParallelenSpiele,
                 ParalleleHeimspiele = nachbar.ParalleleHeimspiele,
             };

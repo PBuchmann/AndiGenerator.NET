@@ -912,7 +912,7 @@ internal sealed partial class KernPlan
             int s = liste[i];
             if (MaxHeim[s] > 0 && Heim[s] == t && Aktiv(s))
             {
-                int belegung = Hallenbelegung(t, Datum[s], Tag[s], Lokal(s));
+                int belegung = Hallenbelegung(t, Datum[s], Tag[s], Lokal(s), Halle(s));
                 if (belegung >= MaxHeim[s])
                 {
                     KostenAnzahl[k] += belegung - MaxHeim[s] + 1;
@@ -925,7 +925,7 @@ internal sealed partial class KernPlan
     }
 
     /// <summary>Original <c>GetHallenBelegung</c>.</summary>
-    private int Hallenbelegung(int t, double datum, int tag, int lokal)
+    private int Hallenbelegung(int t, double datum, int tag, int lokal, int halle)
     {
         int anzahl = 0;
         double fenster = DelphiDatum.EncodeTime(1, 29);
@@ -933,7 +933,7 @@ internal sealed partial class KernPlan
         {
             foreach (Nachbarspiel spiel in nachbarn)
             {
-                if (spiel.IstHeimspiel && Math.Abs(spiel.Datum - datum) <= fenster && lokal == spiel.Lokal)
+                if (spiel.IstHeimspiel && Math.Abs(spiel.Datum - datum) <= fenster && GleicheHalle(lokal, halle, spiel.Lokal, spiel.Halle))
                 {
                     anzahl++;
                 }
@@ -946,7 +946,7 @@ internal sealed partial class KernPlan
             for (int i = 0; i < SpieleAnzahl[verein]; i++)
             {
                 int s = liste[i];
-                if (Heim[s] == verein && Gast[s] != t && Math.Abs(Datum[s] - datum) <= fenster && Lokal(s) == lokal)
+                if (Heim[s] == verein && Gast[s] != t && Math.Abs(Datum[s] - datum) <= fenster && GleicheHalle(Lokal(s), Halle(s), lokal, halle))
                 {
                     anzahl++;
                 }
@@ -955,6 +955,10 @@ internal sealed partial class KernPlan
 
         return anzahl;
     }
+
+    /// <summary>Wie <see cref="Referenz.Hallenvergleich.Gleich"/>.</summary>
+    private bool GleicheHalle(int lokalA, int halleA, int lokalB, int halleB) =>
+        D.Korrekturen.HallenNachNamen && halleA != 0 && halleB != 0 ? halleA == halleB : lokalA == lokalB;
 
     private void ParalleleSpieleKosten(int t, int k, double faktor)
     {

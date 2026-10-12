@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>AndiGenerator.Import</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- PDF lesen (Bericht „Terminwünsche“ aus click-TT), Apache-2.0 (MIGRATIONSPLAN E11). -->
+    <PackageReference Include="PdfPig" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\AndiGenerator.Persistence\AndiGenerator.Persistence.csproj" />
+  </ItemGroup>
+</Project>

@@ -19,6 +19,7 @@ public sealed class EinrichtungViewModel : ObservableObject
     private readonly Func<Einrichtungsschritt, Task<bool>> uebernehmen;
     private readonly Func<Einrichtungsschritt, DatenDialogViewModel?> seiteErzeugen;
     private readonly Func<Task> abschliessen;
+    private readonly Func<Task> abbrechen;
     private Einrichtungsschritt aktiv;
     private string meldung = string.Empty;
 
@@ -28,33 +29,38 @@ public sealed class EinrichtungViewModel : ObservableObject
     /// <param name="uebernehmen">Übernimmt einen Punkt; <c>false</c>, wenn er nicht übernommen werden konnte.</param>
     /// <param name="seiteErzeugen">Erzeugt die eingebettete Seite eines Datenpunkts mit dem aktuellen Stand der Daten.</param>
     /// <param name="abschliessen">Schließt die Seite; generiert wird danach erst mit „Generierung starten“.</param>
+    /// <param name="abbrechen">Bricht die Einrichtung ab und schließt die Staffel (schon übernommene Punkte bleiben gespeichert).</param>
     public EinrichtungViewModel(
         string titel,
         IReadOnlyList<Einrichtungsschritt> schritte,
         Func<Einrichtungsschritt, Task<bool>> uebernehmen,
         Func<Einrichtungsschritt, DatenDialogViewModel?> seiteErzeugen,
-        Func<Task> abschliessen)
+        Func<Task> abschliessen,
+        Func<Task> abbrechen)
     {
         ArgumentNullException.ThrowIfNull(schritte);
         ArgumentOutOfRangeException.ThrowIfZero(schritte.Count);
         ArgumentNullException.ThrowIfNull(uebernehmen);
         ArgumentNullException.ThrowIfNull(seiteErzeugen);
         ArgumentNullException.ThrowIfNull(abschliessen);
+        ArgumentNullException.ThrowIfNull(abbrechen);
         Titel = titel;
         Schritte = schritte;
         this.uebernehmen = uebernehmen;
         this.seiteErzeugen = seiteErzeugen;
         this.abschliessen = abschliessen;
+        this.abbrechen = abbrechen;
         foreach (Einrichtungsschritt schritt in schritte)
         {
             schritt.Gewaehlt += (_, _) => Aktiv = schritt;
         }
 
-        aktiv = schritte[0];
+        aktiv = schritte.FirstOrDefault(s => s.Zustand == Schrittzustand.Offen) ?? schritte[0];
         Zeigen(aktiv);
         UebernehmenCommand = new AsyncRelayCommand(UebernehmenAsync);
         UeberspringenCommand = new RelayCommand(Ueberspringen);
         AbschliessenCommand = new AsyncRelayCommand(AbschliessenAsync);
+        AbbrechenCommand = new AsyncRelayCommand(() => this.abbrechen());
     }
 
     /// <summary>Holt die Überschrift.</summary>
@@ -120,6 +126,9 @@ public sealed class EinrichtungViewModel : ObservableObject
     /// </summary>
     public IAsyncRelayCommand AbschliessenCommand { get; }
 
+    /// <summary>Holt den Befehl „Abbrechen“: schließt die Staffel; schon übernommene Punkte bleiben gespeichert.</summary>
+    public IAsyncRelayCommand AbbrechenCommand { get; }
+
     private int Bearbeitet => Schritte.Count(s => s.Zustand != Schrittzustand.Offen);
 
     private void Zeigen(Einrichtungsschritt schritt)
@@ -140,7 +149,8 @@ public sealed class EinrichtungViewModel : ObservableObject
             return;
         }
 
-        Abhaken(schritt, Schrittzustand.Erledigt);
+        // Ein Punkt mit mehreren Teilen (z. B. zwei Dateien) bleibt offen, bis alle erledigt sind.
+        Abhaken(schritt, (schritt.IstVollstaendig?.Invoke() ?? true) ? Schrittzustand.Erledigt : Schrittzustand.Offen);
     }
 
     private async Task AbschliessenAsync()

@@ -9,4 +9,8 @@ namespace AndiGenerator.Domain.Stammdaten;
 /// <param name="Heim">Name der Heimmannschaft.</param>
 /// <param name="Gast">Name der Gastmannschaft.</param>
 /// <param name="Spiellokal">Abweichendes Spiellokal „1“ bis „5“ oder leer.</param>
-public sealed record Nachbarspiel(DateTime Zeitpunkt, string Heim, string Gast, string Spiellokal);
+public sealed record Nachbarspiel(DateTime Zeitpunkt, string Heim, string Gast, string Spiellokal)
+{
+    /// <summary>Holt den Namen der Halle aus click-TT (<c>courtHall</c>; nicht im Original) oder leer, wenn unbekannt.</summary>
+    public string Halle { get; init; } = string.Empty;
+}

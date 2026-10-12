@@ -71,6 +71,12 @@ public sealed class Einrichtungsschritt : ObservableObject
     /// <summary>Holt einen Wert, der angibt, ob der Schritt eine Entscheidung ist.</summary>
     public bool IstEntscheidung => Optionen.Count > 0;
 
+    /// <summary>
+    /// Holt oder setzt, ob ein Punkt nach dem Übernehmen vollständig erledigt ist (z. B. erst, wenn beide Dateien geladen
+    /// sind); ohne Angabe ist er es immer.
+    /// </summary>
+    public Func<bool>? IstVollstaendig { get; init; }
+
     /// <summary>Holt den Punkt des Erststart-Assistenten oder <c>null</c> bei Entscheidungen.</summary>
     public Erststartpunkt? Punkt { get; }
 

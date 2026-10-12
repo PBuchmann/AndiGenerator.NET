@@ -40,6 +40,19 @@ Wenn Sie vorher mit dem Original-AndiGenerator gearbeitet haben, übernimmt Andi
 
 AndiGenerator.NET läuft unter Windows 10 und 11 (64 Bit), auf dem Mac (macOS 14 oder neuer), auf Chromebooks und unter Linux (siehe unten). Administratorrechte sind nicht nötig, und .NET muss nicht installiert sein – alles Nötige ist dabei.
 
+**Welche Datei?** Ein Klick lädt jeweils die neueste Version:
+
+| Ihr Rechner | Datei |
+|---|---|
+| Windows-PC oder -Laptop (Intel/AMD – der Normalfall) | [AndiGeneratorNET-win-Setup.exe](https://github.com/PBuchmann/AndiGenerator.NET/releases/latest/download/AndiGeneratorNET-win-Setup.exe) |
+| Windows-Laptop mit ARM-Prozessor (z. B. Snapdragon) | [AndiGeneratorNET-win-arm64-Setup.exe](https://github.com/PBuchmann/AndiGenerator.NET/releases/latest/download/AndiGeneratorNET-win-arm64-Setup.exe) |
+| Mac mit Apple-Chip (M1 und neuer) | [AndiGeneratorNET-macos-arm64.dmg](https://github.com/PBuchmann/AndiGenerator.NET/releases/latest/download/AndiGeneratorNET-macos-arm64.dmg) |
+| Mac mit Intel-Prozessor | [AndiGeneratorNET-macos-x64.dmg](https://github.com/PBuchmann/AndiGenerator.NET/releases/latest/download/AndiGeneratorNET-macos-x64.dmg) |
+| Chromebook oder Linux mit Intel/AMD | [andigenerator-net_amd64.deb](https://github.com/PBuchmann/AndiGenerator.NET/releases/latest/download/andigenerator-net_amd64.deb) |
+| Chromebook oder Linux mit ARM-Prozessor | [andigenerator-net_arm64.deb](https://github.com/PBuchmann/AndiGenerator.NET/releases/latest/download/andigenerator-net_arm64.deb) |
+
+Im Zweifel bei Windows die erste Datei nehmen: Sie läuft auch auf ARM-Laptops mit Windows 11, nur langsamer. Die übrigen Dateien auf der Release-Seite (`.nupkg`, `RELEASES`, `releases.*.json`, Stückliste) braucht das Programm für seine Updates bzw. dienen als Nachweis – sie müssen Sie nicht herunterladen.
+
 **Mit Setup (empfohlen)**
 
 1. Auf der Seite [Releases](https://github.com/PBuchmann/AndiGenerator.NET/releases) bei der neuesten Version die Datei `AndiGeneratorNET-win-Setup.exe` herunterladen. Für Windows-Laptops mit ARM-Prozessor (z. B. Snapdragon) gibt es `AndiGeneratorNET-win-arm64-Setup.exe`; sie rechnet dort deutlich schneller. Welcher Prozessor eingebaut ist, steht unter *Einstellungen → System → Info → Systemtyp* („ARM-basierter Prozessor“).
@@ -63,7 +76,7 @@ Das installierte Programm sucht nach dem Start selbst nach einer neuen Version u
 
 **Auf dem Mac**
 
-1. Auf der Seite [Releases](https://github.com/PBuchmann/AndiGenerator.NET/releases) das passende Disk-Image herunterladen: `AndiGeneratorNET-<Version>-macos-arm64.dmg` für Macs mit Apple-Chip (M1 und neuer), `…-macos-x64.dmg` für ältere Macs mit Intel-Prozessor. Welcher Chip eingebaut ist, steht unter * → Über diesen Mac*.
+1. Auf der Seite [Releases](https://github.com/PBuchmann/AndiGenerator.NET/releases) das passende Disk-Image herunterladen: `AndiGeneratorNET-macos-arm64.dmg` für Macs mit Apple-Chip (M1 und neuer), `AndiGeneratorNET-macos-x64.dmg` für ältere Macs mit Intel-Prozessor. Welcher Chip eingebaut ist, steht unter * → Über diesen Mac*.
 2. Das Disk-Image öffnen und **AndiGenerator.NET** auf den Ordner **Programme** ziehen.
 3. Beim ersten Start meldet macOS, dass Apple das Programm nicht überprüfen konnte, und öffnet es nicht – das Programm ist noch nicht von Apple beglaubigt. Die Meldung mit **Fertig** schließen, dann *Systemeinstellungen → Datenschutz & Sicherheit* öffnen, nach unten blättern und bei AndiGenerator.NET **Dennoch öffnen** wählen und mit dem Passwort bestätigen. Danach startet das Programm normal.
 
@@ -74,14 +87,14 @@ Statt **Strg** gilt auf dem Mac die Befehlstaste **⌘** (z. B. ⌘ + Plus zum V
 Auf Chromebooks läuft das Programm in der Linux-Entwicklungsumgebung, die ChromeOS mitbringt.
 
 1. Einmalig Linux einschalten: *Einstellungen → Info zu ChromeOS → Entwickler → Linux-Entwicklungsumgebung → Aktivieren* (bei älteren Versionen *Einstellungen → Erweitert → Entwickler*).
-2. Auf der Seite [Releases](https://github.com/PBuchmann/AndiGenerator.NET/releases) das passende Paket herunterladen: `andigenerator-net_<Version>_amd64.deb` für Chromebooks mit Intel- oder AMD-Prozessor, `…_arm64.deb` für Chromebooks mit ARM-Prozessor (z. B. MediaTek oder Qualcomm). Welcher Prozessor eingebaut ist, steht unter *Einstellungen → Info zu ChromeOS → Weitere Details*, oder im Linux-Terminal mit `dpkg --print-architecture`.
+2. Auf der Seite [Releases](https://github.com/PBuchmann/AndiGenerator.NET/releases) das passende Paket herunterladen: `andigenerator-net_amd64.deb` für Chromebooks mit Intel- oder AMD-Prozessor, `andigenerator-net_arm64.deb` für Chromebooks mit ARM-Prozessor (z. B. MediaTek oder Qualcomm). Welcher Prozessor eingebaut ist, steht unter *Einstellungen → Info zu ChromeOS → Weitere Details*, oder im Linux-Terminal mit `dpkg --print-architecture`.
 3. Die Datei in der App *Dateien* in den Ordner *Linux-Dateien* ziehen.
 4. Das *Terminal* öffnen (im Launcher unter *Linux-Apps*) und eingeben – mit dem Dateinamen der heruntergeladenen Datei:
-   `sudo apt install ./andigenerator-net_<Version>_amd64.deb`
+   `sudo apt install ./andigenerator-net_amd64.deb` (bzw. `…_arm64.deb`)
    ChromeOS bietet die Installation per Doppelklick nicht mehr an. Das Programm erscheint danach im Launcher im Ordner *Linux-Apps*.
 5. Die click-TT-Dateien müssen für Linux sichtbar sein: entweder in den Ordner *Linux-Dateien* legen oder einen Ordner in *Dateien* mit der rechten Maustaste **Mit Linux teilen**.
 
-Ohne Installation geht es mit `AndiGeneratorNET-<Version>-linux-x64.tar.gz` bzw. `…-linux-arm64.tar.gz`: entpacken und `./AndiGenerator.NET` starten. Unter Linux liegen die eigenen Daten im Ordner `~/.local/share/AndiGenerator.NET`. Neue Versionen werden hier nicht selbst gesucht – zum Aktualisieren das neue Paket genauso installieren.
+Ohne Installation geht es mit `AndiGeneratorNET-linux-x64.tar.gz` bzw. `AndiGeneratorNET-linux-arm64.tar.gz`: entpacken und `./AndiGenerator.NET` starten. Unter Linux liegen die eigenen Daten im Ordner `~/.local/share/AndiGenerator.NET`. Neue Versionen werden hier nicht selbst gesucht – zum Aktualisieren das neue Paket genauso installieren.
 
 ## 3. Erste Schritte
 
@@ -115,16 +128,31 @@ click-TT überträgt nicht alles, was für einen guten Plan nötig ist, und die 
 
 | Punkt | Worum es geht |
 |---|---|
+| **Daten aus click-TT ergänzen** | Immer als erster Punkt: weitere Exporte aus click-TT, die nicht in der XML-Datei stehen (siehe unten). Jeder ist freiwillig. Erledigt ist der Punkt erst, wenn Mannschaftsmeldung **und** Terminwünsche übernommen sind – das darf auch in verschiedenen Sitzungen geschehen; die Seite nennt bei jeder Datei, wann sie übernommen wurde. Ist beides erledigt und sonst nichts zu klären, erscheint die Einrichtung nicht. |
 | **Gespeicherte Einstellungen** | Sie haben die Staffel schon einmal bearbeitet und dabei Gewichtungen geändert. Wählen Sie, ob Sie diese weiterverwenden oder für diese Sitzung mit den Standardeinstellungen rechnen wollen (die gespeicherten bleiben erhalten). |
 | **Gespeicherte Kriterienreihenfolge** | Sie haben für diese Staffel in der Ansicht **Qualität** eine eigene Einteilung der Kriterien in die Stufen A, B und C festgelegt (danach richtet sich der Automodus). Die Seite zeigt sie; wählen Sie, ob Sie sie weiterverwenden oder für diese Sitzung die Standardreihenfolge nehmen (die gespeicherte bleibt erhalten, bis Sie die Einteilung wieder ändern). |
 | **Rundenplanung** | Ist die Runde kürzer als sechs Monate, schlägt das Programm eine Halbrunde vor. Beginnt die Rückrunde in weniger als 60 Tagen (oder hat sie vor weniger als 60 Tagen begonnen), schlägt es vor, nur die Rückrunde zu planen; die Frage nennt dazu den Beginn der Rückrunde. |
-| **Spiellokale** | click-TT überträgt keine Spiellokale. Haben Vereine mehrere Hallen, tragen Sie hier ein, welche Mannschaft wo spielt – sonst stimmt die Berechnung der Hallenbelegung nicht. Haben alle Vereine nur eine Halle, können Sie den Punkt überspringen. |
+| **Spiellokale** | click-TT überträgt keine Nummern der Spiellokale, wohl aber die Namen der Hallen. Das Programm vergleicht die Hallenbelegung deshalb nach dem Hallennamen: Ein Heimspiel einer Nachbarmannschaft in einer anderen Halle belegt die eigene Halle nicht. Die Nummern (1, 2, 3) brauchen Sie für den Export nach click-TT und für von Hand angelegte Termine ohne Hallennamen. Haben alle Vereine nur eine Halle, können Sie den Punkt überspringen. |
 | **Koppeltermine** | Die Staffel enthält Koppelwünsche oder mögliche Doppelspieltage. Das Programm leitet sie aus den Meldungen ab; bitte kontrollieren. |
 | **Auswärtskoppelwünsche** | Mannschaften möchten zwei Auswärtsspiele an einem Wochenende zusammenlegen. Bitte kontrollieren. |
 | **Setzliste** | Wenn Sie mit einer Setzliste arbeiten wollen, geben Sie hier die erwartete Abschlusstabelle vor. |
 | **Pflichtspieltage** | Die Staffel enthält Pflichtspieltage. Sie sind bei ungerader Mannschaftszahl problematisch (siehe [Pflichtspieltage](#pflichtspieltage)). |
 
-Jeder Punkt lässt sich direkt auf der Seite bearbeiten; mit **Auswahl übernehmen** ist er erledigt, mit **Überspringen** bleibt er, wie er ist. Unten beendet **Abschließen** die Einrichtung; die Generierung startet danach im Hauptfenster mit **▶ Start** (Verfahren daneben wählen), wo auch der Ausgangsplan gewählt wird. Bei Entscheidungen gilt dabei die angeklickte Wahl, auch ohne **Auswahl übernehmen**; Punkte, bei denen Sie nichts gewählt haben, bleiben unverändert. Die Wahlkacheln und Knöpfe stehen immer unten im Blick, auch wenn die Erklärung darüber lang ist. Alles lässt sich später unter **Spielplandaten**, **Einstellungen** und in der Ansicht **Qualität** ändern.
+Jeder Punkt lässt sich direkt auf der Seite bearbeiten; mit **Auswahl übernehmen** ist er erledigt, mit **Überspringen** bleibt er, wie er ist. Unten beendet **Abschließen** die Einrichtung; **Abbrechen** schließt die Staffel wieder (schon übernommene Punkte bleiben gespeichert). Solange die Einrichtung offen ist, sind auch **Öffnen** und **Neu** gesperrt – erst abschließen oder abbrechen; die Generierung startet danach im Hauptfenster mit **▶ Start** (Verfahren daneben wählen), wo auch der Ausgangsplan gewählt wird. Bei Entscheidungen gilt dabei die angeklickte Wahl, auch ohne **Auswahl übernehmen**; Punkte, bei denen Sie nichts gewählt haben, bleiben unverändert. Die Wahlkacheln und Knöpfe stehen immer unten im Blick, auch wenn die Erklärung darüber lang ist. Alles lässt sich später unter **Spielplandaten**, **Einstellungen** und in der Ansicht **Qualität** ändern.
+
+**Daten aus click-TT ergänzen.** Hier gibt es zwei Dateien. Die **Mannschaftsmeldung**: In click-TT stehen bei den Downloads der Staffel die Dateien **Mannschaftsmeldung Vorrunde (csv)** bzw. **Rückrunde (csv)**. Nach **Mannschaftsmeldung laden…** zeigt das Programm je Mannschaft den Schnitt der TTR-Werte ihrer besten Stammspieler – bei Vierer-Mannschaften der besten vier, bei Sechser-Mannschaften der besten sechs; Reservespieler zählen nicht – und ordnet die Mannschaften danach, die stärkste zuerst. Mit dem Haken **Als Setzliste übernehmen** wird diese Reihenfolge die Setzliste (und die Setzliste eingeschaltet); im Punkt **Setzliste** können Sie sie danach wie gewohnt verschieben. Gelesen werden nur Mannschaft, Rang, Status und TTR-Wert – keine Namen oder Geburtsdaten.
+
+![Daten aus click-TT: Mannschaftsmeldung als Vorschlag für die Setzliste](Anleitung/Bilder/26-daten-aus-clicktt.png)
+
+Die **Terminwünsche** (PDF): In click-TT bei den Downloads der Staffel **Terminmeldungen (pdf)**. Der Bericht nennt die Spiellokale 1 bis 3 jedes Vereins mit Adresse. Nach **Terminwünsche laden…** setzt das Programm bei jedem Heimtermin die Nummer des Spiellokals, dessen Name zur Halle aus click-TT passt – die Nummern braucht der Export nach click-TT, und von Hand eingetragene Nummern bleiben unverändert. Außerdem merkt es sich die Adressen (für die Entfernungen zwischen den Hallen, siehe unten), zeigt die **Bemerkungen der Vereine** – Wünsche, die click-TT nicht strukturiert überträgt, etwa „alle Spiele nur samstags“ – und listet **Unterschiede** zwischen Bericht und Spielplandaten, z. B. Heim- oder Sperrtermine, die ein Verein nach dem Herunterladen der XML-Datei geändert hat oder die Sie selbst angepasst haben. Termine und Sperren selbst ändert der Bericht nicht. Kontaktdaten werden nicht gelesen.
+
+Nach dem Laden erscheint direkt unter dem jeweiligen Knopf eine hervorgehobene Meldung mit grünem Haken und dem Wichtigsten (z. B. wie viele Mannschaften gefunden wurden und wie viele Unterschiede es gibt), und die Seite rollt dorthin; die Einzelheiten stehen darunter.
+
+![Terminwünsche geladen: Meldung, Kennzahlen und eine Karte je Mannschaft](Anleitung/Bilder/27-terminwuensche-pdf.png)
+
+**Wochenspiele (60-km-Regel).** Sobald Hallenadressen bekannt sind, prüft die Seite die Liste „keine Auswärtsspiele unter der Woche“ (Spielplandaten, Seite [Wochenende (60-km-Regel)](#wochenende-60-km-regel)). Gemessen wird die **Luftlinie** zwischen den Hallen, aus Postleitzahl und Ort – deutschlandweit und ohne Internet. Die Prüfung läuft sofort auf der Seite, sobald Hallenadressen bekannt sind, und erneut, wenn Sie die Grenze ändern (Vorgabe 60 km); sie ändert nichts an den Daten. Für den Plan zählen allein die Häkchen auf der Seite *Wochenende (60-km-Regel)*. Geprüft wird ein Paar nur, wenn der Gastgeber Heimtermine **unter der Woche und am Wochenende** gemeldet hat – nur dann entscheidet die Sperre, wann gespielt wird. Unter der Woche heißt Montag bis Donnerstag, der Freitag nur, wenn er in den **Einstellungen** nicht zum Wochenende zählt. Hat in der Staffel niemand solche Termine (etwa in einer Verbandsliga, die nur samstags und sonntags spielt), sagt die Seite das, und es gibt nichts zu prüfen. **Sperre fehlt vermutlich:** Die Hallen liegen weiter auseinander als die Grenze, aber der Gast hat den Gastgeber nicht gesperrt. **Sperre vermutlich unnötig:** gesperrt, obwohl die Hallen höchstens so weit auseinander liegen. Sperrt ein Verein pauschal alle Gegner, ist das sein Wunsch – die Seite nennt ihn, bewertet ihn aber nicht. Da die Wettspielordnung kein festes Maß vorgibt, sind das zunächst nur Hinweise. Mit **Fehlende Sperren setzen…** setzen Sie nach einer einzigen Rückfrage (sie listet alle Treffer) alle fehlenden Sperren auf einmal; vorhandene bleiben. Danach zeigt das **Protokoll** auf der Seite Zeitpunkt, Grenze und je Sperre „Gast spielt bei Gastgeber nur am Wochenende (km)“. Gespeichert wird mit der Seite; **Standard** nimmt die gesetzten Sperren wieder zurück. Unnötige Sperren ändert das Programm nicht.
+
+![Wochenspiele – Prüfung der 60-km-Regel](Anleitung/Bilder/28-wochenspiele.png)
 
 ### 3.4 Terminwünsche kontrollieren
 
@@ -524,6 +552,10 @@ dazu die einzelnen **Begegnungen** dieser Mannschaft.
 ### Wochenende (60-km-Regel)
 
 Ist die Anfahrt zu einem Gegner zu weit, sollen die Spiele gegen ihn am Wochenende stattfinden. Hier legen Sie fest, für welche Paarungen das gilt. Ob der Freitag zum Wochenende zählt, stellen Sie in den **Einstellungen** ein.
+
+Sind die Terminwünsche (PDF) übernommen (siehe [3.3](#33-die-staffel-einrichten)), steht neben jedem Gegner die Entfernung der Hallen in Luftlinie. Die Marke **weit** zeigt einen Gegner über 60 km ohne Häkchen, der auch unter der Woche Heimspiele hat; **nah** ein Häkchen bei höchstens 60 km. Beides sind nur Hinweise. Unter der Liste steht die Summe der Entfernungen zu allen Gegnern (je einfache Strecke).
+
+![Wochenende (60-km-Regel) mit Entfernungen](Anleitung/Bilder/29-wochenende-entfernungen.png)
 
 ### Spielfreie Tage
 

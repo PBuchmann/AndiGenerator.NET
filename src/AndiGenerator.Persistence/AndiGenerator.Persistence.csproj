@@ -4,6 +4,10 @@
     <IsAotCompatible>true</IsAotCompatible>
   </PropertyGroup>
   <ItemGroup>
+    <!-- Lage der Postleitzahlen aus GeoNames (CC BY 4.0), erzeugt mit tools/geonames/plz_tabelle.py -->
+    <EmbeddedResource Include="Geo\plz-de.csv.gz" LogicalName="plz-de.csv.gz" />
+  </ItemGroup>
+  <ItemGroup>
     <ProjectReference Include="..\AndiGenerator.Domain\AndiGenerator.Domain.csproj" />
   </ItemGroup>
 </Project>
