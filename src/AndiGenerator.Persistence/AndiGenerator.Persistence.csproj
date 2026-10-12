@@ -6,6 +6,8 @@
   <ItemGroup>
     <!-- Lage der Postleitzahlen aus GeoNames (CC BY 4.0), erzeugt mit tools/geonames/plz_tabelle.py -->
     <EmbeddedResource Include="Geo\plz-de.csv.gz" LogicalName="plz-de.csv.gz" />
+    <EmbeddedResource Include="Geo\umrisse-de.json" LogicalName="umrisse-de.json" />
+    <EmbeddedResource Include="Geo\staedte-de.json" LogicalName="staedte-de.json" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AndiGenerator.Domain\AndiGenerator.Domain.csproj" />

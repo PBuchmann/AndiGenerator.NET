@@ -1,0 +1,265 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:p="using:AndiGenerator.Presentation"
+             xmlns:sys="using:System"
+             xmlns:ui="using:AndiGenerator.UI"
+             x:Class="AndiGenerator.UI.Ansichten.KompaktspieltageAnsicht"
+             x:DataType="p:KompaktspieltageAnsichtViewModel">
+  <UserControl.Resources>
+    <SolidColorBrush x:Key="HeimHell" Color="#E2F1E7" />
+    <LinearGradientBrush x:Key="BeidesHell" StartPoint="0%,0%" EndPoint="100%,100%">
+      <GradientStop Offset="0.5" Color="#E2F1E7" />
+      <GradientStop Offset="0.5" Color="#E6EEF8" />
+    </LinearGradientBrush>
+  </UserControl.Resources>
+  <UserControl.Styles>
+    <Style Selector="Button.flach">
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="Cursor" Value="Hand" />
+      <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+    </Style>
+    <Style Selector="Button.flach:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{StaticResource Schwebe}" />
+    </Style>
+    <Style Selector="Border.zelle">
+      <Setter Property="Width" Value="40" />
+      <Setter Property="Height" Value="30" />
+      <Setter Property="Margin" Value="1.5" />
+      <Setter Property="CornerRadius" Value="6" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="BorderBrush" Value="Transparent" />
+    </Style>
+    <Style Selector="Border.zelle.heim"><Setter Property="Background" Value="{StaticResource HeimHell}" /></Style>
+    <Style Selector="Border.zelle.auswaerts"><Setter Property="Background" Value="{StaticResource AkzentHell}" /></Style>
+    <Style Selector="Border.zelle.beides"><Setter Property="Background" Value="{StaticResource BeidesHell}" /></Style>
+    <Style Selector="Border.zelle.nicht"><Setter Property="Background" Value="{StaticResource Schwebe}" /></Style>
+    <Style Selector="Border.zelle.unbekannt"><Setter Property="BorderBrush" Value="{StaticResource Rand}" /></Style>
+    <Style Selector="Border.zelle.verstoss">
+      <Setter Property="BorderBrush" Value="{StaticResource Schlecht}" />
+      <Setter Property="BorderThickness" Value="2" />
+    </Style>
+    <Style Selector="Border.zelle.gedimmt"><Setter Property="Opacity" Value="0.35" /></Style>
+    <Style Selector="TextBlock.gewaehlt">
+      <Setter Property="Foreground" Value="{StaticResource Akzent}" />
+      <Setter Property="FontWeight" Value="Bold" />
+    </Style>
+    <Style Selector="Border.spieltag.gewaehlt">
+      <Setter Property="BorderBrush" Value="{StaticResource Akzent}" />
+      <Setter Property="BorderThickness" Value="2" />
+    </Style>
+  </UserControl.Styles>
+  <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+    <StackPanel Margin="18,14" Spacing="16" MaxWidth="1400" HorizontalAlignment="Left">
+      <Grid ColumnDefinitions="*,Auto">
+        <StackPanel Spacing="2">
+          <TextBlock Text="{Binding Kopfzeile}" Classes="klein" />
+          <TextBlock Text="Kompaktspieltage" FontSize="20" FontWeight="SemiBold" />
+        </StackPanel>
+        <Button Grid.Column="1" Classes="link" Command="{Binding AusschaltenCommand}" IsVisible="{Binding Eingeschaltet}" VerticalAlignment="Bottom"
+                Content="Kompaktspieltage ausschalten" ToolTip.Tip="Normale Planung: jedes Spiel einzeln" />
+      </Grid>
+
+      <!-- Ausgeschaltet: Erklärung und Einschalten -->
+      <Border Classes="karte" IsVisible="{Binding !Eingeschaltet}" MaxWidth="760" HorizontalAlignment="Left">
+        <StackPanel Spacing="12">
+          <TextBlock Text="{x:Static p:KompaktspieltageAnsichtViewModel.Erklaerung}" TextWrapping="Wrap" />
+          <Button Classes="seitenknopf" Command="{Binding EinschaltenCommand}" HorizontalAlignment="Left" Content="Mit Kompaktspieltagen planen" />
+        </StackPanel>
+      </Border>
+
+      <StackPanel Spacing="16" IsVisible="{Binding Eingeschaltet}">
+        <!-- Kennzahlen -->
+        <ItemsControl ItemsSource="{Binding Kennzahlen}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+              <WrapPanel />
+            </ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="p:Kachelwert">
+              <Border Classes="karte" Padding="14,10" Margin="0,0,10,10" Width="190">
+                <StackPanel Spacing="2">
+                  <TextBlock Text="{Binding Wert}" Classes="ziffer" FontSize="22" FontWeight="SemiBold" Foreground="{StaticResource Akzent}" />
+                  <TextBlock Text="{Binding Text}" FontSize="12" Foreground="{StaticResource Tinte2}" TextWrapping="Wrap" />
+                </StackPanel>
+              </Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+
+        <Grid ColumnDefinitions="Auto,18,*">
+          <!-- Raster: Meldungen und Plan -->
+          <Border Classes="karte" VerticalAlignment="Top">
+            <StackPanel Spacing="8">
+              <TextBlock Text="Meldungen und Plan" FontSize="15" FontWeight="SemiBold" />
+              <TextBlock Text="Klick auf einen Sonntag oder eine Mannschaft zeigt ihre Fahrten; ein zweiter Klick wieder alle." Classes="klein" TextWrapping="Wrap" MaxWidth="460" HorizontalAlignment="Left" />
+              <StackPanel Orientation="Horizontal" Margin="58,0,0,0">
+                <ItemsControl ItemsSource="{Binding Spalten}">
+                  <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                      <StackPanel Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                  </ItemsControl.ItemsPanel>
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="p:Kompaktspalte">
+                      <Button Classes="flach" Width="43" Height="110" ToolTip.Tip="{Binding Name}"
+                              Command="{Binding $parent[UserControl].((p:KompaktspieltageAnsichtViewModel)DataContext).MannschaftWaehlenCommand}" CommandParameter="{Binding Name}">
+                        <LayoutTransformControl VerticalAlignment="Bottom" HorizontalAlignment="Center">
+                          <LayoutTransformControl.LayoutTransform>
+                            <RotateTransform Angle="-60" />
+                          </LayoutTransformControl.LayoutTransform>
+                          <TextBlock Text="{Binding Kurzname}" FontSize="12" Foreground="{StaticResource Tinte2}" Classes.gewaehlt="{Binding Gewaehlt}" />
+                        </LayoutTransformControl>
+                      </Button>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </StackPanel>
+              <ItemsControl ItemsSource="{Binding Zeilen}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="p:Kompaktrasterzeile">
+                    <StackPanel Orientation="Horizontal">
+                      <Button Classes="flach" Width="58" Height="33"
+                              Command="{Binding $parent[UserControl].((p:KompaktspieltageAnsichtViewModel)DataContext).TagWaehlenCommand}" CommandParameter="{Binding}">
+                        <TextBlock Text="{Binding Datum}" Classes="ziffer" FontSize="12" Foreground="{StaticResource Tinte2}" Classes.gewaehlt="{Binding Gewaehlt}"
+                                   HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0" />
+                      </Button>
+                      <ItemsControl ItemsSource="{Binding Zellen}">
+                        <ItemsControl.ItemsPanel>
+                          <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal" />
+                          </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                          <DataTemplate x:DataType="p:Kompaktzelle">
+                            <Border Classes="zelle" Classes.heim="{Binding IstHeim}" Classes.auswaerts="{Binding IstAuswaerts}" Classes.beides="{Binding IstBeides}"
+                                    Classes.nicht="{Binding IstNicht}" Classes.unbekannt="{Binding IstUnbekannt}" Classes.verstoss="{Binding Verstoss}" Classes.gedimmt="{Binding Gedimmt}"
+                                    ToolTip.Tip="{Binding Hinweis}">
+                              <TextBlock Text="{Binding Zeichen}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="13"
+                                         FontWeight="{Binding Spielt, Converter={x:Static ui:Konverter.MeldungGewicht}}" Foreground="{StaticResource Tinte}" />
+                            </Border>
+                          </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                      </ItemsControl>
+                    </StackPanel>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+              <WrapPanel Orientation="Horizontal" MaxWidth="460" HorizontalAlignment="Left">
+                <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,14,4"><Border Width="16" Height="12" CornerRadius="3" Background="{StaticResource HeimHell}" /><TextBlock Text="Heim möglich" Classes="klein" /></StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,14,4"><Border Width="16" Height="12" CornerRadius="3" Background="{StaticResource AkzentHell}" /><TextBlock Text="auswärts möglich" Classes="klein" /></StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,14,4"><Border Width="16" Height="12" CornerRadius="3" Background="{StaticResource BeidesHell}" /><TextBlock Text="beides" Classes="klein" /></StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,14,4"><Border Width="16" Height="12" CornerRadius="3" Background="{StaticResource Schwebe}" /><TextBlock Text="✗ kann nicht" Classes="klein" /></StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,14,4"><Border Width="16" Height="12" CornerRadius="3" BorderBrush="{StaticResource Rand}" BorderThickness="1" /><TextBlock Text="? keine Meldung" Classes="klein" /></StackPanel>
+                <TextBlock Text="★ richtet aus   ● Gast" Classes="klein" Margin="0,0,14,4" />
+                <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,14,4"><Border Width="16" Height="12" CornerRadius="3" BorderBrush="{StaticResource Schlecht}" BorderThickness="2" /><TextBlock Text="gegen die Meldung" Classes="klein" /></StackPanel>
+              </WrapPanel>
+            </StackPanel>
+          </Border>
+
+          <!-- Karte und km je Mannschaft -->
+          <Border Grid.Column="2" Classes="karte" VerticalAlignment="Top" MinWidth="380">
+            <StackPanel Spacing="10">
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Text="{Binding Kartentitel}" FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap" />
+                <TextBlock Grid.Column="1" Text="Entfernungen in Luftlinie" Classes="klein" VerticalAlignment="Center" />
+              </Grid>
+              <ui:Kompaktkarte Bild="{Binding Karte}" />
+              <TextBlock Text="Für einige Mannschaften ist keine Halle bekannt – Terminwünsche (PDF) in der Einrichtung unter „Daten aus click-TT ergänzen“ laden."
+                         Classes="leer" TextWrapping="Wrap" IsVisible="{Binding FehlenLagen}" />
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Text="km je Mannschaft" FontSize="15" FontWeight="SemiBold" />
+                <TextBlock Grid.Column="1" Text="Luftlinie, hin und zurück" Classes="klein" VerticalAlignment="Center" />
+              </Grid>
+              <ItemsControl ItemsSource="{Binding KmZeilen}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="p:Kompaktkmzeile">
+                    <Button Classes="flach" Command="{Binding $parent[UserControl].((p:KompaktspieltageAnsichtViewModel)DataContext).MannschaftWaehlenCommand}" CommandParameter="{Binding Name}">
+                      <Grid ColumnDefinitions="*,130,60" Margin="0,2">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                          <TextBlock Text="{Binding Kurzname}" Classes.gewaehlt="{Binding Gewaehlt}" />
+                          <TextBlock Text="{Binding Zusatz}" Classes="klein" VerticalAlignment="Center" />
+                        </StackPanel>
+                        <Border Grid.Column="1" Height="8" CornerRadius="4" Background="{StaticResource Akzent}" Width="{Binding Balken}" HorizontalAlignment="Left" VerticalAlignment="Center" />
+                        <TextBlock Grid.Column="2" Text="{Binding Km}" Classes="ziffer" HorizontalAlignment="Right" />
+                      </Grid>
+                    </Button>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+          </Border>
+        </Grid>
+
+        <!-- Spieltage -->
+        <Border Classes="karte">
+          <StackPanel Spacing="10">
+            <TextBlock Text="Spieltage" FontSize="15" FontWeight="SemiBold" />
+            <ItemsControl ItemsSource="{Binding Spieltage}">
+              <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                  <WrapPanel Orientation="Horizontal" ItemWidth="310" />
+                </ItemsPanelTemplate>
+              </ItemsControl.ItemsPanel>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="p:Kompaktspieltagkarte">
+                  <Button Classes="flach" Margin="0,0,10,10" VerticalAlignment="Stretch"
+                          Command="{Binding $parent[UserControl].((p:KompaktspieltageAnsichtViewModel)DataContext).SpieltagWaehlenCommand}" CommandParameter="{Binding}">
+                    <Border Classes="karte spieltag" Classes.gewaehlt="{Binding Gewaehlt}" Padding="12,10">
+                      <StackPanel Spacing="4">
+                        <Grid ColumnDefinitions="*,Auto">
+                          <TextBlock Text="{Binding Datum}" Classes="ziffer" FontWeight="SemiBold" />
+                          <Border Grid.Column="1" CornerRadius="10" Padding="8,1" Background="{StaticResource AkzentHell}">
+                            <TextBlock Text="{Binding Marke}" FontSize="11" Foreground="{StaticResource AkzentDunkel}" />
+                          </Border>
+                        </Grid>
+                        <Grid ColumnDefinitions="*,Auto">
+                          <TextBlock Text="{Binding Ausrichter}" TextTrimming="CharacterEllipsis" />
+                          <TextBlock Grid.Column="1" Text="{Binding Km}" Classes="ziffer klein" />
+                        </Grid>
+                        <ItemsControl ItemsSource="{Binding Spiele}">
+                          <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="sys:String">
+                              <TextBlock Text="{Binding}" FontSize="12.5" />
+                            </DataTemplate>
+                          </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <TextBlock Text="{Binding Verlegen}" IsVisible="{Binding HatVerlegen}" FontSize="12" Foreground="{StaticResource AkzentDunkel}" TextWrapping="Wrap" />
+                        <ItemsControl ItemsSource="{Binding Hinweise}" IsVisible="{Binding HatHinweise}">
+                          <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="sys:String">
+                              <TextBlock Text="{Binding}" FontSize="12" Foreground="{StaticResource Schlecht}" TextWrapping="Wrap" />
+                            </DataTemplate>
+                          </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                        <TextBlock Text="{Binding Gaeste}" Classes="klein" TextWrapping="Wrap" />
+                      </StackPanel>
+                    </Border>
+                  </Button>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </Border>
+
+        <!-- Hinweise -->
+        <Border Classes="karte">
+          <StackPanel Spacing="6">
+            <TextBlock Text="Hinweise" FontSize="15" FontWeight="SemiBold" />
+            <ItemsControl ItemsSource="{Binding Hinweise}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="sys:String">
+                  <SelectableTextBlock Text="{Binding}" TextWrapping="Wrap" Margin="0,2" />
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <TextBlock Text="Optimiert wird nach Luftlinie zwischen den Hallen (aus Postleitzahl und Ort bzw. GPS-Angabe), nicht nach Fahrstrecke. Kartengrundlage: Natural Earth (gemeinfrei)."
+                       Classes="klein" TextWrapping="Wrap" Margin="0,8,0,0" />
+          </StackPanel>
+        </Border>
+      </StackPanel>
+    </StackPanel>
+  </ScrollViewer>
+</UserControl>

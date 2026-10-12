@@ -76,6 +76,19 @@ public sealed class HauptfensterTests : IDisposable
             Zeigen<OptionenAnsicht>(fenster, o, modell.EinstellungenCommand);
             Zeigen<MaschinenraumAnsicht>(fenster, o, modell.MaschinenraumCommand);
             Zeigen<VerlaufAnsicht>(fenster, o, modell.VerlaufCommand);
+
+            // Kompaktspieltage: erst ausgeschaltet (Erklärung), dann eingeschaltet mit Raster, Karte und Spieltagen.
+            Zeigen<KompaktspieltageAnsicht>(fenster, o, modell.KompaktspieltageCommand);
+            var kompakt = (KompaktspieltageAnsichtViewModel)fenster.GetVisualDescendants().OfType<KompaktspieltageAnsicht>().Single().DataContext!;
+            await kompakt.EinschaltenCommand.ExecuteAsync(null);
+            o.Abarbeiten();
+            Oberflaeche.Zeichnen(fenster);
+            Assert.True(kompakt.Eingeschaltet);
+            Assert.NotEmpty(kompakt.Zeilen);
+            kompakt.MannschaftWaehlenCommand.Execute(kompakt.Spalten[0].Name);
+            Oberflaeche.Zeichnen(fenster);
+            await kompakt.AusschaltenCommand.ExecuteAsync(null);
+            Assert.False(kompakt.Eingeschaltet);
         }
         finally
         {

@@ -260,6 +260,9 @@
               <Button Classes="nav" Classes.aktiv="{Binding AktiveAnsicht, Converter={x:Static ui:Konverter.Gleich}, ConverterParameter=Nachbarn}" Command="{Binding NachbarterminansichtCommand}" ToolTip.Tip="Nachbarmannschaften">
                 <StackPanel Orientation="Horizontal" Spacing="12"><ui:Symbol Daten="{StaticResource SymbolNachbarn}" /><TextBlock Classes="navtext" Text="Nachbarmannschaften" VerticalAlignment="Center" /></StackPanel>
               </Button>
+              <Button Classes="nav" Classes.aktiv="{Binding AktiveAnsicht, Converter={x:Static ui:Konverter.Gleich}, ConverterParameter=Kompakt}" Command="{Binding KompaktspieltageCommand}" IsVisible="{Binding ZeigtKompaktspieltage}" ToolTip.Tip="Kompaktspieltage: Meldungen, Plan und Karte der Spielorte">
+                <StackPanel Orientation="Horizontal" Spacing="12"><ui:Symbol Daten="{StaticResource SymbolKarte}" /><TextBlock Classes="navtext" Text="Kompaktspieltage" VerticalAlignment="Center" /></StackPanel>
+              </Button>
             </StackPanel>
             <ToggleButton x:Name="KopfAusgabe" Classes="sektion" IsChecked="True" ToolTip.Tip="Abschnitt auf- oder zuklappen">
               <Grid ColumnDefinitions="*,Auto">

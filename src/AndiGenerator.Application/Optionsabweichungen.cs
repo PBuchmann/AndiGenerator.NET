@@ -42,7 +42,9 @@ public static class Optionsabweichungen
             ergebnis.Add(string.Empty);
         }
 
-        string? runde = optionen.Rundenplanung switch
+        // Bei „(HR)“ bzw. „(FR)“ im Klassennamen ist die Halbrunde fest vorgegeben, also keine Abweichung (nicht im Original).
+        Rundenplanung planung = Halbrundenname.Kennzeichen(staffel.Name) == Halbrundenkennzeichen.Keins ? optionen.Rundenplanung : Rundenplanung.Beide;
+        string? runde = planung switch
         {
             Rundenplanung.Halbrunde => "Halbrunde wird generiert",
             Rundenplanung.NurVorrunde => "Nur Vorrunde wird generiert",

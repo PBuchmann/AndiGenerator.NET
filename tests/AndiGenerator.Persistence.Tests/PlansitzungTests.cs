@@ -145,6 +145,7 @@ public sealed class PlansitzungTests : IDisposable
 
         Assert.Equal(Rundenvorschlag.NurRueckrunde, sitzung.RundeVorschlagen(rueckrunde.AddDays(-30)));
         Assert.Equal(Rundenvorschlag.Keiner, sitzung.RundeVorschlagen(rueckrunde.AddDays(-120)));
+        Assert.False(Kompaktplanung.InFrage(sitzung.Staffel, sitzung.Optionen.Rundenplanung, false));
     }
 
     [Fact]

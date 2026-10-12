@@ -80,6 +80,17 @@ public sealed class OptionenAnsichtViewModel : Document
         }
     }
 
+    /// <summary>Holt einen Wert, der angibt, ob die Rundenplanung wählbar ist (nicht bei „(HR)“ bzw. „(FR)“ im Klassennamen).</summary>
+    public bool RundenplanungWaehlbar => hauptfenster.VorgegebeneRundenplanung is null;
+
+    /// <summary>Holt den Hinweis zur vom Klassennamen vorgegebenen Halbrunde (leer, wenn wählbar).</summary>
+    public string Rundenhinweis => hauptfenster.VorgegebeneRundenplanung switch
+    {
+        Rundenplanung.NurVorrunde => "„(HR)“ im Klassennamen: Es wird nur die Hinrunde geplant.",
+        Rundenplanung.NurRueckrunde => "„(FR)“ im Klassennamen: Es wird nur die Rückrunde geplant.",
+        _ => string.Empty,
+    };
+
     /// <summary>Holt oder setzt die Rundenplanung als Index in <see cref="Rundenplanungen"/>.</summary>
     public int RundenplanungIndex
     {
@@ -199,6 +210,8 @@ public sealed class OptionenAnsichtViewModel : Document
             FreitagZaehltZumWochenende = o.FreitagZaehltZumWochenende;
             SpielfreiAmPflichtspieltag = o.SpielfreiAmPflichtspieltag;
             RundenplanungIndex = (int)o.Rundenplanung;
+            OnPropertyChanged(nameof(RundenplanungWaehlbar));
+            OnPropertyChanged(nameof(Rundenhinweis));
             Doppelrunde = o.Doppelrunde;
             AutomatischeMitte = o.AutomatischeMitte;
             (DateOnly auto1, DateOnly auto2) = hauptfenster.AutomatischeRundenmitten() ?? (default, default);

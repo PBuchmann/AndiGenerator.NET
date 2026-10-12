@@ -50,7 +50,7 @@ public sealed class Plansitzung
         }
 
         string optionsdatei = Path.Combine(Staffelordner, OptionenDatei.Dateiname);
-        Optionen = File.Exists(optionsdatei) ? OptionenDatei.Laden(optionsdatei) : Berechnungsoptionen.Standard;
+        Optionen = MitHalbrunde(File.Exists(optionsdatei) ? OptionenDatei.Laden(optionsdatei) : Berechnungsoptionen.Standard);
     }
 
     /// <summary>Pfad der geöffneten Datei.</summary>
@@ -71,11 +71,22 @@ public sealed class Plansitzung
     /// <summary>Staffelordner des Originals, aus dem Optionen und gemerkte Pläne beim ersten Öffnen kopiert wurden; sonst <c>null</c>.</summary>
     public string? UebernommenAus { get; }
 
-    /// <summary>Aktuelle Berechnungsoptionen.</summary>
+    /// <summary>Aktuelle Berechnungsoptionen (bei „(HR)“ bzw. „(FR)“ im Klassennamen immer mit der passenden Halbrunde).</summary>
     public Berechnungsoptionen Optionen { get; private set; }
 
     /// <summary>Die Optionen weichen von den Standardoptionen ab (Original <c>getDiffToDefault</c>).</summary>
-    public bool OptionenWeichenVomStandardAb => !Gleich(Optionen, Berechnungsoptionen.Standard);
+    public bool OptionenWeichenVomStandardAb => !Gleich(Optionen, MitHalbrunde(Berechnungsoptionen.Standard));
+
+    /// <summary>
+    /// Holt die vom Klassennamen vorgegebene Rundenplanung (nicht im Original): „(HR)“ → nur Hinrunde, „(FR)“ → nur
+    /// Rückrunde; sonst <c>null</c>.
+    /// </summary>
+    public Rundenplanung? VorgegebeneRundenplanung => Halbrundenname.Kennzeichen(Staffel.Name) switch
+    {
+        Halbrundenkennzeichen.Hinrunde => Rundenplanung.NurVorrunde,
+        Halbrundenkennzeichen.Rueckrunde => Rundenplanung.NurRueckrunde,
+        _ => null,
+    };
 
     /// <summary>
     /// Basis der Staffelordner von AndiGenerator.NET: <c>%LOCALAPPDATA%\AndiGenerator.NET</c>. Die Daten des Originals
@@ -249,21 +260,29 @@ public sealed class Plansitzung
     {
         ArgumentNullException.ThrowIfNull(neu);
         Directory.CreateDirectory(Staffelordner);
-        OptionenDatei.Speichern(Path.Combine(Staffelordner, OptionenDatei.Dateiname), neu);
-        Optionen = neu;
+        Optionen = MitHalbrunde(neu);
+        OptionenDatei.Speichern(Path.Combine(Staffelordner, OptionenDatei.Dateiname), Optionen);
     }
 
     /// <summary>
     /// Rechnet in dieser Sitzung mit den Standardoptionen, ohne die gespeicherten Optionen zu überschreiben.
     /// Das Original setzt sie in diesem Fall zurück und speichert sofort (Befund #34); hier bleibt die Datei unverändert.
     /// </summary>
-    public void StandardoptionenFuerDieseSitzung() => Optionen = Berechnungsoptionen.Standard;
+    public void StandardoptionenFuerDieseSitzung() => Optionen = MitHalbrunde(Berechnungsoptionen.Standard);
 
-    /// <summary>Vorschlag zur Rundenplanung wie im Original beim Öffnen (ohne die fest einkodierte Corona-Abfrage 2020).</summary>
+    /// <summary>
+    /// Vorschlag zur Rundenplanung wie im Original beim Öffnen (ohne die fest einkodierte Corona-Abfrage 2020). Neu: Bei
+    /// „(HR)“ bzw. „(FR)“ im Klassennamen ist die Halbrunde vorgegeben, es gibt also keinen Vorschlag.
+    /// </summary>
     /// <param name="heute">Heutiges Datum.</param>
     /// <returns>Der Vorschlag oder <see cref="Rundenvorschlag.Keiner"/>.</returns>
     public Rundenvorschlag RundeVorschlagen(DateOnly heute)
     {
+        if (VorgegebeneRundenplanung is not null)
+        {
+            return Rundenvorschlag.Keiner;
+        }
+
         if (Staffel.Beginn is DateOnly beginn && Staffel.Ende is DateOnly ende
             && Math.Abs(ende.DayNumber - beginn.DayNumber) < 6 * 30
             && Optionen.Rundenplanung != Rundenplanung.Halbrunde)
@@ -503,4 +522,8 @@ public sealed class Plansitzung
             throw new ArgumentException("Der Plan gehört nicht zu dieser Staffel.", nameof(eintrag));
         }
     }
+
+    /// <summary>Setzt die vom Klassennamen vorgegebene Halbrunde in die Optionen ein.</summary>
+    private Berechnungsoptionen MitHalbrunde(Berechnungsoptionen optionen) =>
+        VorgegebeneRundenplanung is Rundenplanung runde ? optionen with { Rundenplanung = runde } : optionen;
 }

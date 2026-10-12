@@ -24,7 +24,7 @@ namespace AndiGenerator.Presentation;
 /// Hauptfenster: geöffnete Staffel, Steuerung der Generierung, Statuszeile und die Ansichten im Andock-Layout
 /// (MIGRATIONSPLAN E15). Mehrere Ansichten können gleichzeitig sichtbar sein, jede mit eigener Planquelle.
 /// </summary>
-public sealed class HauptfensterViewModel : ObservableObject, IDisposable
+public sealed partial class HauptfensterViewModel : ObservableObject, IDisposable
 {
     /// <summary>Dateiname der Anleitung neben dem Programm.</summary>
     public const string Anleitungsdatei = "Anleitung.pdf";
@@ -132,6 +132,11 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
             if (ReferenceEquals(e.Dockable, nachbarterminAnsicht))
             {
                 nachbarterminAnsicht = null;
+            }
+
+            if (ReferenceEquals(e.Dockable, kompaktAnsicht))
+            {
+                kompaktAnsicht = null;
             }
 
             if (ReferenceEquals(e.Dockable, maschinenraumAnsicht))
@@ -995,6 +1000,7 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         DiagrammAnsichtViewModel => "Diagramme",
         TerminwunschAnsichtViewModel => "Terminwuensche",
         NachbarterminAnsichtViewModel => "Nachbarn",
+        KompaktspieltageAnsichtViewModel => "Kompakt",
         OptionenAnsichtViewModel => "Einstellungen",
         _ => null,
     };
@@ -1120,7 +1126,7 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         gemerkteStaende.Clear();
         Einrichtung = null;
         var offen = new List<IDockable>(ansichten);
-        offen.AddRange(new IDockable?[] { optionenAnsicht, terminwunschAnsicht, nachbarterminAnsicht, maschinenraumAnsicht, verlaufAnsicht }.OfType<IDockable>());
+        offen.AddRange(new IDockable?[] { optionenAnsicht, terminwunschAnsicht, nachbarterminAnsicht, kompaktAnsicht, maschinenraumAnsicht, verlaufAnsicht }.OfType<IDockable>());
         foreach (IDockable ansicht in offen)
         {
             fabrik.CloseDockable(ansicht);
@@ -1130,6 +1136,7 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         optionenAnsicht = null;
         terminwunschAnsicht = null;
         nachbarterminAnsicht = null;
+        kompaktAnsicht = null;
         maschinenraumAnsicht = null;
         verlaufAnsicht = null;
         AnsichtOeffnen(new KostenAnsichtViewModel(this, NaechsteId()));
@@ -1143,6 +1150,7 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         OnPropertyChanged(nameof(ZeigtArbeitsbereich));
         OnPropertyChanged(nameof(AktiveAnsicht));
         OnPropertyChanged(nameof(StartplanWaehlbar));
+        KompaktAktualisieren();
         StartenCommand.NotifyCanExecuteChanged();
         GenerierungCommand.NotifyCanExecuteChanged();
         KostenoptimierungCommand.NotifyCanExecuteChanged();
@@ -1209,6 +1217,7 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         optionenAnsicht?.Laden();
         terminwunschAnsicht?.Laden();
         nachbarterminAnsicht?.Laden();
+        KompaktAktualisieren();
         Einrichtung = EinrichtungErstellen(neu);
         return true;
     }
@@ -1274,17 +1283,14 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         Einrichtungsschritt? rundenschritt = null;
         if (vorschlag != Rundenvorschlag.Keiner)
         {
-            bool halb = vorschlag == Rundenvorschlag.Halbrunde;
-            rundenschritt = new Einrichtungsschritt(
-                schritte.Count + 1,
-                "Rundenplanung",
-                halb ? "Die Runde ist kürzer als 6 Monate. Welche Spiele sollen generiert werden?" : RueckrundenFrage(neu.Staffel.Rueckrundenbeginn),
-                [],
-                [
-                    halb ? new Einrichtungsoption("Nur eine Halbrunde", "Vorschlag für kurze Runden") : new Einrichtungsoption("Nur die Rückrunde", "Vorschlag – die Vorrunde bleibt, wie sie ist"),
-                    new Einrichtungsoption("Die ganze Runde", "Vor- und Rückrunde planen"),
-                ]);
+            rundenschritt = RundenschrittErstellen(neu, schritte.Count + 1, vorschlag);
             schritte.Add(rundenschritt);
+        }
+
+        Einrichtungsschritt? kompaktschritt = KompaktschrittErstellen(neu, schritte.Count + 1, vorschlag);
+        if (kompaktschritt is not null)
+        {
+            schritte.Add(kompaktschritt);
         }
 
         if (neu.ErsterStart)
@@ -1298,7 +1304,9 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
             : new EinrichtungViewModel(
                 neu.Staffel.Name + " einrichten",
                 schritte,
-                schritt => EinrichtungsschrittUebernehmenAsync(neu, schritt, stufenschritt, rundenschritt, vorschlag),
+                schritt => ReferenceEquals(schritt, kompaktschritt)
+                    ? KompaktschrittUebernehmenAsync(neu, schritt)
+                    : EinrichtungsschrittUebernehmenAsync(neu, schritt, stufenschritt, rundenschritt, vorschlag),
                 schritt => ReferenceEquals(schritt, zusatzschritt) ? ZusatzseiteErzeugen(neu) : SeiteErzeugen(neu, schritt),
                 EinrichtungAbschliessen,
                 SchliessenAsync);
@@ -1409,7 +1417,7 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         }
         catch (Exception fehler) when (fehler is IOException or UnauthorizedAccessException)
         {
-            await oberflaeche.MeldenAsync("Rundenplanung", fehler.Message);
+            await oberflaeche.MeldenAsync(Rundentitel, fehler.Message);
             return false;
         }
     }
@@ -1925,6 +1933,7 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         AlleAnsichtenAktualisieren();
         terminwunschAnsicht?.Laden();
         nachbarterminAnsicht?.Laden();
+        KompaktAktualisieren();
     }
 
     private void AnsichtOeffnen(AnsichtViewModel ansicht)
@@ -2098,6 +2107,7 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         DiagrammansichtCommand.NotifyCanExecuteChanged();
         TerminwunschansichtCommand.NotifyCanExecuteChanged();
         NachbarterminansichtCommand.NotifyCanExecuteChanged();
+        KompaktspieltageCommand.NotifyCanExecuteChanged();
         MaschinenraumCommand.NotifyCanExecuteChanged();
         VerlaufCommand.NotifyCanExecuteChanged();
     }

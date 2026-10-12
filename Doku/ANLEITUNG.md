@@ -131,7 +131,8 @@ click-TT überträgt nicht alles, was für einen guten Plan nötig ist, und die 
 | **Daten aus click-TT ergänzen** | Immer als erster Punkt: weitere Exporte aus click-TT, die nicht in der XML-Datei stehen (siehe unten). Jeder ist freiwillig. Erledigt ist der Punkt erst, wenn Mannschaftsmeldung **und** Terminwünsche übernommen sind – das darf auch in verschiedenen Sitzungen geschehen; die Seite nennt bei jeder Datei, wann sie übernommen wurde. Ist beides erledigt und sonst nichts zu klären, erscheint die Einrichtung nicht. |
 | **Gespeicherte Einstellungen** | Sie haben die Staffel schon einmal bearbeitet und dabei Gewichtungen geändert. Wählen Sie, ob Sie diese weiterverwenden oder für diese Sitzung mit den Standardeinstellungen rechnen wollen (die gespeicherten bleiben erhalten). |
 | **Gespeicherte Kriterienreihenfolge** | Sie haben für diese Staffel in der Ansicht **Qualität** eine eigene Einteilung der Kriterien in die Stufen A, B und C festgelegt (danach richtet sich der Automodus). Die Seite zeigt sie; wählen Sie, ob Sie sie weiterverwenden oder für diese Sitzung die Standardreihenfolge nehmen (die gespeicherte bleibt erhalten, bis Sie die Einteilung wieder ändern). |
-| **Rundenplanung** | Ist die Runde kürzer als sechs Monate, schlägt das Programm eine Halbrunde vor. Beginnt die Rückrunde in weniger als 60 Tagen (oder hat sie vor weniger als 60 Tagen begonnen), schlägt es vor, nur die Rückrunde zu planen; die Frage nennt dazu den Beginn der Rückrunde. |
+| **Rundenplanung** | Ist die Runde kürzer als sechs Monate, schlägt das Programm eine Halbrunde vor. Beginnt die Rückrunde in weniger als 60 Tagen (oder hat sie vor weniger als 60 Tagen begonnen), schlägt es vor, nur die Rückrunde zu planen; die Frage nennt dazu den Beginn der Rückrunde. Enthält der Klassenname „(HR)“ (Hinrunde bzw. Herbstrunde) oder „(FR)“ (Finalrunde bzw. Frühlingsrunde), spielt die Klasse nur eine Halbrunde: Dann wird ohne Frage nur die Hinrunde bzw. nur die Rückrunde geplant; in den Einstellungen ist die Rundenplanung dann fest. |
+| **Klasse mit Kompaktspieltagen** | Nur bei einer Halbrunde („(HR)“ bzw. „(FR)“ im Namen oder Runde kürzer als sechs Monate), deren Spieltage überwiegend am Wochenende liegen – zwei oder drei Termine unter der Woche für einzelne Spiele stören nicht: Erklärung der Kompaktspieltage (3er- und 4er-Spieltage in einer Halle) und die Wahl, ob die Staffel so geplant wird. Wer es eingeschaltet hat, wird beim nächsten Öffnen noch einmal gefragt und kann es zurücknehmen; danach lässt es sich in der Ansicht **Kompaktspieltage** aus- und einschalten. Siehe [6.8](#68-kompaktspieltage). |
 | **Spiellokale** | click-TT überträgt keine Nummern der Spiellokale, wohl aber die Namen der Hallen. Das Programm vergleicht die Hallenbelegung deshalb nach dem Hallennamen: Ein Heimspiel einer Nachbarmannschaft in einer anderen Halle belegt die eigene Halle nicht. Die Nummern (1, 2, 3) brauchen Sie für den Export nach click-TT und für von Hand angelegte Termine ohne Hallennamen. Haben alle Vereine nur eine Halle, können Sie den Punkt überspringen. |
 | **Koppeltermine** | Die Staffel enthält Koppelwünsche oder mögliche Doppelspieltage. Das Programm leitet sie aus den Meldungen ab; bitte kontrollieren. |
 | **Auswärtskoppelwünsche** | Mannschaften möchten zwei Auswärtsspiele an einem Wochenende zusammenlegen. Bitte kontrollieren. |
@@ -186,7 +187,7 @@ Passt der Plan, **pausieren** Sie und exportieren ihn mit **Für click-TT export
 **Links** stehen alle Befehle:
 
 - **Staffel:** Öffnen, Neu, Spielplandaten, Einstellungen
-- **Ansichten:** Kosten, Qualität, Meldungen, Terminplan, Diagramme, Terminwünsche, Nachbarmannschaften
+- **Ansichten:** Kosten, Qualität, Meldungen, Terminplan, Diagramme, Terminwünsche, Nachbarmannschaften, bei Halbrunden Kompaktspieltage
 - **Ausgabe:** Für click-TT exportieren (farblich hervorgehoben), Drucken (PDF)
 - **Anleitung:** öffnet diese Anleitung als PDF
 - **Über:** Version, Urheber und Lizenzen
@@ -401,6 +402,24 @@ Hat eine Mannschaft zu wenige Termine gemeldet, bleiben einzelne Spiele ohne Ter
 Die Ansicht zeigt die Spiele aus anderen Staffeln, die mit der XML-Datei eingelesen wurden: je Tag, welche Nachbar- und Vereinsmannschaften spielen. Sie dient zur Kontrolle, was click-TT übertragen hat und welche Staffeln dort schon terminiert sind. Direkte Nachbarmannschaften sind anders markiert als weitere Vereinsmannschaften.
 
 ![Termine der Nachbarmannschaften](Anleitung/Bilder/15-nachbarmannschaften.png)
+
+### 6.8 Kompaktspieltage
+
+Manche Staffeln – etwa die Jugend-Verbandsoberliga – spielen eine Halbrunde in **Kompaktspieltagen**: Drei oder vier Mannschaften treffen sich an einem Sonntag in einer Halle. Beim **3er-Spieltag** spielt jede gegen jede (drei Spiele), beim **4er-Spieltag** spielen der Ausrichter und eine zweite Mannschaft je gegen die beiden anderen (vier Spiele in zwei Runden, zwei Spiele parallel). Bei gerader Mannschaftszahl bleiben einzelne **Einzelbegegnungen**. Jede Mannschaft soll mindestens einen Heimspieltag ausrichten.
+
+Die Ansicht **Kompaktspieltage** (links unter *Ansichten*, nur bei Halbrunden) prüft den Plan aus click-TT gegen die Meldungen der Vereine:
+
+- **Kennzahlen:** km gesamt (Luftlinie, hin und zurück), die weiteste Mannschaft, Mannschaften ohne Heimspieltag, Verstöße gegen die Meldungen, der größte Abstand im Stand (Unterschied der gespielten Spiele zwischen zwei Mannschaften im Lauf der Halbrunde) und wie viele Mannschaften am vollsten Spieltag spielen.
+- **Meldungen und Plan:** je Sonntag eine Zeile, je Mannschaft eine Spalte. Die Farbe zeigt die Meldung (Heim möglich, auswärts möglich, beides, kann nicht, keine Meldung), darauf ★ für den Ausrichter und ● für die Gäste. Rot umrandet ist, was der Meldung widerspricht.
+- **Karte:** die Hallen auf einer Karte mit den Bundesländern und einigen Städten, gezoomt auf das Gebiet der Spielorte, dazu die Fahrten. Ein Klick auf einen Sonntag, eine Mannschaft (im Raster oder in der Liste *km je Mannschaft*) oder einen Spieltag zeigt nur dessen Fahrten; ein zweiter Klick wieder alle. Über einem Spielort nennt ein Hinweis Mannschaft und Halle.
+- **Spieltage:** je Spieltag Ausrichter, Spiele und km. Beim 4er-Spieltag steht dabei, bei welchen Spielen Sie in click-TT die Halle des Ausrichters eintragen (die zweite „Heimmannschaft“ ist in Wahrheit Gast).
+- **Hinweise:** Verstöße, Widersprüche, Mannschaften ohne Meldung oder ohne bekannte Halle und die Bemerkungen der Vereine.
+
+**Entfernungen** sind Luftlinie zwischen den Hallen, aus den Adressen des Berichts *Terminwünsche* (Postleitzahl und Ort bzw. GPS-Angabe). Ohne diesen Bericht fehlen Karte und km.
+
+**Die Meldungen** kommen aus den Terminwünschen in click-TT: Ein Sonntag mit Uhrzeit ist ein möglicher Heimspieltag (die Uhrzeit ist der früheste Beginn), ein Sonntag ohne Eintrag ein möglicher Auswärtsspieltag, `frei` heißt „kann nicht“. **Max. Heimspiele 2** bei einem Heimtermin heißt, dass in der Halle zwei Spiele parallel gehen – nur dann kann die Mannschaft einen 4er-Spieltag ausrichten. „An diesem Tag nur Heimspiel“ steht als Zeile `Nur Heim: 18.10., 01.11.` in den Bemerkungen des Vereins. Wie man das in click-TT erfasst, beschreibt [Kompaktspieltage erfassen](KOMPAKTSPIELTAGE.md).
+
+Die Vorschläge für einen eigenen Plan (kürzeste Fahrten, gleichmäßiger Stand, gemeinsamer Spieltag) folgen in einer späteren Version.
 
 ## 7. Gewichtungen anpassen
 

@@ -6,6 +6,8 @@ Was sich von Version zu Version für Anwender ändert. Die Einzelheiten stehen i
 
 ### Neu
 
+- **Kompaktspieltage** (z. B. Jugend-Verbandsoberliga): Bei einer Halbrunde mit überwiegend Spieltagen am Wochenende fragt die Einrichtung, ob die Staffel in 3er- und 4er-Spieltagen geplant wird. Die neue Ansicht prüft den Plan aus click-TT gegen die Meldungen der Vereine aus den Terminwünschen: Raster aus Meldungen und Plan, Karte der Hallen mit den Fahrten (Luftlinie), km je Mannschaft, Spieltage mit den in click-TT zu verlegenden Hallen und Hinweise.
+- **Klassen mit „(HR)“ bzw. „(FR)“ im Namen** spielen nur eine Halbrunde: Geplant wird ohne Rückfrage nur die Hinrunde („(HR)“) bzw. nur die Rückrunde („(FR)“); in den Einstellungen ist die Rundenplanung dann fest.
 - **Setzliste mit TTR-Werten:** Die Schnitte aus der Mannschaftsmeldung werden mit der Staffel gespeichert und in der Setzliste neben jeder Mannschaft gezeigt; **Nach TTR ordnen** stellt die Reihenfolge danach auf.
 
 ### Geändert

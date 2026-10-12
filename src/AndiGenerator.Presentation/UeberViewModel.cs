@@ -90,7 +90,7 @@ public sealed class UeberViewModel
     public static string Drittbibliotheken =>
         "Verwendet Avalonia, Dock, CommunityToolkit.Mvvm, SkiaSharp und Velopack (jeweils MIT-Lizenz), PdfPig (Apache-2.0) sowie die "
         + "Schriften IBM Plex Sans und Mono (SIL Open Font License 1.1). Postleitzahlen-Daten: GeoNames (geonames.org), CC BY 4.0, "
-        + "gekürzt. Einzelheiten in THIRD-PARTY-NOTICES.md.";
+        + "gekürzt; Kartenumrisse: Natural Earth (gemeinfrei). Einzelheiten in THIRD-PARTY-NOTICES.md.";
 
     /// <summary>Holt die Programmversion.</summary>
     public string Version { get; }
