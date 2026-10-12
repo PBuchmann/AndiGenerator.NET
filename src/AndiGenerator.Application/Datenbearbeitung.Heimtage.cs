@@ -31,11 +31,16 @@ public sealed partial class Datenbearbeitung
         List<Heimtag> liste = tage.ToList();
         foreach (DatenKnoten team in Teams(Arbeitsstand).Where(t => t.Lesen("teamname") == mannschaft))
         {
+            // Der Hallenname aus click-TT bleibt erhalten, solange Tag und Spiellokal gleich bleiben.
+            Dictionary<(DateOnly Tag, string Lokal), string> hallen = team.KinderMitNamen("homegameday")
+                .Where(k => k.Lesen(StaffelAbbildung.HallenAttribut).Length > 0)
+                .GroupBy(k => (DateOnly.FromDateTime(DelphiKompatibel.DatumZeitStreng(k.Lesen("datetime")) ?? DelphiKompatibel.DelphiNull), Spiellokale.Korrigieren(k.Lesen("location"))))
+                .ToDictionary(g => g.Key, g => g.First().Lesen(StaffelAbbildung.HallenAttribut));
             team.KinderEntfernen("homegameday");
             team.KinderEntfernen("nogameday");
             foreach (Heimtag h in liste)
             {
-                HeimtagSchreiben(team, h);
+                HeimtagSchreiben(team, h, hallen.GetValueOrDefault((DateOnly.FromDateTime(h.Datum), Spiellokale.Korrigieren(h.Spiellokal))));
             }
         }
     }
@@ -81,7 +86,7 @@ public sealed partial class Datenbearbeitung
             Spiellokale.Korrigieren(knoten.Lesen("location")));
     }
 
-    private static void HeimtagSchreiben(DatenKnoten team, Heimtag h)
+    private static void HeimtagSchreiben(DatenKnoten team, Heimtag h, string? halle)
     {
         if (h.Sperrtermin)
         {
@@ -94,6 +99,11 @@ public sealed partial class Datenbearbeitung
         knoten.Setzen("parallelgames", h.MaxParallel);
         knoten.Setzen("ausweichtermin", h.Ausweichtermin);
         knoten.Setzen("location", Spiellokale.Korrigieren(h.Spiellokal));
+        if (!string.IsNullOrEmpty(halle))
+        {
+            knoten.Setzen(StaffelAbbildung.HallenAttribut, halle);
+        }
+
         knoten.Setzen("doublegameday", h.Doppeltermin);
         knoten.Setzen("couplegameday", h.Koppeltermin);
         knoten.Setzen("coupleauswaertssecondtime", h.AuswaertsKoppelZweitzeit);

@@ -145,6 +145,7 @@ public static class ClickTtNachPlanDaten
         knoten.Setzen("ausweichtermin", termin.Ausweichtermin);
         knoten.Setzen("location", string.Empty);
         knoten.Setzen("parallelgames", termin.MaxParalleleSpiele);
+        HalleSetzen(knoten, termin.Halle);
 
         if (!string.IsNullOrEmpty(termin.Koppelwunsch))
         {
@@ -224,6 +225,16 @@ public static class ClickTtNachPlanDaten
             spielKnoten.Setzen("datetime", zeitpunkt);
             spielKnoten.Setzen("hometeamname", spiel.Heim);
             spielKnoten.Setzen("guestteamname", spiel.Gast);
+            HalleSetzen(spielKnoten, spiel.Halle);
+        }
+    }
+
+    /// <summary>Hallenname aus click-TT übernehmen (nicht im Original; dort ohne Wirkung).</summary>
+    private static void HalleSetzen(DatenKnoten knoten, string? halle)
+    {
+        if (!string.IsNullOrWhiteSpace(halle))
+        {
+            knoten.Setzen(StaffelAbbildung.HallenAttribut, halle.Trim());
         }
     }
 

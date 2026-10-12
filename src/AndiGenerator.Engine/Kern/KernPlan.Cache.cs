@@ -29,8 +29,9 @@ internal sealed partial class KernPlan
         for (int s = 0; s < anzahl; s++)
         {
             int lokal = Lokal(s);
+            int halle = Halle(s);
             if (Datum[s] != cacheDatum[s] || Opt[s] != cacheOptionen[s] || MaxHeim[s] != cacheMaxHeim[s]
-                || NichtNotwendig[s] != cacheNichtNotwendig[s] || lokal != cacheLokal[s])
+                || NichtNotwendig[s] != cacheNichtNotwendig[s] || lokal != cacheLokal[s] || halle != cacheHalle[s])
             {
                 geaendert[Heim[s]] = true;
                 geaendert[Gast[s]] = true;
@@ -39,6 +40,7 @@ internal sealed partial class KernPlan
                 cacheMaxHeim[s] = MaxHeim[s];
                 cacheNichtNotwendig[s] = NichtNotwendig[s];
                 cacheLokal[s] = lokal;
+                cacheHalle[s] = halle;
             }
         }
 

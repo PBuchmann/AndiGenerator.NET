@@ -23,6 +23,8 @@ internal sealed class RefNachbarspiel
 
     public string Lokal { get; init; } = string.Empty;
 
+    public string Halle { get; init; } = string.Empty;
+
     public bool KeineParallelenSpiele { get; init; }
 
     public bool ParalleleHeimspiele { get; init; }

@@ -26,15 +26,21 @@ namespace AndiGenerator.Domain.Optionen;
 /// Auswärtskoppel. Das Original kann dort ein schon terminiertes Spiel neu terminieren (bei der Doppelrunde auch in eine
 /// andere Hauptrunde).
 /// </param>
+/// <param name="HallenNachNamen">
+/// Hallenbelegung (<c>GetHallenBelegung</c>): Sind die Hallen beider Spiele aus click-TT bekannt, zählt ein Heimspiel
+/// einer Nachbar- oder Vereinsmannschaft nur bei gleicher Halle. Das Original vergleicht nur die Spiellokal-Nummer, die
+/// bei Nachbarspielen immer leer ist – jedes Heimspiel des Vereins in der Nähe des Termins gilt dort als Belegung.
+/// </param>
 public sealed record Korrekturen(
     bool WunschterminNurVomEigentuemerFreigeben,
     bool LetzteUeberlappungSummieren,
     bool VollstaendigesRaster,
-    bool AuswaertskoppelNurOffeneSpiele)
+    bool AuswaertskoppelNurOffeneSpiele,
+    bool HallenNachNamen)
 {
     /// <summary>Alle Korrekturen (Standard).</summary>
-    public static Korrekturen Alle { get; } = new(true, true, true, true);
+    public static Korrekturen Alle { get; } = new(true, true, true, true, true);
 
     /// <summary>Keine Korrektur: wie das Original.</summary>
-    public static Korrekturen Keine { get; } = new(false, false, false, false);
+    public static Korrekturen Keine { get; } = new(false, false, false, false, false);
 }

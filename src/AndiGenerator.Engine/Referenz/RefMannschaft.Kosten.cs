@@ -793,7 +793,7 @@ internal sealed partial class RefMannschaft
         foreach (RefSpiel spiel in Spiele.Where(s => s.DatumGueltig && plan.IstInZuPlanenderRunde(s.Datum) && s.DatumMaxHeim > 0 && ReferenceEquals(s.Heim, this)))
         {
             List<string>? belegtVon = meldungen ? [] : null;
-            int belegung = Hallenbelegung(spiel.Datum, spiel.Lokal, plan, belegtVon);
+            int belegung = Hallenbelegung(spiel.Datum, spiel.Lokal, spiel.Halle, plan, belegtVon);
             if (belegung >= spiel.DatumMaxHeim)
             {
                 kosten.Werte[(int)art].Anzahl += belegung - spiel.DatumMaxHeim + 1;

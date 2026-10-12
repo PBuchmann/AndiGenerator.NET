@@ -20,6 +20,9 @@ public static class StaffelAbbildung
     /// <summary>Attribut am Knoten <c>plan</c> mit der Einteilung der Kriterien (nicht im Original, dort ohne Wirkung).</summary>
     public const string KriterienAttribut = "kriterienstufen";
 
+    /// <summary>Attribut an <c>homegameday</c> und <c>sistergame</c> mit dem Hallennamen aus click-TT (nicht im Original).</summary>
+    public const string HallenAttribut = "courthall";
+
     /// <summary>Liest die Stammdaten aus dem Datenbaum.</summary>
     /// <param name="plan">Wurzelknoten <c>plan</c> (click-TT-Import, ggf. mit eingearbeiteten Änderungen).</param>
     /// <returns>Die Staffel.</returns>
@@ -151,7 +154,10 @@ public static class StaffelAbbildung
             Koppelung: koppelung,
             Prioritaet: PrioritaetLesen(knoten),
             ZweiteUhrzeit: zweite.Length == 0 ? null : DelphiKompatibel.TimeFromString(zweite),
-            ZweiteUhrzeitFuerAuswaertskoppel: knoten.LesenBool("coupleauswaertssecondtime"));
+            ZweiteUhrzeitFuerAuswaertskoppel: knoten.LesenBool("coupleauswaertssecondtime"))
+        {
+            Halle = knoten.Lesen(HallenAttribut),
+        };
     }
 
     private static Koppelprioritaet PrioritaetLesen(DatenKnoten knoten) => knoten.LesenZahl("coupleprio") switch
@@ -204,7 +210,10 @@ public static class StaffelAbbildung
         ZeitpunktPflicht(knoten.Lesen("datetime")),
         knoten.Lesen("hometeamname"),
         knoten.Lesen("guestteamname"),
-        Spiellokale.Korrigieren(knoten.Lesen("location")));
+        Spiellokale.Korrigieren(knoten.Lesen("location")))
+    {
+        Halle = knoten.Lesen(HallenAttribut),
+    };
 
     private static List<Spiel> SpieleLesen(DatenKnoten? liste) =>
         liste is null ? [] : liste.KinderMitNamen("game").Select(SpielLesen).ToList();
@@ -285,6 +294,11 @@ public static class StaffelAbbildung
         {
             knoten.Setzen("couplesecondtime", zweite.ToString("HH:mm", System.Globalization.CultureInfo.InvariantCulture));
         }
+
+        if (termin.Halle.Length > 0)
+        {
+            knoten.Setzen(HallenAttribut, termin.Halle);
+        }
     }
 
     private static void NachbarmannschaftSchreiben(DatenKnoten team, Nachbarmannschaft nachbar)
@@ -305,6 +319,11 @@ public static class StaffelAbbildung
             if (spiel.Spiellokal.Length > 0)
             {
                 game.Setzen("location", spiel.Spiellokal);
+            }
+
+            if (spiel.Halle.Length > 0)
+            {
+                game.Setzen(HallenAttribut, spiel.Halle);
             }
         }
     }

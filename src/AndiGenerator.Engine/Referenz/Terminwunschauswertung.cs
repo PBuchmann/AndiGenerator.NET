@@ -137,7 +137,7 @@ public static class Terminwunschauswertung
         }
 
         bool spielfrei = plan.IstSpielfreierTag(w.Datum);
-        List<string> belegtVon = HallenbelegungDurchNachbarn(m, w.Datum, w.Spiellokal);
+        List<string> belegtVon = HallenbelegungDurchNachbarn(m, w, plan.Optionen.Korrekturen.HallenNachNamen);
         if (belegtVon.Count > 0 && w.ParalleleSpiele > 0 && w.ParalleleSpiele <= belegtVon.Count)
         {
             text += ", Halle ist belegt von: " + string.Join(", ", belegtVon);
@@ -167,11 +167,11 @@ public static class Terminwunschauswertung
     }
 
     /// <summary>Original <c>GetHallenBelegung(…, IgnoreThisPlan = true)</c>: nur Heimspiele der Nachbarmannschaften.</summary>
-    private static List<string> HallenbelegungDurchNachbarn(RefMannschaft m, double datum, string lokal)
+    private static List<string> HallenbelegungDurchNachbarn(RefMannschaft m, RefWunschtermin w, bool nachNamen)
     {
         double fenster = DelphiDatum.EncodeTime(1, 29);
-        return m.Nachbarspiele.TryGetValue(DelphiDatum.Trunc(datum), out List<RefNachbarspiel>? liste)
-            ? liste.Where(s => s.IstHeimspiel && Math.Abs(s.Datum - datum) <= fenster && s.Lokal == lokal).Select(s => s.Heim + " (" + s.Geschlecht + ")").ToList()
+        return m.Nachbarspiele.TryGetValue(DelphiDatum.Trunc(w.Datum), out List<RefNachbarspiel>? liste)
+            ? liste.Where(s => s.IstHeimspiel && Math.Abs(s.Datum - w.Datum) <= fenster && Hallenvergleich.Gleich(nachNamen, s.Lokal, s.Halle, w.Spiellokal, w.Halle)).Select(s => s.Heim + " (" + s.Geschlecht + ")").ToList()
             : [];
     }
 

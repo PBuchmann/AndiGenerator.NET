@@ -21,4 +21,12 @@ public sealed record Heimspieltermin(
     Terminkoppelung Koppelung,
     Koppelprioritaet Prioritaet,
     TimeOnly? ZweiteUhrzeit,
-    bool ZweiteUhrzeitFuerAuswaertskoppel);
+    bool ZweiteUhrzeitFuerAuswaertskoppel)
+{
+    /// <summary>
+    /// Holt den Namen der Halle aus click-TT (<c>courtHall</c>, im Datenbaum Attribut <c>courthall</c>; nicht im Original)
+    /// oder leer, wenn unbekannt. Mit <see cref="Optionen.Korrekturen.HallenNachNamen"/> zählt die Hallenbelegung nur
+    /// Spiele in derselben Halle.
+    /// </summary>
+    public string Halle { get; init; } = string.Empty;
+}

@@ -47,6 +47,7 @@ internal sealed partial class KernPlan
     private readonly int[] cacheMaxHeim;
     private readonly bool[] cacheNichtNotwendig;
     private readonly int[] cacheLokal;
+    private readonly int[] cacheHalle;
     private readonly int[][] cacheSpiele;
     private readonly int[] cacheSpieleAnzahl;
     private readonly bool[] geaendert;
@@ -187,6 +188,7 @@ internal sealed partial class KernPlan
         cacheMaxHeim = new int[gesamt];
         cacheNichtNotwendig = new bool[gesamt];
         cacheLokal = new int[gesamt];
+        cacheHalle = new int[gesamt];
         cacheSpiele = kapazitaet.Select(k => new int[k]).ToArray();
         cacheSpieleAnzahl = new int[D.N];
         geaendert = new bool[D.N];
@@ -299,6 +301,19 @@ internal sealed partial class KernPlan
         }
 
         return Wunsch[s] >= 0 ? D.WunschLokal[Wunsch[s]] : 0;
+    }
+
+    /// <summary>Halle aus click-TT wie <see cref="Lokal"/> (0 = unbekannt, auch bei vorgegebenem Spiellokal).</summary>
+    /// <param name="s">Spiel.</param>
+    /// <returns>Die Nummer der Halle.</returns>
+    public int Halle(int s)
+    {
+        if (UeberLokal[s] != 0 || Wunsch[s] < 0)
+        {
+            return 0;
+        }
+
+        return D.WunschHalle[Wunsch[s]];
     }
 
     /// <summary>Original <c>GenerateMannschaftsRefGames</c> mit <c>SortMannschaftsDates</c>.</summary>

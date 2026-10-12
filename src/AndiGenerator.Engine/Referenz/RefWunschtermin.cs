@@ -19,12 +19,16 @@ internal sealed class RefWunschtermin
 
     public string Spiellokal { get; set; } = string.Empty;
 
+    /// <summary>Holt oder setzt den Hallennamen aus click-TT (nicht im Original); leer = unbekannt.</summary>
+    public string Halle { get; set; } = string.Empty;
+
     public RefWunschtermin Kopie() => new()
     {
         Datum = Datum,
         ParalleleSpiele = ParalleleSpiele,
         KoppelZweitzeit = KoppelZweitzeit,
         Spiellokal = Spiellokal,
+        Halle = Halle,
         Optionen = Optionen,
     };
 }

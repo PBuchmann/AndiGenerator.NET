@@ -14,4 +14,5 @@ internal readonly record struct Nachbarspiel(
     bool GleichesGeschlecht,
     bool KeineParallelenSpiele,
     bool ParalleleHeimspiele,
-    int Schluessel);
+    int Schluessel,
+    int Halle);

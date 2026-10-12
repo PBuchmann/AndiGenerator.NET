@@ -15,6 +15,9 @@ namespace AndiGenerator.Persistence.Plandaten;
 /// </summary>
 public sealed class DatenKnoten
 {
+    /// <summary>Attribute nur aus dem click-TT-Import (nicht im Original), die nie in eine Änderungsdatei kommen.</summary>
+    private static readonly string[] NurImport = [StaffelAbbildung.HallenAttribut];
+
     private readonly OrderedDictionary<string, string> attribute = new(StringComparer.Ordinal);
 
     /// <summary>Erzeugt einen Knoten und hängt ihn (falls angegeben) als letztes Kind an <paramref name="eltern"/> an.</summary>
@@ -223,7 +226,9 @@ public sealed class DatenKnoten
     /// <summary>
     /// Macht diesen Knoten zur Differenz „nachher gegenüber vorher“ (Original <c>TDataObject.Diff</c>): Schlüsselattribute immer,
     /// geänderte Attribute mit dem Nachher-Wert (fehlend = leer), gelöschte Kinder zuerst, dann alle Nachher-Kinder als
-    /// <c>dosNew</c>-Kopie bzw. rekursive Differenz (auch unveränderte Kinder erzeugen einen Knoten).
+    /// <c>dosNew</c>-Kopie bzw. rekursive Differenz (auch unveränderte Kinder erzeugen einen Knoten). Attribute, die nur
+    /// aus dem click-TT-Import stammen (Hallenname, nicht im Original), kommen nie in die Differenz: Die Änderungsdatei bleibt
+    /// wie beim Original, der Wert steht ohnehin im Import.
     /// </summary>
     /// <param name="nachher">Neuer Stand.</param>
     /// <param name="vorher">Ausgangsstand.</param>
@@ -239,7 +244,7 @@ public sealed class DatenKnoten
             Setzen(wert.Key, wert.Value);
         }
 
-        foreach (string name in nachher.attribute.Keys.Concat(vorher.attribute.Keys).Where(n => nachher.Lesen(n) != vorher.Lesen(n)).ToList())
+        foreach (string name in nachher.attribute.Keys.Concat(vorher.attribute.Keys).Where(n => nachher.Lesen(n) != vorher.Lesen(n) && !NurImport.Contains(n)).ToList())
         {
             Setzen(name, nachher.Lesen(name));
             Status = KnotenStatus.Geaendert;
@@ -249,6 +254,7 @@ public sealed class DatenKnoten
         {
             var geloescht = new DatenKnoten(kind.Name, this);
             geloescht.AttributeZuweisen(kind);
+            geloescht.ImportattributeEntfernen();
             geloescht.Status = KnotenStatus.Geloescht;
         }
 
@@ -259,6 +265,7 @@ public sealed class DatenKnoten
             if (index < 0)
             {
                 neu.Zuweisen(kind);
+                neu.ImportattributeEntfernen();
                 neu.Status = KnotenStatus.Neu;
             }
             else
@@ -311,5 +318,19 @@ public sealed class DatenKnoten
             .ToList();
 
         return attributeGleich && kinderGleich.TrueForAll(gleich => gleich);
+    }
+
+    /// <summary>Entfernt die nur importierten Attribute aus diesem Knoten und allen Kindern.</summary>
+    private void ImportattributeEntfernen()
+    {
+        foreach (string name in NurImport)
+        {
+            attribute.Remove(name);
+        }
+
+        foreach (DatenKnoten kind in Kinder)
+        {
+            kind.ImportattributeEntfernen();
+        }
     }
 }
