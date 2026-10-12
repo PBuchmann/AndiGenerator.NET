@@ -645,14 +645,19 @@ Befund: Billigere Pläne nach der Kostenfunktion des Originals sind nicht automa
 
 - **3er-Turnier:** 3 Mannschaften, Ausrichter – Gast 1, Gast 1 – Gast 2, Ausrichter – Gast 2 (10, 13, 16 Uhr).
 - **4er-Turnier:** 4 Mannschaften in zwei Runden (11 und 14 Uhr): Ausrichter und eine zweite Mannschaft spielen je gegen die beiden übrigen. Die zweite „Heimmannschaft“ ist in Wahrheit Gast, ihr Spiel wird in click-TT in die Halle des Ausrichters verlegt. Die Halle muss zwei Spiele parallel erlauben.
-- **Bedingungen:** jede Paarung genau einmal, höchstens ein Turnier je Mannschaft und Tag, keine Spieltagssperre (Sperrtermine der Mannschaften, spielfreie Tage der Staffel), Ausrichter kann zuhause, alle anderen auswärts. **Vorrang** hat: jede Mannschaft richtet mindestens ein Turnier (mit zwei eigenen Begegnungen) aus – lieber ein Verstoß gegen eine Meldung als eine Mannschaft ohne Heimspieltag.
+- **Bedingungen:** jede Paarung genau einmal, höchstens ein Turnier je Mannschaft und Tag, Ausrichter kann zuhause, alle anderen auswärts. Es zählen nur die Meldungen der Umfrage, nicht die Sperrtermine und spielfreien Tage aus click-TT. **Vorrang** hat: jede Mannschaft richtet mindestens ein Turnier (mit zwei eigenen Begegnungen) aus – lieber ein Verstoß gegen eine Meldung als eine Mannschaft ohne Heimspieltag.
 - **Wünsche als Freitext** (z. B. „erst ab 12 Uhr“, „Prio für Heimspieltag am 6.12.“): werden vorerst nur angezeigt. Besser als eine KI: feste Felder in der Umfrage (frühester Beginn, Wunschtermin für den Heimspieltag), der Freitext bleibt für Sonderfälle.
 - **Rechnerische Grenze:** In beiden Formen spielt jede Mannschaft zwei Spiele je Turnier. Bei gerader Mannschaftszahl (6, 8, 10) hat jede Mannschaft eine ungerade Zahl von Gegnern – mit 3er und 4er allein geht der Plan dann nie ganz auf. Bisher bleibt dann für jede Mannschaft eine Paarung übrig, die als **Einzelbegegnung** mit möglichst kurzer Fahrt ausgetragen wird (Form `Einzel`; geprüft auf Heim/Auswärts, höchstens eine je Mannschaft, zählt nicht als ausgerichtetes Turnier).
 
 **Stufen:**
 
 - [x] **Prüfen** (`andigen turnier pruefen <xml> <csv>`): erkennt im Plan aus click-TT die Turniere (`Turniererkennung`), liest die Meldungen (`TurniermeldungenCsv`, repariert falsch kodierte Umlaute, letzte Meldung je Mannschaft gilt) und meldet alle Verstöße (`Turnierpruefung`); Bemerkungen werden zum Selbstprüfen ausgegeben. Für Turniere mit Befund schlägt die Prüfung passende Ausweichtage vor (Beispiel 2026: das Turnier in Trier-Olewig, nachträglich vom 08.11. auf den 01.11. verlegt).
-- [ ] **Planen:** selbst einen Plan aus 3er- und 4er-Turnieren suchen (vollständige Suche bzw. Constraint-Löser), Ausrichter möglichst gleichmäßig verteilen, Ausgabe als click-TT-CSV. Optional Entfernungen (Postleitzahlen bzw. Routenplaner).
+- [ ] **Planen:** selbst einen Plan aus 3er- und 4er-Turnieren (und Einzelbegegnungen) suchen. Versuch 12.10.2026 (Plan 2026, nur 4er, exakte Überdeckung): über 120.000 gültige Pläne nach 5 Minuten, Suche nicht beendet – die Aufgabe ist also die Auswahl. Ziele nach Peter (12.10.2026):
+  - *Voraussetzungen:* Meldungen, Wunschtermine und Zeitwünsche, jede Paarung genau einmal, jede Mannschaft mindestens ein Heimspieltag (3er oder 4er).
+  - *1. Fahrtstrecken* möglichst kurz (Hallen brauchen Postleitzahl bzw. Adresse; zuerst Luftlinie, später Routenplaner).
+  - *2. Gleichmäßiger Stand:* zu jedem Zeitpunkt haben alle Mannschaften etwa gleich viele Spiele; keine ist fast fertig, während eine andere kaum angefangen hat.
+  - *3. Gemeinsamer Spieltag:* mindestens ein Tag, an dem möglichst alle Mannschaften spielen.
+  - *Einbindung:* Eingabe in den Spielplandaten (CSV-Import der Umfrage auf Sperrtermine und Heimspieltermine), eigener Turnierplaner statt des Optimierers, Ergebnis als normaler Plan (Ansichten, Druck, click-TT-CSV).
 - [ ] **Oberfläche:** eigene Seite, sobald Prüfen und Planen tragen.
 
 ## Änderungsprotokoll

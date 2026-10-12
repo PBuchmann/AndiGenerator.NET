@@ -172,20 +172,16 @@ public class TurniereTests
     }
 
     [Fact]
-    public void Spieltagssperren_und_spielfreie_Tage_der_Staffel_werden_gemeldet()
+    public void Fuer_Turniere_mit_Befund_werden_Ausweichtage_vorgeschlagen()
     {
-        static Mannschaft Team(string name, params DateOnly[] sperren) => new(name, string.Empty, string.Empty, string.Empty, 1, string.Empty, -1, [], sperren, [], [], [], []);
-        Staffel staffel = Staffel.Leer with
+        // Am 1. Tag kann C nicht auswärts; am 2. Tag passt alles.
+        Turniermeldung c = Meldung("C", Turnierbereitschaft.Auswaerts) with
         {
-            Mannschaften = [Team("A"), Team("B", Tag1), Team("C")],
-            SpielfreieTage = [Tag1],
+            Tage = new Dictionary<DateOnly, Turnierbereitschaft> { [Tag1] = Turnierbereitschaft.None, [Tag2] = Turnierbereitschaft.Auswaerts },
         };
-        Turniermeldung[] meldungen = [Meldung("A", Turnierbereitschaft.Heim), Meldung("B", Turnierbereitschaft.Auswaerts), Meldung("C", Turnierbereitschaft.Auswaerts)];
 
-        Turnierpruefungsergebnis ergebnis = Turnierpruefung.Pruefen(Turniererkennung.Erkennen(Dreier(Tag1, "A", "B", "C")), staffel, meldungen);
+        Turnierpruefungsergebnis ergebnis = Pruefen([.. Dreier(Tag1, "A", "B", "C")], Meldung("A", Turnierbereitschaft.Heim), Meldung("B", Turnierbereitschaft.Auswaerts), c);
 
-        Assert.Equal("15.11.2026: In der Staffel ist dieser Tag spielfrei.", ergebnis.Befunde[0]);
-        Assert.Contains("15.11.2026: B hat an diesem Tag eine Spieltagssperre.", ergebnis.Befunde);
         Assert.Equal([Tag2], ergebnis.Turniere[0].Ausweichtage);
     }
 

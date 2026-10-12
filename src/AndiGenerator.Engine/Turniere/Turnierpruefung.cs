@@ -4,40 +4,21 @@
 
 using System.Globalization;
 using System.Text;
-using AndiGenerator.Domain.Stammdaten;
 using AndiGenerator.Domain.Turniere;
 
 namespace AndiGenerator.Engine.Turniere;
 
 /// <summary>
 /// Prüft einen Plan aus Turniertagen gegen die Meldungen der Mannschaften: Form der Turniere, jede Paarung genau einmal,
-/// höchstens ein Turnier je Mannschaft und Tag, keine Spieltagssperre, Ausrichter kann zuhause (und beim Vierer zwei Spiele parallel), die
+/// höchstens ein Turnier je Mannschaft und Tag, Ausrichter kann zuhause (und beim Vierer zwei Spiele parallel), die
 /// übrigen können auswärts, jede Mannschaft richtet mindestens einmal ein Turnier aus. Einzelbegegnungen (bei gerader
 /// Mannschaftszahl) werden ebenso auf Heim und Auswärts geprüft, zählen aber nicht als ausgerichtetes Turnier; mehr als
-/// eine je Mannschaft wird gemeldet. Für Turniere mit Befund werden Ausweichtage vorgeschlagen.
+/// eine je Mannschaft wird gemeldet. Für Turniere mit Befund werden Ausweichtage vorgeschlagen. Es zählen nur die
+/// Meldungen; Sperrtermine und spielfreie Tage aus click-TT gelten für Turnierrunden nicht.
 /// </summary>
 public static class Turnierpruefung
 {
-    /// <summary>Prüft die Turniere einer Staffel, auch gegen ihre spielfreien Tage und die Sperrtermine der Mannschaften.</summary>
-    /// <param name="turniere">Die Turniere des Plans.</param>
-    /// <param name="staffel">Die Staffel.</param>
-    /// <param name="meldungen">Die Meldungen.</param>
-    /// <returns>Das Ergebnis mit dem gewählten Ausrichter je Turnier und allen Befunden.</returns>
-    public static Turnierpruefungsergebnis Pruefen(
-        IReadOnlyList<Turnier> turniere,
-        Staffel staffel,
-        IReadOnlyList<Turniermeldung> meldungen)
-    {
-        ArgumentNullException.ThrowIfNull(staffel);
-        Dictionary<string, HashSet<DateOnly>> gesperrt = staffel.Mannschaften
-            .GroupBy(m => m.Name, StringComparer.Ordinal)
-            .ToDictionary(g => g.Key, g => g.SelectMany(m => m.Sperrtermine).ToHashSet(), StringComparer.Ordinal);
-        bool Gesperrt(string mannschaft, DateOnly tag) => gesperrt.TryGetValue(mannschaft, out HashSet<DateOnly>? tage) && tage.Contains(tag);
-
-        return Auswerten(turniere, staffel.Mannschaften.Select(m => m.Name).ToList(), meldungen, Gesperrt, staffel.SpielfreieTage.ToHashSet());
-    }
-
-    /// <summary>Prüft die Turniere ohne Sperrtermine und spielfreie Tage.</summary>
+    /// <summary>Prüft die Turniere gegen die Meldungen.</summary>
     /// <param name="turniere">Die Turniere des Plans.</param>
     /// <param name="mannschaften">Alle Mannschaften der Staffel.</param>
     /// <param name="meldungen">Die Meldungen.</param>
@@ -45,39 +26,7 @@ public static class Turnierpruefung
     public static Turnierpruefungsergebnis Pruefen(
         IReadOnlyList<Turnier> turniere,
         IReadOnlyList<string> mannschaften,
-        IReadOnlyList<Turniermeldung> meldungen) =>
-        Auswerten(turniere, mannschaften, meldungen, (_, _) => false, []);
-
-    /// <summary>Sucht die Meldung zu einer Mannschaft: gleicher Name, sonst ohne Satz- und Leerzeichen, sonst Teil des Namens.</summary>
-    /// <param name="mannschaft">Name aus der click-TT-Datei.</param>
-    /// <param name="meldungen">Die Meldungen.</param>
-    /// <returns>Die Meldung oder <c>null</c>.</returns>
-    public static Turniermeldung? Meldung(string mannschaft, IReadOnlyList<Turniermeldung> meldungen)
-    {
-        ArgumentNullException.ThrowIfNull(meldungen);
-        string gesucht = Kern(mannschaft);
-        return meldungen.FirstOrDefault(m => string.Equals(m.Mannschaft, mannschaft, StringComparison.OrdinalIgnoreCase))
-            ?? meldungen.FirstOrDefault(m => Kern(m.Mannschaft) == gesucht)
-            ?? meldungen.FirstOrDefault(m => Kern(m.Mannschaft).Length > 3 && (gesucht.Contains(Kern(m.Mannschaft), StringComparison.Ordinal) || Kern(m.Mannschaft).Contains(gesucht, StringComparison.Ordinal)));
-    }
-
-    /// <summary>Text einer Bereitschaft.</summary>
-    /// <param name="b">Die Bereitschaft.</param>
-    /// <returns>Z. B. „nur zuhause“.</returns>
-    public static string Text(Turnierbereitschaft b) => b switch
-    {
-        Turnierbereitschaft.Heim | Turnierbereitschaft.Auswaerts => "zuhause und auswärts",
-        Turnierbereitschaft.Heim => "nur zuhause",
-        Turnierbereitschaft.Auswaerts => "nur auswärts",
-        _ => "kann nicht",
-    };
-
-    private static Turnierpruefungsergebnis Auswerten(
-        IReadOnlyList<Turnier> turniere,
-        IReadOnlyList<string> mannschaften,
-        IReadOnlyList<Turniermeldung> meldungen,
-        Func<string, DateOnly, bool> gesperrt,
-        HashSet<DateOnly> spielfrei)
+        IReadOnlyList<Turniermeldung> meldungen)
     {
         ArgumentNullException.ThrowIfNull(turniere);
         ArgumentNullException.ThrowIfNull(mannschaften);
@@ -85,11 +34,8 @@ public static class Turnierpruefung
         var kontext = new Kontext(
             turniere,
             mannschaften.ToDictionary(m => m, m => Meldung(m, meldungen), StringComparer.Ordinal),
-            gesperrt,
-            spielfrei,
             meldungen.SelectMany(m => m.Tage.Keys).Distinct().Order().ToList());
         var befunde = new List<string>();
-        befunde.AddRange(turniere.Select(t => t.Tag).Distinct().Where(spielfrei.Contains).Select(t => $"{Datum(t)}: In der Staffel ist dieser Tag spielfrei."));
         befunde.AddRange(mannschaften.Where(m => kontext.MeldungJe[m] is null).Select(m => $"{m}: keine Meldung gefunden – an allen Tagen als möglich angenommen."));
         befunde.AddRange(Paarungen(turniere, mannschaften));
         befunde.AddRange(Doppelte(turniere));
@@ -120,6 +66,30 @@ public static class Turnierpruefung
         return new Turnierpruefungsergebnis(ergebnis, befunde, ausgerichtet);
     }
 
+    /// <summary>Sucht die Meldung zu einer Mannschaft: gleicher Name, sonst ohne Satz- und Leerzeichen, sonst Teil des Namens.</summary>
+    /// <param name="mannschaft">Name aus der click-TT-Datei.</param>
+    /// <param name="meldungen">Die Meldungen.</param>
+    /// <returns>Die Meldung oder <c>null</c>.</returns>
+    public static Turniermeldung? Meldung(string mannschaft, IReadOnlyList<Turniermeldung> meldungen)
+    {
+        ArgumentNullException.ThrowIfNull(meldungen);
+        string gesucht = Kern(mannschaft);
+        return meldungen.FirstOrDefault(m => string.Equals(m.Mannschaft, mannschaft, StringComparison.OrdinalIgnoreCase))
+            ?? meldungen.FirstOrDefault(m => Kern(m.Mannschaft) == gesucht)
+            ?? meldungen.FirstOrDefault(m => Kern(m.Mannschaft).Length > 3 && (gesucht.Contains(Kern(m.Mannschaft), StringComparison.Ordinal) || Kern(m.Mannschaft).Contains(gesucht, StringComparison.Ordinal)));
+    }
+
+    /// <summary>Text einer Bereitschaft.</summary>
+    /// <param name="b">Die Bereitschaft.</param>
+    /// <returns>Z. B. „nur zuhause“.</returns>
+    public static string Text(Turnierbereitschaft b) => b switch
+    {
+        Turnierbereitschaft.Heim | Turnierbereitschaft.Auswaerts => "zuhause und auswärts",
+        Turnierbereitschaft.Heim => "nur zuhause",
+        Turnierbereitschaft.Auswaerts => "nur auswärts",
+        _ => "kann nicht",
+    };
+
     private static Turnierbewertung Bewerten(Turnier turnier, string? ausrichter, Kontext kontext)
     {
         var hinweise = new List<string>();
@@ -134,16 +104,14 @@ public static class Turnierpruefung
             hinweise.Add($"Kein möglicher Ausrichter ({gruende}).");
         }
 
-        hinweise.AddRange(turnier.Mannschaften.Where(m => kontext.Gesperrt(m, turnier.Tag)).Select(m => $"{m} hat an diesem Tag eine Spieltagssperre."));
         hinweise.AddRange(turnier.Mannschaften.Where(m => m != ausrichter && !KannAuswaerts(turnier, m, kontext.MeldungJe))
             .Select(m => $"{m} kann an diesem Tag nicht auswärts spielen ({Text(kontext.MeldungJe[m]!.An(turnier.Tag))})."));
-        bool befund = hinweise.Count > 0 || kontext.Spielfrei.Contains(turnier.Tag);
-        return new Turnierbewertung(turnier, ausrichter, hinweise, befund ? Ausweichtage(turnier, kontext) : []);
+        return new Turnierbewertung(turnier, ausrichter, hinweise, hinweise.Count > 0 ? Ausweichtage(turnier, kontext) : []);
     }
 
     /// <summary>
-    /// Tage aus den Meldungen, an denen das Turnier ohne Befund stattfinden könnte: kein spielfreier Tag, keine Sperre,
-    /// keine der Mannschaften in einem anderen Turnier, ein möglicher Ausrichter kann zuhause und alle anderen auswärts.
+    /// Tage aus den Meldungen, an denen das Turnier ohne Befund stattfinden könnte: keine der Mannschaften spielt dort
+    /// ein anderes Turnier, ein möglicher Ausrichter kann zuhause und alle anderen können auswärts.
     /// </summary>
     private static List<DateOnly> Ausweichtage(Turnier turnier, Kontext kontext)
     {
@@ -151,8 +119,7 @@ public static class Turnierpruefung
             .SelectMany(t => t.Mannschaften.Select(m => (t.Tag, m)))
             .ToHashSet();
         return kontext.Tage
-            .Where(tag => tag != turnier.Tag && !kontext.Spielfrei.Contains(tag))
-            .Where(tag => turnier.Mannschaften.All(m => !belegt.Contains((tag, m)) && !kontext.Gesperrt(m, tag)))
+            .Where(tag => tag != turnier.Tag && turnier.Mannschaften.All(m => !belegt.Contains((tag, m))))
             .Where(tag => Ausrichtbar(turnier with { Tag = tag }, kontext.MeldungJe))
             .ToList();
     }
@@ -225,13 +192,9 @@ public static class Turnierpruefung
     /// <summary>Was alle Turniere einer Prüfung gemeinsam brauchen.</summary>
     /// <param name="Turniere">Alle Turniere des Plans.</param>
     /// <param name="MeldungJe">Meldung je Mannschaft der Staffel oder <c>null</c>.</param>
-    /// <param name="Gesperrt">Ob eine Mannschaft an einem Tag eine Spieltagssperre hat.</param>
-    /// <param name="Spielfrei">Spielfreie Tage der Staffel.</param>
     /// <param name="Tage">Alle Tage der Meldungen, aufsteigend.</param>
     private sealed record Kontext(
         IReadOnlyList<Turnier> Turniere,
         Dictionary<string, Turniermeldung?> MeldungJe,
-        Func<string, DateOnly, bool> Gesperrt,
-        HashSet<DateOnly> Spielfrei,
         IReadOnlyList<DateOnly> Tage);
 }

@@ -23,7 +23,8 @@ internal static class TurnierBefehl
           --ausgabe DATEI       Bildschirmausgabe zusätzlich in diese Datei schreiben
         Geprüft werden: Form der Turniere, jede Paarung genau einmal, ein Turnier je Mannschaft und Tag, Ausrichter kann
         zuhause (beim 4er mit zwei Spielen parallel), die übrigen können auswärts, jede Mannschaft richtet aus
-        (hat Vorrang vor den Meldungen), keine Spieltagssperre der Mannschaften und keine spielfreien Tage der Staffel.
+        (hat Vorrang vor den Meldungen). Es zählen nur die Meldungen, nicht die Sperrtermine aus click-TT.
+        Für Turniere mit Befund werden passende Ausweichtage vorgeschlagen.
         Einzelbegegnungen (bei gerader Mannschaftszahl) werden auf Heim/Auswärts geprüft, höchstens eine je Mannschaft.
         """;
 
@@ -75,7 +76,7 @@ internal static class TurnierBefehl
         IReadOnlyList<Turniermeldung> meldungen = TurniermeldungenCsv.Laden(csv);
         List<string> mannschaften = staffel.Mannschaften.Select(m => m.Name).ToList();
         IReadOnlyList<Turnier> turniere = Turniererkennung.Erkennen(staffel.BestehenderSpielplan);
-        Turnierpruefungsergebnis ergebnis = Turnierpruefung.Pruefen(turniere, staffel, meldungen);
+        Turnierpruefungsergebnis ergebnis = Turnierpruefung.Pruefen(turniere, mannschaften, meldungen);
 
         Console.WriteLine($"Staffel:      {staffel.Name} ({mannschaften.Count} Mannschaften)");
         Console.WriteLine($"Meldungen:    {meldungen.Count} aus {csv}");
