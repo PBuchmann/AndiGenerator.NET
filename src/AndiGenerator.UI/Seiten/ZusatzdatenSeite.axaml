@@ -1,12 +1,15 @@
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:p="using:AndiGenerator.Presentation"
+             xmlns:a="using:AndiGenerator.Application"
+             xmlns:sys="using:System"
              xmlns:ui="using:AndiGenerator.UI"
              x:Class="AndiGenerator.UI.Seiten.ZusatzdatenSeite"
              x:DataType="p:ZusatzdatenSeiteViewModel">
   <StackPanel Margin="12" Spacing="8" HorizontalAlignment="Left">
     <TextBlock Classes="abschnitt" Text="Mannschaftsmeldung – Vorschlag für die Setzliste" />
     <TextBlock Classes="erklaerung" Text="{x:Static p:ZusatzdatenSeiteViewModel.AufstellungsErklaerung}" TextWrapping="Wrap" MaxWidth="700" />
+    <TextBlock Text="{Binding AufstellungsVermerk}" Classes="leer" TextWrapping="Wrap" MaxWidth="700" IsVisible="{Binding AufstellungsVermerk, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
     <Button Classes="seitenknopf" Command="{Binding AufstellungenLadenCommand}" HorizontalAlignment="Left">
       <StackPanel Orientation="Horizontal" Spacing="8">
         <ui:Symbol Daten="{StaticResource SymbolOeffnen}" Groesse="18" />
@@ -35,47 +38,75 @@
 
     <TextBlock Classes="abschnitt" Text="Terminwünsche – Spiellokale, Adressen und Bemerkungen" Margin="0,16,0,0" />
     <TextBlock Classes="erklaerung" Text="{x:Static p:ZusatzdatenSeiteViewModel.TerminwunschErklaerung}" TextWrapping="Wrap" MaxWidth="700" />
+    <TextBlock Text="{Binding TerminwunschVermerk}" Classes="leer" TextWrapping="Wrap" MaxWidth="700" IsVisible="{Binding TerminwunschVermerk, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
     <Button Classes="seitenknopf" Command="{Binding TerminwuenscheLadenCommand}" HorizontalAlignment="Left">
       <StackPanel Orientation="Horizontal" Spacing="8">
         <ui:Symbol Daten="{StaticResource SymbolOeffnen}" Groesse="18" />
         <TextBlock Text="Terminwünsche laden…" VerticalAlignment="Center" />
       </StackPanel>
     </Button>
-    <StackPanel Spacing="8" IsVisible="{Binding HatTerminwuensche}">
-      <TextBlock Text="{Binding TerminwunschZusammenfassung}" Classes="leer" TextWrapping="Wrap" MaxWidth="700" />
-      <TextBlock Classes="spaltenkopf" Text="BEMERKUNGEN DER VEREINE" IsVisible="{Binding HatBemerkungen}" />
-      <ItemsControl ItemsSource="{Binding Bemerkungen}" IsVisible="{Binding HatBemerkungen}" MaxWidth="700" HorizontalAlignment="Left">
+    <StackPanel Spacing="10" IsVisible="{Binding HatTerminwuensche}" MaxWidth="760" HorizontalAlignment="Left">
+      <TextBlock Text="{Binding TerminwunschDatei}" Classes="leer" />
+      <!-- Kennzahlen als Kacheln -->
+      <ItemsControl ItemsSource="{Binding Kennzahlen}">
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate>
+            <WrapPanel />
+          </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
         <ItemsControl.ItemTemplate>
-          <DataTemplate x:DataType="p:Hinweiszeile">
-            <TextBlock TextWrapping="Wrap" Margin="0,2">
-              <Run Text="{Binding Mannschaft}" FontWeight="SemiBold" />
-              <Run Text=": " />
-              <Run Text="{Binding Text}" />
-            </TextBlock>
+          <DataTemplate x:DataType="p:Kachelwert">
+            <Border Classes="karte" Padding="14,10" Margin="0,0,10,10" Width="175">
+              <StackPanel Spacing="2">
+                <TextBlock Text="{Binding Wert}" Classes="ziffer" FontSize="22" FontWeight="SemiBold" Foreground="{StaticResource Akzent}" />
+                <TextBlock Text="{Binding Text}" FontSize="12" Foreground="{StaticResource Tinte2}" TextWrapping="Wrap" />
+              </StackPanel>
+            </Border>
           </DataTemplate>
         </ItemsControl.ItemTemplate>
       </ItemsControl>
-      <TextBlock Classes="spaltenkopf" Text="UNTERSCHIEDE ZU DEN SPIELPLANDATEN" IsVisible="{Binding HatAbweichungen}" />
-      <ItemsControl ItemsSource="{Binding Abweichungen}" IsVisible="{Binding HatAbweichungen}" MaxWidth="700" HorizontalAlignment="Left">
+      <!-- Je Mannschaft eine Karte: Kopf mit Marke, Bemerkung, Unterschiede, Spiellokale -->
+      <ItemsControl ItemsSource="{Binding Vereine}">
         <ItemsControl.ItemTemplate>
-          <DataTemplate x:DataType="p:Hinweiszeile">
-            <TextBlock TextWrapping="Wrap" Margin="0,2">
-              <Run Text="{Binding Mannschaft}" FontWeight="SemiBold" />
-              <Run Text=": " />
-              <Run Text="{Binding Text}" />
-            </TextBlock>
-          </DataTemplate>
-        </ItemsControl.ItemTemplate>
-      </ItemsControl>
-      <TextBlock Classes="spaltenkopf" Text="SPIELLOKALE" />
-      <ItemsControl ItemsSource="{Binding Spiellokale}" MaxWidth="700" HorizontalAlignment="Left">
-        <ItemsControl.ItemTemplate>
-          <DataTemplate x:DataType="p:Hinweiszeile">
-            <TextBlock TextWrapping="Wrap" Margin="0,1">
-              <Run Text="{Binding Mannschaft}" FontWeight="SemiBold" />
-              <Run Text=" – " />
-              <Run Text="{Binding Text}" />
-            </TextBlock>
+          <DataTemplate x:DataType="p:Vereinskarte">
+            <Border Classes="karte" Padding="16,12" Margin="0,0,0,10">
+              <StackPanel Spacing="8">
+                <Grid ColumnDefinitions="*,Auto">
+                  <TextBlock Text="{Binding Mannschaft}" FontSize="15" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                  <Border Grid.Column="1" CornerRadius="10" Padding="10,3" Background="{StaticResource AkzentHell}">
+                    <TextBlock Text="{Binding Marke}" FontSize="12" Foreground="{StaticResource AkzentDunkel}" />
+                  </Border>
+                </Grid>
+                <Border IsVisible="{Binding HatBemerkung}" BorderBrush="{StaticResource Akzent}" BorderThickness="3,0,0,0" Padding="10,4" Background="{StaticResource Schwebe}">
+                  <TextBlock Text="{Binding Bemerkung}" FontStyle="Italic" TextWrapping="Wrap" />
+                </Border>
+                <ItemsControl ItemsSource="{Binding Abweichungen}" IsVisible="{Binding HatAbweichungen}">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="sys:String">
+                      <Grid ColumnDefinitions="18,*" Margin="0,1">
+                        <TextBlock Text="!" FontWeight="Bold" Foreground="{StaticResource Schlecht}" />
+                        <TextBlock Grid.Column="1" Text="{Binding}" TextWrapping="Wrap" />
+                      </Grid>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <ItemsControl ItemsSource="{Binding Spiellokale}">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="a:Spiellokalangabe">
+                      <Grid ColumnDefinitions="30,*" Margin="0,3">
+                        <Border Width="22" Height="22" CornerRadius="11" Background="{StaticResource AkzentHell}" VerticalAlignment="Top">
+                          <TextBlock Text="{Binding Nummer}" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource AkzentDunkel}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                        </Border>
+                        <StackPanel Grid.Column="1">
+                          <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                          <TextBlock Text="{Binding Adresse}" FontSize="12" Foreground="{StaticResource Tinte2}" TextWrapping="Wrap" />
+                        </StackPanel>
+                      </Grid>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </StackPanel>
+            </Border>
           </DataTemplate>
         </ItemsControl.ItemTemplate>
       </ItemsControl>

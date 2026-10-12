@@ -1222,23 +1222,13 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         var schritte = new List<Einrichtungsschritt>();
 
         // Als erster Punkt weitere Exporte aus click-TT (nicht im Original); schon übernommen: als erledigt markiert.
-        Datenbearbeitung daten = neu.DatenBearbeiten();
-        List<string> erledigt = [];
-        if (daten.MannschaftsmeldungVermerk.Length > 0)
+        // Erledigt erst, wenn Mannschaftsmeldung und Terminwünsche übernommen sind – auch über mehrere Sitzungen.
+        static bool BeideGeladen(Datenbearbeitung d) => d.MannschaftsmeldungVermerk.Length > 0 && d.TerminwunschVermerk.Length > 0;
+        var zusatzschritt = new Einrichtungsschritt(1, "Daten aus click-TT ergänzen", ZusatzdatenSeiteViewModel.Einrichtungstext, [], [])
         {
-            erledigt.Add("Mannschaftsmeldung " + daten.MannschaftsmeldungVermerk);
-        }
-
-        if (daten.TerminwunschVermerk.Length > 0)
-        {
-            erledigt.Add("Terminwünsche " + daten.TerminwunschVermerk);
-        }
-
-        string zusatztext = erledigt.Count == 0
-            ? ZusatzdatenSeiteViewModel.Einrichtungstext
-            : ZusatzdatenSeiteViewModel.Einrichtungstext + "\n\nSchon erledigt: " + string.Join("; ", erledigt) + ". Sie können die Dateien hier erneut laden.";
-        var zusatzschritt = new Einrichtungsschritt(1, "Daten aus click-TT ergänzen", zusatztext, [], []);
-        if (erledigt.Count > 0)
+            IstVollstaendig = () => BeideGeladen(neu.DatenBearbeiten()),
+        };
+        if (BeideGeladen(neu.DatenBearbeiten()))
         {
             zusatzschritt.Zustand = Schrittzustand.Erledigt;
         }

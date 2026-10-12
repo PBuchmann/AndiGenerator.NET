@@ -61,39 +61,20 @@ public sealed class ZusatzdatenSeiteViewModel : DatenSeiteViewModel
     /// <summary>Holt einen Wert, der angibt, ob ein Bericht „Terminwünsche“ geladen ist.</summary>
     public bool HatTerminwuensche => abgleich is not null;
 
-    /// <summary>Holt die Zusammenfassung des Abgleichs.</summary>
-    public string TerminwunschZusammenfassung
-    {
-        get
-        {
-            if (abgleich is null)
-            {
-                return string.Empty;
-            }
+    /// <summary>Holt die Kennzahlen des Abgleichs (Mannschaften, gesetzte Nummern, Bemerkungen, Unterschiede).</summary>
+    public ObservableCollection<Kachelwert> Kennzahlen { get; } = [];
 
-            int gefunden = abgleich.Mannschaften.Count(m => m.Gefunden);
-            string text = string.Create(
-                CultureInfo.InvariantCulture,
-                $"{pdfDatei}: {gefunden} von {abgleich.Mannschaften.Count} Mannschaften gefunden; Spiellokal-Nummer für {abgleich.NummernGesetzt} Heimtermine aus dem Hallennamen.");
-            List<string> fehlend = abgleich.Mannschaften.Where(m => !m.Gefunden).Select(m => m.Mannschaft).ToList();
-            return fehlend.Count == 0 ? text : text + " Nicht im Bericht: " + string.Join(", ", fehlend) + ".";
-        }
-    }
+    /// <summary>Holt je Mannschaft Spiellokale, Bemerkung und Unterschiede.</summary>
+    public ObservableCollection<Vereinskarte> Vereine { get; } = [];
 
-    /// <summary>Holt die Spiellokale der Vereine mit Adresse.</summary>
-    public ObservableCollection<Hinweiszeile> Spiellokale { get; } = [];
+    /// <summary>Holt den Namen der geladenen PDF-Datei.</summary>
+    public string TerminwunschDatei => pdfDatei;
 
-    /// <summary>Holt die Bemerkungen der Vereine.</summary>
-    public ObservableCollection<Hinweiszeile> Bemerkungen { get; } = [];
+    /// <summary>Holt den Vermerk, welche Mannschaftsmeldung schon übernommen wurde, oder einen leeren Text.</summary>
+    public string AufstellungsVermerk => Vermerk(Bearbeitung.MannschaftsmeldungVermerk);
 
-    /// <summary>Holt die Unterschiede zwischen Bericht und Spielplandaten.</summary>
-    public ObservableCollection<Hinweiszeile> Abweichungen { get; } = [];
-
-    /// <summary>Holt einen Wert, der angibt, ob es Bemerkungen gibt.</summary>
-    public bool HatBemerkungen => Bemerkungen.Count > 0;
-
-    /// <summary>Holt einen Wert, der angibt, ob es Abweichungen gibt.</summary>
-    public bool HatAbweichungen => Abweichungen.Count > 0;
+    /// <summary>Holt den Vermerk, welcher Bericht „Terminwünsche“ schon übernommen wurde, oder einen leeren Text.</summary>
+    public string TerminwunschVermerk => Vermerk(Bearbeitung.TerminwunschVermerk);
 
     /// <summary>Holt den Befehl „Mannschaftsmeldung laden…“.</summary>
     public IAsyncRelayCommand AufstellungenLadenCommand { get; }
@@ -228,6 +209,8 @@ public sealed class ZusatzdatenSeiteViewModel : DatenSeiteViewModel
         AenderungMelden();
     }
 
+    private static string Vermerk(string vermerk) => vermerk.Length == 0 ? string.Empty : "Bereits übernommen: " + vermerk + ".";
+
     private async Task AufstellungenLadenAsync()
     {
         string? pfad = await oberflaeche.DateiOeffnenAsync("Mannschaftsmeldung aus click-TT laden", [new Dateifilter("CSV-Dateien", ["*.csv"])]);
@@ -250,31 +233,26 @@ public sealed class ZusatzdatenSeiteViewModel : DatenSeiteViewModel
     {
         abgleich = neu;
         pdfDatei = dateiname;
-        Spiellokale.Clear();
-        Bemerkungen.Clear();
-        Abweichungen.Clear();
-        foreach (Mannschaftsabgleich m in neu?.Mannschaften ?? [])
+        Kennzahlen.Clear();
+        Vereine.Clear();
+        if (neu is not null)
         {
-            foreach (string lokal in m.Spiellokale)
-            {
-                Spiellokale.Add(new Hinweiszeile(m.Mannschaft, lokal));
-            }
+            string Zahl(int n) => n.ToString(CultureInfo.InvariantCulture);
+            List<Mannschaftsabgleich> m = neu.Mannschaften.ToList();
+            Kennzahlen.Add(new Kachelwert(Zahl(m.Count(x => x.Gefunden)) + " / " + Zahl(m.Count), "Mannschaften im Bericht gefunden"));
+            Kennzahlen.Add(new Kachelwert(Zahl(neu.NummernGesetzt), "Heimtermine erhalten die Spiellokal-Nummer"));
+            Kennzahlen.Add(new Kachelwert(Zahl(m.Count(x => x.Bemerkung.Length > 0)), "Bemerkungen der Vereine"));
+            Kennzahlen.Add(new Kachelwert(Zahl(m.Sum(x => x.Abweichungen.Count)), "Unterschiede zu den Spielplandaten"));
 
-            if (m.Bemerkung.Length > 0)
+            // Mannschaften mit Bemerkung oder Unterschieden zuerst, sonst in der Reihenfolge der Staffel.
+            foreach (Mannschaftsabgleich a in m.OrderBy(x => x.Bemerkung.Length > 0 || x.Abweichungen.Count > 0 || !x.Gefunden ? 0 : 1))
             {
-                Bemerkungen.Add(new Hinweiszeile(m.Mannschaft, m.Bemerkung));
-            }
-
-            foreach (string abweichung in m.Abweichungen)
-            {
-                Abweichungen.Add(new Hinweiszeile(m.Mannschaft, abweichung));
+                Vereine.Add(new Vereinskarte(a.Mannschaft, a.Gefunden, a.Spiellokale, a.Bemerkung, a.Abweichungen));
             }
         }
 
         OnPropertyChanged(nameof(HatTerminwuensche));
-        OnPropertyChanged(nameof(TerminwunschZusammenfassung));
-        OnPropertyChanged(nameof(HatBemerkungen));
-        OnPropertyChanged(nameof(HatAbweichungen));
+        OnPropertyChanged(nameof(TerminwunschDatei));
         OnPropertyChanged(nameof(IstStandard));
     }
 

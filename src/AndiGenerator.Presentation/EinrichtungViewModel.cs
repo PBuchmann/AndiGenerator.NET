@@ -149,7 +149,8 @@ public sealed class EinrichtungViewModel : ObservableObject
             return;
         }
 
-        Abhaken(schritt, Schrittzustand.Erledigt);
+        // Ein Punkt mit mehreren Teilen (z. B. zwei Dateien) bleibt offen, bis alle erledigt sind.
+        Abhaken(schritt, (schritt.IstVollstaendig?.Invoke() ?? true) ? Schrittzustand.Erledigt : Schrittzustand.Offen);
     }
 
     private async Task AbschliessenAsync()

@@ -56,7 +56,7 @@ public sealed partial class Datenbearbeitung
             mannschaften.Add(new Mannschaftsabgleich(
                 name,
                 true,
-                meldung.Spiellokale.OrderBy(l => l.Key).Select(l => l.Key.ToString(CultureInfo.InvariantCulture) + ": " + l.Value.Text).ToList(),
+                meldung.Spiellokale.OrderBy(l => l.Key).Select(l => new Spiellokalangabe(l.Key, l.Value.Name, Adresse(l.Value))).ToList(),
                 Zuordnungen(team, meldung).Count,
                 meldung.Bemerkung,
                 Abweichungen(team, meldung)));
@@ -139,6 +139,9 @@ public sealed partial class Datenbearbeitung
         ergebnis.AddRange(sperrenDaten.Except(sperrenBericht).Order().Select(t => "Sperrtermin nur in den Spielplandaten: " + Tagtext(t)));
         return ergebnis;
     }
+
+    private static string Adresse(Spiellokaladresse a) =>
+        string.Join(", ", new[] { a.Strasse, (a.Postleitzahl + " " + a.Ort).Trim() }.Where(t => t.Length > 0));
 
     private static string Hallenform(string halle) =>
         string.Join(' ', halle.Replace("- ", "-", StringComparison.Ordinal).Split(' ', StringSplitOptions.RemoveEmptyEntries)).ToUpperInvariant();

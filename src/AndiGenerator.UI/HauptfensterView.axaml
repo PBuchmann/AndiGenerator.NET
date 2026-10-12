@@ -402,31 +402,32 @@
           </StackPanel>
         </Button>
         <Button Classes="kartenknopf verbesserungen" Margin="6" Command="{Binding VerlaufCommand}" ToolTip.Tip="Verlauf der Suche öffnen: Kosten bzw. Verstöße seit dem Start">
-          <Grid ColumnDefinitions="*,Auto">
-            <StackPanel Spacing="2">
-              <Grid ColumnDefinitions="*,Auto">
-                <TextBlock Text="Verbesserungen" Classes="klein" TextTrimming="CharacterEllipsis" />
-                <TextBlock Grid.Column="1" Text="Details ›" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource Akzent}" Margin="8,0,0,0" />
-              </Grid>
+          <!-- Kopfzeile über die ganze Breite (Details rechts oben wie in der Ergebniskachel), darunter Werte und Diagramm -->
+          <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,*">
+            <Grid Grid.ColumnSpan="2" ColumnDefinitions="*,Auto">
+              <TextBlock Text="Verbesserungen" Classes="klein" TextTrimming="CharacterEllipsis" />
+              <TextBlock Grid.Column="1" Text="Details ›" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource Akzent}" Margin="8,0,0,0" />
+            </Grid>
+            <StackPanel Grid.Row="1" Spacing="2" Margin="0,2,0,0">
               <TextBlock Text="{Binding Anzeige.Verbesserungen}" Classes="ziffer wert" />
               <TextBlock Text="{Binding Anzeige.LetzteVerbesserung}" Classes="klein hinweis" />
             </StackPanel>
             <!-- Kleiner Verlauf: Kosten bzw. Verstöße der wichtigsten Stufe, die noch welche hat -->
-            <ui:Verlaufsdiagramm Grid.Column="1" Kompakt="True" Verlauf="{Binding Verlauf}" Version="{Binding Verlauf.Version}"
+            <ui:Verlaufsdiagramm Grid.Row="1" Grid.Column="1" Kompakt="True" Verlauf="{Binding Verlauf}" Version="{Binding Verlauf.Version}"
                                  Width="96" Height="34" VerticalAlignment="Bottom" Margin="12,0,0,4" />
           </Grid>
         </Button>
         <Button Classes="kartenknopf plaene" Margin="6" Command="{Binding MaschinenraumCommand}" ToolTip.Tip="Leitstand öffnen: was die Rechenkerne und Inseln gerade tun">
-          <Grid ColumnDefinitions="*,Auto">
-            <StackPanel Spacing="2">
-              <Grid ColumnDefinitions="*,Auto">
-                <TextBlock Text="Berechnete Pläne" Classes="klein" TextTrimming="CharacterEllipsis" />
-                <TextBlock Grid.Column="1" Text="Details ›" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource Akzent}" Margin="8,0,0,0" />
-              </Grid>
+          <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,*">
+            <Grid Grid.ColumnSpan="2" ColumnDefinitions="*,Auto">
+              <TextBlock Text="Berechnete Pläne" Classes="klein" TextTrimming="CharacterEllipsis" />
+              <TextBlock Grid.Column="1" Text="Details ›" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource Akzent}" Margin="8,0,0,0" />
+            </Grid>
+            <StackPanel Grid.Row="1" Spacing="2" Margin="0,2,0,0">
               <TextBlock Text="{Binding Anzeige.Plaene}" Classes="ziffer wert" />
               <TextBlock Text="{Binding Anzeige.Tempo}" Classes="klein hinweis" />
             </StackPanel>
-            <ItemsControl Grid.Column="1" Classes="kerne" Classes.rechnet="{Binding Anzeige.Rechnet}" ItemsSource="{Binding Anzeige.KachelKerne}"
+            <ItemsControl Grid.Row="1" Grid.Column="1" Classes="kerne" Classes.rechnet="{Binding Anzeige.Rechnet}" ItemsSource="{Binding Anzeige.KachelKerne}"
                           Height="22" VerticalAlignment="Bottom" Margin="12,0,0,4">
               <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
