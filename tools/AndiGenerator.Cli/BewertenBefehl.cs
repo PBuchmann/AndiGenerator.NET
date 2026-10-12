@@ -24,6 +24,7 @@ internal static class BewertenBefehl
           --rundenplanung R     beide | halbrunde | vorrunde | rueckrunde (überschreibt die Optionsdatei)
           --details             zusätzlich die Meldungen je Mannschaft ausgeben
           --original            Kosten wie im Original (ohne die Korrekturen und ohne die Regel für den Pflichtspieltag)
+          --hallen-wie-original nur die Korrektur „Hallen nach Namen“ abschalten
           --ausgabe DATEI       Bildschirmausgabe zusätzlich in diese Datei schreiben
         Eine .modifications-Datei neben der XML-Datei wird automatisch berücksichtigt.
         """;
@@ -68,6 +69,12 @@ internal static class BewertenBefehl
         if (a.Rundenplanung is Rundenplanung r)
         {
             optionen = optionen with { Rundenplanung = r };
+        }
+
+        if (a.HallenWieOriginal)
+        {
+            optionen = optionen with { Korrekturen = optionen.Korrekturen with { HallenNachNamen = false } };
+            herkunft += ", Hallen wie im Original";
         }
 
         if (a.Original)

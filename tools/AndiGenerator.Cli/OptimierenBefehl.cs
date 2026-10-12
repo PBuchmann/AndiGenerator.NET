@@ -84,6 +84,12 @@ internal static class OptimierenBefehl
     {
         Staffel staffel = StaffelLaden(a.Datei, a.Leer);
         (Berechnungsoptionen optionen, string herkunft) = OptionenLaden(a.Optionen, staffel);
+        if (a.HallenWieOriginal)
+        {
+            optionen = optionen with { Korrekturen = optionen.Korrekturen with { HallenNachNamen = false } };
+            herkunft += ", Hallen wie im Original";
+        }
+
         if (a.Original)
         {
             optionen = optionen with { Korrekturen = Korrekturen.Keine, SpielfreiAmPflichtspieltag = false };
