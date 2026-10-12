@@ -6,7 +6,7 @@ using Avalonia.Controls;
 
 namespace AndiGenerator.UI.Ansichten;
 
-/// <summary>Ansicht „Kompaktspieltage“: Raster aus Meldungen und Plan, Karte, Kennzahlen, Spieltage und Hinweise.</summary>
+/// <summary>Ansicht „Kompaktspieltage“: Pläne, Raster aus Meldungen und Plan, Karte, Spieltage, Fahrtwünsche und Hinweise.</summary>
 public partial class KompaktspieltageAnsicht : UserControl
 {
     /// <summary>Initialisiert die Ansicht.</summary>

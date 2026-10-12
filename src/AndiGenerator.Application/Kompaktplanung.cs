@@ -30,39 +30,25 @@ public static partial class Kompaktplanung
     public static Kompaktauswertung Auswerten(Staffel staffel, Datenbearbeitung daten, Rundenplanung planung, DateOnly heute)
     {
         ArgumentNullException.ThrowIfNull(staffel);
-        ArgumentNullException.ThrowIfNull(daten);
-        IReadOnlyList<Turnier> turniere = Turniererkennung.Erkennen(staffel.BestehenderSpielplan);
-        List<DateOnly> tage = Sonntage(staffel, turniere, Rueckrunde(staffel, planung), heute);
-        IReadOnlyDictionary<string, string> bemerkungen = daten.Bemerkungen();
-        IReadOnlyDictionary<string, Koordinate> lagen = daten.Hallenkoordinaten();
-        var befunde = new List<string>();
-        var meldungen = new List<Turniermeldung>();
-        foreach (Mannschaft m in staffel.Mannschaften)
-        {
-            string bemerkung = bemerkungen.GetValueOrDefault(m.Name, string.Empty);
-            if (Meldung(m, tage, bemerkung, befunde) is Turniermeldung meldung)
-            {
-                meldungen.Add(meldung);
-            }
-        }
+        return AuswertenFuer(staffel, daten, planung, heute, Turniererkennung.Erkennen(staffel.BestehenderSpielplan));
+    }
 
-        List<string> namen = staffel.Mannschaften.Select(m => m.Name).ToList();
-        Turnierpruefungsergebnis pruefung = Turnierpruefung.Pruefen(turniere, namen, meldungen);
-        befunde.AddRange(pruefung.Befunde);
-        double Entfernung(string a, string b) =>
-            lagen.TryGetValue(a, out Koordinate x) && lagen.TryGetValue(b, out Koordinate y) ? 2 * x.Luftlinie(y) : 0;
-
-        List<Kompaktspieltag> spieltage = pruefung.Turniere.Select(b => Spieltag(b, Entfernung)).ToList();
-        List<Kompaktmannschaft> mannschaften = staffel.Mannschaften.Select(m => new Kompaktmannschaft(
-            m.Name,
-            Kurzname(m.Name),
-            lagen.TryGetValue(m.Name, out Koordinate lage) ? lage : null,
-            m.Heimspieltermine.Select(t => t.Halle).FirstOrDefault(h => h.Length > 0) ?? string.Empty,
-            meldungen.Find(x => x.Mannschaft == m.Name),
-            bemerkungen.GetValueOrDefault(m.Name, string.Empty),
-            spieltage.Where(s => s.Ausrichter is not null && s.Gaeste.Contains(m.Name)).Sum(s => Entfernung(m.Name, s.Ausrichter!)),
-            pruefung.Ausgerichtet.GetValueOrDefault(m.Name))).ToList();
-        return new Kompaktauswertung(tage, mannschaften, spieltage, befunde, GroessterAbstand(spieltage, namen), MeisteAmTag(spieltage));
+    /// <summary>Wertet einen Plan des Kompaktplaners aus (Ausrichter wie geplant).</summary>
+    /// <param name="staffel">Die Staffel.</param>
+    /// <param name="daten">Arbeitskopie der Spielplandaten (Bemerkungen und Hallenadressen).</param>
+    /// <param name="planung">Eingestellte Rundenplanung.</param>
+    /// <param name="heute">Heutiges Datum.</param>
+    /// <param name="plan">Die geplanten Spieltage.</param>
+    /// <returns>Die Auswertung.</returns>
+    public static Kompaktauswertung Auswerten(Staffel staffel, Datenbearbeitung daten, Rundenplanung planung, DateOnly heute, IReadOnlyList<Planturnier> plan)
+    {
+        ArgumentNullException.ThrowIfNull(staffel);
+        ArgumentNullException.ThrowIfNull(plan);
+        List<Turnier> turniere = plan
+            .Select(p => new Turnier(p.Tag, p.Form, p.Mannschaften, Spiele(p, staffel), [p.Ausrichter]))
+            .OrderBy(t => t.Tag)
+            .ToList();
+        return AuswertenFuer(staffel, daten, planung, heute, turniere);
     }
 
     /// <summary>
@@ -167,6 +153,42 @@ public static partial class Kompaktplanung
         }
 
         return ergebnis.Distinct().Order().ToList();
+    }
+
+    private static Kompaktauswertung AuswertenFuer(Staffel staffel, Datenbearbeitung daten, Rundenplanung planung, DateOnly heute, IReadOnlyList<Turnier> turniere)
+    {
+        ArgumentNullException.ThrowIfNull(daten);
+        List<DateOnly> tage = Sonntage(staffel, turniere, Rueckrunde(staffel, planung), heute);
+        IReadOnlyDictionary<string, string> bemerkungen = daten.Bemerkungen();
+        IReadOnlyDictionary<string, Koordinate> lagen = daten.Hallenkoordinaten();
+        var befunde = new List<string>();
+        var meldungen = new List<Turniermeldung>();
+        foreach (Mannschaft m in staffel.Mannschaften)
+        {
+            string bemerkung = bemerkungen.GetValueOrDefault(m.Name, string.Empty);
+            if (Meldung(m, tage, bemerkung, befunde) is Turniermeldung meldung)
+            {
+                meldungen.Add(meldung);
+            }
+        }
+
+        List<string> namen = staffel.Mannschaften.Select(m => m.Name).ToList();
+        Turnierpruefungsergebnis pruefung = Turnierpruefung.Pruefen(turniere, namen, meldungen);
+        befunde.AddRange(pruefung.Befunde);
+        double Entfernung(string a, string b) =>
+            lagen.TryGetValue(a, out Koordinate x) && lagen.TryGetValue(b, out Koordinate y) ? 2 * x.Luftlinie(y) : 0;
+
+        List<Kompaktspieltag> spieltage = pruefung.Turniere.Select(b => Spieltag(b, Entfernung)).ToList();
+        List<Kompaktmannschaft> mannschaften = staffel.Mannschaften.Select(m => new Kompaktmannschaft(
+            m.Name,
+            Kurzname(m.Name),
+            lagen.TryGetValue(m.Name, out Koordinate lage) ? lage : null,
+            m.Heimspieltermine.Select(t => t.Halle).FirstOrDefault(h => h.Length > 0) ?? string.Empty,
+            meldungen.Find(x => x.Mannschaft == m.Name),
+            bemerkungen.GetValueOrDefault(m.Name, string.Empty),
+            spieltage.Where(s => s.Ausrichter is not null && s.Gaeste.Contains(m.Name)).Sum(s => Entfernung(m.Name, s.Ausrichter!)),
+            pruefung.Ausgerichtet.GetValueOrDefault(m.Name))).ToList();
+        return new Kompaktauswertung(tage, mannschaften, spieltage, befunde, GroessterAbstand(spieltage, namen), MeisteAmTag(spieltage));
     }
 
     /// <summary>Halbrunde: die gewählte, sonst die mit Spielen aus click-TT bzw. – ohne Spiele – die laufende oder nächste.</summary>

@@ -157,7 +157,7 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
         OeffnenCommand = new AsyncRelayCommand(OeffnenAsync, () => !ZeigtEinrichtung);
         NeuCommand = new AsyncRelayCommand(NeueDateiAsync, () => !ZeigtEinrichtung);
         SchliessenCommand = new AsyncRelayCommand(SchliessenAsync, () => IstGeoeffnet);
-        GenerierungCommand = new AsyncRelayCommand(GenerierungUmschaltenAsync, () => IstGeoeffnet);
+        GenerierungCommand = new AsyncRelayCommand(GenerierungUmschaltenAsync, () => IstGeoeffnet && !KompaktRechnet);
         KostenoptimierungCommand = new RelayCommand(() => VerfahrenWaehlen(false), () => IstGeoeffnet);
         AutomodusCommand = new RelayCommand(() => VerfahrenWaehlen(true), () => IstGeoeffnet);
         ZuletztOeffnenCommand = new AsyncRelayCommand<string>(ZuletztOeffnenAsync, _ => !ZeigtEinrichtung);
@@ -296,6 +296,7 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
     /// </summary>
     public string GenerierungText => (Laeuft, Pausiert) switch
     {
+        (false, _) when KompaktAktiv => "Kompaktspieltage planen: Varianten berechnen (etwa 10 Sekunden)",
         (false, _) => "Start",
         (true, true) => "Fortsetzen",
         _ => "Pausieren",
@@ -1122,6 +1123,7 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
         Stoppen();
         Volatile.Write(ref sitzung, null);
         laufenderStand = null;
+        KompaktZuruecksetzen();
         clickTtStand = null;
         gemerkteStaende.Clear();
         Einrichtung = null;
@@ -1192,6 +1194,7 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
         Stoppen();
         Volatile.Write(ref sitzung, neu);
         laufenderStand = null;
+        KompaktZuruecksetzen();
         clickTtStand = null;
         gemerkteStaende.Clear();
         KopfAktualisieren(neu);
@@ -1236,9 +1239,14 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
         // Als erster Punkt weitere Exporte aus click-TT (nicht im Original); schon übernommen: als erledigt markiert.
         // Erledigt erst, wenn Mannschaftsmeldung und Terminwünsche übernommen sind – auch über mehrere Sitzungen.
         static bool BeideGeladen(Datenbearbeitung d) => d.MannschaftsmeldungVermerk.Length > 0 && d.TerminwunschVermerk.Length > 0;
+
+        // Für Kompaktspieltage ist der Bericht „Terminwünsche“ Pflicht: ohne Hallenadressen keine Karte und keine Entfernungen.
+        bool kompakt = neu.IstClickTtDatei && Kompaktplanung.InFrage(neu.Staffel, neu.Optionen.Rundenplanung, false);
         var zusatzschritt = new Einrichtungsschritt(1, "Daten aus click-TT ergänzen", ZusatzdatenSeiteViewModel.Einrichtungstext, [], [])
         {
             IstVollstaendig = () => BeideGeladen(neu.DatenBearbeiten()),
+            IstPflichtErfuellt = kompakt ? () => neu.DatenBearbeiten().TerminwunschVermerk.Length > 0 : null,
+            Pflichthinweis = "Für Kompaktspieltage wird der Bericht „Terminwünsche“ (PDF) gebraucht: Hallenadressen für Karte und Entfernungen, Bemerkungen der Vereine. Bitte zuerst laden.",
         };
         if (BeideGeladen(neu.DatenBearbeiten()))
         {
@@ -1482,7 +1490,11 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
     /// <summary>Hauptknopf: startet eine neue Generierung bzw. hält die laufende an und setzt sie fort.</summary>
     private async Task GenerierungUmschaltenAsync()
     {
-        if (Laeuft)
+        if (KompaktAktiv && !Laeuft)
+        {
+            await KompaktPlanenAsync();
+        }
+        else if (Laeuft)
         {
             PauseUmschalten();
         }

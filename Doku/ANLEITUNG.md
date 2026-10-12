@@ -407,19 +407,28 @@ Die Ansicht zeigt die Spiele aus anderen Staffeln, die mit der XML-Datei eingele
 
 Manche Staffeln – etwa die Jugend-Verbandsoberliga – spielen eine Halbrunde in **Kompaktspieltagen**: Drei oder vier Mannschaften treffen sich an einem Sonntag in einer Halle. Beim **3er-Spieltag** spielt jede gegen jede (drei Spiele), beim **4er-Spieltag** spielen der Ausrichter und eine zweite Mannschaft je gegen die beiden anderen (vier Spiele in zwei Runden, zwei Spiele parallel). Bei gerader Mannschaftszahl bleiben einzelne **Einzelbegegnungen**. Jede Mannschaft soll mindestens einen Heimspieltag ausrichten.
 
-Die Ansicht **Kompaktspieltage** (links unter *Ansichten*, nur bei Halbrunden) prüft den Plan aus click-TT gegen die Meldungen der Vereine:
+Die Ansicht **Kompaktspieltage** steht links oben unter *Ansichten* – nur bei Klassen, die dafür in Frage kommen (Halbrunde mit überwiegend Spieltagen am Wochenende). Sind die Kompaktspieltage eingeschaltet, arbeitet das Hauptfenster im **Kompaktmodus**:
 
-- **Kennzahlen:** km gesamt (Luftlinie, hin und zurück), die weiteste Mannschaft, Mannschaften ohne Heimspieltag, Verstöße gegen die Meldungen, der größte Abstand im Stand (Unterschied der gespielten Spiele zwischen zwei Mannschaften im Lauf der Halbrunde) und wie viele Mannschaften am vollsten Spieltag spielen.
+- Die Ansicht *Kompaktspieltage* ist die Hauptansicht; *Kosten*, *Qualität* und *Meldungen* sowie die Wahl des Verfahrens entfallen. Terminplan, Diagramme, Terminwünsche, Nachbarmannschaften, Einstellungen, Druck und Export bleiben.
+- Die **Kacheln** oben zeigen den gezeigten Plan: Fahrten (km Luftlinie, weiteste Mannschaft), Meldungen (eingehalten oder Zahl der Verstöße), Heimspieltage je Mannschaft und Spieltage (größter Abstand im Stand, wie viele Mannschaften höchstens an einem Tag spielen, wie viele Spiele in click-TT in eine andere Halle zu verlegen sind). Ein Klick öffnet die Ansicht.
+- Der Knopf **▶** sucht etwa zehn Sekunden lang Pläne aus 3er- und 4er-Spieltagen: jede Paarung genau einmal, jede Mannschaft höchstens einmal am Tag, jede richtet mindestens einen Spieltag aus, möglichst ohne Verstöße gegen die Meldungen. Bei 9 Mannschaften (oder 10 mit je einer Einzelbegegnung) geht der Plan genau mit 4er-Spieltagen auf, jede Mannschaft richtet einen aus. Dann durchsucht der Planer zuerst **alle** solchen Pläne vollständig (bis zu zwei Minuten, auf allen Prozessorkernen bis auf einen) und findet den kürzesten; die Hinweise sagen, ob vollständig durchsucht wurde. Ein Plan mit 3er-Spieltagen erscheint nur, wenn er kürzer ist (*Kürzer mit 3er-Spieltagen*). Die Varianten nennen, wie viele 4er- und 3er-Spieltage sie haben. Bei gerader Mannschaftszahl bekommt jede Mannschaft eine Einzelbegegnung; deren Heimrecht wird so gewählt, dass die echten Heimspiele gleichmäßig verteilt sind.
+
+Die Ansicht zeigt:
+
+- **Pläne:** den Plan aus click-TT und die Varianten der letzten Berechnung – *Ausgewogen*, *Kürzeste Fahrten*, *Gleichmäßiger Stand* (die Zahl der gespielten Spiele liegt zu jedem Zeitpunkt nah beieinander) und *Gemeinsamer Spieltag* (möglichst alle Mannschaften spielen einmal am selben Tag). Ein Klick zeigt einen Plan; die gewählte Variante gilt auch für Terminplan, Diagramme, Druck und den Export für click-TT. Mit **Plan merken** heben Sie sie auf.
 - **Meldungen und Plan:** je Sonntag eine Zeile, je Mannschaft eine Spalte. Die Farbe zeigt die Meldung (Heim möglich, auswärts möglich, beides, kann nicht, keine Meldung), darauf ★ für den Ausrichter und ● für die Gäste. Rot umrandet ist, was der Meldung widerspricht.
 - **Karte:** die Hallen auf einer Karte mit den Bundesländern und einigen Städten, gezoomt auf das Gebiet der Spielorte, dazu die Fahrten. Ein Klick auf einen Sonntag, eine Mannschaft (im Raster oder in der Liste *km je Mannschaft*) oder einen Spieltag zeigt nur dessen Fahrten; ein zweiter Klick wieder alle. Über einem Spielort nennt ein Hinweis Mannschaft und Halle.
-- **Spieltage:** je Spieltag Ausrichter, Spiele und km. Beim 4er-Spieltag steht dabei, bei welchen Spielen Sie in click-TT die Halle des Ausrichters eintragen (die zweite „Heimmannschaft“ ist in Wahrheit Gast).
+- **Spieltage:** je Spieltag Ausrichter, Spiele und km. Beim 4er-Spieltag steht dabei, bei welchen Spielen Sie in click-TT die Halle des Ausrichters eintragen (die zweite „Heimmannschaft“ ist in Wahrheit Gast). Mit **Festhalten** bleibt ein Spieltag bei der nächsten Berechnung, wie er ist – auch einer aus dem Plan aus click-TT; ein zweiter Klick löst ihn.
+- **Fahrtwünsche:** zum Beispiel „Sinzig spielt dieses Jahr in der Halle von Trier“. Die Paarung findet dann in der Halle des Gastgebers statt; gilt ab der nächsten Berechnung.
 - **Hinweise:** Verstöße, Widersprüche, Mannschaften ohne Meldung oder ohne bekannte Halle und die Bemerkungen der Vereine.
 
-**Entfernungen** sind Luftlinie zwischen den Hallen, aus den Adressen des Berichts *Terminwünsche* (Postleitzahl und Ort bzw. GPS-Angabe). Ohne diesen Bericht fehlen Karte und km.
+**Entfernungen** sind Luftlinie zwischen den Hallen, aus den Adressen des Berichts *Terminwünsche* (Postleitzahl und Ort bzw. GPS-Angabe). Bei Klassen für Kompaktspieltage ist dieser Bericht deshalb Pflicht: Die Einrichtung lässt sich erst abschließen, wenn er im ersten Punkt *Daten aus click-TT ergänzen* geladen ist.
 
 **Die Meldungen** kommen aus den Terminwünschen in click-TT: Ein Sonntag mit Uhrzeit ist ein möglicher Heimspieltag (die Uhrzeit ist der früheste Beginn), ein Sonntag ohne Eintrag ein möglicher Auswärtsspieltag, `frei` heißt „kann nicht“. **Max. Heimspiele 2** bei einem Heimtermin heißt, dass in der Halle zwei Spiele parallel gehen – nur dann kann die Mannschaft einen 4er-Spieltag ausrichten. „An diesem Tag nur Heimspiel“ steht als Zeile `Nur Heim: 18.10., 01.11.` in den Bemerkungen des Vereins. Wie man das in click-TT erfasst, beschreibt [Kompaktspieltage erfassen](KOMPAKTSPIELTAGE.md).
 
-Die Vorschläge für einen eigenen Plan (kürzeste Fahrten, gleichmäßiger Stand, gemeinsamer Spieltag) folgen in einer späteren Version.
+**Uhrzeiten:** Der 4er-Spieltag beginnt um 11 Uhr, der 3er-Spieltag um 10 Uhr, jeweils später, wenn der Heimtermin des Ausrichters an diesem Sonntag eine spätere Uhrzeit hat; die Runden folgen im Abstand von drei Stunden.
+
+**Grenzen:** Bei wenigen Mannschaften (5 oder 6) gibt es zu wenige Spieltage, als dass jede Mannschaft einen ausrichten könnte; der Planer sagt das dann. Lässt sich kein Plan ohne Verstöße gegen die Meldungen finden, erlaubt er schrittweise welche und nennt sie.
 
 ## 7. Gewichtungen anpassen
 

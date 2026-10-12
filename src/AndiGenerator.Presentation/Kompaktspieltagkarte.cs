@@ -15,6 +15,8 @@ namespace AndiGenerator.Presentation;
 /// <param name="Gaeste">z. B. „Konz, Trier-Olewig, Wirges reisen an“.</param>
 /// <param name="Hinweise">Verstöße gegen die Meldungen.</param>
 /// <param name="Gewaehlt">Spieltag ist ausgewählt.</param>
+/// <param name="Festgehalten">Der Spieltag bleibt bei der nächsten Berechnung, wie er ist.</param>
+/// <param name="KannFesthalten">Form und Ausrichter sind klar, der Spieltag lässt sich festhalten.</param>
 public sealed record Kompaktspieltagkarte(
     int Nummer,
     string Datum,
@@ -25,13 +27,18 @@ public sealed record Kompaktspieltagkarte(
     string Verlegen,
     string Gaeste,
     IReadOnlyList<string> Hinweise,
-    bool Gewaehlt)
+    bool Gewaehlt,
+    bool Festgehalten,
+    bool KannFesthalten)
 {
     /// <summary>Holt einen Wert, der angibt, ob es Verstöße gibt.</summary>
     public bool HatHinweise => Hinweise.Count > 0;
 
     /// <summary>Holt einen Wert, der angibt, ob in click-TT eine Halle zu verlegen ist.</summary>
     public bool HatVerlegen => Verlegen.Length > 0;
+
+    /// <summary>Holt die Beschriftung des Knopfs „Festhalten“.</summary>
+    public string FesthaltenText => Festgehalten ? "Festgehalten ✓" : "Festhalten";
 
     /// <summary>Holt die Marke oben rechts, z. B. „4er“ oder „4er · Verstoß“.</summary>
     public string Marke => HatHinweise ? Form + " · Verstoß" : Form;

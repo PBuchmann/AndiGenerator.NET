@@ -24,9 +24,9 @@
       <Setter Property="Background" Value="{StaticResource Schwebe}" />
     </Style>
     <Style Selector="Border.zelle">
-      <Setter Property="Width" Value="40" />
-      <Setter Property="Height" Value="30" />
-      <Setter Property="Margin" Value="1.5" />
+      <Setter Property="Width" Value="30" />
+      <Setter Property="Height" Value="22" />
+      <Setter Property="Margin" Value="1" />
       <Setter Property="CornerRadius" Value="6" />
       <Setter Property="BorderThickness" Value="1" />
       <Setter Property="BorderBrush" Value="Transparent" />
@@ -45,6 +45,11 @@
       <Setter Property="Foreground" Value="{StaticResource Akzent}" />
       <Setter Property="FontWeight" Value="Bold" />
     </Style>
+    <Style Selector="Border.variante.gewaehlt">
+      <Setter Property="BorderBrush" Value="{StaticResource Akzent}" />
+      <Setter Property="BorderThickness" Value="2" />
+      <Setter Property="Background" Value="{StaticResource AkzentHell}" />
+    </Style>
     <Style Selector="Border.spieltag.gewaehlt">
       <Setter Property="BorderBrush" Value="{StaticResource Akzent}" />
       <Setter Property="BorderThickness" Value="2" />
@@ -57,8 +62,10 @@
           <TextBlock Text="{Binding Kopfzeile}" Classes="klein" />
           <TextBlock Text="Kompaktspieltage" FontSize="20" FontWeight="SemiBold" />
         </StackPanel>
-        <Button Grid.Column="1" Classes="link" Command="{Binding AusschaltenCommand}" IsVisible="{Binding Eingeschaltet}" VerticalAlignment="Bottom"
-                Content="Kompaktspieltage ausschalten" ToolTip.Tip="Normale Planung: jedes Spiel einzeln" />
+        <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="14" VerticalAlignment="Bottom" IsVisible="{Binding Eingeschaltet}">
+          <Button Classes="link" Command="{Binding AusschaltenCommand}" VerticalAlignment="Center"
+                  Content="Kompaktspieltage ausschalten" ToolTip.Tip="Normale Planung: jedes Spiel einzeln" />
+        </StackPanel>
       </Grid>
 
       <!-- Ausgeschaltet: Erklärung und Einschalten -->
@@ -70,24 +77,37 @@
       </Border>
 
       <StackPanel Spacing="16" IsVisible="{Binding Eingeschaltet}">
-        <!-- Kennzahlen -->
-        <ItemsControl ItemsSource="{Binding Kennzahlen}">
-          <ItemsControl.ItemsPanel>
-            <ItemsPanelTemplate>
-              <WrapPanel />
-            </ItemsPanelTemplate>
-          </ItemsControl.ItemsPanel>
-          <ItemsControl.ItemTemplate>
-            <DataTemplate x:DataType="p:Kachelwert">
-              <Border Classes="karte" Padding="14,10" Margin="0,0,10,10" Width="190">
-                <StackPanel Spacing="2">
-                  <TextBlock Text="{Binding Wert}" Classes="ziffer" FontSize="22" FontWeight="SemiBold" Foreground="{StaticResource Akzent}" />
-                  <TextBlock Text="{Binding Text}" FontSize="12" Foreground="{StaticResource Tinte2}" TextWrapping="Wrap" />
-                </StackPanel>
-              </Border>
-            </DataTemplate>
-          </ItemsControl.ItemTemplate>
-        </ItemsControl>
+        <!-- Pläne: Plan aus click-TT und Varianten des Planers (wie im Entwurf: eine Zeile Karten) -->
+        <StackPanel Spacing="6">
+          <Grid ColumnDefinitions="*,Auto">
+            <TextBlock Text="Pläne" FontSize="15" FontWeight="SemiBold" />
+            <TextBlock Grid.Column="1" Text="Rechnet …" Classes="klein" IsVisible="{Binding Rechnet}" VerticalAlignment="Center" />
+          </Grid>
+          <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+            <ItemsControl ItemsSource="{Binding Plaene}">
+              <ItemsControl.ItemsPanel>
+                <ItemsPanelTemplate>
+                  <StackPanel Orientation="Horizontal" Spacing="10" />
+                </ItemsPanelTemplate>
+              </ItemsControl.ItemsPanel>
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="p:Kompaktplanwahl">
+                  <Button Classes="flach" Width="240" VerticalAlignment="Stretch"
+                          Command="{Binding $parent[UserControl].((p:KompaktspieltageAnsichtViewModel)DataContext).PlanWaehlenCommand}" CommandParameter="{Binding}">
+                    <Border Classes="karte variante" Classes.gewaehlt="{Binding Gewaehlt}" Padding="12,9">
+                      <StackPanel Spacing="2">
+                        <TextBlock Text="{Binding Titel}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                        <TextBlock Text="{Binding Zeile}" Classes="klein" TextWrapping="Wrap" />
+                      </StackPanel>
+                    </Border>
+                  </Button>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </ScrollViewer>
+          <TextBlock Text="{Binding FestgehaltenText}" Classes="klein" TextWrapping="Wrap"
+                     IsVisible="{Binding FestgehaltenText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+        </StackPanel>
 
         <Grid ColumnDefinitions="Auto,18,*">
           <!-- Raster: Meldungen und Plan -->
@@ -95,7 +115,7 @@
             <StackPanel Spacing="8">
               <TextBlock Text="Meldungen und Plan" FontSize="15" FontWeight="SemiBold" />
               <TextBlock Text="Klick auf einen Sonntag oder eine Mannschaft zeigt ihre Fahrten; ein zweiter Klick wieder alle." Classes="klein" TextWrapping="Wrap" MaxWidth="460" HorizontalAlignment="Left" />
-              <StackPanel Orientation="Horizontal" Margin="58,0,0,0">
+              <StackPanel Orientation="Horizontal" Margin="50,0,0,0">
                 <ItemsControl ItemsSource="{Binding Spalten}">
                   <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
@@ -104,7 +124,7 @@
                   </ItemsControl.ItemsPanel>
                   <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="p:Kompaktspalte">
-                      <Button Classes="flach" Width="43" Height="110" ToolTip.Tip="{Binding Name}"
+                      <Button Classes="flach" Width="32" Height="84" ToolTip.Tip="{Binding Name}"
                               Command="{Binding $parent[UserControl].((p:KompaktspieltageAnsichtViewModel)DataContext).MannschaftWaehlenCommand}" CommandParameter="{Binding Name}">
                         <LayoutTransformControl VerticalAlignment="Bottom" HorizontalAlignment="Center">
                           <LayoutTransformControl.LayoutTransform>
@@ -121,9 +141,9 @@
                 <ItemsControl.ItemTemplate>
                   <DataTemplate x:DataType="p:Kompaktrasterzeile">
                     <StackPanel Orientation="Horizontal">
-                      <Button Classes="flach" Width="58" Height="33"
+                      <Button Classes="flach" Width="50" Height="24"
                               Command="{Binding $parent[UserControl].((p:KompaktspieltageAnsichtViewModel)DataContext).TagWaehlenCommand}" CommandParameter="{Binding}">
-                        <TextBlock Text="{Binding Datum}" Classes="ziffer" FontSize="12" Foreground="{StaticResource Tinte2}" Classes.gewaehlt="{Binding Gewaehlt}"
+                        <TextBlock Text="{Binding Datum}" Classes="ziffer" FontSize="11" Foreground="{StaticResource Tinte2}" Classes.gewaehlt="{Binding Gewaehlt}"
                                    HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0" />
                       </Button>
                       <ItemsControl ItemsSource="{Binding Zellen}">
@@ -137,7 +157,7 @@
                             <Border Classes="zelle" Classes.heim="{Binding IstHeim}" Classes.auswaerts="{Binding IstAuswaerts}" Classes.beides="{Binding IstBeides}"
                                     Classes.nicht="{Binding IstNicht}" Classes.unbekannt="{Binding IstUnbekannt}" Classes.verstoss="{Binding Verstoss}" Classes.gedimmt="{Binding Gedimmt}"
                                     ToolTip.Tip="{Binding Hinweis}">
-                              <TextBlock Text="{Binding Zeichen}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="13"
+                              <TextBlock Text="{Binding Zeichen}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="11.5"
                                          FontWeight="{Binding Spielt, Converter={x:Static ui:Konverter.MeldungGewicht}}" Foreground="{StaticResource Tinte}" />
                             </Border>
                           </DataTemplate>
@@ -160,7 +180,7 @@
           </Border>
 
           <!-- Karte und km je Mannschaft -->
-          <Border Grid.Column="2" Classes="karte" VerticalAlignment="Top" MinWidth="380">
+          <Border Grid.Column="2" Classes="karte" VerticalAlignment="Top" MinWidth="360" MaxWidth="560" HorizontalAlignment="Left">
             <StackPanel Spacing="10">
               <Grid ColumnDefinitions="*,Auto">
                 <TextBlock Text="{Binding Kartentitel}" FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap" />
@@ -205,7 +225,8 @@
               </ItemsControl.ItemsPanel>
               <ItemsControl.ItemTemplate>
                 <DataTemplate x:DataType="p:Kompaktspieltagkarte">
-                  <Button Classes="flach" Margin="0,0,10,10" VerticalAlignment="Stretch"
+                  <Panel Margin="0,0,10,10">
+                  <Button Classes="flach" VerticalAlignment="Stretch"
                           Command="{Binding $parent[UserControl].((p:KompaktspieltageAnsichtViewModel)DataContext).SpieltagWaehlenCommand}" CommandParameter="{Binding}">
                     <Border Classes="karte spieltag" Classes.gewaehlt="{Binding Gewaehlt}" Padding="12,10">
                       <StackPanel Spacing="4">
@@ -235,9 +256,40 @@
                           </ItemsControl.ItemTemplate>
                         </ItemsControl>
                         <TextBlock Text="{Binding Gaeste}" Classes="klein" TextWrapping="Wrap" />
+                        <Border Height="22" />
                       </StackPanel>
                     </Border>
                   </Button>
+                  <Button Classes="link" Margin="12,0,0,8" HorizontalAlignment="Left" VerticalAlignment="Bottom" IsVisible="{Binding KannFesthalten}"
+                          Content="{Binding FesthaltenText}" ToolTip.Tip="Festgehaltene Spieltage bleiben bei der nächsten Berechnung, wie sie sind; ein zweiter Klick löst sie wieder."
+                          Command="{Binding $parent[UserControl].((p:KompaktspieltageAnsichtViewModel)DataContext).FesthaltenCommand}" CommandParameter="{Binding}" />
+                  </Panel>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </Border>
+
+        <!-- Fahrtwünsche -->
+        <Border Classes="karte">
+          <StackPanel Spacing="8">
+            <TextBlock Text="Fahrtwünsche" FontSize="15" FontWeight="SemiBold" />
+            <TextBlock Text="Zum Beispiel „Sinzig spielt dieses Jahr in Trier“: Die Paarung findet in der Halle des Gastgebers statt. Gilt ab der nächsten Berechnung."
+                       Classes="klein" TextWrapping="Wrap" MaxWidth="760" HorizontalAlignment="Left" />
+            <StackPanel Orientation="Horizontal" Spacing="10">
+              <ComboBox ItemsSource="{Binding Mannschaftsnamen}" SelectedItem="{Binding WunschGast}" MinWidth="220" PlaceholderText="Gast" />
+              <TextBlock Text="spielt in der Halle von" VerticalAlignment="Center" />
+              <ComboBox ItemsSource="{Binding Mannschaftsnamen}" SelectedItem="{Binding WunschGastgeber}" MinWidth="220" PlaceholderText="Gastgeber" />
+              <Button Classes="seitenknopf" Command="{Binding WunschHinzufuegenCommand}" Content="Hinzufügen" />
+            </StackPanel>
+            <ItemsControl ItemsSource="{Binding Fahrtwuensche}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="p:Fahrtwunschzeile">
+                  <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,2">
+                    <TextBlock Text="{Binding Text}" VerticalAlignment="Center" />
+                    <Button Classes="link" Content="entfernen"
+                            Command="{Binding $parent[UserControl].((p:KompaktspieltageAnsichtViewModel)DataContext).WunschEntfernenCommand}" CommandParameter="{Binding}" />
+                  </StackPanel>
                 </DataTemplate>
               </ItemsControl.ItemTemplate>
             </ItemsControl>

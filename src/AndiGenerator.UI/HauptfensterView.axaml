@@ -239,13 +239,16 @@
               </Grid>
             </ToggleButton>
             <StackPanel Classes="sektionsinhalt" Classes.zu="{Binding !#KopfAnsichten.IsChecked}">
-              <Button Classes="nav" Classes.aktiv="{Binding AktiveAnsicht, Converter={x:Static ui:Konverter.Gleich}, ConverterParameter=Kosten}" Command="{Binding KostenansichtCommand}" ToolTip.Tip="Kosten">
+              <Button Classes="nav" Classes.aktiv="{Binding AktiveAnsicht, Converter={x:Static ui:Konverter.Gleich}, ConverterParameter=Kompakt}" Command="{Binding KompaktspieltageCommand}" IsVisible="{Binding ZeigtKompaktspieltage}" ToolTip.Tip="Kompaktspieltage: Meldungen, Plan und Karte der Spielorte">
+                <StackPanel Orientation="Horizontal" Spacing="12"><ui:Symbol Daten="{StaticResource SymbolKarte}" /><TextBlock Classes="navtext" Text="Kompaktspieltage" VerticalAlignment="Center" /></StackPanel>
+              </Button>
+              <Button Classes="nav" Classes.aktiv="{Binding AktiveAnsicht, Converter={x:Static ui:Konverter.Gleich}, ConverterParameter=Kosten}" IsVisible="{Binding ZeigtGenerierung}" Command="{Binding KostenansichtCommand}" ToolTip.Tip="Kosten">
                 <StackPanel Orientation="Horizontal" Spacing="12"><ui:Symbol Daten="{StaticResource SymbolKosten}" /><TextBlock Classes="navtext" Text="Kosten" VerticalAlignment="Center" /></StackPanel>
               </Button>
-              <Button Classes="nav" Classes.aktiv="{Binding AktiveAnsicht, Converter={x:Static ui:Konverter.Gleich}, ConverterParameter=Qualitaet}" Command="{Binding QualitaetsansichtCommand}" ToolTip.Tip="Qualität">
+              <Button Classes="nav" Classes.aktiv="{Binding AktiveAnsicht, Converter={x:Static ui:Konverter.Gleich}, ConverterParameter=Qualitaet}" IsVisible="{Binding ZeigtGenerierung}" Command="{Binding QualitaetsansichtCommand}" ToolTip.Tip="Qualität">
                 <StackPanel Orientation="Horizontal" Spacing="12"><ui:Symbol Daten="{StaticResource SymbolQualitaet}" /><TextBlock Classes="navtext" Text="Qualität" VerticalAlignment="Center" /></StackPanel>
               </Button>
-              <Button Classes="nav" Classes.aktiv="{Binding AktiveAnsicht, Converter={x:Static ui:Konverter.Gleich}, ConverterParameter=Meldungen}" Command="{Binding MeldungsansichtCommand}" ToolTip.Tip="Meldungen je Mannschaft">
+              <Button Classes="nav" Classes.aktiv="{Binding AktiveAnsicht, Converter={x:Static ui:Konverter.Gleich}, ConverterParameter=Meldungen}" IsVisible="{Binding ZeigtGenerierung}" Command="{Binding MeldungsansichtCommand}" ToolTip.Tip="Meldungen je Mannschaft">
                 <StackPanel Orientation="Horizontal" Spacing="12"><ui:Symbol Daten="{StaticResource SymbolMeldungen}" /><TextBlock Classes="navtext" Text="Meldungen" VerticalAlignment="Center" /></StackPanel>
               </Button>
               <Button Classes="nav" Classes.aktiv="{Binding AktiveAnsicht, Converter={x:Static ui:Konverter.Gleich}, ConverterParameter=Terminplan}" Command="{Binding TerminplanansichtCommand}" ToolTip.Tip="Terminplan">
@@ -259,9 +262,6 @@
               </Button>
               <Button Classes="nav" Classes.aktiv="{Binding AktiveAnsicht, Converter={x:Static ui:Konverter.Gleich}, ConverterParameter=Nachbarn}" Command="{Binding NachbarterminansichtCommand}" ToolTip.Tip="Nachbarmannschaften">
                 <StackPanel Orientation="Horizontal" Spacing="12"><ui:Symbol Daten="{StaticResource SymbolNachbarn}" /><TextBlock Classes="navtext" Text="Nachbarmannschaften" VerticalAlignment="Center" /></StackPanel>
-              </Button>
-              <Button Classes="nav" Classes.aktiv="{Binding AktiveAnsicht, Converter={x:Static ui:Konverter.Gleich}, ConverterParameter=Kompakt}" Command="{Binding KompaktspieltageCommand}" IsVisible="{Binding ZeigtKompaktspieltage}" ToolTip.Tip="Kompaktspieltage: Meldungen, Plan und Karte der Spielorte">
-                <StackPanel Orientation="Horizontal" Spacing="12"><ui:Symbol Daten="{StaticResource SymbolKarte}" /><TextBlock Classes="navtext" Text="Kompaktspieltage" VerticalAlignment="Center" /></StackPanel>
               </Button>
             </StackPanel>
             <ToggleButton x:Name="KopfAusgabe" Classes="sektion" IsChecked="True" ToolTip.Tip="Abschnitt auf- oder zuklappen">
@@ -319,7 +319,7 @@
               </Button>
             </Panel>
             <!-- Verfahren: zwei Optionsfelder nebeneinander, gestaltet wie die Umschalter der Ansichten (genau eines ist gewählt); vor dem Start wählen sie, während der Generierung wechseln sie -->
-            <StackPanel Spacing="4" Margin="0,0,12,0" VerticalAlignment="Bottom">
+            <StackPanel Spacing="4" Margin="0,0,12,0" VerticalAlignment="Bottom" IsVisible="{Binding ZeigtGenerierung}">
               <TextBlock Text="Verfahren" Classes="klein" FontSize="11" />
               <Border Background="#ECEAE4" CornerRadius="12" Padding="4" ToolTip.Tip="{Binding VerfahrenErklaerung}">
                 <StackPanel Orientation="Horizontal" Spacing="4">
@@ -352,8 +352,31 @@
         </Grid>
       </Border>
 
-      <!-- Kacheln: Stand der Generierung -->
-      <Grid Grid.Row="1" Classes="kacheln" Classes.automodus="{Binding Anzeige.ZeigtVerstoesse}" IsVisible="{Binding ZeigtArbeitsbereich}" Margin="22,10,22,0"
+      <!-- Kacheln: Stand der Generierung bzw. im Kompaktmodus der gezeigte Plan aus Kompaktspieltagen -->
+      <Panel Grid.Row="1" IsVisible="{Binding ZeigtArbeitsbereich}">
+      <ItemsControl ItemsSource="{Binding Kompaktkacheln}" IsVisible="{Binding KompaktAktiv}" Margin="22,10,22,0">
+        <ItemsControl.ItemsPanel>
+          <ItemsPanelTemplate>
+            <UniformGrid Columns="4" />
+          </ItemsPanelTemplate>
+        </ItemsControl.ItemsPanel>
+        <ItemsControl.ItemTemplate>
+          <DataTemplate x:DataType="p:Kompaktkachel">
+            <Button Classes="kartenknopf" Margin="6" Command="{Binding $parent[Window].((p:HauptfensterViewModel)DataContext).KompaktspieltageCommand}"
+                    ToolTip.Tip="Ansicht „Kompaktspieltage“ öffnen">
+              <StackPanel Spacing="2">
+                <Grid ColumnDefinitions="*,Auto">
+                  <TextBlock Text="{Binding Titel}" Classes="klein" TextTrimming="CharacterEllipsis" />
+                  <TextBlock Grid.Column="1" Text="Details ›" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource Akzent}" Margin="8,0,0,0" />
+                </Grid>
+                <TextBlock Text="{Binding Wert}" Classes="ziffer wert" Classes.gut="{Binding Gut}" Classes.schlecht="{Binding Schlecht}" />
+                <TextBlock Text="{Binding Zusatz}" Classes="klein hinweis" TextWrapping="Wrap" MaxLines="2" TextTrimming="CharacterEllipsis" />
+              </StackPanel>
+            </Button>
+          </DataTemplate>
+        </ItemsControl.ItemTemplate>
+      </ItemsControl>
+      <Grid Classes="kacheln" Classes.automodus="{Binding Anzeige.ZeigtVerstoesse}" IsVisible="{Binding ZeigtGenerierung}" Margin="22,10,22,0"
             ColumnDefinitions="*,*,*,*" RowDefinitions="Auto,Auto">
         <Button Classes="kartenknopf ergebnis" Margin="6" Command="{Binding ErgebnisCommand}" ToolTip.Tip="{Binding ErgebnisHinweis}">
           <StackPanel Spacing="2">
@@ -447,6 +470,7 @@
           </Grid>
         </Button>
       </Grid>
+      </Panel>
 
       <!-- Ansichten -->
       <dock:DockControl x:Name="Ansichten" Grid.Row="2" Layout="{Binding Layout}" Margin="22,2,22,10" IsVisible="{Binding ZeigtArbeitsbereich}" />

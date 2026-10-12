@@ -6,6 +6,7 @@ using System.Reflection;
 using AndiGenerator.Application;
 using AndiGenerator.Domain.Geo;
 using AndiGenerator.Domain.Optionen;
+using AndiGenerator.Domain.Stammdaten;
 using AndiGenerator.Engine.Turniere;
 using AndiGenerator.Persistence.Geo;
 
@@ -90,6 +91,45 @@ public sealed class KompaktspieltageTests : IDisposable
     }
 
     [Fact]
+    public void Festgehaltenes_und_Fahrtwuensche_werden_mit_der_Staffel_gespeichert()
+    {
+        Plansitzung sitzung = Oeffnen(Testdaten.Datei("4__Kreisklasse_Gruppe_A (2).xml"));
+        List<string> namen = sitzung.Staffel.Mannschaften.Select(m => m.Name).Take(4).ToList();
+        var vierer = new Planturnier(new DateOnly(2026, 9, 6), Turnierform.Vierer, namen);
+        var einzel = new Planturnier(new DateOnly(2026, 9, 13), Turnierform.Einzel, [namen[1], namen[0]]);
+        Datenbearbeitung daten = sitzung.DatenBearbeiten();
+
+        daten.FestgehaltenSetzen([vierer, einzel]);
+        daten.FahrtwuenscheSetzen([new Fahrtwunsch(namen[0], namen[2])]);
+        sitzung.DatenUebernehmen(daten);
+
+        Datenbearbeitung neu = Plansitzung.Oeffnen(sitzung.Pfad, Path.Combine(ordner, "basis")).DatenBearbeiten();
+        IReadOnlyList<Planturnier> fest = neu.Festgehalten();
+        Assert.Equal(2, fest.Count);
+        Assert.Equal(vierer.Tag, fest[0].Tag);
+        Assert.Equal(Turnierform.Vierer, fest[0].Form);
+        Assert.Equal(namen, fest[0].Mannschaften);
+        Assert.Equal(Turnierform.Einzel, fest[1].Form);
+        Assert.Equal(new[] { new Fahrtwunsch(namen[0], namen[2]) }, neu.Fahrtwuensche());
+    }
+
+    [Fact]
+    public void Spiele_eines_geplanten_Vierers_mit_Uhrzeit_und_Runden()
+    {
+        Plansitzung sitzung = Oeffnen(Testdaten.Datei("4__Kreisklasse_Gruppe_A (2).xml"));
+        List<string> namen = sitzung.Staffel.Mannschaften.Select(m => m.Name).Take(4).ToList();
+        var vierer = new Planturnier(new DateOnly(2030, 9, 1), Turnierform.Vierer, namen);
+
+        IReadOnlyList<Spiel> spiele = Kompaktplanung.Spiele(vierer, sitzung.Staffel);
+
+        Assert.Equal(4, spiele.Count);
+        Assert.Equal(new DateOnly(2030, 9, 1).ToDateTime(new TimeOnly(11, 0)), spiele[0].Zeitpunkt);
+        Assert.Equal(new DateOnly(2030, 9, 1).ToDateTime(new TimeOnly(14, 0)), spiele[3].Zeitpunkt);
+        Assert.Equal((namen[0], namen[2]), (spiele[0].Heim, spiele[0].Gast));
+        Assert.Equal((namen[1], namen[3]), (spiele[1].Heim, spiele[1].Gast));
+    }
+
+    [Fact]
     public void Plan_der_Jugend_Verbandsoberliga_wird_als_Kompaktspieltage_erkannt()
     {
         string quelle = Path.Combine(Privat, "jugend", "Jugend_19_Verbandsoberliga_HR.xml");
@@ -121,6 +161,13 @@ public sealed class KompaktspieltageTests : IDisposable
         sitzung.StandardoptionenFuerDieseSitzung();
 
         Assert.Equal(Rundenplanung.NurVorrunde, sitzung.Optionen.Rundenplanung);
+
+        Kompaktaufgabe aufgabe = Kompaktplanung.Aufgabe(sitzung.Staffel, sitzung.DatenBearbeiten(), sitzung.Optionen.Rundenplanung, new DateOnly(2026, 7, 1));
+        Kompaktergebnis ergebnis = Kompaktplaner.Planen(aufgabe, new Kompaktplanoptionen(TimeSpan.FromSeconds(3), 2, 1, null, TimeSpan.FromSeconds(20)), CancellationToken.None, null);
+        Kompaktvariante variante = Assert.IsType<Kompaktvariante>(ergebnis.Varianten.FirstOrDefault());
+        Kompaktauswertung plan = Kompaktplanung.Auswerten(sitzung.Staffel, sitzung.DatenBearbeiten(), sitzung.Optionen.Rundenplanung, new DateOnly(2026, 7, 1), variante.Turniere);
+        Assert.Equal(36, plan.Spieltage.Sum(s => s.Spiele.Count));
+        Assert.True(plan.KmGesamt <= a.KmGesamt);
     }
 
     private Plansitzung Oeffnen(string quelle)

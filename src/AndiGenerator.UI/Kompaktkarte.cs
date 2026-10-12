@@ -112,8 +112,16 @@ public sealed class Kompaktkarte : Control
     protected override Size MeasureOverride(Size availableSize)
     {
         Kartenbild bild = Bild ?? Kartenbild.Leer;
+        const double MaxHoehe = 480;
         double breite = double.IsInfinity(availableSize.Width) ? bild.Breite : availableSize.Width;
-        return new Size(breite, breite * bild.Hoehe / bild.Breite);
+        if (bild.Breite <= 0 || bild.Hoehe <= 0)
+        {
+            return new Size(breite, 0);
+        }
+
+        // Höchstens so hoch, dass Raster und Karte nebeneinander überschaubar bleiben (Peter, 13.10.2026).
+        double hoehe = Math.Min(breite * bild.Hoehe / bild.Breite, Math.Min(availableSize.Height, MaxHoehe));
+        return new Size(hoehe * bild.Breite / bild.Hoehe, hoehe);
     }
 
     /// <inheritdoc/>

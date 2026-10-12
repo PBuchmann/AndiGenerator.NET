@@ -2,6 +2,9 @@
 // SPDX-FileCopyrightText: 2026 Peter Buchmann
 // SPDX-License-Identifier: GPL-3.0-only
 
+using System.Globalization;
+using AndiGenerator.Engine.Turniere;
+
 namespace AndiGenerator.Application;
 
 /// <summary>Auswertung eines Plans mit Kompaktspieltagen gegen die Meldungen (nicht im Original).</summary>
@@ -27,4 +30,30 @@ public sealed record Kompaktauswertung(
 
     /// <summary>Holt die Zahl der Mannschaften ohne Heimspieltag.</summary>
     public int OhneHeimspieltag => Mannschaften.Count(m => m.Ausgerichtet == 0);
+
+    /// <summary>Holt die Formen der Spieltage, z. B. „9× 4er“ oder „6× 4er · 2× 3er · 4× Einzel“.</summary>
+    public string Formen
+    {
+        get
+        {
+            var teile = new List<string>();
+            int vierer = Spieltage.Count(s => s.Form == Turnierform.Vierer);
+            int dreier = Spieltage.Count(s => s.Form == Turnierform.Dreier);
+            int einzel = Spieltage.Count(s => s.Form == Turnierform.Einzel);
+            int sonstige = Spieltage.Count - vierer - dreier - einzel;
+            Hinzufuegen(teile, vierer, "4er");
+            Hinzufuegen(teile, dreier, "3er");
+            Hinzufuegen(teile, einzel, "Einzel");
+            Hinzufuegen(teile, sonstige, "unbekannt");
+            return teile.Count == 0 ? "keine Spieltage" : string.Join(" · ", teile);
+        }
+    }
+
+    private static void Hinzufuegen(List<string> teile, int anzahl, string form)
+    {
+        if (anzahl > 0)
+        {
+            teile.Add(string.Create(CultureInfo.InvariantCulture, $"{anzahl}× {form}"));
+        }
+    }
 }
