@@ -2,6 +2,17 @@
 
 Was sich von Version zu Version für Anwender ändert. Die Einzelheiten stehen in der [Anleitung](Doku/ANLEITUNG.md), die technische Geschichte im [Migrationsplan](Doku/MIGRATIONSPLAN.md).
 
+## Unveröffentlicht
+
+### Neu
+
+- **Setzliste mit TTR-Werten:** Die Schnitte aus der Mannschaftsmeldung werden mit der Staffel gespeichert und in der Setzliste neben jeder Mannschaft gezeigt; **Nach TTR ordnen** stellt die Reihenfolge danach auf.
+
+### Geändert
+
+- Der Knopf **Fortsetzen** in der Pause hat ein eigenes Symbol (Strich und Play) und unterscheidet sich so von **Start**.
+- **Leitstand:** Die Säulen der Rechenkerne füllen die ganze Höhe; die helle Spur zeigt 100 % (so schnell wie der schnellste Kern). Bisher sah jeder Kern nur halb ausgelastet aus.
+
 ## 0.9.7 (12.10.2026)
 
 ### Neu

@@ -325,13 +325,14 @@
                 </StackPanel>
               </Border>
             </StackPanel>
-            <!-- Hauptknopf: Play vor dem Start und in der Pause, Pause während der Generierung; rechts daneben vor dem Start
+            <!-- Hauptknopf: Play vor dem Start, Pause während der Generierung, in der Pause „Fortsetzen“ (Strich und Play); rechts daneben vor dem Start
                  „Staffel schließen“ (✕), während der Generierung „Stopp“ (■) -->
             <Button Classes="gross primaer" Command="{Binding GenerierungCommand}" Width="56" Padding="0" HorizontalContentAlignment="Center" VerticalAlignment="Bottom"
                     ToolTip.Tip="{Binding GenerierungText}">
               <Panel>
                 <ui:Symbol Daten="{StaticResource SymbolStart}" Gefuellt="True" Groesse="22" IsVisible="{Binding ZeigtStart}" />
                 <ui:Symbol Daten="{StaticResource SymbolPause}" Gefuellt="True" Groesse="22" IsVisible="{Binding ZeigtPause}" />
+                <ui:Symbol Daten="{StaticResource SymbolFortsetzen}" Gefuellt="True" Groesse="22" IsVisible="{Binding ZeigtFortsetzen}" />
               </Panel>
             </Button>
             <Panel VerticalAlignment="Bottom" Margin="8,0,0,0">

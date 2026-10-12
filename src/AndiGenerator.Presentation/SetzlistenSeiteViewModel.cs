@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 using System.Collections.ObjectModel;
+using System.Globalization;
 using AndiGenerator.Application;
 using CommunityToolkit.Mvvm.Input;
 
@@ -14,6 +15,9 @@ namespace AndiGenerator.Presentation;
 /// </summary>
 public sealed class SetzlistenSeiteViewModel : DatenSeiteViewModel
 {
+    private static readonly CultureInfo Deutsch = CultureInfo.GetCultureInfo("de-DE");
+
+    private IReadOnlyDictionary<string, Mannschaftsstaerke> staerken = new Dictionary<string, Mannschaftsstaerke>();
     private bool aktiv;
     private int auswahl = -1;
     private int gezogen = -1;
@@ -27,6 +31,7 @@ public sealed class SetzlistenSeiteViewModel : DatenSeiteViewModel
     {
         HochCommand = new RelayCommand(() => Verschieben(-1), () => Auswahl > 0);
         RunterCommand = new RelayCommand(() => Verschieben(1), () => Auswahl >= 0 && Auswahl < Reihenfolge.Count - 1);
+        NachStaerkeCommand = new RelayCommand(NachStaerkeOrdnen, () => HatStaerken);
         Reihenfolge.CollectionChanged += (_, _) => ZeilenAufbauen();
         Laden();
     }
@@ -90,6 +95,28 @@ public sealed class SetzlistenSeiteViewModel : DatenSeiteViewModel
     /// <summary>Holt den Befehl „Nach unten“.</summary>
     public IRelayCommand RunterCommand { get; }
 
+    /// <summary>Holt den Befehl „Nach TTR ordnen“: stärkste Mannschaft zuerst, Mannschaften ohne Wert am Ende.</summary>
+    public IRelayCommand NachStaerkeCommand { get; }
+
+    /// <summary>Holt einen Wert, der angibt, ob TTR-Werte aus einer Mannschaftsmeldung gespeichert sind.</summary>
+    public bool HatStaerken => staerken.Count > 0;
+
+    /// <summary>Holt die Erklärung der TTR-Werte mit Herkunft oder einen leeren Text.</summary>
+    public string StaerkenHinweis
+    {
+        get
+        {
+            if (!HatStaerken)
+            {
+                return string.Empty;
+            }
+
+            string vermerk = Bearbeitung.MannschaftsmeldungVermerk;
+            string herkunft = vermerk.Length > 0 ? " (" + vermerk + ")" : string.Empty;
+            return "Ø = Schnitt der TTR-Werte der Stammspieler aus der Mannschaftsmeldung" + herkunft + ".";
+        }
+    }
+
     /// <inheritdoc/>
     public override string Marke => Aktiv ? "an" : "aus";
 
@@ -100,6 +127,10 @@ public sealed class SetzlistenSeiteViewModel : DatenSeiteViewModel
     public override void Laden()
     {
         Setzlistendaten daten = Bearbeitung.Setzliste();
+        staerken = Bearbeitung.Mannschaftsstaerken();
+        OnPropertyChanged(nameof(HatStaerken));
+        OnPropertyChanged(nameof(StaerkenHinweis));
+        NachStaerkeCommand.NotifyCanExecuteChanged();
         aktiv = daten.Aktiv;
         OnPropertyChanged(nameof(Aktiv));
         Reihenfolge.Clear();
@@ -215,6 +246,31 @@ public sealed class SetzlistenSeiteViewModel : DatenSeiteViewModel
         Auswahl = nach;
     }
 
+    /// <summary>Ordnet nach dem TTR-Schnitt, die stärkste Mannschaft zuerst; ohne Wert bleibt die bisherige Folge am Ende.</summary>
+    private void NachStaerkeOrdnen()
+    {
+        List<string> neu =
+        [
+            .. Reihenfolge.Where(staerken.ContainsKey).OrderByDescending(n => staerken[n].Schnitt),
+            .. Reihenfolge.Where(n => !staerken.ContainsKey(n)),
+        ];
+        for (int ziel = 0; ziel < neu.Count; ziel++)
+        {
+            int von = Reihenfolge.IndexOf(neu[ziel]);
+            if (von != ziel)
+            {
+                Reihenfolge.Move(von, ziel);
+            }
+        }
+
+        Auswahl = Reihenfolge.Count > 0 ? 0 : -1;
+        AenderungMelden();
+    }
+
+    /// <summary>Stärke einer Mannschaft als Text, z. B. „Ø 1.623“ (TTR-Schnitt der Stammspieler), sonst leer.</summary>
+    private string StaerkeText(string name) =>
+        staerken.TryGetValue(name, out Mannschaftsstaerke? s) ? "Ø " + s.Schnitt.ToString("N0", Deutsch) : string.Empty;
+
     /// <summary>Baut die angezeigten Zeilen auf; beim Ziehen in der Reihenfolge nach dem Ablegen, mit Lücke.</summary>
     private void ZeilenAufbauen()
     {
@@ -231,9 +287,9 @@ public sealed class SetzlistenSeiteViewModel : DatenSeiteViewModel
         for (int i = 0; i < namen.Count; i++)
         {
             bool luecke = gezogenerName is not null && i == ablage;
-            Zeilen.Add(new Setzlistenzeile(i + 1, namen[i], luecke, gezogenerName is null && i == Auswahl));
+            Zeilen.Add(new Setzlistenzeile(i + 1, namen[i], luecke, gezogenerName is null && i == Auswahl) { Staerke = StaerkeText(namen[i]) });
         }
 
-        Schwebend = gezogenerName is null ? null : new Setzlistenzeile(ablage + 1, gezogenerName, false, false);
+        Schwebend = gezogenerName is null ? null : new Setzlistenzeile(ablage + 1, gezogenerName, false, false) { Staerke = StaerkeText(gezogenerName) };
     }
 }

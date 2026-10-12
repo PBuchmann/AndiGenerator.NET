@@ -16,9 +16,6 @@ public sealed class Kernanzeige : ObservableObject
     /// <summary>Zusätzliche Höhe bei voller Last in der Kachel (Pixel).</summary>
     private const double Vollast = 19;
 
-    /// <summary>Faktor für die große Darstellung in der Ansicht „Maschinenraum“.</summary>
-    private const double Gross = 6;
-
     private static readonly CultureInfo Deutsch = CultureInfo.GetCultureInfo("de-DE");
 
     private double hoehe = Ruhe;
@@ -52,17 +49,8 @@ public sealed class Kernanzeige : ObservableObject
     public double Hoehe
     {
         get => hoehe;
-        private set
-        {
-            if (SetProperty(ref hoehe, value))
-            {
-                OnPropertyChanged(nameof(HoeheGross));
-            }
-        }
+        private set => SetProperty(ref hoehe, value);
     }
-
-    /// <summary>Holt die Höhe des Balkens in der Ansicht „Maschinenraum“.</summary>
-    public double HoeheGross => Hoehe * Gross;
 
     /// <summary>Holt den Hinweis: Kern und Pläne je Sekunde.</summary>
     public string Tempo

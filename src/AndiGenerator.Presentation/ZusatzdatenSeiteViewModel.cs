@@ -274,6 +274,7 @@ public sealed class ZusatzdatenSeiteViewModel : DatenSeiteViewModel
         }
 
         Bearbeitung.MannschaftsmeldungVermerken(datei);
+        Bearbeitung.MannschaftsstaerkenSpeichern(vorschlag.Reihenfolge);
         if (AlsSetzliste)
         {
             Bearbeitung.SetzlisteSpeichern(new Setzlistendaten(true, vorschlag.Reihenfolge.Select(m => m.Mannschaft).ToList()));

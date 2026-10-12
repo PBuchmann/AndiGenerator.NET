@@ -712,7 +712,8 @@ public sealed class HauptfensterTests : IDisposable
         hf.PauseCommand.Execute(null);
         Assert.True(hf.Pausiert);
         Assert.Equal("Fortsetzen", hf.GenerierungText);
-        Assert.True(hf.ZeigtStart);
+        Assert.True(hf.ZeigtFortsetzen);
+        Assert.False(hf.ZeigtStart);
         hf.PauseCommand.Execute(null);
         Assert.False(hf.Pausiert);
         Assert.Equal("Pausieren", hf.GenerierungText);

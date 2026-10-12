@@ -4,6 +4,7 @@
 
 using System.Globalization;
 using AndiGenerator.Persistence.Aufstellungen;
+using AndiGenerator.Persistence.Gemeinsam;
 using AndiGenerator.Persistence.Plandaten;
 
 namespace AndiGenerator.Application;
@@ -13,6 +14,12 @@ public sealed partial class Datenbearbeitung
 {
     /// <summary>Attribut am Knoten <c>plan</c>: wann welche Mannschaftsmeldung übernommen wurde (nicht im Original).</summary>
     private const string MannschaftsmeldungAttribut = "mannschaftsmeldung";
+
+    /// <summary>Attribut am Knoten <c>team</c>: Schnitt der TTR-Werte der gewerteten Stammspieler (nicht im Original).</summary>
+    private const string TtrAttribut = "ttrschnitt";
+
+    /// <summary>Attribut am Knoten <c>team</c>: Zahl der Stammspieler laut Mannschaftsmeldung (nicht im Original).</summary>
+    private const string StammspielerAttribut = "stammspieler";
 
     /// <summary>Holt den Vermerk, welche Mannschaftsmeldung wann übernommen wurde, oder einen leeren Text.</summary>
     public string MannschaftsmeldungVermerk => Arbeitsstand.Lesen(MannschaftsmeldungAttribut);
@@ -85,6 +92,44 @@ public sealed partial class Datenbearbeitung
             .ToList();
         List<Mannschaftsstaerke> reihenfolge = [.. staerken.Where(s => s.HatAufstellung).OrderByDescending(s => s.Schnitt), .. staerken.Where(s => !s.HatAufstellung)];
         return new Setzlistenvorschlag(reihenfolge, gewertet);
+    }
+
+    /// <summary>
+    /// Speichert die Stärke jeder Mannschaft aus der Mannschaftsmeldung (TTR-Schnitt und Stammspieler) an der Mannschaft;
+    /// Mannschaften ohne Aufstellung verlieren einen früheren Wert.
+    /// </summary>
+    /// <param name="staerken">Die Stärken aus dem Vorschlag.</param>
+    public void MannschaftsstaerkenSpeichern(IEnumerable<Mannschaftsstaerke> staerken)
+    {
+        ArgumentNullException.ThrowIfNull(staerken);
+        var nachName = staerken.ToDictionary(s => s.Mannschaft, StringComparer.Ordinal);
+        foreach (DatenKnoten team in Teams(Arbeitsstand))
+        {
+            if (!nachName.TryGetValue(team.Lesen("teamname"), out Mannschaftsstaerke? s) || (!s.HatAufstellung && !team.Hat(TtrAttribut)))
+            {
+                continue;
+            }
+
+            team.Setzen(TtrAttribut, s.HatAufstellung ? Math.Round(s.Schnitt).ToString("0", CultureInfo.InvariantCulture) : string.Empty);
+            team.Setzen(StammspielerAttribut, s.HatAufstellung ? s.Stammspieler.ToString(CultureInfo.InvariantCulture) : string.Empty);
+        }
+    }
+
+    /// <summary>Liest die gespeicherten Stärken (TTR-Schnitt aus der Mannschaftsmeldung) je Mannschaft.</summary>
+    /// <returns>Mannschaftsname → Stärke; Mannschaften ohne gespeicherten Wert fehlen.</returns>
+    public IReadOnlyDictionary<string, Mannschaftsstaerke> Mannschaftsstaerken()
+    {
+        var ergebnis = new Dictionary<string, Mannschaftsstaerke>(StringComparer.Ordinal);
+        foreach (DatenKnoten team in Teams(Arbeitsstand))
+        {
+            if (double.TryParse(team.Lesen(TtrAttribut), NumberStyles.Float, CultureInfo.InvariantCulture, out double schnitt) && schnitt > 0)
+            {
+                string name = team.Lesen("teamname");
+                ergebnis[name] = new Mannschaftsstaerke(name, schnitt, Math.Max(1, DelphiKompatibel.ZahlLesen(team.Lesen(StammspielerAttribut), 1)));
+            }
+        }
+
+        return ergebnis;
     }
 
     /// <summary>Schreibt die Setzliste wie das Original (<c>FormToData</c>): der Knoten wird neu aufgebaut.</summary>

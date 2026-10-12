@@ -51,12 +51,13 @@
     <!-- Eine Zeile: Griff, Platz, Mannschaft; auch für die Zeile, die beim Ziehen am Mauszeiger hängt -->
     <DataTemplate x:Key="Setzvorlage" x:DataType="p:Setzlistenzeile">
       <Border Classes="setzzeile" Classes.gezogen="{Binding IstGezogen}" Classes.gewaehlt="{Binding IstGewaehlt}" MinHeight="38" Padding="4,0">
-        <Grid ColumnDefinitions="30,44,*">
+        <Grid ColumnDefinitions="30,44,*,Auto">
           <Border Classes="griff" ToolTip.Tip="Ziehen: an die gewünschte Stelle legen – der Platz ergibt sich aus der Stelle">
             <TextBlock Text="⋮⋮" FontSize="16" FontWeight="Bold" Foreground="{StaticResource Tinte2}" HorizontalAlignment="Center" VerticalAlignment="Center" />
           </Border>
           <TextBlock Grid.Column="1" Text="{Binding PlatzText}" Classes="ziffer" FontWeight="SemiBold" Foreground="{StaticResource Tinte2}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,12,0" />
           <TextBlock Grid.Column="2" Text="{Binding Name}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+          <TextBlock Grid.Column="3" Text="{Binding Staerke}" Classes="ziffer" Foreground="{StaticResource Tinte2}" VerticalAlignment="Center" Margin="12,0,10,0" ToolTip.Tip="Schnitt der TTR-Werte der Stammspieler aus der Mannschaftsmeldung" />
         </Grid>
       </Border>
     </DataTemplate>
@@ -66,6 +67,7 @@
     <CheckBox DockPanel.Dock="Top" Content="Setzliste aktivieren" IsChecked="{Binding Aktiv}" Margin="0,12" />
     <TextBlock DockPanel.Dock="Top" Classes="abschnitt" Text="Erwartete Reihenfolge" />
     <TextBlock DockPanel.Dock="Top" Classes="leer" Text="Mannschaft am Griff ⋮⋮ an ihren erwarteten Platz ziehen (Escape bricht ab) oder wählen und die Knöpfe nutzen" TextWrapping="Wrap" MaxWidth="700" HorizontalAlignment="Left" Margin="0,0,0,8" />
+    <TextBlock DockPanel.Dock="Top" Classes="leer" Text="{Binding StaerkenHinweis}" IsVisible="{Binding HatStaerken}" TextWrapping="Wrap" MaxWidth="700" HorizontalAlignment="Left" Margin="0,0,0,8" />
     <DockPanel HorizontalAlignment="Left" VerticalAlignment="Top">
       <StackPanel DockPanel.Dock="Right" Classes="seitenknoepfe" IsEnabled="{Binding Aktiv}">
         <Button Classes="seitenknopf" Command="{Binding HochCommand}">
@@ -80,9 +82,15 @@
             <TextBlock Text="Nach unten" VerticalAlignment="Center" />
           </StackPanel>
         </Button>
+        <Button Classes="seitenknopf" Command="{Binding NachStaerkeCommand}" IsVisible="{Binding HatStaerken}" ToolTip.Tip="Stärkste Mannschaft (höchster TTR-Schnitt) zuerst">
+          <StackPanel Orientation="Horizontal" Spacing="8">
+            <ui:Symbol Daten="{StaticResource SymbolDiagramme}" Groesse="18" />
+            <TextBlock Text="Nach TTR ordnen" VerticalAlignment="Center" />
+          </StackPanel>
+        </Button>
       </StackPanel>
       <!-- Solange die Setzliste aus ist, bleibt die Reihenfolge ausgegraut (sie wird aber aufbewahrt) -->
-      <Panel Width="500" VerticalAlignment="Top">
+      <Panel Width="560" VerticalAlignment="Top">
         <Border Classes="karte" Padding="6" IsEnabled="{Binding Aktiv}" Classes.ruht="{Binding !Aktiv}">
           <ItemsControl x:Name="Liste" ItemsSource="{Binding Zeilen}" Background="Transparent" ItemTemplate="{StaticResource Setzvorlage}"
                         PointerPressed="ListeGedrueckt" PointerMoved="ListeBewegt" PointerReleased="ListeLosgelassen" PointerCaptureLost="ListeVerloren" />

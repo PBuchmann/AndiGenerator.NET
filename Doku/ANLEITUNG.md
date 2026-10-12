@@ -167,7 +167,7 @@ Oben rechts wählen Sie zuerst unter **Verfahren** eines der beiden Verfahren (z
 
 Beim Start des Automodus (und beim Wechsel zu ihm) springt das Programm in die Ansicht **Qualität**, beim Start der Kostenoptimierung (und beim Wechsel zu ihr) in die Ansicht **Kosten**; fehlt die Ansicht, wird sie geöffnet.
 
-Vor dem Start wählt *Verfahren* nur, gestartet wird erst mit **▶**. Die Knöpfe zeigen nur Symbole (der Tooltip nennt sie): Vor dem Start stehen **▶ Start** und rechts daneben **✕ Staffel schließen**; während der Generierung wird ▶ zu **⏸ Pausieren** (in der Pause wieder ▶ *Fortsetzen*) und ✕ zu **■ Stopp**. Auch während der Generierung – laufend oder pausiert – wechselt ein Klick unter *Verfahren* zum anderen Verfahren; die Suche setzt beim bisher besten Plan fort.
+Vor dem Start wählt *Verfahren* nur, gestartet wird erst mit **▶**. Die Knöpfe zeigen nur Symbole (der Tooltip nennt sie): Vor dem Start stehen **▶ Start** und rechts daneben **✕ Staffel schließen**; während der Generierung wird ▶ zu **⏸ Pausieren** (in der Pause **▮▶ Fortsetzen** – ein Strich wie bei Pause und das Play-Dreieck, damit man es vom Start unterscheidet) und ✕ zu **■ Stopp**. Auch während der Generierung – laufend oder pausiert – wechselt ein Klick unter *Verfahren* zum anderen Verfahren; die Suche setzt beim bisher besten Plan fort.
 
 Das Programm rechnet mit allen Prozessorkernen bis auf einen, damit der Rechner bedienbar bleibt, und zeigt laufend den besten bisher gefundenen Plan.
 
@@ -223,7 +223,7 @@ Der Leitstand zeigt, was beim Rechnen geschieht. Sie öffnen ihn mit **Details �
 
 Von oben nach unten:
 
-- **Rechenkerne** (oben links): je Kern ein Balken mit seiner Last. Bei sehr vielen Kernen ist es ein Raster aus Kästchen – je kräftiger, desto mehr Last.
+- **Rechenkerne** (oben links): je Kern eine Säule mit seiner Last im Verhältnis zum schnellsten Kern; die volle Höhe der hellen Spur entspricht 100 %. Bei sehr vielen Kernen ist es ein Raster aus Kästchen – je kräftiger, desto mehr Last.
 - **Schaubild der Maschine** (oben rechts): *Inseln → Koordinator → Bester Plan*. Gerechnet wird in den Inseln, jeweils an vielen **Suchplätzen**, die bei jedem Schritt einen Teil der Spiele neu verteilen; die Rechenkerne rechnen reihum an allen. Der Koordinator übernimmt den besten Plan aller Inseln. Wird dieser besser, wandert ein **grüner Punkt** von der Insel, die ihn gefunden hat, über den Koordinator zu *Bester Plan*, und der leuchtet kurz auf.
 - **Kasten unter dem besten Plan:** Bei jedem grünen Punkt erscheint bzw. aktualisiert sich ein Kasten mit der Nummer der Verbesserung – dieselbe Zahl wie in der Kachel *Verbesserungen*, z. B. „Verbesserung 57“ – und dem, was sich geändert hat. Oft wird ein Kriterium besser und ein anderes dafür etwas schlechter. Bei der Kostenoptimierung stehen dort die Kriterien mit den größten Kostendifferenzen (grün mit „−“ besser, rot mit „+“ schlechter), im Automodus die Änderungen der Verstöße, wichtigste Stufe zuerst (z. B. „A · Hallenbelegung 2 → 1“). Ändert sich kein Kriterium sichtbar, steht dort *Feinschliff*. 10 Sekunden nach der letzten Verbesserung verschwindet der Kasten.
 - **Inseln:** Jede Insel sucht für sich und hat ihren eigenen besten Plan. Ihre Karte zeigt den Wert dieses Plans (Kosten, im Automodus die Verstöße A · B · C), was sie gerade tut (Tabelle unten) und einen Balken: Er zeigt, wie lange sie schon nichts Besseres gefunden hat, gemessen an der Neustart-Grenze (100 T Pläne). Darunter stehen die drei größten Kostenverursacher ihres Plans mit ihrem Anteil an den Kosten, im Automodus die Kriterien mit den meisten Verstößen (wichtigste Stufe zuerst). Die Insel mit dem besten Plan ist grün umrandet.
@@ -257,7 +257,7 @@ Am Verlauf sehen Sie, ob sich weiteres Rechnen noch lohnt: Wird die Kurve flach,
 |---|---|
 | **▶ Start** | Beginnt die Suche mit dem Ausgangsplan aus **Start mit** und dem gewählten Verfahren. |
 | **Verfahren** | Wählt das Verfahren für den nächsten Start; während der Generierung wechselt ein Klick zum anderen Verfahren, ab dem bisher besten Plan. |
-| **⏸ Pausieren** / **▶ Fortsetzen** (statt ▶ Start während der Generierung) | Hält die Suche an. Der beste Plan bleibt erhalten; so können Sie ihn in Ruhe ansehen oder exportieren. |
+| **⏸ Pausieren** / **▮▶ Fortsetzen** (statt ▶ Start während der Generierung) | Hält die Suche an. Der beste Plan bleibt erhalten; so können Sie ihn in Ruhe ansehen oder exportieren. |
 | **Fortsetzen** | Setzt eine pausierte Suche mit ihrem besten Plan fort. |
 | **■ Stopp** (statt ✕ während der Generierung) | Beendet die Generierung. Ihr bester Plan bleibt erhalten (*bester Plan der letzten Generierung*); danach kann mit einem anderen Ausgangsplan neu gestartet werden. |
 | **✕ Staffel schließen** (neben ▶ Start, solange keine Generierung läuft) | Schließt die Staffel (eine laufende Generierung wird beendet) und führt zur Startseite. |
@@ -489,6 +489,8 @@ Mannschaften anlegen, bearbeiten und löschen. Über die **Vereins-ID** erkennt 
 Mit der Setzliste geben Sie die erwartete Abschlusstabelle vor. Ziel ist, dass die Spiele, in denen es um Auf- und Abstieg geht, am Ende der Saison stattfinden – und nicht Mannschaften beteiligt sind, für die es um nichts mehr geht. So bleibt die Spannung bis zum Schluss.
 
 Ordnen Sie die Mannschaften per Ziehen am Griff **⋮⋮** – wie in der Qualitätsansicht hängt die Zeile am Mauszeiger, und die Liste zeigt schon die neuen Plätze mit einer Lücke an der Ablagestelle (Escape bricht ab) – oder wählen Sie eine Zeile und nutzen **Nach oben** / **Nach unten**. Mit **Setzliste aktivieren** schalten Sie sie ein oder aus; ausgeschaltet ist die Liste ausgegraut, die Reihenfolge bleibt aber erhalten.
+
+Ist eine **Mannschaftsmeldung** übernommen (Einrichtung, *Daten aus click-TT ergänzen*), steht neben jeder Mannschaft ihr TTR-Schnitt (**Ø**, Schnitt der besten Stammspieler). Die Werte werden mit der Staffel gespeichert – auch wenn Sie den Vorschlag nicht als Setzliste übernommen haben. **Nach TTR ordnen** stellt die Reihenfolge danach auf (stärkste Mannschaft zuerst, Mannschaften ohne Wert am Ende); danach können Sie wie gewohnt verschieben.
 
 ![Setzliste](Anleitung/Bilder/24-setzliste.png)
 

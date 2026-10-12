@@ -353,7 +353,13 @@ public sealed class Bildschirmfotos : IDisposable
         {
             SeiteWaehlen<SpielfreieTageSeiteViewModel>(daten, a.Dialog);
             Foto(ziel, "23-spielfreie-tage", daten, o);
-            SeiteWaehlen<SetzlistenSeiteViewModel>(daten, a.Dialog).Aktiv = true;
+
+            // Setzliste mit erfundenen TTR-Schnitten wie nach einer übernommenen Mannschaftsmeldung.
+            SetzlistenSeiteViewModel setzliste = SeiteWaehlen<SetzlistenSeiteViewModel>(daten, a.Dialog);
+            a.Bearbeitung.MannschaftsstaerkenSpeichern(a.Bearbeitung.Setzliste().Reihenfolge.Select((n, i) => new Mannschaftsstaerke(n, 1350 + ((i * 137) % 400), 4)));
+            setzliste.Laden();
+            setzliste.Aktiv = true;
+            Oberflaeche.Zeichnen(daten);
             Foto(ziel, "24-setzliste", daten, o);
 
             WunschtermineSeiteViewModel seite = SeiteWaehlen<WunschtermineSeiteViewModel>(daten, a.Dialog);

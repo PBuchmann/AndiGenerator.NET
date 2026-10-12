@@ -296,8 +296,11 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         _ => "Pausieren",
     };
 
-    /// <summary>Holt einen Wert, der angibt, ob der Hauptknopf das Play-Symbol zeigt (vor dem Start und in der Pause).</summary>
-    public bool ZeigtStart => !ZeigtPause;
+    /// <summary>Holt einen Wert, der angibt, ob der Hauptknopf das Play-Symbol zeigt (vor dem Start).</summary>
+    public bool ZeigtStart => !Laeuft;
+
+    /// <summary>Holt einen Wert, der angibt, ob der Hauptknopf das Symbol „Fortsetzen“ (Strich und Play) zeigt (in der Pause).</summary>
+    public bool ZeigtFortsetzen => Laeuft && Pausiert;
 
     /// <summary>Holt einen Wert, der angibt, ob der Hauptknopf das Pause-Symbol zeigt (Generierung läuft).</summary>
     public bool ZeigtPause => Laeuft && !Pausiert;
@@ -1565,6 +1568,7 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         OnPropertyChanged(nameof(GenerierungText));
         OnPropertyChanged(nameof(ZeigtPause));
         OnPropertyChanged(nameof(ZeigtStart));
+        OnPropertyChanged(nameof(ZeigtFortsetzen));
         OnPropertyChanged(nameof(ZeigtStopp));
         OnPropertyChanged(nameof(StartplanWaehlbar));
         PlanLoeschenAktualisieren();
