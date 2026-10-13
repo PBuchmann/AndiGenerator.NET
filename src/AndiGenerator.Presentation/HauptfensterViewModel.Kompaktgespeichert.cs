@@ -6,6 +6,7 @@ using System.Globalization;
 using AndiGenerator.Application;
 using AndiGenerator.Engine.Turniere;
 using AndiGenerator.Persistence.Gemeinsam;
+using AndiGenerator.Rendering;
 
 namespace AndiGenerator.Presentation;
 
@@ -115,4 +116,18 @@ public sealed partial class HauptfensterViewModel
     /// <summary>Der gespeicherte Stand einer gewählten Variante, wenn sie ein gespeicherter Plan ist.</summary>
     private Planstand? GespeicherterStand(Plansitzung s, Kompaktvariante? variante) =>
         variante is not null && kompaktGespeichertJe.TryGetValue(variante, out var gespeichert) ? GemerktenStandLaden(s, gespeichert.Eintrag) : null;
+
+    /// <summary>
+    /// Die Abschnitte der Übersicht für die Vereine im Ausdruck: Raster mit Legende, Karte aller Fahrten, Spieltage und je
+    /// Mannschaft eine Seite mit Karte und Spieltagen.
+    /// </summary>
+    private IReadOnlyList<Abschnitt> KompaktDruckabschnitte(Plansitzung s, Planstand stand)
+    {
+        Datenbearbeitung daten = s.DatenBearbeiten();
+        Kompaktauswertung a = Kompaktplanung.SpieleAuswerten(s.Staffel, daten, s.Optionen.Rundenplanung, DateOnly.FromDateTime(DateTime.Today), stand.Spiele);
+        (IReadOnlyList<string> spitze, IReadOnlyList<string> keller) = KompaktGruppen();
+        Kompaktspieltag? spitzentag = spitze.Count >= 3 ? Kompaktpunkte.Gruppentag(a, spitze) : null;
+        Kompaktspieltag? kellertag = keller.Count >= 3 ? Kompaktpunkte.Gruppentag(a, keller) : null;
+        return Kompaktdruck.Abschnitte(a, daten.Hallenname, s.Staffel.Name, (spitzentag, kellertag));
+    }
 }

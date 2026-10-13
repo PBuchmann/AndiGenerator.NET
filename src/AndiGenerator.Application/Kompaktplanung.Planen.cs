@@ -96,7 +96,8 @@ public static partial class Kompaktplanung
     /// <summary>
     /// Die Spiele eines geplanten Spieltags: Beginn zur eingetragenen Uhrzeit des Heimtermins des Ausrichters, ohne Uhrzeit
     /// (00:00) um 10 Uhr beim 3er-, um 11 Uhr beim 4er-Spieltag und bei der Einzelbegegnung; Runden im Abstand von drei Stunden. Spiellokal nur bei
-    /// den Spielen des Ausrichters; die übrigen werden in click-TT in seine Halle verlegt.
+    /// den Spielen des Ausrichters (das des Heimtermins, sonst das der Mannschaft, sonst „1“ – so ist der Ausrichter auch in
+    /// einem gespeicherten Plan erkennbar); die übrigen werden in click-TT in seine Halle verlegt.
     /// </summary>
     /// <param name="turnier">Der Spieltag.</param>
     /// <param name="staffel">Die Staffel (Heimtermine des Ausrichters).</param>
@@ -114,7 +115,8 @@ public static partial class Kompaktplanung
         // Ohne Uhrzeit (00:00) gilt der Standardbeginn; eine eingetragene Uhrzeit gilt so, wie sie ist (Peter, 13.10.2026).
         TimeSpan beginn = termin is not null && termin.Zeitpunkt.TimeOfDay > TimeSpan.Zero ? termin.Zeitpunkt.TimeOfDay : standard;
         DateTime start = turnier.Tag.ToDateTime(TimeOnly.MinValue) + beginn;
-        string lokal = termin?.Spiellokal ?? string.Empty;
+        string lokal = new[] { termin?.Spiellokal, staffel.Mannschaften.FirstOrDefault(m => m.Name == turnier.Ausrichter)?.Spiellokal }
+            .FirstOrDefault(l => !string.IsNullOrEmpty(l)) ?? "1";
         return turnier.Begegnungen()
             .Select(b => new Spiel(start + (Rundenabstand * b.Runde), b.Heim, b.Gast, b.Heim == turnier.Ausrichter ? lokal : string.Empty))
             .ToList();

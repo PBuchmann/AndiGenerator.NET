@@ -144,6 +144,10 @@ public sealed class KompaktspieltageTests : IDisposable
         Assert.Equal(new DateOnly(2030, 9, 1).ToDateTime(new TimeOnly(14, 0)), spiele[3].Zeitpunkt);
         Assert.Equal((namen[0], namen[2]), (spiele[0].Heim, spiele[0].Gast));
         Assert.Equal((namen[1], namen[3]), (spiele[1].Heim, spiele[1].Gast));
+
+        // Nur die Spiele des Ausrichters tragen ein Spiellokal – daran erkennt man ihn im gespeicherten Plan wieder.
+        Assert.All(spiele.Where(s => s.Heim == namen[0]), s => Assert.NotEmpty(s.Spiellokal));
+        Assert.All(spiele.Where(s => s.Heim != namen[0]), s => Assert.Empty(s.Spiellokal));
     }
 
     [Fact]

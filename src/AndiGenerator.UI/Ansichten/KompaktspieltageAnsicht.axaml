@@ -59,10 +59,10 @@
     <Style Selector="TextBlock.zeichen.dritter"><Setter Property="Foreground" Value="#7E22CE" /></Style>
     <!-- Einzelbegegnung: kräftiges Gelb, deutlich abgesetzt vom Rotorange des zweiten Spieltags -->
     <Style Selector="TextBlock.zeichen.einzel"><Setter Property="Foreground" Value="#EAB308" /></Style>
-    <Style Selector="Shape.symbol"><Setter Property="Fill" Value="{StaticResource Tinte}" /></Style>
-    <Style Selector="Shape.symbol.zweiter"><Setter Property="Fill" Value="#C2410C" /></Style>
-    <Style Selector="Shape.symbol.dritter"><Setter Property="Fill" Value="#7E22CE" /></Style>
-    <Style Selector="Shape.symbol.einzel"><Setter Property="Fill" Value="#EAB308" /></Style>
+    <Style Selector=":is(Shape).symbol"><Setter Property="Fill" Value="{StaticResource Tinte}" /></Style>
+    <Style Selector=":is(Shape).symbol.zweiter"><Setter Property="Fill" Value="#C2410C" /></Style>
+    <Style Selector=":is(Shape).symbol.dritter"><Setter Property="Fill" Value="#7E22CE" /></Style>
+    <Style Selector=":is(Shape).symbol.einzel"><Setter Property="Fill" Value="#EAB308" /></Style>
     <!-- Ring um ★/● der Begegnungen des Spitzen- (schwarz) bzw. Abstiegsspieltags (blau), innerhalb des Felds -->
     <Style Selector="Border.ring">
       <Setter Property="Width" Value="18" />

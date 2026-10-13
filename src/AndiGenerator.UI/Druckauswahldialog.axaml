@@ -18,10 +18,11 @@
         </DataTemplate>
       </ComboBox.ItemTemplate>
     </ComboBox>
-    <TextBlock Text="Noch kein Plan vorhanden – Kosten, Spielplan, Mannschaftspläne und Diagramme können nicht gedruckt werden."
+    <TextBlock Text="Noch kein Plan vorhanden – Kosten bzw. Kompaktspieltage, Spielplan, Mannschaftspläne und Diagramme können nicht gedruckt werden."
                IsVisible="{Binding !HatPlan}" Foreground="{StaticResource Grau}" TextWrapping="Wrap" MaxWidth="360" />
     <StackPanel Spacing="8" Margin="16,0,0,0" IsEnabled="{Binding HatPlan}">
-      <CheckBox Content="Kosten" IsChecked="{Binding Kosten}" />
+      <CheckBox Content="Kosten" IsChecked="{Binding Kosten}" IsVisible="{Binding !IstKompakt}" />
+      <CheckBox Content="Kompaktspieltage (Übersicht für die Vereine)" IsChecked="{Binding Kompaktspieltage}" IsVisible="{Binding IstKompakt}" />
       <CheckBox Content="Spielplan" IsChecked="{Binding Spielplan}" />
       <CheckBox Content="Mannschaftspläne" IsChecked="{Binding Mannschaftsplaene}" />
       <CheckBox Content="Mannschaftspläne mit Nachbarmannschaften" IsChecked="{Binding MannschaftsplaeneMitNachbarn}" />

@@ -16,21 +16,32 @@ public sealed class DruckauswahlViewModel : ObservableObject
     private PlanQuelle? quelle;
     private bool terminwuensche = true;
     private bool nachbartermine = true;
-    private bool kosten = true;
+    private bool kosten;
     private bool spielplan = true;
     private bool mannschaftsplaene = true;
     private bool mannschaftsplaeneMitNachbarn = true;
     private bool diagramme = true;
+    private bool kompaktspieltage;
     private bool querformat;
 
-    /// <summary>Initialisiert die Auswahl; alle Teile sind vorgewählt.</summary>
+    /// <summary>
+    /// Initialisiert die Auswahl; alle Teile sind vorgewählt. Im Kompaktmodus statt der Kosten (die dort nicht gelten) die
+    /// Übersicht der Kompaktspieltage für die Vereine.
+    /// </summary>
     /// <param name="quellen">Planquellen, die einen Plan haben.</param>
-    public DruckauswahlViewModel(IReadOnlyList<PlanQuelle> quellen)
+    /// <param name="kompakt">Ob das Hauptfenster im Kompaktmodus arbeitet.</param>
+    public DruckauswahlViewModel(IReadOnlyList<PlanQuelle> quellen, bool kompakt = false)
     {
         ArgumentNullException.ThrowIfNull(quellen);
         Quellen = quellen;
         quelle = quellen.Count > 0 ? quellen[0] : null;
+        IstKompakt = kompakt;
+        kompaktspieltage = kompakt;
+        kosten = !kompakt;
     }
+
+    /// <summary>Holt einen Wert, der angibt, ob im Kompaktmodus gedruckt wird (Übersicht statt Kosten).</summary>
+    public bool IstKompakt { get; }
 
     /// <summary>Holt die Planquellen, die einen Plan haben.</summary>
     public IReadOnlyList<PlanQuelle> Quellen { get; }
@@ -100,6 +111,13 @@ public sealed class DruckauswahlViewModel : ObservableObject
         set => Setzen(ref diagramme, value);
     }
 
+    /// <summary>Holt oder setzt einen Wert, der angibt, ob die Übersicht der Kompaktspieltage für die Vereine gedruckt wird.</summary>
+    public bool Kompaktspieltage
+    {
+        get => kompaktspieltage;
+        set => Setzen(ref kompaktspieltage, value);
+    }
+
     /// <summary>Holt oder setzt einen Wert, der angibt, ob im Querformat gedruckt wird.</summary>
     public bool Querformat
     {
@@ -109,7 +127,7 @@ public sealed class DruckauswahlViewModel : ObservableObject
 
     /// <summary>Holt einen Wert, der angibt, ob mindestens ein druckbarer Teil gewählt ist.</summary>
     public bool IstGueltig =>
-        Terminwuensche || Nachbartermine || (Quelle is not null && (Kosten || Spielplan || Mannschaftsplaene || MannschaftsplaeneMitNachbarn || Diagramme));
+        Terminwuensche || Nachbartermine || (Quelle is not null && (Kosten || Kompaktspieltage || Spielplan || Mannschaftsplaene || MannschaftsplaeneMitNachbarn || Diagramme));
 
     private void Setzen(ref bool feld, bool wert, [CallerMemberName] string? name = null)
     {

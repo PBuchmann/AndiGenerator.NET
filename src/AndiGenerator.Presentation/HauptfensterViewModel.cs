@@ -861,6 +861,11 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
         string plan = string.Empty;
         if (auswahl.Quelle is PlanQuelle quelle && PlanFuer(quelle) is Planstand stand)
         {
+            if (auswahl.Kompaktspieltage)
+            {
+                abschnitte.AddRange(KompaktDruckabschnitte(s, stand));
+            }
+
             abschnitte.AddRange(PlanAbschnitte(s, stand, auswahl));
             plan = quelle.Name;
         }
@@ -1851,7 +1856,7 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
             return;
         }
 
-        var auswahl = new DruckauswahlViewModel(Planquellen.Where(q => PlanFuer(q) is not null).ToList());
+        var auswahl = new DruckauswahlViewModel(Planquellen.Where(q => PlanFuer(q) is not null).ToList(), KompaktAktiv);
         if (!await oberflaeche.DruckauswahlAsync(auswahl) || !auswahl.IstGueltig)
         {
             return;

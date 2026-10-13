@@ -314,7 +314,7 @@ public sealed class Plansitzung
         ArgumentNullException.ThrowIfNull(spiele);
         Directory.CreateDirectory(Staffelordner);
         string pfad = Persistence.Gemeinsam.Staffelordner.GemerkterPlanPfad(Staffelordner, name.Trim());
-        GespeicherterPlanDatei.Speichern(pfad, spiele.Select(s => new GespeichertesSpiel(s.Zeitpunkt, s.Heim, s.Gast)));
+        GespeicherterPlanDatei.Speichern(pfad, spiele.Select(s => new GespeichertesSpiel(s.Zeitpunkt, s.Heim, s.Gast, s.Spiellokal)));
         return new GemerkterPlanEintrag(name.Trim(), pfad, File.GetLastWriteTime(pfad));
     }
 
@@ -334,18 +334,18 @@ public sealed class Plansitzung
         ArgumentNullException.ThrowIfNull(spiele);
         Directory.CreateDirectory(Staffelordner);
         string pfad = Persistence.Gemeinsam.Staffelordner.GesicherterPlanPfad(Staffelordner);
-        GespeicherterPlanDatei.Speichern(pfad, spiele.Select(s => new GespeichertesSpiel(s.Zeitpunkt, s.Heim, s.Gast)));
+        GespeicherterPlanDatei.Speichern(pfad, spiele.Select(s => new GespeichertesSpiel(s.Zeitpunkt, s.Heim, s.Gast, s.Spiellokal)));
         return new GemerkterPlanEintrag(GesicherterPlanName, pfad, File.GetLastWriteTime(pfad));
     }
 
     /// <summary>Lädt die Spiele eines gemerkten Plans.</summary>
     /// <param name="eintrag">Eintrag aus <see cref="GemerktePlaene"/>.</param>
-    /// <returns>Die Spiele (ohne Spiellokal).</returns>
+    /// <returns>Die Spiele, mit Spiellokal, sofern gespeichert (Kompaktspieltage: der Ausrichter).</returns>
     /// <exception cref="PlanDatenFormatException">Die Datei ist ungültig.</exception>
     public IReadOnlyList<Spiel> GemerktenPlanLaden(GemerkterPlanEintrag eintrag)
     {
         PruefenGehoertZurStaffel(eintrag);
-        return GespeicherterPlanDatei.Laden(eintrag.Pfad).Select(s => new Spiel(s.Zeitpunkt, s.Heim, s.Gast, string.Empty)).ToList();
+        return GespeicherterPlanDatei.Laden(eintrag.Pfad).Select(s => new Spiel(s.Zeitpunkt, s.Heim, s.Gast, s.Spiellokal)).ToList();
     }
 
     /// <summary>Entfernt einen gemerkten Plan.</summary>

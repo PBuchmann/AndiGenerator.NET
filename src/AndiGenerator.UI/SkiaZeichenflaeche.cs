@@ -97,20 +97,111 @@ internal sealed class SkiaZeichenflaeche : IZeichenflaeche, IDisposable
     }
 
     /// <inheritdoc/>
-    public void Kreis(double mx, double my, double radius, Farbe fuellung, Farbe rand, double staerke)
+    public void Kreis(double mx, double my, double radius, Farbe? fuellung, Farbe? rand, double staerke)
     {
         if (leinwand is null)
         {
             return;
         }
 
-        stift.Style = SKPaintStyle.Fill;
-        stift.Color = Skia(fuellung);
-        leinwand.DrawCircle((float)mx, (float)my, (float)radius, stift);
-        stift.Style = SKPaintStyle.Stroke;
+        if (fuellung is Farbe f)
+        {
+            stift.Style = SKPaintStyle.Fill;
+            stift.Color = Skia(f);
+            leinwand.DrawCircle((float)mx, (float)my, (float)radius, stift);
+        }
+
+        if (rand is Farbe r)
+        {
+            stift.Style = SKPaintStyle.Stroke;
+            stift.StrokeWidth = (float)staerke;
+            stift.Color = Skia(r);
+            leinwand.DrawCircle((float)mx, (float)my, (float)radius, stift);
+        }
+    }
+
+    /// <inheritdoc/>
+    public void Vieleck(IReadOnlyList<(double X, double Y)> punkte, Farbe? fuellung, Farbe? rand, double staerke, bool geschlossen)
+    {
+        ArgumentNullException.ThrowIfNull(punkte);
+        if (leinwand is null || punkte.Count < 2)
+        {
+            return;
+        }
+
+        using var pfad = new SKPath();
+        pfad.MoveTo((float)punkte[0].X, (float)punkte[0].Y);
+        for (int i = 1; i < punkte.Count; i++)
+        {
+            pfad.LineTo((float)punkte[i].X, (float)punkte[i].Y);
+        }
+
+        if (geschlossen)
+        {
+            pfad.Close();
+        }
+
+        if (fuellung is Farbe f)
+        {
+            stift.Style = SKPaintStyle.Fill;
+            stift.Color = Skia(f);
+            leinwand.DrawPath(pfad, stift);
+        }
+
+        if (rand is Farbe r)
+        {
+            stift.Style = SKPaintStyle.Stroke;
+            stift.StrokeWidth = (float)staerke;
+            stift.StrokeJoin = SKStrokeJoin.Miter;
+            stift.StrokeCap = SKStrokeCap.Butt;
+            stift.Color = Skia(r);
+            leinwand.DrawPath(pfad, stift);
+        }
+    }
+
+    /// <inheritdoc/>
+    public void TextMitRand(string text, double x, double y, double groesse, Farbe farbe, bool fett, Farbe rand, double staerke)
+    {
+        if (leinwand is null || text.Length == 0)
+        {
+            return;
+        }
+
+        SKFont schrift = Schrift(groesse, fett);
+        schrift.GetFontMetrics(out SKFontMetrics metriken);
+        stift.Style = SKPaintStyle.StrokeAndFill;
         stift.StrokeWidth = (float)staerke;
+        stift.StrokeJoin = SKStrokeJoin.Round;
         stift.Color = Skia(rand);
-        leinwand.DrawCircle((float)mx, (float)my, (float)radius, stift);
+        leinwand.DrawText(text, (float)x, (float)(y - metriken.Ascent), schrift, stift);
+        stift.StrokeJoin = SKStrokeJoin.Miter;
+        Text(text, x, y, groesse, farbe, fett);
+    }
+
+    /// <inheritdoc/>
+    public IDisposable Deckkraft(double wert)
+    {
+        if (leinwand is null)
+        {
+            return new Wiederherstellen(null);
+        }
+
+        using var ebene = new SKPaint { Color = new SKColor(0, 0, 0, (byte)Math.Round(Math.Clamp(wert, 0, 1) * 255)) };
+        leinwand.SaveLayer(ebene);
+        return new Wiederherstellen(leinwand);
+    }
+
+    /// <inheritdoc/>
+    public IDisposable Begrenzen(double x, double y, double breite, double hoehe)
+    {
+        if (leinwand is null)
+        {
+            return new Wiederherstellen(null);
+        }
+
+        leinwand.Save();
+        leinwand.ClipRect(new SKRect((float)x, (float)y, (float)(x + breite), (float)(y + hoehe)));
+        return new Wiederherstellen(leinwand);
     }
 
     /// <inheritdoc/>
@@ -157,5 +248,11 @@ internal sealed class SkiaZeichenflaeche : IZeichenflaeche, IDisposable
         }
 
         return schrift;
+    }
+
+    /// <summary>Stellt beim Beenden eines Bereichs (Deckkraft, Ausschnitt) den vorigen Zustand der Leinwand her.</summary>
+    private sealed class Wiederherstellen(SKCanvas? leinwand) : IDisposable
+    {
+        public void Dispose() => leinwand?.Restore();
     }
 }

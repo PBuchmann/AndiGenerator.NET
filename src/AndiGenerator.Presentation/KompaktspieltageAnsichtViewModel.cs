@@ -6,7 +6,6 @@ using System.Globalization;
 using AndiGenerator.Application;
 using AndiGenerator.Domain.Turniere;
 using AndiGenerator.Engine.Turniere;
-using AndiGenerator.Persistence.Geo;
 using CommunityToolkit.Mvvm.Input;
 using Dock.Model.Mvvm.Controls;
 
@@ -326,63 +325,6 @@ public sealed partial class KompaktspieltageAnsichtViewModel : Document
 
     private static string Kurz(Kompaktauswertung a, string name) => a.Mannschaften.FirstOrDefault(m => m.Name == name)?.Kurzname ?? name;
 
-    // Eine Zeile des Rasters; gedimmt ist, was nicht zur Auswahl gehört (andere Mannschaften bzw. andere Sonntage).
-    private static Kompaktrasterzeile Zeile(
-        Kompaktauswertung a,
-        DateOnly tag,
-        bool gewaehlt,
-        string? team,
-        bool andererTag,
-        (string Mannschaft, DateOnly Tag)? rahmen,
-        (Kompaktspieltag? Spitze, Kompaktspieltag? Keller) gruppentage)
-    {
-        var zellen = new List<Kompaktzelle>();
-        foreach (Kompaktmannschaft m in a.Mannschaften)
-        {
-            Turnierbereitschaft? b = m.Meldung?.An(tag);
-            Kompaktspieltag? s = a.Spieltage.FirstOrDefault(x => x.Tag == tag && x.Mannschaften.Contains(m.Name));
-            bool ausrichter = s is not null && s.Ausrichter == m.Name;
-            bool verstoss = s is not null && b is Turnierbereitschaft bb
-                && !bb.HasFlag(ausrichter ? Turnierbereitschaft.Heim : Turnierbereitschaft.Auswaerts);
-            string zeichen = (s, b) switch
-            {
-                (not null, _) => ausrichter ? "★" : "●",
-                (null, null) => "?",
-                _ => string.Empty,
-            };
-            string meldung = b switch
-            {
-                null => "keine Meldung",
-                Turnierbereitschaft.None => "kann nicht",
-                Turnierbereitschaft.Heim => "nur Heim",
-                Turnierbereitschaft.Auswaerts => "nur auswärts",
-                _ => "Heim oder auswärts",
-            };
-            string rolle = string.Empty;
-            if (s is not null)
-            {
-                rolle = ausrichter ? " · richtet aus" : " · Gast bei " + Kurz(a, s.Ausrichter ?? "?");
-            }
-
-            List<Kompaktspieltag> amTag = a.Spieltage.Where(x => x.Tag == tag).ToList();
-            string termin = m.Termine.TryGetValue(tag, out string? text) ? Environment.NewLine + text : string.Empty;
-            zellen.Add(new Kompaktzelle(Meldungsart(b), zeichen, verstoss, andererTag || (team is not null && team != m.Name), string.Create(Deutsch, $"{m.Name}, {tag:dd.MM.yyyy}: {meldung}{rolle}{termin}"))
-            {
-                Spieltag = s is null ? 0 : amTag.IndexOf(s),
-                Einzel = s?.Form == Turnierform.Einzel,
-                Mannschaft = m.Name,
-                Tag = tag,
-                IstCursor = rahmen == (m.Name, tag),
-                Spitzenspieltag = s is not null && ReferenceEquals(s, gruppentage.Spitze),
-                Abstiegsspieltag = s is not null && ReferenceEquals(s, gruppentage.Keller),
-            });
-        }
-
-        // Sonntage wie bisher nur mit Datum, Samstage und Wochentage mit Kürzel (z. B. „Sa 12.09.“).
-        string datum = tag.DayOfWeek == DayOfWeek.Sunday ? tag.ToString("dd.MM.", Deutsch) : tag.ToString("ddd dd.MM.", Deutsch);
-        return new Kompaktrasterzeile(tag, datum, gewaehlt, zellen);
-    }
-
     private static Kompaktspieltagkarte Spieltagkarte(int nummer, Kompaktspieltag s, Kompaktauswertung a, bool gewaehlt)
     {
         string form = s.Form switch
@@ -489,7 +431,7 @@ public sealed partial class KompaktspieltageAnsichtViewModel : Document
         (string, DateOnly)? rahmen = Bearbeiten ? cursor : null;
         Kompaktspieltag? spitzentag = gruppen.Spitze.Count >= 3 ? Kompaktpunkte.Gruppentag(a, gruppen.Spitze) : null;
         Kompaktspieltag? kellertag = gruppen.Keller.Count >= 3 ? Kompaktpunkte.Gruppentag(a, gruppen.Keller) : null;
-        Zeilen = a.Tage.Select(t => Zeile(a, t, tag == t, team, tag is not null && tag != t, rahmen, (spitzentag, kellertag))).ToList();
+        Zeilen = a.Tage.Select(t => Rasterzeile(a, t, tag == t, team, tag is not null && tag != t, rahmen, (spitzentag, kellertag))).ToList();
         double weiteste = Math.Max(1, a.Mannschaften.Select(m => m.Km).DefaultIfEmpty(0).Max());
         KmZeilen = a.Mannschaften.OrderByDescending(m => m.Km)
             .Select(m => new Kompaktkmzeile(m.Name, m.Kurzname, Ausrichtertext(m), m.Km.ToString("N0", Deutsch), m.Km / weiteste, m.Name == team))
@@ -511,21 +453,6 @@ public sealed partial class KompaktspieltageAnsichtViewModel : Document
             _ => "Alle Fahrten der Halbrunde",
         };
         bool alleZeigen = auswahl.Art == '-';
-        List<Kompaktspieltag> sichtbar = alleZeigen ? a.Spieltage.ToList() : gewaehlt;
-        var fahrten = sichtbar.Where(s => s.Ausrichter is not null)
-            .SelectMany(s => s.Gaeste.Where(g => team is null || g == team).Select(g => (Von: g, Nach: s.Ausrichter!, Kraeftig: !alleZeigen, Einzel: s.Form == Turnierform.Einzel)))
-            .ToList();
-        var ausrichter = sichtbar.Select(s => s.Ausrichter).OfType<string>().ToHashSet(StringComparer.Ordinal);
-        List<Kartenort> orte = a.Mannschaften
-            .Where(m => m.Lage is not null)
-            .Select(m => new Kartenort(
-                m.Name,
-                m.Kurzname,
-                m.Lage.GetValueOrDefault(),
-                !alleZeigen && ausrichter.Contains(m.Name),
-                team is not null && m.Name != team && !ausrichter.Contains(m.Name),
-                m.Halle.Length > 0 ? $"{m.Name} – {m.Halle}" : m.Name))
-            .ToList();
-        Karte = Kartenbau.Bauen(orte, fahrten, Kartendaten.Laender, Kartendaten.Staedte);
+        Karte = Kompaktfahrtenkarte.Bauen(a, alleZeigen ? a.Spieltage : gewaehlt, team, alleZeigen);
     }
 }
