@@ -11,7 +11,7 @@ namespace AndiGenerator.Application;
 /// <param name="Name">Name der Mannschaft.</param>
 /// <param name="Kurzname">Kurzer Name für Raster und Karte, z. B. „Engers“ für „ESV Engers“.</param>
 /// <param name="Lage">Lage der Halle oder <c>null</c>, wenn keine Adresse bekannt ist.</param>
-/// <param name="Halle">Name der Halle aus click-TT oder leer.</param>
+/// <param name="Halle">Adresse der Halle aus dem Bericht „Terminwünsche“, sonst der Name der Halle aus click-TT oder leer.</param>
 /// <param name="Meldung">Meldung je Sonntag oder <c>null</c>, wenn die Mannschaft nichts gemeldet hat.</param>
 /// <param name="Bemerkung">Bemerkung des Vereins aus dem Bericht „Terminwünsche“ oder leer.</param>
 /// <param name="Km">Kilometer Luftlinie aller Fahrten zu Kompaktspieltagen, hin und zurück.</param>
@@ -24,4 +24,11 @@ public sealed record Kompaktmannschaft(
     Turniermeldung? Meldung,
     string Bemerkung,
     double Km,
-    int Ausgerichtet);
+    int Ausgerichtet)
+{
+    /// <summary>Holt die Zahl der Einzelbegegnungen, in denen die Mannschaft Heimmannschaft ist (zählen als Heimspieltag mit).</summary>
+    public int EinzelHeim { get; init; }
+
+    /// <summary>Holt je Heimtermin der Halbrunde Halle und Beginn als Text (für den Tooltip im Raster).</summary>
+    public IReadOnlyDictionary<DateOnly, string> Termine { get; init; } = new Dictionary<DateOnly, string>();
+}

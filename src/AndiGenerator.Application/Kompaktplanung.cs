@@ -52,6 +52,24 @@ public static partial class Kompaktplanung
     }
 
     /// <summary>
+    /// Wertet einen Plan aus seinen Spielen aus, z. B. den gesicherten Plan: Die Spieltage werden erkannt; kommen beim
+    /// 4er-Spieltag zwei Mannschaften als Ausrichter in Frage, ist es die, deren Spiele ein Spiellokal haben.
+    /// </summary>
+    /// <param name="staffel">Die Staffel.</param>
+    /// <param name="daten">Arbeitskopie der Spielplandaten (Bemerkungen und Hallenadressen).</param>
+    /// <param name="planung">Eingestellte Rundenplanung.</param>
+    /// <param name="heute">Heutiges Datum.</param>
+    /// <param name="spiele">Die Spiele des Plans.</param>
+    /// <returns>Die Auswertung.</returns>
+    public static Kompaktauswertung SpieleAuswerten(Staffel staffel, Datenbearbeitung daten, Rundenplanung planung, DateOnly heute, IEnumerable<Spiel> spiele)
+    {
+        ArgumentNullException.ThrowIfNull(staffel);
+        ArgumentNullException.ThrowIfNull(spiele);
+        List<Turnier> turniere = Turniererkennung.Erkennen(spiele).Select(AusrichterMitLokal).ToList();
+        return AuswertenFuer(staffel, daten, planung, heute, turniere);
+    }
+
+    /// <summary>
     /// Ob die Frage nach Kompaktspieltagen kommt: Die Klasse spielt nur eine Halbrunde („(HR)“ bzw. „(FR)“ im Namen oder
     /// Rundenplanung „Halbrunde“) und hat überwiegend Spieltage am Wochenende.
     /// </summary>
@@ -70,8 +88,9 @@ public static partial class Kompaktplanung
 
     /// <summary>
     /// Vermutet Kompaktspieltage aus den Daten: Im Plan aus click-TT spielen Mannschaften zweimal am selben Tag (3er- oder
-    /// 4er-Spieltage), oder die Termine (Terminwünsche und Plan) liegen überwiegend am Wochenende. Zwei oder drei Termine
-    /// unter der Woche für einzelne Spiele ändern daran nichts; ohne Termine wird nicht widersprochen.
+    /// 4er-Spieltage), oder die Termine (Terminwünsche und Plan) liegen überwiegend am Wochenende – insgesamt oder bei den
+    /// meisten Mannschaften. Zwei oder drei Termine unter der Woche für einzelne Spiele ändern daran nichts; ohne Termine
+    /// wird nicht widersprochen.
     /// </summary>
     /// <param name="staffel">Die Staffel.</param>
     /// <returns><c>true</c>, wenn die Daten nach Kompaktspieltagen aussehen.</returns>
@@ -89,7 +108,22 @@ public static partial class Kompaktplanung
             .Concat(staffel.BestehenderSpielplan.Where(s => s.Zeitpunkt.HasValue).Select(s => DateOnly.FromDateTime(s.Zeitpunkt!.Value)))
             .ToHashSet();
         int wochenende = tage.Count(t => t.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday);
-        return WochenendeUeberwiegt(wochenende, tage.Count - wochenende);
+        if (WochenendeUeberwiegt(wochenende, tage.Count - wochenende))
+        {
+            return true;
+        }
+
+        // Je Mannschaft gezählt (Peter, 13.10.2026): Eine Mannschaft spielt am Wochenende, wenn höchstens zwei ihrer
+        // Heimtermine unter der Woche liegen (für Einzelbegegnungen) und der Rest am Wochenende – oder das Wochenende
+        // ohnehin überwiegt. Die Klasse zählt, wenn das bei den meisten Mannschaften so ist.
+        List<bool> mannschaftAmWochenende = staffel.Mannschaften
+            .Select(m => m.Heimspieltermine.Select(t => DateOnly.FromDateTime(t.Zeitpunkt)).Distinct().ToList())
+            .Where(d => d.Count > 0)
+            .Select(d => (Wochenende: d.Count(t => t.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday), Werktage: d.Count(t => t.DayOfWeek is not (DayOfWeek.Saturday or DayOfWeek.Sunday))))
+            .Select(z => (z.Werktage <= 2 && z.Wochenende > 0) || WochenendeUeberwiegt(z.Wochenende, z.Werktage))
+            .ToList();
+        int amWochenende = mannschaftAmWochenende.Count(w => w);
+        return mannschaftAmWochenende.Count > 0 && WochenendeUeberwiegt(amWochenende, mannschaftAmWochenende.Count - amWochenende);
     }
 
     /// <summary>Überwiegend Wochenende: mindestens doppelt so viele Tage wie unter der Woche – bis zu drei Werktage stören nicht.</summary>
@@ -155,12 +189,57 @@ public static partial class Kompaktplanung
         return ergebnis.Distinct().Order().ToList();
     }
 
+    /// <summary>
+    /// Nimmt einen Tag in die Zeile „Nur Heim: TT.MM., …“ der Bemerkung auf oder entfernt ihn (Erfassen im Raster). Die übrige
+    /// Bemerkung bleibt, wie sie ist; ohne Tage entfällt die Zeile.
+    /// </summary>
+    /// <param name="bemerkung">Bisherige Bemerkung.</param>
+    /// <param name="tag">Der Tag.</param>
+    /// <param name="nurHeim"><c>true</c> = aufnehmen, <c>false</c> = entfernen.</param>
+    /// <returns>Die neue Bemerkung.</returns>
+    public static string NurHeimAendern(string bemerkung, DateOnly tag, bool nurHeim)
+    {
+        ArgumentNullException.ThrowIfNull(bemerkung);
+        Match zeile = NurHeimZeile().Match(bemerkung);
+        var daten = new SortedSet<(int Monat, int Tag)>();
+        if (zeile.Success)
+        {
+            foreach (GroupCollection d in Datum().Matches(zeile.Groups[1].Value).Select(m => m.Groups))
+            {
+                daten.Add((int.Parse(d[2].Value, CultureInfo.InvariantCulture), int.Parse(d[1].Value, CultureInfo.InvariantCulture)));
+            }
+        }
+
+        if (nurHeim)
+        {
+            daten.Add((tag.Month, tag.Day));
+        }
+        else
+        {
+            daten.Remove((tag.Month, tag.Day));
+        }
+
+        string neu = daten.Count == 0
+            ? string.Empty
+            : "Nur Heim: " + string.Join(", ", daten.Select(d => string.Create(CultureInfo.InvariantCulture, $"{d.Tag:00}.{d.Monat:00}.")));
+        if (!zeile.Success)
+        {
+            return neu.Length == 0 ? bemerkung : string.Join('\n', new[] { bemerkung.TrimEnd(), neu }.Where(t => t.Length > 0));
+        }
+
+        // Zeilenumbruch hinter der Zeile erhalten (der Ausdruck schließt Leerraum hinter dem letzten Datum ein).
+        string schluss = zeile.Value[zeile.Value.TrimEnd().Length..];
+        string ergebnis = bemerkung[..zeile.Index] + neu + (neu.Length > 0 ? schluss : string.Empty) + bemerkung[(zeile.Index + zeile.Length)..];
+        return neu.Length > 0 ? ergebnis : ergebnis.Replace("\n\n", "\n", StringComparison.Ordinal).Trim();
+    }
+
     private static Kompaktauswertung AuswertenFuer(Staffel staffel, Datenbearbeitung daten, Rundenplanung planung, DateOnly heute, IReadOnlyList<Turnier> turniere)
     {
         ArgumentNullException.ThrowIfNull(daten);
-        List<DateOnly> tage = Sonntage(staffel, turniere, Rueckrunde(staffel, planung), heute);
+        List<DateOnly> tage = Spieltermine(staffel, turniere, Rueckrunde(staffel, planung), heute, daten.Kompakttage());
         IReadOnlyDictionary<string, string> bemerkungen = daten.Bemerkungen();
         IReadOnlyDictionary<string, Koordinate> lagen = daten.Hallenkoordinaten();
+        IReadOnlyDictionary<string, string> adressen = daten.Hallenadressen();
         var befunde = new List<string>();
         var meldungen = new List<Turniermeldung>();
         foreach (Mannschaft m in staffel.Mannschaften)
@@ -174,7 +253,13 @@ public static partial class Kompaktplanung
 
         List<string> namen = staffel.Mannschaften.Select(m => m.Name).ToList();
         Turnierpruefungsergebnis pruefung = Turnierpruefung.Pruefen(turniere, namen, meldungen);
-        befunde.AddRange(pruefung.Befunde);
+
+        // Ohne Plan (weder aus click-TT noch berechnet) fehlt jede Paarung – das muss nicht als Hinweis dastehen.
+        if (turniere.Count > 0)
+        {
+            befunde.AddRange(pruefung.Befunde);
+        }
+
         double Entfernung(string a, string b) =>
             lagen.TryGetValue(a, out Koordinate x) && lagen.TryGetValue(b, out Koordinate y) ? 2 * x.Luftlinie(y) : 0;
 
@@ -183,16 +268,41 @@ public static partial class Kompaktplanung
             m.Name,
             Kurzname(m.Name),
             lagen.TryGetValue(m.Name, out Koordinate lage) ? lage : null,
-            m.Heimspieltermine.Select(t => t.Halle).FirstOrDefault(h => h.Length > 0) ?? string.Empty,
+            adressen.GetValueOrDefault(m.Name) ?? m.Heimspieltermine.Select(t => t.Halle).FirstOrDefault(h => h.Length > 0) ?? string.Empty,
             meldungen.Find(x => x.Mannschaft == m.Name),
             bemerkungen.GetValueOrDefault(m.Name, string.Empty),
             spieltage.Where(s => s.Ausrichter is not null && s.Gaeste.Contains(m.Name)).Sum(s => Entfernung(m.Name, s.Ausrichter!)),
-            pruefung.Ausgerichtet.GetValueOrDefault(m.Name))).ToList();
+            pruefung.Ausgerichtet.GetValueOrDefault(m.Name))
+        {
+            EinzelHeim = spieltage.Count(s => s.Form == Turnierform.Einzel && s.Ausrichter == m.Name),
+            Termine = m.Heimspieltermine
+                .Where(h => tage.Contains(DateOnly.FromDateTime(h.Zeitpunkt)))
+                .GroupBy(h => DateOnly.FromDateTime(h.Zeitpunkt))
+                .ToDictionary(g => g.Key, g => Termintext(g.First(), daten, m.Name)),
+        }).ToList();
         return new Kompaktauswertung(tage, mannschaften, spieltage, befunde, GroessterAbstand(spieltage, namen), MeisteAmTag(spieltage));
     }
 
-    /// <summary>Halbrunde: die gewählte, sonst die mit Spielen aus click-TT bzw. – ohne Spiele – die laufende oder nächste.</summary>
-    private static List<DateOnly> Sonntage(Staffel staffel, IReadOnlyList<Turnier> turniere, bool? rueckrunde, DateOnly heute)
+    /// <summary>Halle und Beginn eines Heimtermins, z. B. „Halle: Sporthalle Nord, Hauptstr. 1, 56000 Ort · Beginn: Standard (3er 10:00, 4er 11:00)“.</summary>
+    private static string Termintext(Heimspieltermin h, Datenbearbeitung daten, string mannschaft)
+    {
+        string halle = h.Halle.Length > 0 ? h.Halle : daten.Hallenname(mannschaft, h.Spiellokal);
+        if (halle.Length == 0)
+        {
+            halle = h.Spiellokal.Length > 0 ? "Spiellokal " + h.Spiellokal : "Spiellokal der Mannschaft";
+        }
+
+        string beginn = h.Zeitpunkt.TimeOfDay > TimeSpan.Zero ? h.Zeitpunkt.ToString("HH:mm", Deutsch) + " Uhr" : "Standard (3er 10:00, 4er 11:00)";
+        string tische = h.MaxParalleleSpiele != 1 ? string.Empty : " · nur ein Tisch (kein 4er-Spieltag)";
+        return $"Halle: {halle} · Beginn: {beginn}{tische}";
+    }
+
+    /// <summary>
+    /// Die möglichen Spieltermine der Halbrunde (die gewählte, sonst die mit Spielen aus click-TT bzw. – ohne Spiele – die
+    /// laufende oder nächste): alle Sonntage, dazu Samstage und Wochentage mit einem Heimtermin und die im Raster angelegten Tage;
+    /// ohne spielfreie Tage.
+    /// </summary>
+    private static List<DateOnly> Spieltermine(Staffel staffel, IReadOnlyList<Turnier> turniere, bool? rueckrunde, DateOnly heute, IReadOnlyList<DateOnly> angelegt)
     {
         DateOnly beginn = staffel.Beginn ?? turniere.Select(t => t.Tag).DefaultIfEmpty(heute).Min();
         DateOnly ende = staffel.Ende ?? turniere.Select(t => t.Tag).DefaultIfEmpty(heute).Max();
@@ -203,16 +313,24 @@ public static partial class Kompaktplanung
             (beginn, ende) = zweite ? (mitte, ende) : (beginn, mitte.AddDays(-1));
         }
 
-        var tage = new List<DateOnly>();
+        var tage = new SortedSet<DateOnly>();
         for (DateOnly t = beginn.AddDays(((int)DayOfWeek.Sunday - (int)beginn.DayOfWeek + 7) % 7); t <= ende; t = t.AddDays(7))
         {
-            if (!staffel.SpielfreieTage.Contains(t))
-            {
-                tage.Add(t);
-            }
+            tage.Add(t);
         }
 
-        return tage;
+        // Dazu Samstage (Kompaktspieltage) und Wochentage (nur Einzelbegegnungen) mit einem Heimtermin einer Mannschaft
+        // sowie die Tage des Plans aus click-TT (Peter, 13.10.2026).
+        tage.UnionWith(staffel.Mannschaften
+            .SelectMany(m => m.Heimspieltermine)
+            .Select(h => DateOnly.FromDateTime(h.Zeitpunkt))
+            .Concat(turniere.Select(t => t.Tag))
+            .Where(t => t >= beginn && t <= ende));
+
+        // Und die im Raster angelegten Zeilen (Peter, 13.10.2026).
+        tage.UnionWith(angelegt.Where(t => t >= beginn && t <= ende));
+        tage.ExceptWith(staffel.SpielfreieTage);
+        return [.. tage];
     }
 
     private static Turniermeldung? Meldung(Mannschaft m, List<DateOnly> tage, string bemerkung, List<string> befunde)
@@ -234,7 +352,7 @@ public static partial class Kompaktplanung
             if (!gesperrt.Contains(tag))
             {
                 b = heim.Contains(tag) ? Turnierbereitschaft.Heim : Turnierbereitschaft.None;
-                b |= nurHeim.Contains(tag) ? Turnierbereitschaft.None : Turnierbereitschaft.Auswaerts;
+                b |= Auswaerts(tag, nurHeim) ? Turnierbereitschaft.Auswaerts : Turnierbereitschaft.None;
             }
 
             bereitschaft[tag] = b;
@@ -242,6 +360,23 @@ public static partial class Kompaktplanung
 
         string halle = m.Heimspieltermine.Select(t => t.Halle).FirstOrDefault(h => h.Length > 0) ?? string.Empty;
         return new Turniermeldung(m.Name, bereitschaft, halle, m.Heimspieltermine.Any(t => t.MaxParalleleSpiele >= 2), bemerkung);
+    }
+
+    /// <summary>
+    /// Ob die Mannschaft an dem (nicht gesperrten) Tag auswärts spielen kann: wenn er nicht „Nur Heim“ ist. Das gilt an jedem
+    /// Tag, auch samstags (Peter, 13.10.2026: im Raster frei erfassbar; bisher galt samstags der Sonntag desselben Wochenendes).
+    /// </summary>
+    private static bool Auswaerts(DateOnly tag, IReadOnlyList<DateOnly> nurHeim) => !nurHeim.Contains(tag);
+
+    private static Turnier AusrichterMitLokal(Turnier t)
+    {
+        if (t.MoeglicheAusrichter.Count < 2)
+        {
+            return t;
+        }
+
+        List<string> mitLokal = t.MoeglicheAusrichter.Where(m => t.Spiele.Any(s => s.Heim == m && s.Spiellokal.Length > 0)).ToList();
+        return mitLokal.Count == 1 ? t with { MoeglicheAusrichter = mitLokal } : t;
     }
 
     private static Kompaktspieltag Spieltag(Turnierbewertung b, Func<string, string, double> entfernung)

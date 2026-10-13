@@ -152,6 +152,19 @@ public class SpiellokaleTests
     }
 
     [Fact]
+    public void Am_Kompaktspieltag_gilt_der_Heimtermin_des_Tages_zu_jeder_Uhrzeit()
+    {
+        DatenKnoten plan = Plan("1");
+        Heimtermin(plan, "13.09.2026 00:00", "2");
+        var lokale = new Spiellokale(plan);
+
+        Assert.Equal("2", lokale.AmTag(new DateOnly(2026, 9, 13), "A"));
+        Assert.Equal("1", lokale.AmTag(new DateOnly(2026, 9, 20), "A"));
+        Assert.Equal(string.Empty, lokale.AmTag(new DateOnly(2026, 9, 13), "B"));
+        Assert.Equal(string.Empty, lokale.AmTag(new DateOnly(2026, 9, 13), "Unbekannt"));
+    }
+
+    [Fact]
     public void Ungueltiger_Termin_im_Datenbaum_wird_gemeldet()
     {
         DatenKnoten plan = Plan();

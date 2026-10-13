@@ -50,10 +50,10 @@ internal sealed class Kompaktsuche
     }
 
     /// <summary>Ein Suchversuch.</summary>
-    /// <param name="erlaubteVerstoesse">So viele Verstöße gegen die Meldungen sind (über die festgehaltenen hinaus) erlaubt.</param>
+    /// <param name="erlaubteVerstoesse">So viele Verstöße gegen die Meldungen sind erlaubt.</param>
     /// <param name="erlaubtOhneAusrichtung">So viele Mannschaften dürfen ohne Heimspieltag bleiben.</param>
     /// <param name="nurViererSpieltage">Nur 4er-Spieltage (und Einzelbegegnungen) verwenden.</param>
-    /// <returns>Alle Spieltage einschließlich der festgehaltenen oder <c>null</c>, wenn der Versuch keinen Plan fand.</returns>
+    /// <returns>Alle Spieltage oder <c>null</c>, wenn der Versuch keinen Plan fand.</returns>
     public IReadOnlyList<Kompaktkandidat>? Versuch(int erlaubteVerstoesse, int erlaubtOhneAusrichtung, bool nurViererSpieltage)
     {
         Zuruecksetzen();
@@ -74,11 +74,6 @@ internal sealed class Kompaktsuche
         gewaehlt.Clear();
         offen = modell.Paare;
         ohneAusrichtung = modell.N;
-        foreach (Kompaktkandidat k in modell.Fest)
-        {
-            Setzen(k, 1);
-        }
-
         verstoesse = 0;
     }
 

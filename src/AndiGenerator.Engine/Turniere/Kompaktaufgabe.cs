@@ -11,12 +11,22 @@ namespace AndiGenerator.Engine.Turniere;
 /// <param name="Tage">Mögliche Spieltage (Sonntage der Halbrunde).</param>
 /// <param name="Meldungen">Meldungen der Mannschaften; ohne Meldung gilt jeder Tag als möglich.</param>
 /// <param name="Entfernung">Einfache Entfernung zwischen den Hallen zweier Mannschaften in km (Luftlinie).</param>
-/// <param name="Festgehalten">Spieltage, die unverändert in jeden Plan übernommen werden.</param>
-/// <param name="Fahrtwuensche">Fahrtwünsche: Diese Paarungen finden in der Halle des Gastgebers statt.</param>
 public sealed record Kompaktaufgabe(
     IReadOnlyList<string> Mannschaften,
     IReadOnlyList<DateOnly> Tage,
     IReadOnlyList<Turniermeldung> Meldungen,
-    Func<string, string, double> Entfernung,
-    IReadOnlyList<Planturnier> Festgehalten,
-    IReadOnlyList<Fahrtwunsch> Fahrtwuensche);
+    Func<string, string, double> Entfernung)
+{
+    /// <summary>
+    /// Holt die vier stärksten Mannschaften (nach QTTR-Schnitt, die stärkste zuerst) für einen Spitzenspieltag oder leer.
+    /// Zusätzlich wird der kürzeste Plan gesucht, in dem sie einen 4er-Spieltag bilden (die beiden ersten spielen
+    /// gegeneinander) und die vier schwächsten ebenso – so spät wie möglich.
+    /// </summary>
+    public IReadOnlyList<string> Spitze { get; init; } = [];
+
+    /// <summary>Holt die vier schwächsten Mannschaften (die schwächste zuerst) für einen Abstiegsspieltag oder leer.</summary>
+    public IReadOnlyList<string> Keller { get; init; } = [];
+
+    /// <summary>Holt Hinweise zur Aufgabe (z. B. fehlende QTTR-Werte), die mit dem Ergebnis gezeigt werden.</summary>
+    public IReadOnlyList<string> Hinweise { get; init; } = [];
+}

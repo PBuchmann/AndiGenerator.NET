@@ -2,7 +2,6 @@
 // SPDX-FileCopyrightText: 2026 Peter Buchmann
 // SPDX-License-Identifier: GPL-3.0-only
 
-using System.Globalization;
 using AndiGenerator.Domain.Turniere;
 
 namespace AndiGenerator.Engine.Turniere;
@@ -16,15 +15,18 @@ internal sealed class Kompaktmodell
     /// <summary>Höchstzahl der Verstöße gegen die Meldungen, die ein einzelner Spieltag haben darf.</summary>
     public const int MaxVerstoesseJeSpieltag = 2;
 
-    private static readonly CultureInfo Deutsch = CultureInfo.GetCultureInfo("de-DE");
+    /// <summary>Einzelbegegnungen unter der Woche nur bis zu dieser Entfernung (Luftlinie, km; 60-km-Regel).</summary>
+    public const double EinzelUnterDerWocheKm = 60;
+
+    /// <summary>So viele „Verstöße“ hat ein Spieltag, der an diesem Tag gar nicht geht (z. B. ein 4er-Spieltag am Mittwoch).</summary>
+    private const int Unzulaessig = 99;
 
     private readonly double[] km;
     private readonly bool[] heim;
     private readonly bool[] auswaerts;
     private readonly bool[] zweiTische;
+    private readonly bool[] wochenende;
     private readonly int[] paarIndex;
-    private readonly int[] wunschGastgeber;
-    private readonly HashSet<Kompaktkandidat> fest = [];
     private readonly List<string> hinweise = [];
 
     /// <summary>Bereitet die Aufgabe auf.</summary>
@@ -34,6 +36,7 @@ internal sealed class Kompaktmodell
         N = Namen.Length;
         Tage = aufgabe.Tage.Distinct().Order().ToArray();
         T = Tage.Length;
+        wochenende = Tage.Select(t => t.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday).ToArray();
         km = new double[N * N];
         heim = new bool[N * T];
         auswaerts = new bool[N * T];
@@ -42,7 +45,6 @@ internal sealed class Kompaktmodell
         Paare = PaareNummerieren();
         EntfernungenLesen(aufgabe.Entfernung);
         MeldungenLesen(aufgabe.Meldungen);
-        wunschGastgeber = WuenscheLesen(aufgabe.Fahrtwuensche);
         var kandidaten = new List<Kompaktkandidat>();
         for (int h = 0; h < N; h++)
         {
@@ -54,7 +56,8 @@ internal sealed class Kompaktmodell
         JePaar = Verteilen(kandidaten);
         JePaarOhneDreier = Verteilen(kandidaten.Where(k => k.Form != Turnierform.Dreier).ToList());
         KmSkala = Math.Max(1, kandidaten.Select(k => k.Km).DefaultIfEmpty(0).Average());
-        Fest = FesteLesen(aufgabe.Festgehalten);
+        hinweise.AddRange(aufgabe.Hinweise);
+        Gruppen = GruppenLesen(aufgabe.Spitze, aufgabe.Keller);
 
         // Bei gerader Zahl bleibt je Mannschaft eine Einzelbegegnung; jeder Dreier oder Vierer deckt mindestens drei
         // Paarungen. Bei wenigen Mannschaften (z. B. 5 oder 6) reichen die Spieltage nicht für einen Heimspieltag je Mannschaft.
@@ -95,22 +98,28 @@ internal sealed class Kompaktmodell
     /// <summary>Holt, wie viele Mannschaften rechnerisch mindestens ohne Heimspieltag bleiben.</summary>
     public int MindestensOhneAusrichtung { get; }
 
-    /// <summary>Holt die festgehaltenen Spieltage.</summary>
-    public IReadOnlyList<Kompaktkandidat> Fest { get; }
+    /// <summary>Holt Spitzen- und Abstiegsgruppe (je vier Mannschaften, die ersten beiden spielen gegeneinander) oder leer.</summary>
+    public IReadOnlyList<int[]> Gruppen { get; }
 
     /// <summary>Holt die mittleren Kilometer eines Spieltags (Maßstab für die Zufallsstreuung der Suche).</summary>
     public double KmSkala { get; }
 
-    /// <summary>Holt Hinweise zu den Eingaben (fehlende Meldungen, unbrauchbare Fahrtwünsche oder festgehaltene Spieltage).</summary>
+    /// <summary>Holt Hinweise zu den Eingaben (z. B. fehlende QTTR-Werte).</summary>
     public IReadOnlyList<string> Hinweise => hinweise;
 
-    /// <summary>Ob ein Spieltag festgehalten ist.</summary>
-    public bool IstFest(Kompaktkandidat kandidat) => fest.Contains(kandidat);
-
-    /// <summary>Verstöße gegen die Meldungen: Ausrichter kann nicht zuhause (beim Vierer: oder nicht an zwei Tischen), Gäste nicht auswärts.</summary>
+    /// <summary>
+    /// Verstöße gegen die Meldungen: Ausrichter kann nicht zuhause (beim Vierer: oder nicht an zwei Tischen), Gäste nicht
+    /// auswärts. Unter der Woche gehen nur Einzelbegegnungen bis 60 km Luftlinie (Peter, 13.10.2026: Kompaktspieltage nur
+    /// samstags und sonntags); alles andere dort gilt als unzulässig.
+    /// </summary>
     public int Verstoesse(Turnierform form, int[] mannschaften, int tag)
     {
         int ausrichter = mannschaften[0];
+        if (!wochenende[tag] && (form != Turnierform.Einzel || km[(mannschaften[1] * N) + ausrichter] > EinzelUnterDerWocheKm))
+        {
+            return Unzulaessig;
+        }
+
         bool kannAusrichten = heim[(ausrichter * T) + tag] && (form != Turnierform.Vierer || zweiTische[ausrichter]);
         int gaeste = 0;
         for (int i = 1; i < mannschaften.Length; i++)
@@ -121,15 +130,15 @@ internal sealed class Kompaktmodell
         return (kannAusrichten ? 0 : 1) + gaeste;
     }
 
+    /// <summary>Ob die Mannschaft an diesem Sonntag zuhause spielen kann.</summary>
+    /// <param name="mannschaft">Nummer der Mannschaft.</param>
+    /// <param name="tag">Nummer des Sonntags.</param>
+    /// <returns><c>true</c>, wenn ein Heimspiel gemeldet ist.</returns>
+    public bool KannHeim(int mannschaft, int tag) => heim[(mannschaft * T) + tag];
+
     /// <summary>Ein Spieltag mit allen abgeleiteten Angaben.</summary>
     public Kompaktkandidat Kandidat(Turnierform form, int[] mannschaften, int tag) =>
         new(form, mannschaften, tag, PaareVon(form, mannschaften), Strecke(mannschaften), Verstoesse(form, mannschaften, tag));
-
-    /// <summary>Ob ein Spieltag die Fahrtwünsche einhält: Jede gewünschte Paarung findet in der Halle des Gastgebers statt.</summary>
-    public bool Wunschgerecht(Kompaktkandidat kandidat) => PasstZuWuenschen(kandidat.Mannschaften, kandidat.Paare);
-
-    /// <summary>Ob ein Spieltag (Mannschaften, Paarungen) die Fahrtwünsche einhält.</summary>
-    public bool Wunschgerecht(int[] mannschaften, int[] paare) => PasstZuWuenschen(mannschaften, paare);
 
     /// <summary>Die Nummern der Paarungen eines Spieltags.</summary>
     public int[] PaareFuer(Turnierform form, int[] mannschaften) => PaareVon(form, mannschaften);
@@ -192,46 +201,19 @@ internal sealed class Kompaktmodell
     {
         for (int i = 0; i < N; i++)
         {
-            // Ohne Meldung gilt jeder Sonntag als möglich (das meldet schon die Prüfung der Meldungen).
+            // Ohne Meldung gilt jedes Wochenende als möglich (das meldet schon die Prüfung der Meldungen), unter der Woche
+            // nur auswärts.
             Turniermeldung? meldung = Turnierpruefung.Meldung(Namen[i], meldungen);
             zweiTische[i] = meldung?.ZweiTische ?? true;
             for (int d = 0; d < T; d++)
             {
-                Turnierbereitschaft b = meldung?.An(Tage[d]) ?? (Turnierbereitschaft.Heim | Turnierbereitschaft.Auswaerts);
+                Turnierbereitschaft standard = wochenende[d] ? Turnierbereitschaft.Heim | Turnierbereitschaft.Auswaerts : Turnierbereitschaft.Auswaerts;
+                Turnierbereitschaft b = meldung?.An(Tage[d]) ?? standard;
                 heim[(i * T) + d] = b.HasFlag(Turnierbereitschaft.Heim);
                 auswaerts[(i * T) + d] = b.HasFlag(Turnierbereitschaft.Auswaerts);
             }
         }
     }
-
-    private int[] WuenscheLesen(IReadOnlyList<Fahrtwunsch> wuensche)
-    {
-        int[] gastgeber = Enumerable.Repeat(-1, Paare).ToArray();
-        foreach (Fahrtwunsch w in wuensche)
-        {
-            int gast = Array.IndexOf(Namen, w.Gast);
-            int ziel = Array.IndexOf(Namen, w.Gastgeber);
-            if (gast < 0 || ziel < 0 || gast == ziel)
-            {
-                hinweise.Add($"Fahrtwunsch {w.Gast} → {w.Gastgeber}: Mannschaft nicht in der Staffel – übergangen.");
-                continue;
-            }
-
-            int p = Paar(gast, ziel);
-            if (gastgeber[p] >= 0 && gastgeber[p] != ziel)
-            {
-                hinweise.Add($"Fahrtwunsch {w.Gast} → {w.Gastgeber} widerspricht einem anderen Wunsch für diese Paarung – übergangen.");
-                continue;
-            }
-
-            gastgeber[p] = ziel;
-        }
-
-        return gastgeber;
-    }
-
-    private bool PasstZuWuenschen(int[] mannschaften, int[] paare) =>
-        Array.TrueForAll(paare, p => wunschGastgeber[p] < 0 || wunschGastgeber[p] == mannschaften[0]);
 
     private int[] PaareVon(Turnierform form, int[] m) => form switch
     {
@@ -255,11 +237,6 @@ internal sealed class Kompaktmodell
     private void Hinzufuegen(Turnierform form, int[] mannschaften, List<Kompaktkandidat> kandidaten)
     {
         int[] paare = PaareVon(form, mannschaften);
-        if (!PasstZuWuenschen(mannschaften, paare))
-        {
-            return;
-        }
-
         double strecke = Strecke(mannschaften);
         for (int d = 0; d < T; d++)
         {
@@ -325,53 +302,15 @@ internal sealed class Kompaktmodell
         }
     }
 
-    private List<Kompaktkandidat> FesteLesen(IReadOnlyList<Planturnier> festgehalten)
+    private List<int[]> GruppenLesen(IReadOnlyList<string> spitze, IReadOnlyList<string> keller)
     {
-        var liste = new List<Kompaktkandidat>();
-        var gedeckt = new bool[Paare];
-        var belegt = new bool[N * T];
-        foreach (Planturnier turnier in festgehalten)
-        {
-            Kompaktkandidat? k = Umsetzen(turnier);
-            if (k is null || !Frei(k, gedeckt, belegt))
-            {
-                hinweise.Add($"Festgehaltener Spieltag am {turnier.Tag.ToString("dd.MM.yyyy", Deutsch)} ({string.Join(", ", turnier.Mannschaften)}) passt nicht (mehr) – übergangen.");
-                continue;
-            }
+        int[][] gruppen = [Nummern(spitze), Nummern(keller)];
 
-            foreach (int p in k.Paare)
-            {
-                gedeckt[p] = true;
-            }
-
-            foreach (int m in k.Mannschaften)
-            {
-                belegt[(m * T) + k.Tag] = true;
-            }
-
-            liste.Add(k);
-            fest.Add(k);
-        }
-
-        return liste;
+        // Je vier Mannschaften (4er-Spieltage) oder bei kleinen Klassen je drei (3er-Spieltage), alle verschieden.
+        bool gueltig = Array.TrueForAll(gruppen, g => g.Length is 3 or 4 && g.Length == gruppen[0].Length && Array.TrueForAll(g, m => m >= 0))
+            && gruppen.SelectMany(g => g).Distinct().Count() == gruppen.Sum(g => g.Length);
+        return gueltig ? [.. gruppen] : [];
     }
 
-    private bool Frei(Kompaktkandidat k, bool[] gedeckt, bool[] belegt) =>
-        !Array.Exists(k.Paare, p => gedeckt[p]) && !Array.Exists(k.Mannschaften, m => belegt[(m * T) + k.Tag]);
-
-    private Kompaktkandidat? Umsetzen(Planturnier turnier)
-    {
-        int[] mannschaften = turnier.Mannschaften.Select(m => Array.IndexOf(Namen, m)).ToArray();
-        int tag = Array.IndexOf(Tage, turnier.Tag);
-        int anzahl = turnier.Form switch
-        {
-            Turnierform.Vierer => 4,
-            Turnierform.Dreier => 3,
-            Turnierform.Einzel => 2,
-            _ => 0,
-        };
-        bool gueltig = tag >= 0 && anzahl > 0 && mannschaften.Length == anzahl && Array.TrueForAll(mannschaften, m => m >= 0)
-            && mannschaften.Distinct().Count() == anzahl;
-        return gueltig ? Kandidat(turnier.Form, mannschaften, tag) : null;
-    }
+    private int[] Nummern(IReadOnlyList<string> namen) => namen.Select(n => Array.IndexOf(Namen, n)).ToArray();
 }

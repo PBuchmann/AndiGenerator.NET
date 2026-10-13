@@ -14,10 +14,10 @@ namespace AndiGenerator.Presentation;
 
 /// <summary>
 /// Ansicht „Kompaktspieltage“ (nicht im Original): Meldungen und Plan als Raster, Karte der Spielorte mit den Fahrten,
-/// Pläne (Plan aus click-TT und Varianten des Planers), Spieltage zum Festhalten, Fahrtwünsche und Hinweise. Ein Klick auf einen Sonntag, eine Mannschaft oder einen Spieltag zeigt dessen
+/// Pläne (Plan aus click-TT und Varianten des Planers), Spieltage und Hinweise. Ein Klick auf einen Sonntag, eine Mannschaft oder einen Spieltag zeigt dessen
 /// Fahrten; ein zweiter Klick wieder alle. Entfernungen in Luftlinie.
 /// </summary>
-public sealed class KompaktspieltageAnsichtViewModel : Document
+public sealed partial class KompaktspieltageAnsichtViewModel : Document
 {
     private static readonly CultureInfo Deutsch = CultureInfo.GetCultureInfo("de-DE");
 
@@ -31,16 +31,18 @@ public sealed class KompaktspieltageAnsichtViewModel : Document
     private IReadOnlyList<Kompaktplanwahl> plaene = [];
     private IReadOnlyList<string> planerhinweise = [];
     private IReadOnlyList<string> mannschaftsnamen = [];
-    private IReadOnlyList<Fahrtwunschzeile> fahrtwuensche = [];
-    private string? wunschGast;
-    private string? wunschGastgeber;
-    private string festgehaltenText = string.Empty;
     private bool rechnet;
+    private bool angehalten;
+    private double fortschritt;
+    private string fortschrittText = string.Empty;
+    private string erlaeuterungstitel = string.Empty;
+    private IReadOnlyList<string> erlaeuterung = [];
     private IReadOnlyList<Kompaktspalte> spalten = [];
     private IReadOnlyList<Kompaktrasterzeile> zeilen = [];
     private IReadOnlyList<Kompaktkmzeile> kmZeilen = [];
     private IReadOnlyList<Kompaktspieltagkarte> spieltage = [];
     private IReadOnlyList<string> hinweise = [];
+    private (IReadOnlyList<string> Spitze, IReadOnlyList<string> Keller) gruppen = ([], []);
 
     /// <summary>Initialisiert die Ansicht.</summary>
     /// <param name="hauptfenster">Hauptfenster.</param>
@@ -58,9 +60,12 @@ public sealed class KompaktspieltageAnsichtViewModel : Document
         MannschaftWaehlenCommand = new RelayCommand<string>(n => Waehlen('M', n));
         SpieltagWaehlenCommand = new RelayCommand<Kompaktspieltagkarte>(k => Waehlen('S', k?.Nummer.ToString(CultureInfo.InvariantCulture)));
         PlanWaehlenCommand = new RelayCommand<Kompaktplanwahl>(w => hauptfenster.KompaktplanWaehlen(w?.Variante));
-        FesthaltenCommand = new AsyncRelayCommand<Kompaktspieltagkarte>(FesthaltenAsync);
-        WunschHinzufuegenCommand = new AsyncRelayCommand(WunschHinzufuegenAsync, () => WunschGast is not null && WunschGastgeber is not null && WunschGast != WunschGastgeber);
-        WunschEntfernenCommand = new AsyncRelayCommand<Fahrtwunschzeile>(z => z is null ? Task.CompletedTask : hauptfenster.FahrtwunschEntfernenAsync(z.Wunsch));
+        ZelleWaehlenCommand = new RelayCommand<Kompaktzelle>(z => CursorSetzen(z?.Mannschaft, z?.Tag));
+        FeldSetzenCommand = new AsyncRelayCommand<string>(FeldSetzenAsync, AsyncRelayCommandOptions.AllowConcurrentExecutions);
+        TerminSpeichernCommand = new AsyncRelayCommand(TerminSpeichernAsync);
+        TagAnlegenCommand = new AsyncRelayCommand(TagAnlegenAsync);
+        LokalFuerAlleCommand = new AsyncRelayCommand(LokalFuerAlleAsync);
+        ZeitLoeschenCommand = new AsyncRelayCommand(ZeitLoeschenAsync);
         Laden();
     }
 
@@ -71,7 +76,7 @@ public sealed class KompaktspieltageAnsichtViewModel : Document
         + "anderen (vier Spiele in zwei Runden, zwei Spiele parallel). Jede Mannschaft soll mindestens einen Heimspieltag "
         + "ausrichten. Die Meldungen stehen in den Terminwünschen aus click-TT: Uhrzeit am Sonntag = Heimspieltag möglich, ohne "
         + "Eintrag = auswärts möglich, „frei“ = kann nicht, max. Heimspiele 2 = 4er-Spieltag möglich; „Nur Heim: TT.MM., …“ in "
-        + "den Bemerkungen. Entfernungen werden in Luftlinie zwischen den Hallen berechnet.";
+        + "den Bemerkungen. Im Raster lassen sich die Meldungen auch direkt erfassen (Schalter „Bearbeiten“). Entfernungen werden in Luftlinie zwischen den Hallen berechnet.";
 
     /// <summary>Holt den Befehl „Kompaktspieltage einschalten“.</summary>
     public IAsyncRelayCommand EinschaltenCommand { get; }
@@ -88,17 +93,11 @@ public sealed class KompaktspieltageAnsichtViewModel : Document
     /// <summary>Holt den Befehl „Spieltag wählen“.</summary>
     public IRelayCommand<Kompaktspieltagkarte> SpieltagWaehlenCommand { get; }
 
+    /// <summary>Holt den Befehl „Plan merken…“ für den gewählten Plan.</summary>
+    public IAsyncRelayCommand MerkenCommand => hauptfenster.PlanMerkenCommand;
+
     /// <summary>Holt den Befehl „Plan zeigen“ (Variante oder Plan aus click-TT).</summary>
     public IRelayCommand<Kompaktplanwahl> PlanWaehlenCommand { get; }
-
-    /// <summary>Holt den Befehl „Spieltag festhalten bzw. lösen“.</summary>
-    public IAsyncRelayCommand<Kompaktspieltagkarte> FesthaltenCommand { get; }
-
-    /// <summary>Holt den Befehl „Fahrtwunsch hinzufügen“.</summary>
-    public IAsyncRelayCommand WunschHinzufuegenCommand { get; }
-
-    /// <summary>Holt den Befehl „Fahrtwunsch entfernen“.</summary>
-    public IAsyncRelayCommand<Fahrtwunschzeile> WunschEntfernenCommand { get; }
 
     /// <summary>Holt einen Wert, der angibt, ob die Staffel mit Kompaktspieltagen geplant wird.</summary>
     public bool Eingeschaltet
@@ -119,6 +118,41 @@ public sealed class KompaktspieltageAnsichtViewModel : Document
     {
         get => rechnet;
         private set => SetProperty(ref rechnet, value);
+    }
+
+    /// <summary>Holt einen Wert, der angibt, ob die Berechnung angehalten ist (dann stehen die bisher besten Pläne zur Wahl).</summary>
+    public bool Angehalten
+    {
+        get => angehalten;
+        private set => SetProperty(ref angehalten, value);
+    }
+
+    /// <summary>Holt den Fortschritt der Berechnung in Prozent.</summary>
+    public double Fortschritt
+    {
+        get => fortschritt;
+        private set => SetProperty(ref fortschritt, value);
+    }
+
+    /// <summary>Holt, was die Berechnung gerade tut.</summary>
+    public string FortschrittText
+    {
+        get => fortschrittText;
+        private set => SetProperty(ref fortschrittText, value);
+    }
+
+    /// <summary>Holt die Überschrift der Erläuterung, z. B. „Bestes Gesamtpaket“.</summary>
+    public string Erlaeuterungstitel
+    {
+        get => erlaeuterungstitel;
+        private set => SetProperty(ref erlaeuterungstitel, value);
+    }
+
+    /// <summary>Holt die Erläuterung des gezeigten Plans: wofür er steht und wie er im Vergleich abschneidet.</summary>
+    public IReadOnlyList<string> Erlaeuterung
+    {
+        get => erlaeuterung;
+        private set => SetProperty(ref erlaeuterung, value);
     }
 
     /// <summary>Holt die Pläne zur Wahl: Plan aus click-TT und die Varianten der letzten Berechnung.</summary>
@@ -144,51 +178,11 @@ public sealed class KompaktspieltageAnsichtViewModel : Document
     /// <summary>Holt einen Wert, der angibt, ob es Hinweise der Berechnung gibt.</summary>
     public bool HatPlanerhinweise => Planerhinweise.Count > 0;
 
-    /// <summary>Holt z. B. „2 Spieltage festgehalten“ oder leer.</summary>
-    public string FestgehaltenText
-    {
-        get => festgehaltenText;
-        private set => SetProperty(ref festgehaltenText, value);
-    }
-
-    /// <summary>Holt die Namen der Mannschaften (für die Fahrtwünsche).</summary>
+    /// <summary>Holt die Namen der Mannschaften.</summary>
     public IReadOnlyList<string> Mannschaftsnamen
     {
         get => mannschaftsnamen;
         private set => SetProperty(ref mannschaftsnamen, value);
-    }
-
-    /// <summary>Holt die Fahrtwünsche.</summary>
-    public IReadOnlyList<Fahrtwunschzeile> Fahrtwuensche
-    {
-        get => fahrtwuensche;
-        private set => SetProperty(ref fahrtwuensche, value);
-    }
-
-    /// <summary>Holt oder setzt die Gastmannschaft eines neuen Fahrtwunschs.</summary>
-    public string? WunschGast
-    {
-        get => wunschGast;
-        set
-        {
-            if (SetProperty(ref wunschGast, value))
-            {
-                WunschHinzufuegenCommand.NotifyCanExecuteChanged();
-            }
-        }
-    }
-
-    /// <summary>Holt oder setzt den Gastgeber eines neuen Fahrtwunschs.</summary>
-    public string? WunschGastgeber
-    {
-        get => wunschGastgeber;
-        set
-        {
-            if (SetProperty(ref wunschGastgeber, value))
-            {
-                WunschHinzufuegenCommand.NotifyCanExecuteChanged();
-            }
-        }
     }
 
     /// <summary>Holt die Spaltenköpfe des Rasters.</summary>
@@ -240,41 +234,72 @@ public sealed class KompaktspieltageAnsichtViewModel : Document
         private set => SetProperty(ref hinweise, value);
     }
 
+    /// <summary>Holt einen Wert, der angibt, ob ein Plan gezeigt wird (aus click-TT oder berechnet); sonst entfallen die km je Mannschaft.</summary>
+    public bool HatPlan => auswertung?.Spieltage.Count > 0;
+
     /// <summary>Holt einen Wert, der angibt, ob Hallen ohne bekannte Lage fehlen (dann Hinweis auf die Terminwünsche).</summary>
     public bool FehlenLagen => auswertung?.Mannschaften.Any(m => m.Lage is null) ?? false;
+
+    /// <summary>Zeigt den Fortschritt der Berechnung.</summary>
+    /// <param name="prozent">Erledigt in Prozent.</param>
+    /// <param name="text">Was gerade geschieht.</param>
+    internal void FortschrittZeigen(double prozent, string text)
+    {
+        Fortschritt = prozent;
+        FortschrittText = string.Create(Deutsch, $"{prozent:N0} % – {text}");
+    }
+
+    /// <summary>Zeigt unter dem Balken, dass die Berechnung angehalten ist (der Balken bleibt stehen).</summary>
+    /// <param name="text">Der Hinweis.</param>
+    internal void PauseZeigen(string text) => FortschrittText = string.Create(Deutsch, $"{Fortschritt:N0} % – {text}");
 
     /// <summary>Liest Staffel und Plan neu (nach Öffnen oder Änderung).</summary>
     internal void Laden()
     {
         Eingeschaltet = hauptfenster.KompaktEingeschaltet;
         Rechnet = hauptfenster.KompaktRechnet;
+        Angehalten = hauptfenster.KompaktPausiert;
         Planerhinweise = hauptfenster.KompaktPlanerhinweise;
         auswertung = Eingeschaltet ? hauptfenster.Kompaktauswertung() : null;
         Plaene = PlaeneBilden();
         Mannschaftsnamen = hauptfenster.KompaktMannschaften();
-        Fahrtwuensche = hauptfenster.Fahrtwuensche()
-            .Select(w => new Fahrtwunschzeile($"{Kompaktplanung.Kurzname(w.Gast)} spielt in der Halle von {Kompaktplanung.Kurzname(w.Gastgeber)}", w))
-            .ToList();
         if (auswertung is null)
         {
+            Bearbeiten = false;
             Kopfzeile = hauptfenster.Staffelname;
             Spalten = [];
             Zeilen = [];
             KmZeilen = [];
             Spieltage = [];
             Hinweise = [];
-            FestgehaltenText = string.Empty;
+            Erlaeuterungstitel = string.Empty;
+            Erlaeuterung = [];
             Karte = Kartenbild.Leer;
             OnPropertyChanged(nameof(FehlenLagen));
+            OnPropertyChanged(nameof(HatPlan));
             return;
         }
 
         Kompaktauswertung a = auswertung;
-        Kopfzeile = string.Create(Deutsch, $"{hauptfenster.Staffelname} · {a.Tage.Count} Sonntage · {a.Mannschaften.Count} Mannschaften");
-        int fest = a.Spieltage.Count(hauptfenster.IstFestgehalten);
-        FestgehaltenText = fest == 0 ? string.Empty : string.Create(Deutsch, $"{fest} Spieltag(e) festgehalten – sie bleiben bei der nächsten Berechnung.");
+        (IReadOnlyList<string> spitze, IReadOnlyList<string> keller) = hauptfenster.KompaktGruppen();
+        gruppen = (spitze, keller);
+        Kompaktvariante? gezeigt = hauptfenster.GewaehlteKompaktvariante;
+        if (gezeigt is null && !hauptfenster.HatClickTtPlan)
+        {
+            // Ohne Plan aus click-TT und noch ohne Varianten gibt es nichts zu erläutern.
+            Erlaeuterungstitel = string.Empty;
+            Erlaeuterung = [];
+        }
+        else
+        {
+            Erlaeuterungstitel = gezeigt?.Name ?? "Plan aus click-TT";
+            Erlaeuterung = Kompakterlaeuterung.Zeilen(gezeigt, a, hauptfenster.Kompaktvarianten, spitze, keller);
+        }
+
+        Kopfzeile = string.Create(Deutsch, $"{hauptfenster.Staffelname} · {a.Tage.Count} mögliche Termine · {a.Mannschaften.Count} Mannschaften");
         Hinweise = [.. Planerhinweise.Select(h => "ℹ " + h), .. HinweiseBilden(a)];
         OnPropertyChanged(nameof(FehlenLagen));
+        OnPropertyChanged(nameof(HatPlan));
         AuswahlZeigen();
     }
 
@@ -295,9 +320,21 @@ public sealed class KompaktspieltageAnsichtViewModel : Document
         _ => "nicht",
     };
 
+    private static string Ausrichtertext(Kompaktmannschaft m) => m.EinzelHeim > 0
+        ? string.Create(Deutsch, $"{m.Ausgerichtet}× Ausrichter, {m.EinzelHeim}× Einzel zuhause")
+        : string.Create(Deutsch, $"{m.Ausgerichtet}× Ausrichter");
+
     private static string Kurz(Kompaktauswertung a, string name) => a.Mannschaften.FirstOrDefault(m => m.Name == name)?.Kurzname ?? name;
 
-    private static Kompaktrasterzeile Zeile(Kompaktauswertung a, DateOnly tag, bool gewaehlt, string? team)
+    // Eine Zeile des Rasters; gedimmt ist, was nicht zur Auswahl gehört (andere Mannschaften bzw. andere Sonntage).
+    private static Kompaktrasterzeile Zeile(
+        Kompaktauswertung a,
+        DateOnly tag,
+        bool gewaehlt,
+        string? team,
+        bool andererTag,
+        (string Mannschaft, DateOnly Tag)? rahmen,
+        (Kompaktspieltag? Spitze, Kompaktspieltag? Keller) gruppentage)
     {
         var zellen = new List<Kompaktzelle>();
         foreach (Kompaktmannschaft m in a.Mannschaften)
@@ -311,7 +348,6 @@ public sealed class KompaktspieltageAnsichtViewModel : Document
             {
                 (not null, _) => ausrichter ? "★" : "●",
                 (null, null) => "?",
-                (null, Turnierbereitschaft.None) => "✗",
                 _ => string.Empty,
             };
             string meldung = b switch
@@ -328,13 +364,26 @@ public sealed class KompaktspieltageAnsichtViewModel : Document
                 rolle = ausrichter ? " · richtet aus" : " · Gast bei " + Kurz(a, s.Ausrichter ?? "?");
             }
 
-            zellen.Add(new Kompaktzelle(Meldungsart(b), zeichen, verstoss, team is not null && team != m.Name, string.Create(Deutsch, $"{m.Name}, {tag:dd.MM.yyyy}: {meldung}{rolle}")));
+            List<Kompaktspieltag> amTag = a.Spieltage.Where(x => x.Tag == tag).ToList();
+            string termin = m.Termine.TryGetValue(tag, out string? text) ? Environment.NewLine + text : string.Empty;
+            zellen.Add(new Kompaktzelle(Meldungsart(b), zeichen, verstoss, andererTag || (team is not null && team != m.Name), string.Create(Deutsch, $"{m.Name}, {tag:dd.MM.yyyy}: {meldung}{rolle}{termin}"))
+            {
+                Spieltag = s is null ? 0 : amTag.IndexOf(s),
+                Einzel = s?.Form == Turnierform.Einzel,
+                Mannschaft = m.Name,
+                Tag = tag,
+                IstCursor = rahmen == (m.Name, tag),
+                Spitzenspieltag = s is not null && ReferenceEquals(s, gruppentage.Spitze),
+                Abstiegsspieltag = s is not null && ReferenceEquals(s, gruppentage.Keller),
+            });
         }
 
-        return new Kompaktrasterzeile(tag, tag.ToString("dd.MM.", Deutsch), gewaehlt, zellen);
+        // Sonntage wie bisher nur mit Datum, Samstage und Wochentage mit Kürzel (z. B. „Sa 12.09.“).
+        string datum = tag.DayOfWeek == DayOfWeek.Sunday ? tag.ToString("dd.MM.", Deutsch) : tag.ToString("ddd dd.MM.", Deutsch);
+        return new Kompaktrasterzeile(tag, datum, gewaehlt, zellen);
     }
 
-    private static Kompaktspieltagkarte Spieltagkarte(int nummer, Kompaktspieltag s, Kompaktauswertung a, bool gewaehlt, bool festgehalten)
+    private static Kompaktspieltagkarte Spieltagkarte(int nummer, Kompaktspieltag s, Kompaktauswertung a, bool gewaehlt)
     {
         string form = s.Form switch
         {
@@ -347,7 +396,7 @@ public sealed class KompaktspieltageAnsichtViewModel : Document
         string verlegen = string.Empty;
         if (s.HalleVerlegen.Count > 0)
         {
-            string ziel = halle.Length > 0 ? " → " + halle : string.Empty;
+            string ziel = halle.Length > 0 ? " – in diese Halle:" : string.Empty;
             verlegen = "In click-TT Halle verlegen: " + string.Join(", ", s.HalleVerlegen.Select(g => Kurz(a, g.Heim) + " – " + Kurz(a, g.Gast))) + ziel;
         }
 
@@ -361,12 +410,13 @@ public sealed class KompaktspieltageAnsichtViewModel : Document
             verlegen,
             string.Join(", ", s.Gaeste.Select(g => Kurz(a, g))) + " reisen an",
             s.Hinweise,
-            gewaehlt,
-            festgehalten,
-            Kompaktplanung.AlsPlanturnier(s) is not null);
+            gewaehlt)
+        {
+            Adresse = halle,
+        };
     }
 
-    private static string Planzeile(Kompaktkennzahlen k, int mannschaften)
+    private static string Planzeile(Kompaktkennzahlen k, int mannschaften, double? punkte)
     {
         var formen = new List<string>();
         if (k.Vierer > 0)
@@ -385,8 +435,9 @@ public sealed class KompaktspieltageAnsichtViewModel : Document
         }
 
         string zeile = string.Join(" · ", formen)
-            + string.Create(Deutsch, $" · {k.Km:N0} km · Stand höchstens {k.Abstand} Spiele auseinander · bis zu {k.Gemeinsam} von {mannschaften} an einem Tag");
-        return k.Verstoesse > 0 ? zeile + string.Create(Deutsch, $" · {k.Verstoesse} Verstöße") : zeile;
+            + string.Create(Deutsch, $" · {k.Km:N0} km (Unterschied {k.KmSpanne:N0} km) · Stand höchstens {k.Abstand} Spiele auseinander · bis zu {k.Gemeinsam} von {mannschaften} an einem Tag");
+        zeile = k.Verstoesse > 0 ? zeile + string.Create(Deutsch, $" · {k.Verstoesse} Verstöße") : zeile;
+        return punkte is double p ? string.Create(Deutsch, $"{p:N1} Punkte · ") + zeile : zeile;
     }
 
     private List<Kompaktplanwahl> PlaeneBilden()
@@ -396,31 +447,15 @@ public sealed class KompaktspieltageAnsichtViewModel : Document
         var liste = new List<Kompaktplanwahl>();
         if (hauptfenster.HatClickTtPlan)
         {
-            liste.Add(new Kompaktplanwahl("Plan aus click-TT", "wie in click-TT eingetragen", gezeigt is null, null));
+            string zeile = hauptfenster.KompaktClickTtPunkte is double p ? string.Create(Deutsch, $"wie in click-TT eingetragen · {p:N1} Punkte") : "wie in click-TT eingetragen";
+            liste.Add(new Kompaktplanwahl("Plan aus click-TT", zeile, gezeigt is null, null));
         }
 
-        liste.AddRange(hauptfenster.Kompaktvarianten.Select(v => new Kompaktplanwahl(v.Name, Planzeile(v.Kennzahlen, mannschaften), ReferenceEquals(v, gezeigt), v)));
+        // Gespeicherte Pläne (gesichert, gemerkt): gewählt gelten sie mit genau ihren Spielen für Druck und click-TT-Export.
+        liste.AddRange(hauptfenster.KompaktGespeichertePlaene.Select(v =>
+            new Kompaktplanwahl(v.Name, Planzeile(v.Kennzahlen, mannschaften, hauptfenster.KompaktPunkte(v)), ReferenceEquals(v, gezeigt), v) { Gespeichert = true }));
+        liste.AddRange(hauptfenster.Kompaktvarianten.Select(v => new Kompaktplanwahl(v.Name, Planzeile(v.Kennzahlen, mannschaften, hauptfenster.KompaktPunkte(v)), ReferenceEquals(v, gezeigt), v)));
         return liste;
-    }
-
-    private Task FesthaltenAsync(Kompaktspieltagkarte? karte)
-    {
-        if (karte is null || auswertung is null || karte.Nummer >= auswertung.Spieltage.Count)
-        {
-            return Task.CompletedTask;
-        }
-
-        return hauptfenster.KompaktFesthaltenAsync(auswertung.Spieltage[karte.Nummer]);
-    }
-
-    private async Task WunschHinzufuegenAsync()
-    {
-        if (WunschGast is string gast && WunschGastgeber is string gastgeber && gast != gastgeber)
-        {
-            await hauptfenster.FahrtwunschHinzufuegenAsync(new Fahrtwunsch(gast, gastgeber));
-            WunschGast = null;
-            WunschGastgeber = null;
-        }
     }
 
     private void Waehlen(char art, string? schluessel)
@@ -451,13 +486,22 @@ public sealed class KompaktspieltageAnsichtViewModel : Document
             .ToList();
 
         Spalten = a.Mannschaften.Select(m => new Kompaktspalte(m.Name, m.Kurzname, m.Name == team)).ToList();
-        Zeilen = a.Tage.Select(t => Zeile(a, t, tag == t, team)).ToList();
+        (string, DateOnly)? rahmen = Bearbeiten ? cursor : null;
+        Kompaktspieltag? spitzentag = gruppen.Spitze.Count >= 3 ? Kompaktpunkte.Gruppentag(a, gruppen.Spitze) : null;
+        Kompaktspieltag? kellertag = gruppen.Keller.Count >= 3 ? Kompaktpunkte.Gruppentag(a, gruppen.Keller) : null;
+        Zeilen = a.Tage.Select(t => Zeile(a, t, tag == t, team, tag is not null && tag != t, rahmen, (spitzentag, kellertag))).ToList();
         double weiteste = Math.Max(1, a.Mannschaften.Select(m => m.Km).DefaultIfEmpty(0).Max());
         KmZeilen = a.Mannschaften.OrderByDescending(m => m.Km)
-            .Select(m => new Kompaktkmzeile(m.Name, m.Kurzname, string.Create(Deutsch, $"{m.Ausgerichtet}× Ausrichter"), m.Km.ToString("N0", Deutsch), m.Km / weiteste, m.Name == team))
+            .Select(m => new Kompaktkmzeile(m.Name, m.Kurzname, Ausrichtertext(m), m.Km.ToString("N0", Deutsch), m.Km / weiteste, m.Name == team))
             .ToList();
+
+        // Markiert sind die Spieltage der Auswahl: des Sonntags, der angeklickte, oder alle der Mannschaft (Heim und auswärts).
         Spieltage = alle
-            .Select(x => Spieltagkarte(x.Nummer, x.Spieltag, a, (tag is not null && x.Spieltag.Tag == tag) || nummer == x.Nummer, hauptfenster.IstFestgehalten(x.Spieltag)))
+            .Select(x => Spieltagkarte(
+                x.Nummer,
+                x.Spieltag,
+                a,
+                (tag is not null && x.Spieltag.Tag == tag) || nummer == x.Nummer || (team is not null && x.Spieltag.Mannschaften.Contains(team))))
             .ToList();
         Kartentitel = (auswahl.Art, team) switch
         {
@@ -469,7 +513,7 @@ public sealed class KompaktspieltageAnsichtViewModel : Document
         bool alleZeigen = auswahl.Art == '-';
         List<Kompaktspieltag> sichtbar = alleZeigen ? a.Spieltage.ToList() : gewaehlt;
         var fahrten = sichtbar.Where(s => s.Ausrichter is not null)
-            .SelectMany(s => s.Gaeste.Where(g => team is null || g == team).Select(g => (Von: g, Nach: s.Ausrichter!, Kraeftig: !alleZeigen)))
+            .SelectMany(s => s.Gaeste.Where(g => team is null || g == team).Select(g => (Von: g, Nach: s.Ausrichter!, Kraeftig: !alleZeigen, Einzel: s.Form == Turnierform.Einzel)))
             .ToList();
         var ausrichter = sichtbar.Select(s => s.Ausrichter).OfType<string>().ToHashSet(StringComparer.Ordinal);
         List<Kartenort> orte = a.Mannschaften

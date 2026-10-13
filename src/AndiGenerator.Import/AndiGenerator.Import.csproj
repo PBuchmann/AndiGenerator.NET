@@ -5,6 +5,8 @@
   <ItemGroup>
     <!-- PDF lesen (Bericht „Terminwünsche“ aus click-TT), Apache-2.0 (MIGRATIONSPLAN E11). -->
     <PackageReference Include="PdfPig" />
+    <!-- Löser HiGHS für die Kompaktspieltage, MIT: nur die native Bibliothek über die C-Schnittstelle (HighsLoeser.cs). -->
+    <PackageReference Include="Highs.Native" ExcludeAssets="compile" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AndiGenerator.Persistence\AndiGenerator.Persistence.csproj" />

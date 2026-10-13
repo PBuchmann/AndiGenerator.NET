@@ -2,6 +2,7 @@
 // SPDX-FileCopyrightText: 2026 Peter Buchmann
 // SPDX-License-Identifier: GPL-3.0-only
 
+using System.Globalization;
 using AndiGenerator.Application;
 using AndiGenerator.Domain.Stammdaten;
 using AndiGenerator.Engine.Turniere;
@@ -16,14 +17,20 @@ namespace AndiGenerator.Presentation;
 public sealed partial class HauptfensterViewModel
 {
     private KompaktspieltageAnsichtViewModel? kompaktAnsicht;
+    private bool kompaktMeldungenBearbeiten;
+    private Datenbearbeitung? kompaktLesekopie;
     private IRelayCommand? kompaktCommand;
     private IReadOnlyList<Kompaktvariante> kompaktVarianten = [];
+    private Dictionary<Kompaktvariante, double> kompaktPunkte = [];
+    private double? kompaktClickTtPunkte;
     private IReadOnlyList<string> kompaktPlanerhinweise = [];
-    private IReadOnlyList<Planturnier> kompaktFest = [];
     private IReadOnlyList<Kompaktkachel> kompaktKacheln = [];
     private Kompaktvariante? kompaktVariante;
     private Kompaktauswertung? kompaktStand;
     private bool kompaktRechnet;
+    private bool kompaktPausiert;
+    private Kompaktsteuerung? kompaktSteuerung;
+    private Kompaktvariante? kompaktBehalten;
     private bool kompaktAktivBisher;
 
     /// <summary>Holt den Befehl „Kompaktspieltage“ (Ansicht als andockbares Dokument).</summary>
@@ -31,9 +38,9 @@ public sealed partial class HauptfensterViewModel
 
     /// <summary>
     /// Holt einen Wert, der angibt, ob die Ansicht „Kompaktspieltage“ angeboten wird: nur, wenn die Klasse dafür in Frage
-    /// kommt (Halbrunde mit überwiegend Spieltagen am Wochenende).
+    /// kommt (Halbrunde mit überwiegend Spieltagen am Wochenende) oder wenn die Kompaktspieltage schon eingeschaltet sind.
     /// </summary>
-    public bool ZeigtKompaktspieltage => sitzung is Plansitzung s && Kompaktplanung.InFrage(s.Staffel, s.Optionen.Rundenplanung, false);
+    public bool ZeigtKompaktspieltage => sitzung is Plansitzung s && (Kompaktplanung.InFrage(s.Staffel, s.Optionen.Rundenplanung, false) || KompaktEingeschaltet);
 
     /// <summary>Holt einen Wert, der angibt, ob die Staffel mit Kompaktspieltagen geplant wird (Kompaktmodus).</summary>
     public bool KompaktAktiv => ZeigtKompaktspieltage && KompaktEingeschaltet;
@@ -48,6 +55,23 @@ public sealed partial class HauptfensterViewModel
         private set => SetProperty(ref kompaktKacheln, value);
     }
 
+    /// <summary>
+    /// Holt oder setzt einen Wert, der angibt, ob die Meldungen im Raster gerade bearbeitet werden; solange lässt sich keine
+    /// Berechnung starten (Peter, 13.10.2026).
+    /// </summary>
+    public bool KompaktMeldungenBearbeiten
+    {
+        get => kompaktMeldungenBearbeiten;
+        set
+        {
+            if (kompaktMeldungenBearbeiten != value)
+            {
+                kompaktMeldungenBearbeiten = value;
+                GenerierungCommand.NotifyCanExecuteChanged();
+            }
+        }
+    }
+
     /// <summary>Holt einen Wert, der angibt, ob der Kompaktplaner gerade rechnet.</summary>
     public bool KompaktRechnet
     {
@@ -57,6 +81,21 @@ public sealed partial class HauptfensterViewModel
             if (SetProperty(ref kompaktRechnet, value))
             {
                 GenerierungCommand.NotifyCanExecuteChanged();
+                StoppenCommand.NotifyCanExecuteChanged();
+                GenerierungGeaendert();
+            }
+        }
+    }
+
+    /// <summary>Holt einen Wert, der angibt, ob die Planung der Kompaktspieltage angehalten ist (dann zeigt die Ansicht die bisher besten Pläne).</summary>
+    public bool KompaktPausiert
+    {
+        get => kompaktPausiert;
+        private set
+        {
+            if (SetProperty(ref kompaktPausiert, value))
+            {
+                GenerierungGeaendert();
             }
         }
     }
@@ -70,6 +109,9 @@ public sealed partial class HauptfensterViewModel
     /// <summary>Holt die Varianten der letzten Berechnung.</summary>
     internal IReadOnlyList<Kompaktvariante> Kompaktvarianten => kompaktVarianten;
 
+    /// <summary>Holt die Punkte des Plans aus click-TT (wie beim besten Gesamtpaket) oder <c>null</c>, wenn nicht berechnet.</summary>
+    internal double? KompaktClickTtPunkte => kompaktClickTtPunkte;
+
     /// <summary>Holt die gezeigte Variante oder <c>null</c> für den Plan aus click-TT.</summary>
     internal Kompaktvariante? GewaehlteKompaktvariante => kompaktVariante;
 
@@ -79,6 +121,11 @@ public sealed partial class HauptfensterViewModel
     /// <summary>Holt einen Wert, der angibt, ob es einen Plan aus click-TT gibt.</summary>
     internal bool HatClickTtPlan => sitzung?.Staffel.BestehenderSpielplan.Count > 0;
 
+    /// <summary>Die Punkte einer Variante (wie beim besten Gesamtpaket, kleiner ist besser).</summary>
+    /// <param name="variante">Die Variante.</param>
+    /// <returns>Die Punkte oder <c>null</c>, wenn nicht berechnet.</returns>
+    internal double? KompaktPunkte(Kompaktvariante variante) => kompaktPunkte.TryGetValue(variante, out double p) ? p : null;
+
     /// <summary>Die Auswertung des gezeigten Plans (Variante oder Plan aus click-TT).</summary>
     /// <returns>Die Auswertung oder <c>null</c> außerhalb des Kompaktmodus.</returns>
     internal Kompaktauswertung? Kompaktauswertung() => kompaktStand;
@@ -87,15 +134,19 @@ public sealed partial class HauptfensterViewModel
     /// <returns>Die Namen.</returns>
     internal List<string> KompaktMannschaften() => sitzung?.Staffel.Mannschaften.Select(m => m.Name).ToList() ?? [];
 
-    /// <summary>Die Fahrtwünsche der Staffel.</summary>
-    /// <returns>Die Wünsche.</returns>
-    internal IReadOnlyList<Fahrtwunsch> Fahrtwuensche() => sitzung?.DatenBearbeiten().Fahrtwuensche() ?? [];
+    /// <summary>Die vier stärksten und die vier schwächsten Mannschaften nach QTTR-Schnitt (leer, wenn nicht bekannt).</summary>
+    /// <returns>Spitze und Keller.</returns>
+    internal (IReadOnlyList<string> Spitze, IReadOnlyList<string> Keller) KompaktGruppen()
+    {
+        if (sitzung is not Plansitzung s)
+        {
+            return ([], []);
+        }
 
-    /// <summary>Ob ein Spieltag festgehalten ist.</summary>
-    /// <param name="spieltag">Der Spieltag.</param>
-    /// <returns><c>true</c>, wenn er bei der nächsten Berechnung bleibt.</returns>
-    internal bool IstFestgehalten(Kompaktspieltag spieltag) =>
-        Kompaktplanung.AlsPlanturnier(spieltag) is Planturnier turnier && kompaktFest.Any(f => GleicherSpieltag(f, turnier));
+        (IReadOnlyList<string> spitze, IReadOnlyList<string> keller, _) =
+            Kompaktplanung.Staerkegruppen(s.Staffel.Mannschaften.Select(m => m.Name).ToList(), s.DatenBearbeiten().Mannschaftsstaerken());
+        return (spitze, keller);
+    }
 
     /// <summary>Schaltet die Kompaktspieltage ein oder aus und speichert das mit der Staffel.</summary>
     /// <param name="modus">Der neue Zustand.</param>
@@ -111,9 +162,57 @@ public sealed partial class HauptfensterViewModel
         daten.KompaktspieltageSetzen(modus);
         if (await UebernehmenAsync(s, daten))
         {
+            KompaktGespeichertAufbauen();
             KompaktAktualisieren();
         }
     }
+
+    /// <summary>Ändert die Meldungen (Raster im Bearbeitungsmodus), speichert sie wie die Spielplandaten und zeigt sie neu.</summary>
+    /// <param name="aenderung">Die Änderung an der Arbeitskopie.</param>
+    /// <returns>Eine Aufgabe.</returns>
+    internal async Task KompaktMeldungAendernAsync(Action<Datenbearbeitung> aenderung)
+    {
+        if (sitzung is not Plansitzung s)
+        {
+            return;
+        }
+
+        Datenbearbeitung daten = s.DatenBearbeiten();
+        try
+        {
+            aenderung(daten);
+        }
+        catch (ArgumentException fehler)
+        {
+            await oberflaeche.MeldenAsync("Meldungen", fehler.Message);
+            return;
+        }
+
+        if (await UebernehmenAsync(s, daten))
+        {
+            KompaktAktualisieren();
+        }
+    }
+
+    /// <summary>Liest etwas aus den Spielplandaten (z. B. den Heimtermin unter dem Rahmen des Rasters).</summary>
+    /// <typeparam name="T">Art des Ergebnisses.</typeparam>
+    /// <param name="lesen">Was gelesen wird.</param>
+    /// <param name="ersatz">Ergebnis ohne geöffnete Staffel.</param>
+    /// <returns>Das Ergebnis.</returns>
+    internal T KompaktDatenLesen<T>(Func<Datenbearbeitung, T> lesen, T ersatz)
+    {
+        if (sitzung is not Plansitzung s)
+        {
+            return ersatz;
+        }
+
+        // Eine Lesekopie für alle Bewegungen des Rahmens; sie wird bei jeder Änderung neu angelegt.
+        kompaktLesekopie ??= s.DatenBearbeiten();
+        return lesen(kompaktLesekopie);
+    }
+
+    /// <summary>Verwirft die Lesekopie der Spielplandaten (nach Änderungen von außen).</summary>
+    internal void KompaktLesekopieVerwerfen() => kompaktLesekopie = null;
 
     /// <summary>Berechnet Varianten (Startknopf im Kompaktmodus) und zeigt die ausgewogene.</summary>
     /// <returns>Eine Aufgabe.</returns>
@@ -124,14 +223,20 @@ public sealed partial class HauptfensterViewModel
             return;
         }
 
+        using var steuerung = new Kompaktsteuerung();
+        kompaktSteuerung = steuerung;
+        kompaktBehalten = null;
         KompaktRechnet = true;
+        kompaktAnsicht?.FortschrittZeigen(0, "Wird vorbereitet …");
         kompaktAnsicht?.Laden();
         Kompaktaufgabe aufgabe = Kompaktplanung.Aufgabe(s.Staffel, s.DatenBearbeiten(), s.Optionen.Rundenplanung, DateOnly.FromDateTime(DateTime.Today));
-        Statuszeile = string.Create(Deutsch, $"Kompaktspieltage werden geplant (auf {Kompaktplanoptionen.Standard.Threads} Prozessorkernen) …");
+        Kompaktplanoptionen optionen = Kompaktplanung.Optionen();
+        Statuszeile = string.Create(Deutsch, $"Kompaktspieltage werden geplant (auf {optionen.Threads} Prozessorkernen) …");
         Kompaktergebnis ergebnis;
         try
         {
-            ergebnis = await Task.Run(() => Kompaktplaner.Planen(aufgabe, Kompaktplanoptionen.Standard, CancellationToken.None, KompaktFortschritt));
+            // Beenden läuft über die Steuerung: der Planer liefert dann noch die bis dahin besten Pläne.
+            ergebnis = await Task.Run(() => Kompaktplaner.Planen(aufgabe, optionen, steuerung, KompaktFortschritt), CancellationToken.None);
         }
         catch (Exception fehler) when (fehler is not OperationCanceledException)
         {
@@ -142,6 +247,8 @@ public sealed partial class HauptfensterViewModel
         }
         finally
         {
+            kompaktSteuerung = null;
+            KompaktPausiert = false;
             KompaktRechnet = false;
         }
 
@@ -150,14 +257,51 @@ public sealed partial class HauptfensterViewModel
             return;
         }
 
-        kompaktVarianten = ergebnis.Varianten;
-        kompaktPlanerhinweise = ergebnis.Hinweise;
+        KompaktErgebnisZeigen(s, ergebnis);
+        kompaktBehalten = null;
         Statuszeile = ergebnis.Varianten.Count == 0
             ? "Kompaktspieltage: kein vollständiger Plan gefunden – Hinweise in der Ansicht „Kompaktspieltage“."
             : string.Create(Deutsch, $"Kompaktspieltage: {ergebnis.Varianten.Count} Varianten aus {ergebnis.Geprueft:N0} Versuchen.");
-        KompaktspieltageOeffnen();
-        KompaktplanWaehlen(ergebnis.Varianten.Count > 0 ? ergebnis.Varianten[0] : kompaktVariante);
     }
+
+    /// <summary>
+    /// Hält die laufende Planung an und zeigt die bisher besten Pläne (sie werden ersetzt, wenn die Planung später
+    /// bessere findet) bzw. setzt sie fort.
+    /// </summary>
+    /// <returns>Eine Aufgabe.</returns>
+    internal async Task KompaktPauseUmschaltenAsync()
+    {
+        if (kompaktSteuerung is not Kompaktsteuerung steuerung || sitzung is not Plansitzung s)
+        {
+            return;
+        }
+
+        if (KompaktPausiert)
+        {
+            // Von den Plänen der Pause bleibt nur der gewählte; er steht am Ende neben den neuen.
+            kompaktBehalten = kompaktVariante;
+            kompaktVarianten = kompaktBehalten is null ? [] : [kompaktBehalten];
+            kompaktPunkte = kompaktPunkte.Where(p => ReferenceEquals(p.Key, kompaktBehalten)).ToDictionary();
+            KompaktPausiert = false;
+            steuerung.Fortsetzen();
+            KompaktAktualisieren();
+            Statuszeile = "Kompaktspieltage werden weiter geplant …";
+            return;
+        }
+
+        steuerung.Pausieren();
+        KompaktPausiert = true;
+        Statuszeile = "Kompaktspieltage: angehalten – gezeigt werden die bisher besten Pläne.";
+        Kompaktergebnis? zwischenstand = await Task.Run(() => steuerung.Zwischenstand(), CancellationToken.None);
+        if (zwischenstand is not null && KompaktPausiert && ReferenceEquals(s, sitzung))
+        {
+            KompaktErgebnisZeigen(s, zwischenstand);
+            kompaktAnsicht?.PauseZeigen("Angehalten – die bisher besten Pläne stehen zur Auswahl. Weiterrechnen behält nur den gewählten.");
+        }
+    }
+
+    /// <summary>Beendet die laufende Planung; sie liefert die bis dahin besten Pläne.</summary>
+    internal void KompaktStoppen() => kompaktSteuerung?.Stoppen();
 
     /// <summary>Zeigt einen Plan: eine Variante (sie wird zum aktuellen Plan für alle Ansichten, Druck und Export) oder den Plan aus click-TT.</summary>
     /// <param name="variante">Die Variante oder <c>null</c> für den Plan aus click-TT.</param>
@@ -171,8 +315,17 @@ public sealed partial class HauptfensterViewModel
         kompaktVariante = variante;
         if (variante is not null)
         {
-            IReadOnlyList<Spiel> spiele = Kompaktplanung.Spiele(variante.Turniere, s.Staffel);
-            laufenderStand = new Planstand(spiele, s.Bewerten(spiele));
+            // Gespeicherte Pläne mit genau ihren Spielen (Uhrzeiten, Hallen, Heimrecht), Varianten aus ihren Spieltagen.
+            if (GespeicherterStand(s, variante) is Planstand gespeichert)
+            {
+                laufenderStand = gespeichert;
+            }
+            else
+            {
+                IReadOnlyList<Spiel> spiele = Kompaktplanung.Spiele(variante.Turniere, s.Staffel);
+                laufenderStand = new Planstand(spiele, s.Bewerten(spiele));
+            }
+
             StartplaeneAufbauen();
             BefehleAktualisieren();
             AnsichtenAktualisieren(PlanQuellenArt.LaufendeGenerierung);
@@ -181,65 +334,9 @@ public sealed partial class HauptfensterViewModel
         KompaktAktualisieren();
     }
 
-    /// <summary>Hält einen Spieltag fest bzw. löst ihn wieder.</summary>
-    /// <param name="spieltag">Der Spieltag.</param>
-    /// <returns>Eine Aufgabe.</returns>
-    internal Task KompaktFesthaltenAsync(Kompaktspieltag spieltag)
-    {
-        if (sitzung is not Plansitzung s || Kompaktplanung.AlsPlanturnier(spieltag) is not Planturnier turnier)
-        {
-            return Task.CompletedTask;
-        }
-
-        Datenbearbeitung daten = s.DatenBearbeiten();
-        List<Planturnier> fest = daten.Festgehalten().ToList();
-        if (fest.RemoveAll(f => GleicherSpieltag(f, turnier)) == 0)
-        {
-            fest.Add(turnier);
-        }
-
-        daten.FestgehaltenSetzen(fest);
-        return KompaktDatenUebernehmenAsync(s, daten);
-    }
-
-    /// <summary>Fügt einen Fahrtwunsch hinzu (ein älterer für dieselbe Paarung wird ersetzt).</summary>
-    /// <param name="wunsch">Der Wunsch.</param>
-    /// <returns>Eine Aufgabe.</returns>
-    internal Task FahrtwunschHinzufuegenAsync(Fahrtwunsch wunsch)
-    {
-        if (sitzung is not Plansitzung s)
-        {
-            return Task.CompletedTask;
-        }
-
-        Datenbearbeitung daten = s.DatenBearbeiten();
-        List<Fahrtwunsch> wuensche = daten.Fahrtwuensche().Where(w => !GleichePaarung(w, wunsch)).ToList();
-        wuensche.Add(wunsch);
-        daten.FahrtwuenscheSetzen(wuensche);
-        return KompaktDatenUebernehmenAsync(s, daten);
-    }
-
-    /// <summary>Entfernt einen Fahrtwunsch.</summary>
-    /// <param name="wunsch">Der Wunsch.</param>
-    /// <returns>Eine Aufgabe.</returns>
-    internal Task FahrtwunschEntfernenAsync(Fahrtwunsch wunsch)
-    {
-        if (sitzung is not Plansitzung s)
-        {
-            return Task.CompletedTask;
-        }
-
-        Datenbearbeitung daten = s.DatenBearbeiten();
-        daten.FahrtwuenscheSetzen(daten.Fahrtwuensche().Where(w => w != wunsch));
-        return KompaktDatenUebernehmenAsync(s, daten);
-    }
-
-    private static bool GleicherSpieltag(Planturnier a, Planturnier b) =>
-        a.Tag == b.Tag && a.Form == b.Form && a.Ausrichter == b.Ausrichter
-        && a.Mannschaften.Order(StringComparer.Ordinal).SequenceEqual(b.Mannschaften.Order(StringComparer.Ordinal));
-
-    private static bool GleichePaarung(Fahrtwunsch a, Fahrtwunsch b) =>
-        (a.Gast == b.Gast && a.Gastgeber == b.Gastgeber) || (a.Gast == b.Gastgeber && a.Gastgeber == b.Gast);
+    /// <summary>Ein Plan als Text (Tag, Form, Mannschaften je Spieltag) zum Erkennen gleicher Pläne.</summary>
+    private static string Planschluessel(Kompaktvariante v) =>
+        string.Join(';', v.Turniere.Select(t => string.Create(CultureInfo.InvariantCulture, $"{t.Tag:yyyy-MM-dd}|{t.Form}|{string.Join(',', t.Mannschaften)}")));
 
     private static string KmText(double km) => km.ToString("N0", Deutsch) + " km";
 
@@ -263,12 +360,11 @@ public sealed partial class HauptfensterViewModel
         int wenigste = a.Mannschaften.Min(m => m.Ausgerichtet);
         int meiste = a.Mannschaften.Max(m => m.Ausgerichtet);
         string heim = wenigste == meiste ? wenigste.ToString(Deutsch) : string.Create(Deutsch, $"{wenigste}–{meiste}");
-        string ohne = a.OhneHeimspieltag == 0 ? "jede richtet aus" : string.Create(Deutsch, $"{a.OhneHeimspieltag} ohne Heimspieltag");
         return
         [
-            new Kompaktkachel("Fahrten (Luftlinie)", KmText(a.KmGesamt), weiteste is null ? plan : $"weiteste: {weiteste.Kurzname} {KmText(weiteste.Km)}", false, false),
+            new Kompaktkachel("Fahrten (Luftlinie)", KmText(a.KmGesamt), weiteste is null ? plan : $"weiteste: {weiteste.Kurzname} {KmText(weiteste.Km)} · Unterschied {KmText(a.Mannschaften.Max(m => m.Km) - a.Mannschaften.Min(m => m.Km))}", false, false),
             new Kompaktkachel("Meldungen", a.Verstoesse == 0 ? "eingehalten" : string.Create(Deutsch, $"{a.Verstoesse} Verstöße"), plan, a.Verstoesse == 0, a.Verstoesse > 0),
-            new Kompaktkachel("Heimspieltage je Mannschaft", heim, ohne, false, a.OhneHeimspieltag > 0),
+            new Kompaktkachel("Heimspieltage je Mannschaft", heim, Kompakterlaeuterung.Heimspieltage(a), false, a.OhneHeimspieltag > 0),
             new Kompaktkachel(
                 "Spieltage",
                 a.Formen,
@@ -311,6 +407,7 @@ public sealed partial class HauptfensterViewModel
     /// <summary>Nach Öffnen, Schließen oder Änderungen: Auswertung, Kacheln, Ansicht und Navigation aktualisieren; beim Wechsel in den oder aus dem Kompaktmodus die Ansichten umstellen.</summary>
     private void KompaktAktualisieren()
     {
+        kompaktLesekopie = null;
         KompaktStandBerechnen();
         kompaktAnsicht?.Laden();
         OnPropertyChanged(nameof(ZeigtKompaktspieltage));
@@ -326,22 +423,90 @@ public sealed partial class HauptfensterViewModel
         }
     }
 
+    /// <summary>Übernimmt Varianten und Hinweise (am Ende oder in der Pause) und zeigt den Plan mit den wenigsten Punkten.</summary>
+    private void KompaktErgebnisZeigen(Plansitzung s, Kompaktergebnis ergebnis)
+    {
+        List<Kompaktvariante> varianten = [.. ergebnis.Varianten];
+        if (kompaktBehalten is Kompaktvariante behalten && !varianten.Exists(v => Planschluessel(v) == Planschluessel(behalten)))
+        {
+            const string Zusatz = " (aus der Pause)";
+            varianten.Add(behalten.Name.EndsWith(Zusatz, StringComparison.Ordinal) ? behalten : behalten with { Name = behalten.Name + Zusatz });
+        }
+
+        kompaktVarianten = NachPunkten(s, varianten);
+        kompaktPlanerhinweise = ergebnis.Hinweise;
+        KompaktspieltageOeffnen();
+        KompaktplanWaehlen(kompaktVarianten.Count > 0 ? kompaktVarianten[0] : kompaktVariante);
+    }
+
+    /// <summary>
+    /// Die Varianten aufsteigend nach Punkten (wie in der Erläuterung, bei Gleichstand in der Reihenfolge des Planers);
+    /// merkt sich die Punkte, auch die des Plans aus click-TT.
+    /// </summary>
+    private List<Kompaktvariante> NachPunkten(Plansitzung s, IReadOnlyList<Kompaktvariante> varianten)
+    {
+        kompaktPunkte = [];
+        kompaktClickTtPunkte = null;
+        if (Kompaktpunkte.Bezug(varianten) is not Kompaktbezug bezug)
+        {
+            return varianten.ToList();
+        }
+
+        Datenbearbeitung daten = s.DatenBearbeiten();
+        DateOnly heute = DateOnly.FromDateTime(DateTime.Today);
+        (IReadOnlyList<string> spitze, IReadOnlyList<string> keller) = KompaktGruppen();
+        IReadOnlyList<IReadOnlyList<string>> gruppen = spitze.Count >= 3 && spitze.Count == keller.Count ? [spitze, keller] : [];
+        foreach (Kompaktvariante v in varianten)
+        {
+            Kompaktauswertung a = Kompaktplanung.Auswerten(s.Staffel, daten, s.Optionen.Rundenplanung, heute, v.Turniere);
+            kompaktPunkte[v] = Kompaktpunkte.Berechnen(a, bezug, gruppen).Summe;
+        }
+
+        if (HatClickTtPlan)
+        {
+            Kompaktauswertung clickTt = Kompaktplanung.Auswerten(s.Staffel, daten, s.Optionen.Rundenplanung, heute);
+            kompaktClickTtPunkte = clickTt.Spieltage.Count == 0 ? null : Kompaktpunkte.Berechnen(clickTt, bezug, gruppen).Summe;
+        }
+
+        GespeichertePunkte(bezug);
+        return varianten.OrderBy(v => kompaktPunkte[v]).ToList();
+    }
+
+    /// <summary>Vergleich für „Plan sichern“ im Kompaktmodus: beide Pläne nach den Kennzahlen der Kompaktspieltage.</summary>
+    private Planvergleich KompaktVergleich(Plansitzung s, string anlass, IReadOnlyList<Spiel> aktuell, IReadOnlyList<Spiel> gesichert, DateTime gesichertAm)
+    {
+        Datenbearbeitung daten = s.DatenBearbeiten();
+        DateOnly heute = DateOnly.FromDateTime(DateTime.Today);
+        Kompaktauswertung neu = Kompaktplanung.SpieleAuswerten(s.Staffel, daten, s.Optionen.Rundenplanung, heute, aktuell);
+        Kompaktauswertung alt = Kompaktplanung.SpieleAuswerten(s.Staffel, daten, s.Optionen.Rundenplanung, heute, gesichert);
+        (IReadOnlyList<string> spitze, IReadOnlyList<string> keller) = KompaktGruppen();
+
+        // Gleicher Bezug wie in der Erläuterung der Pläne: kürzester 4er-Plan und kleinster Unterschied der Varianten.
+        return Planvergleich.Kompakt(anlass, neu, alt, [spitze, keller], Kompaktpunkte.Bezug(kompaktVarianten), gesichertAm);
+    }
+
     private void KompaktStandBerechnen()
     {
         if (sitzung is not Plansitzung s || !KompaktEingeschaltet)
         {
             kompaktStand = null;
-            kompaktFest = [];
             Kompaktkacheln = [];
             return;
         }
 
         Datenbearbeitung daten = s.DatenBearbeiten();
         DateOnly heute = DateOnly.FromDateTime(DateTime.Today);
-        kompaktFest = daten.Festgehalten();
-        kompaktStand = kompaktVariante is Kompaktvariante v
-            ? Kompaktplanung.Auswerten(s.Staffel, daten, s.Optionen.Rundenplanung, heute, v.Turniere)
-            : Kompaktplanung.Auswerten(s.Staffel, daten, s.Optionen.Rundenplanung, heute);
+        if (GespeicherterStand(s, kompaktVariante) is Planstand gespeichert)
+        {
+            kompaktStand = Kompaktplanung.SpieleAuswerten(s.Staffel, daten, s.Optionen.Rundenplanung, heute, gespeichert.Spiele);
+        }
+        else
+        {
+            kompaktStand = kompaktVariante is Kompaktvariante v
+                ? Kompaktplanung.Auswerten(s.Staffel, daten, s.Optionen.Rundenplanung, heute, v.Turniere)
+                : Kompaktplanung.Auswerten(s.Staffel, daten, s.Optionen.Rundenplanung, heute);
+        }
+
         Kompaktkacheln = KachelnBilden(kompaktStand, kompaktVariante);
     }
 
@@ -349,6 +514,10 @@ public sealed partial class HauptfensterViewModel
     private void KompaktZuruecksetzen()
     {
         kompaktVarianten = [];
+        kompaktGespeichert = [];
+        kompaktGespeichertJe = [];
+        kompaktPunkte = [];
+        kompaktClickTtPunkte = null;
         kompaktPlanerhinweise = [];
         kompaktVariante = null;
     }
@@ -370,19 +539,12 @@ public sealed partial class HauptfensterViewModel
         }
     }
 
-    private void KompaktFortschritt(string stand) =>
+    private void KompaktFortschritt(Kompaktfortschritt stand) =>
         oberflaeche.AufOberflaeche(() =>
         {
-            Statuszeile = "Kompaktspieltage werden geplant – " + stand;
+            Statuszeile = "Kompaktspieltage werden geplant – " + stand.Text;
+            kompaktAnsicht?.FortschrittZeigen(stand.Anteil * 100, stand.Text);
         });
-
-    private async Task KompaktDatenUebernehmenAsync(Plansitzung s, Datenbearbeitung daten)
-    {
-        if (await UebernehmenAsync(s, daten))
-        {
-            KompaktAktualisieren();
-        }
-    }
 
     private void KompaktspieltageOeffnen()
     {

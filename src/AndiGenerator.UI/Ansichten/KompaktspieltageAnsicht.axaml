@@ -6,10 +6,12 @@
              x:Class="AndiGenerator.UI.Ansichten.KompaktspieltageAnsicht"
              x:DataType="p:KompaktspieltageAnsichtViewModel">
   <UserControl.Resources>
-    <SolidColorBrush x:Key="HeimHell" Color="#E2F1E7" />
-    <LinearGradientBrush x:Key="BeidesHell" StartPoint="0%,0%" EndPoint="100%,100%">
-      <GradientStop Offset="0.5" Color="#E2F1E7" />
-      <GradientStop Offset="0.5" Color="#E6EEF8" />
+    <!-- Heim kräftig grün, auswärts hell blau: unterscheiden sich in Farbton und Helligkeit. -->
+    <SolidColorBrush x:Key="HeimFarbe" Color="#8FCB9E" />
+    <SolidColorBrush x:Key="AuswaertsFarbe" Color="#CADDF7" />
+    <LinearGradientBrush x:Key="BeidesFarbe" StartPoint="0%,0%" EndPoint="100%,100%">
+      <GradientStop Offset="0.5" Color="#8FCB9E" />
+      <GradientStop Offset="0.5" Color="#CADDF7" />
     </LinearGradientBrush>
   </UserControl.Resources>
   <UserControl.Styles>
@@ -30,21 +32,51 @@
       <Setter Property="CornerRadius" Value="6" />
       <Setter Property="BorderThickness" Value="1" />
       <Setter Property="BorderBrush" Value="Transparent" />
+      <!-- Auch leere Felder (kann nicht) sind anklickbar -->
+      <Setter Property="Background" Value="Transparent" />
     </Style>
-    <Style Selector="Border.zelle.heim"><Setter Property="Background" Value="{StaticResource HeimHell}" /></Style>
-    <Style Selector="Border.zelle.auswaerts"><Setter Property="Background" Value="{StaticResource AkzentHell}" /></Style>
-    <Style Selector="Border.zelle.beides"><Setter Property="Background" Value="{StaticResource BeidesHell}" /></Style>
-    <Style Selector="Border.zelle.nicht"><Setter Property="Background" Value="{StaticResource Schwebe}" /></Style>
+    <Style Selector="Border.zelle.heim"><Setter Property="Background" Value="{StaticResource HeimFarbe}" /></Style>
+    <Style Selector="Border.zelle.auswaerts"><Setter Property="Background" Value="{StaticResource AuswaertsFarbe}" /></Style>
+    <Style Selector="Border.zelle.beides"><Setter Property="Background" Value="{StaticResource BeidesFarbe}" /></Style>
     <Style Selector="Border.zelle.unbekannt"><Setter Property="BorderBrush" Value="{StaticResource Rand}" /></Style>
     <Style Selector="Border.zelle.verstoss">
       <Setter Property="BorderBrush" Value="{StaticResource Schlecht}" />
       <Setter Property="BorderThickness" Value="2" />
     </Style>
     <Style Selector="Border.zelle.gedimmt"><Setter Property="Opacity" Value="0.35" /></Style>
+    <!-- Bearbeiten: Rahmen auf dem gewählten Feld -->
+    <Style Selector="Border.zelle.cursor">
+      <Setter Property="BorderBrush" Value="{StaticResource Akzent}" />
+      <Setter Property="BorderThickness" Value="2.5" />
+    </Style>
     <Style Selector="TextBlock.gewaehlt">
       <Setter Property="Foreground" Value="{StaticResource Akzent}" />
       <Setter Property="FontWeight" Value="Bold" />
     </Style>
+    <!-- ★ und ●: mehrere Spieltage am selben Sonntag in verschiedenen Farben -->
+    <Style Selector="TextBlock.zeichen"><Setter Property="Foreground" Value="{StaticResource Tinte}" /></Style>
+    <Style Selector="TextBlock.zeichen.zweiter"><Setter Property="Foreground" Value="#C2410C" /></Style>
+    <Style Selector="TextBlock.zeichen.dritter"><Setter Property="Foreground" Value="#7E22CE" /></Style>
+    <!-- Einzelbegegnung: kräftiges Gelb, deutlich abgesetzt vom Rotorange des zweiten Spieltags -->
+    <Style Selector="TextBlock.zeichen.einzel"><Setter Property="Foreground" Value="#EAB308" /></Style>
+    <Style Selector="Shape.symbol"><Setter Property="Fill" Value="{StaticResource Tinte}" /></Style>
+    <Style Selector="Shape.symbol.zweiter"><Setter Property="Fill" Value="#C2410C" /></Style>
+    <Style Selector="Shape.symbol.dritter"><Setter Property="Fill" Value="#7E22CE" /></Style>
+    <Style Selector="Shape.symbol.einzel"><Setter Property="Fill" Value="#EAB308" /></Style>
+    <!-- Ring um ★/● der Begegnungen des Spitzen- (schwarz) bzw. Abstiegsspieltags (blau), innerhalb des Felds -->
+    <Style Selector="Border.ring">
+      <Setter Property="Width" Value="18" />
+      <Setter Property="Height" Value="18" />
+      <Setter Property="CornerRadius" Value="9" />
+      <Setter Property="BorderThickness" Value="1.5" />
+      <Setter Property="BorderBrush" Value="Transparent" />
+      <Setter Property="HorizontalAlignment" Value="Center" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Border.ring.spitze"><Setter Property="BorderBrush" Value="#111827" /></Style>
+    <Style Selector="Border.ring.keller"><Setter Property="BorderBrush" Value="#1D4ED8" /></Style>
+    <Style Selector="TextBlock.gut"><Setter Property="Foreground" Value="{StaticResource Gut}" /></Style>
+    <Style Selector="TextBlock.schlecht"><Setter Property="Foreground" Value="{StaticResource Schlecht}" /></Style>
     <Style Selector="Border.variante.gewaehlt">
       <Setter Property="BorderBrush" Value="{StaticResource Akzent}" />
       <Setter Property="BorderThickness" Value="2" />
@@ -55,7 +87,7 @@
       <Setter Property="BorderThickness" Value="2" />
     </Style>
   </UserControl.Styles>
-  <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+  <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
     <StackPanel Margin="18,14" Spacing="16" MaxWidth="1400" HorizontalAlignment="Left">
       <Grid ColumnDefinitions="*,Auto">
         <StackPanel Spacing="2">
@@ -79,10 +111,19 @@
       <StackPanel Spacing="16" IsVisible="{Binding Eingeschaltet}">
         <!-- Pläne: Plan aus click-TT und Varianten des Planers (wie im Entwurf: eine Zeile Karten) -->
         <StackPanel Spacing="6">
-          <Grid ColumnDefinitions="*,Auto">
-            <TextBlock Text="Pläne" FontSize="15" FontWeight="SemiBold" />
-            <TextBlock Grid.Column="1" Text="Rechnet …" Classes="klein" IsVisible="{Binding Rechnet}" VerticalAlignment="Center" />
-          </Grid>
+          <TextBlock Text="Pläne" FontSize="15" FontWeight="SemiBold" />
+          <!-- Während der Berechnung: Fortschritt bis 100 % und was gerade geschieht -->
+          <StackPanel Spacing="4" IsVisible="{Binding Rechnet}">
+            <ProgressBar Minimum="0" Maximum="100" Value="{Binding Fortschritt}" Height="8" HorizontalAlignment="Stretch" />
+            <TextBlock Text="{Binding FortschrittText}" Classes="klein" TextWrapping="Wrap" />
+            <!-- In der Pause: mit welchem Knopf oben es weitergeht -->
+            <StackPanel Orientation="Horizontal" Spacing="6" IsVisible="{Binding Angehalten}">
+              <ui:Symbol Daten="{StaticResource SymbolFortsetzen}" Gefuellt="True" Groesse="14" VerticalAlignment="Center" />
+              <TextBlock Text="setzt fort (nur der gewählte Plan bleibt),"  Classes="klein" VerticalAlignment="Center" />
+              <ui:Symbol Daten="{StaticResource SymbolStopp}" Gefuellt="True" Groesse="14" VerticalAlignment="Center" />
+              <TextBlock Text="beendet mit den bisher besten Plänen." Classes="klein" VerticalAlignment="Center" />
+            </StackPanel>
+          </StackPanel>
           <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
             <ItemsControl ItemsSource="{Binding Plaene}">
               <ItemsControl.ItemsPanel>
@@ -98,6 +139,11 @@
                       <StackPanel Spacing="2">
                         <TextBlock Text="{Binding Titel}" FontWeight="SemiBold" TextWrapping="Wrap" />
                         <TextBlock Text="{Binding Zeile}" Classes="klein" TextWrapping="Wrap" />
+                        <TextBlock Text="{Binding Zugleich}" Classes="klein gut" TextWrapping="Wrap"
+                                   IsVisible="{Binding Zugleich, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                        <Button Classes="link" Content="Merken …" HorizontalAlignment="Left" Margin="0,4,0,0" IsVisible="{Binding KannMerken}"
+                                Command="{Binding $parent[UserControl].((p:KompaktspieltageAnsichtViewModel)DataContext).MerkenCommand}"
+                                ToolTip.Tip="Diesen Plan unter einem Namen merken – er steht dann auch nach dem Schließen hier zur Wahl" />
                       </StackPanel>
                     </Border>
                   </Button>
@@ -105,17 +151,36 @@
               </ItemsControl.ItemTemplate>
             </ItemsControl>
           </ScrollViewer>
-          <TextBlock Text="{Binding FestgehaltenText}" Classes="klein" TextWrapping="Wrap"
-                     IsVisible="{Binding FestgehaltenText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+          <!-- Erläuterung des gezeigten Plans (Klick auf eine Plankarte) -->
+          <Border Classes="karte" Padding="14,10" IsVisible="{Binding Erlaeuterungstitel, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+            <StackPanel Spacing="4">
+              <TextBlock Text="{Binding Erlaeuterungstitel}" FontWeight="SemiBold" />
+              <ItemsControl ItemsSource="{Binding Erlaeuterung}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="sys:String">
+                    <ui:Auszeichnungstext Auszeichnung="{Binding}" Hervorhebung="{StaticResource Akzent}" FontSize="12.5" TextWrapping="Wrap" Margin="0,1" />
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+          </Border>
         </StackPanel>
+
 
         <Grid ColumnDefinitions="Auto,18,*">
           <!-- Raster: Meldungen und Plan -->
-          <Border Classes="karte" VerticalAlignment="Top">
+          <Border x:Name="Raster" Classes="karte" VerticalAlignment="Top" Focusable="True">
             <StackPanel Spacing="8">
-              <TextBlock Text="Meldungen und Plan" FontSize="15" FontWeight="SemiBold" />
-              <TextBlock Text="Klick auf einen Sonntag oder eine Mannschaft zeigt ihre Fahrten; ein zweiter Klick wieder alle." Classes="klein" TextWrapping="Wrap" MaxWidth="460" HorizontalAlignment="Left" />
-              <StackPanel Orientation="Horizontal" Margin="50,0,0,0">
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Text="Meldungen und Plan" FontSize="15" FontWeight="SemiBold" VerticalAlignment="Center" />
+                <ToggleSwitch Grid.Column="1" IsChecked="{Binding Bearbeiten}" OnContent="Bearbeiten" OffContent="Anzeigen" Margin="12,0,0,0"
+                              IsEnabled="{Binding !Rechnet}" ToolTip.Tip="Meldungen direkt im Raster erfassen (nicht während einer Berechnung; solange lässt sich keine starten)" />
+              </Grid>
+              <TextBlock Text="Klick auf einen Sonntag oder eine Mannschaft zeigt ihre Fahrten; ein zweiter Klick wieder alle." Classes="klein" TextWrapping="Wrap" MaxWidth="460" HorizontalAlignment="Left"
+                         IsVisible="{Binding !Bearbeiten}" />
+              <TextBlock Text="Feld anklicken oder mit den Pfeiltasten wählen · A auswärts · H nur Heim · B beides · Entf oder Leertaste kann nicht. Gespeichert wird sofort."
+                         Classes="klein" TextWrapping="Wrap" MaxWidth="460" HorizontalAlignment="Left" IsVisible="{Binding Bearbeiten}" />
+              <StackPanel Orientation="Horizontal" Margin="64,0,0,0">
                 <ItemsControl ItemsSource="{Binding Spalten}">
                   <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
@@ -124,11 +189,12 @@
                   </ItemsControl.ItemsPanel>
                   <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="p:Kompaktspalte">
-                      <Button Classes="flach" Width="32" Height="84" ToolTip.Tip="{Binding Name}"
+                      <!-- Senkrechte Beschriftung, von unten nach oben zu lesen. -->
+                      <Button Classes="flach" Width="32" Height="104" ToolTip.Tip="{Binding Name}"
                               Command="{Binding $parent[UserControl].((p:KompaktspieltageAnsichtViewModel)DataContext).MannschaftWaehlenCommand}" CommandParameter="{Binding Name}">
-                        <LayoutTransformControl VerticalAlignment="Bottom" HorizontalAlignment="Center">
+                        <LayoutTransformControl VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,4">
                           <LayoutTransformControl.LayoutTransform>
-                            <RotateTransform Angle="-60" />
+                            <RotateTransform Angle="-90" />
                           </LayoutTransformControl.LayoutTransform>
                           <TextBlock Text="{Binding Kurzname}" FontSize="12" Foreground="{StaticResource Tinte2}" Classes.gewaehlt="{Binding Gewaehlt}" />
                         </LayoutTransformControl>
@@ -141,7 +207,7 @@
                 <ItemsControl.ItemTemplate>
                   <DataTemplate x:DataType="p:Kompaktrasterzeile">
                     <StackPanel Orientation="Horizontal">
-                      <Button Classes="flach" Width="50" Height="24"
+                      <Button Classes="flach" Width="64" Height="24"
                               Command="{Binding $parent[UserControl].((p:KompaktspieltageAnsichtViewModel)DataContext).TagWaehlenCommand}" CommandParameter="{Binding}">
                         <TextBlock Text="{Binding Datum}" Classes="ziffer" FontSize="11" Foreground="{StaticResource Tinte2}" Classes.gewaehlt="{Binding Gewaehlt}"
                                    HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,8,0" />
@@ -156,9 +222,19 @@
                           <DataTemplate x:DataType="p:Kompaktzelle">
                             <Border Classes="zelle" Classes.heim="{Binding IstHeim}" Classes.auswaerts="{Binding IstAuswaerts}" Classes.beides="{Binding IstBeides}"
                                     Classes.nicht="{Binding IstNicht}" Classes.unbekannt="{Binding IstUnbekannt}" Classes.verstoss="{Binding Verstoss}" Classes.gedimmt="{Binding Gedimmt}"
-                                    ToolTip.Tip="{Binding Hinweis}">
-                              <TextBlock Text="{Binding Zeichen}" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="11.5"
-                                         FontWeight="{Binding Spielt, Converter={x:Static ui:Konverter.MeldungGewicht}}" Foreground="{StaticResource Tinte}" />
+                                    Classes.cursor="{Binding IstCursor}" ToolTip.Tip="{Binding Hinweis}">
+                              <Border Classes="ring" Classes.spitze="{Binding Spitzenspieltag}" Classes.keller="{Binding Abstiegsspieltag}">
+                                <Panel>
+                                  <!-- ★ und ● als Formen, exakt in der Mitte (Schriftzeichen sitzen je nach Schrift nicht mittig) -->
+                                  <Path Classes="symbol" Classes.zweiter="{Binding ZweiterSpieltag}" Classes.dritter="{Binding DritterSpieltag}" Classes.einzel="{Binding Einzel}"
+                                        IsVisible="{Binding IstAusrichter}" Width="11" Height="11" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center"
+                                        Data="M5,0 L6.18,3.38 9.76,3.45 6.9,5.62 7.94,9.05 5,7 2.06,9.05 3.1,5.62 0.24,3.45 3.82,3.38 Z" />
+                                  <Ellipse Classes="symbol" Classes.zweiter="{Binding ZweiterSpieltag}" Classes.dritter="{Binding DritterSpieltag}" Classes.einzel="{Binding Einzel}"
+                                           IsVisible="{Binding IstGast}" Width="8" Height="8" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                                  <TextBlock Text="?" Classes="zeichen" IsVisible="{Binding IstUnbekanntZeichen}"
+                                             HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="13" />
+                                </Panel>
+                              </Border>
                             </Border>
                           </DataTemplate>
                         </ItemsControl.ItemTemplate>
@@ -168,14 +244,75 @@
                 </ItemsControl.ItemTemplate>
               </ItemsControl>
               <WrapPanel Orientation="Horizontal" MaxWidth="460" HorizontalAlignment="Left">
-                <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,14,4"><Border Width="16" Height="12" CornerRadius="3" Background="{StaticResource HeimHell}" /><TextBlock Text="Heim möglich" Classes="klein" /></StackPanel>
-                <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,14,4"><Border Width="16" Height="12" CornerRadius="3" Background="{StaticResource AkzentHell}" /><TextBlock Text="auswärts möglich" Classes="klein" /></StackPanel>
-                <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,14,4"><Border Width="16" Height="12" CornerRadius="3" Background="{StaticResource BeidesHell}" /><TextBlock Text="beides" Classes="klein" /></StackPanel>
-                <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,14,4"><Border Width="16" Height="12" CornerRadius="3" Background="{StaticResource Schwebe}" /><TextBlock Text="✗ kann nicht" Classes="klein" /></StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,14,4"><Border Width="16" Height="12" CornerRadius="3" Background="{StaticResource HeimFarbe}" /><TextBlock Text="Heim möglich" Classes="klein" /></StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,14,4"><Border Width="16" Height="12" CornerRadius="3" Background="{StaticResource AuswaertsFarbe}" /><TextBlock Text="auswärts möglich" Classes="klein" /></StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,14,4"><Border Width="16" Height="12" CornerRadius="3" Background="{StaticResource BeidesFarbe}" /><TextBlock Text="beides" Classes="klein" /></StackPanel>
+                <TextBlock Text="leer: kann nicht" Classes="klein" Margin="0,0,14,4" />
                 <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,14,4"><Border Width="16" Height="12" CornerRadius="3" BorderBrush="{StaticResource Rand}" BorderThickness="1" /><TextBlock Text="? keine Meldung" Classes="klein" /></StackPanel>
-                <TextBlock Text="★ richtet aus   ● Gast" Classes="klein" Margin="0,0,14,4" />
-                <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,14,4"><Border Width="16" Height="12" CornerRadius="3" BorderBrush="{StaticResource Schlecht}" BorderThickness="2" /><TextBlock Text="gegen die Meldung" Classes="klein" /></StackPanel>
+                <TextBlock Text="★ richtet aus   ● Gast" Classes="klein" Margin="0,0,14,4" IsVisible="{Binding !Bearbeiten}" />
+                <StackPanel Orientation="Horizontal" Spacing="4" Margin="0,0,14,4" IsVisible="{Binding !Bearbeiten}">
+                  <TextBlock Text="★●" Foreground="{StaticResource Tinte}" FontSize="13" />
+                  <TextBlock Text="★●" Foreground="#C2410C" FontSize="13" />
+                  <TextBlock Text="zwei Spieltage am selben Sonntag" Classes="klein" VerticalAlignment="Center" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="4" Margin="0,0,14,4" IsVisible="{Binding !Bearbeiten}">
+                  <TextBlock Text="★●" Foreground="#EAB308" FontWeight="Black" FontSize="13" />
+                  <TextBlock Text="Einzelbegegnung" Classes="klein" VerticalAlignment="Center" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,14,4" IsVisible="{Binding !Bearbeiten}"><Border Width="16" Height="12" CornerRadius="3" BorderBrush="{StaticResource Schlecht}" BorderThickness="2" /><TextBlock Text="gegen die Meldung" Classes="klein" /></StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,14,4" IsVisible="{Binding !Bearbeiten}">
+                  <Border Classes="ring spitze"><TextBlock Text="★" FontSize="11" HorizontalAlignment="Center" VerticalAlignment="Center" /></Border>
+                  <TextBlock Text="Spitzenspieltag" Classes="klein" VerticalAlignment="Center" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,14,4" IsVisible="{Binding !Bearbeiten}">
+                  <Border Classes="ring keller"><TextBlock Text="★" FontSize="11" HorizontalAlignment="Center" VerticalAlignment="Center" /></Border>
+                  <TextBlock Text="Abstiegsspieltag" Classes="klein" VerticalAlignment="Center" />
+                </StackPanel>
               </WrapPanel>
+
+              <!-- Bearbeiten: Feld unter dem Rahmen, Heimtermin und weitere Tage -->
+              <Border IsVisible="{Binding Bearbeiten}" BorderBrush="{StaticResource Rand}" BorderThickness="0,1,0,0" Padding="0,10,0,0" MaxWidth="460" HorizontalAlignment="Left">
+                <StackPanel Spacing="8">
+                  <TextBlock Text="{Binding CursorText}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                  <WrapPanel Orientation="Horizontal">
+                    <Button Content="A auswärts" Command="{Binding FeldSetzenCommand}" CommandParameter="A" Margin="0,0,6,6" />
+                    <Button Content="H nur Heim" Command="{Binding FeldSetzenCommand}" CommandParameter="H" Margin="0,0,6,6" />
+                    <Button Content="B beides" Command="{Binding FeldSetzenCommand}" CommandParameter="B" Margin="0,0,6,6" />
+                    <Button Content="Entf kann nicht" Command="{Binding FeldSetzenCommand}" CommandParameter="-" Margin="0,0,6,6" />
+                  </WrapPanel>
+                  <TextBlock Text="Heimtermin: Beginn, Spiellokal und Tische – zuerst mit H oder B einen Heimtermin setzen." Classes="klein" TextWrapping="Wrap"
+                             IsVisible="{Binding !CursorHatTermin}" />
+                  <Grid ColumnDefinitions="Auto,8,*" RowDefinitions="Auto,6,Auto,6,Auto,6,Auto" IsEnabled="{Binding CursorHatTermin}">
+                    <TextBlock Text="Beginn" VerticalAlignment="Center" />
+                    <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8">
+                      <TextBox Text="{Binding CursorZeit}" Watermark="Standard" Width="80"
+                               ToolTip.Tip="Leer = Standard: 3er-Spieltag 10:00, 4er-Spieltag 11:00. Nur eine abweichende Uhrzeit eintragen; Enter übernimmt.">
+                        <TextBox.KeyBindings>
+                          <KeyBinding Gesture="Enter" Command="{Binding TerminSpeichernCommand}" />
+                        </TextBox.KeyBindings>
+                      </TextBox>
+                      <Button Content="Zeit löschen" Command="{Binding ZeitLoeschenCommand}"
+                              ToolTip.Tip="Zurück zum Standard (3er 10:00, 4er 11:00), sofort gespeichert" />
+                      <TextBlock Text="leer = 3er 10:00, 4er 11:00" Classes="klein" VerticalAlignment="Center" />
+                    </StackPanel>
+                    <TextBlock Grid.Row="2" Text="Halle" VerticalAlignment="Center" />
+                    <ComboBox Grid.Row="2" Grid.Column="2" ItemsSource="{Binding CursorLokale}" SelectedItem="{Binding CursorLokal}" HorizontalAlignment="Stretch" />
+                    <CheckBox Grid.Row="4" Grid.ColumnSpan="3" IsChecked="{Binding CursorZweiTische}" Content="Zwei Spiele parallel (4er-Spieltag möglich)" />
+                    <StackPanel Grid.Row="6" Grid.ColumnSpan="3" Orientation="Horizontal" Spacing="8">
+                      <Button Content="Heimtermin übernehmen" Command="{Binding TerminSpeichernCommand}" />
+                      <Button Content="Halle für alle Heimtermine der Mannschaft" Command="{Binding LokalFuerAlleCommand}"
+                              ToolTip.Tip="Die gewählte Halle wird Standardhalle der Mannschaft und gilt für alle ihre Heimtermine." />
+                    </StackPanel>
+                  </Grid>
+                  <StackPanel Orientation="Horizontal" Spacing="8">
+                    <CalendarDatePicker SelectedDate="{Binding NeuerTag}" Watermark="Tag wählen" Width="150" />
+                    <Button Content="Tag als Zeile anlegen" Command="{Binding TagAnlegenCommand}"
+                            ToolTip.Tip="Neue Zeile: alle Felder zunächst leer (kann nicht)" />
+                  </StackPanel>
+                  <TextBlock Text="{Binding Bearbeitungsmeldung}" Classes="klein schlecht" TextWrapping="Wrap"
+                             IsVisible="{Binding Bearbeitungsmeldung, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                </StackPanel>
+              </Border>
             </StackPanel>
           </Border>
 
@@ -189,21 +326,26 @@
               <ui:Kompaktkarte Bild="{Binding Karte}" />
               <TextBlock Text="Für einige Mannschaften ist keine Halle bekannt – Terminwünsche (PDF) in der Einrichtung unter „Daten aus click-TT ergänzen“ laden."
                          Classes="leer" TextWrapping="Wrap" IsVisible="{Binding FehlenLagen}" />
-              <Grid ColumnDefinitions="*,Auto">
+              <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding HatPlan}">
                 <TextBlock Text="km je Mannschaft" FontSize="15" FontWeight="SemiBold" />
                 <TextBlock Grid.Column="1" Text="Luftlinie, hin und zurück" Classes="klein" VerticalAlignment="Center" />
               </Grid>
-              <ItemsControl ItemsSource="{Binding KmZeilen}">
+              <!-- Spalten über alle Zeilen gleich breit: Name, Ausrichter, Balken, km -->
+              <ItemsControl ItemsSource="{Binding KmZeilen}" Grid.IsSharedSizeScope="True" IsVisible="{Binding HatPlan}">
                 <ItemsControl.ItemTemplate>
                   <DataTemplate x:DataType="p:Kompaktkmzeile">
                     <Button Classes="flach" Command="{Binding $parent[UserControl].((p:KompaktspieltageAnsichtViewModel)DataContext).MannschaftWaehlenCommand}" CommandParameter="{Binding Name}">
-                      <Grid ColumnDefinitions="*,130,60" Margin="0,2">
-                        <StackPanel Orientation="Horizontal" Spacing="6">
-                          <TextBlock Text="{Binding Kurzname}" Classes.gewaehlt="{Binding Gewaehlt}" />
-                          <TextBlock Text="{Binding Zusatz}" Classes="klein" VerticalAlignment="Center" />
-                        </StackPanel>
-                        <Border Grid.Column="1" Height="8" CornerRadius="4" Background="{StaticResource Akzent}" Width="{Binding Balken}" HorizontalAlignment="Left" VerticalAlignment="Center" />
-                        <TextBlock Grid.Column="2" Text="{Binding Km}" Classes="ziffer" HorizontalAlignment="Right" />
+                      <Grid Margin="0,2">
+                        <Grid.ColumnDefinitions>
+                          <ColumnDefinition Width="Auto" SharedSizeGroup="KmName" />
+                          <ColumnDefinition Width="Auto" SharedSizeGroup="KmZusatz" />
+                          <ColumnDefinition Width="132" />
+                          <ColumnDefinition Width="Auto" SharedSizeGroup="KmWert" />
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Text="{Binding Kurzname}" Classes.gewaehlt="{Binding Gewaehlt}" Margin="0,0,12,0" VerticalAlignment="Center" />
+                        <TextBlock Grid.Column="1" Text="{Binding Zusatz}" Classes="klein" Margin="0,0,12,0" VerticalAlignment="Center" />
+                        <Border Grid.Column="2" Height="8" CornerRadius="4" Background="{StaticResource Akzent}" Width="{Binding Balken}" HorizontalAlignment="Left" VerticalAlignment="Center" />
+                        <TextBlock Grid.Column="3" Text="{Binding Km}" Classes="ziffer" MinWidth="44" TextAlignment="Right" Margin="10,0,0,0" VerticalAlignment="Center" />
                       </Grid>
                     </Button>
                   </DataTemplate>
@@ -225,71 +367,45 @@
               </ItemsControl.ItemsPanel>
               <ItemsControl.ItemTemplate>
                 <DataTemplate x:DataType="p:Kompaktspieltagkarte">
-                  <Panel Margin="0,0,10,10">
-                  <Button Classes="flach" VerticalAlignment="Stretch"
-                          Command="{Binding $parent[UserControl].((p:KompaktspieltageAnsichtViewModel)DataContext).SpieltagWaehlenCommand}" CommandParameter="{Binding}">
-                    <Border Classes="karte spieltag" Classes.gewaehlt="{Binding Gewaehlt}" Padding="12,10">
-                      <StackPanel Spacing="4">
-                        <Grid ColumnDefinitions="*,Auto">
-                          <TextBlock Text="{Binding Datum}" Classes="ziffer" FontWeight="SemiBold" />
-                          <Border Grid.Column="1" CornerRadius="10" Padding="8,1" Background="{StaticResource AkzentHell}">
-                            <TextBlock Text="{Binding Marke}" FontSize="11" Foreground="{StaticResource AkzentDunkel}" />
-                          </Border>
-                        </Grid>
-                        <Grid ColumnDefinitions="*,Auto">
-                          <TextBlock Text="{Binding Ausrichter}" TextTrimming="CharacterEllipsis" />
-                          <TextBlock Grid.Column="1" Text="{Binding Km}" Classes="ziffer klein" />
-                        </Grid>
-                        <ItemsControl ItemsSource="{Binding Spiele}">
-                          <ItemsControl.ItemTemplate>
-                            <DataTemplate x:DataType="sys:String">
-                              <TextBlock Text="{Binding}" FontSize="12.5" />
-                            </DataTemplate>
-                          </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                        <TextBlock Text="{Binding Verlegen}" IsVisible="{Binding HatVerlegen}" FontSize="12" Foreground="{StaticResource AkzentDunkel}" TextWrapping="Wrap" />
-                        <ItemsControl ItemsSource="{Binding Hinweise}" IsVisible="{Binding HatHinweise}">
-                          <ItemsControl.ItemTemplate>
-                            <DataTemplate x:DataType="sys:String">
-                              <TextBlock Text="{Binding}" FontSize="12" Foreground="{StaticResource Schlecht}" TextWrapping="Wrap" />
-                            </DataTemplate>
-                          </ItemsControl.ItemTemplate>
-                        </ItemsControl>
-                        <TextBlock Text="{Binding Gaeste}" Classes="klein" TextWrapping="Wrap" />
-                        <Border Height="22" />
-                      </StackPanel>
-                    </Border>
-                  </Button>
-                  <Button Classes="link" Margin="12,0,0,8" HorizontalAlignment="Left" VerticalAlignment="Bottom" IsVisible="{Binding KannFesthalten}"
-                          Content="{Binding FesthaltenText}" ToolTip.Tip="Festgehaltene Spieltage bleiben bei der nächsten Berechnung, wie sie sind; ein zweiter Klick löst sie wieder."
-                          Command="{Binding $parent[UserControl].((p:KompaktspieltageAnsichtViewModel)DataContext).FesthaltenCommand}" CommandParameter="{Binding}" />
-                  </Panel>
-                </DataTemplate>
-              </ItemsControl.ItemTemplate>
-            </ItemsControl>
-          </StackPanel>
-        </Border>
-
-        <!-- Fahrtwünsche -->
-        <Border Classes="karte">
-          <StackPanel Spacing="8">
-            <TextBlock Text="Fahrtwünsche" FontSize="15" FontWeight="SemiBold" />
-            <TextBlock Text="Zum Beispiel „Sinzig spielt dieses Jahr in Trier“: Die Paarung findet in der Halle des Gastgebers statt. Gilt ab der nächsten Berechnung."
-                       Classes="klein" TextWrapping="Wrap" MaxWidth="760" HorizontalAlignment="Left" />
-            <StackPanel Orientation="Horizontal" Spacing="10">
-              <ComboBox ItemsSource="{Binding Mannschaftsnamen}" SelectedItem="{Binding WunschGast}" MinWidth="220" PlaceholderText="Gast" />
-              <TextBlock Text="spielt in der Halle von" VerticalAlignment="Center" />
-              <ComboBox ItemsSource="{Binding Mannschaftsnamen}" SelectedItem="{Binding WunschGastgeber}" MinWidth="220" PlaceholderText="Gastgeber" />
-              <Button Classes="seitenknopf" Command="{Binding WunschHinzufuegenCommand}" Content="Hinzufügen" />
-            </StackPanel>
-            <ItemsControl ItemsSource="{Binding Fahrtwuensche}">
-              <ItemsControl.ItemTemplate>
-                <DataTemplate x:DataType="p:Fahrtwunschzeile">
-                  <StackPanel Orientation="Horizontal" Spacing="10" Margin="0,2">
-                    <TextBlock Text="{Binding Text}" VerticalAlignment="Center" />
-                    <Button Classes="link" Content="entfernen"
-                            Command="{Binding $parent[UserControl].((p:KompaktspieltageAnsichtViewModel)DataContext).WunschEntfernenCommand}" CommandParameter="{Binding}" />
-                  </StackPanel>
+                  <!-- Karte: Klick wählt den Spieltag (Fahrten auf der Karte); darunter die Adresse zum Kopieren -->
+                  <Border Classes="karte spieltag" Classes.gewaehlt="{Binding Gewaehlt}" Padding="0" Margin="0,0,10,10">
+                    <StackPanel>
+                      <Button Classes="flach" Padding="12,10,12,10"
+                              Command="{Binding $parent[UserControl].((p:KompaktspieltageAnsichtViewModel)DataContext).SpieltagWaehlenCommand}" CommandParameter="{Binding}">
+                        <StackPanel Spacing="4">
+                          <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Text="{Binding Datum}" Classes="ziffer" FontWeight="SemiBold" />
+                            <Border Grid.Column="1" CornerRadius="10" Padding="8,1" Background="{StaticResource AkzentHell}">
+                              <TextBlock Text="{Binding Marke}" FontSize="11" Foreground="{StaticResource AkzentDunkel}" />
+                            </Border>
+                          </Grid>
+                          <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Text="{Binding Ausrichter}" TextTrimming="CharacterEllipsis" />
+                            <TextBlock Grid.Column="1" Text="{Binding Km}" Classes="ziffer klein" Margin="8,0,0,0" />
+                          </Grid>
+                          <ItemsControl ItemsSource="{Binding Spiele}">
+                            <ItemsControl.ItemTemplate>
+                              <DataTemplate x:DataType="sys:String">
+                                <TextBlock Text="{Binding}" FontSize="12.5" TextTrimming="CharacterEllipsis" />
+                              </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                          </ItemsControl>
+                          <TextBlock Text="{Binding Gaeste}" Classes="klein" TextWrapping="Wrap" />
+                          <ItemsControl ItemsSource="{Binding Hinweise}" IsVisible="{Binding HatHinweise}">
+                            <ItemsControl.ItemTemplate>
+                              <DataTemplate x:DataType="sys:String">
+                                <TextBlock Text="{Binding}" FontSize="12" Foreground="{StaticResource Schlecht}" TextWrapping="Wrap" />
+                              </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                          </ItemsControl>
+                          <TextBlock Text="{Binding Verlegen}" IsVisible="{Binding HatVerlegen}" FontSize="12" Foreground="{StaticResource AkzentDunkel}" TextWrapping="Wrap" />
+                        </StackPanel>
+                      </Button>
+                      <!-- Adresse aus dem Bericht „Terminwünsche“ außerhalb des Knopfs, damit sie sich markieren und kopieren lässt -->
+                      <SelectableTextBlock Text="{Binding Adresse}" IsVisible="{Binding HatAdresse}" Margin="12,0,12,10" FontSize="12" TextWrapping="Wrap"
+                                           Foreground="{StaticResource Tinte}" ToolTip.Tip="Markieren und mit Strg+C kopieren" />
+                    </StackPanel>
+                  </Border>
                 </DataTemplate>
               </ItemsControl.ItemTemplate>
             </ItemsControl>

@@ -452,18 +452,26 @@ public sealed class Plansitzung
     /// <param name="spiele">Spiele des Plans.</param>
     public void CsvExportieren(string pfad, IReadOnlyList<Spiel> spiele)
     {
-        ArgumentException.ThrowIfNullOrEmpty(pfad);
-        ArgumentNullException.ThrowIfNull(spiele);
-        bool halbrunde = Optionen.Rundenplanung == Rundenplanung.Halbrunde;
-        var lokale = new Spiellokale(stand, halbrunde);
-        DateTime beginn = (Staffel.Beginn ?? DateOnly.FromDateTime(DelphiKompatibel.DelphiNull)).ToDateTime(TimeOnly.MinValue);
-        DateTime rueckrunde = (Staffel.Rueckrundenbeginn ?? DateOnly.FromDateTime(DelphiKompatibel.DelphiNull)).ToDateTime(TimeOnly.MinValue);
-        var optionen = new CsvExportOptionen(beginn, rueckrunde, halbrunde, Rundenpruefung.Erzeugen(Staffel, Optionen));
-        ClickTtCsvExport.Schreiben(
-            pfad,
-            spiele.Select(s => new CsvSpiel(s.Zeitpunkt, s.Heim, s.Gast, lokale.Ermitteln(s.Zeitpunkt, s.Heim, s.Gast))),
-            Staffel.Mannschaften.Select(m => new CsvMannschaft(m.Name, m.VereinsId, m.Id)),
-            optionen);
+        var lokale = new Spiellokale(stand, Optionen.Rundenplanung == Rundenplanung.Halbrunde);
+        CsvSchreiben(pfad, spiele, s => lokale.Ermitteln(s.Zeitpunkt, s.Heim, s.Gast));
+    }
+
+    /// <summary>
+    /// Exportiert einen Plan mit Kompaktspieltagen als CSV für click-TT (nicht im Original): Spiele des Ausrichters erhalten
+    /// das Spiellokal seines Heimtermins an diesem Tag (sonst sein Standardlokal); Spiele anderer Heimmannschaften bleiben
+    /// leer – ihre Halle ist die des Ausrichters, und click-TT kennt im Import nur die Nummern der Hallen des Heimvereins.
+    /// </summary>
+    /// <param name="pfad">Zieldatei.</param>
+    /// <param name="spiele">Spiele des Plans.</param>
+    /// <param name="spieltage">Die Kompaktspieltage des Plans (mit den Spielen, deren Halle verlegt wird).</param>
+    public void KompaktCsvExportieren(string pfad, IReadOnlyList<Spiel> spiele, IReadOnlyList<Kompaktspieltag> spieltage)
+    {
+        ArgumentNullException.ThrowIfNull(spieltage);
+        var verlegt = spieltage.SelectMany(t => t.HalleVerlegen).Select(s => (s.Zeitpunkt, s.Heim, s.Gast)).ToHashSet();
+        var lokale = new Spiellokale(stand, Optionen.Rundenplanung == Rundenplanung.Halbrunde);
+        CsvSchreiben(pfad, spiele, s => s.Zeitpunkt is DateTime z && !verlegt.Contains((s.Zeitpunkt, s.Heim, s.Gast))
+            ? lokale.AmTag(DateOnly.FromDateTime(z), s.Heim)
+            : string.Empty);
     }
 
     private static bool Gleich(Berechnungsoptionen a, Berechnungsoptionen b) =>
@@ -526,4 +534,19 @@ public sealed class Plansitzung
     /// <summary>Setzt die vom Klassennamen vorgegebene Halbrunde in die Optionen ein.</summary>
     private Berechnungsoptionen MitHalbrunde(Berechnungsoptionen optionen) =>
         VorgegebeneRundenplanung is Rundenplanung runde ? optionen with { Rundenplanung = runde } : optionen;
+
+    private void CsvSchreiben(string pfad, IReadOnlyList<Spiel> spiele, Func<Spiel, string> lokal)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(pfad);
+        ArgumentNullException.ThrowIfNull(spiele);
+        bool halbrunde = Optionen.Rundenplanung == Rundenplanung.Halbrunde;
+        DateTime beginn = (Staffel.Beginn ?? DateOnly.FromDateTime(DelphiKompatibel.DelphiNull)).ToDateTime(TimeOnly.MinValue);
+        DateTime rueckrunde = (Staffel.Rueckrundenbeginn ?? DateOnly.FromDateTime(DelphiKompatibel.DelphiNull)).ToDateTime(TimeOnly.MinValue);
+        var optionen = new CsvExportOptionen(beginn, rueckrunde, halbrunde, Rundenpruefung.Erzeugen(Staffel, Optionen));
+        ClickTtCsvExport.Schreiben(
+            pfad,
+            spiele.Select(s => new CsvSpiel(s.Zeitpunkt, s.Heim, s.Gast, lokal(s))),
+            Staffel.Mannschaften.Select(m => new CsvMannschaft(m.Name, m.VereinsId, m.Id)),
+            optionen);
+    }
 }

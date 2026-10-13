@@ -8,4 +8,8 @@ namespace AndiGenerator.Engine.Turniere;
 /// <param name="Name">Wofür die Variante steht, z. B. „Ausgewogen“ oder „Kürzeste Fahrten · Gleichmäßiger Stand“.</param>
 /// <param name="Turniere">Die Spieltage nach Datum.</param>
 /// <param name="Kennzahlen">Die Kennzahlen.</param>
-public sealed record Kompaktvariante(string Name, IReadOnlyList<Planturnier> Turniere, Kompaktkennzahlen Kennzahlen);
+public sealed record Kompaktvariante(string Name, IReadOnlyList<Planturnier> Turniere, Kompaktkennzahlen Kennzahlen)
+{
+    /// <summary>Holt die Ziele anderer Varianten, die dieser Plan (das beste Gesamtpaket) zugleich erfüllt, z. B. „Gemeinsamer Spieltag“.</summary>
+    public IReadOnlyList<string> Zugleich { get; init; } = [];
+}

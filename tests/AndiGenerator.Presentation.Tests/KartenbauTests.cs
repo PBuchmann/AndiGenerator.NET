@@ -21,7 +21,7 @@ public sealed class KartenbauTests
             new("TV Dienheim", "Dienheim", new Koordinate(49.837, 8.350), false, false, string.Empty),
         ];
 
-        Kartenbild bild = Kartenbau.Bauen(orte, [("ESV Engers", "TTC Zugbrücke Grenzau", true), ("SV Trier-Olewig", "Unbekannt", true)], Kartendaten.Laender, Kartendaten.Staedte);
+        Kartenbild bild = Kartenbau.Bauen(orte, [("ESV Engers", "TTC Zugbrücke Grenzau", true, false), ("SV Trier-Olewig", "Unbekannt", true, true)], Kartendaten.Laender, Kartendaten.Staedte);
 
         Assert.Equal(600, bild.Breite);
         Assert.InRange(bild.Hoehe / bild.Breite, 0.55, 1.0);

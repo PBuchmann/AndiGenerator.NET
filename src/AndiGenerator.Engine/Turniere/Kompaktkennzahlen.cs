@@ -14,4 +14,12 @@ namespace AndiGenerator.Engine.Turniere;
 /// <param name="Vierer">Zahl der 4er-Spieltage.</param>
 /// <param name="Dreier">Zahl der 3er-Spieltage.</param>
 /// <param name="Einzel">Zahl der Einzelbegegnungen.</param>
-public sealed record Kompaktkennzahlen(double Km, int Abstand, int Gemeinsam, int Verstoesse, int OhneHeimspieltag, int Heimspiele, int Vierer, int Dreier, int Einzel);
+/// <param name="KmSpanne">Unterschied zwischen der Mannschaft mit den meisten und der mit den wenigsten Kilometern.</param>
+public sealed record Kompaktkennzahlen(double Km, int Abstand, int Gemeinsam, int Verstoesse, int OhneHeimspieltag, int Heimspiele, int Vierer, int Dreier, int Einzel, double KmSpanne)
+{
+    /// <summary>Holt die Kilometer der Einzelbegegnungen (sie zählen in der Bewertung doppelt).</summary>
+    public double EinzelKm { get; init; }
+
+    /// <summary>Holt die Kilometer für die Bewertung: Einzelfahrten doppelt.</summary>
+    public double Bewertungskm => Km + EinzelKm;
+}

@@ -7,7 +7,7 @@ namespace AndiGenerator.Engine.Turniere;
 /// <summary>
 /// Verbessert einen gefundenen Plan, ohne die Kilometer zu ändern: Spieltage auf andere Sonntage verlegen (für den
 /// Stand oder einen gemeinsamen Spieltag) und das Heimrecht von Einzelbegegnungen tauschen (echte Heimspiele
-/// gleichmäßig). Festgehaltene Spieltage bleiben, Verstöße gegen die Meldungen werden nicht mehr.
+/// gleichmäßig). Verstöße gegen die Meldungen werden nicht mehr.
 /// </summary>
 internal static class Kompaktverbesserung
 {
@@ -39,20 +39,37 @@ internal static class Kompaktverbesserung
         return beste;
     }
 
-    /// <summary>Tauscht das Heimrecht von Einzelbegegnungen, solange die echten Heimspiele dadurch gleichmäßiger werden.</summary>
+    /// <summary>
+    /// Tauscht das Heimrecht von Einzelbegegnungen, solange es besser wird: zuerst sollen möglichst alle Mannschaften
+    /// wenigstens ein Heimspiel haben (wer keinen Spieltag ausrichtet, bekommt so sein Einzel zuhause), dann die echten
+    /// Heimspiele gleichmäßig verteilt, dann die Fahrten kurz sein (Einzelfahrten doppelt gezählt).
+    /// </summary>
     public static Kompaktloesung EinzelAusgleichen(Kompaktmodell modell, Kompaktloesung loesung)
     {
         Kompaktloesung beste = loesung;
+        bool verbessert = true;
+        for (int runde = 0; verbessert && runde < Runden; runde++)
+        {
+            (beste, verbessert) = EinzelRunde(modell, beste);
+        }
+
+        return beste;
+    }
+
+    private static (Kompaktloesung Loesung, bool Verbessert) EinzelRunde(Kompaktmodell modell, Kompaktloesung loesung)
+    {
+        Kompaktloesung beste = loesung;
+        bool verbessert = false;
         for (int i = 0; i < beste.Turniere.Length; i++)
         {
             Kompaktkandidat k = beste.Turniere[i];
-            if (!k.IstEinzel || modell.IstFest(k))
+            if (!k.IstEinzel)
             {
                 continue;
             }
 
             Kompaktkandidat getauscht = modell.Kandidat(Turnierform.Einzel, [k.Mannschaften[1], k.Mannschaften[0]], k.Tag);
-            if (getauscht.Verstoesse > k.Verstoesse || !modell.Wunschgerecht(getauscht))
+            if (getauscht.Verstoesse > k.Verstoesse)
             {
                 continue;
             }
@@ -60,13 +77,14 @@ internal static class Kompaktverbesserung
             var turniere = (Kompaktkandidat[])beste.Turniere.Clone();
             turniere[i] = getauscht;
             var probe = new Kompaktloesung(modell, turniere);
-            if (probe.Heimspiele < beste.Heimspiele)
+            if ((probe.OhneHeimspiel, probe.Heimspiele, probe.Bewertungskm).CompareTo((beste.OhneHeimspiel, beste.Heimspiele, beste.Bewertungskm)) < 0)
             {
                 beste = probe;
+                verbessert = true;
             }
         }
 
-        return beste;
+        return (beste, verbessert);
     }
 
     private static Kompaktloesung? BesterZug(Kompaktmodell modell, Kompaktloesung loesung, Comparison<Kompaktloesung> ziel)
@@ -75,11 +93,6 @@ internal static class Kompaktverbesserung
         Kompaktkandidat[] turniere = loesung.Turniere;
         for (int i = 0; i < turniere.Length; i++)
         {
-            if (modell.IstFest(turniere[i]))
-            {
-                continue;
-            }
-
             for (int tag = 0; tag < modell.T; tag++)
             {
                 Kompaktloesung? probe = Verlegen(modell, turniere, i, tag);

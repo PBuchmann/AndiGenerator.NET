@@ -17,13 +17,22 @@ namespace AndiGenerator.UI.Seiten;
 /// </summary>
 public partial class SetzlistenSeite : UserControl
 {
+    /// <summary>So weit (Pixel, im Fenster) muss sich die Maus bewegen, bis die Zeile wirklich verschoben wird.</summary>
+    private const double Ziehschwelle = 4;
+
     private bool ziehen;
+    private bool bewegt;
+    private Point start;
     private double griffhoehe;
 
     /// <summary>Initialisiert die Seite.</summary>
     public SetzlistenSeite()
     {
         InitializeComponent();
+
+        // Den Fokus (für Escape) holen, ohne dass die umgebende Bildlaufleiste dorthin springt: Sonst rutscht die Liste unter
+        // dem ruhenden Mauszeiger weg, und ein Klick auf den Griff verschiebt die Zeile.
+        AddHandler(RequestBringIntoViewEvent, (_, e) => e.Handled |= ReferenceEquals(e.TargetObject, this));
         Focusable = true;
         KeyDown += (_, e) =>
         {
@@ -55,6 +64,8 @@ public partial class SetzlistenSeite : UserControl
         if (amGriff && modell.ZiehenBeginnen(index))
         {
             ziehen = true;
+            bewegt = false;
+            start = e.GetPosition(TopLevel.GetTopLevel(this));
             griffhoehe = e.GetPosition(zeile).Y;
             Schwebezeile.Width = Liste.Bounds.Width;
             Mitfuehren(e);
@@ -77,6 +88,13 @@ public partial class SetzlistenSeite : UserControl
         }
 
         Mitfuehren(e);
+
+        // Erst eine echte Mausbewegung (in Fensterkoordinaten, nicht bloßer Bildlauf) verschiebt die Zeile.
+        bewegt |= Point.Distance(e.GetPosition(TopLevel.GetTopLevel(this)), start) >= Ziehschwelle;
+        if (!bewegt)
+        {
+            return;
+        }
 
         // Zeile unter dem Zeiger: obere Hälfte = davor, untere Hälfte = dahinter.
         foreach (Control behaelter in Liste.GetRealizedContainers())
@@ -110,6 +128,6 @@ public partial class SetzlistenSeite : UserControl
 
         ziehen = false;
         zeiger?.Capture(null);
-        Modell?.ZiehenBeenden(uebernehmen);
+        Modell?.ZiehenBeenden(uebernehmen && bewegt);
     }
 }

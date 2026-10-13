@@ -67,6 +67,19 @@ public sealed class KompaktspieltageTests : IDisposable
     }
 
     [Fact]
+    public void Nur_Heim_wird_in_der_Bemerkung_ergaenzt_und_entfernt()
+    {
+        DateOnly okt = new(2026, 10, 18);
+        DateOnly nov = new(2026, 11, 1);
+
+        Assert.Equal("Nur Heim: 18.10.", Kompaktplanung.NurHeimAendern(string.Empty, okt, true));
+        Assert.Equal("Bitte nicht vor 11 Uhr.\nNur Heim: 18.10.", Kompaktplanung.NurHeimAendern("Bitte nicht vor 11 Uhr.", okt, true));
+        Assert.Equal("Vorab\nNur Heim: 18.10., 01.11.\nSonst alles", Kompaktplanung.NurHeimAendern("Vorab\nNur Heim: 18.10.\nSonst alles", nov, true));
+        Assert.Equal("Vorab\nSonst alles", Kompaktplanung.NurHeimAendern("Vorab\nNur Heim: 18.10.\nSonst alles", okt, false));
+        Assert.Equal("Ohne Zeile", Kompaktplanung.NurHeimAendern("Ohne Zeile", okt, false));
+    }
+
+    [Fact]
     public void Kartendaten_enthalten_die_Bundeslaender_und_Staedte()
     {
         Assert.Equal(16, Kartendaten.Laender.Count);
@@ -91,26 +104,30 @@ public sealed class KompaktspieltageTests : IDisposable
     }
 
     [Fact]
-    public void Festgehaltenes_und_Fahrtwuensche_werden_mit_der_Staffel_gespeichert()
+    public void Spitze_und_Keller_nach_QTTR_Schnitt()
     {
-        Plansitzung sitzung = Oeffnen(Testdaten.Datei("4__Kreisklasse_Gruppe_A (2).xml"));
-        List<string> namen = sitzung.Staffel.Mannschaften.Select(m => m.Name).Take(4).ToList();
-        var vierer = new Planturnier(new DateOnly(2026, 9, 6), Turnierform.Vierer, namen);
-        var einzel = new Planturnier(new DateOnly(2026, 9, 13), Turnierform.Einzel, [namen[1], namen[0]]);
-        Datenbearbeitung daten = sitzung.DatenBearbeiten();
+        List<string> namen = Enumerable.Range(1, 9).Select(i => "M" + i).ToList();
+        var staerken = namen.ToDictionary(n => n, n => new Mannschaftsstaerke(n, 1000 + (10 * int.Parse(n[1..], System.Globalization.CultureInfo.InvariantCulture)), 4));
 
-        daten.FestgehaltenSetzen([vierer, einzel]);
-        daten.FahrtwuenscheSetzen([new Fahrtwunsch(namen[0], namen[2])]);
-        sitzung.DatenUebernehmen(daten);
+        (IReadOnlyList<string> spitze, IReadOnlyList<string> keller, string? hinweis) = Kompaktplanung.Staerkegruppen(namen, staerken);
 
-        Datenbearbeitung neu = Plansitzung.Oeffnen(sitzung.Pfad, Path.Combine(ordner, "basis")).DatenBearbeiten();
-        IReadOnlyList<Planturnier> fest = neu.Festgehalten();
-        Assert.Equal(2, fest.Count);
-        Assert.Equal(vierer.Tag, fest[0].Tag);
-        Assert.Equal(Turnierform.Vierer, fest[0].Form);
-        Assert.Equal(namen, fest[0].Mannschaften);
-        Assert.Equal(Turnierform.Einzel, fest[1].Form);
-        Assert.Equal(new[] { new Fahrtwunsch(namen[0], namen[2]) }, neu.Fahrtwuensche());
+        Assert.Equal(new[] { "M9", "M8", "M7", "M6" }, spitze);
+        Assert.Equal(new[] { "M1", "M2", "M3", "M4" }, keller);
+        Assert.Null(hinweis);
+
+        staerken.Remove("M5");
+        (spitze, _, hinweis) = Kompaktplanung.Staerkegruppen(namen, staerken);
+        Assert.Empty(spitze);
+        Assert.Contains("M5", hinweis, StringComparison.Ordinal);
+
+        // Bei 6 oder 7 Mannschaften je drei (für 3er-Spieltage), darunter keine Gruppen.
+        List<string> sieben = namen.Take(7).ToList();
+        staerken["M5"] = new Mannschaftsstaerke("M5", 1050, 4);
+        (spitze, keller, _) = Kompaktplanung.Staerkegruppen(sieben, staerken);
+        Assert.Equal(new[] { "M7", "M6", "M5" }, spitze);
+        Assert.Equal(new[] { "M1", "M2", "M3" }, keller);
+        (spitze, _, _) = Kompaktplanung.Staerkegruppen(namen.Take(5).ToList(), staerken);
+        Assert.Empty(spitze);
     }
 
     [Fact]
@@ -146,7 +163,10 @@ public sealed class KompaktspieltageTests : IDisposable
         Assert.Equal(9, a.Spieltage.Count);
         Assert.All(a.Spieltage, s => Assert.Equal(Turnierform.Vierer, s.Form));
         Assert.Equal(36, a.Spieltage.Sum(s => s.Spiele.Count));
-        Assert.All(a.Tage, t => Assert.Equal(DayOfWeek.Sunday, t.DayOfWeek));
+
+        // Alle Sonntage, dazu Samstage und Wochentage mit Heimtermin; die Spieltage selbst liegen am Wochenende.
+        Assert.Contains(a.Tage, t => t.DayOfWeek == DayOfWeek.Sunday);
+        Assert.All(a.Spieltage, s => Assert.True(s.Tag.DayOfWeek is DayOfWeek.Saturday or DayOfWeek.Sunday));
         Assert.True(a.Tage[0] < new DateOnly(2026, 9, 1) && a.Tage[^1] < new DateOnly(2026, 12, 7));
         Assert.Equal(8, a.MeisteAmTag);
         Assert.True(Kompaktplanung.InFrage(sitzung.Staffel, sitzung.Optionen.Rundenplanung, false));

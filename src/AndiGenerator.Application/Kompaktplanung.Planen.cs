@@ -16,7 +16,15 @@ public static partial class Kompaktplanung
     /// <summary>Abstand der Runden eines Spieltags.</summary>
     private static readonly TimeSpan Rundenabstand = TimeSpan.FromHours(3);
 
-    /// <summary>Stellt die Aufgabe für den Kompaktplaner zusammen: Sonntage der Halbrunde, Meldungen, Luftlinie, Festgehaltenes, Fahrtwünsche.</summary>
+    /// <summary>
+    /// Die Einstellungen des Kompaktplaners: Standard, mit dem Löser HiGHS für die gezielte Konstruktion, wenn er sich
+    /// laden lässt.
+    /// </summary>
+    /// <returns>Die Einstellungen.</returns>
+    public static Kompaktplanoptionen Optionen() =>
+        Kompaktplanoptionen.Standard with { Loeser = Highsbruecke.Verfuegbar ? new Highsbruecke() : null };
+
+    /// <summary>Stellt die Aufgabe für den Kompaktplaner zusammen: Spieltermine der Halbrunde (Sonntage, Samstage und Wochentage mit Heimtermin), Meldungen, Luftlinie, Spitze und Keller.</summary>
     /// <param name="staffel">Die Staffel.</param>
     /// <param name="daten">Arbeitskopie der Spielplandaten.</param>
     /// <param name="planung">Eingestellte Rundenplanung.</param>
@@ -27,7 +35,7 @@ public static partial class Kompaktplanung
         ArgumentNullException.ThrowIfNull(staffel);
         ArgumentNullException.ThrowIfNull(daten);
         IReadOnlyList<Turnier> turniere = Turniererkennung.Erkennen(staffel.BestehenderSpielplan);
-        List<DateOnly> tage = Sonntage(staffel, turniere, Rueckrunde(staffel, planung), heute);
+        List<DateOnly> tage = Spieltermine(staffel, turniere, Rueckrunde(staffel, planung), heute, daten.Kompakttage());
         IReadOnlyDictionary<string, string> bemerkungen = daten.Bemerkungen();
         List<Turniermeldung> meldungen = staffel.Mannschaften
             .Select(m => Meldung(m, tage, bemerkungen.GetValueOrDefault(m.Name, string.Empty), []))
@@ -36,18 +44,58 @@ public static partial class Kompaktplanung
         IReadOnlyDictionary<string, Koordinate> lagen = daten.Hallenkoordinaten();
         double Entfernung(string a, string b) =>
             lagen.TryGetValue(a, out Koordinate x) && lagen.TryGetValue(b, out Koordinate y) ? x.Luftlinie(y) : 0;
-        return new Kompaktaufgabe(
-            staffel.Mannschaften.Select(m => m.Name).ToList(),
-            tage,
-            meldungen,
-            Entfernung,
-            daten.Festgehalten(),
-            daten.Fahrtwuensche());
+        List<string> namen = staffel.Mannschaften.Select(m => m.Name).ToList();
+        (IReadOnlyList<string> spitze, IReadOnlyList<string> keller, string? hinweis) = Staerkegruppen(namen, daten.Mannschaftsstaerken());
+        return new Kompaktaufgabe(namen, tage, meldungen, Entfernung)
+        {
+            Spitze = spitze,
+            Keller = keller,
+            Hinweise = hinweis is null ? [] : [hinweis],
+        };
     }
 
     /// <summary>
-    /// Die Spiele eines geplanten Spieltags: Beginn zur Uhrzeit des Heimtermins des Ausrichters (frühestens 10 Uhr beim
-    /// 3er-, 11 Uhr beim 4er-Spieltag und bei der Einzelbegegnung), Runden im Abstand von drei Stunden. Spiellokal nur bei
+    /// Spitzen- und Abstiegsgruppe nach dem QTTR-Schnitt (Mannschaftsaufstellung): die vier stärksten (stärkste zuerst) und
+    /// die vier schwächsten (schwächste zuerst), bei 6 oder 7 Mannschaften je drei (für 3er-Spieltage). Nur, wenn für alle
+    /// ein Schnitt bekannt ist.
+    /// </summary>
+    /// <param name="namen">Die Mannschaften.</param>
+    /// <param name="staerken">QTTR-Schnitt je Mannschaft.</param>
+    /// <returns>Spitze, Keller (leer, wenn nicht möglich) und ggf. ein Hinweis.</returns>
+    public static (IReadOnlyList<string> Spitze, IReadOnlyList<string> Keller, string? Hinweis) Staerkegruppen(
+        IReadOnlyList<string> namen,
+        IReadOnlyDictionary<string, Mannschaftsstaerke> staerken)
+    {
+        ArgumentNullException.ThrowIfNull(namen);
+        ArgumentNullException.ThrowIfNull(staerken);
+        int groesse = 0;
+        if (namen.Count >= 8)
+        {
+            groesse = 4;
+        }
+        else if (namen.Count >= 6)
+        {
+            groesse = 3;
+        }
+
+        if (groesse == 0)
+        {
+            return ([], [], null);
+        }
+
+        List<string> ohne = namen.Where(n => !staerken.TryGetValue(n, out Mannschaftsstaerke? st) || !st.HatAufstellung || st.Schnitt <= 0).ToList();
+        if (ohne.Count > 0)
+        {
+            return ([], [], "Spitzen- und Abstiegsspieltag: Für " + string.Join(", ", ohne) + " fehlt der QTTR-Schnitt (Mannschaftsaufstellung in der Einrichtung laden).");
+        }
+
+        List<string> sortiert = namen.OrderByDescending(n => staerken[n].Schnitt).ThenBy(n => n, StringComparer.Ordinal).ToList();
+        return (sortiert.Take(groesse).ToList(), Enumerable.Reverse(sortiert).Take(groesse).ToList(), null);
+    }
+
+    /// <summary>
+    /// Die Spiele eines geplanten Spieltags: Beginn zur eingetragenen Uhrzeit des Heimtermins des Ausrichters, ohne Uhrzeit
+    /// (00:00) um 10 Uhr beim 3er-, um 11 Uhr beim 4er-Spieltag und bei der Einzelbegegnung; Runden im Abstand von drei Stunden. Spiellokal nur bei
     /// den Spielen des Ausrichters; die übrigen werden in click-TT in seine Halle verlegt.
     /// </summary>
     /// <param name="turnier">Der Spieltag.</param>
@@ -62,7 +110,9 @@ public static partial class Kompaktplanung
             .SelectMany(m => m.Heimspieltermine)
             .FirstOrDefault(t => DateOnly.FromDateTime(t.Zeitpunkt) == turnier.Tag);
         TimeSpan standard = turnier.Form == Turnierform.Dreier ? TimeSpan.FromHours(10) : TimeSpan.FromHours(11);
-        TimeSpan beginn = termin is not null && termin.Zeitpunkt.TimeOfDay > standard ? termin.Zeitpunkt.TimeOfDay : standard;
+
+        // Ohne Uhrzeit (00:00) gilt der Standardbeginn; eine eingetragene Uhrzeit gilt so, wie sie ist (Peter, 13.10.2026).
+        TimeSpan beginn = termin is not null && termin.Zeitpunkt.TimeOfDay > TimeSpan.Zero ? termin.Zeitpunkt.TimeOfDay : standard;
         DateTime start = turnier.Tag.ToDateTime(TimeOnly.MinValue) + beginn;
         string lokal = termin?.Spiellokal ?? string.Empty;
         return turnier.Begegnungen()
@@ -78,38 +128,5 @@ public static partial class Kompaktplanung
     {
         ArgumentNullException.ThrowIfNull(turniere);
         return turniere.SelectMany(t => Spiele(t, staffel)).ToList();
-    }
-
-    /// <summary>
-    /// Ein angezeigter Spieltag als festhaltbarer Spieltag: Ausrichter zuerst, beim Vierer dann der Partner, der nicht gegen
-    /// den Ausrichter spielt, und dessen beide Gegner.
-    /// </summary>
-    /// <param name="spieltag">Der Spieltag.</param>
-    /// <returns>Der Spieltag oder <c>null</c>, wenn Form oder Ausrichter unklar sind.</returns>
-    public static Planturnier? AlsPlanturnier(Kompaktspieltag spieltag)
-    {
-        ArgumentNullException.ThrowIfNull(spieltag);
-        if (spieltag.Ausrichter is not string ausrichter || spieltag.Spiele.Count == 0)
-        {
-            return null;
-        }
-
-        if (spieltag.Form == Turnierform.Einzel)
-        {
-            Spiel spiel = spieltag.Spiele[0];
-            return new Planturnier(spieltag.Tag, Turnierform.Einzel, [spiel.Heim, spiel.Gast]);
-        }
-
-        List<string> gegner = spieltag.Spiele
-            .Where(s => s.Heim == ausrichter || s.Gast == ausrichter)
-            .Select(s => s.Heim == ausrichter ? s.Gast : s.Heim)
-            .Distinct(StringComparer.Ordinal)
-            .ToList();
-        List<string> partner = spieltag.Mannschaften.Where(m => m != ausrichter && !gegner.Contains(m)).ToList();
-        int anzahl = spieltag.Form == Turnierform.Vierer ? 4 : 3;
-        List<string> mannschaften = [ausrichter, .. partner, .. gegner];
-        return (spieltag.Form is Turnierform.Dreier or Turnierform.Vierer) && mannschaften.Count == anzahl
-            ? new Planturnier(spieltag.Tag, spieltag.Form, mannschaften)
-            : null;
     }
 }

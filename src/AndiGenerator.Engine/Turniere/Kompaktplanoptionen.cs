@@ -16,9 +16,15 @@ namespace AndiGenerator.Engine.Turniere;
 public sealed record Kompaktplanoptionen(TimeSpan Dauer, int Threads, int Startwert, int? Versuche, TimeSpan ExaktDauer)
 {
     /// <summary>
-    /// Holt die Standardeinstellungen auf allen Prozessorkernen bis auf einen: bis zu zwei Minuten vollständige Suche nach
-    /// 4er-Plänen, danach zehn Sekunden zufällige Suche.
+    /// Holt die Standardeinstellungen auf allen Prozessorkernen bis auf einen: bis zu zwei Minuten gezielte Konstruktion
+    /// (bzw. vollständige Suche nach 4er-Plänen), danach zehn Sekunden zufällige Suche.
     /// </summary>
     public static Kompaktplanoptionen Standard =>
         new(TimeSpan.FromSeconds(10), Math.Max(1, Environment.ProcessorCount - 1), Random.Shared.Next(), null, TimeSpan.FromMinutes(2));
+
+    /// <summary>
+    /// Holt den Löser, mit dem die Pläne zuerst gezielt nach den Kriterien konstruiert werden (ganzzahlige Optimierung,
+    /// höchstens <see cref="ExaktDauer"/>); ohne ihn wie bisher vollständige 4er-Suche und Zufallssuche.
+    /// </summary>
+    public IGanzzahlloeser? Loeser { get; init; }
 }

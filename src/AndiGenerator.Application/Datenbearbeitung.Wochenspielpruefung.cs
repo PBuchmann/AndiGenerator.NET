@@ -126,18 +126,7 @@ public sealed partial class Datenbearbeitung
     /// <summary>Lage der Halle: Spiellokal der Mannschaft (Nummer am Team, sonst die häufigste der Heimtermine, sonst 1).</summary>
     private static Koordinate? HallenLage(DatenKnoten team, IReadOnlyList<Vereinsmeldung> meldungen)
     {
-        int nummer = DelphiKompatibel.ZahlLesen(team.Lesen("location"), 0);
-        if (nummer is < 1 or > 3)
-        {
-            nummer = team.KinderMitNamen("homegameday")
-                .Select(k => DelphiKompatibel.ZahlLesen(k.Lesen("location"), 0))
-                .Where(n => n is >= 1 and <= 3)
-                .GroupBy(n => n)
-                .OrderByDescending(g => g.Count())
-                .Select(g => g.Key)
-                .FirstOrDefault(1);
-        }
-
+        int nummer = Hallennummer(team);
         Spiellokaladresse? adresse = MeldungZu(team, meldungen) is Vereinsmeldung m
             ? m.Spiellokale.GetValueOrDefault(nummer) ?? m.Spiellokale.Values.FirstOrDefault()
             : GespeicherteAdresse(team, nummer);
@@ -147,6 +136,21 @@ public sealed partial class Datenbearbeitung
             { Postleitzahl.Length: > 0 } a => Postleitzahlen.Lage(a.Postleitzahl, a.Ort),
             _ => null,
         };
+    }
+
+    /// <summary>Nummer des Spiellokals der Mannschaft (1 bis 3): die eingetragene, sonst die ihrer meisten Heimtermine.</summary>
+    private static int Hallennummer(DatenKnoten team)
+    {
+        int nummer = DelphiKompatibel.ZahlLesen(team.Lesen("location"), 0);
+        return nummer is >= 1 and <= 3
+            ? nummer
+            : team.KinderMitNamen("homegameday")
+                .Select(k => DelphiKompatibel.ZahlLesen(k.Lesen("location"), 0))
+                .Where(n => n is >= 1 and <= 3)
+                .GroupBy(n => n)
+                .OrderByDescending(g => g.Count())
+                .Select(g => g.Key)
+                .FirstOrDefault(1);
     }
 
     private static Spiellokaladresse? GespeicherteAdresse(DatenKnoten team, int nummer)

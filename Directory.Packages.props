@@ -21,6 +21,10 @@
   <ItemGroup>
     <PackageVersion Include="PdfPig" Version="0.1.16" />
   </ItemGroup>
+  <!-- Löser HiGHS für die Kompaktspieltage (ganzzahlige Optimierung), MIT. -->
+  <ItemGroup>
+    <PackageVersion Include="Highs.Native" Version="1.15.1" />
+  </ItemGroup>
   <!-- Installation und Updates über GitHub Releases (MIGRATIONSPLAN E12), MIT. Version wie das Werkzeug vpk im Release-Workflow. -->
   <ItemGroup>
     <PackageVersion Include="Velopack" Version="0.0.1298" />

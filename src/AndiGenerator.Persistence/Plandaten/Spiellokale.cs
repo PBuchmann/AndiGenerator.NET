@@ -26,6 +26,7 @@ public sealed class Spiellokale
 
     private readonly Dictionary<(DateTime, string, string), string> vorgegeben = [];
     private readonly Dictionary<string, Dictionary<DateTime, string>> heimtermine = new(StringComparer.Ordinal);
+    private readonly Dictionary<string, string> mannschaftslokale = new(StringComparer.Ordinal);
 
     /// <summary>Wertet den (mit den Änderungen zusammengeführten) Datenbaum einer Staffel aus.</summary>
     /// <param name="plan">Wurzelknoten <c>plan</c>.</param>
@@ -90,6 +91,7 @@ public sealed class Spiellokale
                 }
 
                 heimtermine.TryAdd(mannschaft.Lesen("teamname"), termine);
+                mannschaftslokale.TryAdd(mannschaft.Lesen("teamname"), mannschaftsLokal);
             }
         }
         catch (FormatException ex)
@@ -125,6 +127,22 @@ public sealed class Spiellokale
             && termine.TryGetValue(termin, out lokal)
             ? lokal
             : string.Empty;
+    }
+
+    /// <summary>
+    /// Ermittelt das Spiellokal eines Spiels am Kompaktspieltag (nicht im Original): das des Heimtermins der Heimmannschaft an
+    /// diesem Tag, gleich zu welcher Uhrzeit (die Spiele eines Spieltags beginnen nacheinander); ohne Heimtermin an diesem
+    /// Tag das Spiellokal der Mannschaft.
+    /// </summary>
+    /// <param name="tag">Tag des Spiels.</param>
+    /// <param name="heim">Name der Heimmannschaft (der Ausrichter).</param>
+    /// <returns>Das Spiellokal oder ein leerer Text, wenn keins eingetragen ist.</returns>
+    public string AmTag(DateOnly tag, string heim)
+    {
+        string? amTag = heimtermine.TryGetValue(heim, out Dictionary<DateTime, string>? termine)
+            ? termine.Where(t => DateOnly.FromDateTime(t.Key) == tag).OrderBy(t => t.Key).Select(t => t.Value).FirstOrDefault()
+            : null;
+        return amTag ?? mannschaftslokale.GetValueOrDefault(heim, string.Empty);
     }
 
     private static DateTime? DatumOderNull(string text) =>

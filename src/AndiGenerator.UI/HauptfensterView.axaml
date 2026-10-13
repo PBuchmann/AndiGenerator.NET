@@ -340,7 +340,7 @@
             </Button>
             <Panel VerticalAlignment="Bottom" Margin="8,0,0,0">
               <Button Classes="gross" Command="{Binding StoppenCommand}" IsVisible="{Binding ZeigtStopp}" Width="56" Padding="0" HorizontalContentAlignment="Center"
-                      ToolTip.Tip="Stopp: Generierung beenden. Ihr bester Plan bleibt erhalten („bester Plan der letzten Generierung“).">
+                      ToolTip.Tip="Stopp: Generierung bzw. Planung der Kompaktspieltage beenden. Der bisher beste Plan bleibt erhalten.">
                 <ui:Symbol Daten="{StaticResource SymbolStopp}" Gefuellt="True" Groesse="22" />
               </Button>
               <Button Classes="gross" Command="{Binding SchliessenCommand}" IsVisible="{Binding !ZeigtStopp}" Width="56" Padding="0" HorizontalContentAlignment="Center"
@@ -352,30 +352,8 @@
         </Grid>
       </Border>
 
-      <!-- Kacheln: Stand der Generierung bzw. im Kompaktmodus der gezeigte Plan aus Kompaktspieltagen -->
+      <!-- Kacheln: Stand der Generierung (im Kompaktmodus ausgeblendet; die Kennzahlen stehen dort in der Ansicht) -->
       <Panel Grid.Row="1" IsVisible="{Binding ZeigtArbeitsbereich}">
-      <ItemsControl ItemsSource="{Binding Kompaktkacheln}" IsVisible="{Binding KompaktAktiv}" Margin="22,10,22,0">
-        <ItemsControl.ItemsPanel>
-          <ItemsPanelTemplate>
-            <UniformGrid Columns="4" />
-          </ItemsPanelTemplate>
-        </ItemsControl.ItemsPanel>
-        <ItemsControl.ItemTemplate>
-          <DataTemplate x:DataType="p:Kompaktkachel">
-            <Button Classes="kartenknopf" Margin="6" Command="{Binding $parent[Window].((p:HauptfensterViewModel)DataContext).KompaktspieltageCommand}"
-                    ToolTip.Tip="Ansicht „Kompaktspieltage“ öffnen">
-              <StackPanel Spacing="2">
-                <Grid ColumnDefinitions="*,Auto">
-                  <TextBlock Text="{Binding Titel}" Classes="klein" TextTrimming="CharacterEllipsis" />
-                  <TextBlock Grid.Column="1" Text="Details ›" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource Akzent}" Margin="8,0,0,0" />
-                </Grid>
-                <TextBlock Text="{Binding Wert}" Classes="ziffer wert" Classes.gut="{Binding Gut}" Classes.schlecht="{Binding Schlecht}" />
-                <TextBlock Text="{Binding Zusatz}" Classes="klein hinweis" TextWrapping="Wrap" MaxLines="2" TextTrimming="CharacterEllipsis" />
-              </StackPanel>
-            </Button>
-          </DataTemplate>
-        </ItemsControl.ItemTemplate>
-      </ItemsControl>
       <Grid Classes="kacheln" Classes.automodus="{Binding Anzeige.ZeigtVerstoesse}" IsVisible="{Binding ZeigtGenerierung}" Margin="22,10,22,0"
             ColumnDefinitions="*,*,*,*" RowDefinitions="Auto,Auto">
         <Button Classes="kartenknopf ergebnis" Margin="6" Command="{Binding ErgebnisCommand}" ToolTip.Tip="{Binding ErgebnisHinweis}">

@@ -11,4 +11,14 @@ namespace AndiGenerator.Presentation;
 /// <param name="Zeile">Kennzahlen, z. B. „2.961 km · Stand höchstens 2 Spiele auseinander“.</param>
 /// <param name="Gewaehlt">Dieser Plan wird gezeigt.</param>
 /// <param name="Variante">Die Variante oder <c>null</c> für den Plan aus click-TT.</param>
-public sealed record Kompaktplanwahl(string Titel, string Zeile, bool Gewaehlt, Kompaktvariante? Variante);
+public sealed record Kompaktplanwahl(string Titel, string Zeile, bool Gewaehlt, Kompaktvariante? Variante)
+{
+    /// <summary>Holt die Ziele, die der Plan zugleich erfüllt (beim besten Gesamtpaket), z. B. „zugleich: Gemeinsamer Spieltag“, sonst leer.</summary>
+    public string Zugleich => Variante is { Zugleich.Count: > 0 } v ? "✓ zugleich: " + string.Join(" · ", v.Zugleich) : string.Empty;
+
+    /// <summary>Holt einen Wert, der angibt, ob es ein gespeicherter Plan ist (gesichert oder gemerkt).</summary>
+    public bool Gespeichert { get; init; }
+
+    /// <summary>Holt einen Wert, der angibt, ob der gewählte Plan gemerkt werden kann (eine berechnete Variante).</summary>
+    public bool KannMerken => Gewaehlt && Variante is not null && !Gespeichert;
+}

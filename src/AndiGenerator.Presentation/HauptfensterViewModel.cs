@@ -157,7 +157,10 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
         OeffnenCommand = new AsyncRelayCommand(OeffnenAsync, () => !ZeigtEinrichtung);
         NeuCommand = new AsyncRelayCommand(NeueDateiAsync, () => !ZeigtEinrichtung);
         SchliessenCommand = new AsyncRelayCommand(SchliessenAsync, () => IstGeoeffnet);
-        GenerierungCommand = new AsyncRelayCommand(GenerierungUmschaltenAsync, () => IstGeoeffnet && !KompaktRechnet);
+
+        // Mehrfach gleichzeitig: Während die Planung der Kompaktspieltage (vom selben Knopf gestartet) noch läuft, muss der
+        // Knopf für Pause und Fortsetzen bedienbar bleiben.
+        GenerierungCommand = new AsyncRelayCommand(GenerierungUmschaltenAsync, () => IstGeoeffnet && !(KompaktMeldungenBearbeiten && !KompaktRechnet), AsyncRelayCommandOptions.AllowConcurrentExecutions);
         KostenoptimierungCommand = new RelayCommand(() => VerfahrenWaehlen(false), () => IstGeoeffnet);
         AutomodusCommand = new RelayCommand(() => VerfahrenWaehlen(true), () => IstGeoeffnet);
         ZuletztOeffnenCommand = new AsyncRelayCommand<string>(ZuletztOeffnenAsync, _ => !ZeigtEinrichtung);
@@ -167,7 +170,7 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
         ZoomZuruecksetzenCommand = new RelayCommand(() => ZoombareAnsicht()?.Zoom.Zuruecksetzen());
         StartenCommand = new AsyncRelayCommand(StartenAsync, () => IstGeoeffnet);
         PauseCommand = new RelayCommand(PauseUmschalten, () => Laeuft);
-        StoppenCommand = new RelayCommand(Stoppen, () => Laeuft);
+        StoppenCommand = new RelayCommand(Stoppen, () => Laeuft || KompaktRechnet);
         PlanMerkenCommand = new AsyncRelayCommand(PlanMerkenAsync, () => laufenderStand is not null);
         PlanLoeschenCommand = new AsyncRelayCommand(
             () => startplan.Quelle is PlanQuelle quelle ? GemerktenPlanEntfernenAsync(quelle) : Task.CompletedTask,
@@ -296,6 +299,8 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
     /// </summary>
     public string GenerierungText => (Laeuft, Pausiert) switch
     {
+        (false, _) when KompaktRechnet && KompaktPausiert => "Fortsetzen (gezeigt werden die bisher besten Pläne)",
+        (false, _) when KompaktRechnet => "Anhalten und die bisher besten Pläne zeigen",
         (false, _) when KompaktAktiv => "Kompaktspieltage planen: Varianten berechnen (etwa 10 Sekunden)",
         (false, _) => "Start",
         (true, true) => "Fortsetzen",
@@ -303,16 +308,16 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
     };
 
     /// <summary>Holt einen Wert, der angibt, ob der Hauptknopf das Play-Symbol zeigt (vor dem Start).</summary>
-    public bool ZeigtStart => !Laeuft;
+    public bool ZeigtStart => !Laeuft && !KompaktRechnet;
 
     /// <summary>Holt einen Wert, der angibt, ob der Hauptknopf das Symbol „Fortsetzen“ (Strich und Play) zeigt (in der Pause).</summary>
-    public bool ZeigtFortsetzen => Laeuft && Pausiert;
+    public bool ZeigtFortsetzen => (Laeuft && Pausiert) || (KompaktRechnet && KompaktPausiert);
 
     /// <summary>Holt einen Wert, der angibt, ob der Hauptknopf das Pause-Symbol zeigt (Generierung läuft).</summary>
-    public bool ZeigtPause => Laeuft && !Pausiert;
+    public bool ZeigtPause => (Laeuft && !Pausiert) || (KompaktRechnet && !KompaktPausiert);
 
     /// <summary>Holt einen Wert, der angibt, ob rechts daneben „Stopp“ steht (Generierung läuft oder ruht; sonst „Schließen“).</summary>
-    public bool ZeigtStopp => Laeuft;
+    public bool ZeigtStopp => Laeuft || KompaktRechnet;
 
     /// <summary>
     /// Holt einen Wert, der angibt, ob „Start mit“ gewählt werden kann: nur vor dem Start. Eine laufende oder angehaltene
@@ -910,6 +915,13 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
         QuellenNeuAufbauen();
     }
 
+    /// <summary>Ob zwei Pläne dieselben Begegnungen an denselben Tagen haben, gleich in welcher Reihenfolge.</summary>
+    private static bool GleicheBegegnungen(IReadOnlyList<Spiel> a, IReadOnlyList<Spiel> b)
+    {
+        static string Schluessel(Spiel s) => string.Create(CultureInfo.InvariantCulture, $"{s.Zeitpunkt:yyyy-MM-dd}|{s.Heim}|{s.Gast}");
+        return a.Count == b.Count && a.Select(Schluessel).Order(StringComparer.Ordinal).SequenceEqual(b.Select(Schluessel).Order(StringComparer.Ordinal), StringComparer.Ordinal);
+    }
+
     /// <summary>Die Einteilung als Aufzählung für die Einrichtung: je Stufe eine Überschrift, darunter die Kriterien mit Nummer.</summary>
     private static List<string> Einteilungszeilen(Stufeneinteilung einteilung)
     {
@@ -1490,7 +1502,11 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
     /// <summary>Hauptknopf: startet eine neue Generierung bzw. hält die laufende an und setzt sie fort.</summary>
     private async Task GenerierungUmschaltenAsync()
     {
-        if (KompaktAktiv && !Laeuft)
+        if (KompaktRechnet)
+        {
+            await KompaktPauseUmschaltenAsync();
+        }
+        else if (KompaktAktiv && !Laeuft)
         {
             await KompaktPlanenAsync();
         }
@@ -1689,7 +1705,17 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
             return true;
         }
 
-        var vergleich = new Planvergleich(anlass, aktuell.Bewertung, gesichert.Bewertung, Einteilung, eintrag.Geaendert);
+        // Dieselben Begegnungen an denselben Tagen (nur anders gespeichert oder sortiert): nichts zu vergleichen (Peter, 13.10.2026).
+        if (GleicheBegegnungen(aktuell.Spiele, gesichert.Spiele))
+        {
+            sicherungEntschieden = aktuell.Spiele;
+            await oberflaeche.MeldenAsync("Plan sichern", $"{anlass} Der aktuelle Plan ist mit dem gesicherten identisch; es ist nichts zu sichern.");
+            return true;
+        }
+
+        Planvergleich vergleich = KompaktAktiv
+            ? KompaktVergleich(s, anlass, aktuell.Spiele, gesichert.Spiele, eintrag.Geaendert)
+            : new Planvergleich(anlass, aktuell.Bewertung, gesichert.Bewertung, Einteilung, eintrag.Geaendert);
         switch (await oberflaeche.SicherungAbfragenAsync(vergleich))
         {
             case Sicherungswahl.Ueberschreiben:
@@ -1728,6 +1754,12 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
 
     private void Stoppen()
     {
+        if (KompaktRechnet)
+        {
+            KompaktStoppen();
+            return;
+        }
+
         dienst.Stoppen();
         Anzeige.KerneAnhalten();
         maschinenraumAnsicht?.Uebernehmen(Optimierungsstand.Leer);
@@ -1771,10 +1803,17 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
             return;
         }
 
-        IReadOnlyList<string> harteFehler = s.HarteFehler(stand.Spiele);
-        if (harteFehler.Count > 0)
+        // Kompaktspieltage finden nicht an den Heimterminen der Heimmannschaft statt; die normale Prüfung hielte fast jedes
+        // Spiel für ungültig. Dort gelten stattdessen die Hinweise der Kompaktauswertung (wie in der Ansicht).
+        Kompaktauswertung? kompakt = KompaktAktiv
+            ? Kompaktplanung.SpieleAuswerten(s.Staffel, s.DatenBearbeiten(), s.Optionen.Rundenplanung, DateOnly.FromDateTime(DateTime.Today), stand.Spiele)
+            : null;
+        (string kopf, IReadOnlyList<string> befunde) = kompakt is not null
+            ? ("Der Kompaktplan hat Hinweise:", KompaktExportHinweise(kompakt))
+            : ("Der Plan hat harte Fehler:", s.HarteFehler(stand.Spiele));
+        if (befunde.Count > 0)
         {
-            string frage = "Der Plan hat harte Fehler:" + Environment.NewLine + string.Join(Environment.NewLine, harteFehler)
+            string frage = kopf + Environment.NewLine + string.Join(Environment.NewLine, befunde)
                 + Environment.NewLine + Environment.NewLine + "Trotzdem exportieren?";
             if (!await oberflaeche.FragenAsync("CSV exportieren", frage))
             {
@@ -1790,7 +1829,14 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
 
         try
         {
-            s.CsvExportieren(pfad, stand.Spiele);
+            if (kompakt is not null)
+            {
+                s.KompaktCsvExportieren(pfad, stand.Spiele, kompakt.Spieltage);
+            }
+            else
+            {
+                s.CsvExportieren(pfad, stand.Spiele);
+            }
         }
         catch (Exception fehler) when (fehler is IOException or UnauthorizedAccessException)
         {
@@ -2004,6 +2050,8 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
 
         Planquellen = neu;
         StartplaeneAufbauen();
+        KompaktGespeichertAufbauen();
+        kompaktAnsicht?.Laden();
         foreach (AnsichtViewModel ansicht in ansichten)
         {
             ansicht.QuellenUebernehmen(neu);
