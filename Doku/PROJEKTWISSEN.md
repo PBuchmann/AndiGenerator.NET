@@ -15,7 +15,7 @@ Entscheidungen mit Begründung stehen ausführlich im [MIGRATIONSPLAN](MIGRATION
 - **Branches:** Gearbeitet wird auf Feature-Branches (derzeit `feature/setzliste-qttr`); Peter führt sie über Pull
   Requests auf GitHub nach `main` zusammen und pusht selbst.
 - **Werkzeuge:** `bauen.cmd` (Build + Tests, Protokoll `build-log.txt`), `bildschirmfotos.cmd` (Bilder der Anleitung,
-  Protokoll `bildschirmfotos-log.txt`), `starten.cmd` (Programm starten), `abdeckung.cmd` (Testabdeckung).
+  Protokoll `bildschirmfotos-log.txt`), `anleitung.cmd` (PDF der Anleitung), `starten.cmd` (Programm starten), `abdeckung.cmd` (Testabdeckung).
 - **Langsame/zeitabhängige Tests:** HiGHS- und Kompaktplaner-Tests (`KompaktplanerTests`, Sammlung `MessungenSammlung`)
   laufen seriell und hängen von der Rechnerlast ab. Zeitgrenzen nur erhöhen, wenn die Suche dann von selbst früher endet
   (vollständige 4er-Suche ja; HiGHS-Schritte mit Ausschluss-Schnitten nein – die rechnen ihren ganzen Zeitanteil).
@@ -57,11 +57,13 @@ Entscheidungen mit Begründung stehen ausführlich im [MIGRATIONSPLAN](MIGRATION
 
 ## Anleitung
 
-- Quelle `Doku/ANLEITUNG.md` (Kapitel 1–13; Kompaktspieltage in 6.8, Druck in 9.2), Bilder `Doku/Anleitung/Bilder`
+- Quelle `Doku/ANLEITUNG.md` (Kapitel 1–10; gegliedert nach den zwei Arten der Planung: 3.5 Gegenüberstellung,
+  5 normale Runden, 6 Kompaktspieltage, 7–9 gemeinsam; Druck in 8.2), Bilder `Doku/Anleitung/Bilder`
   (01–34), PDF `Doku/Anleitung.pdf` (wird mit dem Programm ausgeliefert).
 - Bilder neu: `bildschirmfotos.cmd` (Test `tests/AndiGenerator.UI.Tests/Bildschirmfotos.cs`; neue Bilder dort ergänzen).
-- PDF neu: pandoc + Node/Playwright, siehe `tools/anleitung/README.md`. Auf Windows müssen pandoc und Node mit Playwright
-  installiert sein; alternativ in einer Linux-Umgebung erzeugen.
+- PDF neu: unter Windows `anleitung.cmd` (portables pandoc, Playwright für .NET mit Edge; Protokoll
+  `anleitung-log.txt`), unter Linux pandoc + Node/Playwright – siehe `tools/anleitung/README.md`. Auf Peters Rechner
+  gibt es weder pandoc noch Node noch WSL, deshalb der Windows-Weg.
 - Nach Änderungen an der Oberfläche: Bilder neu erzeugen, ansehen, dann PDF neu erzeugen.
 
 ## Offene Punkte (Stand 14.10.2026)

@@ -2,6 +2,12 @@
 
 Quelle ist `Doku/ANLEITUNG.md` mit den Bildern unter `Doku/Anleitung/Bilder`. Daraus entsteht `Doku/Anleitung.pdf`, die das Programm mitliefert und über **Anleitung** öffnet.
 
+## Unter Windows
+
+`anleitung.cmd` im Hauptordner erzeugt die PDF neu – ohne Installation, nur .NET SDK und Microsoft Edge müssen vorhanden sein. Dahinter steht `tools/anleitung/anleitung.ps1`: Es lädt beim ersten Lauf [pandoc](https://pandoc.org) als portables ZIP (Version und SHA-256-Prüfsumme stehen im Skript) nach `%LOCALAPPDATA%\AndiGenerator.NET\werkzeuge`, baut in `%TEMP%\andigen-anleitung` das HTML, prüft alle Verweise innerhalb der Anleitung und alle Bilder und druckt mit `drucken.cs` (Playwright für .NET mit dem installierten Edge, gleiche Einstellungen wie `pdf.js`) nach `Doku/Anleitung.pdf`. Beim ersten Lauf lädt `dotnet run` außerdem das NuGet-Paket Microsoft.Playwright. Protokoll: `anleitung-log.txt`. Nur das HTML (zum Prüfen im Browser): `powershell -File tools\anleitung\anleitung.ps1 -NurHtml`.
+
+## Unter Linux (oder WSL)
+
 Benötigt: [pandoc](https://pandoc.org), Node.js mit Playwright (Chromium) und die IBM-Plex-Schriften aus `src/AndiGenerator.UI/Assets/Fonts`.
 
 ```sh
