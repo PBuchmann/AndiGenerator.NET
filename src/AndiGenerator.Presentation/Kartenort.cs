@@ -7,10 +7,10 @@ using AndiGenerator.Domain.Geo;
 namespace AndiGenerator.Presentation;
 
 /// <summary>Ein Spielort für die Karte.</summary>
-/// <param name="Name">Name der Mannschaft (für den Hinweis).</param>
-/// <param name="Kurzname">Beschriftung auf der Karte.</param>
+/// <param name="Name">Schlüssel des Spielorts (Name der Mannschaft), auf den sich die Fahrten beziehen.</param>
+/// <param name="Beschriftung">Beschriftung auf der Karte (voller Mannschaftsname).</param>
 /// <param name="Lage">Lage der Halle.</param>
 /// <param name="Hervorgehoben">Ausrichter in der Auswahl (größer, grün).</param>
 /// <param name="Gedimmt">Nicht Teil der Auswahl (blass).</param>
 /// <param name="Hinweis">Text für den Tooltip, z. B. Halle und Ort.</param>
-public sealed record Kartenort(string Name, string Kurzname, Koordinate Lage, bool Hervorgehoben, bool Gedimmt, string Hinweis);
+public sealed record Kartenort(string Name, string Beschriftung, Koordinate Lage, bool Hervorgehoben, bool Gedimmt, string Hinweis);

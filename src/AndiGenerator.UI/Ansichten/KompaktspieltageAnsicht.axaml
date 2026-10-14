@@ -190,13 +190,13 @@
                   <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="p:Kompaktspalte">
                       <!-- Senkrechte Beschriftung, von unten nach oben zu lesen. -->
-                      <Button Classes="flach" Width="32" Height="104" ToolTip.Tip="{Binding Name}"
+                      <Button Classes="flach" Width="32" Padding="0" Height="{Binding $parent[UserControl].((p:KompaktspieltageAnsichtViewModel)DataContext).Kopfhoehe}" ToolTip.Tip="{Binding Name}"
                               Command="{Binding $parent[UserControl].((p:KompaktspieltageAnsichtViewModel)DataContext).MannschaftWaehlenCommand}" CommandParameter="{Binding Name}">
                         <LayoutTransformControl VerticalAlignment="Bottom" HorizontalAlignment="Center" Margin="0,0,0,4">
                           <LayoutTransformControl.LayoutTransform>
                             <RotateTransform Angle="-90" />
                           </LayoutTransformControl.LayoutTransform>
-                          <TextBlock Text="{Binding Kurzname}" FontSize="12" Foreground="{StaticResource Tinte2}" Classes.gewaehlt="{Binding Gewaehlt}" />
+                          <TextBlock Text="{Binding Beschriftung}" FontSize="12" LineHeight="14" Foreground="{StaticResource Tinte2}" Classes.gewaehlt="{Binding Gewaehlt}" />
                         </LayoutTransformControl>
                       </Button>
                     </DataTemplate>
@@ -342,7 +342,7 @@
                           <ColumnDefinition Width="132" />
                           <ColumnDefinition Width="Auto" SharedSizeGroup="KmWert" />
                         </Grid.ColumnDefinitions>
-                        <TextBlock Text="{Binding Kurzname}" Classes.gewaehlt="{Binding Gewaehlt}" Margin="0,0,12,0" VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding Name}" Classes.gewaehlt="{Binding Gewaehlt}" Margin="0,0,12,0" VerticalAlignment="Center" />
                         <TextBlock Grid.Column="1" Text="{Binding Zusatz}" Classes="klein" Margin="0,0,12,0" VerticalAlignment="Center" />
                         <Border Grid.Column="2" Height="8" CornerRadius="4" Background="{StaticResource Akzent}" Width="{Binding Balken}" HorizontalAlignment="Left" VerticalAlignment="Center" />
                         <TextBlock Grid.Column="3" Text="{Binding Km}" Classes="ziffer" MinWidth="44" TextAlignment="Right" Margin="10,0,0,0" VerticalAlignment="Center" />
@@ -362,7 +362,7 @@
             <ItemsControl ItemsSource="{Binding Spieltage}">
               <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
-                  <WrapPanel Orientation="Horizontal" ItemWidth="310" />
+                  <WrapPanel Orientation="Horizontal" ItemWidth="{Binding $parent[UserControl].((p:KompaktspieltageAnsichtViewModel)DataContext).Spieltagbreite}" />
                 </ItemsPanelTemplate>
               </ItemsControl.ItemsPanel>
               <ItemsControl.ItemTemplate>
@@ -380,13 +380,13 @@
                             </Border>
                           </Grid>
                           <Grid ColumnDefinitions="*,Auto">
-                            <TextBlock Text="{Binding Ausrichter}" TextTrimming="CharacterEllipsis" />
+                            <TextBlock Text="{Binding Ausrichter}" TextWrapping="Wrap" />
                             <TextBlock Grid.Column="1" Text="{Binding Km}" Classes="ziffer klein" Margin="8,0,0,0" />
                           </Grid>
                           <ItemsControl ItemsSource="{Binding Spiele}">
                             <ItemsControl.ItemTemplate>
                               <DataTemplate x:DataType="sys:String">
-                                <TextBlock Text="{Binding}" FontSize="12.5" TextTrimming="CharacterEllipsis" />
+                                <TextBlock Text="{Binding}" FontSize="12.5" TextWrapping="Wrap" />
                               </DataTemplate>
                             </ItemsControl.ItemTemplate>
                           </ItemsControl>

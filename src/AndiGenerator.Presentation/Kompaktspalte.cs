@@ -6,6 +6,9 @@ namespace AndiGenerator.Presentation;
 
 /// <summary>Spaltenkopf im Raster der Kompaktspieltage: eine Mannschaft.</summary>
 /// <param name="Name">Name der Mannschaft.</param>
-/// <param name="Kurzname">Beschriftung.</param>
 /// <param name="Gewaehlt">Mannschaft ist ausgewählt.</param>
-public sealed record Kompaktspalte(string Name, string Kurzname, bool Gewaehlt);
+public sealed record Kompaktspalte(string Name, bool Gewaehlt)
+{
+    /// <summary>Holt die Beschriftung: der volle Name, lange Namen in zwei Zeilen wie im Ausdruck.</summary>
+    public string Beschriftung => string.Join('\n', Kompaktdruck.Kopfzeilen(Name));
+}

@@ -167,7 +167,8 @@ public sealed class Seitenumbruch
             NeueSeite();
         }
 
-        elemente.Add(new GrafikElement(format.Rand, y, skala, grafik.Zeichnung));
+        double x = grafik.Zentriert ? format.Rand + ((format.Nutzbreite - (grafik.Breite * skala)) / 2) : format.Rand;
+        elemente.Add(new GrafikElement(x, y, skala, grafik.Zeichnung));
         y += hoehe;
     }
 

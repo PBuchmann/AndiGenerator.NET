@@ -362,7 +362,7 @@ public sealed partial class HauptfensterViewModel
         string heim = wenigste == meiste ? wenigste.ToString(Deutsch) : string.Create(Deutsch, $"{wenigste}–{meiste}");
         return
         [
-            new Kompaktkachel("Fahrten (Luftlinie)", KmText(a.KmGesamt), weiteste is null ? plan : $"weiteste: {weiteste.Kurzname} {KmText(weiteste.Km)} · Unterschied {KmText(a.Mannschaften.Max(m => m.Km) - a.Mannschaften.Min(m => m.Km))}", false, false),
+            new Kompaktkachel("Fahrten (Luftlinie)", KmText(a.KmGesamt), weiteste is null ? plan : $"weiteste: {weiteste.Name} {KmText(weiteste.Km)} · Unterschied {KmText(a.Mannschaften.Max(m => m.Km) - a.Mannschaften.Min(m => m.Km))}", false, false),
             new Kompaktkachel("Meldungen", a.Verstoesse == 0 ? "eingehalten" : string.Create(Deutsch, $"{a.Verstoesse} Verstöße"), plan, a.Verstoesse == 0, a.Verstoesse > 0),
             new Kompaktkachel("Heimspieltage je Mannschaft", heim, Kompakterlaeuterung.Heimspieltage(a), false, a.OhneHeimspieltag > 0),
             new Kompaktkachel(

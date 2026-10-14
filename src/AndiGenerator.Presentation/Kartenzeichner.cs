@@ -53,7 +53,7 @@ public sealed class Kartenzeichner(IZeichenflaeche f)
         }
 
         // Namen erst hier setzen: Ihre Breite hängt von der gezeichneten Größe ab, nicht vom Maßstab der Karte.
-        (Dictionary<Kartenhalle, (double X, double Y)> namen, List<Kartenbeschriftung> staedte) = Beschriften(bild, s, breite, hoehe);
+        (Dictionary<Kartenhalle, Hallenname> namen, List<Kartenbeschriftung> staedte, Legende? legende) = Beschriften(bild, s, breite, hoehe);
         foreach (Kartenbeschriftung stadt in staedte)
         {
             f.Rechteck((stadt.Punkt.X * s) - 2.5, (stadt.Punkt.Y * s) - 2.5, 5, 5, Farbe.Tinte2);
@@ -79,9 +79,19 @@ public sealed class Kartenzeichner(IZeichenflaeche f)
             using (f.Deckkraft(halle.Ort.Gedimmt ? 0.45 : 1))
             {
                 HallePunkt(bild, halle, s);
-                (double x, double y) = namen[halle];
-                f.TextMitRand(halle.Ort.Kurzname, x + 2, y, 12, Farbe.Tinte, true, Hell, 3);
+                Hallenname name = namen[halle];
+                if (name.Leitlinie)
+                {
+                    Leitlinie(halle, name, s);
+                }
+
+                f.TextMitRand(name.Text, name.X + 2, name.Y, 12, Farbe.Tinte, true, Hell, 3);
             }
+        }
+
+        if (legende is not null)
+        {
+            LegendeZeichnen(legende);
         }
 
         // Kurze Fahrten im Vordergrund mit hellem Umriss.
@@ -156,12 +166,38 @@ public sealed class Kartenzeichner(IZeichenflaeche f)
         return punkte;
     }
 
+    /// <summary>Die nahen Lagen eines Namens der Breite <paramref name="w"/> am Punkt: rechts, links, schräg darüber oder darunter, darüber, darunter.</summary>
+    private static (double X, double Y)[] NaheLagen(double x, double y, double w, double h) =>
+    [
+        (x + 10, y - 10), (x - 10 - w, y - 10), (x + 9, y - 20), (x + 9, y + 2), (x - 9 - w, y - 20), (x - 9 - w, y + 2),
+        (x - (w / 2), y + 9), (x - (w / 2), y - 9 - h),
+    ];
+
+    /// <summary>Weiter entfernte Lagen in acht Richtungen (mit Hinweislinie zum Punkt), zuerst die näheren.</summary>
+    private static IEnumerable<(double X, double Y)> FerneLagen(double x, double y, double w, double h)
+    {
+        foreach (double d in new[] { 28.0, 44.0, 62.0 })
+        {
+            double e = d * 0.7;
+            yield return (x + d, y - (h / 2));
+            yield return (x - d - w, y - (h / 2));
+            yield return (x + e, y - e - h);
+            yield return (x + e, y + e);
+            yield return (x - e - w, y - e - h);
+            yield return (x - e - w, y + e);
+            yield return (x - (w / 2), y - d - h);
+            yield return (x - (w / 2), y + d);
+        }
+    }
+
     /// <summary>
     /// Setzt die Namen der Hallen und Städte mit ihrer gemessenen Breite so, dass sie ganz im Bild liegen und sich nicht
-    /// überdecken: rechts neben dem Punkt, sonst links, schräg darüber oder darunter, sonst über bzw. unter dem Punkt. Hallen
-    /// der Auswahl zuerst, gedimmte zuletzt; Städte nur, wo dann noch Platz ist.
+    /// überdecken: nah am Punkt (rechts, links, schräg, darüber, darunter), sonst weiter weg mit einer Hinweislinie. Findet
+    /// ein voller Mannschaftsname nirgends Platz (dichte Stadtklassen wie in Hamburg), steht am Punkt eine Nummer und der
+    /// Name in einer Legende in einer freien Ecke (Peter, 14.10.2026). Hallen der Auswahl zuerst, gedimmte zuletzt; Städte
+    /// nur, wo dann noch Platz ist.
     /// </summary>
-    private (Dictionary<Kartenhalle, (double X, double Y)> Hallen, List<Kartenbeschriftung> Staedte) Beschriften(Kartenbild bild, double s, double breite, double hoehe)
+    private (Dictionary<Kartenhalle, Hallenname> Hallen, List<Kartenbeschriftung> Staedte, Legende? Legende) Beschriften(Kartenbild bild, double s, double breite, double hoehe)
     {
         const double H = 16;
         var belegt = new List<(double L, double O, double R, double U)>();
@@ -173,26 +209,51 @@ public sealed class Kartenzeichner(IZeichenflaeche f)
             belegt.Add((8, hoehe - 34, 24 + (bild.MassstabBreite * s), hoehe - 6));
         }
 
-        var hallen = new Dictionary<Kartenhalle, (double X, double Y)>();
+        (double X, double Y)? Erste(IEnumerable<(double X, double Y)> lagen, double w) =>
+            lagen.Where(l => Frei((l.X, l.Y, l.X + w, l.Y + H))).Select(l => ((double X, double Y)?)l).FirstOrDefault();
+
+        var hallen = new Dictionary<Kartenhalle, Hallenname>();
+        var nummeriert = new List<(string Nummer, string Name)>();
         foreach (Kartenhalle halle in bild.Hallen.OrderBy(h => h.Ort.Gedimmt).ThenByDescending(h => h.Ort.Hervorgehoben))
         {
             double x = halle.Punkt.X * s;
             double y = halle.Punkt.Y * s;
-            double w = f.TextBreite(halle.Ort.Kurzname, 12, true) + 6;
-            (double X, double Y)[] lagen =
-            [
-                (x + 10, y - 10), (x - 10 - w, y - 10), (x + 9, y - 20), (x + 9, y + 2), (x - 9 - w, y - 20), (x - 9 - w, y + 2),
-                (x - (w / 2), y + 9), (x - (w / 2), y - 9 - H),
-            ];
-            (double X, double Y) lage = Array.Find(lagen, l => Frei((l.X, l.Y, l.X + w, l.Y + H)));
-            if (!Frei((lage.X, lage.Y, lage.X + w, lage.Y + H)))
+            string text = halle.Ort.Beschriftung;
+            double w = f.TextBreite(text, 12, true) + 6;
+            (double X, double Y)? lage = Erste(NaheLagen(x, y, w, H), w);
+            bool leitlinie = false;
+            if (lage is null)
             {
-                // Nirgends ganz frei: rechts bzw. links, aber immer ganz im Bild.
-                lage = (Math.Clamp(x + 10 + w > breite - 2 ? x - 10 - w : x + 10, 2, Math.Max(2, breite - 2 - w)), Math.Clamp(y - 10, 2, Math.Max(2, hoehe - 2 - H)));
+                lage = Erste(FerneLagen(x, y, w, H), w);
+                leitlinie = lage is not null;
             }
 
-            belegt.Add((lage.X, lage.Y, lage.X + w, lage.Y + H));
-            hallen[halle] = lage;
+            if (lage is null)
+            {
+                // Kein Platz für den Namen: eine Nummer am Punkt, der Name steht in der Legende.
+                text = (nummeriert.Count + 1).ToString(Deutsch);
+                nummeriert.Add((text, halle.Ort.Beschriftung));
+                w = f.TextBreite(text, 12, true) + 6;
+                lage = Erste(NaheLagen(x, y, w, H), w)
+                    ?? (Math.Clamp(x + 9, 2, Math.Max(2, breite - 2 - w)), Math.Clamp(y - 10, 2, Math.Max(2, hoehe - 2 - H)));
+            }
+
+            (double lx, double ly) = lage.Value;
+            belegt.Add((lx, ly, lx + w, ly + H));
+            hallen[halle] = new Hallenname(text, lx, ly, w, H, leitlinie);
+        }
+
+        Legende? legende = null;
+        if (nummeriert.Count > 0)
+        {
+            const double Zeile = 15;
+            double lw = nummeriert.Max(n => f.TextBreite(n.Name, 11, false)) + 34;
+            double lh = (nummeriert.Count * Zeile) + 10;
+            (double X, double Y)[] ecken = [(6, 6), (breite - lw - 6, 6), (breite - lw - 6, hoehe - lh - 6), (6, hoehe - lh - 40)];
+            int Ueberdeckt((double X, double Y) e) => belegt.Count(c => e.X < c.R && e.X + lw > c.L && e.Y < c.U && e.Y + lh > c.O);
+            (double ex, double ey) = ecken.MinBy(Ueberdeckt);
+            belegt.Add((ex, ey, ex + lw, ey + lh));
+            legende = new Legende(ex, ey, lw, lh, nummeriert);
         }
 
         var staedte = new List<Kartenbeschriftung>();
@@ -208,7 +269,36 @@ public sealed class Kartenzeichner(IZeichenflaeche f)
             }
         }
 
-        return (hallen, staedte);
+        return (hallen, staedte, legende);
+    }
+
+    /// <summary>Dünne Linie vom Rand des Hallenpunkts zur nächsten Stelle des weiter entfernten Namens.</summary>
+    private void Leitlinie(Kartenhalle halle, Hallenname name, double s)
+    {
+        var mitte = new V(halle.Punkt.X * s, halle.Punkt.Y * s);
+        var ziel = new V(Math.Clamp(mitte.X, name.X + 2, name.X + name.Breite - 2), Math.Clamp(mitte.Y, name.Y + 2, name.Y + name.Hoehe - 2));
+        V r = ziel - mitte;
+        double laenge = r.Laenge;
+        if (laenge < 10)
+        {
+            return;
+        }
+
+        V anfang = mitte + (r * (8 / laenge));
+        f.Linie(anfang.X, anfang.Y, ziel.X, ziel.Y, Farbe.Tinte2, 0.8);
+    }
+
+    /// <summary>Kasten mit den Namen der nummerierten Hallen.</summary>
+    private void LegendeZeichnen(Legende l)
+    {
+        f.Vieleck([(l.X, l.Y), (l.X + l.Breite, l.Y), (l.X + l.Breite, l.Y + l.Hoehe), (l.X, l.Y + l.Hoehe)], Hell, Grenze, 1, geschlossen: true);
+        for (int i = 0; i < l.Eintraege.Count; i++)
+        {
+            double y = l.Y + 5 + (i * 15);
+            (string nummer, string name) = l.Eintraege[i];
+            f.Text(nummer, l.X + 8, y, 11, Farbe.Tinte, true);
+            f.Text(name, l.X + 28, y, 11, Farbe.Tinte, false);
+        }
     }
 
     /// <summary>
@@ -380,4 +470,10 @@ public sealed class Kartenzeichner(IZeichenflaeche f)
             return new V(quer, laengs);
         }
     }
+
+    /// <summary>Gesetzter Name einer Halle: Text (Name oder Nummer), Lage und Größe, ob mit Hinweislinie.</summary>
+    private sealed record Hallenname(string Text, double X, double Y, double Breite, double Hoehe, bool Leitlinie);
+
+    /// <summary>Legende der nummerierten Hallen: Lage, Größe und je Eintrag Nummer und Name.</summary>
+    private sealed record Legende(double X, double Y, double Breite, double Hoehe, IReadOnlyList<(string Nummer, string Name)> Eintraege);
 }

@@ -57,7 +57,7 @@ public sealed partial class KompaktspieltageAnsichtViewModel
             string rolle = string.Empty;
             if (s is not null)
             {
-                rolle = ausrichter ? " · richtet aus" : " · Gast bei " + Kurz(a, s.Ausrichter ?? "?");
+                rolle = ausrichter ? " · richtet aus" : " · Gast bei " + (s.Ausrichter ?? "?");
             }
 
             List<Kompaktspieltag> amTag = a.Spieltage.Where(x => x.Tag == tag).ToList();

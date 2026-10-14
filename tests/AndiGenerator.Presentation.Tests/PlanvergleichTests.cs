@@ -28,5 +28,5 @@ public sealed class PlanvergleichTests
     private static Kompaktauswertung Auswertung(double kmA, double kmB) =>
         new([], [Mannschaft("A", kmA), Mannschaft("B", kmB)], [], [], 2, 2);
 
-    private static Kompaktmannschaft Mannschaft(string name, double km) => new(name, name, null, string.Empty, null, string.Empty, km, 1);
+    private static Kompaktmannschaft Mannschaft(string name, double km) => new(name, null, string.Empty, null, string.Empty, km, 1);
 }

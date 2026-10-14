@@ -65,7 +65,7 @@ public static class Kartenbau
         foreach (Kartenort ort in orte)
         {
             Kartenpunkt p = punkte[ort.Name];
-            double w = (ort.Kurzname.Length * 7) + 4;
+            double w = (ort.Beschriftung.Length * 7) + 4;
             Kartenpunkt[] lagen = [new(p.X + 9, p.Y - 16), new(p.X + 9, p.Y + 4), new(p.X - 9 - w, p.Y - 16), new(p.X - 9 - w, p.Y + 4), new(p.X - (w / 2), p.Y + 9), new(p.X - (w / 2), p.Y - 28)];
             Kartenpunkt schrift = Array.Find(lagen, l => Frei((l.X, l.Y, l.X + w, l.Y + Schrifthoehe)));
             if (schrift == default)
@@ -146,8 +146,11 @@ public static class Kartenbau
             double x1 = orte.Max(o => o.Laenge * faktorLaenge);
             double y0 = orte.Min(o => -o.Breite * Gradmass);
             double y1 = orte.Max(o => -o.Breite * Gradmass);
-            double randX = Math.Max(((x1 - x0) * 0.22) + 12, (120 - (x1 - x0)) / 2);
-            double randY = Math.Max(((y1 - y0) * 0.22) + 12, (80 - (y1 - y0)) / 2);
+
+            // Rand im Verhältnis zur Ausdehnung, Mindestausschnitt etwa 25 × 30 km, damit auch Stadtklassen (Hamburg: Hallen in
+            // rund 25 km) groß genug erscheinen; bisher mindestens rund 80 × 90 km und je Seite gut 8 km fester Rand (Peter, 14.10.2026).
+            double randX = Math.Max(((x1 - x0) * 0.25) + 4, (40 - (x1 - x0)) / 2);
+            double randY = Math.Max(((y1 - y0) * 0.25) + 4, (27 - (y1 - y0)) / 2);
             (x0, x1, y0, y1) = (x0 - randX, x1 + randX, y0 - randY, y1 + randY);
 
             // Seitenverhältnis zwischen 0,55 und 1,0: die kürzere Seite wird verlängert.

@@ -7,9 +7,12 @@ using AndiGenerator.Domain.Turniere;
 
 namespace AndiGenerator.Application;
 
-/// <summary>Eine Mannschaft in der Auswertung der Kompaktspieltage (nicht im Original).</summary>
+/// <summary>
+/// Eine Mannschaft in der Auswertung der Kompaktspieltage (nicht im Original). Überall, auch in Raster und Karte, steht ihr
+/// voller Name wie in click-TT (ab der zweiten Mannschaft mit Nummer): Ein aus dem Vereinsnamen abgeleiteter Kurzname war
+/// weder Ort noch eindeutig (Peter, 14.10.2026).
+/// </summary>
 /// <param name="Name">Name der Mannschaft.</param>
-/// <param name="Kurzname">Kurzer Name für Raster und Karte, z. B. „Engers“ für „ESV Engers“.</param>
 /// <param name="Lage">Lage der Halle oder <c>null</c>, wenn keine Adresse bekannt ist.</param>
 /// <param name="Halle">Adresse der Halle aus dem Bericht „Terminwünsche“, sonst der Name der Halle aus click-TT oder leer.</param>
 /// <param name="Meldung">Meldung je Sonntag oder <c>null</c>, wenn die Mannschaft nichts gemeldet hat.</param>
@@ -18,7 +21,6 @@ namespace AndiGenerator.Application;
 /// <param name="Ausgerichtet">Zahl der ausgerichteten Kompaktspieltage (ohne Einzelbegegnungen).</param>
 public sealed record Kompaktmannschaft(
     string Name,
-    string Kurzname,
     Koordinate? Lage,
     string Halle,
     Turniermeldung? Meldung,

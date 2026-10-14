@@ -90,7 +90,7 @@ internal static class Kompakterlaeuterung
     {
         // Ein Einzel-Heimspiel zählt als Heimspieltag mit (Peter, 13.10.2026); die Pflicht erfüllt nur ein 3er/4er-Spieltag.
         static int Heim(Kompaktmannschaft m) => m.Ausgerichtet + m.EinzelHeim;
-        static string Name(Kompaktmannschaft m) => m.EinzelHeim > 0 ? string.Create(Deutsch, $"{m.Kurzname} ({m.EinzelHeim}× Einzel)") : m.Kurzname;
+        static string Name(Kompaktmannschaft m) => m.EinzelHeim > 0 ? string.Create(Deutsch, $"{m.Name} ({m.EinzelHeim}× Einzel)") : m.Name;
         int wenigste = a.Mannschaften.Min(Heim);
         int meiste = a.Mannschaften.Max(Heim);
         List<string> teile = [];
@@ -124,7 +124,7 @@ internal static class Kompakterlaeuterung
             }
         }
 
-        List<string> ohne = a.Mannschaften.Where(m => m.Ausgerichtet == 0 && Heim(m) > 0).Select(m => m.Kurzname).ToList();
+        List<string> ohne = a.Mannschaften.Where(m => m.Ausgerichtet == 0 && Heim(m) > 0).Select(m => m.Name).ToList();
         if (ohne.Count > 0)
         {
             teile.Add("keinen 3er- oder 4er-Spieltag richtet aus: " + string.Join(", ", ohne));
@@ -140,7 +140,7 @@ internal static class Kompakterlaeuterung
         Kompaktmannschaft? wenigste = a.Mannschaften.MinBy(m => m.Km);
         return weiteste is null || wenigste is null
             ? text + "."
-            : text + string.Create(Deutsch, $"; am weitesten fährt **{weiteste.Kurzname} ({weiteste.Km:N0} km)**, am wenigsten {wenigste.Kurzname} ({wenigste.Km:N0} km) – **{weiteste.Km - wenigste.Km:N0} km Unterschied**.");
+            : text + string.Create(Deutsch, $"; am weitesten fährt **{weiteste.Name} ({weiteste.Km:N0} km)**, am wenigsten {wenigste.Name} ({wenigste.Km:N0} km) – **{weiteste.Km - wenigste.Km:N0} km Unterschied**.");
     }
 
     /// <summary>
@@ -219,7 +219,7 @@ internal static class Kompakterlaeuterung
     private static string Gruppe(string titel, Kompaktauswertung a, IReadOnlyList<string> gruppe)
     {
         Kompaktspieltag? s = a.Spieltage.FirstOrDefault(x => x.Mannschaften.Count == gruppe.Count && gruppe.All(x.Mannschaften.Contains));
-        string namen = string.Join(", ", gruppe.Select(Kompaktplanung.Kurzname));
+        string namen = string.Join(", ", gruppe);
         if (s is not null)
         {
             return string.Create(Deutsch, $"**{titel} am {s.Tag:dd.MM.}** ({namen}).");
@@ -230,6 +230,6 @@ internal static class Kompakterlaeuterung
         Kompaktspieltag? dreier = a.Spieltage.FirstOrDefault(x => x.Form == Turnierform.Dreier && drei.All(x.Mannschaften.Contains));
         return dreier is null
             ? $"**Kein {titel}** ({namen})."
-            : string.Create(Deutsch, $"**{titel} zu dritt am {dreier.Tag:dd.MM.}** ({string.Join(", ", drei.Select(Kompaktplanung.Kurzname))}).");
+            : string.Create(Deutsch, $"**{titel} zu dritt am {dreier.Tag:dd.MM.}** ({string.Join(", ", drei)}).");
     }
 }

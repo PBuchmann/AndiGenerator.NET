@@ -153,19 +153,6 @@ public static partial class Kompaktplanung
         };
     }
 
-    /// <summary>Kurzer Name ohne Vereinskürzel und Zusatz nach „/“: „ESV Engers“ → „Engers“, „SG Sinzig/Ehlingen“ → „Sinzig“.</summary>
-    /// <param name="name">Mannschaftsname.</param>
-    /// <returns>Der kurze Name (oder der ganze, wenn nichts übrig bliebe).</returns>
-    public static string Kurzname(string name)
-    {
-        ArgumentNullException.ThrowIfNull(name);
-        string ohneZusatz = name.Split('/')[0];
-        List<string> woerter = ohneZusatz.Split(' ', StringSplitOptions.RemoveEmptyEntries)
-            .Where(w => !(w.Length <= 4 && w.Count(char.IsUpper) >= 2) && !RoemischeZahl().IsMatch(w))
-            .ToList();
-        return woerter.Count == 0 ? name : string.Join(' ', woerter);
-    }
-
     /// <summary>Sonntage aus der Zeile „Nur Heim: TT.MM., …“ der Bemerkung.</summary>
     /// <param name="bemerkung">Bemerkung des Vereins.</param>
     /// <param name="tage">Sonntage der Halbrunde (für Daten ohne Jahr).</param>
@@ -266,7 +253,6 @@ public static partial class Kompaktplanung
         List<Kompaktspieltag> spieltage = pruefung.Turniere.Select(b => Spieltag(b, Entfernung)).ToList();
         List<Kompaktmannschaft> mannschaften = staffel.Mannschaften.Select(m => new Kompaktmannschaft(
             m.Name,
-            Kurzname(m.Name),
             lagen.TryGetValue(m.Name, out Koordinate lage) ? lage : null,
             adressen.GetValueOrDefault(m.Name) ?? m.Heimspieltermine.Select(t => t.Halle).FirstOrDefault(h => h.Length > 0) ?? string.Empty,
             meldungen.Find(x => x.Mannschaft == m.Name),
@@ -423,7 +409,4 @@ public static partial class Kompaktplanung
 
     [GeneratedRegex(@"(\d{1,2})\.(\d{1,2})\.(\d{4}|\d{2}(?!\d))?", RegexOptions.CultureInvariant, matchTimeoutMilliseconds: 1000)]
     private static partial Regex Datum();
-
-    [GeneratedRegex(@"^[IVX]+$", RegexOptions.CultureInvariant, matchTimeoutMilliseconds: 1000)]
-    private static partial Regex RoemischeZahl();
 }

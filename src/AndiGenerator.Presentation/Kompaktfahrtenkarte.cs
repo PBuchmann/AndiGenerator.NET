@@ -29,7 +29,7 @@ public static class Kompaktfahrtenkarte
             .Where(m => m.Lage is not null)
             .Select(m => new Kartenort(
                 m.Name,
-                m.Kurzname,
+                m.Name,
                 m.Lage.GetValueOrDefault(),
                 !alleZeigen && ausrichter.Contains(m.Name),
                 team is not null && m.Name != team && !ausrichter.Contains(m.Name),

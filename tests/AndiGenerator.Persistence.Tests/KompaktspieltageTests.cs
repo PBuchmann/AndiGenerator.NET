@@ -26,15 +26,6 @@ public sealed class KompaktspieltageTests : IDisposable
     public void Dispose() => Directory.Delete(ordner, recursive: true);
 
     [Theory]
-    [InlineData("ESV Engers", "Engers")]
-    [InlineData("SG Sinzig/Ehlingen", "Sinzig")]
-    [InlineData("TTG Mündersbach/Höchstenbach", "Mündersbach")]
-    [InlineData("RSV Klein-Winternheim II", "Klein-Winternheim")]
-    [InlineData("DJK SV RW Finthen", "Finthen")]
-    [InlineData("TTC", "TTC")]
-    public void Kurzname_ohne_Vereinskuerzel(string name, string kurz) => Assert.Equal(kurz, Kompaktplanung.Kurzname(name));
-
-    [Theory]
     [InlineData("Jugend 19 Verbandsoberliga (HR)", Halbrundenkennzeichen.Hinrunde)]
     [InlineData("Jungen 15 Rheinlandliga (FR) Gruppe 2", Halbrundenkennzeichen.Rueckrunde)]
     [InlineData("Jugend 13 Kreisliga ( hr )", Halbrundenkennzeichen.Hinrunde)]

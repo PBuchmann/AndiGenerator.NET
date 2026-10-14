@@ -26,7 +26,10 @@ Entscheidungen mit Begründung stehen ausführlich im [MIGRATIONSPLAN](MIGRATION
 - Oberfläche ruhig und verständlich; Hinweise erst zeigen, wenn sie etwas bedeuten (z. B. keine Hinweise ohne Plan).
 - Karten: gerade Linien (keine Bögen), Pfeilspitzen am Rand des Ziels, Ausgangshalle grün, Ziel in Linienfarbe,
   zweifarbige Pfeile aus zwei Hälften (nicht dicker als ein einfacher Pfeil), kurze Fahrten im Vordergrund mit hellem
-  Rand, Namen nie abgeschnitten, Maßstab nur „N km“. Die Feinheiten (Abstände in Pixeln) stehen als Kommentare im
+  Rand, Namen nie abgeschnitten, Maßstab nur „N km“. Beschriftung im Kompaktmodus überall der volle Mannschaftsname
+  (keine Orts- oder Kurznamen – in Hamburg hieße jeder Ort „Hamburg“); auf der Karte notfalls weiter weg mit
+  Hinweislinie, sonst Nummer am Punkt und Name in einer Legende. Lage der Hallen nur aus PLZ (bzw. GPS): in Städten
+  fallen Hallen mit gleicher PLZ zusammen – offen: Punkte je Halle, Fahrten zur tatsächlichen Halle, genauere Lage. Die Feinheiten (Abstände in Pixeln) stehen als Kommentare im
   `Kartenzeichner` – nicht ohne Rückfrage ändern.
 - Raster: ★ Ausrichter, ● Gast, zentriert; Ring schwarz = Spitzenspieltag, blau = Abstiegsspieltag; Einzelbegegnung gelb.
 - Druck für die Vereine: nur, was Vereine brauchen (keine Hinweise für die Staffelleitung wie „Halle verlegen“ oder

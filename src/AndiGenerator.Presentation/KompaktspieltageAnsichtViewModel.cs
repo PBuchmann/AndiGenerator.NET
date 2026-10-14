@@ -188,8 +188,17 @@ public sealed partial class KompaktspieltageAnsichtViewModel : Document
     public IReadOnlyList<Kompaktspalte> Spalten
     {
         get => spalten;
-        private set => SetProperty(ref spalten, value);
+        private set
+        {
+            if (SetProperty(ref spalten, value))
+            {
+                OnPropertyChanged(nameof(Kopfhoehe));
+            }
+        }
     }
+
+    /// <summary>Holt die Höhe der Spaltenköpfe: Platz für den längsten vollen Mannschaftsnamen (senkrecht), wie im Ausdruck.</summary>
+    public double Kopfhoehe => Kompaktdruck.Kopfhoehe(spalten.Select(s => s.Name));
 
     /// <summary>Holt die Zeilen des Rasters (je Sonntag).</summary>
     public IReadOnlyList<Kompaktrasterzeile> Zeilen
@@ -223,8 +232,22 @@ public sealed partial class KompaktspieltageAnsichtViewModel : Document
     public IReadOnlyList<Kompaktspieltagkarte> Spieltage
     {
         get => spieltage;
-        private set => SetProperty(ref spieltage, value);
+        private set
+        {
+            if (SetProperty(ref spieltage, value))
+            {
+                OnPropertyChanged(nameof(Spieltagbreite));
+            }
+        }
     }
+
+    /// <summary>
+    /// Holt die Breite der Spieltagskarten (alle gleich, damit die Reihen ordentlich bleiben): Platz für die längste Zeile aus
+    /// Uhrzeit und Begegnung mit vollen Mannschaftsnamen, zwischen 310 und 560; Längeres bricht um (Peter, 14.10.2026).
+    /// Geschätzt mit 6,9 je Zeichen bei 12,5 pt, dazu Innenabstand und Rand der Karte.
+    /// </summary>
+    public double Spieltagbreite =>
+        Math.Clamp(Math.Ceiling((spieltage.SelectMany(s => s.Spiele).Select(z => z.Length).DefaultIfEmpty(0).Max() * 6.9) + 34), 310, 560);
 
     /// <summary>Holt die Hinweise: Verstöße, fehlende Meldungen und Bemerkungen der Vereine.</summary>
     public IReadOnlyList<string> Hinweise
@@ -306,7 +329,7 @@ public sealed partial class KompaktspieltageAnsichtViewModel : Document
     {
         var liste = new List<string>(a.Befunde.Select(b => "! " + b));
         liste.AddRange(a.Mannschaften.Where(m => m.Lage is null).Select(m => $"? {m.Name}: Halle ohne bekannte Lage – Terminwünsche (PDF) in der Einrichtung laden."));
-        liste.AddRange(a.Mannschaften.Where(m => m.Bemerkung.Length > 0).Select(m => $"„ {m.Kurzname}: {m.Bemerkung}"));
+        liste.AddRange(a.Mannschaften.Where(m => m.Bemerkung.Length > 0).Select(m => $"„ {m.Name}: {m.Bemerkung}"));
         return liste;
     }
 
@@ -323,8 +346,6 @@ public sealed partial class KompaktspieltageAnsichtViewModel : Document
         ? string.Create(Deutsch, $"{m.Ausgerichtet}× Ausrichter, {m.EinzelHeim}× Einzel zuhause")
         : string.Create(Deutsch, $"{m.Ausgerichtet}× Ausrichter");
 
-    private static string Kurz(Kompaktauswertung a, string name) => a.Mannschaften.FirstOrDefault(m => m.Name == name)?.Kurzname ?? name;
-
     private static Kompaktspieltagkarte Spieltagkarte(int nummer, Kompaktspieltag s, Kompaktauswertung a, bool gewaehlt)
     {
         string form = s.Form switch
@@ -339,7 +360,7 @@ public sealed partial class KompaktspieltageAnsichtViewModel : Document
         if (s.HalleVerlegen.Count > 0)
         {
             string ziel = halle.Length > 0 ? " – in diese Halle:" : string.Empty;
-            verlegen = "In click-TT Halle verlegen: " + string.Join(", ", s.HalleVerlegen.Select(g => Kurz(a, g.Heim) + " – " + Kurz(a, g.Gast))) + ziel;
+            verlegen = "In click-TT Halle verlegen: " + string.Join(", ", s.HalleVerlegen.Select(g => g.Heim + " – " + g.Gast)) + ziel;
         }
 
         return new Kompaktspieltagkarte(
@@ -348,9 +369,9 @@ public sealed partial class KompaktspieltageAnsichtViewModel : Document
             form,
             (s.Form == Turnierform.Einzel ? "Heim: " : "★ ") + (s.Ausrichter ?? "kein passender Ausrichter"),
             s.Km.ToString("N0", Deutsch) + " km",
-            s.Spiele.Select(g => string.Create(Deutsch, $"{g.Zeitpunkt:HH:mm}  {Kurz(a, g.Heim)} – {Kurz(a, g.Gast)}")).ToList(),
+            s.Spiele.Select(g => string.Create(Deutsch, $"{g.Zeitpunkt:HH:mm}  {g.Heim} – {g.Gast}")).ToList(),
             verlegen,
-            string.Join(", ", s.Gaeste.Select(g => Kurz(a, g))) + " reisen an",
+            string.Join(", ", s.Gaeste) + " reisen an",
             s.Hinweise,
             gewaehlt)
         {
@@ -427,14 +448,14 @@ public sealed partial class KompaktspieltageAnsichtViewModel : Document
             .Select(x => x.Spieltag)
             .ToList();
 
-        Spalten = a.Mannschaften.Select(m => new Kompaktspalte(m.Name, m.Kurzname, m.Name == team)).ToList();
+        Spalten = a.Mannschaften.Select(m => new Kompaktspalte(m.Name, m.Name == team)).ToList();
         (string, DateOnly)? rahmen = Bearbeiten ? cursor : null;
         Kompaktspieltag? spitzentag = gruppen.Spitze.Count >= 3 ? Kompaktpunkte.Gruppentag(a, gruppen.Spitze) : null;
         Kompaktspieltag? kellertag = gruppen.Keller.Count >= 3 ? Kompaktpunkte.Gruppentag(a, gruppen.Keller) : null;
         Zeilen = a.Tage.Select(t => Rasterzeile(a, t, tag == t, team, tag is not null && tag != t, rahmen, (spitzentag, kellertag))).ToList();
         double weiteste = Math.Max(1, a.Mannschaften.Select(m => m.Km).DefaultIfEmpty(0).Max());
         KmZeilen = a.Mannschaften.OrderByDescending(m => m.Km)
-            .Select(m => new Kompaktkmzeile(m.Name, m.Kurzname, Ausrichtertext(m), m.Km.ToString("N0", Deutsch), m.Km / weiteste, m.Name == team))
+            .Select(m => new Kompaktkmzeile(m.Name, Ausrichtertext(m), m.Km.ToString("N0", Deutsch), m.Km / weiteste, m.Name == team))
             .ToList();
 
         // Markiert sind die Spieltage der Auswahl: des Sonntags, der angeklickte, oder alle der Mannschaft (Heim und auswärts).
@@ -447,9 +468,9 @@ public sealed partial class KompaktspieltageAnsichtViewModel : Document
             .ToList();
         Kartentitel = (auswahl.Art, team) switch
         {
-            ('M', string t) => string.Create(Deutsch, $"Fahrten von {Kurz(a, t)} · {a.Mannschaften.First(m => m.Name == t).Km:N0} km"),
+            ('M', string t) => string.Create(Deutsch, $"Fahrten von {t} ·{a.Mannschaften.First(m => m.Name == t).Km:N0} km"),
             ('T', _) => gewaehlt.Count == 0 ? string.Create(Deutsch, $"Am {tag:dd.MM.yyyy} kein Spieltag") : string.Create(Deutsch, $"Fahrten am {tag:dd.MM.yyyy}"),
-            ('S', _) => gewaehlt.Count == 0 ? "Spieltag" : string.Create(Deutsch, $"Spieltag {gewaehlt[0].Tag:dd.MM.yyyy} bei {Kurz(a, gewaehlt[0].Ausrichter ?? string.Empty)}"),
+            ('S', _) => gewaehlt.Count == 0 ? "Spieltag" : string.Create(Deutsch, $"Spieltag {gewaehlt[0].Tag:dd.MM.yyyy} bei {gewaehlt[0].Ausrichter ?? string.Empty}"),
             _ => "Alle Fahrten der Halbrunde",
         };
         bool alleZeigen = auswahl.Art == '-';
