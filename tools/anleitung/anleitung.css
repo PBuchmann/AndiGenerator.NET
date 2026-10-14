@@ -11,6 +11,7 @@ h2 { font-size: 16pt; font-weight: 700; margin: 0 0 6pt; padding-bottom: 4pt; bo
      break-before: page; position: relative; }
 h2::after { content: ""; position: absolute; left: 0; bottom: -2px; width: 36pt; height: 3px; background: #1D5FA8; }
 h3 { font-size: 12pt; font-weight: 600; color: #164A84; margin: 14pt 0 4pt; break-after: avoid; }
+h4 { font-size: 10.5pt; font-weight: 600; color: #1B1F24; margin: 10pt 0 3pt; break-after: avoid; }
 p, li { orphans: 3; widows: 3; }
 a { color: #1D5FA8; text-decoration: none; }
 code { font-family: "PlexMono", monospace; font-size: 9pt; background: #F0EFEA; padding: 0 3px; border-radius: 3px; }
