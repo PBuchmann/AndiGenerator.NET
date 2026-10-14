@@ -6,15 +6,12 @@
              x:DataType="p:MaschinenraumAnsichtViewModel">
   <UserControl.Styles>
     <!-- Ein Rechenkern: Balken wächst und schrumpft mit seiner Last, sanft im Takt der Statusabfrage. -->
-    <Style Selector="Border.kern">
-      <Setter Property="Background" Value="{StaticResource Akzent}" />
-      <Setter Property="CornerRadius" Value="3" />
+    <Style Selector="ui|Lastsaeule.kern">
       <Setter Property="Margin" Value="2,0" />
       <Setter Property="MaxWidth" Value="22" />
-      <Setter Property="VerticalAlignment" Value="Bottom" />
       <Setter Property="Transitions">
         <Transitions>
-          <DoubleTransition Property="Height" Duration="0:0:0.45" Easing="CubicEaseOut" />
+          <DoubleTransition Property="Anteil" Duration="0:0:0.45" Easing="CubicEaseOut" />
         </Transitions>
       </Setter>
     </Style>
@@ -73,10 +70,10 @@
       <Grid ColumnDefinitions="360,12,*">
         <Border Classes="karte" Padding="16,12">
           <DockPanel>
-            <TextBlock DockPanel.Dock="Top" Text="Rechenkerne – Last im Verhältnis zum schnellsten" Classes="klein" Margin="0,0,0,8" />
+            <TextBlock DockPanel.Dock="Top" Text="Rechenkerne – Last im Verhältnis zum schnellsten (volle Säule = 100 %)" Classes="klein" TextWrapping="Wrap" Margin="0,0,0,8" />
             <!-- Bis 32 Kerne Säulen, die sich die Breite teilen; darüber ein Raster aus Kästchen (kräftig = volle Last). -->
             <Panel>
-              <ItemsControl ItemsSource="{Binding Anzeige.Kerne}" Height="150" VerticalAlignment="Bottom" IsVisible="{Binding !Anzeige.VieleKerne}">
+              <ItemsControl ItemsSource="{Binding Anzeige.Kerne}" MinHeight="150" IsVisible="{Binding !Anzeige.VieleKerne}">
                 <ItemsControl.ItemsPanel>
                   <ItemsPanelTemplate>
                     <UniformGrid Rows="1" />
@@ -84,7 +81,7 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                   <DataTemplate x:DataType="p:Kernanzeige">
-                    <Border Classes="kern" Height="{Binding HoeheGross}" ToolTip.Tip="{Binding Tempo}" />
+                    <ui:Lastsaeule Classes="kern" Anteil="{Binding Last}" Farbe="{StaticResource Akzent}" Spur="{StaticResource AkzentHell}" ToolTip.Tip="{Binding Tempo}" />
                   </DataTemplate>
                 </ItemsControl.ItemTemplate>
               </ItemsControl>

@@ -76,6 +76,7 @@ public sealed class Bildschirmfotos : IDisposable
         string datei = StaffelKopieren("daten", mitAenderungen: true);
         await HauptfensterAsync(ziel, datei);
         Dialoge(ziel, datei);
+        await KompaktAsync(ziel, KompaktklasseVorbereiten());
     });
 
     /// <summary>
@@ -317,6 +318,120 @@ public sealed class Bildschirmfotos : IDisposable
         }
     }
 
+    /// <summary>
+    /// Kompaktspieltage mit der erfundenen Klasse <c>testdaten/kompakt</c>: Varianten berechnen (HiGHS), Pläne und
+    /// Erläuterung, Raster mit Karte, Spieltage, Meldungen bearbeiten und die Druckauswahl im Kompaktmodus.
+    /// </summary>
+    private static async Task KompaktAsync(string ziel, string datei)
+    {
+        string basis = Path.Combine(Path.GetDirectoryName(datei)!, "..", "basis-kompakt");
+        var o = new TestOberflaeche { DateiZumOeffnen = datei, Sammeln = true };
+        using var modell = new HauptfensterViewModel(o, () => new HostWindow(), basis, null);
+        var fenster = new HauptfensterView { DataContext = modell, Width = 1400, Height = 860 };
+        DruckauswahlViewModel? druckauswahl = null;
+        fenster.Show();
+        try
+        {
+            await modell.OeffnenCommand.ExecuteAsync(null);
+            o.Abarbeiten();
+            if (modell.Einrichtung is { } einrichtung)
+            {
+                await einrichtung.AbschliessenCommand.ExecuteAsync(null);
+                o.Abarbeiten();
+            }
+
+            Zeigen(modell.KompaktspieltageCommand, o);
+            await modell.GenerierungCommand.ExecuteAsync(null);
+            await WartenAsync(o, TimeSpan.FromMinutes(3), () => !modell.KompaktRechnet);
+            Foto(ziel, "30-kompakt-plaene", Ansichten(fenster), o);
+
+            // Für Raster, Karte und Spieltage ein hohes Fenster, damit alles ohne Rollen im Bild ist.
+            fenster.Height = 2600;
+            Oberflaeche.Zeichnen(fenster);
+            Border raster = fenster.GetVisualDescendants().OfType<Border>().First(b => b.Name == "Raster");
+            Foto(ziel, "31-kompakt-raster-karte", raster.GetVisualAncestors().OfType<Grid>().First(), o);
+            Border spieltage = fenster.GetVisualDescendants().OfType<TextBlock>()
+                .First(b => b.Text == "Spieltage" && b.FontSize > 14)
+                .GetVisualAncestors().OfType<Border>().First(b => b.Classes.Contains("karte"));
+            Foto(ziel, "32-kompakt-spieltage", spieltage, o);
+
+            // Meldungen im Raster bearbeiten: Rahmen auf einem Heimtermin, darunter Beginn und Halle.
+            var ansicht = (KompaktspieltageAnsichtViewModel)Einzige<KompaktspieltageAnsicht>(fenster).DataContext!;
+            ansicht.Bearbeiten = true;
+            Kompaktzelle zelle = ansicht.Zeilen.SelectMany(z => z.Zellen).Skip(9).FirstOrDefault(z => z.Meldung == "beides") ?? ansicht.Zeilen[1].Zellen[1];
+            ansicht.ZelleWaehlenCommand.Execute(zelle);
+            Oberflaeche.Zeichnen(fenster);
+            Foto(ziel, "33-kompakt-bearbeiten", raster, o);
+            ansicht.Bearbeiten = false;
+            fenster.Height = 860;
+            Oberflaeche.Zeichnen(fenster);
+
+            // Drucken im Kompaktmodus: nur die Übersicht für die Vereine, mit dem gewählten Plan, im Hochformat.
+            o.Druckauswahl = a =>
+            {
+                druckauswahl = a;
+                return true;
+            };
+            o.DateiZumSpeichern = Path.Combine(Path.GetTempPath(), "andigen-kompaktdruck.pdf");
+            await modell.DruckenCommand.ExecuteAsync(null);
+            o.Abarbeiten();
+            Assert.NotNull(druckauswahl);
+            Assert.True(druckauswahl.IstKompakt);
+            Assert.Equal("Bestes Gesamtpaket", druckauswahl.Planname);
+            Druckdokument dokument = Assert.IsType<Druckdokument>(o.Ausdruck);
+            Assert.Equal("Bestes Gesamtpaket", dokument.Plan);
+            Assert.Equal(["Meldungen und Plan", "Alle Fahrten", "Kompaktspieltage"], dokument.Abschnitte.Take(3).Select(a => a.Titel));
+            Assert.DoesNotContain(dokument.Abschnitte, a => a.Titel is "Terminwünsche" or "Spielplan" or "Mannschaftspläne" or "Diagramme");
+            Assert.Same(Seitenformat.A4Hoch, o.Format);
+        }
+        finally
+        {
+            fenster.Close();
+        }
+
+        var druck = new Druckauswahldialog(druckauswahl ?? throw new InvalidOperationException("Die Druckauswahl wurde nicht gezeigt."));
+        druck.Show();
+        Foto(ziel, "34-kompakt-druckauswahl", druck, o);
+        druck.Close();
+    }
+
+    /// <summary>
+    /// Bericht „Terminwünsche“ zur erfundenen Kompaktklasse: je Verein eine Halle an einem echten Ort (für Karte und
+    /// Entfernungen), die gemeldeten Heimtermine und Sperren, bei einer Mannschaft „Nur Heim“ an ihrem ersten Heimtermin.
+    /// </summary>
+    private static List<Vereinsmeldung> Kompaktmeldungen(IReadOnlyList<Mannschaft> mannschaften)
+    {
+        (string Plz, string Ort)[] orte =
+        [
+            ("55116", "Mainz"), ("56068", "Koblenz"), ("54290", "Trier"), ("67655", "Kaiserslautern"), ("55543", "Bad Kreuznach"),
+            ("56564", "Neuwied"), ("67547", "Worms"), ("56410", "Montabaur"), ("55411", "Bingen am Rhein"),
+        ];
+        var meldungen = new List<Vereinsmeldung>();
+        for (int i = 0; i < mannschaften.Count; i++)
+        {
+            Mannschaft m = mannschaften[i];
+            (string plz, string ort) = orte[i % orte.Length];
+            string halle = m.Heimspieltermine.Select(t => t.Halle).FirstOrDefault(h => h.Length > 0) ?? ("Sporthalle " + ort);
+            List<GemeldeterHeimtermin> termine = m.Heimspieltermine.Select(t => new GemeldeterHeimtermin(t.Zeitpunkt, halle, "2", "-")).ToList();
+            string bemerkung = i == 2 && termine.Count > 0
+                ? "Nur Heim: " + termine[0].Zeitpunkt.ToString("dd.MM.", System.Globalization.CultureInfo.InvariantCulture)
+                : string.Empty;
+            meldungen.Add(new Vereinsmeldung(
+                m.Name,
+                int.Parse(m.VereinsId, System.Globalization.CultureInfo.InvariantCulture),
+                "Jugend 19",
+                new Dictionary<int, Spiellokaladresse>
+                {
+                    [1] = new(halle, "Schulstraße " + (i + 3).ToString(System.Globalization.CultureInfo.InvariantCulture), plz, ort),
+                },
+                bemerkung,
+                termine,
+                m.Sperrtermine));
+        }
+
+        return meldungen;
+    }
+
     /// <summary>Gewichtung einer Kostenart, Druckauswahl und Wunschtermin.</summary>
     private static void Dialoge(string ziel, string datei)
     {
@@ -353,7 +468,13 @@ public sealed class Bildschirmfotos : IDisposable
         {
             SeiteWaehlen<SpielfreieTageSeiteViewModel>(daten, a.Dialog);
             Foto(ziel, "23-spielfreie-tage", daten, o);
-            SeiteWaehlen<SetzlistenSeiteViewModel>(daten, a.Dialog).Aktiv = true;
+
+            // Setzliste mit erfundenen TTR-Schnitten wie nach einer übernommenen Mannschaftsmeldung.
+            SetzlistenSeiteViewModel setzliste = SeiteWaehlen<SetzlistenSeiteViewModel>(daten, a.Dialog);
+            a.Bearbeitung.MannschaftsstaerkenSpeichern(a.Bearbeitung.Setzliste().Reihenfolge.Select((n, i) => new Mannschaftsstaerke(n, 1350 + ((i * 137) % 400), 4)));
+            setzliste.Laden();
+            setzliste.Aktiv = true;
+            Oberflaeche.Zeichnen(daten);
             Foto(ziel, "24-setzliste", daten, o);
 
             WunschtermineSeiteViewModel seite = SeiteWaehlen<WunschtermineSeiteViewModel>(daten, a.Dialog);
@@ -484,6 +605,25 @@ public sealed class Bildschirmfotos : IDisposable
     /// <summary>Die Kacheln mit dem Stand der Generierung.</summary>
     private static Control Kacheln(Window fenster) =>
         fenster.GetVisualDescendants().OfType<Grid>().First(g => g.Classes.Contains("kacheln"));
+
+    /// <summary>
+    /// Kopiert die erfundene Kompaktklasse in einen eigenen Ordner und bereitet sie vor wie nach der Einrichtung:
+    /// Kompaktspieltage bestätigt, Bericht „Terminwünsche“ übernommen, QTTR-Schnitte (für Spitzen- und Abstiegsspieltag).
+    /// </summary>
+    private string KompaktklasseVorbereiten()
+    {
+        string daten = Path.Combine(ordner, "kompakt");
+        Directory.CreateDirectory(daten);
+        string datei = Path.Combine(daten, "Jugend 19 Testliga (HR).xml");
+        File.Copy(Path.Combine(Testdaten.Referenz, "..", "kompakt", "Jugend_19_Testliga_(HR).xml"), datei);
+        Plansitzung sitzung = Plansitzung.Oeffnen(datei, Path.Combine(ordner, "basis-kompakt"));
+        Datenbearbeitung b = sitzung.DatenBearbeiten();
+        b.KompaktspieltageSetzen(Kompaktmodus.Bestaetigt);
+        b.TerminwuenscheUebernehmen(b.TerminwuenscheAbgleichen(Kompaktmeldungen(sitzung.Staffel.Mannschaften)), "Terminmeldungen.pdf");
+        b.MannschaftsstaerkenSpeichern(sitzung.Staffel.Mannschaften.Select((m, i) => new Mannschaftsstaerke(m.Name, 1450 + ((i * 173) % 500), 4)));
+        sitzung.DatenUebernehmen(b);
+        return datei;
+    }
 
     /// <summary>Kopiert die Staffel (click-TT-Datei, auf Wunsch mit Änderungen) in einen eigenen Ordner, damit nichts verändert wird.</summary>
     private string StaffelKopieren(string unterordner, bool mitAenderungen)

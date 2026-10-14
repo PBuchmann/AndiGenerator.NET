@@ -12,4 +12,8 @@ namespace AndiGenerator.Rendering;
 /// <param name="Hoehe">Höhe in Zeicheneinheiten.</param>
 /// <param name="Zeichnung">Zeichnet die Grafik ab (0, 0) auf eine Fläche.</param>
 /// <param name="AbstandDavor">Freiraum über der Grafik in Punkt.</param>
-public sealed record Grafik(double Breite, double Hoehe, Action<IZeichenflaeche> Zeichnung, double AbstandDavor = 0) : Baustein(AbstandDavor);
+public sealed record Grafik(double Breite, double Hoehe, Action<IZeichenflaeche> Zeichnung, double AbstandDavor = 0) : Baustein(AbstandDavor)
+{
+    /// <summary>Holt einen Wert, der angibt, ob die Grafik in der Nutzbreite zentriert wird (sonst linksbündig).</summary>
+    public bool Zentriert { get; init; }
+}

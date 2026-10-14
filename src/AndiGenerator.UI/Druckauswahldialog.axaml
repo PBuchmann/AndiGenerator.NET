@@ -7,30 +7,40 @@
         SizeToContent="WidthAndHeight" CanResize="False" ShowInTaskbar="False"
         WindowStartupLocation="CenterOwner" Classes="dialog">
   <StackPanel Margin="24" Spacing="8" MinWidth="360">
-    <TextBlock Text="Was soll gedruckt werden?" FontWeight="SemiBold" />
-    <CheckBox Content="Terminwünsche" IsChecked="{Binding Terminwuensche}" />
-    <CheckBox Content="Termine der Nachbarmannschaften" IsChecked="{Binding Nachbartermine}" />
-    <TextBlock Text="Plan:" FontWeight="SemiBold" Margin="0,8,0,0" />
-    <ComboBox ItemsSource="{Binding Quellen}" SelectedItem="{Binding Quelle}" IsEnabled="{Binding HatPlan}" HorizontalAlignment="Stretch">
-      <ComboBox.ItemTemplate>
-        <DataTemplate x:DataType="p:PlanQuelle">
-          <TextBlock Text="{Binding Name}" />
-        </DataTemplate>
-      </ComboBox.ItemTemplate>
-    </ComboBox>
-    <TextBlock Text="Noch kein Plan vorhanden – Kosten, Spielplan, Mannschaftspläne und Diagramme können nicht gedruckt werden."
-               IsVisible="{Binding !HatPlan}" Foreground="{StaticResource Grau}" TextWrapping="Wrap" MaxWidth="360" />
-    <StackPanel Spacing="8" Margin="16,0,0,0" IsEnabled="{Binding HatPlan}">
-      <CheckBox Content="Kosten" IsChecked="{Binding Kosten}" />
-      <CheckBox Content="Spielplan" IsChecked="{Binding Spielplan}" />
-      <CheckBox Content="Mannschaftspläne" IsChecked="{Binding Mannschaftsplaene}" />
-      <CheckBox Content="Mannschaftspläne mit Nachbarmannschaften" IsChecked="{Binding MannschaftsplaeneMitNachbarn}" />
-      <CheckBox Content="Diagramme" IsChecked="{Binding Diagramme}" />
+    <!-- Kompaktmodus: nur die Übersicht für die Vereine, im Hochformat, mit dem in der Ansicht gewählten Plan. -->
+    <StackPanel Spacing="8" IsVisible="{Binding IstKompakt}">
+      <TextBlock Text="Kompaktspieltage (Übersicht für die Vereine)" FontWeight="SemiBold" />
+      <TextBlock Text="Raster „Meldungen und Plan“ mit Legende, Karte aller Fahrten, die Spieltage mit Halle und Begegnungen und je Mannschaft eine Seite mit der Karte ihrer Fahrten – im Hochformat."
+                 TextWrapping="Wrap" MaxWidth="360" />
+      <TextBlock Text="{Binding Kompakthinweis}" TextWrapping="Wrap" MaxWidth="360" Margin="0,4,0,0"
+                 Foreground="{StaticResource Grau}" />
     </StackPanel>
-    <TextBlock Text="Format:" FontWeight="SemiBold" Margin="0,8,0,0" />
-    <StackPanel Orientation="Horizontal" Spacing="16">
-      <RadioButton Content="Hochformat" GroupName="Format" IsChecked="{Binding !Querformat}" />
-      <RadioButton Content="Querformat" GroupName="Format" IsChecked="{Binding Querformat}" />
+    <StackPanel Spacing="8" IsVisible="{Binding !IstKompakt}">
+      <TextBlock Text="Was soll gedruckt werden?" FontWeight="SemiBold" />
+      <CheckBox Content="Terminwünsche" IsChecked="{Binding Terminwuensche}" />
+      <CheckBox Content="Termine der Nachbarmannschaften" IsChecked="{Binding Nachbartermine}" />
+      <TextBlock Text="Plan:" FontWeight="SemiBold" Margin="0,8,0,0" />
+      <ComboBox ItemsSource="{Binding Quellen}" SelectedItem="{Binding Quelle}" IsEnabled="{Binding HatPlan}" HorizontalAlignment="Stretch">
+        <ComboBox.ItemTemplate>
+          <DataTemplate x:DataType="p:PlanQuelle">
+            <TextBlock Text="{Binding Name}" />
+          </DataTemplate>
+        </ComboBox.ItemTemplate>
+      </ComboBox>
+      <TextBlock Text="Noch kein Plan vorhanden – Kosten, Spielplan, Mannschaftspläne und Diagramme können nicht gedruckt werden."
+                 IsVisible="{Binding !HatPlan}" Foreground="{StaticResource Grau}" TextWrapping="Wrap" MaxWidth="360" />
+      <StackPanel Spacing="8" Margin="16,0,0,0" IsEnabled="{Binding HatPlan}">
+        <CheckBox Content="Kosten" IsChecked="{Binding Kosten}" />
+        <CheckBox Content="Spielplan" IsChecked="{Binding Spielplan}" />
+        <CheckBox Content="Mannschaftspläne" IsChecked="{Binding Mannschaftsplaene}" />
+        <CheckBox Content="Mannschaftspläne mit Nachbarmannschaften" IsChecked="{Binding MannschaftsplaeneMitNachbarn}" />
+        <CheckBox Content="Diagramme" IsChecked="{Binding Diagramme}" />
+      </StackPanel>
+      <TextBlock Text="Format:" FontWeight="SemiBold" Margin="0,8,0,0" />
+      <StackPanel Orientation="Horizontal" Spacing="16">
+        <RadioButton Content="Hochformat" GroupName="Format" IsChecked="{Binding !Querformat}" />
+        <RadioButton Content="Querformat" GroupName="Format" IsChecked="{Binding Querformat}" />
+      </StackPanel>
     </StackPanel>
     <TextBlock Text="Der Ausdruck wird als PDF-Datei gespeichert und anschließend zum Ansehen und Drucken geöffnet."
                Foreground="{StaticResource Grau}" TextWrapping="Wrap" MaxWidth="360" Margin="0,8,0,0" />

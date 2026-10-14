@@ -33,6 +33,19 @@ public sealed class AvaloniaOberflaeche(Window fenster) : IOberflaeche
     }
 
     /// <inheritdoc/>
+    public async Task<IReadOnlyList<string>> DateienOeffnenAsync(string titel, IReadOnlyList<Dateifilter> filter)
+    {
+        ArgumentNullException.ThrowIfNull(filter);
+        IReadOnlyList<IStorageFile> dateien = await fenster.StorageProvider.OpenFilePickerAsync(new FilePickerOpenOptions
+        {
+            Title = titel,
+            AllowMultiple = true,
+            FileTypeFilter = filter.Select(Dateityp).ToList(),
+        });
+        return dateien.Select(d => d.TryGetLocalPath()).OfType<string>().ToList();
+    }
+
+    /// <inheritdoc/>
     public async Task<string?> DateiSpeichernAsync(string titel, string vorschlag, Dateifilter filter)
     {
         ArgumentNullException.ThrowIfNull(filter);

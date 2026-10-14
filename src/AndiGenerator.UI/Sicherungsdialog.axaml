@@ -16,8 +16,8 @@
       <Setter Property="FontWeight" Value="SemiBold" />
     </Style>
   </Window.Styles>
-  <!-- Aktueller und gesicherter Plan im Vergleich: Verstöße je Stufe, Kosten, dann die einzelnen Kriterien mit Unterschieden;
-       der jeweils bessere Wert ist grün. -->
+  <!-- Aktueller und gesicherter Plan im Vergleich: Verstöße je Stufe, Kosten, dann die einzelnen Kriterien mit Unterschieden
+       (im Kompaktmodus die Kennzahlen der Kompaktspieltage); der jeweils bessere Wert ist grün. -->
   <StackPanel Margin="24" Spacing="12" Width="560">
     <TextBlock Text="{Binding Frage}" TextWrapping="Wrap" />
     <Border Classes="karte" Padding="14,10">
@@ -52,8 +52,7 @@
       </StackPanel>
     </Border>
     <TextBlock Text="{Binding Empfehlung}" FontWeight="SemiBold" />
-    <TextBlock Text="Bewertet wie im Automodus: erst die Verstöße der Stufe A, dann B, dann C, zuletzt die Kosten."
-               Classes="klein hinweis" TextWrapping="Wrap" />
+    <TextBlock Text="{Binding Bewertungshinweis}" Classes="klein hinweis" TextWrapping="Wrap" />
     <Border Classes="dialogfuss">
       <StackPanel Orientation="Horizontal" Spacing="10" HorizontalAlignment="Right">
         <Button x:Name="Abbrechen" Classes="gross" Content="Abbrechen" IsCancel="True" />

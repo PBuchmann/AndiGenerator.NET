@@ -122,6 +122,39 @@ public sealed class EinrichtungTests
     }
 
     [Fact]
+    public async Task Pflichtpunkt_laesst_sich_nicht_ueberspringen_und_haelt_das_Abschliessen_auf()
+    {
+        bool geladen = false;
+        var pflicht = new Einrichtungsschritt(1, "Daten", "PDF laden", [], [])
+        {
+            IstPflichtErfuellt = () => geladen,
+            Pflichthinweis = "Bitte zuerst laden.",
+        };
+        var frei = new Einrichtungsschritt(2, "Runde", "?", [], [new Einrichtungsoption("A", "x"), new Einrichtungsoption("B", "y")]);
+        int abgeschlossen = 0;
+        var einrichtung = new EinrichtungViewModel(
+            "Staffel einrichten",
+            [pflicht, frei],
+            _ => Task.FromResult(true),
+            _ => null,
+            () =>
+            {
+                abgeschlossen++;
+                return Task.CompletedTask;
+            },
+            () => Task.CompletedTask);
+
+        Assert.False(einrichtung.UeberspringenCommand.CanExecute(null));
+        await einrichtung.AbschliessenCommand.ExecuteAsync(null);
+        Assert.Equal(0, abgeschlossen);
+        Assert.Equal("Bitte zuerst laden.", einrichtung.Meldung);
+
+        geladen = true;
+        await einrichtung.AbschliessenCommand.ExecuteAsync(null);
+        Assert.Equal(1, abgeschlossen);
+    }
+
+    [Fact]
     public void Details_ohne_Leerzeilen_mit_Ueberschrift_und_Unterpunkten()
     {
         IReadOnlyList<Detailzeile> zeilen = Detailzeile.Aus(["Gewichtung", "  Sperrtermine: extrem hoch", "  Wechsel H/A: sehr hoch", string.Empty, "Doppelrunde ist aktiv", string.Empty]);

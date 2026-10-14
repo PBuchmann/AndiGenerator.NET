@@ -35,6 +35,8 @@ public sealed class DialogTests
         var o = new TestOberflaeche();
         Anzeigen(new Ueberdialog(new UeberViewModel(o, "1.0")));
         Anzeigen(new Druckauswahldialog(new DruckauswahlViewModel([PlanQuelle.ClickTt])));
+        Anzeigen(new Druckauswahldialog(DruckauswahlViewModel.Kompakt(PlanQuelle.Laufend, "Bestes Gesamtpaket")));
+        Anzeigen(new Druckauswahldialog(DruckauswahlViewModel.Kompakt(null, string.Empty)));
         Anzeigen(new Dialogfenster("Frage", "Wirklich?", null, mitAbbrechen: true));
         Anzeigen(new Dialogfenster("Name", "Name des Plans:", "Plan 1", mitAbbrechen: true));
         Anzeigen(new Dialogfenster("Entscheidung", "Was tun?", ["Erster Punkt", "Zweiter Punkt"], "Ja", "Nein"));

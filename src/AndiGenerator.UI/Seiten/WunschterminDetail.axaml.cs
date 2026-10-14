@@ -36,6 +36,10 @@ public partial class WunschterminDetail : UserControl
         AddHandler(PointerMovedEvent, Bewegt, RoutingStrategies.Tunnel, handledEventsToo: true);
         AddHandler(PointerReleasedEvent, Losgelassen, RoutingStrategies.Tunnel, handledEventsToo: true);
         AddHandler(PointerCaptureLostEvent, (_, _) => Abbrechen(), RoutingStrategies.Bubble, handledEventsToo: true);
+
+        // Den Fokus (für Escape) holen, ohne dass die umgebende Bildlaufleiste dorthin springt: Sonst rutscht beim Klick auf
+        // die erste Woche das Raster unter dem ruhenden Mauszeiger weg, und der Klick wird zum Ziehen auf die nächste Woche.
+        AddHandler(RequestBringIntoViewEvent, (_, e) => e.Handled |= ReferenceEquals(e.TargetObject, this));
         KeyDown += (_, e) =>
         {
             if (gedrueckt is not null && e.Key == Key.Escape)
@@ -59,7 +63,7 @@ public partial class WunschterminDetail : UserControl
         }
 
         gedrueckt = zelle;
-        start = e.GetPosition(this);
+        start = e.GetPosition(TopLevel.GetTopLevel(this));
         griff = e.GetPosition(karte);
         e.Pointer.Capture(this);
         Focus();
@@ -73,7 +77,8 @@ public partial class WunschterminDetail : UserControl
             return;
         }
 
-        Point jetzt = e.GetPosition(this);
+        // Die Schwelle gilt in Fensterkoordinaten: Bewegt sich nur der Inhalt (Bildlauf), wird daraus kein Ziehen.
+        Point jetzt = e.GetPosition(TopLevel.GetTopLevel(this));
         if (!ziehen)
         {
             if (!zelle.HatTermin || Point.Distance(jetzt, start) < Ziehschwelle)

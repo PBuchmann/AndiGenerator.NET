@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="iso-8859-15"?>
+<TT name="Jugend 19 Testliga (HR)" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.tt-liga.de/TTGenerator http://www.tt-liga.de/includes/TTGenerator.xsd" xmlns="http://www.tt-liga.de/TTGenerator" mid="07.12.2026" from="17.08.2026" seasonType="STANDARD" until="09.05.2027" gender="Jugend 19" id="990001">
+  <noGameDays />
+  <mandatoryGameDays>
+  </mandatoryGameDays>
+  <predefinedGames>
+  </predefinedGames>
+  <existingSchedule>
+  </existingSchedule>
+  <teams>
+      <team gender="Jugend 19" clubId="90001" number="1" id="9900001">
+        <name>TTC Aowi</name>
+        <gameDays>
+           <homeGame secondary="false" courtHall="Sporthalle Aowi" maxParallelGames="2" day="30.08.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Aowi" maxParallelGames="2" day="13.09.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Aowi" maxParallelGames="2" day="04.10.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Aowi" maxParallelGames="2" day="08.11.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Aowi" maxParallelGames="2" day="15.11.2026" time="11:00" /> <noGame from="20.09.2026" until="20.09.2026" /> <noGame from="18.10.2026" until="18.10.2026" /> <noGame from="25.10.2026" until="25.10.2026" /> 
+        </gameDays>
+        <sisterTeams>
+        </sisterTeams>
+      </team>
+      <team gender="Jugend 19" clubId="90002" number="1" id="9900002">
+        <name>TV Bekra</name>
+        <gameDays>
+           <homeGame secondary="false" courtHall="Sporthalle Bekra" maxParallelGames="2" day="13.09.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Bekra" maxParallelGames="2" day="18.10.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Bekra" maxParallelGames="2" day="25.10.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Bekra" maxParallelGames="2" day="01.11.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Bekra" maxParallelGames="2" day="22.11.2026" time="11:00" /> <noGame from="23.08.2026" until="23.08.2026" /> <noGame from="06.09.2026" until="06.09.2026" /> <noGame from="04.10.2026" until="04.10.2026" /> 
+        </gameDays>
+        <sisterTeams>
+        </sisterTeams>
+      </team>
+      <team gender="Jugend 19" clubId="90003" number="1" id="9900003">
+        <name>SV Dlimo</name>
+        <gameDays>
+           <homeGame secondary="false" courtHall="Sporthalle Dlimo" maxParallelGames="2" day="06.09.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Dlimo" maxParallelGames="2" day="13.09.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Dlimo" maxParallelGames="2" day="04.10.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Dlimo" maxParallelGames="2" day="15.11.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Dlimo" maxParallelGames="2" day="29.11.2026" time="11:00" /> <noGame from="23.08.2026" until="23.08.2026" /> <noGame from="25.10.2026" until="25.10.2026" /> <noGame from="22.11.2026" until="22.11.2026" /> 
+        </gameDays>
+        <sisterTeams>
+        </sisterTeams>
+      </team>
+      <team gender="Jugend 19" clubId="90004" number="1" id="9900004">
+        <name>TTF Gorna</name>
+        <gameDays>
+           <homeGame secondary="false" courtHall="Sporthalle Gorna" maxParallelGames="2" day="13.09.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Gorna" maxParallelGames="2" day="27.09.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Gorna" maxParallelGames="2" day="04.10.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Gorna" maxParallelGames="2" day="11.10.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Gorna" maxParallelGames="2" day="22.11.2026" time="11:00" /> <noGame from="20.09.2026" until="20.09.2026" /> <noGame from="15.11.2026" until="15.11.2026" /> <noGame from="06.12.2026" until="06.12.2026" /> 
+        </gameDays>
+        <sisterTeams>
+        </sisterTeams>
+      </team>
+      <team gender="Jugend 19" clubId="90005" number="1" id="9900005">
+        <name>TSG Helto</name>
+        <gameDays>
+           <homeGame secondary="false" courtHall="Sporthalle Helto" maxParallelGames="2" day="23.08.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Helto" maxParallelGames="2" day="13.09.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Helto" maxParallelGames="2" day="08.11.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Helto" maxParallelGames="2" day="29.11.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Helto" maxParallelGames="2" day="06.12.2026" time="11:00" /> <noGame from="27.09.2026" until="27.09.2026" /> <noGame from="11.10.2026" until="11.10.2026" /> <noGame from="22.11.2026" until="22.11.2026" /> 
+        </gameDays>
+        <sisterTeams>
+        </sisterTeams>
+      </team>
+      <team gender="Jugend 19" clubId="90006" number="1" id="9900006">
+        <name>TuS Kavre</name>
+        <gameDays>
+           <homeGame secondary="false" courtHall="Sporthalle Kavre" maxParallelGames="2" day="23.08.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Kavre" maxParallelGames="2" day="06.09.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Kavre" maxParallelGames="2" day="13.09.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Kavre" maxParallelGames="2" day="15.11.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Kavre" maxParallelGames="2" day="29.11.2026" time="11:00" /> <noGame from="20.09.2026" until="20.09.2026" /> <noGame from="18.10.2026" until="18.10.2026" /> <noGame from="06.12.2026" until="06.12.2026" /> 
+        </gameDays>
+        <sisterTeams>
+        </sisterTeams>
+      </team>
+      <team gender="Jugend 19" clubId="90007" number="1" id="9900007">
+        <name>SG Lumpa</name>
+        <gameDays>
+           <homeGame secondary="false" courtHall="Sporthalle Lumpa" maxParallelGames="2" day="30.08.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Lumpa" maxParallelGames="2" day="27.09.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Lumpa" maxParallelGames="2" day="25.10.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Lumpa" maxParallelGames="2" day="15.11.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Lumpa" maxParallelGames="2" day="29.11.2026" time="11:00" /> <noGame from="06.09.2026" until="06.09.2026" /> <noGame from="04.10.2026" until="04.10.2026" /> <noGame from="22.11.2026" until="22.11.2026" /> 
+        </gameDays>
+        <sisterTeams>
+        </sisterTeams>
+      </team>
+      <team gender="Jugend 19" clubId="90008" number="1" id="9900008">
+        <name>DJK Morsi</name>
+        <gameDays>
+           <homeGame secondary="false" courtHall="Sporthalle Morsi" maxParallelGames="2" day="23.08.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Morsi" maxParallelGames="2" day="06.09.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Morsi" maxParallelGames="2" day="13.09.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Morsi" maxParallelGames="2" day="27.09.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Morsi" maxParallelGames="2" day="29.11.2026" time="11:00" /> <noGame from="20.09.2026" until="20.09.2026" /> <noGame from="18.10.2026" until="18.10.2026" /> <noGame from="22.11.2026" until="22.11.2026" /> 
+        </gameDays>
+        <sisterTeams>
+        </sisterTeams>
+      </team>
+      <team gender="Jugend 19" clubId="90009" number="1" id="9900009">
+        <name>TTG Nefri</name>
+        <gameDays>
+           <homeGame secondary="false" courtHall="Sporthalle Nefri" maxParallelGames="2" day="13.09.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Nefri" maxParallelGames="2" day="27.09.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Nefri" maxParallelGames="2" day="25.10.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Nefri" maxParallelGames="2" day="22.11.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Nefri" maxParallelGames="2" day="29.11.2026" time="11:00" /> <noGame from="06.09.2026" until="06.09.2026" /> <noGame from="04.10.2026" until="04.10.2026" /> <noGame from="06.12.2026" until="06.12.2026" /> 
+        </gameDays>
+        <sisterTeams>
+        </sisterTeams>
+      </team>
+  </teams>
+</TT>

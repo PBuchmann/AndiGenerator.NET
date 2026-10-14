@@ -21,6 +21,9 @@ internal sealed class Messflaeche : IZeichenflaeche
     /// <summary>Holt die Anzahl der gezeichneten Rechtecke.</summary>
     public int Rechtecke { get; private set; }
 
+    /// <summary>Holt die Anzahl der gezeichneten Vielecke und Linienzüge.</summary>
+    public int Vielecke { get; private set; }
+
     public double TextBreite(string text, double groesse, bool fett) => text.Length * groesse * (fett ? 0.6 : 0.5);
 
     public void Text(string text, double x, double y, double groesse, Farbe farbe, bool fett)
@@ -39,5 +42,22 @@ internal sealed class Messflaeche : IZeichenflaeche
 
     public void Rechteck(double x, double y, double breite, double hoehe, Farbe farbe) => Rechtecke++;
 
-    public void Kreis(double mx, double my, double radius, Farbe fuellung, Farbe rand, double staerke) => Punkte.Add(("Kreis", mx, my, radius));
+    public void Kreis(double mx, double my, double radius, Farbe? fuellung, Farbe? rand, double staerke) => Punkte.Add(("Kreis", mx, my, radius));
+
+    public void Vieleck(IReadOnlyList<(double X, double Y)> punkte, Farbe? fuellung, Farbe? rand, double staerke, bool geschlossen) => Vielecke++;
+
+    public void TextMitRand(string text, double x, double y, double groesse, Farbe farbe, bool fett, Farbe rand, double staerke) =>
+        Text(text, x, y, groesse, farbe, fett);
+
+    public IDisposable Deckkraft(double wert) => new Bereich();
+
+    public IDisposable Begrenzen(double x, double y, double breite, double hoehe) => new Bereich();
+
+    private sealed class Bereich : IDisposable
+    {
+        public void Dispose()
+        {
+            // Nichts zu beenden.
+        }
+    }
 }

@@ -712,7 +712,8 @@ public sealed class HauptfensterTests : IDisposable
         hf.PauseCommand.Execute(null);
         Assert.True(hf.Pausiert);
         Assert.Equal("Fortsetzen", hf.GenerierungText);
-        Assert.True(hf.ZeigtStart);
+        Assert.True(hf.ZeigtFortsetzen);
+        Assert.False(hf.ZeigtStart);
         hf.PauseCommand.Execute(null);
         Assert.False(hf.Pausiert);
         Assert.Equal("Pausieren", hf.GenerierungText);
@@ -932,6 +933,73 @@ public sealed class HauptfensterTests : IDisposable
     }
 
     [Fact]
+    public async Task Oeffnen_mit_passender_Mannschaftsmeldung_uebernimmt_sie_gleich()
+    {
+        string csv = await MannschaftsmeldungAsync(alle: true);
+        o.DateienZumOeffnen = [datei, csv];
+
+        await hf.OeffnenCommand.ExecuteAsync(null);
+
+        Assert.True(hf.IstGeoeffnet);
+        EinrichtungViewModel einrichtung = Assert.IsType<EinrichtungViewModel>(hf.Einrichtung);
+        Assert.Equal(string.Empty, einrichtung.Meldung);
+        Assert.EndsWith("Daten aus click-TT übernommen.", hf.Statuszeile, StringComparison.Ordinal);
+        Assert.Contains(Path.GetFileName(csv), Zusatzseite(einrichtung).AufstellungsVermerk, StringComparison.Ordinal);
+
+        // Erledigt ist der Punkt erst mit beiden Dateien; ein unlesbarer Bericht bleibt offen und wird genannt.
+        Assert.False(einrichtung.Schritte[0].IstErledigt);
+    }
+
+    [Fact]
+    public async Task Oeffnen_mit_unpassenden_Dateien_uebernimmt_sie_nicht_und_nennt_sie()
+    {
+        string csv = await MannschaftsmeldungAsync(alle: false);
+        string pdf = Path.Combine(ordner, "daten", "Terminmeldungen.pdf");
+        await File.WriteAllTextAsync(pdf, "kein PDF");
+        o.DateienZumOeffnen = [pdf, datei, csv];
+
+        await hf.OeffnenCommand.ExecuteAsync(null);
+
+        Assert.True(hf.IstGeoeffnet);
+        EinrichtungViewModel einrichtung = Assert.IsType<EinrichtungViewModel>(hf.Einrichtung);
+        Assert.Contains("Mannschaftsmeldung (meldung.csv) passt nicht zu dieser Staffel – ohne Aufstellung:", einrichtung.Meldung, StringComparison.Ordinal);
+        Assert.Contains("Bericht „Terminwünsche“ (Terminmeldungen.pdf)", einrichtung.Meldung, StringComparison.Ordinal);
+        Assert.Equal(string.Empty, Zusatzseite(einrichtung).AufstellungsVermerk);
+        Assert.Equal(string.Empty, Zusatzseite(einrichtung).TerminwunschVermerk);
+    }
+
+    [Fact]
+    public async Task Erkannte_Kompaktklasse_ist_in_der_Einrichtung_vorgewaehlt()
+    {
+        string kompakt = Path.Combine(ordner, "daten", "Jugend_19_Testliga_(HR).xml");
+        File.Copy(Path.Combine(Testdaten.Referenz, "..", "kompakt", "Jugend_19_Testliga_(HR).xml"), kompakt);
+        o.DateiZumOeffnen = kompakt;
+
+        await hf.OeffnenCommand.ExecuteAsync(null);
+
+        EinrichtungViewModel einrichtung = Assert.IsType<EinrichtungViewModel>(hf.Einrichtung);
+        Einrichtungsschritt schritt = einrichtung.Schritte.Single(s => s.Titel == "Klasse mit Kompaktspieltagen");
+        Assert.Equal(0, schritt.Auswahl);
+        Assert.Equal("Mit Kompaktspieltagen planen", schritt.Optionen[0].Titel);
+
+        // Gilt wie angeklickt: Abschließen übernimmt die Wahl auch ohne Klick.
+        Assert.True(schritt.IstGewaehlt);
+    }
+
+    [Fact]
+    public async Task Oeffnen_mit_zwei_XML_Dateien_wird_abgelehnt()
+    {
+        string zweite = Path.Combine(ordner, "daten", "zweite.xml");
+        File.Copy(datei, zweite);
+        o.DateienZumOeffnen = [datei, zweite];
+
+        await hf.OeffnenCommand.ExecuteAsync(null);
+
+        Assert.False(hf.IstGeoeffnet);
+        Assert.Contains("Staffel öffnen: Bitte nur eine XML-Datei auswählen – je Staffel eine.", o.Meldungen);
+    }
+
+    [Fact]
     public async Task Abbrechen_der_Einrichtung_schliesst_die_Staffel_und_Oeffnen_ist_solange_gesperrt()
     {
         await hf.OeffnenCommand.ExecuteAsync(null);
@@ -1031,6 +1099,24 @@ public sealed class HauptfensterTests : IDisposable
     }
 
     /// <summary>Öffnet die Testdatei und schließt die Einrichtung ohne Änderungen ab.</summary>
+    /// <summary>Die Seite „Daten aus click-TT“ des ersten Einrichtungspunkts.</summary>
+    private static ZusatzdatenSeiteViewModel Zusatzseite(EinrichtungViewModel einrichtung)
+    {
+        einrichtung.Aktiv = einrichtung.Schritte[0];
+        return Assert.IsType<ZusatzdatenSeiteViewModel>(Assert.Single(einrichtung.Schritte[0].Seite!.Seiten));
+    }
+
+    /// <summary>Schreibt eine Mannschaftsmeldung (CSV) für alle Mannschaften der Staffel oder nur für die erste.</summary>
+    private async Task<string> MannschaftsmeldungAsync(bool alle)
+    {
+        Plansitzung lesen = Plansitzung.Oeffnen(datei, Path.Combine(ordner, "basis-namen"), null);
+        IEnumerable<string> namen = lesen.Staffel.Mannschaften.Select(m => m.Name).Take(alle ? int.MaxValue : 1);
+        string csv = Path.Combine(ordner, "daten", "meldung.csv");
+        string zeilen = string.Concat(namen.SelectMany(n => Enumerable.Range(1, 4).Select(i => $"{n};{Persistence.Aufstellungen.MannschaftsaufstellungenCsv.Nummer(n)};{i};{1500 + i};\n")));
+        await File.WriteAllTextAsync(csv, "MannschaftName;SpielerMannschaftNr;SpielerRang;TTR;SpielerStatus\n" + zeilen);
+        return csv;
+    }
+
     private async Task OeffnenAsync()
     {
         await hf.OeffnenCommand.ExecuteAsync(null);

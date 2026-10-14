@@ -64,7 +64,8 @@
         <Border Classes="karte bereich">
           <StackPanel Spacing="8">
             <TextBlock Text="Runden" Classes="bereichstitel" />
-            <ComboBox HorizontalAlignment="Stretch" ItemsSource="{x:Static p:OptionenAnsichtViewModel.Rundenplanungen}" SelectedIndex="{Binding RundenplanungIndex}" />
+            <ComboBox HorizontalAlignment="Stretch" ItemsSource="{x:Static p:OptionenAnsichtViewModel.Rundenplanungen}" SelectedIndex="{Binding RundenplanungIndex}" IsEnabled="{Binding RundenplanungWaehlbar}" />
+            <TextBlock Text="{Binding Rundenhinweis}" IsVisible="{Binding !RundenplanungWaehlbar}" TextWrapping="Wrap" MaxWidth="320" Classes="klein" />
             <CheckBox Content="Doppelrunde planen" IsChecked="{Binding Doppelrunde}" />
             <StackPanel Margin="28,0,0,0" Spacing="6">
               <CheckBox Content="Enddatum der Viertelrunden automatisch ermitteln" IsChecked="{Binding AutomatischeMitte}" IsEnabled="{Binding Doppelrunde}" />

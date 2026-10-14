@@ -23,6 +23,12 @@ public interface IOberflaeche
     /// <returns>Der lokale Pfad oder <c>null</c> bei Abbruch.</returns>
     Task<string?> DateiOeffnenAsync(string titel, IReadOnlyList<Dateifilter> filter);
 
+    /// <summary>Lässt eine oder mehrere vorhandene Dateien auswählen.</summary>
+    /// <param name="titel">Titel des Dialogs.</param>
+    /// <param name="filter">Dateifilter.</param>
+    /// <returns>Die lokalen Pfade; leer bei Abbruch.</returns>
+    Task<IReadOnlyList<string>> DateienOeffnenAsync(string titel, IReadOnlyList<Dateifilter> filter);
+
     /// <summary>Lässt eine Zieldatei auswählen.</summary>
     /// <param name="titel">Titel des Dialogs.</param>
     /// <param name="vorschlag">Vorgeschlagener Dateiname.</param>

@@ -6,6 +6,8 @@ Ausnahme Schriften: Die SIL Open Font License (OFL 1.1) erlaubt das Einbetten un
 
 Ausnahme Daten: Die Postleitzahlen-Tabelle `src/AndiGenerator.Persistence/Geo/plz-de.csv.gz` (Postleitzahl, Ort, Breite, Länge) ist aus `DE.zip` von **GeoNames** (https://www.geonames.org, Postleitzahlen-Export https://download.geonames.org/export/zip/) abgeleitet: auf diese vier Spalten gekürzt und komprimiert (`tools/geonames/plz_tabelle.py`). Die Daten stehen unter **Creative Commons Attribution 4.0** (CC BY 4.0, https://creativecommons.org/licenses/by/4.0/); Namensnennung: „Postleitzahlen-Daten: GeoNames (geonames.org), CC BY 4.0, gekürzt“. Sie dienen nur der Entfernung in Luftlinie zwischen Hallen (Prüfung der 60-km-Regel) und sind keine Programmbibliothek.
 
+Die Umrisse der Bundesländer `src/AndiGenerator.Persistence/Geo/umrisse-de.json` stammen aus **Natural Earth** (https://www.naturalearthdata.com, „Admin 1 – States, Provinces“, Maßstab 1:10 Mio.), vereinfacht mit `tools/karte/umrisse.py`. Natural Earth ist gemeinfrei (public domain); eine Namensnennung ist nicht nötig, steht aber in der Ansicht „Kompaktspieltage“. Die Lage der Städte in `staedte-de.json` ist aus der GeoNames-Tabelle oben abgeleitet.
+
 | Paket | Lizenz | Verwendung |
 |---|---|---|
 | .NET 10 Runtime/BCL | MIT | Laufzeit |
@@ -14,6 +16,7 @@ Ausnahme Daten: Die Postleitzahlen-Tabelle `src/AndiGenerator.Persistence/Geo/pl
 | Dock.Avalonia, Dock.Avalonia.Themes.Fluent, Dock.Model.Mvvm | MIT | Andock-Layout der Ansichten (E15) |
 | CommunityToolkit.Mvvm | MIT | ViewModels (E3) |
 | PdfPig (UglyToad.PdfPig) | Apache-2.0 | Bericht „Terminwünsche“ aus click-TT lesen (nur im Baustein `AndiGenerator.Import`) |
+| HiGHS (Paket Highs.Native, © die HiGHS-Entwickler, University of Edinburgh) | MIT | Löser für die gezielte Konstruktion der Kompaktspieltage (ganzzahlige Optimierung, nur die native Bibliothek über die C-Schnittstelle, im Baustein `AndiGenerator.Import`; der Rechenkern kennt nur seine Schnittstelle); https://highs.dev |
 | Velopack | MIT | Installation und Updates über GitHub Releases (E12); Version gemeinsam mit `VPK_VERSION` in `release.yml` |
 | Schriften IBM Plex Sans und IBM Plex Mono (je Regular, Medium, SemiBold, Bold), © 2017 IBM Corp. | SIL OFL 1.1 | Schrift der Oberfläche, eingebettet unter `src/AndiGenerator.UI/Assets/Fonts` mit `OFL.txt` |
 | xunit | Apache-2.0 | nur Tests |

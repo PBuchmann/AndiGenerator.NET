@@ -58,7 +58,7 @@ public sealed class EinrichtungViewModel : ObservableObject
         aktiv = schritte.FirstOrDefault(s => s.Zustand == Schrittzustand.Offen) ?? schritte[0];
         Zeigen(aktiv);
         UebernehmenCommand = new AsyncRelayCommand(UebernehmenAsync);
-        UeberspringenCommand = new RelayCommand(Ueberspringen);
+        UeberspringenCommand = new RelayCommand(Ueberspringen, () => !Aktiv.FehltPflicht);
         AbschliessenCommand = new AsyncRelayCommand(AbschliessenAsync);
         AbbrechenCommand = new AsyncRelayCommand(() => this.abbrechen());
     }
@@ -86,6 +86,7 @@ public sealed class EinrichtungViewModel : ObservableObject
             Zeigen(value);
             Meldung = string.Empty;
             OnPropertyChanged(nameof(UebernehmenText));
+            UeberspringenCommand.NotifyCanExecuteChanged();
         }
     }
 
@@ -102,7 +103,7 @@ public sealed class EinrichtungViewModel : ObservableObject
     public string Meldung
     {
         get => meldung;
-        private set
+        internal set
         {
             if (SetProperty(ref meldung, value))
             {
@@ -151,10 +152,18 @@ public sealed class EinrichtungViewModel : ObservableObject
 
         // Ein Punkt mit mehreren Teilen (z. B. zwei Dateien) bleibt offen, bis alle erledigt sind.
         Abhaken(schritt, (schritt.IstVollstaendig?.Invoke() ?? true) ? Schrittzustand.Erledigt : Schrittzustand.Offen);
+        UeberspringenCommand.NotifyCanExecuteChanged();
     }
 
     private async Task AbschliessenAsync()
     {
+        if (Schritte.FirstOrDefault(s => s.FehltPflicht) is Einrichtungsschritt pflicht)
+        {
+            Aktiv = pflicht;
+            Meldung = pflicht.Pflichthinweis.Length > 0 ? pflicht.Pflichthinweis : "Dieser Punkt muss erledigt werden.";
+            return;
+        }
+
         foreach (Einrichtungsschritt schritt in Schritte.Where(s => s.IstEntscheidung && s.IstGewaehlt && s.Zustand == Schrittzustand.Offen).ToList())
         {
             if (!await uebernehmen(schritt))

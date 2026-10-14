@@ -36,6 +36,22 @@ public class GespeicherterPlanTests
     }
 
     [Fact]
+    public void Spiellokal_wird_nur_geschrieben_wenn_vorhanden_und_wieder_gelesen()
+    {
+        var termin = new DateTime(2026, 9, 13, 11, 0, 0, DateTimeKind.Unspecified);
+        GespeichertesSpiel[] spiele = [new(termin, "TTC A", "TTC B", "2"), new(termin, "TTC C", "TTC D")];
+
+        byte[] inhalt = GespeicherterPlanDatei.ErzeugenBytes(spiele);
+        string text = Encoding.UTF8.GetString(inhalt);
+        using var strom = new MemoryStream(inhalt);
+        IReadOnlyList<GespeichertesSpiel> geladen = GespeicherterPlanDatei.Laden(strom);
+
+        Assert.Contains("<game datetime=\"13.09.2026 11:00\" hometeamname=\"TTC A\" guestteamname=\"TTC B\" location=\"2\"/>", text, StringComparison.Ordinal);
+        Assert.Contains("<game datetime=\"13.09.2026 11:00\" hometeamname=\"TTC C\" guestteamname=\"TTC D\"/>", text, StringComparison.Ordinal);
+        Assert.Equal(spiele, geladen);
+    }
+
+    [Fact]
     public void BestehendeSpielplaeneUeberstehenSpeichernUndLaden()
     {
         int geprueft = 0;

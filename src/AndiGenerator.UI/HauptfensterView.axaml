@@ -239,13 +239,16 @@
               </Grid>
             </ToggleButton>
             <StackPanel Classes="sektionsinhalt" Classes.zu="{Binding !#KopfAnsichten.IsChecked}">
-              <Button Classes="nav" Classes.aktiv="{Binding AktiveAnsicht, Converter={x:Static ui:Konverter.Gleich}, ConverterParameter=Kosten}" Command="{Binding KostenansichtCommand}" ToolTip.Tip="Kosten">
+              <Button Classes="nav" Classes.aktiv="{Binding AktiveAnsicht, Converter={x:Static ui:Konverter.Gleich}, ConverterParameter=Kompakt}" Command="{Binding KompaktspieltageCommand}" IsVisible="{Binding ZeigtKompaktspieltage}" ToolTip.Tip="Kompaktspieltage: Meldungen, Plan und Karte der Spielorte">
+                <StackPanel Orientation="Horizontal" Spacing="12"><ui:Symbol Daten="{StaticResource SymbolKarte}" /><TextBlock Classes="navtext" Text="Kompaktspieltage" VerticalAlignment="Center" /></StackPanel>
+              </Button>
+              <Button Classes="nav" Classes.aktiv="{Binding AktiveAnsicht, Converter={x:Static ui:Konverter.Gleich}, ConverterParameter=Kosten}" IsVisible="{Binding ZeigtGenerierung}" Command="{Binding KostenansichtCommand}" ToolTip.Tip="Kosten">
                 <StackPanel Orientation="Horizontal" Spacing="12"><ui:Symbol Daten="{StaticResource SymbolKosten}" /><TextBlock Classes="navtext" Text="Kosten" VerticalAlignment="Center" /></StackPanel>
               </Button>
-              <Button Classes="nav" Classes.aktiv="{Binding AktiveAnsicht, Converter={x:Static ui:Konverter.Gleich}, ConverterParameter=Qualitaet}" Command="{Binding QualitaetsansichtCommand}" ToolTip.Tip="Qualität">
+              <Button Classes="nav" Classes.aktiv="{Binding AktiveAnsicht, Converter={x:Static ui:Konverter.Gleich}, ConverterParameter=Qualitaet}" IsVisible="{Binding ZeigtGenerierung}" Command="{Binding QualitaetsansichtCommand}" ToolTip.Tip="Qualität">
                 <StackPanel Orientation="Horizontal" Spacing="12"><ui:Symbol Daten="{StaticResource SymbolQualitaet}" /><TextBlock Classes="navtext" Text="Qualität" VerticalAlignment="Center" /></StackPanel>
               </Button>
-              <Button Classes="nav" Classes.aktiv="{Binding AktiveAnsicht, Converter={x:Static ui:Konverter.Gleich}, ConverterParameter=Meldungen}" Command="{Binding MeldungsansichtCommand}" ToolTip.Tip="Meldungen je Mannschaft">
+              <Button Classes="nav" Classes.aktiv="{Binding AktiveAnsicht, Converter={x:Static ui:Konverter.Gleich}, ConverterParameter=Meldungen}" IsVisible="{Binding ZeigtGenerierung}" Command="{Binding MeldungsansichtCommand}" ToolTip.Tip="Meldungen je Mannschaft">
                 <StackPanel Orientation="Horizontal" Spacing="12"><ui:Symbol Daten="{StaticResource SymbolMeldungen}" /><TextBlock Classes="navtext" Text="Meldungen" VerticalAlignment="Center" /></StackPanel>
               </Button>
               <Button Classes="nav" Classes.aktiv="{Binding AktiveAnsicht, Converter={x:Static ui:Konverter.Gleich}, ConverterParameter=Terminplan}" Command="{Binding TerminplanansichtCommand}" ToolTip.Tip="Terminplan">
@@ -316,7 +319,7 @@
               </Button>
             </Panel>
             <!-- Verfahren: zwei Optionsfelder nebeneinander, gestaltet wie die Umschalter der Ansichten (genau eines ist gewählt); vor dem Start wählen sie, während der Generierung wechseln sie -->
-            <StackPanel Spacing="4" Margin="0,0,12,0" VerticalAlignment="Bottom">
+            <StackPanel Spacing="4" Margin="0,0,12,0" VerticalAlignment="Bottom" IsVisible="{Binding ZeigtGenerierung}">
               <TextBlock Text="Verfahren" Classes="klein" FontSize="11" />
               <Border Background="#ECEAE4" CornerRadius="12" Padding="4" ToolTip.Tip="{Binding VerfahrenErklaerung}">
                 <StackPanel Orientation="Horizontal" Spacing="4">
@@ -325,18 +328,19 @@
                 </StackPanel>
               </Border>
             </StackPanel>
-            <!-- Hauptknopf: Play vor dem Start und in der Pause, Pause während der Generierung; rechts daneben vor dem Start
+            <!-- Hauptknopf: Play vor dem Start, Pause während der Generierung, in der Pause „Fortsetzen“ (Strich und Play); rechts daneben vor dem Start
                  „Staffel schließen“ (✕), während der Generierung „Stopp“ (■) -->
             <Button Classes="gross primaer" Command="{Binding GenerierungCommand}" Width="56" Padding="0" HorizontalContentAlignment="Center" VerticalAlignment="Bottom"
                     ToolTip.Tip="{Binding GenerierungText}">
               <Panel>
                 <ui:Symbol Daten="{StaticResource SymbolStart}" Gefuellt="True" Groesse="22" IsVisible="{Binding ZeigtStart}" />
                 <ui:Symbol Daten="{StaticResource SymbolPause}" Gefuellt="True" Groesse="22" IsVisible="{Binding ZeigtPause}" />
+                <ui:Symbol Daten="{StaticResource SymbolFortsetzen}" Gefuellt="True" Groesse="22" IsVisible="{Binding ZeigtFortsetzen}" />
               </Panel>
             </Button>
             <Panel VerticalAlignment="Bottom" Margin="8,0,0,0">
               <Button Classes="gross" Command="{Binding StoppenCommand}" IsVisible="{Binding ZeigtStopp}" Width="56" Padding="0" HorizontalContentAlignment="Center"
-                      ToolTip.Tip="Stopp: Generierung beenden. Ihr bester Plan bleibt erhalten („bester Plan der letzten Generierung“).">
+                      ToolTip.Tip="Stopp: Generierung bzw. Planung der Kompaktspieltage beenden. Der bisher beste Plan bleibt erhalten.">
                 <ui:Symbol Daten="{StaticResource SymbolStopp}" Gefuellt="True" Groesse="22" />
               </Button>
               <Button Classes="gross" Command="{Binding SchliessenCommand}" IsVisible="{Binding !ZeigtStopp}" Width="56" Padding="0" HorizontalContentAlignment="Center"
@@ -348,8 +352,9 @@
         </Grid>
       </Border>
 
-      <!-- Kacheln: Stand der Generierung -->
-      <Grid Grid.Row="1" Classes="kacheln" Classes.automodus="{Binding Anzeige.ZeigtVerstoesse}" IsVisible="{Binding ZeigtArbeitsbereich}" Margin="22,10,22,0"
+      <!-- Kacheln: Stand der Generierung (im Kompaktmodus ausgeblendet; die Kennzahlen stehen dort in der Ansicht) -->
+      <Panel Grid.Row="1" IsVisible="{Binding ZeigtArbeitsbereich}">
+      <Grid Classes="kacheln" Classes.automodus="{Binding Anzeige.ZeigtVerstoesse}" IsVisible="{Binding ZeigtGenerierung}" Margin="22,10,22,0"
             ColumnDefinitions="*,*,*,*" RowDefinitions="Auto,Auto">
         <Button Classes="kartenknopf ergebnis" Margin="6" Command="{Binding ErgebnisCommand}" ToolTip.Tip="{Binding ErgebnisHinweis}">
           <StackPanel Spacing="2">
@@ -443,6 +448,7 @@
           </Grid>
         </Button>
       </Grid>
+      </Panel>
 
       <!-- Ansichten -->
       <dock:DockControl x:Name="Ansichten" Grid.Row="2" Layout="{Binding Layout}" Margin="22,2,22,10" IsVisible="{Binding ZeigtArbeitsbereich}" />

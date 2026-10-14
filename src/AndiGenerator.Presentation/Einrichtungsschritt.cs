@@ -77,6 +77,18 @@ public sealed class Einrichtungsschritt : ObservableObject
     /// </summary>
     public Func<bool>? IstVollstaendig { get; init; }
 
+    /// <summary>
+    /// Holt oder setzt die Prüfung eines Pflichtpunkts (nicht im Original): Solange sie <c>false</c> liefert, lässt sich der
+    /// Punkt nicht überspringen und die Einrichtung nicht abschließen; ohne Angabe ist der Punkt freiwillig.
+    /// </summary>
+    public Func<bool>? IstPflichtErfuellt { get; init; }
+
+    /// <summary>Holt oder setzt die Meldung, wenn ein Pflichtpunkt noch fehlt.</summary>
+    public string Pflichthinweis { get; init; } = string.Empty;
+
+    /// <summary>Holt einen Wert, der angibt, ob der Punkt erledigt sein muss und es noch nicht ist.</summary>
+    public bool FehltPflicht => !(IstPflichtErfuellt?.Invoke() ?? true);
+
     /// <summary>Holt den Punkt des Erststart-Assistenten oder <c>null</c> bei Entscheidungen.</summary>
     public Erststartpunkt? Punkt { get; }
 
@@ -154,6 +166,17 @@ public sealed class Einrichtungsschritt : ObservableObject
 
     /// <summary>Holt den Befehl, der den Schritt zeigt.</summary>
     public IRelayCommand WaehlenCommand { get; }
+
+    /// <summary>
+    /// Wählt eine Option vor, als hätte der Anwender sie angeklickt: Sie gilt auch beim Abschließen, ohne dass „Auswahl
+    /// übernehmen“ gedrückt wurde (z. B. „Mit Kompaktspieltagen planen“ bei einer erkannten Kompaktklasse).
+    /// </summary>
+    /// <param name="index">Die Option.</param>
+    public void Vorwaehlen(int index)
+    {
+        Auswahl = index;
+        IstGewaehlt = true;
+    }
 
     private void Anzeigeaendern()
     {

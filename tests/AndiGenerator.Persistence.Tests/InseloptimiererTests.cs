@@ -252,15 +252,39 @@ public class InseloptimiererTests
         optimierer.Starten();
         await Task.Delay(300);
 
+        // Unter Last (andere Tests rechnen parallel) braucht das Anhalten bzw. Weiterlaufen etwas länger: warten, bis sich
+        // der Zähler nicht mehr bzw. wieder bewegt, höchstens fünf Sekunden.
         optimierer.Pausiert = true;
-        await Task.Delay(300);
-        long angehalten = optimierer.Durchlaeufe;
+        long angehalten = await StehtAsync(() => optimierer.Durchlaeufe);
         await Task.Delay(300);
         Assert.Equal(angehalten, optimierer.Durchlaeufe);
 
         optimierer.Pausiert = false;
-        await Task.Delay(300);
+        for (int i = 0; i < 50 && optimierer.Durchlaeufe == angehalten; i++)
+        {
+            await Task.Delay(100);
+        }
+
         Assert.True(optimierer.Durchlaeufe > angehalten);
+    }
+
+    /// <summary>Wartet, bis sich ein Zähler 300 ms lang nicht mehr ändert (höchstens fünf Sekunden), und liefert seinen Stand.</summary>
+    private static async Task<long> StehtAsync(Func<long> zaehler)
+    {
+        long stand = zaehler();
+        for (int i = 0; i < 16; i++)
+        {
+            await Task.Delay(300);
+            long neu = zaehler();
+            if (neu == stand)
+            {
+                break;
+            }
+
+            stand = neu;
+        }
+
+        return stand;
     }
 
     private static Optimierungsergebnis Rechnen(Staffel staffel, Optimierungseinstellungen einstellungen, long durchlaeufe)

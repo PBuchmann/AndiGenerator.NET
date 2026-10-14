@@ -25,8 +25,19 @@ internal sealed class VersetzteZeichenflaeche(IZeichenflaeche ziel, double x0, d
     public void Rechteck(double x, double y, double breite, double hoehe, Farbe farbe) =>
         ziel.Rechteck(X(x), Y(y), breite * skala, hoehe * skala, farbe);
 
-    public void Kreis(double mx, double my, double radius, Farbe fuellung, Farbe rand, double staerke) =>
+    public void Kreis(double mx, double my, double radius, Farbe? fuellung, Farbe? rand, double staerke) =>
         ziel.Kreis(X(mx), Y(my), radius * skala, fuellung, rand, staerke * skala);
+
+    public void Vieleck(IReadOnlyList<(double X, double Y)> punkte, Farbe? fuellung, Farbe? rand, double staerke, bool geschlossen) =>
+        ziel.Vieleck(punkte.Select(p => (X(p.X), Y(p.Y))).ToList(), fuellung, rand, staerke * skala, geschlossen);
+
+    public void TextMitRand(string text, double x, double y, double groesse, Farbe farbe, bool fett, Farbe rand, double staerke) =>
+        ziel.TextMitRand(text, X(x), Y(y), groesse * skala, farbe, fett, rand, staerke * skala);
+
+    public IDisposable Deckkraft(double wert) => ziel.Deckkraft(wert);
+
+    public IDisposable Begrenzen(double x, double y, double breite, double hoehe) =>
+        ziel.Begrenzen(X(x), Y(y), breite * skala, hoehe * skala);
 
     private double X(double x) => x0 + (x * skala);
 

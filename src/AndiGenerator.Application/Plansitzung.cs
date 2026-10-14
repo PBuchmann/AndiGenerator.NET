@@ -50,7 +50,7 @@ public sealed class Plansitzung
         }
 
         string optionsdatei = Path.Combine(Staffelordner, OptionenDatei.Dateiname);
-        Optionen = File.Exists(optionsdatei) ? OptionenDatei.Laden(optionsdatei) : Berechnungsoptionen.Standard;
+        Optionen = MitHalbrunde(File.Exists(optionsdatei) ? OptionenDatei.Laden(optionsdatei) : Berechnungsoptionen.Standard);
     }
 
     /// <summary>Pfad der geöffneten Datei.</summary>
@@ -71,11 +71,22 @@ public sealed class Plansitzung
     /// <summary>Staffelordner des Originals, aus dem Optionen und gemerkte Pläne beim ersten Öffnen kopiert wurden; sonst <c>null</c>.</summary>
     public string? UebernommenAus { get; }
 
-    /// <summary>Aktuelle Berechnungsoptionen.</summary>
+    /// <summary>Aktuelle Berechnungsoptionen (bei „(HR)“ bzw. „(FR)“ im Klassennamen immer mit der passenden Halbrunde).</summary>
     public Berechnungsoptionen Optionen { get; private set; }
 
     /// <summary>Die Optionen weichen von den Standardoptionen ab (Original <c>getDiffToDefault</c>).</summary>
-    public bool OptionenWeichenVomStandardAb => !Gleich(Optionen, Berechnungsoptionen.Standard);
+    public bool OptionenWeichenVomStandardAb => !Gleich(Optionen, MitHalbrunde(Berechnungsoptionen.Standard));
+
+    /// <summary>
+    /// Holt die vom Klassennamen vorgegebene Rundenplanung (nicht im Original): „(HR)“ → nur Hinrunde, „(FR)“ → nur
+    /// Rückrunde; sonst <c>null</c>.
+    /// </summary>
+    public Rundenplanung? VorgegebeneRundenplanung => Halbrundenname.Kennzeichen(Staffel.Name) switch
+    {
+        Halbrundenkennzeichen.Hinrunde => Rundenplanung.NurVorrunde,
+        Halbrundenkennzeichen.Rueckrunde => Rundenplanung.NurRueckrunde,
+        _ => null,
+    };
 
     /// <summary>
     /// Basis der Staffelordner von AndiGenerator.NET: <c>%LOCALAPPDATA%\AndiGenerator.NET</c>. Die Daten des Originals
@@ -249,21 +260,29 @@ public sealed class Plansitzung
     {
         ArgumentNullException.ThrowIfNull(neu);
         Directory.CreateDirectory(Staffelordner);
-        OptionenDatei.Speichern(Path.Combine(Staffelordner, OptionenDatei.Dateiname), neu);
-        Optionen = neu;
+        Optionen = MitHalbrunde(neu);
+        OptionenDatei.Speichern(Path.Combine(Staffelordner, OptionenDatei.Dateiname), Optionen);
     }
 
     /// <summary>
     /// Rechnet in dieser Sitzung mit den Standardoptionen, ohne die gespeicherten Optionen zu überschreiben.
     /// Das Original setzt sie in diesem Fall zurück und speichert sofort (Befund #34); hier bleibt die Datei unverändert.
     /// </summary>
-    public void StandardoptionenFuerDieseSitzung() => Optionen = Berechnungsoptionen.Standard;
+    public void StandardoptionenFuerDieseSitzung() => Optionen = MitHalbrunde(Berechnungsoptionen.Standard);
 
-    /// <summary>Vorschlag zur Rundenplanung wie im Original beim Öffnen (ohne die fest einkodierte Corona-Abfrage 2020).</summary>
+    /// <summary>
+    /// Vorschlag zur Rundenplanung wie im Original beim Öffnen (ohne die fest einkodierte Corona-Abfrage 2020). Neu: Bei
+    /// „(HR)“ bzw. „(FR)“ im Klassennamen ist die Halbrunde vorgegeben, es gibt also keinen Vorschlag.
+    /// </summary>
     /// <param name="heute">Heutiges Datum.</param>
     /// <returns>Der Vorschlag oder <see cref="Rundenvorschlag.Keiner"/>.</returns>
     public Rundenvorschlag RundeVorschlagen(DateOnly heute)
     {
+        if (VorgegebeneRundenplanung is not null)
+        {
+            return Rundenvorschlag.Keiner;
+        }
+
         if (Staffel.Beginn is DateOnly beginn && Staffel.Ende is DateOnly ende
             && Math.Abs(ende.DayNumber - beginn.DayNumber) < 6 * 30
             && Optionen.Rundenplanung != Rundenplanung.Halbrunde)
@@ -295,7 +314,7 @@ public sealed class Plansitzung
         ArgumentNullException.ThrowIfNull(spiele);
         Directory.CreateDirectory(Staffelordner);
         string pfad = Persistence.Gemeinsam.Staffelordner.GemerkterPlanPfad(Staffelordner, name.Trim());
-        GespeicherterPlanDatei.Speichern(pfad, spiele.Select(s => new GespeichertesSpiel(s.Zeitpunkt, s.Heim, s.Gast)));
+        GespeicherterPlanDatei.Speichern(pfad, spiele.Select(s => new GespeichertesSpiel(s.Zeitpunkt, s.Heim, s.Gast, s.Spiellokal)));
         return new GemerkterPlanEintrag(name.Trim(), pfad, File.GetLastWriteTime(pfad));
     }
 
@@ -315,18 +334,18 @@ public sealed class Plansitzung
         ArgumentNullException.ThrowIfNull(spiele);
         Directory.CreateDirectory(Staffelordner);
         string pfad = Persistence.Gemeinsam.Staffelordner.GesicherterPlanPfad(Staffelordner);
-        GespeicherterPlanDatei.Speichern(pfad, spiele.Select(s => new GespeichertesSpiel(s.Zeitpunkt, s.Heim, s.Gast)));
+        GespeicherterPlanDatei.Speichern(pfad, spiele.Select(s => new GespeichertesSpiel(s.Zeitpunkt, s.Heim, s.Gast, s.Spiellokal)));
         return new GemerkterPlanEintrag(GesicherterPlanName, pfad, File.GetLastWriteTime(pfad));
     }
 
     /// <summary>Lädt die Spiele eines gemerkten Plans.</summary>
     /// <param name="eintrag">Eintrag aus <see cref="GemerktePlaene"/>.</param>
-    /// <returns>Die Spiele (ohne Spiellokal).</returns>
+    /// <returns>Die Spiele, mit Spiellokal, sofern gespeichert (Kompaktspieltage: der Ausrichter).</returns>
     /// <exception cref="PlanDatenFormatException">Die Datei ist ungültig.</exception>
     public IReadOnlyList<Spiel> GemerktenPlanLaden(GemerkterPlanEintrag eintrag)
     {
         PruefenGehoertZurStaffel(eintrag);
-        return GespeicherterPlanDatei.Laden(eintrag.Pfad).Select(s => new Spiel(s.Zeitpunkt, s.Heim, s.Gast, string.Empty)).ToList();
+        return GespeicherterPlanDatei.Laden(eintrag.Pfad).Select(s => new Spiel(s.Zeitpunkt, s.Heim, s.Gast, s.Spiellokal)).ToList();
     }
 
     /// <summary>Entfernt einen gemerkten Plan.</summary>
@@ -433,18 +452,26 @@ public sealed class Plansitzung
     /// <param name="spiele">Spiele des Plans.</param>
     public void CsvExportieren(string pfad, IReadOnlyList<Spiel> spiele)
     {
-        ArgumentException.ThrowIfNullOrEmpty(pfad);
-        ArgumentNullException.ThrowIfNull(spiele);
-        bool halbrunde = Optionen.Rundenplanung == Rundenplanung.Halbrunde;
-        var lokale = new Spiellokale(stand, halbrunde);
-        DateTime beginn = (Staffel.Beginn ?? DateOnly.FromDateTime(DelphiKompatibel.DelphiNull)).ToDateTime(TimeOnly.MinValue);
-        DateTime rueckrunde = (Staffel.Rueckrundenbeginn ?? DateOnly.FromDateTime(DelphiKompatibel.DelphiNull)).ToDateTime(TimeOnly.MinValue);
-        var optionen = new CsvExportOptionen(beginn, rueckrunde, halbrunde, Rundenpruefung.Erzeugen(Staffel, Optionen));
-        ClickTtCsvExport.Schreiben(
-            pfad,
-            spiele.Select(s => new CsvSpiel(s.Zeitpunkt, s.Heim, s.Gast, lokale.Ermitteln(s.Zeitpunkt, s.Heim, s.Gast))),
-            Staffel.Mannschaften.Select(m => new CsvMannschaft(m.Name, m.VereinsId, m.Id)),
-            optionen);
+        var lokale = new Spiellokale(stand, Optionen.Rundenplanung == Rundenplanung.Halbrunde);
+        CsvSchreiben(pfad, spiele, s => lokale.Ermitteln(s.Zeitpunkt, s.Heim, s.Gast));
+    }
+
+    /// <summary>
+    /// Exportiert einen Plan mit Kompaktspieltagen als CSV für click-TT (nicht im Original): Spiele des Ausrichters erhalten
+    /// das Spiellokal seines Heimtermins an diesem Tag (sonst sein Standardlokal); Spiele anderer Heimmannschaften bleiben
+    /// leer – ihre Halle ist die des Ausrichters, und click-TT kennt im Import nur die Nummern der Hallen des Heimvereins.
+    /// </summary>
+    /// <param name="pfad">Zieldatei.</param>
+    /// <param name="spiele">Spiele des Plans.</param>
+    /// <param name="spieltage">Die Kompaktspieltage des Plans (mit den Spielen, deren Halle verlegt wird).</param>
+    public void KompaktCsvExportieren(string pfad, IReadOnlyList<Spiel> spiele, IReadOnlyList<Kompaktspieltag> spieltage)
+    {
+        ArgumentNullException.ThrowIfNull(spieltage);
+        var verlegt = spieltage.SelectMany(t => t.HalleVerlegen).Select(s => (s.Zeitpunkt, s.Heim, s.Gast)).ToHashSet();
+        var lokale = new Spiellokale(stand, Optionen.Rundenplanung == Rundenplanung.Halbrunde);
+        CsvSchreiben(pfad, spiele, s => s.Zeitpunkt is DateTime z && !verlegt.Contains((s.Zeitpunkt, s.Heim, s.Gast))
+            ? lokale.AmTag(DateOnly.FromDateTime(z), s.Heim)
+            : string.Empty);
     }
 
     private static bool Gleich(Berechnungsoptionen a, Berechnungsoptionen b) =>
@@ -502,5 +529,24 @@ public sealed class Plansitzung
         {
             throw new ArgumentException("Der Plan gehört nicht zu dieser Staffel.", nameof(eintrag));
         }
+    }
+
+    /// <summary>Setzt die vom Klassennamen vorgegebene Halbrunde in die Optionen ein.</summary>
+    private Berechnungsoptionen MitHalbrunde(Berechnungsoptionen optionen) =>
+        VorgegebeneRundenplanung is Rundenplanung runde ? optionen with { Rundenplanung = runde } : optionen;
+
+    private void CsvSchreiben(string pfad, IReadOnlyList<Spiel> spiele, Func<Spiel, string> lokal)
+    {
+        ArgumentException.ThrowIfNullOrEmpty(pfad);
+        ArgumentNullException.ThrowIfNull(spiele);
+        bool halbrunde = Optionen.Rundenplanung == Rundenplanung.Halbrunde;
+        DateTime beginn = (Staffel.Beginn ?? DateOnly.FromDateTime(DelphiKompatibel.DelphiNull)).ToDateTime(TimeOnly.MinValue);
+        DateTime rueckrunde = (Staffel.Rueckrundenbeginn ?? DateOnly.FromDateTime(DelphiKompatibel.DelphiNull)).ToDateTime(TimeOnly.MinValue);
+        var optionen = new CsvExportOptionen(beginn, rueckrunde, halbrunde, Rundenpruefung.Erzeugen(Staffel, Optionen));
+        ClickTtCsvExport.Schreiben(
+            pfad,
+            spiele.Select(s => new CsvSpiel(s.Zeitpunkt, s.Heim, s.Gast, lokal(s))),
+            Staffel.Mannschaften.Select(m => new CsvMannschaft(m.Name, m.VereinsId, m.Id)),
+            optionen);
     }
 }

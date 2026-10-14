@@ -24,7 +24,7 @@ namespace AndiGenerator.Presentation;
 /// Hauptfenster: geöffnete Staffel, Steuerung der Generierung, Statuszeile und die Ansichten im Andock-Layout
 /// (MIGRATIONSPLAN E15). Mehrere Ansichten können gleichzeitig sichtbar sein, jede mit eigener Planquelle.
 /// </summary>
-public sealed class HauptfensterViewModel : ObservableObject, IDisposable
+public sealed partial class HauptfensterViewModel : ObservableObject, IDisposable
 {
     /// <summary>Dateiname der Anleitung neben dem Programm.</summary>
     public const string Anleitungsdatei = "Anleitung.pdf";
@@ -37,6 +37,9 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
     private static readonly CultureInfo Deutsch = CultureInfo.GetCultureInfo("de-DE");
 
     private static readonly Dateifilter PlanDateien = new("click-TT- und Plandateien", ["*.xml"]);
+
+    /// <summary>Beim Öffnen auch die beiden weiteren Exporte aus click-TT: Mannschaftsmeldung (CSV) und Terminwünsche (PDF).</summary>
+    private static readonly Dateifilter ClickTtDateien = new("click-TT-Dateien (XML, Mannschaftsmeldung, Terminwünsche)", ["*.xml", "*.csv", "*.pdf"]);
 
     private readonly IOberflaeche oberflaeche;
     private readonly Optimierungsdienst dienst;
@@ -134,6 +137,11 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
                 nachbarterminAnsicht = null;
             }
 
+            if (ReferenceEquals(e.Dockable, kompaktAnsicht))
+            {
+                kompaktAnsicht = null;
+            }
+
             if (ReferenceEquals(e.Dockable, maschinenraumAnsicht))
             {
                 maschinenraumAnsicht = null;
@@ -152,7 +160,10 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         OeffnenCommand = new AsyncRelayCommand(OeffnenAsync, () => !ZeigtEinrichtung);
         NeuCommand = new AsyncRelayCommand(NeueDateiAsync, () => !ZeigtEinrichtung);
         SchliessenCommand = new AsyncRelayCommand(SchliessenAsync, () => IstGeoeffnet);
-        GenerierungCommand = new AsyncRelayCommand(GenerierungUmschaltenAsync, () => IstGeoeffnet);
+
+        // Mehrfach gleichzeitig: Während die Planung der Kompaktspieltage (vom selben Knopf gestartet) noch läuft, muss der
+        // Knopf für Pause und Fortsetzen bedienbar bleiben.
+        GenerierungCommand = new AsyncRelayCommand(GenerierungUmschaltenAsync, () => IstGeoeffnet && !(KompaktMeldungenBearbeiten && !KompaktRechnet), AsyncRelayCommandOptions.AllowConcurrentExecutions);
         KostenoptimierungCommand = new RelayCommand(() => VerfahrenWaehlen(false), () => IstGeoeffnet);
         AutomodusCommand = new RelayCommand(() => VerfahrenWaehlen(true), () => IstGeoeffnet);
         ZuletztOeffnenCommand = new AsyncRelayCommand<string>(ZuletztOeffnenAsync, _ => !ZeigtEinrichtung);
@@ -162,7 +173,7 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         ZoomZuruecksetzenCommand = new RelayCommand(() => ZoombareAnsicht()?.Zoom.Zuruecksetzen());
         StartenCommand = new AsyncRelayCommand(StartenAsync, () => IstGeoeffnet);
         PauseCommand = new RelayCommand(PauseUmschalten, () => Laeuft);
-        StoppenCommand = new RelayCommand(Stoppen, () => Laeuft);
+        StoppenCommand = new RelayCommand(Stoppen, () => Laeuft || KompaktRechnet);
         PlanMerkenCommand = new AsyncRelayCommand(PlanMerkenAsync, () => laufenderStand is not null);
         PlanLoeschenCommand = new AsyncRelayCommand(
             () => startplan.Quelle is PlanQuelle quelle ? GemerktenPlanEntfernenAsync(quelle) : Task.CompletedTask,
@@ -291,19 +302,25 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
     /// </summary>
     public string GenerierungText => (Laeuft, Pausiert) switch
     {
+        (false, _) when KompaktRechnet && KompaktPausiert => "Fortsetzen (gezeigt werden die bisher besten Pläne)",
+        (false, _) when KompaktRechnet => "Anhalten und die bisher besten Pläne zeigen",
+        (false, _) when KompaktAktiv => "Kompaktspieltage planen: Varianten berechnen (etwa 10 Sekunden)",
         (false, _) => "Start",
         (true, true) => "Fortsetzen",
         _ => "Pausieren",
     };
 
-    /// <summary>Holt einen Wert, der angibt, ob der Hauptknopf das Play-Symbol zeigt (vor dem Start und in der Pause).</summary>
-    public bool ZeigtStart => !ZeigtPause;
+    /// <summary>Holt einen Wert, der angibt, ob der Hauptknopf das Play-Symbol zeigt (vor dem Start).</summary>
+    public bool ZeigtStart => !Laeuft && !KompaktRechnet;
+
+    /// <summary>Holt einen Wert, der angibt, ob der Hauptknopf das Symbol „Fortsetzen“ (Strich und Play) zeigt (in der Pause).</summary>
+    public bool ZeigtFortsetzen => (Laeuft && Pausiert) || (KompaktRechnet && KompaktPausiert);
 
     /// <summary>Holt einen Wert, der angibt, ob der Hauptknopf das Pause-Symbol zeigt (Generierung läuft).</summary>
-    public bool ZeigtPause => Laeuft && !Pausiert;
+    public bool ZeigtPause => (Laeuft && !Pausiert) || (KompaktRechnet && !KompaktPausiert);
 
     /// <summary>Holt einen Wert, der angibt, ob rechts daneben „Stopp“ steht (Generierung läuft oder ruht; sonst „Schließen“).</summary>
-    public bool ZeigtStopp => Laeuft;
+    public bool ZeigtStopp => Laeuft || KompaktRechnet;
 
     /// <summary>
     /// Holt einen Wert, der angibt, ob „Start mit“ gewählt werden kann: nur vor dem Start. Eine laufende oder angehaltene
@@ -847,8 +864,13 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         string plan = string.Empty;
         if (auswahl.Quelle is PlanQuelle quelle && PlanFuer(quelle) is Planstand stand)
         {
+            if (auswahl.Kompaktspieltage)
+            {
+                abschnitte.AddRange(KompaktDruckabschnitte(s, stand));
+            }
+
             abschnitte.AddRange(PlanAbschnitte(s, stand, auswahl));
-            plan = quelle.Name;
+            plan = auswahl.IstKompakt ? auswahl.Planname : quelle.Name;
         }
 
         return new Druckdokument(s.Staffel.Name, plan, DateTime.Now, abschnitte);
@@ -899,6 +921,13 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
 
         gemerkteStaende.Remove(eintrag.Pfad);
         QuellenNeuAufbauen();
+    }
+
+    /// <summary>Ob zwei Pläne dieselben Begegnungen an denselben Tagen haben, gleich in welcher Reihenfolge.</summary>
+    private static bool GleicheBegegnungen(IReadOnlyList<Spiel> a, IReadOnlyList<Spiel> b)
+    {
+        static string Schluessel(Spiel s) => string.Create(CultureInfo.InvariantCulture, $"{s.Zeitpunkt:yyyy-MM-dd}|{s.Heim}|{s.Gast}");
+        return a.Count == b.Count && a.Select(Schluessel).Order(StringComparer.Ordinal).SequenceEqual(b.Select(Schluessel).Order(StringComparer.Ordinal), StringComparer.Ordinal);
     }
 
     /// <summary>Die Einteilung als Aufzählung für die Einrichtung: je Stufe eine Überschrift, darunter die Kriterien mit Nummer.</summary>
@@ -992,6 +1021,7 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         DiagrammAnsichtViewModel => "Diagramme",
         TerminwunschAnsichtViewModel => "Terminwuensche",
         NachbarterminAnsichtViewModel => "Nachbarn",
+        KompaktspieltageAnsichtViewModel => "Kompakt",
         OptionenAnsichtViewModel => "Einstellungen",
         _ => null,
     };
@@ -1042,13 +1072,97 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
 
     private string NaechsteId() => "Ansicht" + (naechsteAnsicht++).ToString(CultureInfo.InvariantCulture);
 
+    /// <summary>
+    /// Öffnen: die XML-Datei der Staffel, auf Wunsch zusammen mit Mannschaftsmeldung (CSV) und Terminwünschen (PDF) aus
+    /// click-TT (Peter, 14.10.2026). Passen sie zur Staffel, werden sie gleich übernommen und der Punkt „Daten aus click-TT
+    /// ergänzen“ der Einrichtung ist erledigt.
+    /// </summary>
     private async Task OeffnenAsync()
     {
-        string? pfad = await oberflaeche.DateiOeffnenAsync("Staffel öffnen", [PlanDateien]);
-        if (pfad is not null)
+        const string Titeltext = "Staffel öffnen";
+        IReadOnlyList<string> pfade = await oberflaeche.DateienOeffnenAsync(Titeltext, [ClickTtDateien, PlanDateien]);
+        if (pfade.Count == 0)
         {
-            await StaffelOeffnenAsync(pfad);
+            return;
         }
+
+        List<string> Mit(string endung) => pfade.Where(p => string.Equals(Path.GetExtension(p), endung, StringComparison.OrdinalIgnoreCase)).ToList();
+        List<string> xml = Mit(".xml");
+        List<string> csv = Mit(".csv");
+        List<string> pdf = Mit(".pdf");
+        string? problem = (xml.Count, csv.Count, pdf.Count, pfade.Count - xml.Count - csv.Count - pdf.Count) switch
+        {
+            (0, _, _, _) => "Bitte die XML-Datei der Staffel mit auswählen (Terminmeldung für Meinl-Generator).",
+            (> 1, _, _, _) => "Bitte nur eine XML-Datei auswählen – je Staffel eine.",
+            (_, > 1, _, _) => "Bitte höchstens eine Mannschaftsmeldung (CSV) auswählen.",
+            (_, _, > 1, _) => "Bitte höchstens einen Bericht „Terminwünsche“ (PDF) auswählen.",
+            (_, _, _, > 0) => "Ausgewählt werden können nur XML-, CSV- und PDF-Dateien aus click-TT.",
+            _ => null,
+        };
+        if (problem is not null)
+        {
+            await oberflaeche.MeldenAsync(Titeltext, problem);
+            return;
+        }
+
+        await StaffelOeffnenAsync(xml[0], csv.FirstOrDefault(), pdf.FirstOrDefault());
+    }
+
+    /// <summary>
+    /// Übernimmt die beim Öffnen mit ausgewählten Exporte aus click-TT – jeden nur, wenn er zur Staffel passt, d. h. jede
+    /// Mannschaft der Staffel darin vorkommt. Wie auf der Seite „Daten aus click-TT“ der Einrichtung (dort mit „Auswahl
+    /// übernehmen“), die Mannschaftsmeldung auch als Setzliste.
+    /// </summary>
+    /// <returns>Je Datei, die nicht passte oder nicht gelesen werden konnte, ein Hinweis; leer, wenn alles übernommen ist.</returns>
+    private async Task<List<string>> ZusatzdateienUebernehmenAsync(Plansitzung s, string? csv, string? pdf)
+    {
+        static string? Hinweis(ZusatzdatenSeiteViewModel seite, string datei, string was, IReadOnlyList<string> fehlend)
+        {
+            if (seite.HatFehler)
+            {
+                return $"{datei}: {seite.Fehler}";
+            }
+
+            return fehlend.Count > 0 ? $"{datei} passt nicht zu dieser Staffel – {was}: {string.Join(", ", fehlend)}." : null;
+        }
+
+        var hinweise = new List<string>();
+        if (pdf is not null)
+        {
+            Datenbearbeitung bearbeitung = s.DatenBearbeiten();
+            var seite = new ZusatzdatenSeiteViewModel(bearbeitung, oberflaeche);
+            seite.TerminwuenscheLaden(pdf);
+            string datei = $"Bericht „Terminwünsche“ ({Path.GetFileName(pdf)})";
+            string? hinweis = Hinweis(seite, datei, "nicht darin", seite.NichtImBericht());
+            hinweise.AddRange(hinweis is null ? await ZusatzseiteUebernehmenAsync(s, bearbeitung, seite, datei) : [hinweis]);
+        }
+
+        if (csv is not null)
+        {
+            Datenbearbeitung bearbeitung = s.DatenBearbeiten();
+            var seite = new ZusatzdatenSeiteViewModel(bearbeitung, oberflaeche);
+            seite.AufstellungenLaden(csv);
+            string datei = $"Mannschaftsmeldung ({Path.GetFileName(csv)})";
+            string? hinweis = Hinweis(seite, datei, "ohne Aufstellung", seite.OhneAufstellung);
+            hinweise.AddRange(hinweis is null ? await ZusatzseiteUebernehmenAsync(s, bearbeitung, seite, datei) : [hinweis]);
+        }
+
+        return hinweise;
+    }
+
+    /// <summary>Speichert eine Seite „Daten aus click-TT“ wie mit „Auswahl übernehmen“.</summary>
+    /// <returns>Leer, wenn gespeichert; sonst ein Hinweis.</returns>
+    private async Task<List<string>> ZusatzseiteUebernehmenAsync(Plansitzung s, Datenbearbeitung bearbeitung, ZusatzdatenSeiteViewModel seite, string datei)
+    {
+        var dialog = new DatenDialogViewModel(bearbeitung, [seite]);
+        if (!dialog.Bestaetigen() || !await UebernehmenAsync(s, bearbeitung))
+        {
+            return [$"{datei} konnte nicht übernommen werden."];
+        }
+
+        KopfAktualisieren(s);
+        NachAenderung(s);
+        return [];
     }
 
     /// <summary>
@@ -1113,11 +1227,12 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         Stoppen();
         Volatile.Write(ref sitzung, null);
         laufenderStand = null;
+        KompaktZuruecksetzen();
         clickTtStand = null;
         gemerkteStaende.Clear();
         Einrichtung = null;
         var offen = new List<IDockable>(ansichten);
-        offen.AddRange(new IDockable?[] { optionenAnsicht, terminwunschAnsicht, nachbarterminAnsicht, maschinenraumAnsicht, verlaufAnsicht }.OfType<IDockable>());
+        offen.AddRange(new IDockable?[] { optionenAnsicht, terminwunschAnsicht, nachbarterminAnsicht, kompaktAnsicht, maschinenraumAnsicht, verlaufAnsicht }.OfType<IDockable>());
         foreach (IDockable ansicht in offen)
         {
             fabrik.CloseDockable(ansicht);
@@ -1127,6 +1242,7 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         optionenAnsicht = null;
         terminwunschAnsicht = null;
         nachbarterminAnsicht = null;
+        kompaktAnsicht = null;
         maschinenraumAnsicht = null;
         verlaufAnsicht = null;
         AnsichtOeffnen(new KostenAnsichtViewModel(this, NaechsteId()));
@@ -1140,6 +1256,7 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         OnPropertyChanged(nameof(ZeigtArbeitsbereich));
         OnPropertyChanged(nameof(AktiveAnsicht));
         OnPropertyChanged(nameof(StartplanWaehlbar));
+        KompaktAktualisieren();
         StartenCommand.NotifyCanExecuteChanged();
         GenerierungCommand.NotifyCanExecuteChanged();
         KostenoptimierungCommand.NotifyCanExecuteChanged();
@@ -1157,7 +1274,7 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         AlleAnsichtenAktualisieren();
     }
 
-    private async Task<bool> StaffelOeffnenAsync(string pfad)
+    private async Task<bool> StaffelOeffnenAsync(string pfad, string? mannschaftsmeldung = null, string? terminwuensche = null)
     {
         if (!await PlanSichernAsync("Eine andere Staffel wird geöffnet."))
         {
@@ -1181,6 +1298,7 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         Stoppen();
         Volatile.Write(ref sitzung, neu);
         laufenderStand = null;
+        KompaktZuruecksetzen();
         clickTtStand = null;
         gemerkteStaende.Clear();
         KopfAktualisieren(neu);
@@ -1206,7 +1324,29 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         optionenAnsicht?.Laden();
         terminwunschAnsicht?.Laden();
         nachbarterminAnsicht?.Laden();
+        KompaktAktualisieren();
+
+        // Mit ausgewählte Exporte aus click-TT gleich übernehmen; was nicht passt, bleibt in der Einrichtung offen.
+        bool zusatz = mannschaftsmeldung is not null || terminwuensche is not null;
+        List<string> hinweise = zusatz ? await ZusatzdateienUebernehmenAsync(neu, mannschaftsmeldung, terminwuensche) : [];
         Einrichtung = EinrichtungErstellen(neu);
+        if (hinweise.Count > 0)
+        {
+            string text = string.Join(Environment.NewLine, hinweise) + " Bitte die passende Datei unter „Daten aus click-TT ergänzen“ laden.";
+            if (Einrichtung is not null)
+            {
+                Einrichtung.Meldung = text;
+            }
+            else
+            {
+                await oberflaeche.MeldenAsync("Daten aus click-TT", text);
+            }
+        }
+        else if (zusatz)
+        {
+            Statuszeile += " Daten aus click-TT übernommen.";
+        }
+
         return true;
     }
 
@@ -1224,9 +1364,14 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         // Als erster Punkt weitere Exporte aus click-TT (nicht im Original); schon übernommen: als erledigt markiert.
         // Erledigt erst, wenn Mannschaftsmeldung und Terminwünsche übernommen sind – auch über mehrere Sitzungen.
         static bool BeideGeladen(Datenbearbeitung d) => d.MannschaftsmeldungVermerk.Length > 0 && d.TerminwunschVermerk.Length > 0;
+
+        // Für Kompaktspieltage ist der Bericht „Terminwünsche“ Pflicht: ohne Hallenadressen keine Karte und keine Entfernungen.
+        bool kompakt = neu.IstClickTtDatei && Kompaktplanung.InFrage(neu.Staffel, neu.Optionen.Rundenplanung, false);
         var zusatzschritt = new Einrichtungsschritt(1, "Daten aus click-TT ergänzen", ZusatzdatenSeiteViewModel.Einrichtungstext, [], [])
         {
             IstVollstaendig = () => BeideGeladen(neu.DatenBearbeiten()),
+            IstPflichtErfuellt = kompakt ? () => neu.DatenBearbeiten().TerminwunschVermerk.Length > 0 : null,
+            Pflichthinweis = "Für Kompaktspieltage wird der Bericht „Terminwünsche“ (PDF) gebraucht: Hallenadressen für Karte und Entfernungen, Bemerkungen der Vereine. Bitte zuerst laden.",
         };
         if (BeideGeladen(neu.DatenBearbeiten()))
         {
@@ -1271,17 +1416,14 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         Einrichtungsschritt? rundenschritt = null;
         if (vorschlag != Rundenvorschlag.Keiner)
         {
-            bool halb = vorschlag == Rundenvorschlag.Halbrunde;
-            rundenschritt = new Einrichtungsschritt(
-                schritte.Count + 1,
-                "Rundenplanung",
-                halb ? "Die Runde ist kürzer als 6 Monate. Welche Spiele sollen generiert werden?" : RueckrundenFrage(neu.Staffel.Rueckrundenbeginn),
-                [],
-                [
-                    halb ? new Einrichtungsoption("Nur eine Halbrunde", "Vorschlag für kurze Runden") : new Einrichtungsoption("Nur die Rückrunde", "Vorschlag – die Vorrunde bleibt, wie sie ist"),
-                    new Einrichtungsoption("Die ganze Runde", "Vor- und Rückrunde planen"),
-                ]);
+            rundenschritt = RundenschrittErstellen(neu, schritte.Count + 1, vorschlag);
             schritte.Add(rundenschritt);
+        }
+
+        Einrichtungsschritt? kompaktschritt = KompaktschrittErstellen(neu, schritte.Count + 1, vorschlag);
+        if (kompaktschritt is not null)
+        {
+            schritte.Add(kompaktschritt);
         }
 
         if (neu.ErsterStart)
@@ -1295,7 +1437,9 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
             : new EinrichtungViewModel(
                 neu.Staffel.Name + " einrichten",
                 schritte,
-                schritt => EinrichtungsschrittUebernehmenAsync(neu, schritt, stufenschritt, rundenschritt, vorschlag),
+                schritt => ReferenceEquals(schritt, kompaktschritt)
+                    ? KompaktschrittUebernehmenAsync(neu, schritt)
+                    : EinrichtungsschrittUebernehmenAsync(neu, schritt, stufenschritt, rundenschritt, vorschlag),
                 schritt => ReferenceEquals(schritt, zusatzschritt) ? ZusatzseiteErzeugen(neu) : SeiteErzeugen(neu, schritt),
                 EinrichtungAbschliessen,
                 SchliessenAsync);
@@ -1406,7 +1550,7 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         }
         catch (Exception fehler) when (fehler is IOException or UnauthorizedAccessException)
         {
-            await oberflaeche.MeldenAsync("Rundenplanung", fehler.Message);
+            await oberflaeche.MeldenAsync(Rundentitel, fehler.Message);
             return false;
         }
     }
@@ -1471,7 +1615,15 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
     /// <summary>Hauptknopf: startet eine neue Generierung bzw. hält die laufende an und setzt sie fort.</summary>
     private async Task GenerierungUmschaltenAsync()
     {
-        if (Laeuft)
+        if (KompaktRechnet)
+        {
+            await KompaktPauseUmschaltenAsync();
+        }
+        else if (KompaktAktiv && !Laeuft)
+        {
+            await KompaktPlanenAsync();
+        }
+        else if (Laeuft)
         {
             PauseUmschalten();
         }
@@ -1565,6 +1717,7 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         OnPropertyChanged(nameof(GenerierungText));
         OnPropertyChanged(nameof(ZeigtPause));
         OnPropertyChanged(nameof(ZeigtStart));
+        OnPropertyChanged(nameof(ZeigtFortsetzen));
         OnPropertyChanged(nameof(ZeigtStopp));
         OnPropertyChanged(nameof(StartplanWaehlbar));
         PlanLoeschenAktualisieren();
@@ -1665,7 +1818,17 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
             return true;
         }
 
-        var vergleich = new Planvergleich(anlass, aktuell.Bewertung, gesichert.Bewertung, Einteilung, eintrag.Geaendert);
+        // Dieselben Begegnungen an denselben Tagen (nur anders gespeichert oder sortiert): nichts zu vergleichen (Peter, 13.10.2026).
+        if (GleicheBegegnungen(aktuell.Spiele, gesichert.Spiele))
+        {
+            sicherungEntschieden = aktuell.Spiele;
+            await oberflaeche.MeldenAsync("Plan sichern", $"{anlass} Der aktuelle Plan ist mit dem gesicherten identisch; es ist nichts zu sichern.");
+            return true;
+        }
+
+        Planvergleich vergleich = KompaktAktiv
+            ? KompaktVergleich(s, anlass, aktuell.Spiele, gesichert.Spiele, eintrag.Geaendert)
+            : new Planvergleich(anlass, aktuell.Bewertung, gesichert.Bewertung, Einteilung, eintrag.Geaendert);
         switch (await oberflaeche.SicherungAbfragenAsync(vergleich))
         {
             case Sicherungswahl.Ueberschreiben:
@@ -1704,6 +1867,12 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
 
     private void Stoppen()
     {
+        if (KompaktRechnet)
+        {
+            KompaktStoppen();
+            return;
+        }
+
         dienst.Stoppen();
         Anzeige.KerneAnhalten();
         maschinenraumAnsicht?.Uebernehmen(Optimierungsstand.Leer);
@@ -1747,10 +1916,17 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
             return;
         }
 
-        IReadOnlyList<string> harteFehler = s.HarteFehler(stand.Spiele);
-        if (harteFehler.Count > 0)
+        // Kompaktspieltage finden nicht an den Heimterminen der Heimmannschaft statt; die normale Prüfung hielte fast jedes
+        // Spiel für ungültig. Dort gelten stattdessen die Hinweise der Kompaktauswertung (wie in der Ansicht).
+        Kompaktauswertung? kompakt = KompaktAktiv
+            ? Kompaktplanung.SpieleAuswerten(s.Staffel, s.DatenBearbeiten(), s.Optionen.Rundenplanung, DateOnly.FromDateTime(DateTime.Today), stand.Spiele)
+            : null;
+        (string kopf, IReadOnlyList<string> befunde) = kompakt is not null
+            ? ("Der Kompaktplan hat Hinweise:", KompaktExportHinweise(kompakt))
+            : ("Der Plan hat harte Fehler:", s.HarteFehler(stand.Spiele));
+        if (befunde.Count > 0)
         {
-            string frage = "Der Plan hat harte Fehler:" + Environment.NewLine + string.Join(Environment.NewLine, harteFehler)
+            string frage = kopf + Environment.NewLine + string.Join(Environment.NewLine, befunde)
                 + Environment.NewLine + Environment.NewLine + "Trotzdem exportieren?";
             if (!await oberflaeche.FragenAsync("CSV exportieren", frage))
             {
@@ -1766,7 +1942,14 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
 
         try
         {
-            s.CsvExportieren(pfad, stand.Spiele);
+            if (kompakt is not null)
+            {
+                s.KompaktCsvExportieren(pfad, stand.Spiele, kompakt.Spieltage);
+            }
+            else
+            {
+                s.CsvExportieren(pfad, stand.Spiele);
+            }
         }
         catch (Exception fehler) when (fehler is IOException or UnauthorizedAccessException)
         {
@@ -1781,7 +1964,7 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
             return;
         }
 
-        var auswahl = new DruckauswahlViewModel(Planquellen.Where(q => PlanFuer(q) is not null).ToList());
+        DruckauswahlViewModel auswahl = KompaktAktiv ? KompaktDruckauswahl() : new DruckauswahlViewModel(Planquellen.Where(q => PlanFuer(q) is not null).ToList());
         if (!await oberflaeche.DruckauswahlAsync(auswahl) || !auswahl.IstGueltig)
         {
             return;
@@ -1921,6 +2104,7 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         AlleAnsichtenAktualisieren();
         terminwunschAnsicht?.Laden();
         nachbarterminAnsicht?.Laden();
+        KompaktAktualisieren();
     }
 
     private void AnsichtOeffnen(AnsichtViewModel ansicht)
@@ -1979,6 +2163,8 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
 
         Planquellen = neu;
         StartplaeneAufbauen();
+        KompaktGespeichertAufbauen();
+        kompaktAnsicht?.Laden();
         foreach (AnsichtViewModel ansicht in ansichten)
         {
             ansicht.QuellenUebernehmen(neu);
@@ -2094,6 +2280,7 @@ public sealed class HauptfensterViewModel : ObservableObject, IDisposable
         DiagrammansichtCommand.NotifyCanExecuteChanged();
         TerminwunschansichtCommand.NotifyCanExecuteChanged();
         NachbarterminansichtCommand.NotifyCanExecuteChanged();
+        KompaktspieltageCommand.NotifyCanExecuteChanged();
         MaschinenraumCommand.NotifyCanExecuteChanged();
         VerlaufCommand.NotifyCanExecuteChanged();
     }

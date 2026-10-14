@@ -10,7 +10,8 @@ namespace AndiGenerator.Persistence.Plandaten;
 /// Gemerkter Plan („Plan merken“ im Hauptfenster, Original <c>TPlan.SaveScheduleToXml</c>/<c>LoadScheduleFromXml</c>):
 /// <c>&lt;andigenerator&gt;&lt;plan&gt;&lt;schedule&gt;&lt;game datetime hometeamname guestteamname/&gt;…</c>
 /// im Staffelordner (<see cref="Staffelordner"/>), eine Datei je Plan, Dateiname = kodierter Planname + <c>.xml</c>.
-/// Spiellokale werden nicht gespeichert.
+/// Ein Spiellokal steht nur dann als Attribut <c>location</c> am Spiel, wenn es eins gibt (nicht im Original, das es
+/// beim Laden übergeht); Pläne ohne Spiellokale sind byte-gleich mit denen des Originals.
 /// </summary>
 public static class GespeicherterPlanDatei
 {
@@ -38,6 +39,11 @@ public static class GespeicherterPlanDatei
             game.Setzen("datetime", DelphiKompatibel.DatumZeitSchreiben(spiel.Zeitpunkt));
             game.Setzen("hometeamname", spiel.Heim);
             game.Setzen("guestteamname", spiel.Gast);
+            string lokal = Spiellokale.Korrigieren(spiel.Spiellokal);
+            if (lokal.Length > 0)
+            {
+                game.Setzen("location", lokal);
+            }
         }
 
         return plan;
@@ -101,7 +107,7 @@ public static class GespeicherterPlanDatei
                 throw new PlanDatenFormatException($"Ungültiger Termin '{game.Lesen("datetime")}'.", ex);
             }
 
-            spiele.Add(new GespeichertesSpiel(zeitpunkt, game.Lesen("hometeamname"), game.Lesen("guestteamname")));
+            spiele.Add(new GespeichertesSpiel(zeitpunkt, game.Lesen("hometeamname"), game.Lesen("guestteamname"), Spiellokale.Korrigieren(game.Lesen("location"))));
         }
 
         return spiele;

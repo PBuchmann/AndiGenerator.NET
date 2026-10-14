@@ -59,6 +59,9 @@
       <StreamGeometry x:Key="SymbolAnleitung">M4 4h6a3 3 0 0 1 3 3v13a2 2 0 0 0-2-2H4z M20 4h-6a3 3 0 0 0-3 3v13a2 2 0 0 1 2-2h7z</StreamGeometry>
       <StreamGeometry x:Key="SymbolInfo">M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0 M12 11v5 M12 8h0.01</StreamGeometry>
       <StreamGeometry x:Key="SymbolStart">M7 4l13 8l-13 8z</StreamGeometry>
+      <StreamGeometry x:Key="SymbolKarte">M3 6l6-2l6 2l6-2v14l-6 2l-6-2l-6 2z M9 4v14 M15 6v14</StreamGeometry>
+      <!-- Fortsetzen: links ein Balken wie bei Pause, rechts das Play-Dreieck -->
+      <StreamGeometry x:Key="SymbolFortsetzen">M4 5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z M11 4l11 8l-11 8z</StreamGeometry>
       <StreamGeometry x:Key="SymbolPause">M7 4h2a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z M15 4h2a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z</StreamGeometry>
       <StreamGeometry x:Key="SymbolStopp">M7 5h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z</StreamGeometry>
       <StreamGeometry x:Key="SymbolMerken">M6 3h12v18l-6-4l-6 4z</StreamGeometry>

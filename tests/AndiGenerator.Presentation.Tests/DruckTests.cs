@@ -51,6 +51,32 @@ public sealed class DruckTests
     }
 
     [Fact]
+    public void Druckauswahl_im_Kompaktmodus_druckt_nur_die_Uebersicht_im_Hochformat()
+    {
+        var mit = DruckauswahlViewModel.Kompakt(PlanQuelle.Laufend, "Bestes Gesamtpaket");
+        Assert.True(mit.IstKompakt);
+        Assert.True(mit.HatPlan);
+        Assert.Same(PlanQuelle.Laufend, mit.Quelle);
+        Assert.Equal("Bestes Gesamtpaket", mit.Planname);
+        Assert.True(mit.Kompaktspieltage);
+        Assert.False(mit.Terminwuensche || mit.Nachbartermine || mit.Kosten || mit.Spielplan || mit.Mannschaftsplaene || mit.MannschaftsplaeneMitNachbarn || mit.Diagramme);
+        Assert.False(mit.Querformat);
+        Assert.True(mit.IstGueltig);
+        Assert.EndsWith("gewählt ist: Bestes Gesamtpaket.", mit.Kompakthinweis, StringComparison.Ordinal);
+
+        var ohne = DruckauswahlViewModel.Kompakt(null, string.Empty);
+        Assert.True(ohne.IstKompakt);
+        Assert.False(ohne.HatPlan);
+        Assert.False(ohne.IstGueltig);
+        Assert.StartsWith("Noch kein Plan", ohne.Kompakthinweis, StringComparison.Ordinal);
+
+        var normal = new DruckauswahlViewModel([PlanQuelle.ClickTt]);
+        Assert.False(normal.IstKompakt);
+        Assert.True(normal.Kosten);
+        Assert.False(normal.Kompaktspieltage);
+    }
+
+    [Fact]
     public void Text_wird_an_Wortgrenzen_umbrochen()
     {
         // Breite = Zeichen × 1 bei Größe 2.

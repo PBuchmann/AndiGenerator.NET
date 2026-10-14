@@ -25,10 +25,12 @@ public sealed class AnsichtenLocator : IDataTemplate
         MeldungenAnsichtViewModel => new MeldungenAnsicht(),
         MaschinenraumAnsichtViewModel => new MaschinenraumAnsicht(),
         VerlaufAnsichtViewModel => new VerlaufAnsicht(),
+        KompaktspieltageAnsichtViewModel => new KompaktspieltageAnsicht(),
         _ => null,
     };
 
     /// <inheritdoc/>
     public bool Match(object? data) => data is KostenAnsichtViewModel or TerminplanAnsichtViewModel or QualitaetAnsichtViewModel or OptionenAnsichtViewModel
-        or TerminwunschAnsichtViewModel or NachbarterminAnsichtViewModel or DiagrammAnsichtViewModel or MeldungenAnsichtViewModel or MaschinenraumAnsichtViewModel or VerlaufAnsichtViewModel;
+        or TerminwunschAnsichtViewModel or NachbarterminAnsichtViewModel or DiagrammAnsichtViewModel or MeldungenAnsichtViewModel or MaschinenraumAnsichtViewModel or VerlaufAnsichtViewModel
+        or KompaktspieltageAnsichtViewModel;
 }

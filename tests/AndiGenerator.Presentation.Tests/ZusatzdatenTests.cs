@@ -45,6 +45,28 @@ public sealed class ZusatzdatenTests : IDisposable
     }
 
     [Fact]
+    public async Task TTR_Werte_werden_gespeichert_in_der_Setzliste_gezeigt_und_ordnen_sie()
+    {
+        IReadOnlyList<string> namen = a.Bearbeitung.Setzliste().Reihenfolge;
+        string Zeilen(string name, params int[] ttr) =>
+            string.Concat(ttr.Select((t, i) => $"{name};{MannschaftsaufstellungenCsv.Nummer(name)};{i + 1};{t};\n"));
+        await File.WriteAllTextAsync(csv, Kopf + "\n" + Zeilen(namen[0], 1400, 1400, 1400, 1400) + Zeilen(namen[^1], 1650, 1650, 1650, 1650));
+        var seite = new ZusatzdatenSeiteViewModel(a.Bearbeitung, a.Oberflaeche);
+        seite.AufstellungenLaden(csv);
+        seite.AlsSetzliste = false;
+        seite.Speichern();
+        a.Sitzung.DatenUebernehmen(a.Bearbeitung);
+
+        var setzliste = new SetzlistenSeiteViewModel(a.Sitzung.DatenBearbeiten()) { Aktiv = true };
+
+        Assert.True(setzliste.HatStaerken);
+        Assert.Equal("Ø 1.400", setzliste.Zeilen.Single(z => z.Name == namen[0]).Staerke);
+        Assert.Equal(string.Empty, setzliste.Zeilen.Single(z => z.Name == namen[1]).Staerke);
+        setzliste.NachStaerkeCommand.Execute(null);
+        Assert.Equal([namen[^1], namen[0]], setzliste.Reihenfolge.Take(2));
+    }
+
+    [Fact]
     public void Ohne_Haken_bleibt_die_Setzliste_unveraendert()
     {
         Setzlistendaten vorher = a.Bearbeitung.Setzliste();
