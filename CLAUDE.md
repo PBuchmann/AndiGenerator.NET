@@ -7,8 +7,11 @@ Zu Beginn jeder Sitzung auch `Doku/PROJEKTWISSEN.md` lesen (Arbeitsweise, Vorlie
 
 ## Bauen und Testen
 - Vor dem Bauen prüfen, dass `AndiGenerator.NET.exe` nicht läuft (sonst schlägt der Build fehl) – ggf. Peter bitten, sie zu schließen.
-- Bauen und testen wie `bauen.cmd`: `dotnet build AndiGenerator.slnx -c Release -nologo -v:minimal`, dann
-  `dotnet test AndiGenerator.slnx -c Release --no-build -nologo --filter "Kategorie!=Messung"`.
+- Bauen wie `bauen.cmd`: `dotnet build AndiGenerator.slnx -c Release -nologo -v:minimal` (immer die ganze Solution).
+- Testen gezielt: Bei lokalen Änderungen nur die Tests, die betroffen sein können – betroffenes Testprojekt und
+  `--filter "FullyQualifiedName~Klasse1|FullyQualifiedName~Klasse2"` (z. B. Karte: `Kartenbau|Kompaktdruck`). Den vollen
+  Lauf (`dotnet test AndiGenerator.slnx -c Release --no-build -nologo --filter "Kategorie!=Messung"`, gut 2 Minuten, davon
+  fast alles Persistence.Tests) vor jedem Commit und wenn Peter danach fragt. Im Bericht sagen, was gelaufen ist.
 - StyleCop- und Sonar-Befunde sind Build-Fehler. Häufig: SA1515 (Leerzeile vor Kommentar), SA1513 (Leerzeile nach `}`),
   SA1636 (Dateikopf, siehe unten), SA1201/SA1202/SA1204 (Reihenfolge der Member), S3358 (keine verschachtelten
   Bedingungsausdrücke), S3267 (Schleifen mit Bedingung → LINQ), S1117/CS0136 (Namen verdecken), S2234 (Argumentreihenfolge),
