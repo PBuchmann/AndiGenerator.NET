@@ -200,7 +200,10 @@ internal sealed class Kompaktlauf(Kompaktmodell modell, Kompaktplanoptionen opti
                 return Abbruch.IsCancellationRequested || verstrichen > grenze;
             }
 
-            (Kompaktloesung? l, bool optimal) = optimierung.Suchen(auftrag, start, Math.Max(1, parallel), Aufhoeren);
+            // HiGHS bekommt die Zeit des Schritts mit Reserve als harte Grenze: Sie greift auch in Phasen ohne Rückfrage
+            // (Stopp, Fortschritt); die Reserve deckt kurze Pausen, in denen die Uhr des Lösers weiterläuft.
+            TimeSpan hart = grenze + TimeSpan.FromTicks(Math.Max(TimeSpan.FromSeconds(15).Ticks, grenze.Ticks / 2));
+            (Kompaktloesung? l, bool optimal) = optimierung.Suchen(auftrag, start, Math.Max(1, parallel), Aufhoeren, hart);
             Interlocked.Increment(ref schritt);
             if (l is null)
             {

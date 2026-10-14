@@ -2,6 +2,7 @@
 // SPDX-FileCopyrightText: 2026 Peter Buchmann
 // SPDX-License-Identifier: GPL-3.0-only
 
+using System.Diagnostics;
 using System.Globalization;
 
 namespace AndiGenerator.Engine.Turniere;
@@ -71,17 +72,20 @@ internal sealed class Kompaktoptimierung
     /// <param name="start">Ein bekannter Plan als Startpunkt, oder <c>null</c>.</param>
     /// <param name="parallel">Zahl paralleler Läufe.</param>
     /// <param name="aufhoeren">Wird während der Suche gefragt (darf für die Pause blockieren).</param>
+    /// <param name="zeitgrenze">Harte Zeitgrenze für den Löser (auch ohne Rückfrage), oder <c>null</c>.</param>
     /// <returns>Der Plan, oder <c>null</c>, wenn keiner gefunden wurde; und ob er beweisbar der beste ist.</returns>
-    public (Kompaktloesung? Loesung, bool Optimal) Suchen(Kompaktauftrag auftrag, Kompaktloesung? start, int parallel, Func<bool> aufhoeren)
+    public (Kompaktloesung? Loesung, bool Optimal) Suchen(Kompaktauftrag auftrag, Kompaktloesung? start, int parallel, Func<bool> aufhoeren, TimeSpan? zeitgrenze = null)
     {
         ArgumentNullException.ThrowIfNull(auftrag);
         ArgumentNullException.ThrowIfNull(aufhoeren);
+        var uhr = Stopwatch.StartNew();
+        TimeSpan? Rest() => zeitgrenze is TimeSpan g ? TimeSpan.FromTicks(Math.Max(TimeSpan.TicksPerSecond, (g - uhr.Elapsed).Ticks)) : null;
 
         // Erst nur Spieltage ohne Verstoß (kleineres Modell, meist reicht das), sonst auch mit Verstößen (10 Punkte je Verstoß).
-        (Kompaktloesung? loesung, bool optimal) = SuchenBis(auftrag, 0, start, parallel, aufhoeren);
+        (Kompaktloesung? loesung, bool optimal) = SuchenBis(auftrag, 0, start, parallel, aufhoeren, Rest());
         if (loesung is null && !aufhoeren())
         {
-            (loesung, optimal) = SuchenBis(auftrag, Kompaktmodell.MaxVerstoesseJeSpieltag, start, parallel, aufhoeren);
+            (loesung, optimal) = SuchenBis(auftrag, Kompaktmodell.MaxVerstoesseJeSpieltag, start, parallel, aufhoeren, Rest());
         }
 
         return (loesung, optimal);
@@ -90,7 +94,7 @@ internal sealed class Kompaktoptimierung
     private static string Block(Kompaktkandidat k) => string.Create(CultureInfo.InvariantCulture, $"{(int)k.Form}:{string.Join(',', k.Mannschaften)}");
 
     /// <summary>Sucht nur mit Spieltagen bis zu so vielen Verstößen, in mehreren Läufen parallel.</summary>
-    private (Kompaktloesung? Loesung, bool Optimal) SuchenBis(Kompaktauftrag auftrag, int verstoesse, Kompaktloesung? start, int parallel, Func<bool> aufhoeren)
+    private (Kompaktloesung? Loesung, bool Optimal) SuchenBis(Kompaktauftrag auftrag, int verstoesse, Kompaktloesung? start, int parallel, Func<bool> aufhoeren, TimeSpan? zeitgrenze)
     {
         (Ganzzahlmodell m, int[] spalteZuKandidat) = Aufbauen(auftrag, verstoesse);
         double[]? startwerte = start is null ? null : Startwerte(m, spalteZuKandidat, start, auftrag);
@@ -99,7 +103,7 @@ internal sealed class Kompaktoptimierung
         var laeufe = new (double[]? Werte, bool Optimal)[Math.Max(1, parallel)];
         Parallel.For(0, laeufe.Length, new ParallelOptions { MaxDegreeOfParallelism = laeufe.Length }, i =>
         {
-            laeufe[i] = loeser.Loesen(m, startwerte, i + 1, Aufhoeren);
+            laeufe[i] = loeser.Loesen(m, startwerte, i + 1, Aufhoeren, zeitgrenze);
             if (laeufe[i].Optimal)
             {
                 Interlocked.Exchange(ref bewiesen, 1);

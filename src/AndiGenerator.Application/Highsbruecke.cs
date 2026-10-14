@@ -14,7 +14,7 @@ public sealed class Highsbruecke : IGanzzahlloeser
     public static bool Verfuegbar => HighsLoeser.Verfuegbar;
 
     /// <inheritdoc/>
-    public (double[]? Werte, bool Optimal) Loesen(Ganzzahlmodell modell, double[]? start, int startwert, Func<bool> aufhoeren)
+    public (double[]? Werte, bool Optimal) Loesen(Ganzzahlmodell modell, double[]? start, int startwert, Func<bool> aufhoeren, TimeSpan? zeitgrenze = null)
     {
         ArgumentNullException.ThrowIfNull(modell);
         var problem = new Ganzzahlproblem(
@@ -25,6 +25,6 @@ public sealed class Highsbruecke : IGanzzahlloeser
             [.. modell.ZeilenAnfang],
             [.. modell.EintragSpalten],
             [.. modell.EintragWerte]);
-        return HighsLoeser.Loesen(problem, start, startwert, aufhoeren);
+        return HighsLoeser.Loesen(problem, start, startwert, aufhoeren, zeitgrenze);
     }
 }

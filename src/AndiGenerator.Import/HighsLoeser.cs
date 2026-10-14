@@ -33,6 +33,9 @@ public static class HighsLoeser
     /// <summary>Rückruf während der ganzzahligen Suche mit der Frage nach Abbruch (kCallbackMipInterrupt).</summary>
     private const int MipUnterbrechung = 6;
 
+    /// <summary>Ab so vielen Spalten ohne Vorverarbeitung (die üblichen Modelle haben 2.000 bis 4.000).</summary>
+    private const int GrossesModell = 10_000;
+
     private static int verfuegbar;
 
     [UnmanagedFunctionPointer(CallingConvention.Cdecl)]
@@ -83,11 +86,12 @@ public static class HighsLoeser
     /// Wird während der Suche (im Thread des Lösers) gefragt; <c>true</c> beendet sie mit der bis dahin besten Lösung.
     /// Darf blockieren (Pause).
     /// </param>
+    /// <param name="zeitgrenze">Harte Zeitgrenze für HiGHS (auch für Phasen ohne Rückruf), oder <c>null</c>.</param>
     /// <returns>
     /// Die Werte der Spalten (0 oder 1) der besten gefundenen Lösung, oder <c>null</c>, wenn keine gefunden wurde; und ob sie
     /// beweisbar die beste ist.
     /// </returns>
-    public static (double[]? Werte, bool Optimal) Loesen(Ganzzahlproblem problem, double[]? start, int startwert, Func<bool> aufhoeren)
+    public static (double[]? Werte, bool Optimal) Loesen(Ganzzahlproblem problem, double[]? start, int startwert, Func<bool> aufhoeren, TimeSpan? zeitgrenze = null)
     {
         ArgumentNullException.ThrowIfNull(problem);
         ArgumentNullException.ThrowIfNull(aufhoeren);
@@ -110,6 +114,21 @@ public static class HighsLoeser
         {
             SetzeSchalter(h, "output_flag", 0);
             SetzeZahl(h, "mip_heuristic_effort", Heuristik);
+
+            // Große Modelle (z. B. mit Verstößen, wenn Mannschaften keine Heimtermine haben) ohne Vorverarbeitung: Deren
+            // „Probing“ dauerte bei 25.000 Spalten rund 20 Minuten – ohne Rückruf, also ohne Fortschritt und ohne Abbruch.
+            // Ohne sie findet HiGHS in Sekunden erste Lösungen (Peter, 14.10.2026).
+            if (problem.Kosten.Length > GrossesModell)
+            {
+                SetzeText(h, "presolve", "off");
+            }
+
+            // Harte Zeitgrenze als Rückfallebene für Phasen ohne Rückruf.
+            if (zeitgrenze is TimeSpan grenze && grenze > TimeSpan.Zero)
+            {
+                SetzeZahl(h, "time_limit", grenze.TotalSeconds);
+            }
+
             SetzeGanzzahl(h, "random_seed", Math.Abs(startwert % 2_000_000_000));
             double unendlich = Unendlich(h);
             int n = problem.Kosten.Length;
@@ -199,6 +218,9 @@ public static class HighsLoeser
 
     [DllImport(Bibliothek, EntryPoint = "Highs_setDoubleOptionValue", CallingConvention = CallingConvention.Cdecl)]
     private static extern int SetzeZahl(IntPtr highs, [MarshalAs(UnmanagedType.LPUTF8Str)] string option, double wert);
+
+    [DllImport(Bibliothek, EntryPoint = "Highs_setStringOptionValue", CallingConvention = CallingConvention.Cdecl)]
+    private static extern int SetzeText(IntPtr highs, [MarshalAs(UnmanagedType.LPUTF8Str)] string option, [MarshalAs(UnmanagedType.LPUTF8Str)] string wert);
 
     [DllImport(Bibliothek, EntryPoint = "Highs_setIntOptionValue", CallingConvention = CallingConvention.Cdecl)]
     private static extern int SetzeGanzzahl(IntPtr highs, [MarshalAs(UnmanagedType.LPUTF8Str)] string option, int wert);

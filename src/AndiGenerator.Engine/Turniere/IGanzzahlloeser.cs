@@ -17,9 +17,10 @@ public interface IGanzzahlloeser
     /// <param name="aufhoeren">
     /// Wird während der Suche gefragt; <c>true</c> beendet sie mit der bis dahin besten Lösung. Darf blockieren (Pause).
     /// </param>
+    /// <param name="zeitgrenze">Harte Zeitgrenze, die auch ohne Rückfrage gilt, oder <c>null</c>.</param>
     /// <returns>
     /// Die Werte der Spalten der besten gefundenen Lösung, oder <c>null</c>, wenn keine gefunden wurde; und ob sie beweisbar
     /// die beste ist.
     /// </returns>
-    (double[]? Werte, bool Optimal) Loesen(Ganzzahlmodell modell, double[]? start, int startwert, Func<bool> aufhoeren);
+    (double[]? Werte, bool Optimal) Loesen(Ganzzahlmodell modell, double[]? start, int startwert, Func<bool> aufhoeren, TimeSpan? zeitgrenze = null);
 }
