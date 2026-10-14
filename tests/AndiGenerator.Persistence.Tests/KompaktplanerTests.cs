@@ -160,10 +160,10 @@ public class KompaktplanerTests
         Assert.All(ergebnis.Varianten.Where(v => v.Kennzahlen.Dreier == 0), v => Assert.True(kuerzeste.Kennzahlen.Km <= v.Kennzahlen.Km + 1e-6));
     }
 
-    [Fact]
+    [HighsFact]
     public void HiGHS_ist_verfuegbar() => Assert.True(Highsbruecke.Verfuegbar);
 
-    [Theory]
+    [HighsTheory]
     [InlineData(7)]
     [InlineData(8)]
     [InlineData(9)]
@@ -191,7 +191,7 @@ public class KompaktplanerTests
         }
     }
 
-    [Fact]
+    [HighsFact]
     public void Kuerzester_4er_Plan_wie_die_vollstaendige_Suche()
     {
         var modell = new Kompaktmodell(Aufgabe(9, []));
