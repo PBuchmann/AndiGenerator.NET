@@ -2,7 +2,7 @@
 
 Was sich von Version zu Version für Anwender ändert. Die Einzelheiten stehen in der [Anleitung](Doku/ANLEITUNG.md), die technische Geschichte im [Migrationsplan](Doku/MIGRATIONSPLAN.md).
 
-## Unveröffentlicht
+## 0.9.8 (14.10.2026)
 
 ### Neu
 
@@ -21,6 +21,7 @@ Was sich von Version zu Version für Anwender ändert. Die Einzelheiten stehen i
 
 ### Geändert
 
+- **Kompaktspieltage, Berechnung bei fehlenden Meldungen:** Lässt sich kein Plan ohne Verstöße finden (z. B. weil Mannschaften nichts gemeldet haben), wird das Modell sehr groß; dessen Vorverarbeitung in HiGHS dauerte bis zu 20 Minuten – ohne Fortschritt, und Stopp wirkte nicht. Große Modelle rechnet HiGHS jetzt ohne diese Vorverarbeitung, und jeder Schritt hat eine harte Zeitgrenze: Der Fortschritt läuft, Stopp greift nach wenigen Sekunden, die Pläne liegen nach wenigen Minuten vor.
 - **Einrichtung einer Kompaktklasse:** „Mit Kompaktspieltagen planen“ ist vorgewählt und gilt auch beim Abschließen ohne weiteren Klick (bisher war die Kachel zwar markiert, übernommen wurde die Wahl aber nur nach einem Klick).
 - **Kompaktspieltage, volle Mannschaftsnamen:** Raster, Karte, km-Liste, Spieltage, Erläuterung und Druck zeigen den vollen Namen wie in click-TT (ab der zweiten Mannschaft mit Nummer) statt eines abgeleiteten Kurznamens, der weder Ort noch eindeutig war (z. B. „Grün-Weiss Kirn“, „Horner“, zwei Mannschaften eines Vereins gleich benannt). Die Spaltenköpfe des Rasters wachsen mit dem längsten Namen; Namen über 15 Zeichen stehen dort in zwei Zeilen (geteilt nach „/“, „-“ oder an einem Leerzeichen, z. B. „TTG Mündersbach/“ – „Höchstenbach“), und im Ausdruck stehen Raster und Karte je Mannschaft mittig auf der Seite; die Spieltagskarten werden so breit wie die längste Begegnung (bis 560 Bildpunkte; Längeres bricht um, statt mit „…“ abgeschnitten zu werden). Auf der Karte steht ein Name, der neben dem Punkt keinen Platz hat, weiter weg mit Hinweislinie; reicht auch das nicht, steht am Punkt eine Nummer und der Name in einer Legende. Die Karte zoomt auch auf eine Klasse innerhalb einer Stadt (bisher mindestens rund 80 × 90 km, nun rund 25 × 30 km).
 - **Übersicht für die Vereine, Seite je Mannschaft:** luftiger gesetzt – mehr Abstand zur Karte, je Spieltag eine Überschrift (Datum, Form, Heim bzw. bei wem), darunter die Halle (auch beim Heimspieltag) und je Spiel eine Zeile mit Beginn und Gegner, mit Abstand zwischen den Spieltagen. Die Karte ist höchstens 340 Punkte hoch, damit auch bei Stadtklassen alles auf eine Seite passt.

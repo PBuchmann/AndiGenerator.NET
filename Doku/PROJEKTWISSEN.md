@@ -1,7 +1,7 @@
 # Projektwissen für die Arbeit mit Claude
 
 Ergänzt `CLAUDE.md` (Regeln) um das, was sich in der Zusammenarbeit zwischen Peter und Claude angesammelt hat: wie wir
-arbeiten, was Peter wichtig ist, wie die Kompaktspieltage gebaut sind und was offen ist. Stand: 14.10.2026 (Commit f3a2142).
+arbeiten, was Peter wichtig ist, wie die Kompaktspieltage gebaut sind und was offen ist. Stand: 14.10.2026 (Version 0.9.8).
 Entscheidungen mit Begründung stehen ausführlich im [MIGRATIONSPLAN](MIGRATIONSPLAN.md); Änderungen für Anwender im
 [CHANGELOG](../CHANGELOG.md).
 
@@ -67,11 +67,16 @@ Entscheidungen mit Begründung stehen ausführlich im [MIGRATIONSPLAN](MIGRATION
 - PDF neu: unter Windows `anleitung.cmd` (portables pandoc, Playwright für .NET mit Edge; Protokoll
   `anleitung-log.txt`), unter Linux pandoc + Node/Playwright – siehe `tools/anleitung/README.md`. Auf Peters Rechner
   gibt es weder pandoc noch Node noch WSL, deshalb der Windows-Weg.
-- Nach Änderungen an der Oberfläche: Bilder neu erzeugen, ansehen, dann PDF neu erzeugen.
+- Nach Änderungen an der Oberfläche: betroffene Bilder neu erzeugen und ansehen (die übrigen zurücksetzen, weil die
+  rechnenden Ansichten von Lauf zu Lauf leicht abweichen). Das PDF erst vor einem Pull Request neu erzeugen.
 
 ## Offene Punkte (Stand 14.10.2026)
 
-- Release 0.9.8 vorbereiten (CHANGELOG „Unveröffentlicht“ ist gefüllt).
+- Karte, zweiter Schritt: Punkte je Halle statt je Mannschaft, Fahrten zur tatsächlichen Halle des Spieltags (auch km),
+  Hinweis bzw. genauere Lage, wenn Hallen mit gleicher PLZ zusammenfallen (Hamburg: Ritterstraße/Richardstraße).
+- Kompaktspieltage: vor der Berechnung sagen, dass es ohne Verstöße nicht geht und warum (Mannschaften ohne Meldung
+  bzw. ohne Heimtermin) – vorgeschlagen, noch nicht entschieden. Fortschritt steht bei großen Modellen noch 20–40 s still,
+  bis HiGHS sich meldet.
 - Gewichte der Kompaktplanung einstellbar – erst auf Nachfrage (MIGRATIONSPLAN 12).
 - Idee: 6er-Spieltage (vier Mannschaften, jeder gegen jeden) bei gerader Mannschaftszahl (10/12) statt vieler
   Einzelbegegnungen – vorher klären, ob die Wettspielordnung drei Spiele am Tag erlaubt.

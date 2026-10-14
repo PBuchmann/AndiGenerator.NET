@@ -51,8 +51,12 @@ Zu Beginn jeder Sitzung auch `Doku/PROJEKTWISSEN.md` lesen (Arbeitsweise, Vorlie
 - Nicht pushen und keine Zugangsdaten eingeben – Peter pusht selbst (Visual Studio).
 
 ## Doku und Versionen
-- Jede sichtbare Änderung in `CHANGELOG.md` unter „Unveröffentlicht“ (aktuell Arbeit an 0.9.8; 0.9.7 ist veröffentlicht).
+- Jede sichtbare Änderung in `CHANGELOG.md` unter „Unveröffentlicht“ (aktuell Arbeit an 0.9.9; 0.9.8 ist veröffentlicht –
+  den Abschnitt „Unveröffentlicht“ bei der ersten Änderung wieder anlegen). Release: Abschnitt zu `## x.y.z (Datum)`,
+  PDF der Anleitung neu, Pull Request; nach dem Merge setzt Peter den Tag `vx.y.z` auf `main` (startet den Release-Workflow).
 - Anleitung: `Doku/ANLEITUNG.md`; Bilder mit `bildschirmfotos.cmd` (Test `Bildschirmfotos`), PDF siehe `tools/anleitung/README.md`.
+  `Doku/Anleitung.pdf` nur vor einem Pull Request neu erzeugen (`anleitung.cmd`), nicht bei jeder Änderung der Anleitung –
+  bis dahin darf das PDF hinter `ANLEITUNG.md` zurückliegen.
 - Entscheidungen und offene Punkte: `Doku/MIGRATIONSPLAN.md` (Kompaktspieltage: Abschnitt 12).
 - Signierung darf nichts kosten.
 
