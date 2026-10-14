@@ -1,0 +1,57 @@
+# Arbeitsregeln für Claude in diesem Repository
+
+AndiGenerator.NET – Portierung des AndiGenerator (Delphi) nach C#/.NET 10 mit Avalonia 12. Ansprechpartner: Peter
+(spricht Deutsch; Antworten, Code-Bezeichner, Kommentare und Doku auf Deutsch).
+
+Zu Beginn jeder Sitzung auch `Doku/PROJEKTWISSEN.md` lesen (Arbeitsweise, Vorlieben, Kompaktspieltage, offene Punkte).
+
+## Bauen und Testen
+- Vor dem Bauen prüfen, dass `AndiGenerator.NET.exe` nicht läuft (sonst schlägt der Build fehl) – ggf. Peter bitten, sie zu schließen.
+- Bauen und testen wie `bauen.cmd`: `dotnet build AndiGenerator.slnx -c Release -nologo -v:minimal`, dann
+  `dotnet test AndiGenerator.slnx -c Release --no-build -nologo --filter "Kategorie!=Messung"`.
+- StyleCop- und Sonar-Befunde sind Build-Fehler. Häufig: SA1515 (Leerzeile vor Kommentar), SA1513 (Leerzeile nach `}`),
+  SA1636 (Dateikopf, siehe unten), SA1201/SA1202/SA1204 (Reihenfolge der Member), S3358 (keine verschachtelten
+  Bedingungsausdrücke), S3267 (Schleifen mit Bedingung → LINQ), S1117/CS0136 (Namen verdecken), S2234 (Argumentreihenfolge),
+  S3604 (überflüssiger Initialisierer). Erst melden, wenn der Build grün ist.
+- Zeitabhängige Tests (HiGHS, Kompaktplaner) nicht durch lange Zeitgrenzen „reparieren“, wenn die Suche dann nicht von selbst
+  früher endet – sonst dauert der Testlauf Minuten.
+- Keine automatischen Leistungsmessungen mit dem Original-AndiGenerator.
+
+## Dateikopf (jede .cs-Datei)
+```
+// SPDX-FileCopyrightText: 2017 Andreas Hofmann
+// SPDX-FileCopyrightText: 2026 Peter Buchmann
+// SPDX-License-Identifier: GPL-3.0-only
+```
+
+## Architektur
+- Schichten: Domain, Engine (ohne Paketabhängigkeiten – Architekturtest), Import, Persistence, Application, Rendering,
+  Presentation (ViewModels ohne Avalonia), UI (Avalonia, Skia, Velopack).
+- HiGHS: Schnittstelle `IGanzzahlloeser` in der Engine, `HighsLoeser` in Import, `Highsbruecke` in Application.
+- Karte: `Kartenzeichner` (Presentation, auf `IZeichenflaeche`) zeichnet für Ansicht und PDF.
+
+## Daten und Datenschutz
+- `Referenz/` ist privat (gitignored), echte Daten mit Klarnamen. Nie ins Repository, nie in Commits.
+- `testdaten/` ist anonymisiert; neue Testdaten nur anonymisiert oder erfunden (z. B. `testdaten/kompakt`).
+- PDFs/CSVs mit personenbezogenen Daten bleiben in `Referenz/`.
+- Die Originale in `%LOCALAPPDATA%\Andi-Generator` nie verändern (nur lesen/kopieren).
+- Keine Windows-Sicherheitseinstellungen ändern.
+
+## Git
+- Gearbeitet wird auf Feature-Branches; Peter führt sie per Pull Request nach `main` zusammen.
+- Commits nur nach grünem Build, möglichst klein und thematisch.
+- Autor: `Peter Buchmann <PBuchmann@users.noreply.github.com>`.
+- Commit-Nachricht auf Deutsch, am Ende:
+  ```
+  Co-Authored-By: Claude <noreply@anthropic.com>
+  ```
+- Nicht pushen und keine Zugangsdaten eingeben – Peter pusht selbst (Visual Studio).
+
+## Doku und Versionen
+- Jede sichtbare Änderung in `CHANGELOG.md` unter „Unveröffentlicht“ (aktuell Arbeit an 0.9.8; 0.9.7 ist veröffentlicht).
+- Anleitung: `Doku/ANLEITUNG.md`; Bilder mit `bildschirmfotos.cmd` (Test `Bildschirmfotos`), PDF siehe `tools/anleitung/README.md`.
+- Entscheidungen und offene Punkte: `Doku/MIGRATIONSPLAN.md` (Kompaktspieltage: Abschnitt 12).
+- Signierung darf nichts kosten.
+
+## Oberfläche
+- Explorer (Windows) nur per Klick bedienen lassen, keine Skripte für Dateiverwaltung an Peter.
