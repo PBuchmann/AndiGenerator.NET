@@ -401,7 +401,12 @@ public sealed partial class HauptfensterViewModel
         IReadOnlyList<Einrichtungsoption> optionen = eingeschaltet
             ? [new Einrichtungsoption("Kompaktspieltage beibehalten", "wird danach nicht mehr gefragt"), new Einrichtungsoption("Kompaktspieltage ausschalten", "normale Planung")]
             : [new Einrichtungsoption("Mit Kompaktspieltagen planen", "3er- und 4er-Spieltage, Karte und Prüfung"), new Einrichtungsoption("Normal planen", "jedes Spiel einzeln")];
-        return new Einrichtungsschritt(nummer, "Klasse mit Kompaktspieltagen", text, details, optionen);
+
+        // Die Erkennung wählt die erste Option vor (planen bzw. beibehalten); sie gilt auch beim Abschließen ohne Klick
+        // (Peter, 14.10.2026). „Normal planen“ bleibt mit einem Klick möglich.
+        var schritt = new Einrichtungsschritt(nummer, "Klasse mit Kompaktspieltagen", text, details, optionen);
+        schritt.Vorwaehlen(0);
+        return schritt;
     }
 
     /// <summary>Nach Öffnen, Schließen oder Änderungen: Auswertung, Kacheln, Ansicht und Navigation aktualisieren; beim Wechsel in den oder aus dem Kompaktmodus die Ansichten umstellen.</summary>

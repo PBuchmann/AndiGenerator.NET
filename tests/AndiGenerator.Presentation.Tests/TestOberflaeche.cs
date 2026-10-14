@@ -33,6 +33,9 @@ internal sealed class TestOberflaeche : IOberflaeche
     /// <summary>Holt oder setzt die Datei, die „Öffnen“ liefert.</summary>
     public string? DateiZumOeffnen { get; set; }
 
+    /// <summary>Holt oder setzt die Dateien, die „Öffnen“ mit Mehrfachauswahl liefert; ohne Angabe <see cref="DateiZumOeffnen"/>.</summary>
+    public IReadOnlyList<string>? DateienZumOeffnen { get; set; }
+
     /// <summary>Holt oder setzt die Datei, die „Speichern unter“ liefert.</summary>
     public string? DateiZumSpeichern { get; set; }
 
@@ -110,6 +113,9 @@ internal sealed class TestOberflaeche : IOberflaeche
     }
 
     public Task<string?> DateiOeffnenAsync(string titel, IReadOnlyList<Dateifilter> filter) => Merken(titel, DateiZumOeffnen);
+
+    public Task<IReadOnlyList<string>> DateienOeffnenAsync(string titel, IReadOnlyList<Dateifilter> filter) =>
+        Merken(titel, DateienZumOeffnen ?? (DateiZumOeffnen is string pfad ? [pfad] : (IReadOnlyList<string>)[]));
 
     public Task<string?> DateiSpeichernAsync(string titel, string vorschlag, Dateifilter filter) => Merken(titel, DateiZumSpeichern);
 

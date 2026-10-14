@@ -119,7 +119,7 @@ Die Datei enthält die Terminwünsche aller Mannschaften und die schon terminier
 
 ![Startseite](Anleitung/Bilder/01-startseite.png)
 
-Auf der Startseite **click-TT-Datei öffnen** wählen, oder links **Öffnen**. Zuletzt geöffnete Staffeln stehen in der Liste darunter und öffnen sich mit einem Klick; mit dem **×** am Ende einer Zeile entfernen Sie einen Eintrag aus der Liste (die Datei selbst bleibt erhalten).
+Auf der Startseite **click-TT-Datei öffnen** wählen, oder links **Öffnen**. Im Dateidialog können Sie zusammen mit der XML-Datei gleich die beiden weiteren Downloads der Staffel markieren (mit gedrückter **Strg**-Taste): die **Mannschaftsmeldung (CSV)** und den Bericht **Terminwünsche (PDF)**. Das Programm übernimmt jede dieser Dateien, wenn alle Mannschaften der Staffel darin vorkommen – genau so, als hätten Sie sie in der Einrichtung unter *Daten aus click-TT ergänzen* geladen und übernommen (die Mannschaftsmeldung auch als Setzliste); mit beiden Dateien ist dieser Punkt dann schon erledigt. Passt eine Datei nicht zur Staffel (z. B. aus einer anderen Klasse), bleibt sie unberücksichtigt, und die Einrichtung sagt, welche Mannschaften fehlen. Zuletzt geöffnete Staffeln stehen in der Liste darunter und öffnen sich mit einem Klick; mit dem **×** am Ende einer Zeile entfernen Sie einen Eintrag aus der Liste (die Datei selbst bleibt erhalten).
 
 Ohne click-TT können Sie mit **Neu** eine leere Plandatei anlegen und Liga, Mannschaften und Termine von Hand eingeben. Die Eingabemasken sind dafür aber eher zum Korrigieren gedacht als zum Erfassen einer ganzen Staffel.
 
@@ -496,7 +496,7 @@ Jede Mannschaft soll mindestens einen 3er- oder 4er-Spieltag ausrichten; ein Ein
 ### 6.2 Der Weg zum Plan
 
 1. **Meldungen in click-TT erfassen.** Die Vereine melden in den Terminwünschen von click-TT, wann sie ausrichten, auswärts spielen oder nicht können (Abschnitt [6.4](#64-meldungen-und-daten-aus-click-tt)).
-2. **Staffel öffnen und einrichten.** XML-Datei herunterladen und öffnen (Abschnitte [3.1](#31-terminwünsche-aus-click-tt-herunterladen) und [3.2](#32-staffel-öffnen)). In der Einrichtung unter *Daten aus click-TT ergänzen* den Bericht **Terminwünsche** (Pflicht, für Hallen und Entfernungen) und die **Mannschaftsmeldung** (für Spitzen- und Abstiegsspieltag) laden und die Kompaktspieltage wählen (Abschnitt [6.3](#63-der-kompaktmodus)).
+2. **Staffel öffnen und einrichten.** XML-Datei, Bericht **Terminwünsche** (Pflicht, für Hallen und Entfernungen) und **Mannschaftsmeldung** (für Spitzen- und Abstiegsspieltag) herunterladen und alle drei zusammen öffnen (Abschnitte [3.1](#31-terminwünsche-aus-click-tt-herunterladen) und [3.2](#32-staffel-öffnen)) – oder die beiden letzten in der Einrichtung unter *Daten aus click-TT ergänzen* laden. Dann die Kompaktspieltage wählen (Abschnitt [6.3](#63-der-kompaktmodus)).
 3. **Meldungen prüfen.** Im Raster der Ansicht **Kompaktspieltage** sehen Sie alle Meldungen auf einen Blick und ergänzen oder korrigieren sie dort direkt (Abschnitte [6.7](#67-meldungen-und-plan-karte) und [6.9](#69-meldungen-im-raster-bearbeiten)).
 4. **Pläne berechnen** mit **▶** (Abschnitt [6.5](#65-pläne-berechnen)).
 5. **Plan wählen.** Die Varianten vergleichen, einen Plan wählen und merken (Abschnitte [6.6](#66-pläne-und-punkte) und [6.10](#610-pläne-sichern-und-merken)).
@@ -504,7 +504,7 @@ Jede Mannschaft soll mindestens einen 3er- oder 4er-Spieltag ausrichten; ein Ein
 
 ### 6.3 Der Kompaktmodus
 
-Ob eine Klasse in Kompaktspieltagen geplant werden kann, erkennt das Programm beim Öffnen: Es muss eine Halbrunde sein („(HR)“ bzw. „(FR)“ im Namen oder Runde kürzer als sechs Monate), deren Spieltage überwiegend am Wochenende liegen – zwei oder drei Termine unter der Woche für einzelne Spiele stören nicht. Dann erscheint in der Einrichtung der Punkt **Klasse mit Kompaktspieltagen** mit einer Erklärung und der Wahl, ob die Staffel so geplant wird. Wer es eingeschaltet hat, wird beim nächsten Öffnen noch einmal gefragt und kann es zurücknehmen; danach lässt es sich in der Ansicht **Kompaktspieltage** aus- und einschalten.
+Ob eine Klasse in Kompaktspieltagen geplant werden kann, erkennt das Programm beim Öffnen: Es muss eine Halbrunde sein („(HR)“ bzw. „(FR)“ im Namen oder Runde kürzer als sechs Monate), deren Spieltage überwiegend am Wochenende liegen – zwei oder drei Termine unter der Woche für einzelne Spiele stören nicht. Dann erscheint in der Einrichtung der Punkt **Klasse mit Kompaktspieltagen** mit einer Erklärung und der Wahl, ob die Staffel so geplant wird. Vorgewählt ist **Mit Kompaktspieltagen planen**; das gilt auch, wenn Sie ohne weiteren Klick **Abschließen** – für die normale Planung klicken Sie **Normal planen** an. Wer es eingeschaltet hat, wird beim nächsten Öffnen noch einmal gefragt und kann es zurücknehmen; danach lässt es sich in der Ansicht **Kompaktspieltage** aus- und einschalten.
 
 Die Ansicht **Kompaktspieltage** steht links oben unter *Ansichten* – nur bei Klassen, die dafür in Frage kommen. Sind die Kompaktspieltage eingeschaltet, arbeitet das Hauptfenster im **Kompaktmodus**:
 

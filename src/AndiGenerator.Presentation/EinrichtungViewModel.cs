@@ -103,7 +103,7 @@ public sealed class EinrichtungViewModel : ObservableObject
     public string Meldung
     {
         get => meldung;
-        private set
+        internal set
         {
             if (SetProperty(ref meldung, value))
             {

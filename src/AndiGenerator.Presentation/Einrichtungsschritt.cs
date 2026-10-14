@@ -167,6 +167,17 @@ public sealed class Einrichtungsschritt : ObservableObject
     /// <summary>Holt den Befehl, der den Schritt zeigt.</summary>
     public IRelayCommand WaehlenCommand { get; }
 
+    /// <summary>
+    /// Wählt eine Option vor, als hätte der Anwender sie angeklickt: Sie gilt auch beim Abschließen, ohne dass „Auswahl
+    /// übernehmen“ gedrückt wurde (z. B. „Mit Kompaktspieltagen planen“ bei einer erkannten Kompaktklasse).
+    /// </summary>
+    /// <param name="index">Die Option.</param>
+    public void Vorwaehlen(int index)
+    {
+        Auswahl = index;
+        IstGewaehlt = true;
+    }
+
     private void Anzeigeaendern()
     {
         OnPropertyChanged(nameof(Status));

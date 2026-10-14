@@ -82,6 +82,9 @@ public sealed class ZusatzdatenSeiteViewModel : DatenSeiteViewModel
     /// <summary>Holt einen Wert, der angibt, ob ein Bericht „Terminwünsche“ geladen ist.</summary>
     public bool HatTerminwuensche => abgleich is not null;
 
+    /// <summary>Holt die Mannschaften der Staffel ohne Aufstellung in der geladenen Mannschaftsmeldung (leer ohne Meldung).</summary>
+    public IReadOnlyList<string> OhneAufstellung => vorschlag?.OhneAufstellung ?? [];
+
     /// <summary>Holt die Erfolgsmeldung nach dem Laden der Terminwünsche (hervorgehoben unter dem Knopf) oder einen leeren Text.</summary>
     public string TerminwunschErgebnis
     {
@@ -295,6 +298,11 @@ public sealed class ZusatzdatenSeiteViewModel : DatenSeiteViewModel
         Vorschlagen(null, string.Empty);
         Abgleichen(null, string.Empty);
     }
+
+    /// <summary>Die Mannschaften der Staffel, die im geladenen Bericht „Terminwünsche“ fehlen (leer ohne Bericht).</summary>
+    /// <returns>Die Namen.</returns>
+    public IReadOnlyList<string> NichtImBericht() =>
+        abgleich?.Mannschaften.Where(m => !m.Gefunden).Select(m => m.Mannschaft).ToList() ?? [];
 
     /// <summary>Liest einen Bericht „Terminwünsche“ und zeigt den Abgleich; Fehler erscheinen in <see cref="Fehler"/>.</summary>
     /// <param name="pfad">Pfad der PDF-Datei.</param>

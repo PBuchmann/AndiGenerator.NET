@@ -38,6 +38,9 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
 
     private static readonly Dateifilter PlanDateien = new("click-TT- und Plandateien", ["*.xml"]);
 
+    /// <summary>Beim Öffnen auch die beiden weiteren Exporte aus click-TT: Mannschaftsmeldung (CSV) und Terminwünsche (PDF).</summary>
+    private static readonly Dateifilter ClickTtDateien = new("click-TT-Dateien (XML, Mannschaftsmeldung, Terminwünsche)", ["*.xml", "*.csv", "*.pdf"]);
+
     private readonly IOberflaeche oberflaeche;
     private readonly Optimierungsdienst dienst;
     private readonly DockFabrik fabrik;
@@ -1069,13 +1072,97 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
 
     private string NaechsteId() => "Ansicht" + (naechsteAnsicht++).ToString(CultureInfo.InvariantCulture);
 
+    /// <summary>
+    /// Öffnen: die XML-Datei der Staffel, auf Wunsch zusammen mit Mannschaftsmeldung (CSV) und Terminwünschen (PDF) aus
+    /// click-TT (Peter, 14.10.2026). Passen sie zur Staffel, werden sie gleich übernommen und der Punkt „Daten aus click-TT
+    /// ergänzen“ der Einrichtung ist erledigt.
+    /// </summary>
     private async Task OeffnenAsync()
     {
-        string? pfad = await oberflaeche.DateiOeffnenAsync("Staffel öffnen", [PlanDateien]);
-        if (pfad is not null)
+        const string Titeltext = "Staffel öffnen";
+        IReadOnlyList<string> pfade = await oberflaeche.DateienOeffnenAsync(Titeltext, [ClickTtDateien, PlanDateien]);
+        if (pfade.Count == 0)
         {
-            await StaffelOeffnenAsync(pfad);
+            return;
         }
+
+        List<string> Mit(string endung) => pfade.Where(p => string.Equals(Path.GetExtension(p), endung, StringComparison.OrdinalIgnoreCase)).ToList();
+        List<string> xml = Mit(".xml");
+        List<string> csv = Mit(".csv");
+        List<string> pdf = Mit(".pdf");
+        string? problem = (xml.Count, csv.Count, pdf.Count, pfade.Count - xml.Count - csv.Count - pdf.Count) switch
+        {
+            (0, _, _, _) => "Bitte die XML-Datei der Staffel mit auswählen (Terminmeldung für Meinl-Generator).",
+            (> 1, _, _, _) => "Bitte nur eine XML-Datei auswählen – je Staffel eine.",
+            (_, > 1, _, _) => "Bitte höchstens eine Mannschaftsmeldung (CSV) auswählen.",
+            (_, _, > 1, _) => "Bitte höchstens einen Bericht „Terminwünsche“ (PDF) auswählen.",
+            (_, _, _, > 0) => "Ausgewählt werden können nur XML-, CSV- und PDF-Dateien aus click-TT.",
+            _ => null,
+        };
+        if (problem is not null)
+        {
+            await oberflaeche.MeldenAsync(Titeltext, problem);
+            return;
+        }
+
+        await StaffelOeffnenAsync(xml[0], csv.FirstOrDefault(), pdf.FirstOrDefault());
+    }
+
+    /// <summary>
+    /// Übernimmt die beim Öffnen mit ausgewählten Exporte aus click-TT – jeden nur, wenn er zur Staffel passt, d. h. jede
+    /// Mannschaft der Staffel darin vorkommt. Wie auf der Seite „Daten aus click-TT“ der Einrichtung (dort mit „Auswahl
+    /// übernehmen“), die Mannschaftsmeldung auch als Setzliste.
+    /// </summary>
+    /// <returns>Je Datei, die nicht passte oder nicht gelesen werden konnte, ein Hinweis; leer, wenn alles übernommen ist.</returns>
+    private async Task<List<string>> ZusatzdateienUebernehmenAsync(Plansitzung s, string? csv, string? pdf)
+    {
+        static string? Hinweis(ZusatzdatenSeiteViewModel seite, string datei, string was, IReadOnlyList<string> fehlend)
+        {
+            if (seite.HatFehler)
+            {
+                return $"{datei}: {seite.Fehler}";
+            }
+
+            return fehlend.Count > 0 ? $"{datei} passt nicht zu dieser Staffel – {was}: {string.Join(", ", fehlend)}." : null;
+        }
+
+        var hinweise = new List<string>();
+        if (pdf is not null)
+        {
+            Datenbearbeitung bearbeitung = s.DatenBearbeiten();
+            var seite = new ZusatzdatenSeiteViewModel(bearbeitung, oberflaeche);
+            seite.TerminwuenscheLaden(pdf);
+            string datei = $"Bericht „Terminwünsche“ ({Path.GetFileName(pdf)})";
+            string? hinweis = Hinweis(seite, datei, "nicht darin", seite.NichtImBericht());
+            hinweise.AddRange(hinweis is null ? await ZusatzseiteUebernehmenAsync(s, bearbeitung, seite, datei) : [hinweis]);
+        }
+
+        if (csv is not null)
+        {
+            Datenbearbeitung bearbeitung = s.DatenBearbeiten();
+            var seite = new ZusatzdatenSeiteViewModel(bearbeitung, oberflaeche);
+            seite.AufstellungenLaden(csv);
+            string datei = $"Mannschaftsmeldung ({Path.GetFileName(csv)})";
+            string? hinweis = Hinweis(seite, datei, "ohne Aufstellung", seite.OhneAufstellung);
+            hinweise.AddRange(hinweis is null ? await ZusatzseiteUebernehmenAsync(s, bearbeitung, seite, datei) : [hinweis]);
+        }
+
+        return hinweise;
+    }
+
+    /// <summary>Speichert eine Seite „Daten aus click-TT“ wie mit „Auswahl übernehmen“.</summary>
+    /// <returns>Leer, wenn gespeichert; sonst ein Hinweis.</returns>
+    private async Task<List<string>> ZusatzseiteUebernehmenAsync(Plansitzung s, Datenbearbeitung bearbeitung, ZusatzdatenSeiteViewModel seite, string datei)
+    {
+        var dialog = new DatenDialogViewModel(bearbeitung, [seite]);
+        if (!dialog.Bestaetigen() || !await UebernehmenAsync(s, bearbeitung))
+        {
+            return [$"{datei} konnte nicht übernommen werden."];
+        }
+
+        KopfAktualisieren(s);
+        NachAenderung(s);
+        return [];
     }
 
     /// <summary>
@@ -1187,7 +1274,7 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
         AlleAnsichtenAktualisieren();
     }
 
-    private async Task<bool> StaffelOeffnenAsync(string pfad)
+    private async Task<bool> StaffelOeffnenAsync(string pfad, string? mannschaftsmeldung = null, string? terminwuensche = null)
     {
         if (!await PlanSichernAsync("Eine andere Staffel wird geöffnet."))
         {
@@ -1238,7 +1325,28 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
         terminwunschAnsicht?.Laden();
         nachbarterminAnsicht?.Laden();
         KompaktAktualisieren();
+
+        // Mit ausgewählte Exporte aus click-TT gleich übernehmen; was nicht passt, bleibt in der Einrichtung offen.
+        bool zusatz = mannschaftsmeldung is not null || terminwuensche is not null;
+        List<string> hinweise = zusatz ? await ZusatzdateienUebernehmenAsync(neu, mannschaftsmeldung, terminwuensche) : [];
         Einrichtung = EinrichtungErstellen(neu);
+        if (hinweise.Count > 0)
+        {
+            string text = string.Join(Environment.NewLine, hinweise) + " Bitte die passende Datei unter „Daten aus click-TT ergänzen“ laden.";
+            if (Einrichtung is not null)
+            {
+                Einrichtung.Meldung = text;
+            }
+            else
+            {
+                await oberflaeche.MeldenAsync("Daten aus click-TT", text);
+            }
+        }
+        else if (zusatz)
+        {
+            Statuszeile += " Daten aus click-TT übernommen.";
+        }
+
         return true;
     }
 
