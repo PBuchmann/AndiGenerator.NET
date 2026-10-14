@@ -67,7 +67,7 @@ public static class Kompaktdruck
 
         var abschnitte = new List<Abschnitt>
         {
-            new("Meldungen und Plan", [new Textzeile(klasse, Druckbericht.Groesse + 5, Farbe.Tinte, Fett: true), Raster(auswertung, gruppentage) with { AbstandDavor = Luft }]),
+            new("Meldungen und Plan", [Raster(auswertung, gruppentage, klasse)]),
             new("Alle Fahrten", [Karte(Kompaktfahrtenkarte.Bauen(auswertung, auswertung.Spieltage, null, alleZeigen: true), Kartenbreite, 0), KmJeMannschaft(auswertung)]),
             Spieltage(auswertung, halle),
         };
@@ -75,17 +75,35 @@ public static class Kompaktdruck
         return abschnitte;
     }
 
-    /// <summary>Das Raster „Meldungen und Plan“ mit Legende als Grafik, gezeichnet wie in der Ansicht.</summary>
+    /// <summary>
+    /// Das Raster „Meldungen und Plan“ mit Legende als Grafik, gezeichnet wie in der Ansicht; auf Wunsch mit dem Klassennamen
+    /// darüber. Der Name gehört zur Grafik, damit ein hohes Raster (viele Tage) als Ganzes auf die erste Seite verkleinert
+    /// wird, statt allein auf die nächste Seite zu rutschen und den Namen auf einer sonst leeren Seite zu lassen.
+    /// </summary>
     /// <param name="a">Die Auswertung.</param>
     /// <param name="gruppentage">Spitzen- und Abstiegsspieltag (Ringe).</param>
+    /// <param name="klasse">Name der Klasse über dem Raster oder <c>null</c>.</param>
     /// <returns>Die Grafik.</returns>
-    public static Grafik Raster(Kompaktauswertung a, (Kompaktspieltag? Spitze, Kompaktspieltag? Keller) gruppentage)
+    public static Grafik Raster(Kompaktauswertung a, (Kompaktspieltag? Spitze, Kompaktspieltag? Keller) gruppentage, string? klasse = null)
     {
         ArgumentNullException.ThrowIfNull(a);
         List<Kompaktrasterzeile> zeilen = a.Tage.Select(t => KompaktspieltageAnsichtViewModel.Rasterzeile(a, t, false, null, false, null, gruppentage)).ToList();
+        double titelgroesse = Druckbericht.Groesse + 5;
+        double oben = klasse is null ? 0 : (titelgroesse * Seitenumbruch.Zeilenfaktor) + Luft;
         double breite = Math.Max(Datumsbreite + (a.Mannschaften.Count * Spaltenbreite), 470);
-        double hoehe = Kopfhoehe + (zeilen.Count * Zeilenhoehe) + Legendenhoehe;
-        return new Grafik(breite, hoehe, f => RasterZeichnen(f, a, zeilen));
+        double hoehe = oben + Kopfhoehe + (zeilen.Count * Zeilenhoehe) + Legendenhoehe;
+        return new Grafik(
+            breite,
+            hoehe,
+            f =>
+            {
+                if (klasse is not null)
+                {
+                    f.Text(klasse, 0, 0, titelgroesse, Farbe.Tinte, true);
+                }
+
+                RasterZeichnen(f, a, zeilen, oben);
+            });
     }
 
     /// <summary>„km je Mannschaft“ wie in der Ansicht: je Mannschaft Ausrichtungen, ein Balken und die km, die weiteste zuerst.</summary>
@@ -183,17 +201,17 @@ public static class Kompaktdruck
         return adresse.Length > 0 ? adresse : a.Mannschaften.FirstOrDefault(m => m.Name == ausrichter)?.Halle ?? string.Empty;
     }
 
-    private static void RasterZeichnen(IZeichenflaeche f, Kompaktauswertung a, List<Kompaktrasterzeile> zeilen)
+    private static void RasterZeichnen(IZeichenflaeche f, Kompaktauswertung a, List<Kompaktrasterzeile> zeilen, double oben)
     {
         for (int j = 0; j < a.Mannschaften.Count; j++)
         {
             double x = Datumsbreite + (j * Spaltenbreite) + (Spaltenbreite / 2) - 8;
-            f.TextSenkrecht(a.Mannschaften[j].Kurzname, x, Kopfhoehe - 4, 12, Farbe.Tinte2);
+            f.TextSenkrecht(a.Mannschaften[j].Kurzname, x, oben + Kopfhoehe - 4, 12, Farbe.Tinte2);
         }
 
         for (int i = 0; i < zeilen.Count; i++)
         {
-            double y = Kopfhoehe + (i * Zeilenhoehe);
+            double y = oben + Kopfhoehe + (i * Zeilenhoehe);
             f.Text(zeilen[i].Datum, Datumsbreite - 8 - f.TextBreite(zeilen[i].Datum, 11, false), y + 4, 11, Farbe.Tinte2, false);
             for (int j = 0; j < zeilen[i].Zellen.Count; j++)
             {
@@ -201,7 +219,7 @@ public static class Kompaktdruck
             }
         }
 
-        Legende(f, Kopfhoehe + (zeilen.Count * Zeilenhoehe) + 12);
+        Legende(f, oben + Kopfhoehe + (zeilen.Count * Zeilenhoehe) + 12);
     }
 
     /// <summary>Ein Feld des Rasters: Meldung als Farbe, Ring für Spitzen- und Abstiegsspieltag, ★ bzw. ● bzw. ?.</summary>

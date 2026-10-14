@@ -573,7 +573,7 @@ Wie bei normalen Runden sichert das Programm den aktuellen Plan, bevor er verwor
 
 ### 6.11 Drucken und Export für click-TT
 
-Im Kompaktmodus bietet **Drucken** statt der Kosten die **Übersicht für die Vereine** (siehe [8.2](#82-drucken-pdf)). Jeder Teil beginnt auf einer neuen Seite: der Klassenname mit dem Raster „Meldungen und Plan“ samt Legende, die Karte aller Fahrten mit „km je Mannschaft“ darunter, die Spieltage (Datum, Form, Ausrichter, Halle und Begegnungen mit Beginn) und für jede Mannschaft genau eine Seite mit der **Karte ihrer Fahrten** und ihren Spieltagen (Ort, Gegner, Uhrzeiten, Halle). Hinweise für die Staffelleitung (zu verlegende Hallen, Verstöße) stehen nicht darin. Die Karten sind dieselbe Zeichnung wie in der Ansicht.
+Im Kompaktmodus druckt **Drucken** nur die **Übersicht für die Vereine**, immer im Hochformat und mit dem Plan, der in der Ansicht *Kompaktspieltage* gewählt ist; der Dialog nennt ihn. Die übrigen Drucke für normale Runden entfallen hier: Terminwünsche, Spielplan und Mannschaftspläne stehen schon in der Übersicht, Nachbarmannschaften spielen bei Kompaktspieltagen keine Rolle, und die Diagramme bewerten normale Runden. Gibt es noch keinen Plan, sagt der Dialog das, und es lässt sich nichts drucken. Jeder Teil beginnt auf einer neuen Seite: der Klassenname mit dem Raster „Meldungen und Plan“ samt Legende, die Karte aller Fahrten mit „km je Mannschaft“ darunter, die Spieltage (Datum, Form, Ausrichter, Halle und Begegnungen mit Beginn) und für jede Mannschaft genau eine Seite mit der **Karte ihrer Fahrten** und ihren Spieltagen (Ort, Gegner, Uhrzeiten, Halle). Hinweise für die Staffelleitung (zu verlegende Hallen, Verstöße) stehen nicht darin. Die Karten sind dieselbe Zeichnung wie in der Ansicht.
 
 ![Druckauswahl im Kompaktmodus](Anleitung/Bilder/34-kompakt-druckauswahl.png)
 
@@ -663,10 +663,12 @@ Im Kompaktmodus exportiert das Programm den in der Ansicht *Kompaktspieltage* ge
 **Drucken (PDF)** erzeugt einen Ausdruck als PDF-Datei und öffnet ihn anschließend zum Ansehen und Drucken. Im Dialog wählen Sie:
 
 - **welcher Plan** gedruckt wird,
-- **was** gedruckt wird: Terminwünsche, Termine der Nachbarmannschaften, Kosten, Spielplan, Mannschaftspläne, Mannschaftspläne mit Nachbarmannschaften, Diagramme; im Kompaktmodus statt der Kosten **Kompaktspieltage (Übersicht für die Vereine)** (Abschnitt [6.11](#611-drucken-und-export-für-click-tt)),
+- **was** gedruckt wird: Terminwünsche, Termine der Nachbarmannschaften, Kosten, Spielplan, Mannschaftspläne, Mannschaftspläne mit Nachbarmannschaften, Diagramme,
 - **Hoch- oder Querformat**.
 
 Jeder Abschnitt beginnt auf einer neuen Seite; zu breite Tabellen und Diagramme werden passend verkleinert. Solange es noch keinen Plan gibt, lassen sich nur Terminwünsche und Termine der Nachbarmannschaften drucken.
+
+Im Kompaktmodus gibt es nichts zu wählen: Gedruckt wird die **Übersicht für die Vereine** mit dem in der Ansicht gewählten Plan, im Hochformat (Abschnitt [6.11](#611-drucken-und-export-für-click-tt)).
 
 ## 9. Spielplandaten bearbeiten
 

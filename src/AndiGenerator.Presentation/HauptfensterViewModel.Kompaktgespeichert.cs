@@ -118,6 +118,22 @@ public sealed partial class HauptfensterViewModel
         variante is not null && kompaktGespeichertJe.TryGetValue(variante, out var gespeichert) ? GemerktenStandLaden(s, gespeichert.Eintrag) : null;
 
     /// <summary>
+    /// Die Druckauswahl im Kompaktmodus mit dem Plan, den die Ansicht zeigt: die gewählte Variante bzw. der gewählte
+    /// gespeicherte Plan, sonst der Plan aus click-TT, sofern er Spiele hat.
+    /// </summary>
+    private DruckauswahlViewModel KompaktDruckauswahl()
+    {
+        if (kompaktVariante is Kompaktvariante variante && laufenderStand is not null)
+        {
+            return DruckauswahlViewModel.Kompakt(PlanQuelle.Laufend, variante.Name);
+        }
+
+        return PlanFuer(PlanQuelle.ClickTt) is { Spiele.Count: > 0 }
+            ? DruckauswahlViewModel.Kompakt(PlanQuelle.ClickTt, "Plan aus click-TT")
+            : DruckauswahlViewModel.Kompakt(null, string.Empty);
+    }
+
+    /// <summary>
     /// Die Abschnitte der Übersicht für die Vereine im Ausdruck: Raster mit Legende, Karte aller Fahrten, Spieltage und je
     /// Mannschaft eine Seite mit Karte und Spieltagen.
     /// </summary>

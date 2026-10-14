@@ -21,13 +21,32 @@ public sealed class KompaktdruckTests
         IReadOnlyList<Abschnitt> abschnitte = Abschnitte(Auswertung(), (_, _) => string.Empty);
 
         Assert.Equal(["Meldungen und Plan", "Alle Fahrten", "Kompaktspieltage", "TTC A", "TTC B", "TTC C", "TTC D"], abschnitte.Select(x => x.Titel));
-        Assert.Contains("Jugend 19 Testliga (HR)", Texte(abschnitte[0]));
+        var raster = new Messflaeche();
+        Assert.IsType<Grafik>(Assert.Single(abschnitte[0].Bausteine)).Zeichnung(raster);
+        Assert.Contains("Jugend 19 Testliga (HR)", raster.Texte);
         Assert.Equal(2, abschnitte[1].Bausteine.OfType<Grafik>().Count());
         var f = new Messflaeche();
         abschnitte[1].Bausteine.OfType<Grafik>().Last().Zeichnung(f);
         Assert.Contains("km je Mannschaft", f.Texte);
         Assert.Contains("1× Ausrichter", f.Texte);
         Assert.Contains("30", f.Texte);
+    }
+
+    [Fact]
+    public void Bei_vielen_Tagen_stehen_Klassenname_und_Raster_auf_einer_Seite()
+    {
+        // Höher als eine Seite: bisher rutschte das Raster auf Seite 2, der Klassenname blieb allein auf Seite 1.
+        Kompaktauswertung a = Auswertung();
+        List<DateOnly> tage = Enumerable.Range(0, 30).Select(i => Sonntag.AddDays(i * 3)).ToList();
+        var viele = new Kompaktauswertung(tage, a.Mannschaften, a.Spieltage, [], 0, 4);
+        IReadOnlyList<Abschnitt> abschnitte = Abschnitte(viele, (_, _) => string.Empty);
+        Grafik raster = Assert.IsType<Grafik>(Assert.Single(abschnitte[0].Bausteine));
+        Assert.True(raster.Hoehe > Seitenformat.A4Hoch.Hoehe);
+
+        var dokument = new Druckdokument("Klasse", "Plan", DateTime.Now, [abschnitte[0]]);
+        IReadOnlyList<Druckseite> seiten = Seitenumbruch.Umbrechen(dokument, Seitenformat.A4Hoch, new Messflaeche());
+
+        Assert.Single(seiten);
     }
 
     [Fact]

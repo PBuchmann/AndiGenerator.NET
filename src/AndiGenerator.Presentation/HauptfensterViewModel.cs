@@ -867,7 +867,7 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
             }
 
             abschnitte.AddRange(PlanAbschnitte(s, stand, auswahl));
-            plan = quelle.Name;
+            plan = auswahl.IstKompakt ? auswahl.Planname : quelle.Name;
         }
 
         return new Druckdokument(s.Staffel.Name, plan, DateTime.Now, abschnitte);
@@ -1856,7 +1856,7 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
             return;
         }
 
-        var auswahl = new DruckauswahlViewModel(Planquellen.Where(q => PlanFuer(q) is not null).ToList(), KompaktAktiv);
+        DruckauswahlViewModel auswahl = KompaktAktiv ? KompaktDruckauswahl() : new DruckauswahlViewModel(Planquellen.Where(q => PlanFuer(q) is not null).ToList());
         if (!await oberflaeche.DruckauswahlAsync(auswahl) || !auswahl.IstGueltig)
         {
             return;
