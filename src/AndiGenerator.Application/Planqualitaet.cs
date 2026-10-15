@@ -69,13 +69,25 @@ public static class Planqualitaet
 
     private static Qualitaetskriterium Kriterium(Planbewertung bewertung, string stufe, Kostenkriterium k) => k switch
     {
-        Kostenkriterium.VereinsinterneSpieleAmAnfang => new(stufe, Name(k), null, null, bewertung.VereinsinterneSpieleAmAnfang, k),
-        Kostenkriterium.Spieltaglaenge => new(stufe, Name(k), null, null, bewertung.LaengeSpieltage, k),
-        Kostenkriterium.Spieltagueberlappung => new(stufe, Name(k), null, null, bewertung.UeberlappungSpieltage, k),
-        Kostenkriterium.LetzterSpieltagLaenge => new(stufe, Name(k), null, null, bewertung.LaengeLetzterSpieltag, k),
-        Kostenkriterium.LetzterSpieltagUeberlappung => new(stufe, Name(k), null, null, bewertung.UeberlappungLetzterSpieltag, k),
+        Kostenkriterium.VereinsinterneSpieleAmAnfang => new(stufe, Name(k), bewertung.VereinsinterneSpieleAmAnfang > 0 ? bewertung.VereinsinterneAnzahl : 0, null, bewertung.VereinsinterneSpieleAmAnfang, k),
+        Kostenkriterium.Spieltaglaenge => Spieltag(stufe, k, bewertung.LaengeSpieltage, bewertung.Zusatz?.SpieltageLaenge),
+        Kostenkriterium.Spieltagueberlappung => Spieltag(stufe, k, bewertung.UeberlappungSpieltage, bewertung.Zusatz?.SpieltageUeberlappung),
+        Kostenkriterium.LetzterSpieltagLaenge => Spieltag(stufe, k, bewertung.LaengeLetzterSpieltag, bewertung.Zusatz?.LetzterLaenge),
+        Kostenkriterium.LetzterSpieltagUeberlappung => Spieltag(stufe, k, bewertung.UeberlappungLetzterSpieltag, bewertung.Zusatz?.LetzterUeberlappung),
+        Kostenkriterium.Spielverteilung => Kostenart(bewertung, stufe, MannschaftsKostenart.Spielverteilung) with
+        {
+            Kriterium = k,
+            Anzahl = bewertung.Zusatz is { } z && Kostenart(bewertung, stufe, MannschaftsKostenart.Spielverteilung).Kosten > 0 ? z.Spielverteilung.Sum() : 0,
+        },
         _ => Kostenart(bewertung, stufe, (MannschaftsKostenart)(int)k) with { Kriterium = k },
     };
+
+    /// <summary>Kriterium der Spieltage: Anzahl aus der Zusatzzählung (nur, wenn es Kosten gibt).</summary>
+    private static Qualitaetskriterium Spieltag(string stufe, Kostenkriterium k, double kosten, int? anzahl)
+    {
+        int? wert = kosten > 0 ? anzahl : 0;
+        return new(stufe, Name(k), anzahl is null ? null : wert, null, kosten, k);
+    }
 
     private static Qualitaetskriterium HarterFehler(string name, double kosten) =>
         new("A1", name, (int)Math.Round(kosten / KostenJeHartemFehler), null, kosten);

@@ -4,6 +4,7 @@
 
 using AndiGenerator.Domain.Optionen;
 using AndiGenerator.Domain.Stammdaten;
+using AndiGenerator.Engine.Kern;
 
 namespace AndiGenerator.Engine.Referenz;
 
@@ -55,7 +56,9 @@ public static class Referenzbewertung
             spieltag.LetzteBreite,
             plan.VereinsinterneSpieleAmAnfangKosten(),
             Enum.GetValues<MannschaftsKostenart>().Where(plan.HatWerteFuer).ToList(),
-            mannschaften);
+            mannschaften,
+            plan.TeamsNichtAmAnfang(),
+            new KernPlan(plan).ZusatzZaehlen(meldungen: true));
     }
 
     /// <summary>
@@ -96,6 +99,20 @@ public static class Referenzbewertung
         var kosten = new RefMannschaftsKosten();
         mannschaft.KostenFuerArt(plan, art, kosten, meldungen: true);
         return kosten.Meldungen.ToList();
+    }
+
+    /// <summary>Verstöße gegen „vereinsinterne Spiele am Anfang“ je Mannschaft (für die Qualitätsansicht).</summary>
+    /// <param name="staffel">Staffel mit dem zu bewertenden Plan als bestehendem Spielplan.</param>
+    /// <param name="optionen">Berechnungsoptionen.</param>
+    /// <returns>Je betroffene Mannschaft die Spiele gegen fremde Vereine, die vor einem vereinsinternen Spiel liegen.</returns>
+    public static IReadOnlyList<Mannschaftsmeldungen> VereinsinterneMeldungen(Staffel staffel, Berechnungsoptionen optionen)
+    {
+        ArgumentNullException.ThrowIfNull(staffel);
+        ArgumentNullException.ThrowIfNull(optionen);
+        return RefPlan.Laden(staffel, optionen).VereinsinterneVerstoesse()
+            .GroupBy(v => v.Mannschaft, StringComparer.Ordinal)
+            .Select(g => new Mannschaftsmeldungen(g.Key, g.Select(v => v.Meldung).ToList()))
+            .ToList();
     }
 
     /// <summary>

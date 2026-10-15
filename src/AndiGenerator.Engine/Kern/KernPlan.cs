@@ -196,6 +196,7 @@ internal sealed partial class KernPlan
         artBerechnet = new bool[KernDefinition.AnzahlArten];
 
         KostenAnzahl = new int[D.N * KernDefinition.AnzahlArten];
+        StufenAnzahl = new int[D.N * KernDefinition.AnzahlArten];
         KostenAlle = new int[D.N * KernDefinition.AnzahlArten];
         KostenWert = new double[D.N * KernDefinition.AnzahlArten];
     }
@@ -242,6 +243,12 @@ internal sealed partial class KernPlan
     public int[] SpieleAnzahl { get; }
 
     public bool AlleTermineGueltig { get; set; }
+
+    /// <summary>
+    /// Gets die Verstöße je Mannschaft und Kostenart für die Stufen (nach <see cref="StufenBewerten"/>): wie
+    /// <see cref="KostenAnzahl"/>, bei der Spielverteilung die zu langen Pausen (das Original zählt dort nichts).
+    /// </summary>
+    public int[] StufenAnzahl { get; }
 
     /// <summary>Anzahl je Mannschaft und Kostenart (Index t·16 + Art).</summary>
     public int[] KostenAnzahl { get; }

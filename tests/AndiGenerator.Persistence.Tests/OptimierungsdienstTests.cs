@@ -59,6 +59,30 @@ public class OptimierungsdienstTests
         Assert.Equal(ausgangsplan.Count, stand.Spiele.Count);
     }
 
+    /// <summary>
+    /// Nur Rückrunde mit leerem Plan: Die Vorrunde aus click-TT bleibt fest. Vorher begann die Suche ohne sie und setzte
+    /// Paarungen in der Rückrunde in derselben Richtung an (die untere Schranke rechnete dagegen mit der Vorrunde).
+    /// </summary>
+    /// <returns>Der Testlauf.</returns>
+    [Fact]
+    public async Task Rueckrunde_mit_leerem_Plan_haelt_die_Vorrunde_fest()
+    {
+        Plansitzung sitzung = Sitzung();
+        Berechnungsoptionen optionen = sitzung.Optionen with { Rundenplanung = Rundenplanung.NurRueckrunde };
+        IReadOnlyList<Spiel> vorrunde = Engine.Referenz.Vorrunde.Festhalten(sitzung.Staffel, optionen, null);
+        Assert.NotEmpty(vorrunde);
+        using var dienst = new Optimierungsdienst(ZweiKerne);
+        var gemeldet = new TaskCompletionSource<Optimierungsstand>(TaskCreationOptions.RunContinuationsAsynchronously);
+        dienst.Verbessert += (_, stand) => gemeldet.TrySetResult(stand);
+
+        dienst.Starten(sitzung.Staffel, optionen);
+        Optimierungsstand stand = await gemeldet.Task.WaitAsync(TimeSpan.FromSeconds(10));
+
+        Assert.All(vorrunde, v => Assert.Contains(v, stand.Spiele));
+        Assert.DoesNotContain(stand.Spiele, s => s.Zeitpunkt is not null && !vorrunde.Contains(s)
+            && vorrunde.Any(v => v.Heim == s.Heim && v.Gast == s.Gast));
+    }
+
     [Fact]
     public void Anhalten_stellt_den_vorherigen_Zustand_wieder_her()
     {

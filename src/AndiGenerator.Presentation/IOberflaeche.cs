@@ -49,6 +49,11 @@ public interface IOberflaeche
     /// <returns>Die Antwort.</returns>
     Task<Sicherungswahl> SicherungAbfragenAsync(Planvergleich vergleich);
 
+    /// <summary>Zeigt den Dialog „B-Varianten“ bildschirmfüllend und modal.</summary>
+    /// <param name="dialog">Der Dialog.</param>
+    /// <returns><c>true</c> bei „Übernehmen“ (dann ist <see cref="AlternativendialogViewModel.Gewaehlt"/> gesetzt).</returns>
+    Task<bool> AlternativenZeigenAsync(AlternativendialogViewModel dialog);
+
     /// <summary>Stellt eine Entscheidungsfrage mit Detailtext und eigenen Schaltflächen.</summary>
     /// <param name="titel">Titel des Dialogs.</param>
     /// <param name="text">Einleitender Text.</param>

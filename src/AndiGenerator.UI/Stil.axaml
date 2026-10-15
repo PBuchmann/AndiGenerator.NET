@@ -24,6 +24,9 @@
       <SolidColorBrush x:Key="AkzentHell" Color="#E6EEF8" />
       <SolidColorBrush x:Key="Gut" Color="#1D6B3A" />
       <SolidColorBrush x:Key="Schlecht" Color="#B42318" />
+      <!-- HiGHS im Leitstand (Anteil am Prozessor, Kasten im Schaubild); dunkel für Schrift -->
+      <SolidColorBrush x:Key="Highs" Color="#C2680E" />
+      <SolidColorBrush x:Key="HighsDunkel" Color="#8F4C0A" />
 
       <!-- Reiter der Ansichten (Dock.Avalonia): ruhig, weiß hinterlegt wenn gewählt, Akzentlinie unter der aktiven Gruppe -->
       <SolidColorBrush x:Key="DockDocumentTabStripMaskBrush" Color="Transparent" />
@@ -75,6 +78,7 @@
       <StreamGeometry x:Key="SymbolRunter">M12 5v14 M6 13l6 6 6-6</StreamGeometry>
       <StreamGeometry x:Key="SymbolAuswahl">M6 9l6 6 6-6</StreamGeometry>
       <StreamGeometry x:Key="SymbolWarnung">M12 4l9 16H3z M12 10v4 M12 17h0.01</StreamGeometry>
+      <StreamGeometry x:Key="SymbolSanduhr">M6 3h12 M6 21h12 M7 3c0 5 5 6 5 9s-5 4-5 9 M17 3c0 5-5 6-5 9s5 4 5 9 M9.5 19h5</StreamGeometry>
       <StreamGeometry x:Key="SymbolKalender">M5 4h14a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z M3 9h18 M8 2v4 M16 2v4</StreamGeometry>
     </ResourceDictionary>
   </Styles.Resources>

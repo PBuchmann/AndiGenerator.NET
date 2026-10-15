@@ -27,6 +27,12 @@ public static class HighsLoeser
     /// <summary>Status „beweisbar beste Lösung“ (kHighsModelStatusOptimal).</summary>
     private const int Optimal = 7;
 
+    /// <summary>Status „keine Lösung“ (kHighsModelStatusInfeasible).</summary>
+    private const int Unzulaessig = 8;
+
+    /// <summary>Lösung vorhanden (kHighsSolutionStatusFeasible).</summary>
+    private const int ZulaessigeLoesung = 2;
+
     /// <summary>Mehr Aufwand für Heuristiken, damit früh gute Lösungen da sind (Standard 0,05).</summary>
     private const double Heuristik = 0.2;
 
@@ -163,7 +169,15 @@ public static class HighsLoeser
 
             SetzeRueckruf(h, Marshal.GetFunctionPointerForDelegate(rueckruf), IntPtr.Zero);
             StarteRueckruf(h, MipUnterbrechung);
+            using IDisposable messung = Rechenfaeden.HighsRechnet();
             if (Ausfuehren(h) < 0)
+            {
+                return (null, false);
+            }
+
+            // Abgebrochen, bevor es eine Lösung gab: keine Werte (sonst lauter Nullen).
+            _ = LeseGanzzahlInfo(h, "primal_solution_status", out int loesungsstatus);
+            if (loesungsstatus != ZulaessigeLoesung)
             {
                 return (null, false);
             }
@@ -171,6 +185,114 @@ public static class HighsLoeser
             var werte = new double[n];
             LeseLoesung(h, werte, new double[n], new double[m], new double[m]);
             return (werte, Modellstatus(h) == Optimal);
+        }
+        finally
+        {
+            Zerstoeren(h);
+            GC.KeepAlive(rueckruf);
+        }
+    }
+
+    /// <summary>
+    /// Löst das Problem bis zur Zeitgrenze und liefert neben der besten Lösung die beweisbare untere Schranke (für die untere
+    /// Schranke der Ligaplanung, MIGRATIONSPLAN O7).
+    /// </summary>
+    /// <param name="problem">Das Problem.</param>
+    /// <param name="zeitgrenze">Zeitgrenze.</param>
+    /// <param name="start">Eine bekannte Lösung als Startpunkt, oder <c>null</c>.</param>
+    /// <param name="aufhoeren">
+    /// Wird während der Suche gefragt; <c>true</c> beendet sie mit der bis dahin besten Lösung (Abbruch, Pause), oder <c>null</c>.
+    /// </param>
+    /// <returns>
+    /// Die Werte der besten Lösung (oder <c>null</c>), ihre Kosten, die untere Schranke, ob die Lösung beweisbar die beste ist
+    /// und ob das Problem keine Lösung hat.
+    /// </returns>
+    public static (double[]? Werte, double Wert, double Schranke, bool Optimal, bool Unloesbar) LoesenMitSchranke(Ganzzahlproblem problem, TimeSpan zeitgrenze, double[]? start = null, Func<bool>? aufhoeren = null)
+    {
+        ArgumentNullException.ThrowIfNull(problem);
+        IntPtr h = Erzeugen();
+        if (h == IntPtr.Zero)
+        {
+            return (null, double.PositiveInfinity, double.NegativeInfinity, false, false);
+        }
+
+        Rueckruf rueckruf = (_, _, _, datenEin, _) =>
+        {
+            if (datenEin != IntPtr.Zero && aufhoeren?.Invoke() == true)
+            {
+                Marshal.WriteInt32(datenEin, 1);
+            }
+        };
+
+        try
+        {
+            SetzeSchalter(h, "output_flag", 0);
+            SetzeZahl(h, "time_limit", zeitgrenze.TotalSeconds);
+
+            // Hier bleibt die Vorverarbeitung an (anders als bei den Kompaktspieltagen): Ohne sie fand die Teilneuplanung in der
+            // Zeitgrenze nichts mehr (Kreisklasse (7): 0 von 10 Ausschnitten), und abbrechen lässt sich jetzt über den Rückruf.
+            double unendlich = Unendlich(h);
+            int n = problem.Kosten.Length;
+            int m = problem.ZeileUnten.Length;
+            double[] zeileOben = problem.ZeileOben.Select(x => double.IsPositiveInfinity(x) ? unendlich : x).ToArray();
+            double[] zeileUnten = problem.ZeileUnten.Select(x => double.IsNegativeInfinity(x) ? -unendlich : x).ToArray();
+            int status = UebergebeMip(
+                h,
+                n,
+                m,
+                problem.Spalten.Length,
+                Zeilenweise,
+                Minimieren,
+                0,
+                problem.Kosten,
+                new double[n],
+                problem.SpalteOben,
+                zeileUnten,
+                zeileOben,
+                problem.ZeilenAnfang,
+                problem.Spalten,
+                problem.Werte,
+                Enumerable.Repeat(Ganzzahlig, n).ToArray());
+            if (status < 0)
+            {
+                return (null, double.PositiveInfinity, double.NegativeInfinity, false, false);
+            }
+
+            if (start is not null && start.Length == n)
+            {
+                SetzeLoesung(h, start, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero);
+            }
+
+            if (aufhoeren is not null)
+            {
+                SetzeRueckruf(h, Marshal.GetFunctionPointerForDelegate(rueckruf), IntPtr.Zero);
+                StarteRueckruf(h, MipUnterbrechung);
+            }
+
+            using IDisposable messung = Rechenfaeden.HighsRechnet();
+            if (Ausfuehren(h) < 0)
+            {
+                return (null, double.PositiveInfinity, double.NegativeInfinity, false, false);
+            }
+
+            int modellstatus = Modellstatus(h);
+            if (modellstatus == Unzulaessig)
+            {
+                return (null, double.PositiveInfinity, double.PositiveInfinity, false, true);
+            }
+
+            _ = LeseGanzzahlInfo(h, "primal_solution_status", out int loesungsstatus);
+            _ = LeseZahlInfo(h, "mip_dual_bound", out double schranke);
+            if (loesungsstatus != ZulaessigeLoesung)
+            {
+                return (null, double.PositiveInfinity, schranke, false, false);
+            }
+
+            var werte = new double[n];
+            LeseLoesung(h, werte, new double[n], new double[m], new double[m]);
+            _ = LeseZahlInfo(h, "objective_function_value", out double wert);
+            bool optimal = modellstatus == Optimal;
+            return (werte, wert, optimal ? wert : schranke, optimal, false);
         }
         finally
         {
@@ -227,6 +349,12 @@ public static class HighsLoeser
 
     [DllImport(Bibliothek, EntryPoint = "Highs_setSolution", CallingConvention = CallingConvention.Cdecl)]
     private static extern int SetzeLoesung(IntPtr highs, double[] spalten, IntPtr zeilen, IntPtr spaltenDual, IntPtr zeilenDual);
+
+    [DllImport(Bibliothek, EntryPoint = "Highs_getDoubleInfoValue", CallingConvention = CallingConvention.Cdecl)]
+    private static extern int LeseZahlInfo(IntPtr highs, [MarshalAs(UnmanagedType.LPUTF8Str)] string info, out double wert);
+
+    [DllImport(Bibliothek, EntryPoint = "Highs_getIntInfoValue", CallingConvention = CallingConvention.Cdecl)]
+    private static extern int LeseGanzzahlInfo(IntPtr highs, [MarshalAs(UnmanagedType.LPUTF8Str)] string info, out int wert);
 
     [DllImport(Bibliothek, EntryPoint = "Highs_getInfinity", CallingConvention = CallingConvention.Cdecl)]
     private static extern double Unendlich(IntPtr highs);

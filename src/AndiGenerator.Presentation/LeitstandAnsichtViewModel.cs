@@ -8,17 +8,18 @@ using AndiGenerator.Application;
 using AndiGenerator.Domain.Optionen;
 using AndiGenerator.Engine.Inseln;
 using AndiGenerator.Engine.Referenz;
+using AndiGenerator.Engine.Schranke;
 using Dock.Model.Mvvm.Controls;
 
 namespace AndiGenerator.Presentation;
 
 /// <summary>
-/// Blick in den Maschinenraum der Optimierung: was die Rechenkerne gerade schaffen, wie die Inseln suchen (beste Kosten,
+/// Leitstand der Optimierung: was die Rechenkerne gerade schaffen, wie die Inseln suchen (beste Kosten,
 /// Weg bis zum Neustart, Suchstrategien; im Automodus statt der Kosten die Verstöße A, B und C), was die Spezial-Insel
 /// tut und – im Automodus – welche Gewichte er gerade gegenüber den eigenen angehoben hat. Hängt nicht vom Plan ab,
 /// sondern nur von der laufenden Generierung.
 /// </summary>
-public sealed class MaschinenraumAnsichtViewModel : Document
+public sealed class LeitstandAnsichtViewModel : Document
 {
     /// <summary>Breite eines Kostenbalkens bei 100 % (Pixel).</summary>
     private const double Balkenbreite = 90;
@@ -26,34 +27,56 @@ public sealed class MaschinenraumAnsichtViewModel : Document
     /// <summary>Höchste Gewichtsstufe der Stufenleiste („extrem hoch“; „nicht berücksichtigen“ = keine Stufe).</summary>
     private const int Stufen = (int)Gewichtung.ExtremHoch;
 
+    /// <summary>So viele Schritte des Automodus zeigt das Protokoll.</summary>
+    private const int ProtokollZeilen = 6;
+
     private static readonly CultureInfo Deutsch = CultureInfo.GetCultureInfo("de-DE");
 
     private readonly HauptfensterViewModel hauptfenster;
     private readonly ObservableCollection<Inselanzeige> inseln = [];
     private string ueberschrift = "Keine Generierung aktiv";
-    private bool rechnet;
     private bool automodus;
     private IReadOnlyList<Gewichtsgruppe> gewichte = [];
     private string gewichteSchluessel = string.Empty;
+    private string verfahren = string.Empty;
+    private IReadOnlyList<string> protokoll = [];
+    private bool zeigtTeilneuplanung;
 
     /// <summary>Initialisiert die Ansicht.</summary>
     /// <param name="hauptfenster">Hauptfenster mit der Anzeige der Rechenkerne.</param>
-    public MaschinenraumAnsichtViewModel(HauptfensterViewModel hauptfenster)
+    public LeitstandAnsichtViewModel(HauptfensterViewModel hauptfenster)
     {
         ArgumentNullException.ThrowIfNull(hauptfenster);
         this.hauptfenster = hauptfenster;
-        Id = "Maschinenraum";
+        Id = "Leitstand";
         Title = "Leitstand";
         CanClose = true;
         CanFloat = true;
         Anzeige = hauptfenster.Anzeige;
     }
 
+    /// <summary>Holt die Erklärung der Teilneuplanung mit HiGHS.</summary>
+    public static string TeilneuplanungErklaerung =>
+        "So arbeiten Inseln und HiGHS zusammen – es gibt immer nur einen besten Plan: Jede Verbesserung der Inseln und jeder "
+        + "bessere Plan aus HiGHS wird sofort bester Plan, wenn er nach den Regeln des Automodus besser ist. Die untere Schranke "
+        + "rechnet in Schritten (A, dann B, dann C); nach jedem Schritt wird ihr Plan sofort angeboten. Nach der Basisoptimierung "
+        + "plant die Teilneuplanung (im Schaubild rechts) fortlaufend die Spiele einiger Mannschaften des besten Plans neu "
+        + "(der Ausschnitt, zuerst zwei Mannschaften; bringt eine Größe eine Weile nichts, eine mehr): A und B dürfen nicht "
+        + "schlechter werden, C soll besser werden (Ungleich und Wechsel H/A, 3-Tage-Abstand, 2 Spiele pro Woche, gleiche "
+        + "Heimtermine, 60-km-Regel, genähert auch Abstand H/A, Setzliste und Pausen der Spielverteilung). Ein besserer Ausschnitt "
+        + "geht sofort an den Automodus und wird bester Plan (ein orangefarbener Punkt wandert dorthin), die schlechteste Insel rechnet "
+        + "von ihm aus weiter. Haben die Inseln inzwischen einen besseren Plan, plant HiGHS ab dem nächsten Ausschnitt von diesem "
+        + "aus weiter. Je Ausschnitt ein Kästchen: grün besser, rot im Modell besser, nach der echten Bewertung aber nicht, grau "
+        + "nichts Besseres, blau Plan der Inseln übernommen; umrandet der, den HiGHS gerade plant. Die Balken je Größe zeigen, wie oft "
+        + "Ausschnitte mit 2, 3, … Mannschaften besser waren. HiGHS hat keinen eigenen Kern: "
+        + "Es rechnet auf einem eigenen Faden und teilt sich den Prozessor mit der Suche – wie viel, zeigt die Anzeige "
+        + "Prozessor links (orange).";
+
     /// <summary>Holt die Erklärung des Inselmodells.</summary>
     public static string Erklaerung =>
         "Jeder Rechenkern rechnet abwechselnd an mehreren Suchplätzen. Die Suchplätze gehören zu Inseln: Jede Insel sucht für sich "
         + "und hat ihren eigenen besten Plan; die Balken zeigen, welche Kriterien in ihm die meisten Kosten verursachen. Im Schaubild "
-        + "steht je Insel grob, was sie gerade tut; ein grüner Punkt wandert nur, wenn der beste Plan besser wird. Findet die "
+        + "steht je Insel grob, was sie gerade tut; ein Punkt wandert nur, wenn der beste Plan besser wird (grün von einer Insel, orange von HiGHS). Findet die "
         + "schlechteste Insel lange nichts Besseres, beginnt sie neu – mit einem leeren Plan oder mit dem Plan der Spezial-Insel, "
         + "die eine Kostenart extrem gewichtet.";
 
@@ -71,13 +94,6 @@ public sealed class MaschinenraumAnsichtViewModel : Document
     {
         get => ueberschrift;
         private set => SetProperty(ref ueberschrift, value);
-    }
-
-    /// <summary>Holt einen Wert, der angibt, ob gerade gerechnet wird (nicht pausiert).</summary>
-    public bool Rechnet
-    {
-        get => rechnet;
-        private set => SetProperty(ref rechnet, value);
     }
 
     /// <summary>Holt einen Wert, der angibt, ob der Automodus lenkt (dann gibt es den Abschnitt der Gewichte).</summary>
@@ -103,31 +119,91 @@ public sealed class MaschinenraumAnsichtViewModel : Document
     /// <summary>Holt einen Wert, der angibt, ob der Automodus noch kein Gewicht geändert hat.</summary>
     public bool KeineGewichte => Gewichte.Count == 0;
 
+    /// <summary>
+    /// Holt, was der Automodus aus HiGHS weiß und wie er danach mit den Gewichten arbeitet (Schranke, Schutz von A und B);
+    /// leer, solange es keine Schranke gibt.
+    /// </summary>
+    public string Verfahren
+    {
+        get => verfahren;
+        private set
+        {
+            if (SetProperty(ref verfahren, value))
+            {
+                OnPropertyChanged(nameof(HatVerfahren));
+            }
+        }
+    }
+
+    /// <summary>Holt einen Wert, der angibt, ob es den Text zum Verfahren HiGHS gibt.</summary>
+    public bool HatVerfahren => Verfahren.Length > 0;
+
+    /// <summary>Holt die letzten Schritte des Automodus, der neueste zuerst.</summary>
+    public IReadOnlyList<string> Protokoll
+    {
+        get => protokoll;
+        private set
+        {
+            if (!protokoll.SequenceEqual(value))
+            {
+                protokoll = value;
+                OnPropertyChanged();
+                OnPropertyChanged(nameof(HatProtokoll));
+            }
+        }
+    }
+
+    /// <summary>
+    /// Holt einen Wert, der angibt, ob die Teilneuplanung läuft (ihr Stand steht im Schaubild, die Erklärung darunter).
+    /// </summary>
+    public bool ZeigtTeilneuplanung
+    {
+        get => zeigtTeilneuplanung;
+        private set => SetProperty(ref zeigtTeilneuplanung, value);
+    }
+
+    /// <summary>Holt einen Wert, der angibt, ob es Schritte des Automodus gibt.</summary>
+    public bool HatProtokoll => Protokoll.Count > 0;
+
+    /// <summary>Zeigt im Schaubild, woran HiGHS für die untere Schranke gerade rechnet.</summary>
+    /// <param name="fortschritt">Der Schritt; <c>null</c>, wenn HiGHS fertig ist.</param>
+    public void HighsZeigen(Schrankenfortschritt? fortschritt) => Schaubild.SchrankeZeigen(fortschritt);
+
     /// <summary>Übernimmt den Stand der Generierung (im Takt der Statusabfrage).</summary>
     /// <param name="stand">Der Stand.</param>
     public void Uebernehmen(Optimierungsstand stand)
     {
         ArgumentNullException.ThrowIfNull(stand);
-        Rechnet = stand.Laeuft && !stand.Pausiert;
         if (stand.Maschinenraum is not Maschinenraum raum)
         {
             Ueberschrift = "Keine Generierung aktiv";
             inseln.Clear();
             Automodus = false;
+            ZeigtTeilneuplanung = false;
+            Verfahren = string.Empty;
+            Protokoll = [];
             GewichteZeigen([]);
             Schaubild.Uebernehmen(stand, inseln);
             return;
         }
 
+        InselnUebernehmen(raum);
+        Automodus = stand.Lenkung is not null;
+        ZeigtTeilneuplanung = stand.Teilneuplanung is not null;
+        Verfahren = stand.Lenkung is { } lenkung ? Verfahrenstext(lenkung) : string.Empty;
+        Protokoll = stand.Lenkung?.Aenderungen.TakeLast(ProtokollZeilen).Reverse().ToArray() ?? [];
+        GewichteZeigen(stand.Lenkung?.Gewichte ?? []);
+        Schaubild.Uebernehmen(stand, inseln);
+
+        // HiGHS hat keine eigenen Kerne: Es teilt sich den Prozessor mit der Suche (gemessener Anteil).
         int normale = raum.Inseln.Count(i => !i.Spezial);
+        string highs = stand.Last is { Highs: > 0.001 } last
+            ? string.Create(Deutsch, $" · HiGHS {last.Highs:P0} des Prozessors")
+            : string.Empty;
         string zustand = stand.Pausiert ? " · angehalten" : string.Empty;
         Ueberschrift = string.Create(
             Deutsch,
-            $"{raum.Kerne.Count} Rechenkerne · {normale} Inseln{(normale < raum.Inseln.Count ? " und Spezial-Insel" : string.Empty)} · {stand.PlaeneProSekunde:N0} Pläne/s{zustand}");
-        InselnUebernehmen(raum);
-        Automodus = stand.Lenkung is not null;
-        GewichteZeigen(stand.Lenkung?.Gewichte ?? []);
-        Schaubild.Uebernehmen(stand, inseln);
+            $"{raum.Kerne.Count} Rechenkerne der Suche · {normale} Inseln{(normale < raum.Inseln.Count ? " und Spezial-Insel" : string.Empty)}{highs} · {stand.PlaeneProSekunde:N0} Pläne/s{zustand}");
     }
 
     /// <summary>
@@ -178,6 +254,26 @@ public sealed class MaschinenraumAnsichtViewModel : Document
         return stufe.ToString() + nummer.ToString(Deutsch);
     }
 
+    /// <summary>
+    /// Zeilen eines Kriteriums: je Mannschaft; dieselbe Änderung bei mehr als drei Mannschaften als eine Zeile (etwa wenn eine
+    /// bestmögliche Stufe geschützt wird).
+    /// </summary>
+    /// <param name="anhebungen">Die geänderten Gewichte des Kriteriums.</param>
+    /// <returns>Die Zeilen.</returns>
+    private static Gewichtszeile[] Zeilen(IEnumerable<Gewichtsanhebung> anhebungen) =>
+        anhebungen
+            .GroupBy(a => (a.Vorher, a.Jetzt))
+            .SelectMany(g => g.Count() > 3
+                ? [new Gewichtsanhebung(g.First().Kriterium, string.Create(Deutsch, $"{g.Count()} Mannschaften"), g.Key.Vorher, g.Key.Jetzt)]
+                : g.AsEnumerable())
+            .OrderBy(a => a.Mannschaft is not null)
+            .ThenBy(a => a.Mannschaft, StringComparer.CurrentCulture)
+            .Select(a => new Gewichtszeile(
+                a.Mannschaft ?? "alle Mannschaften",
+                Segmente(a.Vorher, a.Jetzt),
+                $"{Gewichtungsanzeige.Name(a.Vorher)} → {Gewichtungsanzeige.Name(a.Jetzt)}"))
+            .ToArray();
+
     private static string Spezialhinweis(Maschinenraum raum, Inselstand insel)
     {
         if (!insel.Laeuft || raum.SpezialKostenart is not { } art)
@@ -193,6 +289,7 @@ public sealed class MaschinenraumAnsichtViewModel : Document
     /// <param name="anhebungen">Die geänderten Gewichte.</param>
     private void GewichteZeigen(IReadOnlyList<Gewichtsanhebung> anhebungen)
     {
+        Stufeneinteilung einteilung = hauptfenster.Einteilung.Vervollstaendigt();
         string schluessel = string.Join(';', anhebungen.Select(a => $"{a.Kriterium},{a.Mannschaft},{a.Vorher},{a.Jetzt}"));
         if (schluessel == gewichteSchluessel)
         {
@@ -200,7 +297,6 @@ public sealed class MaschinenraumAnsichtViewModel : Document
         }
 
         gewichteSchluessel = schluessel;
-        Stufeneinteilung einteilung = hauptfenster.Einteilung.Vervollstaendigt();
         Kostenkriterium[] reihenfolge = [.. einteilung.A, .. einteilung.B, .. einteilung.C];
         Gewichte = anhebungen
             .GroupBy(a => a.Kriterium)
@@ -208,14 +304,46 @@ public sealed class MaschinenraumAnsichtViewModel : Document
             .Select(g => new Gewichtsgruppe(
                 StufeMitNummer(einteilung, g.Key),
                 Planqualitaet.Name(g.Key),
-                g.OrderBy(a => a.Mannschaft is not null)
-                    .ThenBy(a => a.Mannschaft, StringComparer.CurrentCulture)
-                    .Select(a => new Gewichtszeile(
-                        a.Mannschaft ?? "alle Mannschaften",
-                        Segmente(a.Vorher, a.Jetzt),
-                        $"{Gewichtungsanzeige.Name(a.Vorher)} → {Gewichtungsanzeige.Name(a.Jetzt)}"))
-                    .ToArray()))
+                Zeilen(g)))
             .ToArray();
+    }
+
+    /// <summary>
+    /// Was der Automodus aus HiGHS weiß und wie er danach arbeitet: Schranke je Stufe gegen den besten Plan, geschützte
+    /// Stufen.
+    /// </summary>
+    /// <param name="lenkung">Der Stand des Automodus.</param>
+    /// <returns>Der Text; leer ohne Schranke.</returns>
+    private string Verfahrenstext(Lenkungsstand lenkung)
+    {
+        Stufenwert b = lenkung.Bester;
+        var teile = new List<string>();
+        if (lenkung.SchrankeA is not null)
+        {
+            int? a = lenkung.SchrankeA;
+            int? bb = lenkung.SchrankeB;
+            string Teil(string stufe, int? schranke, int wert)
+            {
+                if (schranke is not int s)
+                {
+                    return stufe + " noch offen";
+                }
+
+                string erreicht = wert <= s ? " – bestmöglich" : string.Empty;
+                return string.Create(Deutsch, $"{stufe} ≥ {s} (bester Plan {wert}{erreicht})");
+            }
+
+            teile.Add($"Untere Schranke aus HiGHS (Summe je Stufe): {Teil("A", a, b.A)}, {Teil("B", bb, b.B)}.");
+            teile.Add("Ist eine Stufe bestmöglich, hört der Automodus dort auf zu drängen und setzt ihre Gewichte auf „extrem hoch“, "
+                + "damit die Suche sie hält; danach glättet er C.");
+        }
+
+        if (lenkung.Festgelegt is { } festgelegt)
+        {
+            teile.Add($"Festgelegt vom Staffelleiter: {festgelegt} – A und B bleiben höchstens so, der Automodus glättet nur noch C.");
+        }
+
+        return string.Join(" ", teile);
     }
 
     private void InselnUebernehmen(Maschinenraum raum)

@@ -70,7 +70,7 @@ Wesentliche Eigenschaften (Details in [PlanTypes](Dateien/PlanTypes.md), [PlanMa
 ---
 
 ### 1.5 Neue Version 26.7.1.0 (Stand 27.09.2026)
-Der Quellcode liegt unter `Claude\AndiGenerator 26.7.1.0`. Laut Release Notes wurden nur Hänger korrigiert. Ein normalisierter Vergleich (ohne Groß-/Kleinschreibung, Leerzeichen und Kommentare) bestätigt das:
+Der Quellcode liegt (seit dem Umzug am 15.10.2026) neben dem Repository unter `..\AndiGenerator`; der ältere Stand 24.5.1.0, mit dem die Analyse begann, wurde danach gelöscht. Laut Release Notes wurden nur Hänger korrigiert. Ein normalisierter Vergleich (ohne Groß-/Kleinschreibung, Leerzeichen und Kommentare) bestätigt das:
 - **Kostenfunktion, Füll-Algorithmus, Suche: unverändert.** Die ca. 2.200 geänderten Zeilen in `PlanTypes.pas` stammen fast vollständig von einem Code-Formatierer. Übrig bleiben 10 Stellen, alle `try … finally` um `ParentCriticalSection`. **Die Referenzwerte (Referenz/werte) bleiben gültig.**
 - `PlanOptimizer`/`PlanMainThread`: `try … finally` um alle Sperren, Ausnahmen werden protokolliert (`LogException` in `PlanUtils`), und `ReInit` + `SetMaxOption` sind zu `ReInitWithMaxOption` zusammengefasst (atomar unter Lock). Damit ist **Befund #11 im Original behoben**.
 - `AndiGeneratorMain`: Debug-Ausgabe `SaveToXML('D:\temp\andigenerator.xml')` entfernt. `DialogProfile`: ebenfalls nur `try … finally`.
@@ -610,6 +610,42 @@ Die **TT-Spielplan Engine** (Stephan Rüb, v1.1.2) ist ein neues, unabhängiges 
 1. **Oberflächenkonzepte** (Kandidaten für Phase 4/5): Top-5-Pläne mit „ab hier optimieren“; Planqualität als Zahl der Verstöße je Kriterium (live, Ziel 0; passt zu E14); Diagramme (Heim-/Auswärts-Rhythmus je Mannschaft, Spiel- und Pausenrhythmus, Auslastung je Kalenderwoche); Gewichtungs-Voreinstellungen; Konfliktliste; Terminwünsche mit Erfüllungsstatus; Kalender mit Verschieben per Klick; Verlauf früherer Läufe; Batch-Modus für mehrere Staffeln; Importe (Rahmenterminplan-PDF, Vereinsbemerkungen-PDF, Setzliste aus TTR-CSV); Plausibilitätsprüfung der Daten vor dem Start; geführte Einführung (Tour).
 2. **Andere Optimierungsverfahren prüfen**, insbesondere **Google OR-Tools CP-SAT** (Apache-2.0, GPL-v3-kompatibel; .NET-Paket `Google.OrTools`, nativ ca. 35 MB): z. B. als Startlösung oder für Teilprobleme (Paarungen/Heimrecht, Pflichtspielwoche) in Kombination mit der bestehenden lokalen Suche. Maßstab bleibt das Kostenmodell des Originals (`andigen bewerten`). Ausgearbeitet in **Abschnitt 11** (O7).
 
+**Zweiter Blick (15.10.2026)** – die TT-Spielplan Engine (v1.1.2) erneut untersucht (nur entpackt, Texte und Programmteile
+gelesen, nicht ausgeführt). Ihr „KI Konfliktberater“ ist eine **regelbasierte Analyse** (zu wenige Wunschtermine für die
+Heimspiele, Wunschtermine durch Sperren blockiert, kein Spielraum, je nicht platziertem Spiel und Termin der Grund:
+Gast gesperrt, Halle voll, Mannschaft spielt schon; Spiele auf Sperrterminen, Doppelbelegungen), deren Ergebnis optional
+mit eigenem API-Schlüssel an Google Gemini geht, das daraus einen Fließtext mit Empfehlungen formuliert. Die KI findet
+nichts Neues. **Empfehlung (15.10.2026): vorerst keine LLM-Anbindung** (Datenschutz, API-Schlüssel, Kosten,
+Nachvollziehbarkeit); stattdessen die regelbasierten Teile selbst bauen. Offene Punkte, nach Nutzen geordnet:
+
+3. **Datencheck vor dem Start** (offline, regelbasiert): je Mannschaft, was knapp ist und was helfen würde – Heimtermine
+   im Verhältnis zu den Heimspielen der Runde, durch Sperrtermine blockierte Heimtermine, kein Spielraum (genau so viele
+   nutzbare Termine wie Heimspiele), Hallenkapazität (parallele Spiele, Vereinsmannschaften in derselben Halle),
+   Pflichtspielwoche ohne mögliche Termine. Anzeige in der Einrichtung und auf Wunsch vor dem Start.
+4. **Warum nicht besser?** Für einen Verstoß bzw. ein Spiel zeigen, warum es an keinem anderen möglichen Termin liegt:
+   je Termin der Grund (Gegner gesperrt, Halle voll, schon ein Spiel, Pflichtspielwoche …) und die Kostenänderung,
+   wenn man es dorthin verschöbe.
+5. **Was-wäre-wenn für Meldungen (Sensitivität):** Welche einzelne Änderung an den Meldungen (ein zusätzlicher
+   Heimtermin bei Verein X, eine aufgehobene Sperre) würde die meisten Verstöße beseitigen? Ergebnis als kurze Liste
+   „Bei diesen Vereinen lohnt eine Rückfrage“ – mit Textvorschlag für die Rückfrage an den Verein.
+6. **Spiel im Plan von Hand verschieben** (Terminplan oder Kalender) mit sofortiger Bewertung (Kostenänderung,
+   neue/entfallene Verstöße), danach auf Wunsch festhalten und um das festgehaltene Spiel herum weiteroptimieren.
+7. **Neuplanung mit wenig Änderungen:** Wenn sich nach der Veröffentlichung etwas ändert (Halle fällt aus, neuer
+   Sperrtermin), einen Plan suchen, der möglichst wenige bereits veröffentlichte Spiele verschiebt (Abstand zum
+   bestehenden Plan als zusätzliche Kostenart).
+8. **Untere Schranke („geht es überhaupt besser?“):** Mit dem vorhandenen Löser HiGHS für Teilziele (z. B. Zahl
+   unvermeidbarer Sperrtermin-Verstöße, Pflichtspielwoche) nachweisen, dass ein Wert nicht zu unterbieten ist – dann
+   sagt der Automodus „Stufe A ist bestmöglich“, und man weiß, wann sich weiteres Rechnen nicht lohnt.
+9. **Verschiedene gute Pläne zur Wahl** auch im normalen Modus (wie bei den Kompaktspieltagen): z. B. „wenigste
+   Verstöße“, „gleichmäßigster Heim-/Auswärtswechsel“, „kürzeste Wochenspiel-Fahrten“, jeweils mit kurzer Begründung.
+10. **Fahrtstrecken auch im normalen Modus:** Die Hallenadressen aus den Terminwünschen sind vorhanden – km je Mannschaft
+    und Saison anzeigen, Wochenspiele und Auswärtskoppeln nach Entfernung bewerten.
+11. **Robustheit des Plans:** Wie anfällig ist der Plan, wenn ein Termin ausfällt (gibt es für jedes Spiel einen
+    Ausweichtermin ohne neuen Verstoß)? Anzeige je Spiel bzw. Kennzahl.
+12. **Mehrere Staffeln:** Batch-Modus für mehrere Klassen nacheinander (über die Kommandozeile schon möglich) und
+    langfristig gemeinsame Planung von Staffeln, die sich Hallen teilen.
+13. **Geführte Einführung** in der Oberfläche (kurze Tour für Erstnutzer) – niedrige Priorität, die Anleitung gibt es.
+
 ## 11. Verbesserungen der Optimierung: Automodus (Stand 05.10.2026)
 
 **Ausgangspunkt:** Jeder Suchplatz arbeitet wie im Original: besten Stand zurücksetzen, verändern (Neu würfeln, Termine füllen), bewerten und nur bei echter Verbesserung übernehmen. Vielfalt entsteht durch Inseln, Strategiemix, Neustarts und die Spezial-Insel. Gesucht war ein Verfahren, das einem Staffelleiter in 5, höchstens 10 Minuten einen besseren Plan liefert. Grundsatz: Erweiterungen ändern das Standardverhalten nicht; die Funktionsgleichheit mit dem Original (E7/E9) bleibt.
@@ -627,6 +663,200 @@ Die **TT-Spielplan Engine** (Stephan Rüb, v1.1.2) ist ein neues, unabhängiges 
 | Gerüstbauer (Rundenturnier mit Zeitfenstern als Ausgangsplan) | leichte Verbesserung, kein Durchbruch |
 
 Befund: Billigere Pläne nach der Kostenfunktion des Originals sind nicht automatisch bessere Pläne – die Standardgewichtung stellt z. B. viele parallele Spiele nicht über einige C-Kosten. Nicht weiterverfolgt: OR-Tools CP-SAT (O7) und automatische Parametersuche (O8).
+
+**O7 neu: HiGHS als Ergänzung der Suche (Vorschlag 15.10.2026, nach dem Umzug teilweise angehen).** Alle bisherigen
+Versuche waren Varianten der lokalen Suche; ein ganzzahliges Modell (wie bei den Kompaktspieltagen, HiGHS ist über
+`IGanzzahlloeser` schon eingebunden) arbeitet grundsätzlich anders und kann Optimalität beweisen. Grundgerüst
+x[Spiel, Termin] ∈ {0,1} mit einem Spiel je Mannschaft und Tag, Hallenkapazität, Sperrterminen, Pflichtspielwoche,
+Vor-/Rückrunde ist gut modellierbar; folgeabhängige Kostenarten (Heim-/Auswärtswechsel, Spielverteilung, Doppelwochen,
+Überlappung, Koppelungen) nur näherungsweise. Daher nicht als Ersatz, sondern als Ergänzung – nach Aufwand:
+1. **Untere Schranke für Stufe A** (ggf. B): beweisen, wie viele Verstöße unvermeidbar sind; der Automodus meldet
+   „Stufe A bestmöglich“ und man weiß, wann weiteres Rechnen nichts bringt.
+2. **Startplan aus HiGHS** mit den wenigsten A-/B-Verstößen; die bisherige Suche verbessert C-Kriterien und Feinheiten.
+3. **Gezielte Reparatur (Large Neighbourhood Search)** als zusätzlicher Suchplatz: Ausschnitt freigeben (z. B. zwei
+   Wochen oder drei Mannschaften), Rest festhalten, Ausschnitt mit HiGHS optimal neu belegen, übernehmen nur bei
+   Verbesserung nach der echten Kostenfunktion.
+Erwartung: Gewinn eher bei A/B-Verstößen und beim „wann ist es fertig“ als bei der Kostensumme. Vorgehen: zuerst
+Prototyp in Python (HiGHS) auf den anonymisierten Referenzstaffeln, Schranke und A/B-Optimum mit den Ergebnissen des
+Automodus vergleichen (bewertet mit `andigen bewerten`); erst bei deutlichem Abstand in C# einbauen.
+
+**O7 Schritt 1 umgesetzt (15.10.2026), gleich in C#** (die Kostenarten der Stufe A hängen an zu vielen Einzelheiten des
+Kerns – Hallenvergleich, Fenster 1:29 h bzw. 3:59 h, weitergereichte Nachbarspiele, Regel für den Pflichtspieltag –, um
+sie in Python nachzubauen): `Ligaschranke` (Engine, `Schranke/`) baut aus `KernDefinition` ein Modell
+x[Spiel, Wunschtermin der Heimmannschaft] mit einem Spiel je Wunschtermin, je Mannschaft und Tag, Hin- und Rückspiel
+in verschiedenen Runden, und minimiert lexikografisch A1 (Spiele ohne Termin), A2 Hallenbelegung, A3 parallele Spiele,
+A4 Pflichtspieltage, A5 vereinsinterne Spiele am Anfang (ja/nein); jede Stufe wird für die nächste festgehalten. Das
+Modell ist eine **Lockerung**: Es erlaubt mindestens alles, was ein gültiger Plan darf, und zählt nur sicher gezählte
+Verstöße (parallele Spiele: alle festen Nachbarspiele samt Weiterreichung, von den Vereinsmannschaften im Plan nur die
+direkten Fälle). Daher ist das Ergebnis eine beweisbare untere Schranke. Aufruf: `andigen schranke <xml> [--sekunden N]
+[--plan DATEI]`; HiGHS über `ISchrankenloeser` (`Highsbruecke`, CLI) mit der Schranke des Lösers (`mip_dual_bound`).
+Noch nicht: nur eine Runde planen, vorgegebene Spiele, A5 bei Doppelrunde; Koppeltermine nur gelockert (zwei Spiele am
+Tag erlaubt).
+
+Ergebnis auf den 27 Referenzstaffeln (Standardoptionen): Alle Stufen in 0,1–2 s bewiesen. Keine Schranke wird von
+einem Plan der normalen Suche (60 s, `--leer`) unterschritten. Der **Plan des Modells** ist in 23 Fällen gültig und
+erreicht dort die Schranke genau – Stufe A ist damit **beweisbar bestmöglich** gelöst. Ungültig sind nur die vier
+Staffeln mit Koppelterminen (R16, R21, R22, R26). Abstand zur normalen Suche vor allem bei den parallelen Spielen
+(Schranke → Suche): R3 2 → 4, R04 9 → 10, R11/R12 2 → 35, R14 4 → 14, R19 6 → 35, R24 4 → 38, R25 6 → 24, R26 5 → 20;
+in 14 Staffeln sind 0 möglich, die Suche hatte davon in 10 Fällen 1–23. Hallenbelegung ist überall 0, Pflichtspieltage sind in R08 und
+R13 je 2 unvermeidbar, und in R22 sind 80 Spiele zwangsläufig ohne Termin. Dafür hat der Modellplan mehr Sperrtermin-
+Verstöße (Stufe B ist nicht im Modell). Bei R11/R12 kosten zwei statt 35 parallele Spiele die vereinsinternen Spiele
+am Anfang (Rangfolge A3 vor A5). Der Vergleich lief mit der normalen Suche, nicht mit dem Automodus, der die Gewichte
+nach der Rangfolge lenkt (die CLI kann ihn noch nicht).
+
+**Versuch Startplan (Variante 1, 15./16.10.2026):** Eine von vier Inseln beginnt mit dem Plan des Modells
+(`Optimierungseinstellungen.Startplan`/`StartplanInseln`, CLI `optimieren --start PLAN [--start-inseln N] [--auto]`).
+Kostenmodus (12 Staffeln, 60 s, 2 Startwerte): Kosten insgesamt neutral (R24 klar besser, ≈ 790 T → 650 T, sonst
+gemischt), kein Hängenbleiben – aber die Suche gibt den Vorsprung bei den parallelen Spielen wieder her (R11: Start 2,
+Ende 36–42), weil die Standardgewichtung sie billig macht. Automodus (R3, R11, R14, R24; 120 s, 2 Startwerte): Parallele
+Spiele leer → mit Startplan (Schranke): R3 2/2 → 2/2 (2), R14 4/5 → 5/4 (4), R11 4/8 → 7/5 (2), R24 11/7 → 10/10 (4);
+kein klarer Gewinn durch den Startplan, er geht in der Basisoptimierung mit Standardgewichten unter. Wichtigster
+Befund: Der **Automodus allein erreicht die Schranke bei R3 und fast bei R14**; bei R11 und R24 bleibt ein Abstand von
+2–6 parallelen Spielen. Folgerung: Die Schranke zuerst als **Maßstab im Automodus anzeigen** (fertig, wenn erreicht);
+den Startplan erst wieder versuchen, wenn Stufe B im Modell ist und der Automodus ihn nach der Basisoptimierung mit
+festgehaltener Stufe A übernimmt.
+
+**Stufe B im Modell (16.10.2026):** Sperr- und Ausweichtermine exakt (je Spiel und Tag), Heimkoppel als Soll minus
+gekoppelte Paare belegter Koppeltermine (≤ 1 Tag, ohne Reihenfolge), Auswärtskoppel über die Zähler je Gegner (Σ max(0,
+Zähler)/2) mit Paar-Variablen für gekoppelte Fahrten. Die Stufen folgen der Einteilung (A, dann B; auch nach A/B
+geschobene C-Kriterien, sofern das Modell sie kennt, sonst übersprungen). Auf allen 27 Referenzstaffeln in 0–5 s je
+Stufe bewiesen; bei allen gültigen Modellplänen zählt `bewerten` genau die Schranke (z. B. R19: 7 Sperrtermine
+unvermeidbar bei 6 parallelen Spielen). Halbrunde/nur Vorrunde ebenfalls (je Paarung ein Spiel, Richtung frei). Anzeige im
+Automodus: Spalte „Bestmöglich“ der Qualitätsansicht.
+
+**Schritt 2 umgesetzt (16.10.2026):** Koppeltermine exakt (je Mannschaft und Tag: zwei Heimspiele nur auf Koppelterminen
+≥ 3:30 h auseinander, zwei Auswärtsspiele nur mit passendem Auswärtskoppel-Wunsch, nie heim und auswärts, Zweitzeit nur
+mit Partner) – alle Modellpläne gültig, auch R16/R21/R22/R26. C-Kriterien im Modell (auch als Schranke, wenn nach A/B
+geschoben): gleiche Heimtermine, 2 Spiele/Woche, 3-Tage-Abstand, Ungleich H/A (alle in Stichproben exakt), Wechsel H/A
+(exakt, aber für HiGHS zu schwer: als Schranke oft unbewiesen, im Feinschliff ohne Verbesserung in 20 s – bleibt dem
+Automodus). Feinschliff nach A/B: Ansetzungen festlegen, Hilfsspalten ergänzen, lösen und mit diesem Startpunkt die
+C-Kriterien gewichtet verbessern (R3: C-Kosten 322 Mio → 1,2 Mio). Automodus mit Startplan: alle Inseln beginnen damit,
+keine Basisoptimierung, der Startplan ist sofort bester Plan nach Stufen; `AutoObergrenzen` halten die A/B-Werte fest
+(Überschreitung zählt wie ein harter Fehler), weil `Stufenwert` innerhalb einer Stufe nur die Summe vergleicht. Ergebnis
+(60 s, 2 Kerne): A/B bleiben exakt bestmöglich (parallele Spiele z. B. 34 → 7, 25 → 2, 27 → 6, 16 → 4), C teils besser
+(3-Tage, 2/Woche), teils schlechter (Ungleich und Wechsel H/A) – der Preis der Rangfolge. Oberfläche: Start im Automodus
+wartet auf die Schranke und nimmt den HiGHS-Plan (außer gemerkter/gesicherter Plan gewählt). CLI: `optimieren --highs`,
+`schranke --stufen`.
+
+**Umbau nach Peters Rückmeldung (16.10.2026):** Zwei getrennte Wege statt HiGHS-Start im Automodus. (1) Automodus wie
+bisher (Basisoptimierung, A/B drängen, C glätten). (2) Drittes Verfahren **HiGHS**: A/B-optimaler Plan (Kacheln zeigen je
+Stufe den Zwischenstand), angehalten zur Wahl; „Fortsetzen“ = Automodus mit `AutoTausch` (10, 5): sofort C glätten, bester
+Plan nach Tauschwert 10·A + 5·B + C (A/B nur gegen deutlich besseres C), A/B-Gewichte zu Beginn „extrem hoch“, damit die
+Suche in der Nähe des Optimums bleibt (ohne das lief sie mit den normalen Gewichten sofort weg – R11: 25 parallele Spiele –
+und der beste Plan änderte sich nie). R11 nach 60 s: A/B unverändert, Wechsel H/A 101 → 73 (40 Mio → 167 T), gesamt
+69 → 30 Mio; Peters Verbandsliga bewegte sich in 60 s auf 2 Kernen nicht. Stufe C (bei bestmöglichem A/B) in der Spalte
+„Bestmöglich“; unabhängige HiGHS-Läufe parallel auf Modellkopien.
+
+**Zusammengeführt (17.10.2026, Vorschlag Peter):** Das Verfahren HiGHS ist wieder entfallen; der Automodus nutzt beide
+Techniken. HiGHS rechnet ab dem Start nebenher; `Inseloptimierer.HighsEinspielen` übernimmt (1) die bewiesenen Schranken
+je A/B-Kriterium – das Drängen einer Stufe endet, sobald der beste Plan sie erreicht; ihre Gewichte gehen dann auf
+„extrem hoch“ (Schutz), danach B bzw. C glätten; sind A und B bei der Schranke, wird nach C nicht wieder gedrängt – und
+(2) den Plan, der nach dem Grundlauf geprüft wird (besser → bester Plan, die schlechtere Hälfte der Inseln startet mit ihm
+neu). Tauschregel (10, 5) als Haken „A/B für C hergeben“ in der Qualitätsansicht statt eigenem Verfahren; `AutoObergrenzen`
+entfällt. R11, 120 s, 2 Kerne: kombiniert A 3 · B 1 · C 169 (A/B bestmöglich ab 81 s, Wechsel H/A 101 → 80), klassisch
+A 11 · B 2 · C 187 (noch beim Drängen von A). Danach (Peter): Tauschregel nur noch für B (`AutoTausch` = 5 C-Verstöße je
+B-Verstoß; Vergleich Harte, A, dann 5·B + C) – A wird nie hergegeben; der Plan aus HiGHS geht schon während des Grundlaufs
+an eine Insel. Nächster Schritt: Teilneuplanung mit HiGHS als Werkzeug einer Insel
+(Schritt 3, LNS: Ausschnitt freigeben, A/B als Bedingung, C als Ziel – dort auch Wechsel H/A).
+
+**O7 Schritt 3 – Teilneuplanung, Prototyp (17.10.2026, `andigen neuplanen`):** `Ligaschranke.Neuplanen` legt die
+Ansetzungen des Plans je Spalte als Zeile fest, ergänzt die Hilfsspalten (alle Ziele minimiert) und hält jedes A-Kriterium
+(ohne Tauschregel auch jedes B-Kriterium) bei seinem Wert im Plan fest. Dann je Schritt ein Ausschnitt frei – zwei von drei
+Mal alle Spiele zweier Mannschaften auf allen Terminen, sonst die Spiele von sechs Wochen auf Terminen in diesen Wochen –,
+HiGHS (5 s, mit dem Plan als Start) minimiert die Zahl der C-Verstöße (mit Wechsel H/A; mit Tauschregel 5 × B + C). Die echte
+Bewertung entscheidet (harte Fehler und A nicht mehr, B nicht mehr, weniger C). Ergebnisse, 2 Kerne:
+R11 vom Plan des Automodus (120 s, A 3 · B 1 · C 178): nach 120 s C 147 (Wechsel H/A 81 → 40, dafür 3-Tage 4 → 8,
+2 Spiele/Woche 2 → 8), 9 von 154 Ausschnitten angenommen; Wochen-Ausschnitte bringen kaum etwas.
+Peters Verbandsliga (nur Rückrunde) vom HiGHS-Plan (A 8 · B 42 · C 157): 180 s mit 2 Mannschaften C 153, 110 s mit
+4 Mannschaften C 151 – bei bestmöglichem A/B ist dort wenig Spielraum (Koppel- und Sperrtermine).
+**Abstand H/A genähert (17.10.2026):** nur in der Teilneuplanung (`Ziel(k, naeherung: true)`, nie für Schranken): Lage
+jedes Spiels in seiner Halbrunde (0 … 1 zwischen erstem und letztem echten Datum) × Spiele je Halbrunde; je Paarung
+z ≥ |Lage Rückspiel − Lage Hinspiel| − 0,5, je Mannschaft das größte z (gespiegelter Plan = 0; Vorrunde bei „nur
+Rückrunde“ fest). Start R11: Modell 89, echt 87; Verbandsliga: Modell 71, echt 64. R11 120 s vom Plan des Automodus:
+C 178 → **120** (Abstand H/A 87 → 49, Wechsel H/A 81 → 52; ohne Abstand im Modell: 147), 23 von 77 Ausschnitten
+angenommen. Verbandsliga 120 s vom HiGHS-Plan: C 157 → 147 (vorher 153), nur 2 von 816 Ausschnitten.
+**Im Automodus (17.10.2026):** Ausschnitte wachsen (2 Mannschaften; nach max(4, N/2) Schritten ohne Erfolg eine mehr bis N/2,
+dann von vorn; Zeitgrenze mitwachsend); Wochen-Ausschnitte entfallen. `Teilneuplaner` (Engine, eigener Faden, gestartet vom
+`Optimierungsdienst` bzw. `andigen optimieren --neuplanen`): nach dem Grundlauf Runden zu 30 s ab dem besten Plan, angenommen
+nach dem Maßstab des Automodus (`Inseloptimierer.NachStufen`/`IstBesser`, also mit C-Ausreißern), Einspielen per
+`Inseloptimierer.PlanEinspielen` (bester Plan, schlechteste Insel startet damit neu). Befund: Mit dem eigenen Maßstab (ohne
+Ausreißer) fand sie in R11 Pläne mit C 146–152, die der Automodus wegen 3–4 C-Ausreißern ablehnte. Mit seinem Maßstab, R11
+240 s, 2 Kerne: C **161** (ohne Teilneuplanung 171), danach fand sie nichts Ausreißerfreies mehr; die C-Kosten steigen
+(4,8 Mio statt 0,55 Mio), weil nur Verstöße zählen. Bremse ist die Ausreißer-Regel – nächster Schritt: Ausreißer im Modell
+(je Mannschaft und Kriterium die Grenze aus der Basis) oder die Regel überdenken.
+**Setzliste genähert, Plan aus HiGHS sofort (17.10.2026):** Setzliste wie im Original (i-tes Spiel der Halbrunde gegen einen
+a Plätze entfernten Gegner verletzt sie bei i > N − 1 − a), i geschätzt aus der Lage des Termins → feste Kosten je
+Termin-Spalte (0 oder 2), ohne Hilfsspalten. R13 mit aktiver Setzliste (Kopie, Plan des Automodus, C 78: Setzliste 29,
+Abstand 25; Modell 26 bzw. 29), je 120 s: nur Setzliste C 60/64 (Abstand wird schlechter: 27/35), nur Abstand C 40
+(Setzliste 28), **beide C 32** (Abstand 6, Setzliste 14) – Peters Vorschlag (mit Setzliste Abstand weglassen) geprüft und
+verworfen. Plan aus HiGHS: beendet den Grundlauf, sobald er vorliegt (frühestens nach 10 s), und wird sofort geprüft und
+angezeigt; die eine Insel, die vorher schon damit rechnete, entfällt.
+**Weitere C-Kriterien im Modell (17.10.2026):** 60-km-Regel genau (Auswärts-Termin-Spalte an einem Werktag bei einem Gegner
+ohne Wochenspiel), Pausen der Spielverteilung genau wie `KernPlan.ZusatzZaehlen` (je Mannschaft und möglichem Spieltag a:
+p ≥ Spiel an a − Spiele im Fenster danach mit zwei Spieltagen; Rundenbeginn/-ende anderthalb; ohne Koppel-Abzug) – Start
+R11 Modell 9/echt 9, Verbandsliga Rheinhessen Rückrunde 7/7. 120 s Teilneuplanung: R11 C 227 → 184 (Pausen 9 → 6),
+Verbandsliga Rheinhessen C 174 → 150 (Pausen 7 → 2). Länge/Überlappung der Spieltage hängen an der Reihenfolge aller Spiele
+jeder Mannschaft – nicht modelliert. Leitstand: Karte „Teilneuplanung mit HiGHS“ (Erklärung, Zustand, Zähler, letzte
+Schritte); Qualitätsansicht: Verstöße mit eigenem Bildlauf rechts (immer im Blick).
+
+**Ein bester Plan (17.10.2026):** Die Teilneuplanung lief in Runden zu 30 s und bot ihren Plan erst am Ende der Runde an;
+die nächste Runde begann beim besten Plan der Suche – Fortschritt von HiGHS ging so verloren oder kam spät. Jetzt fortlaufend:
+jeder angenommene Ausschnitt sofort `PlanEinspielen` (Rückruf `Verbessert`); vor jedem Ausschnitt fragt `Ausgangsplan`, ob der
+beste Plan des Automodus besser ist – dann wird er neuer Ausgangsplan (Ansetzungen festlegen, Hilfsspalten ergänzen,
+Bedingungen neu). Auch die Zwischenpläne der Schranke (nach jedem Schritt) gehen sofort an `PlanEinspielen`. Kreisklasse
+(7), 120 s: viermal sofort bester Plan, C 239 → 201. Leitstand: HiGHS im Schaubild oben rechts; Leiste „Ganzer Prozessor“ mit
+gemessener Rechenzeit je Faden (`Rechenfaeden`: Windows `GetThreadTimes`, Linux `CLOCK_THREAD_CPUTIME_ID`) – HiGHS ist kein
+zusätzlicher Kern, sondern ein Anteil am Prozessor.
+
+**Schranke als Summe je Stufe (17.10.2026, Entscheidung Peter):** Die Kette war lexikografisch je Kriterium (A2, A3, … B4), der
+Automodus vergleicht aber Summen je Stufe; die addierten Kettenwerte waren keine Schranke der Summe (Verbandsliga: Kette
+parallele Spiele 0 → Pflichtspieltage 2, „A ≥ 2“, gefunden wurde A = 1 + 0). Jetzt: A1 → Summe A → Summe B → C. Vor jeder
+Summe die Kriterien einzeln auf Kopien (A nach A1, B bei festem A); ihre Summe kommt als Bedingung ins Modell und macht den
+Beweis meist sofort möglich. `Schrankenbericht.SchrankeA/SchrankeB`, Automodus `SchrankenSetzen(a, b)`, `AmZiel` über
+`BesterWert.A/B`; Teilneuplanung hält die Summen. R11: A ≥ 3 in 9 s; die Summe B ist dort in 20 s nicht beweisbar (vorher
+lexikografisch 3) – B bleibt dann offen. C nur noch, wenn die ganze Kette bewiesen ist.
+
+**Eine Vergleichsregel (17.10.2026, Aufräumen Schritt 2):** `Stufenvergleich(Tausch)` ist die einzige Regel für „besser“
+(bester Plan, Teilneuplanung, Stillstand der Suche, Zurückziehen beim Glätten mit `BSpielraumBeimGlaetten` = 1);
+`Stufenwert.IstBesserAls` = `Stufenvergleich.Streng`. Der Automodus bewertet Pläne mit `Auswerten` → `Auswertung` (Wert,
+Anzahl/Kosten je Kriterium, Verstöße je Mannschaft) statt über gemeinsame Felder – vorher hing z. B. der Beginn des Glättens
+nach der Schranke an der zuletzt bewerteten Suche statt am besten Plan. Tausch-Faktor 5 = `Stufenvergleich.StandardTausch`,
+Zeit je Schranken-Stufe = `Ligaschranke.StandardZeitJeStufe` (20 s, auch CLI).
+
+**Rangfolge C vor Ausreißern (17.10.2026, Vorgabe Peter):** `Stufenwert.IstBesserAls` vergleicht (harte, A, B, C-Anzahl,
+Ausreißer, C-Kosten) statt Ausreißer vor C – sonst konnte ein „besserer“ Plan mehr C-Verstöße haben (Teilneuplanung: C 146–152
+abgelehnt, Inseln mit weniger Ausreißern und mehr C übernommen). Tauschwert = Tausch × B + C-Anzahl, Ausreißer danach. Pläne aus
+HiGHS werden wie die der Inseln vollständig bewertet (`NachStufen`/`Einspielen` → `Pruefen`), nie mit der Näherung des Modells.
+Offen: Gewichtung der C-Kriterien nach ihrer Reihenfolge (zählt jetzt jeder Verstoß
+gleich – wie `Stufenwert.CAnzahl`); Kriterien ohne Modell (Abstand H/A, Spielverteilung) lehnt nur die echte Bewertung ab.
+
+Nächste Schritte: Wechsel H/A beim Glätten im Blick behalten (längere Läufe auf Peters Rechner); Koppeltermine genau modellieren; Modellplan
+als Startplan der Suche (Schritt 2), die A festhält und B/C verbessert; Schranke im Automodus anzeigen („Stufe A
+bestmöglich“).
+
+**O9: Tabu-Suche mit voller Nachbarschaft (Vorschlag 15.10.2026).** Je Schritt alle möglichen Änderungen bewerten
+(jedes Spiel auf jeden erlaubten Termin, Tausch zweier Spiele) und die beste nehmen – auch wenn sie kurz verschlechtert –,
+kürzlich Geändertes ist eine Zeit lang tabu. Kommt aus Sackgassen heraus, in denen die zufällige lokale Suche hängen
+bleibt. Voraussetzung: Kosten als Änderung je betroffener Mannschaft (Delta-Bewertung, auch für folgeabhängige
+Kostenarten nur die Zeilen der zwei beteiligten Mannschaften). Pro Schritt einige tausend gleichartige Bewertungen –
+gut für eine **GPU**.
+
+**O10: Parallel Tempering (Vorschlag 15.10.2026).** Sehr viele Kopien des Plans mit unterschiedlicher „Temperatur“
+(heiß = darf sich verschlechtern, kalt = verbessert nur), regelmäßiger Austausch benachbarter Kopien. Baut auf dem
+Befund zu Simulated Annealing auf (billiger, aber mehr A-Verstöße) und ist besser steuerbar; viele kleine unabhängige
+Suchen passen zur **GPU**, wenn der Plan als kompaktes Zahlenfeld vorliegt. Nebenanwendung: viele Was-wäre-wenn-
+Varianten der Meldungen (Abschnitt 10, Punkt 5) auf einmal bewerten.
+
+**GPU allgemein:** Die bestehende Suche auf die GPU zu bringen lohnt nicht (verzweigter, ungleichförmiger Ablauf;
+mehr Tempo hat bisher keine besseren Pläne gebracht). Sinnvoll nur für O9/O10, und nur in zwei Stufen: (1) Prototyp
+auf der CPU (Python/numpy oder vektorisiert in C#) auf den Referenzstaffeln gegen den Automodus, vor allem A/B-Verstöße;
+(2) nur wenn das Verfahren besser, aber zu langsam ist, auf die GPU mit **ILGPU** (.NET, freizügige Lizenz,
+GPL-verträglich, NVIDIA/AMD/Intel, CPU-Ausweichlösung). HiGHS' GPU-Löser (PDLP) bringt für unsere Modellgrößen nichts.
+
+**Reihenfolge (Empfehlung 15.10.2026):** zuerst O7 Schritt 1–2 (untere Schranke und Startplan mit HiGHS) – kleiner
+Aufwand, HiGHS ist schon eingebunden, und die Schranke ist der Maßstab für alles Weitere: Liegt der Automodus bei A/B
+schon an der Schranke, lohnen O9/O10 dafür nicht. Parallel dazu der Datencheck (Abschnitt 10, Punkt 3). Danach je
+nach Abstand O9 (CPU-Prototyp), dann O7 Schritt 3 bzw. O10.
 
 **Automodus – Lenkung über die Gewichte** (Vorschlag Peter, Rest von E14; `Optimierungseinstellungen.Automodus`, `Automodus`): Der Automodus macht, was ein Staffelleiter von Hand tut – er ändert während der Rechnung Gewichte, bis die wichtigen Kriterien eingehalten sind. Ziel ist nicht der billigste Plan für eine feste Kostenfunktion, sondern möglichst wenige Verstöße in der Rangfolge, die der Staffelleiter festlegt.
 - **Einteilung:** Der Staffelleiter teilt die Kriterien (16 Mannschafts-Kostenarten, vereinsinterne Spiele am Anfang, Länge und Überlappung der Spieltage) in die Stufen A, B und C ein und ordnet sie (`Stufeneinteilung`, in der Qualitätsansicht; gespeichert als Attribut `kriterienstufen` am Knoten `plan`, das der alte AndiGenerator übernimmt, ohne es zu beachten). Kriterien ohne Anzahl gehören immer zu C. Standard: A = Hallenbelegung, parallele Spiele, Pflichtspieltage, vereinsinterne Spiele; B = Auswärts-/Heimkoppel, Sperr-, Ausweichtermine; C = die übrigen.

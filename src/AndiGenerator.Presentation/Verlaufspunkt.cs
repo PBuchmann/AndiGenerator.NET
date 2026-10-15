@@ -4,7 +4,7 @@
 
 namespace AndiGenerator.Presentation;
 
-/// <summary>Ein Punkt im Verlauf der Suche (Maschinenraum).</summary>
+/// <summary>Ein Punkt im Verlauf der Suche (Leitstand).</summary>
 /// <param name="Sekunden">Rechenzeit seit dem Start (ohne Pausen).</param>
 /// <param name="Kosten">Kosten des besten Plans; negativ = noch keiner.</param>
 /// <param name="A">Im Automodus nach der Basisoptimierung: Verstöße der Stufe A des besten Plans; sonst <c>null</c>.</param>

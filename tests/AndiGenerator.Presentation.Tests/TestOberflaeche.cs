@@ -30,6 +30,12 @@ internal sealed class TestOberflaeche : IOberflaeche
     /// <summary>Holt oder setzt die Antwort auf Ja/Nein-Fragen.</summary>
     public bool Antwort { get; set; }
 
+    /// <summary>Holt die gezeigten Dialoge „B-Varianten“.</summary>
+    public List<AlternativendialogViewModel> Alternativendialoge { get; } = [];
+
+    /// <summary>Holt oder setzt, ob im Dialog der Alternativen „Übernehmen“ gewählt wird.</summary>
+    public bool AlternativeUebernehmen { get; set; }
+
     /// <summary>Holt oder setzt die Datei, die „Öffnen“ liefert.</summary>
     public string? DateiZumOeffnen { get; set; }
 
@@ -121,6 +127,13 @@ internal sealed class TestOberflaeche : IOberflaeche
 
     public Task<bool> FragenAsync(string titel, string frage) => Merken(titel, Antwort);
 
+    public Task<bool> AlternativenZeigenAsync(AlternativendialogViewModel dialog)
+    {
+        Alternativendialoge.Add(dialog);
+        return Task.FromResult(AlternativeUebernehmen);
+    }
+
+    /// <inheritdoc/>
     public Task<Sicherungswahl> SicherungAbfragenAsync(Planvergleich vergleich)
     {
         Vergleich = vergleich;

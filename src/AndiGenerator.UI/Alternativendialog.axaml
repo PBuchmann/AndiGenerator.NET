@@ -1,0 +1,157 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:p="using:AndiGenerator.Presentation"
+        xmlns:ui="using:AndiGenerator.UI"
+        x:Class="AndiGenerator.UI.Alternativendialog"
+        x:DataType="p:AlternativendialogViewModel"
+        Title="B-Varianten"
+        WindowState="Maximized" MinWidth="900" MinHeight="600" ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner" Classes="dialog">
+  <Window.Styles>
+    <!-- Eine Spalte je Plan; die ausgewählte ist hinterlegt -->
+    <Style Selector="Border.zelle">
+      <Setter Property="Width" Value="170" />
+      <Setter Property="Padding" Value="10,6" />
+      <Setter Property="Background" Value="Transparent" />
+    </Style>
+    <Style Selector="Border.zelle.gewaehlt">
+      <Setter Property="Background" Value="{StaticResource AkzentHell}" />
+    </Style>
+    <Style Selector="TextBlock.besser">
+      <Setter Property="Foreground" Value="{StaticResource Gut}" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector="TextBlock.schlechter">
+      <Setter Property="Foreground" Value="{StaticResource Schlecht}" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector="SelectableTextBlock.meldung">
+      <Setter Property="Foreground" Value="{StaticResource Tinte2}" />
+    </Style>
+    <Style Selector="SelectableTextBlock.meldung.neu">
+      <Setter Property="Foreground" Value="{StaticResource Schlecht}" />
+    </Style>
+    <Style Selector="SelectableTextBlock.meldung.entfaellt">
+      <Setter Property="Foreground" Value="{StaticResource Gut}" />
+    </Style>
+    <Style Selector="Button.spaltenkopf">
+      <Setter Property="Width" Value="170" />
+      <Setter Property="Padding" Value="10,8" />
+      <Setter Property="HorizontalContentAlignment" Value="Left" />
+      <Setter Property="VerticalAlignment" Value="Stretch" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="0" />
+      <Setter Property="CornerRadius" Value="8,8,0,0" />
+    </Style>
+    <Style Selector="Button.spaltenkopf.gewaehlt /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{StaticResource AkzentHell}" />
+    </Style>
+  </Window.Styles>
+  <DockPanel Margin="24,18">
+    <TextBlock DockPanel.Dock="Top" Text="B-Varianten" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,6" />
+    <TextBlock DockPanel.Dock="Top" Text="{Binding Erklaerung}" TextWrapping="Wrap" MaxWidth="1100" HorizontalAlignment="Left" Foreground="{StaticResource Tinte2}" Margin="0,0,0,12" />
+    <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Spacing="12" HorizontalAlignment="Right" Margin="0,12,0,0">
+      <Button x:Name="Uebernehmen" Classes="primaer" Content="{Binding UebernehmenText}" IsEnabled="{Binding UebernehmenMoeglich}" />
+      <Button x:Name="Abbrechen" Content="Abbrechen" IsCancel="True" />
+    </StackPanel>
+    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
+      <StackPanel Spacing="16">
+        <!-- Vergleich: Zeilen = Kriterien, Spalten = Pläne; ein Klick auf eine Spaltenüberschrift wählt die Alternative -->
+        <Border Classes="karte" Padding="12,8" HorizontalAlignment="Left">
+          <StackPanel>
+            <StackPanel Orientation="Horizontal">
+              <Border Width="300" />
+              <ItemsControl ItemsSource="{Binding Spalten}">
+                <ItemsControl.ItemsPanel>
+                  <ItemsPanelTemplate>
+                    <StackPanel Orientation="Horizontal" />
+                  </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="p:Alternativspalte">
+                    <Button Classes="spaltenkopf" Classes.gewaehlt="{Binding IstGewaehlt}" Command="{Binding AuswaehlenCommand}"
+                            ToolTip.Tip="Auswählen: Unten stehen ihre betroffenen Mannschaften, „Übernehmen“ gilt ihr.">
+                      <StackPanel Spacing="2">
+                        <TextBlock Text="{Binding Titel}" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap" />
+                        <TextBlock Text="{Binding Summen}" Classes="ziffer" FontSize="12" Foreground="{StaticResource Tinte2}" />
+                      </StackPanel>
+                    </Button>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+            <ItemsControl ItemsSource="{Binding Zeilen}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="p:Alternativzeile">
+                  <Border BorderBrush="{StaticResource Linie}" BorderThickness="0,1,0,0">
+                    <StackPanel Orientation="Horizontal">
+                      <StackPanel Orientation="Horizontal" Width="300" Spacing="8" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding Stufe}" Width="32" FontSize="12" Foreground="{StaticResource Tinte2}" VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding Name}" FontSize="13" TextWrapping="Wrap" Width="260" VerticalAlignment="Center"
+                                   FontWeight="{Binding IstSumme, Converter={x:Static ui:Konverter.Fett}}" />
+                      </StackPanel>
+                      <ItemsControl ItemsSource="{Binding Zellen}">
+                        <ItemsControl.ItemsPanel>
+                          <ItemsPanelTemplate>
+                            <StackPanel Orientation="Horizontal" />
+                          </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                        <ItemsControl.ItemTemplate>
+                          <DataTemplate x:DataType="p:Alternativzelle">
+                            <Border Classes="zelle" Classes.gewaehlt="{Binding Spalte.IstGewaehlt}">
+                              <TextBlock Text="{Binding Text}" Classes="ziffer" FontSize="13"
+                                         Classes.besser="{Binding Richtung, Converter={x:Static ui:Konverter.IstNegativ}}"
+                                         Classes.schlechter="{Binding Richtung, Converter={x:Static ui:Konverter.IstPositiv}}" />
+                            </Border>
+                          </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                      </ItemsControl>
+                    </StackPanel>
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </StackPanel>
+        </Border>
+        <!-- Betroffene Mannschaften der ausgewählten Spalte, je Kriterium eine Karte -->
+        <TextBlock Text="{Binding DetailTitel}" FontSize="15" FontWeight="SemiBold" />
+        <!-- So breit wie das Fenster (nicht wie die Tabelle): Die Karten brechen um, kein waagerechter Bildlauf -->
+        <ItemsControl ItemsSource="{Binding AuswahlDetails}" HorizontalAlignment="Left" MaxWidth="{Binding $parent[ScrollViewer].Viewport.Width}">
+          <ItemsControl.ItemsPanel>
+            <ItemsPanelTemplate>
+              <WrapPanel Orientation="Horizontal" />
+            </ItemsPanelTemplate>
+          </ItemsControl.ItemsPanel>
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="p:Vergleichsabschnitt">
+              <Border Classes="karte" Padding="14,10" Width="420" Margin="0,0,12,12" VerticalAlignment="Top">
+                <StackPanel Spacing="6">
+                  <TextBlock Text="{Binding Titel}" FontSize="13" FontWeight="SemiBold" />
+                  <ItemsControl ItemsSource="{Binding Gruppen}">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate x:DataType="p:Unterschiedsgruppe">
+                        <StackPanel Spacing="2" Margin="0,4,0,4">
+                          <Grid ColumnDefinitions="*,Auto">
+                            <TextBlock Text="{Binding Name}" FontSize="12" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                            <TextBlock Grid.Column="1" Text="{Binding Anzahl}" FontSize="11" Foreground="{StaticResource Tinte2}" Margin="8,0,0,0" />
+                          </Grid>
+                          <ItemsControl ItemsSource="{Binding Zeilen}">
+                            <ItemsControl.ItemTemplate>
+                              <DataTemplate x:DataType="p:Unterschied">
+                                <SelectableTextBlock Classes="meldung" Classes.neu="{Binding IstNeu}" Classes.entfaellt="{Binding Entfaellt}" Text="{Binding Text}" FontSize="12" TextWrapping="Wrap" />
+                              </DataTemplate>
+                            </ItemsControl.ItemTemplate>
+                          </ItemsControl>
+                        </StackPanel>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </StackPanel>
+              </Border>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </StackPanel>
+    </ScrollViewer>
+  </DockPanel>
+</Window>

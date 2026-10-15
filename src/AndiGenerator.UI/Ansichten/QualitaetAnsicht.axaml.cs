@@ -78,6 +78,7 @@ public partial class QualitaetAnsicht : UserControl
         if (zeilenrahmen is { DataContext: Qualitaetszeile gewaehlt } && Modell is { } m)
         {
             m.Waehlen(gewaehlt);
+            DetailBildlauf.ScrollToHome();
             e.Handled = true;
         }
     }

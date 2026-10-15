@@ -6,7 +6,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 
 namespace AndiGenerator.Presentation;
 
-/// <summary>Eine Insel im Maschinenraum: eine eigenständige Suche mit eigenem besten Plan.</summary>
+/// <summary>Eine Insel im Leitstand: eine eigenständige Suche mit eigenem besten Plan.</summary>
 public sealed class Inselanzeige : ObservableObject
 {
     private string kosten = string.Empty;

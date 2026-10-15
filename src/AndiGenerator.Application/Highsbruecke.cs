@@ -8,7 +8,7 @@ using AndiGenerator.Import;
 namespace AndiGenerator.Application;
 
 /// <summary>Reicht den Löser HiGHS (Baustein Import) an den Rechenkern weiter (nicht im Original).</summary>
-public sealed class Highsbruecke : IGanzzahlloeser
+public sealed class Highsbruecke : IGanzzahlloeser, ISchrankenloeser
 {
     /// <summary>Holt einen Wert, der angibt, ob HiGHS auf diesem Rechner geladen werden kann.</summary>
     public static bool Verfuegbar => HighsLoeser.Verfuegbar;
@@ -17,14 +17,23 @@ public sealed class Highsbruecke : IGanzzahlloeser
     public (double[]? Werte, bool Optimal) Loesen(Ganzzahlmodell modell, double[]? start, int startwert, Func<bool> aufhoeren, TimeSpan? zeitgrenze = null)
     {
         ArgumentNullException.ThrowIfNull(modell);
-        var problem = new Ganzzahlproblem(
-            [.. modell.Kosten],
-            [.. modell.SpalteOben],
-            [.. modell.ZeileUnten],
-            [.. modell.ZeileOben],
-            [.. modell.ZeilenAnfang],
-            [.. modell.EintragSpalten],
-            [.. modell.EintragWerte]);
-        return HighsLoeser.Loesen(problem, start, startwert, aufhoeren, zeitgrenze);
+        return HighsLoeser.Loesen(Problem(modell), start, startwert, aufhoeren, zeitgrenze);
     }
+
+    /// <inheritdoc/>
+    public Schrankenloesung Loesen(Ganzzahlmodell modell, TimeSpan zeitgrenze, double[]? start = null, Func<bool>? aufhoeren = null)
+    {
+        ArgumentNullException.ThrowIfNull(modell);
+        (double[]? werte, double wert, double schranke, bool optimal, bool unloesbar) = HighsLoeser.LoesenMitSchranke(Problem(modell), zeitgrenze, start, aufhoeren);
+        return new Schrankenloesung(werte, wert, schranke, optimal, unloesbar);
+    }
+
+    private static Ganzzahlproblem Problem(Ganzzahlmodell modell) => new(
+        [.. modell.Kosten],
+        [.. modell.SpalteOben],
+        [.. modell.ZeileUnten],
+        [.. modell.ZeileOben],
+        [.. modell.ZeilenAnfang],
+        [.. modell.EintragSpalten],
+        [.. modell.EintragWerte]);
 }

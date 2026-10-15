@@ -18,19 +18,23 @@ namespace AndiGenerator.Engine.Inseln;
 /// Drängen, erst Stufe A, dann Stufe B: Der Automodus beobachtet die Verstöße im Plan der Suche. Ändern sie sich nach einer
 /// Gewichtsänderung 10 s lang nicht mehr, steigen die Gewichte genau der Mannschaften und Kriterien um eine Stufe, die einen
 /// Verstoß der Stufe haben – bis bei ihr nichts mehr geht (nichts mehr anzuheben oder dreimal kein Fortschritt). Die
-/// A-Gewichte bleiben beim Drängen von B stehen. Es gibt keine Zeitgrenzen.
+/// A-Gewichte bleiben beim Drängen von B stehen. Zeitgrenzen gibt es keine, außer der Höchstdauer der Basisoptimierung. Kennt
+/// der Automodus die untere Schranke aus HiGHS (Summe je Stufe), hört er bei einer Stufe auf, sobald der beste Plan sie
+/// erreicht, und schützt sie (Gewichte „extrem hoch“).
 /// </item>
 /// <item>
 /// Glätten, ab dem besten Plan: C-Kriterien nach Wichtigkeit, Verstöße allgemein reduzieren, Spitzen zuerst. Eine
-/// Mannschaft reißt bei einem C-Kriterium aus, wenn sie mehr als zwei Verstöße mehr hat als im Grundlauf – ein, zwei sind
-/// in Ordnung, zu viele bei einer Mannschaft sind unfair. Für die Ausreißer, sonst für die Mannschaften mit den meisten
+/// Mannschaft reißt bei einem C-Kriterium aus, wenn sie mehr Verstöße als im Grundlauf hat als der Spielraum erlaubt
+/// (<see cref="Optimierungseinstellungen.AutoSpielraum"/>, Standard 2) – zu viele bei einer Mannschaft sind unfair. Für die Ausreißer, sonst für die Mannschaften mit den meisten
 /// Verstößen steigt das Gewicht des Kriteriums eine Stufe, so lange, bis nichts mehr anzuheben ist (dann das nächste
-/// Kriterium) oder A oder B wieder steigen: Dann wird die Anhebung zurückgezogen, beim besten Plan neu begonnen und mit dem
-/// nächsten Kriterium weitergemacht. Sind alle C-Kriterien durch, wird wieder gedrängt.
+/// Kriterium) oder A oder B wieder steigen (<see cref="Stufenvergleich.AOderBSchlechter"/>): Dann wird die Anhebung ganz
+/// zurückgezogen, beim besten Plan neu begonnen und mit dem nächsten Kriterium weitergemacht. Sind alle C-Kriterien durch,
+/// wird wieder gedrängt – oder, wenn A und B bei der Schranke sind, von vorn geglättet.
 /// </item>
 /// <item>
-/// Der beste Plan wird immer mit den Gewichtungen des Anwenders bewertet: harte Fehler, A, B, C-Ausreißer, C-Verstöße, dann
-/// C-Kosten (<see cref="Stufenwert"/>).
+/// Der beste Plan wird immer mit den Gewichtungen des Anwenders bewertet und nach einer Regel verglichen
+/// (<see cref="Stufenvergleich"/>): harte Fehler, A, B, C-Verstöße, C-Ausreißer, dann C-Kosten. Pläne aus HiGHS (Schranke,
+/// Alternativen, Teilneuplanung) werden genauso bewertet.
 /// </item>
 /// </list>
 /// </summary>
@@ -38,6 +42,9 @@ internal sealed class Automodus
 {
     /// <summary>Sekunden, denen ein Lauf mit fester Zahl von Durchläufen (<see cref="Inseloptimierer.Rechnen"/>) ohne Zeitbudget entspricht.</summary>
     public const double StandardBudget = 300;
+
+    /// <summary>So viele Schritte behält das Protokoll höchstens.</summary>
+    private const int ProtokollHoechstens = 500;
 
     /// <summary>Mindestdauer des Grundlaufs in Sekunden.</summary>
     private const double MinGrundlauf = 10;
@@ -70,30 +77,52 @@ internal sealed class Automodus
     private readonly double deutlich;
     private readonly long stillstandPlaene;
     private readonly double maxGrundlauf;
-    private readonly double[] anzahl = new double[Stufeneinteilung.AnzahlKriterien];
-    private readonly double[] kosten = new double[Stufeneinteilung.AnzahlKriterien];
     private readonly double[] grenzeKosten = new double[Stufeneinteilung.AnzahlKriterien];
     private readonly int[] basisMannschaft;
-    private readonly List<int> angehobenC = [];
+
+    /// <summary>Beim Glätten angehobene Gewichte des aktuellen C-Kriteriums mit ihrem Wert vor der ersten Anhebung.</summary>
+    private readonly Dictionary<int, Gewichtung> angehobenC = [];
     private readonly List<string> aenderungen = [];
+
+    /// <summary>Die Auswertung des zuletzt geprüften Plans (<see cref="Pruefen"/>), für <see cref="Verursacher"/>.</summary>
+    private Auswertung? letzte;
     private Phase phase = Phase.Grundlauf;
+
+    /// <summary>
+    /// Untere Schranke aus HiGHS für die Summe der Stufe A und – bei bestmöglichem A – der Stufe B; <c>null</c> = unbekannt
+    /// (siehe <see cref="SchrankenSetzen"/>).
+    /// </summary>
+    private (int? A, int? B) schranke;
+
+    /// <summary>Die Stufen A bzw. B des besten Plans sind bei der Schranke aus HiGHS (beim letzten <see cref="Lenken"/>).</summary>
+    private (bool A, bool B) amZiel;
+
+    /// <summary>Bester Plan zu Beginn des aktuellen C-Kriteriums (Bezug beim Zurückziehen).</summary>
+    private Stufenwert bezugWert;
     private (int, int, int)? draengBester;
     private int ohneDraengfortschritt;
     private int indexC;
     private Stufe draengStufe = Stufe.A;
-    private (int A, int B) bezug;
     private double letzteAenderung;
     private double letzteSuche;
     private long plaeneLetzteSuche;
     private long plaene;
     private double deutlicheKosten = -1;
     private (int, int, int, int, int)? sucheVerstoesse;
-    private double sekunden;
     private int zurueckgezogen;
+    private int vonInseln;
+    private int vonHighs;
+    private string? zuletztVon;
     private int zaehlerAnhebungen;
     private Stufeneinteilung einteilung;
     private Stufe[] stufen;
     private int[] reihenfolgeC;
+
+    /// <summary>Festlegung des Staffelleiters: je Kriterium die Obergrenze der Verstöße (−1 = keine); <c>null</c> = keine.</summary>
+    private int[]? obergrenze;
+
+    /// <summary>Was festgelegt wurde (für die Anzeige), z. B. „Heimkoppel bestmöglich“.</summary>
+    private string? festgelegt;
     private Kostenkriterium[] draengKriterien = [];
     private Kostenkriterium? fokus;
     private Kostenkriterium? verschoben;
@@ -173,7 +202,13 @@ internal sealed class Automodus
         Optionen,
         aenderungen.ToArray(),
         AktuelleKriterien,
-        Anhebungsliste());
+        Anhebungsliste(),
+        schranke.A,
+        schranke.B,
+        vonInseln,
+        vonHighs,
+        zuletztVon,
+        festgelegt);
 
     /// <summary>Rang der laufenden Phase wie bei <see cref="ErsteAenderung"/>: Drängen A = 0, Drängen B = 1, Glätten des i-ten C-Kriteriums = 2 + i.</summary>
     private int Rang => phase switch
@@ -237,6 +272,14 @@ internal sealed class Automodus
     }
 
     /// <summary>
+    /// Der Grundlauf hat die Mindestdauer von 10 s erreicht (so lange läuft die Basisoptimierung auch, wenn der Plan aus HiGHS
+    /// schon früher vorliegt – ihr bester Plan ist der Maßstab für die C-Ausreißer).
+    /// </summary>
+    /// <param name="jetzt">Sekunden reiner Rechenzeit.</param>
+    /// <returns><c>true</c> ab 10 s.</returns>
+    public bool GrundlaufLangGenug(double jetzt) => Grundlauf && jetzt >= MinGrundlauf;
+
+    /// <summary>
     /// Der Grundlauf ist vorbei, wenn die Basisoptimierung steht (nach mindestens 10 s; 10 s und
     /// <see cref="Optimierungseinstellungen.AutoStillstandPlaene"/> Pläne ohne deutliche Verbesserung), spätestens nach
     /// <see cref="Optimierungseinstellungen.AutoMaxGrundlauf"/>.
@@ -254,20 +297,25 @@ internal sealed class Automodus
     /// <param name="jetzt">Sekunden reiner Rechenzeit.</param>
     public void GrundlaufBeenden(Loesung beste, double jetzt)
     {
-        Stufenwert wert = Bewerten(beste, out double gesamt);
+        Auswertung basis = Auswerten(beste);
+        Stufenwert wert = basis.Wert;
+        double gesamt = basis.Gesamt;
         for (int s = 0; s < basisMannschaft.Length; s++)
         {
-            basisMannschaft[s] = Math.Max(0, bewerter.KostenAnzahl[s]);
+            basisMannschaft[s] = Math.Max(0, basis.Mannschaft[s]);
         }
 
         double spielraumKosten = SpielraumKosten * Math.Max(1, wert.C);
         for (int k = 0; k < stufen.Length; k++)
         {
-            grenzeKosten[k] = Math.Max(kosten[k] * (1 + kostenToleranz), kosten[k] + spielraumKosten);
+            grenzeKosten[k] = Math.Max(basis.Kosten[k] * (1 + kostenToleranz), basis.Kosten[k] + spielraumKosten);
         }
 
         phase = Phase.Draengen;
         draengStufe = Stufe.A;
+        indexC = 0;
+        angehobenC.Clear();
+        bezugWert = wert;
         Basis = wert;
         beste.KopierenNach(Beste);
         beste.KopierenNach(basisLoesung);
@@ -300,6 +348,9 @@ internal sealed class Automodus
         einteilung = neu;
         stufen = neu.AlsFeld();
         reihenfolgeC = neu.C.Select(k => (int)k).ToArray();
+
+        // Die Schranke gilt nur für die Rangfolge, mit der sie berechnet wurde.
+        schranke = (null, null);
         if (Grundlauf)
         {
             return;
@@ -313,7 +364,7 @@ internal sealed class Automodus
         (int ziel, Kostenkriterium? geaendert) = ErsteAenderung(alt, neu);
         if (ziel > Rang)
         {
-            aenderungen.Add($"{jetzt:0} s Einteilung geändert: weiter bei {PhaseText}");
+            Notieren($"{jetzt:0} s Einteilung geändert: weiter bei {PhaseText}");
             return;
         }
 
@@ -331,7 +382,7 @@ internal sealed class Automodus
             phase = Phase.Glaetten;
             indexC = ziel - 2;
             angehobenC.Clear();
-            bezug = (BesterWert.A, BesterWert.B);
+            bezugWert = BesterWert;
             fokus = null;
         }
 
@@ -340,10 +391,10 @@ internal sealed class Automodus
         verschoben = geaendert;
         verschobenBis = jetzt + AnzeigeVerschoben;
         zuletzt = jetzt;
-        aenderungen.Add($"{jetzt:0} s Einteilung geändert, bester Plan {BesterWert}: weiter bei {PhaseText}{(fokus is { } f ? " ab " + f : string.Empty)}");
+        Notieren($"{jetzt:0} s Einteilung geändert, bester Plan {BesterWert}: weiter bei {PhaseText}{(fokus is { } f ? " ab " + f : string.Empty)}");
     }
 
-    /// <summary>Bewertet den Plan der Suche (bester nach den aktuellen Gewichten) für die Anzeige.</summary>
+    /// <summary>Bewertet den Plan der Suche (bester nach den aktuellen Gewichten) für die Anzeige und den Stillstand.</summary>
     /// <param name="suche">Der Plan.</param>
     /// <param name="jetzt">Sekunden reiner Rechenzeit.</param>
     public void Verfolgen(Loesung suche, double jetzt)
@@ -353,7 +404,7 @@ internal sealed class Automodus
         zuletzt = jetzt;
 
         // Beobachtet wird, ob sich die Verstöße noch ändern: Jede Verbesserung der Anzahlen setzt die Uhr des Stillstands zurück.
-        var verstoesse = (wert.Harte, wert.A, wert.B, wert.Ausreisser, wert.CAnzahl);
+        var verstoesse = Stufenvergleich.Schluessel(wert);
         if (!Grundlauf && (sucheVerstoesse is not { } bisher || verstoesse.CompareTo(bisher) < 0))
         {
             sucheVerstoesse = verstoesse;
@@ -362,20 +413,132 @@ internal sealed class Automodus
     }
 
     /// <summary>Übernimmt <paramref name="loesung"/> als besten Plan, wenn sie nach Stufen besser ist.</summary>
-    /// <param name="loesung">Lösung einer Insel.</param>
-    /// <returns>Ihre Bewertung nach Stufen (für den Maschinenraum).</returns>
+    /// <param name="loesung">Ein Plan (einer Insel oder aus HiGHS).</param>
+    /// <returns>Seine Bewertung nach Stufen (für den Leitstand).</returns>
     public Stufenwert Pruefen(Loesung loesung)
     {
-        Stufenwert wert = Bewerten(loesung, out double gesamt);
-        if (wert.IstBesserAls(BesterWert))
+        letzte = Auswerten(loesung);
+        Stufenwert wert = letzte.Wert;
+        if (Stufenvergleich.Besser(wert, BesterWert))
         {
             loesung.KopierenNach(Beste);
             BesterWert = wert;
-            BesteKosten = gesamt;
+            BesteKosten = letzte.Gesamt;
             Verbesserungen++;
         }
 
         return wert;
+    }
+
+    /// <summary>Wie <see cref="Pruefen"/> für den Plan einer Insel; merkt sich, wenn er bester Plan wird (Herkunft).</summary>
+    /// <param name="loesung">Lösung der Insel.</param>
+    /// <param name="insel">Nummer der Insel.</param>
+    /// <returns>Ihre Bewertung nach Stufen.</returns>
+    public Stufenwert PruefenVonInsel(Loesung loesung, int insel)
+    {
+        int vorher = Verbesserungen;
+        Stufenwert wert = Pruefen(loesung);
+        if (Verbesserungen > vorher)
+        {
+            vonInseln++;
+            zuletztVon = $"Insel {insel}";
+        }
+
+        return wert;
+    }
+
+    /// <summary>
+    /// Der Staffelleiter legt A und B fest (gewählte Alternative aus HiGHS): Kein Kriterium der Stufen A und B darf mehr
+    /// Verstöße haben als angegeben – ein Plan, der eine Obergrenze überschreitet, zählt mit jedem Verstoß darüber wie ein harter
+    /// Fehler. Danach wird nicht mehr gedrängt, nur noch C geglättet. <c>null</c> hebt die Festlegung auf.
+    /// </summary>
+    /// <param name="grenzen">Je Kriterium die Obergrenze, oder <c>null</c>.</param>
+    /// <param name="name">Was festgelegt wurde (für die Anzeige).</param>
+    /// <param name="jetzt">Sekunden reiner Rechenzeit.</param>
+    public void Festlegen(IReadOnlyDictionary<Kostenkriterium, int>? grenzen, string? name, double jetzt)
+    {
+        if (grenzen is null)
+        {
+            obergrenze = null;
+            festgelegt = null;
+            Notieren($"{jetzt:0} s Festlegung aufgehoben");
+        }
+        else
+        {
+            obergrenze = Enumerable.Repeat(-1, Stufeneinteilung.AnzahlKriterien).ToArray();
+            foreach ((Kostenkriterium k, int wert) in grenzen)
+            {
+                obergrenze[(int)k] = wert;
+            }
+
+            festgelegt = name;
+            Notieren($"{jetzt:0} s Festgelegt: {name} – A und B bleiben so, C wird geglättet");
+        }
+
+        if (Grundlauf)
+        {
+            return;
+        }
+
+        // Neu bewerten und von vorn: Mit Festlegung erreicht der beste Plan sie, und es geht sofort ans Glätten.
+        Basis = Bewerten(basisLoesung, out _);
+        BesterWert = Bewerten(Beste, out double gesamt);
+        BesteKosten = gesamt;
+        sucheVerstoesse = null;
+        phase = Phase.Draengen;
+        draengStufe = Stufe.A;
+        draengBester = null;
+        ohneDraengfortschritt = 0;
+        draengKriterien = [];
+        fokus = null;
+        sofort = true;
+    }
+
+    /// <summary>
+    /// Übernimmt die untere Schranke aus HiGHS: Die Stufe, die gerade gedrängt wird, endet, sobald der beste Plan bei ihr ist
+    /// (sofort geprüft, ohne Stillstand abzuwarten).
+    /// </summary>
+    /// <param name="a">Bewiesene Schranke der Summe der Stufe A, oder <c>null</c>.</param>
+    /// <param name="b">Bewiesene Schranke der Summe der Stufe B (bei bestmöglichem A), oder <c>null</c>.</param>
+    /// <param name="jetzt">Sekunden reiner Rechenzeit.</param>
+    public void SchrankenSetzen(int? a, int? b, double jetzt)
+    {
+        schranke = (a, a is null ? null : b);
+        sofort = !Grundlauf;
+        Notieren($"{jetzt:0} s Schranke aus HiGHS: A ≥ {a?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "?"}, B ≥ {schranke.B?.ToString(System.Globalization.CultureInfo.InvariantCulture) ?? "?"}");
+    }
+
+    /// <summary>Schreibt einen Schritt ins Protokoll (für die Anzeige im Leitstand).</summary>
+    /// <param name="text">Der Schritt mit Zeitpunkt.</param>
+    public void Melden(string text) => Notieren(text);
+
+    /// <summary>Bewertet einen Plan nach Stufen wie den besten Plan (mit C-Ausreißern gegenüber der Basis).</summary>
+    /// <param name="plan">Der Plan.</param>
+    /// <returns>Die Bewertung.</returns>
+    public Stufenwert NachStufen(Loesung plan) => Bewerten(plan, out _);
+
+    /// <summary>
+    /// Plan von außen (aus HiGHS oder der Teilneuplanung): wird bester Plan, wenn er nach Stufen besser ist.
+    /// </summary>
+    /// <param name="plan">Der Plan.</param>
+    /// <param name="jetzt">Sekunden reiner Rechenzeit.</param>
+    /// <param name="herkunft">Für das Protokoll, z. B. „Plan aus HiGHS“.</param>
+    /// <param name="sofortLenken">Ist er besser, gleich lenken (beim Plan aus HiGHS: Schranke prüfen).</param>
+    /// <returns><c>true</c>, wenn er bester Plan geworden ist.</returns>
+    public bool Einspielen(Loesung plan, double jetzt, string herkunft, bool sofortLenken)
+    {
+        int vorher = Verbesserungen;
+        Stufenwert wert = Pruefen(plan);
+        bool besser = Verbesserungen > vorher;
+        if (besser)
+        {
+            vonHighs++;
+            zuletztVon = "HiGHS";
+        }
+
+        Notieren($"{jetzt:0} s {herkunft} ({wert}): " + (besser ? "bester Plan" : "nicht besser"));
+        sofort |= besser && sofortLenken;
+        return besser;
     }
 
     /// <summary>
@@ -386,6 +549,11 @@ internal sealed class Automodus
     /// <returns>Die Kriterien mit ihren Verstößen.</returns>
     public Kostenverursacher[] Verursacher(int hoechstens)
     {
+        if (letzte is not { Anzahl: { } anzahl })
+        {
+            return [];
+        }
+
         int[] auswahl = Enumerable.Range(0, stufen.Length)
             .Where(k => Stufeneinteilung.HatAnzahl((Kostenkriterium)k) && anzahl[k] > 0)
             .OrderBy(k => stufen[k])
@@ -398,9 +566,14 @@ internal sealed class Automodus
 
     /// <summary>Die Verstöße je Kriterium im besten Plan nach Stufen mit der Stufe des Kriteriums.</summary>
     /// <returns>Alle Kriterien, die Verstöße zählen.</returns>
-    public Kriterienwert[] BesteKriterien()
+    public Kriterienwert[] BesteKriterien() => KriterienVon(Beste);
+
+    /// <summary>Die Verstöße je Kriterium eines Plans mit der Stufe des Kriteriums (z. B. des besten Plans im Grundlauf).</summary>
+    /// <param name="loesung">Der Plan.</param>
+    /// <returns>Alle Kriterien, die Verstöße zählen.</returns>
+    public Kriterienwert[] KriterienVon(Loesung loesung)
     {
-        Bewerten(Beste, out _);
+        double[] anzahl = Auswerten(loesung).Anzahl;
         return Enumerable.Range(0, stufen.Length)
             .Where(k => Stufeneinteilung.HatAnzahl((Kostenkriterium)k))
             .Select(k => new Kriterienwert((Kostenkriterium)k, anzahl[k], stufen[k]))
@@ -421,11 +594,17 @@ internal sealed class Automodus
         sofort = false;
 
         letzteAenderung = jetzt;
-        sekunden = jetzt;
 
         // Was sich ändert, bestimmt der Plan der Suche (wie ihn ein Anwender in der Oberfläche sieht).
-        Stufenwert wert = Bewerten(suche, out _);
-        Berechnungsoptionen neu = phase == Phase.Draengen ? DraengenSchritt(wert) : GlaettenSchritt(wert, Optionen);
+        // Erst der beste Plan gegen die Schranke aus HiGHS: Ist eine Stufe dort, ist bei ihr nichts mehr zu holen.
+        amZiel = (AmZiel(Stufe.A), AmZiel(Stufe.B));
+        Auswertung plan = Auswerten(suche);
+        Berechnungsoptionen neu = phase switch
+        {
+            Phase.Draengen when SchrankeErreicht() is { } erreicht => erreicht,
+            Phase.Draengen => DraengenSchritt(plan),
+            _ => GlaettenSchritt(plan, Optionen),
+        };
         if (neu == Optionen && !NeustartVomBesten)
         {
             return null;
@@ -439,9 +618,6 @@ internal sealed class Automodus
 
     /// <summary>Eine Stufe höher, mindestens „normal“, höchstens „extrem hoch“.</summary>
     private static Gewichtung Hoeher(Gewichtung g) => g < Gewichtung.Normal ? Gewichtung.Normal : (Gewichtung)Math.Min((int)g + 1, (int)Gewichtung.ExtremHoch);
-
-    /// <summary>Eine Stufe niedriger, nicht unter die Gewichtung des Anwenders.</summary>
-    private static Gewichtung Niedriger(Gewichtung g, Gewichtung untergrenze) => (Gewichtung)Math.Max((int)g - 1, (int)untergrenze);
 
     /// <summary>Schlüssel eines Gewichts für das ganze Kriterium (alle Mannschaften bzw. Plan-Gewichtung).</summary>
     private static int Gesamtschluessel(int kriterium) => -kriterium - 1;
@@ -534,12 +710,14 @@ internal sealed class Automodus
     /// bis bei ihr nichts mehr geht (nichts mehr anzuheben oder dreimal kein Fortschritt); dann beginnt
     /// das Glätten beim besten Plan.
     /// </summary>
-    private Berechnungsoptionen DraengenSchritt(Stufenwert wert)
+    private Berechnungsoptionen DraengenSchritt(Auswertung plan)
     {
+        Stufenwert wert = plan.Wert;
+
         // Nach einer geänderten Einteilung zuerst nur das wichtigste geänderte Kriterium, dann die ganze Stufe.
         if (fokus is Kostenkriterium f)
         {
-            (int, int, int) fokusStand = (wert.Harte, (int)anzahl[(int)f], 0);
+            (int, int, int) fokusStand = (wert.Harte, (int)plan.Anzahl[(int)f], 0);
             if (draengBester is not { } vorher || fokusStand.CompareTo(vorher) < 0)
             {
                 draengBester = fokusStand;
@@ -550,13 +728,13 @@ internal sealed class Automodus
                 ohneDraengfortschritt++;
             }
 
-            Berechnungsoptionen nurFokus = Draengen(draengStufe);
-            if (nurFokus != Optionen && ohneDraengfortschritt < DraengenOhneFortschritt)
+            (Berechnungsoptionen Neu, int[] Ziele) nurFokus = Draengen(draengStufe, plan);
+            if (nurFokus.Neu != Optionen && ohneDraengfortschritt < DraengenOhneFortschritt)
             {
-                return nurFokus;
+                return Angehoben(draengStufe, nurFokus);
             }
 
-            aenderungen.Add($"{sekunden:0} s bei {f} geht nichts mehr ({wert}): ganze Stufe {draengStufe}");
+            Notieren($"{letzteAenderung:0} s bei {f} geht nichts mehr ({wert}): ganze Stufe {draengStufe}");
             fokus = null;
             draengBester = null;
             ohneDraengfortschritt = 0;
@@ -573,10 +751,10 @@ internal sealed class Automodus
             ohneDraengfortschritt++;
         }
 
-        Berechnungsoptionen neu = Draengen(draengStufe);
-        if (neu != Optionen && ohneDraengfortschritt < DraengenOhneFortschritt)
+        (Berechnungsoptionen Neu, int[] Ziele) anhebung = Draengen(draengStufe, plan);
+        if (anhebung.Neu != Optionen && ohneDraengfortschritt < DraengenOhneFortschritt)
         {
-            return neu;
+            return Angehoben(draengStufe, anhebung);
         }
 
         if (draengStufe == Stufe.A)
@@ -585,51 +763,107 @@ internal sealed class Automodus
             draengStufe = Stufe.B;
             draengBester = null;
             ohneDraengfortschritt = 0;
-            aenderungen.Add($"{sekunden:0} s bei A geht nichts mehr ({wert}): Stufe B");
-            neu = Draengen(Stufe.B);
-            if (neu != Optionen)
+            Notieren($"{letzteAenderung:0} s bei A geht nichts mehr ({wert}): Stufe B");
+            anhebung = Draengen(Stufe.B, plan);
+            if (anhebung.Neu != Optionen)
+            {
+                return Angehoben(Stufe.B, anhebung);
+            }
+        }
+
+        // Bei A und B geht nichts mehr (eine zuletzt berechnete, aber verworfene Anhebung gilt nicht). Hat der beste Plan keine
+        // C-Verstöße mehr, deren Gewicht steigen kann, gibt es nichts zu glätten: Die Suche läuft mit den aktuellen Gewichten
+        // ruhig weiter.
+        Auswertung beste = Auswerten(Beste);
+        if (!reihenfolgeC.Any(k => ZieleC(k, Optionen, beste).Length > 0))
+        {
+            return Optionen;
+        }
+
+        // Sonst C glätten, beginnend beim besten Plan und beim wichtigsten C-Kriterium.
+        Notieren($"{letzteAenderung:0} s bei A und B geht nichts mehr, bester Plan {BesterWert}: C glätten");
+        return GlaettenBeginnen(Optionen, beste);
+    }
+
+    /// <summary>C glätten, beginnend beim besten Plan und beim wichtigsten C-Kriterium.</summary>
+    private Berechnungsoptionen GlaettenBeginnen(Berechnungsoptionen neu, Auswertung beste)
+    {
+        phase = Phase.Glaetten;
+        indexC = 0;
+        angehobenC.Clear();
+        bezugWert = BesterWert;
+        NeustartVomBesten = true;
+        return GlaettenSchritt(beste, neu);
+    }
+
+    /// <summary>
+    /// Drängen mit Schranke: Ist die Stufe, die gerade gedrängt wird, im besten Plan bei der Schranke aus HiGHS, ist bei ihr
+    /// nichts mehr zu holen. Ihre Gewichte gehen auf „extrem hoch“ (damit die Suche dort bleibt), und es geht mit Stufe B bzw.
+    /// dem Glätten von C weiter – ohne die drei Versuche ohne Fortschritt abzuwarten.
+    /// </summary>
+    /// <returns>Die neuen Gewichtungen oder <c>null</c>, wenn die Stufe nicht bei der Schranke ist.</returns>
+    private Berechnungsoptionen? SchrankeErreicht()
+    {
+        if (fokus is not null || !(draengStufe == Stufe.A ? amZiel.A : amZiel.B))
+        {
+            return null;
+        }
+
+        Berechnungsoptionen neu = Schuetzen(Optionen, draengStufe);
+        draengBester = null;
+        ohneDraengfortschritt = 0;
+        if (draengStufe == Stufe.A)
+        {
+            Notieren($"{letzteAenderung:0} s Stufe A bei der Schranke ({BesterWert}): A geschützt, Stufe B");
+            draengStufe = Stufe.B;
+            if (!amZiel.B)
             {
                 return neu;
             }
         }
 
-        // Bei A und B geht nichts mehr. Hat der beste Plan keine C-Verstöße mehr, deren Gewicht steigen kann, gibt es nichts
-        // zu glätten: Die Suche läuft mit den aktuellen Gewichten ruhig weiter.
-        Bewerten(Beste, out _);
-        if (!reihenfolgeC.Any(k => ZieleC(k, Optionen).Length > 0))
+        Notieren($"{letzteAenderung:0} s Stufe B bei der Schranke ({BesterWert}): B geschützt, C glätten");
+        neu = Schuetzen(neu, Stufe.B);
+        return GlaettenBeginnen(neu, Auswerten(Beste));
+    }
+
+    /// <summary>
+    /// Ist der beste Plan in der Stufe bei ihrer Schranke (Summe der Verstöße, keine harten Fehler)? B nur, wenn auch A dort
+    /// ist – die Schranke von B gilt nur bei bestmöglichem A.
+    /// </summary>
+    private bool AmZiel(Stufe stufe)
+    {
+        // Festgelegt: A und B sind entschieden, sobald der beste Plan die Obergrenzen einhält.
+        if (obergrenze is not null)
         {
-            return neu;
+            return BesterWert.Harte == 0;
         }
 
-        // Sonst C glätten, beginnend beim besten Plan und beim wichtigsten C-Kriterium.
-        phase = Phase.Glaetten;
-        indexC = 0;
-        angehobenC.Clear();
-        bezug = (BesterWert.A, BesterWert.B);
-        NeustartVomBesten = true;
-        aenderungen.Add($"{sekunden:0} s bei A und B geht nichts mehr, bester Plan {BesterWert}: C glätten");
-        return GlaettenSchritt(BesterWert, Optionen);
+        bool a = schranke.A is int sa && BesterWert.Harte == 0 && BesterWert.A <= sa;
+        return stufe == Stufe.A ? a : a && schranke.B is int sb && BesterWert.B <= sb;
     }
 
     /// <summary>Verstöße einer Stufe im zuletzt bewerteten Plan herausdrängen: ihre Gewichte eine Stufe höher.</summary>
-    private Berechnungsoptionen Draengen(Stufe stufe)
+    private (Berechnungsoptionen Neu, int[] Ziele) Draengen(Stufe stufe, Auswertung plan)
     {
         Berechnungsoptionen neu = Optionen;
-        int[] ziele = Ziele(stufe);
-        var betroffen = ziele.Select(z => z >= 0 ? z % KernDefinition.AnzahlArten : -z - 1).ToHashSet();
-        draengKriterien = einteilung.A.Concat(einteilung.B).Where(k => betroffen.Contains((int)k)).ToArray();
+        int[] ziele = Ziele(stufe, plan);
         foreach (int schluessel in ziele)
         {
             neu = Setzen(neu, schluessel, Hoeher(Gewicht(neu, schluessel)));
         }
 
-        if (ziele.Length > 0)
-        {
-            zaehlerAnhebungen++;
-            Protokoll($"{stufe} angehoben", neu, ziele);
-        }
+        return (neu, ziele);
+    }
 
-        return neu;
+    /// <summary>Eine Anhebung beim Drängen gilt: Kriterien merken, zählen, protokollieren.</summary>
+    private Berechnungsoptionen Angehoben(Stufe stufe, (Berechnungsoptionen Neu, int[] Ziele) anhebung)
+    {
+        var betroffen = anhebung.Ziele.Select(z => z >= 0 ? z % KernDefinition.AnzahlArten : -z - 1).ToHashSet();
+        draengKriterien = einteilung.A.Concat(einteilung.B).Where(k => betroffen.Contains((int)k)).ToArray();
+        zaehlerAnhebungen++;
+        Protokoll($"{stufe} angehoben", anhebung.Neu, anhebung.Ziele);
+        return anhebung.Neu;
     }
 
     /// <summary>
@@ -637,33 +871,36 @@ internal sealed class Automodus
     /// und beim besten Plan mit dem nächsten Kriterium weitergemacht. Sonst steigt für die ausreißenden Mannschaften des
     /// aktuellen Kriteriums das Gewicht; reißt keine mehr aus, kommt das nächste Kriterium dran.
     /// </summary>
-    private Berechnungsoptionen GlaettenSchritt(Stufenwert wert, Berechnungsoptionen neu)
+    private Berechnungsoptionen GlaettenSchritt(Auswertung plan, Berechnungsoptionen neu)
     {
-        if (angehobenC.Count > 0 && (wert.A > bezug.A || wert.B > bezug.B + 1))
+        Stufenwert wert = plan.Wert;
+        bool schlechter = Stufenvergleich.AOderBSchlechter(wert, bezugWert);
+        if (angehobenC.Count > 0 && schlechter)
         {
-            foreach (int schluessel in angehobenC.Distinct())
+            // Ganz zurück auf den Stand vor dem Kriterium (auch wenn ein Gewicht mehrmals angehoben wurde).
+            foreach ((int schluessel, Gewichtung vorher) in angehobenC)
             {
-                neu = Setzen(neu, schluessel, Niedriger(Gewicht(neu, schluessel), Gewicht(original, schluessel)));
+                neu = Setzen(neu, schluessel, vorher);
             }
 
             zurueckgezogen++;
-            aenderungen.Add($"{sekunden:0} s A/B steigen ({wert}): {(Kostenkriterium)reihenfolgeC[indexC]} zurückgezogen");
+            Notieren($"{letzteAenderung:0} s A/B steigen ({wert}): {(Kostenkriterium)reihenfolgeC[indexC]} zurückgezogen");
             NaechstesKriterium();
-            Bewerten(Beste, out _);
+            plan = Auswerten(Beste);
         }
 
         while (indexC < reihenfolgeC.Length)
         {
             int k = reihenfolgeC[indexC];
-            int[] ziele = ZieleC(k, neu);
+            int[] ziele = ZieleC(k, neu, plan);
             if (ziele.Length > 0)
             {
                 foreach (int schluessel in ziele)
                 {
+                    angehobenC.TryAdd(schluessel, Gewicht(neu, schluessel));
                     neu = Setzen(neu, schluessel, Hoeher(Gewicht(neu, schluessel)));
                 }
 
-                angehobenC.AddRange(ziele);
                 zaehlerAnhebungen++;
                 Protokoll($"C {(Kostenkriterium)k} angehoben", neu, ziele);
                 return neu;
@@ -672,8 +909,24 @@ internal sealed class Automodus
             NaechstesKriterium();
         }
 
+        // Sind A und B bei der Schranke: von vorn glätten, statt wieder zu drängen.
+        if (amZiel is (true, true))
+        {
+            // Nur melden und neu beginnen, wenn es beim Glätten noch etwas anzuheben gibt (sonst bei jedem Stillstand dieselbe Zeile).
+            indexC = 0;
+            angehobenC.Clear();
+            bezugWert = BesterWert;
+            if (reihenfolgeC.Any(k => ZieleC(k, neu, plan).Length > 0))
+            {
+                Notieren($"{letzteAenderung:0} s alle C-Kriterien durch: von vorn glätten");
+                NeustartVomBesten = true;
+            }
+
+            return neu;
+        }
+
         // Alle C-Kriterien durch (geglättet oder zurückgezogen): wieder drängen.
-        aenderungen.Add($"{sekunden:0} s alle C-Kriterien durch: wieder A/B drängen");
+        Notieren($"{letzteAenderung:0} s alle C-Kriterien durch: wieder A/B drängen");
         phase = Phase.Draengen;
         draengStufe = Stufe.A;
         draengBester = null;
@@ -683,11 +936,29 @@ internal sealed class Automodus
         return neu;
     }
 
+    /// <summary>Alle Kriterien einer Stufe (je Mannschaft bzw. für den ganzen Plan) auf „extrem hoch“.</summary>
+    private Berechnungsoptionen Schuetzen(Berechnungsoptionen optionen, Stufe stufe)
+    {
+        Berechnungsoptionen neu = optionen;
+        foreach (int k in (stufe == Stufe.A ? einteilung.A : einteilung.B).Select(k => (int)k))
+        {
+            IEnumerable<int> schluessel = k >= KernDefinition.AnzahlArten
+                ? [Gesamtschluessel(k)]
+                : Enumerable.Range(0, ids.Length).Select(t => (t * KernDefinition.AnzahlArten) + k);
+            foreach (int z in schluessel.Where(z => Gewicht(neu, z) != Gewichtung.NichtBeruecksichtigen))
+            {
+                neu = Setzen(neu, z, Gewichtung.ExtremHoch);
+            }
+        }
+
+        return neu;
+    }
+
     private void NaechstesKriterium()
     {
         indexC++;
         angehobenC.Clear();
-        bezug = (BesterWert.A, BesterWert.B);
+        bezugWert = BesterWert;
         NeustartVomBesten = true;
     }
 
@@ -696,9 +967,9 @@ internal sealed class Automodus
     /// meisten Verstößen bei diesem Kriterium (Verstöße allgemein reduzieren); bei Plan-Kriterien das ganze Kriterium, solange
     /// es Verstöße bzw. Kosten hat. Nur Gewichte, die noch steigen können.
     /// </summary>
-    private int[] ZieleC(int k, Berechnungsoptionen optionen)
+    private int[] ZieleC(int k, Berechnungsoptionen optionen, Auswertung plan)
     {
-        int[] spitzen = AusreisserSchluessel(k).Where(z => Anhebbar(Gewicht(optionen, z))).ToArray();
+        int[] spitzen = AusreisserSchluessel(k, plan).Where(z => Anhebbar(Gewicht(optionen, z))).ToArray();
         if (spitzen.Length > 0)
         {
             return spitzen;
@@ -707,31 +978,31 @@ internal sealed class Automodus
         if (k >= KernDefinition.AnzahlArten)
         {
             int gesamt = Gesamtschluessel(k);
-            return (anzahl[k] > 0 || (!Stufeneinteilung.HatAnzahl((Kostenkriterium)k) && kosten[k] > 0)) && Anhebbar(Gewicht(optionen, gesamt)) ? [gesamt] : [];
+            return (plan.Anzahl[k] > 0 || (!Stufeneinteilung.HatAnzahl((Kostenkriterium)k) && plan.Kosten[k] > 0)) && Anhebbar(Gewicht(optionen, gesamt)) ? [gesamt] : [];
         }
 
         int[] mitVerstoss = Enumerable.Range(0, ids.Length)
             .Select(t => (t * KernDefinition.AnzahlArten) + k)
-            .Where(s => bewerter.KostenAnzahl[s] > 0 && Anhebbar(Gewicht(optionen, s)))
+            .Where(s => plan.Mannschaft[s] > 0 && Anhebbar(Gewicht(optionen, s)))
             .ToArray();
         if (mitVerstoss.Length == 0)
         {
             return [];
         }
 
-        int meiste = mitVerstoss.Max(s => bewerter.KostenAnzahl[s]);
-        return mitVerstoss.Where(s => bewerter.KostenAnzahl[s] == meiste).ToArray();
+        int meiste = mitVerstoss.Max(s => plan.Mannschaft[s]);
+        return mitVerstoss.Where(s => plan.Mannschaft[s] == meiste).ToArray();
     }
 
     /// <summary>
     /// Ausreißer eines C-Kriteriums im zuletzt bewerteten Plan: Mannschaften mit mehr als <c>spielraum</c> Verstößen mehr als
     /// im Grundlauf; bei Kriterien ohne Anzahl (Spieltage) der ganze Plan, wenn die Kosten über der Grenze liegen.
     /// </summary>
-    private IEnumerable<int> AusreisserSchluessel(int k)
+    private IEnumerable<int> AusreisserSchluessel(int k, Auswertung plan)
     {
         if (k >= KernDefinition.AnzahlArten)
         {
-            if (!Stufeneinteilung.HatAnzahl((Kostenkriterium)k) && kosten[k] > grenzeKosten[k])
+            if (!Stufeneinteilung.HatAnzahl((Kostenkriterium)k) && plan.Kosten[k] > grenzeKosten[k])
             {
                 yield return Gesamtschluessel(k);
             }
@@ -739,7 +1010,7 @@ internal sealed class Automodus
             yield break;
         }
 
-        if (anzahl[k] <= 0)
+        if (plan.Anzahl[k] <= 0)
         {
             yield break;
         }
@@ -747,7 +1018,7 @@ internal sealed class Automodus
         for (int t = 0; t < ids.Length; t++)
         {
             int s = (t * KernDefinition.AnzahlArten) + k;
-            if (bewerter.KostenAnzahl[s] > basisMannschaft[s] + spielraum)
+            if (plan.Mannschaft[s] > basisMannschaft[s] + spielraum)
             {
                 yield return s;
             }
@@ -755,12 +1026,12 @@ internal sealed class Automodus
     }
 
     /// <summary>Verstöße der Stufe A bzw. B im zuletzt bewerteten Plan, deren Gewicht noch angehoben werden kann.</summary>
-    private int[] Ziele(Stufe stufe)
+    private int[] Ziele(Stufe stufe, Auswertung plan)
     {
         var ziele = new List<int>();
         for (int k = 0; k < stufen.Length; k++)
         {
-            if (stufen[k] != stufe || anzahl[k] <= 0 || (fokus is Kostenkriterium f && (int)f != k))
+            if (stufen[k] != stufe || plan.Anzahl[k] <= 0 || (fokus is Kostenkriterium f && (int)f != k))
             {
                 continue;
             }
@@ -774,7 +1045,7 @@ internal sealed class Automodus
             for (int t = 0; t < ids.Length; t++)
             {
                 int s = (t * KernDefinition.AnzahlArten) + k;
-                if (bewerter.KostenAnzahl[s] > 0)
+                if (plan.Mannschaft[s] > 0)
                 {
                     ziele.Add(s);
                 }
@@ -785,7 +1056,7 @@ internal sealed class Automodus
     }
 
     private void Protokoll(string was, Berechnungsoptionen optionen, int[] schluessel) =>
-        aenderungen.Add($"{sekunden:0} s {was}: " + string.Join(", ", schluessel.Select(z => Beschreibung(z) + " " + Gewicht(optionen, z))));
+        Notieren($"{letzteAenderung:0} s {was}: " + string.Join(", ", schluessel.Select(z => Beschreibung(z) + " " + Gewicht(optionen, z))));
 
     /// <summary>Gewicht zu einem Schlüssel: ≥ 0 Mannschaft × Kostenart, &lt; 0 ganzes Kriterium.</summary>
     private Gewichtung Gewicht(Berechnungsoptionen optionen, int schluessel)
@@ -848,24 +1119,64 @@ internal sealed class Automodus
         : $"{(MannschaftsKostenart)(schluessel % KernDefinition.AnzahlArten)} {namen[schluessel / KernDefinition.AnzahlArten]}";
 
     /// <summary>Bewertet eine Lösung mit den Gewichtungen des Anwenders je Kriterium und nach Stufen, mit den C-Ausreißern.</summary>
-    private Stufenwert Bewerten(Loesung loesung, out double gesamt)
+    /// <summary>Ein Schritt ins Protokoll; es behält nur die letzten <see cref="ProtokollHoechstens"/>.</summary>
+    private void Notieren(string text)
+    {
+        aenderungen.Add(text);
+        if (aenderungen.Count > ProtokollHoechstens)
+        {
+            aenderungen.RemoveRange(0, aenderungen.Count - ProtokollHoechstens);
+        }
+    }
+
+    /// <summary>Bewertet einen Plan vollständig: nach Stufen (mit C-Ausreißern), je Kriterium und je Mannschaft × Kostenart.</summary>
+    private Auswertung Auswerten(Loesung loesung)
     {
         bewerter.LoesungUebernehmen(loesung);
         bewerter.Zuruecksetzen();
         bewerter.Sortieren();
-        gesamt = bewerter.Kosten();
+        double gesamt = bewerter.Kosten();
+        double[] anzahl = new double[Stufeneinteilung.AnzahlKriterien];
+        double[] kosten = new double[Stufeneinteilung.AnzahlKriterien];
         Stufenwert wert = bewerter.StufenBewerten(stufen, anzahl, kosten);
+        var plan = new Auswertung(wert, gesamt, anzahl, kosten, [.. bewerter.StufenAnzahl]);
         if (Grundlauf)
         {
-            return wert;
+            return plan with { Wert = wert with { Harte = wert.Harte + Ueberschreitung(anzahl) } };
         }
 
-        int ausreisser = 0;
-        foreach (int k in reihenfolgeC)
-        {
-            ausreisser += AusreisserSchluessel(k).Count();
-        }
-
-        return wert with { Ausreisser = ausreisser };
+        int ausreisser = reihenfolgeC.Sum(k => AusreisserSchluessel(k, plan).Count());
+        return plan with { Wert = wert with { Ausreisser = ausreisser, Harte = wert.Harte + Ueberschreitung(anzahl) } };
     }
+
+    /// <summary>Verstöße über den festgelegten Obergrenzen (0 ohne Festlegung).</summary>
+    private int Ueberschreitung(double[] anzahl)
+    {
+        if (obergrenze is null)
+        {
+            return 0;
+        }
+
+        int ueber = 0;
+        for (int k = 0; k < obergrenze.Length; k++)
+        {
+            if (obergrenze[k] >= 0 && anzahl[k] > obergrenze[k])
+            {
+                ueber += (int)Math.Ceiling(anzahl[k] - obergrenze[k]);
+            }
+        }
+
+        return ueber;
+    }
+
+    /// <summary>Bewertet einen Plan nach Stufen (siehe <see cref="Auswerten"/>).</summary>
+    private Stufenwert Bewerten(Loesung loesung, out double gesamt)
+    {
+        Auswertung plan = Auswerten(loesung);
+        gesamt = plan.Gesamt;
+        return plan.Wert;
+    }
+
+    /// <summary>Bewertung eines Plans: nach Stufen, Gesamtkosten, je Kriterium Anzahl und Kosten, je Mannschaft × Kostenart die Verstöße.</summary>
+    private sealed record Auswertung(Stufenwert Wert, double Gesamt, double[] Anzahl, double[] Kosten, int[] Mannschaft);
 }

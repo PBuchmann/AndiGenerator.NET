@@ -1,0 +1,17 @@
+{
+  // Starten mit Debugger: F5 (braucht die Erweiterung "C#" bzw. "C# Dev Kit" von Microsoft).
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "AndiGenerator.NET (Debug)",
+      "type": "coreclr",
+      "request": "launch",
+      "preLaunchTask": "Bauen (Debug)",
+      "program": "${env:LOCALAPPDATA}\\AndiGenerator.NET\\artifacts\\bin\\AndiGenerator.Desktop\\debug\\AndiGenerator.NET.dll",
+      "cwd": "${workspaceFolder}",
+      "env": { "ANDIGEN_BILDSCHIRMFOTOS": "${workspaceFolder}\\Bildschirmfotos" },
+      "console": "internalConsole",
+      "stopAtEntry": false
+    }
+  ]
+}

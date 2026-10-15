@@ -7,7 +7,7 @@
              x:DataType="p:AuswaertskoppelDetailViewModel">
   <StackPanel Spacing="8">
     <TextBlock Classes="abschnitt" Text="Auswärtskoppelwünsche" />
-    <DockPanel HorizontalAlignment="Left">
+    <DockPanel HorizontalAlignment="Stretch" MaxWidth="756">
       <StackPanel DockPanel.Dock="Right" Classes="seitenknoepfe">
         <Button Classes="seitenknopf" Command="{Binding NeuCommand}">
           <StackPanel Orientation="Horizontal" Spacing="8">
@@ -28,10 +28,10 @@
           </StackPanel>
         </Button>
       </StackPanel>
-      <ListBox x:Name="Liste" ItemsSource="{Binding Koppeln}" SelectedItem="{Binding Auswahl}" MinHeight="120" MaxHeight="220" Width="520">
+      <ListBox x:Name="Liste" ItemsSource="{Binding Koppeln}" SelectedItem="{Binding Auswahl}" MinHeight="120" MaxHeight="220" MinWidth="200">
         <ListBox.ItemTemplate>
           <DataTemplate x:DataType="a:Auswaertskoppeldaten">
-            <TextBlock Text="{Binding Bezeichnung}" />
+            <TextBlock Text="{Binding Bezeichnung}" TextWrapping="Wrap" />
           </DataTemplate>
         </ListBox.ItemTemplate>
       </ListBox>

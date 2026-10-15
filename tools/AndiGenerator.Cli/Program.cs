@@ -20,6 +20,16 @@ try
         return await BewertenBefehl.Ausfuehren(args[1..]);
     }
 
+    if (args.Length >= 1 && args[0] == "schranke")
+    {
+        return SchrankeBefehl.Ausfuehren(args[1..]);
+    }
+
+    if (args.Length >= 1 && args[0] == "neuplanen")
+    {
+        return NeuplanenBefehl.Ausfuehren(args[1..]);
+    }
+
     if (args.Length >= 1 && args[0] == "turnier")
     {
         return await TurnierBefehl.Ausfuehren(args[1..]);
@@ -44,5 +54,7 @@ catch (Exception ex) when (ex is ClickTtFormatException or PlanDatenFormatExcept
 Console.WriteLine("Aufruf: andigen info <click-TT-Exportdatei.xml>");
 Console.WriteLine("        andigen optimieren <click-TT-Exportdatei.xml> [Optionen]   (Hilfe: andigen optimieren --hilfe)");
 Console.WriteLine("        andigen bewerten <click-TT-Exportdatei.xml> <Plan> [<Plan> ...] [Optionen]   (Hilfe: andigen bewerten --hilfe)");
+Console.WriteLine("        andigen schranke <click-TT-Exportdatei.xml> [Optionen]   (untere Schranke der Stufe A mit HiGHS)");
+Console.WriteLine("        andigen neuplanen <click-TT-Exportdatei.xml> --start PLAN [Optionen]   (Teilneuplanung mit HiGHS)");
 Console.WriteLine("        andigen turnier pruefen <click-TT-Exportdatei.xml> <Meldungen.csv> [--ausgabe DATEI]");
 return 1;

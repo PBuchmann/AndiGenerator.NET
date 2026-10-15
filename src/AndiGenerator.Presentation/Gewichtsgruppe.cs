@@ -4,7 +4,7 @@
 
 namespace AndiGenerator.Presentation;
 
-/// <summary>Ein Kriterium mit den Gewichten, die der Automodus dafür geändert hat (Maschinenraum).</summary>
+/// <summary>Ein Kriterium mit den Gewichten, die der Automodus dafür geändert hat (Leitstand).</summary>
 /// <param name="Stufe">Stufe mit Nummer, z. B. <c>A2</c>.</param>
 /// <param name="Kriterium">Name des Kriteriums.</param>
 /// <param name="Zeilen">Je geändertes Gewicht eine Zeile (ganzes Kriterium bzw. je Mannschaft).</param>

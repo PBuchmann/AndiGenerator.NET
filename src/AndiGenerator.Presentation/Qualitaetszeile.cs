@@ -21,6 +21,11 @@ public sealed class Qualitaetszeile : ObservableObject
     private string kosten = string.Empty;
     private Qualitaetszustand zustand;
     private bool istGewaehlt;
+    private string bestmoeglich = string.Empty;
+    private bool bestmoeglichErreicht;
+    private bool bestmoeglichRechnet;
+    private Stufenkopf? kopf;
+    private string festgelegt = string.Empty;
 
     /// <summary>Initialisiert die Zeile; Verstöße, Kosten und Zustand werden danach gesetzt.</summary>
     /// <param name="stufe">Stufe mit Nummer, z. B. <c>A2</c>.</param>
@@ -91,6 +96,53 @@ public sealed class Qualitaetszeile : ObservableObject
     {
         get => kosten;
         internal set => SetProperty(ref kosten, value);
+    }
+
+    /// <summary>
+    /// Holt die untere Schranke des Kriteriums allein im Automodus (so viele Verstöße hat jeder Plan mindestens, wenn nur dieses
+    /// Kriterium zählt und die Stufen darüber bestmöglich sind), z. B. <c>≥ 2</c>, oder leer, wenn es keine gibt.
+    /// </summary>
+    public string Bestmoeglich
+    {
+        get => bestmoeglich;
+        internal set => SetProperty(ref bestmoeglich, value);
+    }
+
+    /// <summary>Holt einen Wert, der angibt, ob die Schranke gerade berechnet wird (Sanduhr).</summary>
+    public bool BestmoeglichRechnet
+    {
+        get => bestmoeglichRechnet;
+        internal set => SetProperty(ref bestmoeglichRechnet, value);
+    }
+
+    /// <summary>Holt einen Wert, der angibt, ob der Plan die Schranke erreicht (besser geht es nicht).</summary>
+    public bool BestmoeglichErreicht
+    {
+        get => bestmoeglichErreicht;
+        internal set => SetProperty(ref bestmoeglichErreicht, value);
+    }
+
+    /// <summary>Holt die Kopfzeile der Stufe, wenn die Zeile die erste ihrer Stufe ist (Automodus); sonst <c>null</c>.</summary>
+    public Stufenkopf? Kopf
+    {
+        get => kopf;
+        internal set
+        {
+            if (SetProperty(ref kopf, value))
+            {
+                OnPropertyChanged(nameof(HatKopf));
+            }
+        }
+    }
+
+    /// <summary>Holt einen Wert, der angibt, ob über der Zeile die Kopfzeile ihrer Stufe steht.</summary>
+    public bool HatKopf => Kopf is not null;
+
+    /// <summary>Holt die Obergrenze aus der übernommenen B-Variante, z. B. <c>höchstens 4</c>; sonst leer.</summary>
+    public string Festgelegt
+    {
+        get => festgelegt;
+        internal set => SetProperty(ref festgelegt, value);
     }
 
     /// <summary>Holt den Zustand für die Farbe.</summary>

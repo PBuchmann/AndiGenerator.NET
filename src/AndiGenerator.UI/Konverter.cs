@@ -46,6 +46,35 @@ public static class Konverter
         _ => "!",
     });
 
+    /// <summary>Holt die Farbe des Spielraums einer Stufe (grün: Optimum erreicht, orange: noch besser möglich, sonst grau).</summary>
+    public static IValueConverter SpielraumFarbe { get; } = new FuncValueConverter<Spielraumzustand, IBrush>(z => z switch
+    {
+        Spielraumzustand.Bestmoeglich => Gut,
+        Spielraumzustand.Offen => Warnung,
+        _ => Grau,
+    });
+
+    /// <summary>Holt die Farbe einer Differenz im Vergleich (−1 grün besser, +1 rot schlechter, sonst grau).</summary>
+    public static IValueConverter RichtungFarbe { get; } = new FuncValueConverter<int, IBrush>(r => r switch
+    {
+        < 0 => Gut,
+        > 0 => Schlecht,
+        _ => Grau,
+    });
+
+    /// <summary>Holt, ob eine Zahl negativ ist (z. B. Differenz: besser).</summary>
+    public static IValueConverter IstNegativ { get; } = new FuncValueConverter<int, bool>(r => r < 0);
+
+    /// <summary>Holt, ob eine Zahl positiv ist (z. B. Differenz: schlechter).</summary>
+    public static IValueConverter IstPositiv { get; } = new FuncValueConverter<int, bool>(r => r > 0);
+
+    /// <summary>Holt die Schriftstärke: fett für <c>true</c>.</summary>
+    public static IValueConverter Fett { get; } = new FuncValueConverter<bool, FontWeight>(fett => fett ? FontWeight.SemiBold : FontWeight.Normal);
+
+    /// <summary>Holt die Breite eines Anteils (0 bis 100) an einer Leiste, deren Breite der Parameter angibt.</summary>
+    public static IValueConverter Anteilsbreite { get; } = new FuncValueConverter<double?, object?, double>((anteil, breite) =>
+        Math.Clamp(anteil ?? 0, 0, 100) / 100 * (breite is null ? 100 : Convert.ToDouble(breite, System.Globalization.CultureInfo.InvariantCulture)));
+
     /// <summary>Holt die Farbe der Zusammenfassung (grün, wenn die Pflichtstufe erfüllt ist, sonst rot).</summary>
     public static IValueConverter PflichtFarbe { get; } = new FuncValueConverter<bool, IBrush>(erfuellt => erfuellt ? Gut : Schlecht);
 

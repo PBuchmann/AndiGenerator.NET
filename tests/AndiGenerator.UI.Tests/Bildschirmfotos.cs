@@ -223,7 +223,7 @@ public sealed class Bildschirmfotos : IDisposable
             await WartenAsync(o, TimeSpan.FromSeconds(8), () => false);
 
             // Leitstand der Kostenoptimierung (mit Spezial-Insel), solange gerechnet wird; danach wieder die Kosten vorn.
-            Zeigen(modell.MaschinenraumCommand, o);
+            Zeigen(modell.LeitstandCommand, o);
             await WartenAsync(o, TimeSpan.FromSeconds(2), () => false);
             Foto(ziel, "20-leitstand-kosten", Ansichten(fenster), o);
             Zeigen(modell.KostenansichtCommand, o);
@@ -266,8 +266,8 @@ public sealed class Bildschirmfotos : IDisposable
             await WartenAsync(o, TimeSpan.FromSeconds(45), () => modell.Anzeige.Phase.Length > 0);
             await WartenAsync(o, TimeSpan.FromSeconds(3), () => false);
 
-            // Maschinenraum, solange gerechnet wird (die Kerne zeigen ihre Last).
-            Zeigen(modell.MaschinenraumCommand, o);
+            // Leitstand, solange gerechnet wird (die Kerne zeigen ihre Last).
+            Zeigen(modell.LeitstandCommand, o);
             await WartenAsync(o, TimeSpan.FromSeconds(2), () => false);
             Foto(ziel, "19-leitstand", Ansichten(fenster), o);
 
@@ -292,6 +292,7 @@ public sealed class Bildschirmfotos : IDisposable
             // Qualität im Automodus (mit Einstufung), gewählt die erste Zeile mit Verstößen je Mannschaft.
             Zeigen(modell.QualitaetsansichtCommand, o);
             var qualitaet = (QualitaetAnsichtViewModel)Einzige<QualitaetAnsicht>(fenster).DataContext!;
+            await WartenAsync(o, TimeSpan.FromSeconds(60), () => !qualitaet.Zeilen.Any(z => z.BestmoeglichRechnet));
             if (qualitaet.Zeilen.FirstOrDefault(z => z.Zustand != Qualitaetszustand.Erfuellt && z.Kriterium is not null) is { } zeile)
             {
                 qualitaet.Waehlen(zeile);

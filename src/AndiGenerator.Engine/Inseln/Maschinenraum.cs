@@ -7,7 +7,7 @@ using AndiGenerator.Domain.Optionen;
 namespace AndiGenerator.Engine.Inseln;
 
 /// <summary>
-/// Blick in den Maschinenraum der Optimierung: was die Rechenkerne und Inseln gerade tun (Anzeige „Maschinenraum“).
+/// Leitstand der Optimierung: was die Rechenkerne und Inseln gerade tun (Anzeige „Leitstand“).
 /// </summary>
 /// <param name="Kerne">Berechnete Pläne je Rechen-Thread seit dem Start (ohne Rechen-Threads leer).</param>
 /// <param name="Inseln">Die Inseln, zuletzt die Spezial-Insel, wenn es sie gibt.</param>

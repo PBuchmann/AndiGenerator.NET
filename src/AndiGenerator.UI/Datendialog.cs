@@ -124,9 +124,9 @@ internal sealed class Datendialog : Window
             Padding = new Thickness(7, 1),
             Margin = new Thickness(6, 0, 0, 0),
             VerticalAlignment = VerticalAlignment.Center,
-            Background = Farbe("Schwebe"),
+            Background = Pinsel.Farbe("Schwebe"),
         };
-        var punkt = new Ellipse { Width = 8, Height = 8, Margin = new Thickness(6, 0, 0, 0), VerticalAlignment = VerticalAlignment.Center, Fill = Farbe("Akzent") };
+        var punkt = new Ellipse { Width = 8, Height = 8, Margin = new Thickness(6, 0, 0, 0), VerticalAlignment = VerticalAlignment.Center, Fill = Pinsel.Farbe("Akzent") };
         ToolTip.SetTip(punkt, "In diesem Dialog geändert");
         var zeile = new Grid { ColumnDefinitions = new ColumnDefinitions("*,Auto,Auto") };
         Grid.SetColumn(markenrahmen, 1);
@@ -147,9 +147,6 @@ internal sealed class Datendialog : Window
 
         return zeile;
     }
-
-    private static IBrush Farbe(string name) =>
-        global::Avalonia.Application.Current?.TryFindResource(name, out object? wert) == true && wert is IBrush b ? b : Brushes.Gray;
 
     /// <summary>Verkleinert den Dialog, falls er größer als der Arbeitsbereich des Bildschirms ist, und zentriert ihn neu.</summary>
     private void AnBildschirmAnpassen()

@@ -2,6 +2,8 @@
 // SPDX-FileCopyrightText: 2026 Peter Buchmann
 // SPDX-License-Identifier: GPL-3.0-only
 
+using AndiGenerator.Domain.Stammdaten;
+
 namespace AndiGenerator.Engine.Inseln;
 
 /// <summary>Einstellungen des Inselmodells (MIGRATIONSPLAN E6).</summary>
@@ -44,6 +46,12 @@ namespace AndiGenerator.Engine.Inseln;
 /// damit langsame Rechner ebenso viel suchen wie schnelle, bevor der Automodus entscheidet.
 /// </param>
 /// <param name="AutoMaxGrundlauf">Höchstdauer der Basisoptimierung in Sekunden reiner Rechenzeit; danach beginnt in jedem Fall Stufe A.</param>
+/// <param name="Startplan">
+/// Startplan für die ersten <paramref name="StartplanInseln"/> Inseln (z. B. aus HiGHS, MIGRATIONSPLAN O7 Schritt 2), oder
+/// <c>null</c>; die übrigen Inseln beginnen wie bisher.
+/// </param>
+/// <param name="StartplanInseln">Zahl der Inseln, die mit dem Startplan beginnen.</param>
+/// <param name="Fadenstart">Wird zu Beginn jedes Rechen-Threads auf ihm aufgerufen (z. B. für die Messung der Rechenzeit), oder <c>null</c>.</param>
 public sealed record Optimierungseinstellungen(
     int Kerne,
     int Inseln,
@@ -63,7 +71,10 @@ public sealed record Optimierungseinstellungen(
     bool AutoOhneGrundlauf = false,
     double AutoDeutlich = 0.01,
     long AutoStillstandPlaene = 500_000,
-    double AutoMaxGrundlauf = 180)
+    double AutoMaxGrundlauf = 180,
+    IReadOnlyList<Spiel>? Startplan = null,
+    int StartplanInseln = 1,
+    Action? Fadenstart = null)
 {
     /// <summary>Standard: Topologie des Originals (4 Inseln × 14 feste + 10 dynamische Suchplätze, Spezial-Insel), alle Kerne bis auf einen.</summary>
     public static Optimierungseinstellungen Standard { get; } = new(

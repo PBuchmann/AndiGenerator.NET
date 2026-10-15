@@ -62,6 +62,15 @@ internal static class BewertenBefehl
         }
     }
 
+    /// <summary>Liest einen Plan (CSV oder gemerkter Plan) und ordnet ihn der Staffel zu; <c>null</c> bei unbekannten Mannschaften.</summary>
+    internal static List<Spiel>? PlanLaden(Staffel staffel, string plan)
+    {
+        IReadOnlyList<GespeichertesSpiel> gelesen = string.Equals(Path.GetExtension(plan), ".csv", StringComparison.OrdinalIgnoreCase)
+            ? PlanCsvLeser.Laden(plan)
+            : GespeicherterPlanDatei.Laden(plan);
+        return Zuordnen(staffel, gelesen, plan);
+    }
+
     private static int Bewerten(BewertenArgumente a)
     {
         Staffel staffel = OptimierenBefehl.StaffelLaden(a.Datei, leer: true);
@@ -91,10 +100,7 @@ internal static class BewertenBefehl
         bool fehlerhaft = false;
         foreach (string plan in a.Plaene)
         {
-            IReadOnlyList<GespeichertesSpiel> gelesen = string.Equals(Path.GetExtension(plan), ".csv", StringComparison.OrdinalIgnoreCase)
-                ? PlanCsvLeser.Laden(plan)
-                : GespeicherterPlanDatei.Laden(plan);
-            IReadOnlyList<Spiel>? spiele = Zuordnen(staffel, gelesen, plan);
+            IReadOnlyList<Spiel>? spiele = PlanLaden(staffel, plan);
             if (spiele is null)
             {
                 fehlerhaft = true;
@@ -162,6 +168,11 @@ internal static class BewertenBefehl
         Zeile("  Überlappung letzter Sp.", ergebnisse.Select(e => Kostenanzeige.Kurz(e.Bewertung.UeberlappungLetzterSpieltag)));
         Zeile("  Länge letzter Spieltag", ergebnisse.Select(e => Kostenanzeige.Kurz(e.Bewertung.LaengeLetzterSpieltag)));
         Zeile("  Vereinsint. am Anfang", ergebnisse.Select(e => Kostenanzeige.Kurz(e.Bewertung.VereinsinterneSpieleAmAnfang)));
+        Console.WriteLine();
+        Console.WriteLine("Anzahlen (nicht im Original): vereinsintern, Pausen, Spieltage zu lang/überlappend, letzter zu lang/überlappend");
+        Zeile("  Anzahlen", ergebnisse.Select(e => e.Bewertung.Zusatz is { } z
+            ? string.Create(CultureInfo.InvariantCulture, $"{e.Bewertung.VereinsinterneAnzahl}, {z.Spielverteilung.Sum()}, {z.SpieltageLaenge}/{z.SpieltageUeberlappung}, {z.LetzterLaenge}/{z.LetzterUeberlappung}")
+            : "–"));
         Console.WriteLine();
         Console.WriteLine("Mannschafts-Kostenarten: Verstöße über alle Mannschaften (Kosten)");
         IEnumerable<MannschaftsKostenart> arten = ergebnisse.SelectMany(e => e.Bewertung.SichtbareKostenarten).Distinct().Order();

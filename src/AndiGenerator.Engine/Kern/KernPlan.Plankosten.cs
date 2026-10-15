@@ -217,8 +217,12 @@ internal sealed partial class KernPlan
         return new RefPlan.Spieltagskosten(breite, ueberlappung, letzteBreite, letzteUeberlappung);
     }
 
-    /// <summary>Original <c>getTeamsNotAtBegin</c>.</summary>
-    private int TeamsNichtAmAnfang()
+    /// <summary>
+    /// Original <c>getTeamsNotAtBegin</c>: Spiele gegen fremde Vereine vor einem vereinsinternen Spiel derselben Runde (je
+    /// Mannschaft gezählt).
+    /// </summary>
+    /// <returns>Die Anzahl.</returns>
+    public int TeamsNichtAmAnfang()
     {
         int ergebnis = 0;
         for (int t = 0; t < D.N; t++)

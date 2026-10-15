@@ -103,21 +103,6 @@
       <Setter Property="Grid.Column" Value="2" />
       <Setter Property="Grid.ColumnSpan" Value="2" />
     </Style>
-    <!-- Maschinenraum in der Kachel „Berechnete Pläne“: je Rechenkern ein Balken, der mit seiner Last wächst. -->
-    <Style Selector="Border.kernbalken">
-      <Setter Property="Width" Value="5" />
-      <Setter Property="CornerRadius" Value="2" />
-      <Setter Property="VerticalAlignment" Value="Bottom" />
-      <Setter Property="Background" Value="{StaticResource Akzent}" />
-      <Setter Property="Transitions">
-        <Transitions>
-          <DoubleTransition Property="Height" Duration="0:0:0.45" Easing="CubicEaseOut" />
-        </Transitions>
-      </Setter>
-    </Style>
-    <Style Selector="ItemsControl.kerne:not(.rechnet) Border.kernbalken">
-      <Setter Property="Background" Value="{StaticResource Rand}" />
-    </Style>
     <Style Selector="TextBlock.wert">
       <Setter Property="FontSize" Value="26" />
     </Style>
@@ -422,7 +407,7 @@
                                  Width="96" Height="34" VerticalAlignment="Bottom" Margin="12,0,0,4" />
           </Grid>
         </Button>
-        <Button Classes="kartenknopf plaene" Margin="6" Command="{Binding MaschinenraumCommand}" ToolTip.Tip="Leitstand öffnen: was die Rechenkerne und Inseln gerade tun">
+        <Button Classes="kartenknopf plaene" Margin="6" Command="{Binding LeitstandCommand}" ToolTip.Tip="Leitstand öffnen: was die Rechenkerne und Inseln gerade tun">
           <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,*">
             <Grid Grid.ColumnSpan="2" ColumnDefinitions="*,Auto">
               <TextBlock Text="Berechnete Pläne" Classes="klein" TextTrimming="CharacterEllipsis" />
@@ -432,19 +417,13 @@
               <TextBlock Text="{Binding Anzeige.Plaene}" Classes="ziffer wert" />
               <TextBlock Text="{Binding Anzeige.Tempo}" Classes="klein hinweis" />
             </StackPanel>
-            <ItemsControl Grid.Row="1" Grid.Column="1" Classes="kerne" Classes.rechnet="{Binding Anzeige.Rechnet}" ItemsSource="{Binding Anzeige.KachelKerne}"
-                          Height="22" VerticalAlignment="Bottom" Margin="12,0,0,4">
-              <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                  <StackPanel Orientation="Horizontal" Spacing="2" />
-                </ItemsPanelTemplate>
-              </ItemsControl.ItemsPanel>
-              <ItemsControl.ItemTemplate>
-                <DataTemplate x:DataType="p:Kernanzeige">
-                  <Border Classes="kernbalken" Height="{Binding Hoehe}" />
-                </DataTemplate>
-              </ItemsControl.ItemTemplate>
-            </ItemsControl>
+            <!-- Der ganze Prozessor wie im Leitstand: blau die Suche, orange HiGHS, grau andere Programme, hell frei; je Kern ein Strich -->
+            <StackPanel Grid.Row="1" Grid.Column="1" Width="96" Spacing="3" VerticalAlignment="Bottom" Margin="12,0,0,4"
+                        ToolTip.Tip="Der ganze Prozessor: blau die Suche, orange HiGHS, grau andere Programme, hell frei – je Kern ein Strich">
+              <TextBlock Text="{Binding Anzeige.Auslastung}" Classes="klein" HorizontalAlignment="Right" />
+              <ui:Anteilsleiste Height="10" Kerne="{Binding Anzeige.Last.Prozessoren, FallbackValue=0}" Suche="{Binding Anzeige.Last.Suche, FallbackValue=0}"
+                                Highs="{Binding Anzeige.Last.Highs, FallbackValue=0}" Rest="{Binding Anzeige.Last.Sonstiges, FallbackValue=0}" />
+            </StackPanel>
           </Grid>
         </Button>
       </Grid>

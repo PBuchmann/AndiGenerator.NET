@@ -434,6 +434,20 @@ public sealed class Plansitzung
         OptionenSpeichern(ziel.Setzen(Optionen, wert));
     }
 
+    /// <summary>Verstöße gegen „vereinsinterne Spiele am Anfang“ je Mannschaft (für die Qualitätsansicht).</summary>
+    /// <param name="spiele">Spiele des Plans.</param>
+    /// <returns>Je betroffene Mannschaft ihre Spiele gegen fremde Vereine vor einem vereinsinternen Spiel.</returns>
+    public IReadOnlyList<Mannschaftsmeldungen> VereinsinterneMeldungen(IReadOnlyList<Spiel> spiele) =>
+        Referenzbewertung.VereinsinterneMeldungen(Staffel with { BestehenderSpielplan = spiele }, Optionen);
+
+    /// <summary>
+    /// Verstöße der Kriterien, die im Original nur Kosten haben: bei der Spielverteilung je Mannschaft die zu langen Pausen, bei
+    /// den Spieltagen die zu langen bzw. überlappenden (für die Qualitätsansicht).
+    /// </summary>
+    /// <param name="spiele">Spiele des Plans.</param>
+    /// <returns>Die Bewertung mit den Meldungen.</returns>
+    public Zusatzverstoesse? Zusatzverstoesse(IReadOnlyList<Spiel> spiele) => Bewerten(spiele).Zusatz;
+
     /// <summary>Meldungen zu harten Fehlern vor dem Export (Original <c>getHardErrorMessages</c>).</summary>
     /// <param name="spiele">Spiele des Plans.</param>
     /// <returns>Die Meldungen; leer, wenn der Plan keine harten Fehler hat.</returns>

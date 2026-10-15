@@ -8,6 +8,8 @@ using AndiGenerator.Domain.Optionen;
 using AndiGenerator.Domain.Stammdaten;
 using AndiGenerator.Engine.Inseln;
 using AndiGenerator.Engine.Referenz;
+using AndiGenerator.Engine.Schranke;
+using AndiGenerator.Import;
 using AndiGenerator.Persistence.Gemeinsam;
 using AndiGenerator.Persistence.Optionen;
 using AndiGenerator.Persistence.Plandaten;
@@ -82,7 +84,7 @@ internal static class OptimierenBefehl
 
     private static async Task<int> Optimieren(OptimierenArgumente a)
     {
-        Staffel staffel = StaffelLaden(a.Datei, a.Leer);
+        Staffel staffel = StaffelLaden(a.Datei, leer: false);
         (Berechnungsoptionen optionen, string herkunft) = OptionenLaden(a.Optionen, staffel);
         if (a.HallenWieOriginal)
         {
@@ -102,13 +104,44 @@ internal static class OptimierenBefehl
             herkunft += $", Rundenplanung {runde}";
         }
 
+        // Mit leerem Plan: bei „nur Rückrunde“ bleibt die Vorrunde aus der Datei fest (wie in der Oberfläche).
+        if (a.Leer)
+        {
+            staffel = staffel with { BestehenderSpielplan = Vorrunde.Festhalten(staffel, optionen, null) };
+        }
+
+        // Wie die Oberfläche: Einteilung der Kriterien aus der Staffel (Qualitätsansicht), sonst die Standard-Einteilung.
+        Stufeneinteilung einteilung = Stufeneinteilung.AusText(staffel.Kriterienstufen);
         Optimierungseinstellungen einstellungen = Optimierungseinstellungen.Standard with
         {
+            AutoStufen = einteilung,
             Kerne = a.Kerne ?? Optimierungseinstellungen.Standard.Kerne,
             Inseln = a.Inseln ?? Optimierungseinstellungen.Standard.Inseln,
             Startwert = a.Startwert,
             SpezialInsel = !a.OhneSpezial,
+            Automodus = a.Auto,
+            StartplanInseln = a.StartInseln,
         };
+
+        // Automodus mit HiGHS wie in der Oberfläche: Schranke und Plan werden nach dem Start eingespielt (ab Ende des Grundlaufs).
+        Schrankenbericht? highs = null;
+        if (a.Highs)
+        {
+            highs = Ligaschranke.Berechnen(staffel, optionen, new SchrankeBefehl.Highsschranke(), Ligaschranke.StandardZeitJeStufe, einteilung);
+            Console.WriteLine($"HiGHS:        A ≥ {highs.SchrankeA?.ToString(CultureInfo.InvariantCulture) ?? "?"}, B ≥ {highs.SchrankeB?.ToString(CultureInfo.InvariantCulture) ?? "?"}" + (highs.Plan.Count > 0 ? string.Empty : " (kein Plan)"));
+        }
+
+        if (a.Start is not null)
+        {
+            List<Spiel>? start = BewertenBefehl.PlanLaden(staffel, a.Start);
+            if (start is null)
+            {
+                return 2;
+            }
+
+            einstellungen = einstellungen with { Startplan = start };
+            Console.WriteLine($"Startplan:    {a.Start} für {Math.Min(a.StartInseln, einstellungen.Inseln)} Insel(n)");
+        }
 
         Console.WriteLine($"Staffel:      {staffel.Name} ({staffel.Mannschaften.Count} Mannschaften, bestehender Plan {staffel.BestehenderSpielplan.Count(s => s.Zeitpunkt is not null)} Spiele terminiert)");
         Console.WriteLine($"Optionen:     {herkunft}");
@@ -125,6 +158,17 @@ internal static class OptimierenBefehl
             await protokoll.WriteLineAsync("Sekunden;Durchlaeufe;PlaeneProSekunde;Kosten;Verbesserungen;Neustarts;Spezial");
         }
 
+        if (highs is not null)
+        {
+            optimierer.HighsEinspielen(highs.Plan, highs.SchrankeA, highs.SchrankeB);
+        }
+
+        // Automodus mit Teilneuplanung (HiGHS) nebenher, fortlaufend.
+        using Teilneuplaner? teilneuplaner = a.Neuplanen && a.Auto && HighsLoeser.Verfuegbar
+            ? new Teilneuplaner(optimierer, staffel, optionen, new SchrankeBefehl.Highsschranke(), einteilung.Vervollstaendigt())
+            : null;
+        teilneuplaner?.Starten();
+
         var uhr = Stopwatch.StartNew();
         if (a.Durchlaeufe is long ziel && einstellungen.Kerne == 1)
         {
@@ -132,12 +176,20 @@ internal static class OptimierenBefehl
         }
         else
         {
-            await ImHintergrundRechnen(optimierer, a, uhr, protokoll);
+            await ImHintergrundRechnen(optimierer, a, uhr, protokoll, teilneuplaner);
         }
 
         await Status(optimierer, uhr, protokoll);
         Console.WriteLine();
         Zusammenfassung(staffel, optionen, optimierer, uhr);
+        if (optimierer.Lenkung is { } lenkung)
+        {
+            Console.WriteLine($"Automodus: bester Plan {lenkung.Bester}");
+            foreach (string aenderung in lenkung.Aenderungen)
+            {
+                Console.WriteLine("  " + aenderung);
+            }
+        }
 
         if (a.Plan is not null)
         {
@@ -148,7 +200,7 @@ internal static class OptimierenBefehl
         return 0;
     }
 
-    private static async Task ImHintergrundRechnen(Inseloptimierer optimierer, OptimierenArgumente a, Stopwatch uhr, StreamWriter? protokoll)
+    private static async Task ImHintergrundRechnen(Inseloptimierer optimierer, OptimierenArgumente a, Stopwatch uhr, StreamWriter? protokoll, Teilneuplaner? teilneuplaner)
     {
         using var abbruch = new CancellationTokenSource();
         ConsoleCancelEventHandler strgC = (_, e) =>
@@ -181,6 +233,8 @@ internal static class OptimierenBefehl
             Console.CancelKeyPress -= strgC;
         }
 
+        // Erst die Teilneuplanung beenden: Danach spielt sie nichts mehr ein, Ausgabe und gespeicherter Plan stimmen überein.
+        teilneuplaner?.Dispose();
         optimierer.Stoppen();
         if (optimierer.Fehler is Exception ex)
         {

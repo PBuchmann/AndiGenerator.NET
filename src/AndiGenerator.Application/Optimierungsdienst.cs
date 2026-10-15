@@ -7,6 +7,8 @@ using AndiGenerator.Domain.Optionen;
 using AndiGenerator.Domain.Stammdaten;
 using AndiGenerator.Engine.Inseln;
 using AndiGenerator.Engine.Referenz;
+using AndiGenerator.Engine.Schranke;
+using AndiGenerator.Import;
 
 namespace AndiGenerator.Application;
 
@@ -23,6 +25,7 @@ public sealed class Optimierungsdienst : IDisposable
     private readonly Lock sperre = new();
     private readonly Optimierungseinstellungen einstellungen;
     private readonly Stopwatch seitVerbesserung = new();
+    private readonly Prozessormessung messung = new();
     private Inseloptimierer? optimierer;
     private CancellationTokenSource? beobachtung;
     private Thread? beobachter;
@@ -33,6 +36,10 @@ public sealed class Optimierungsdienst : IDisposable
     private bool pausiert;
     private bool automodus;
     private bool laufenderAutomodus;
+    private volatile bool highsVorrang;
+    private (IReadOnlyDictionary<Kostenkriterium, int> Grenzen, string Name)? festlegung;
+    private Teilneuplaner? teilneuplaner;
+    private (Staffel Staffel, Berechnungsoptionen Optionen)? laufend;
 
     /// <summary>Legt den Dienst an.</summary>
     /// <param name="einstellungen">Einstellungen des Inselmodells; <c>null</c> = Standard.</param>
@@ -103,6 +110,16 @@ public sealed class Optimierungsdienst : IDisposable
         }
     }
 
+    /// <summary>
+    /// Vorrang für HiGHS: Solange die untere Schranke die Stufen A und B rechnet, wartet die Teilneuplanung – ihre Arbeit wäre
+    /// verloren, wenn danach eine Variante in B gewählt wird, und HiGHS bekommt die Kerne.
+    /// </summary>
+    public bool HighsVorrang
+    {
+        get => highsVorrang;
+        set => highsVorrang = value;
+    }
+
     /// <summary>Fehler, an dem die Generierung abgebrochen ist; <c>null</c>, solange alles läuft.</summary>
     public Exception? Fehler
     {
@@ -131,7 +148,10 @@ public sealed class Optimierungsdienst : IDisposable
         {
             fruehereDurchlaeufe = 0;
             fruehereVerbesserungen = 0;
-            NeuStarten(staffel with { BestehenderSpielplan = ausgangsplan ?? [] }, optionen, ausgangsplan is { Count: > 0 });
+            festlegung = null;
+
+            // Bei „nur Rückrunde“ bleibt die Vorrunde aus click-TT fest, auch mit leerem oder gemerktem Startplan.
+            NeuStarten(staffel with { BestehenderSpielplan = Vorrunde.Festhalten(staffel, optionen, ausgangsplan) }, optionen, ausgangsplan is { Count: > 0 });
         }
 
         beobachtung = new CancellationTokenSource();
@@ -160,12 +180,46 @@ public sealed class Optimierungsdienst : IDisposable
             Optimierungsergebnis bisher = optimierer.BesterStand();
             fruehereDurchlaeufe += optimierer.Durchlaeufe;
             fruehereVerbesserungen += bisher.Verbesserungen;
+            TeilneuplanungBeenden();
             optimierer.Dispose();
 
             // Wechsel von der Kostenoptimierung in den Automodus: Der Plan ist schon optimiert, keine neue Basisoptimierung.
             bool wechselZumAutomodus = automodus && !laufenderAutomodus && bisher.Spiele.Count > 0;
-            NeuStarten(staffel with { BestehenderSpielplan = bisher.Spiele }, optionen, ausgangsplanMelden: true, ohneGrundlauf: wechselZumAutomodus);
+            NeuStarten(staffel with { BestehenderSpielplan = Vorrunde.Festhalten(staffel, optionen, bisher.Spiele) }, optionen, ausgangsplanMelden: true, ohneGrundlauf: wechselZumAutomodus);
         }
+    }
+
+    /// <summary>
+    /// Automodus: übernimmt Schranke und Plan aus HiGHS in die laufende Generierung (siehe
+    /// <see cref="Inseloptimierer.HighsEinspielen"/>).
+    /// </summary>
+    /// <param name="plan">Plan aus HiGHS (leer = keiner).</param>
+    /// <param name="schrankeA">Bewiesene Schranke der Summe der Stufe A, oder <c>null</c>.</param>
+    /// <param name="schrankeB">Bewiesene Schranke der Summe der Stufe B (bei bestmöglichem A), oder <c>null</c>.</param>
+    public void HighsEinspielen(IReadOnlyList<Spiel> plan, int? schrankeA, int? schrankeB)
+    {
+        lock (sperre)
+        {
+            optimierer?.HighsEinspielen(plan, schrankeA, schrankeB);
+        }
+    }
+
+    /// <summary>
+    /// Automodus: bietet einen Zwischenplan aus HiGHS sofort an (siehe <see cref="Inseloptimierer.PlanEinspielen"/>) – ist er
+    /// nach Stufen besser, wird er bester Plan, und alle Inseln, die in A oder B schlechter sind, beginnen mit ihm. Während der
+    /// Basisoptimierung wird nichts übernommen.
+    /// </summary>
+    /// <param name="plan">Der Plan.</param>
+    /// <param name="herkunft">Für das Protokoll des Automodus.</param>
+    public void PlanAnbieten(IReadOnlyList<Spiel> plan, string herkunft)
+    {
+        Inseloptimierer? o;
+        lock (sperre)
+        {
+            o = laufenderAutomodus ? optimierer : null;
+        }
+
+        o?.PlanEinspielen(plan, herkunft, inselnNachziehen: true);
     }
 
     /// <summary>
@@ -179,6 +233,49 @@ public sealed class Optimierungsdienst : IDisposable
         lock (sperre)
         {
             optimierer?.EinteilungAendern(neu);
+            TeilneuplanungStarten(neu);
+        }
+    }
+
+    /// <summary>
+    /// Automodus: Der Staffelleiter legt A und B fest (gewählte Alternative aus HiGHS) – kein Kriterium der Stufen A und B darf
+    /// mehr Verstöße haben als angegeben, danach wird nur noch C geglättet. Der Plan wird angeboten (er hält die Grenzen ein und
+    /// wird so bester Plan), die Teilneuplanung beginnt mit den Grenzen neu. <c>null</c> hebt die Festlegung auf. Gilt auch
+    /// nach einer Datenänderung, bis zum nächsten Start.
+    /// </summary>
+    /// <param name="grenzen">Je Kriterium die Obergrenze, oder <c>null</c>.</param>
+    /// <param name="name">Was festgelegt wurde.</param>
+    /// <param name="plan">Der gewählte Plan, oder <c>null</c>.</param>
+    public void Festlegen(IReadOnlyDictionary<Kostenkriterium, int>? grenzen, string name, IReadOnlyList<Spiel>? plan)
+    {
+        lock (sperre)
+        {
+            festlegung = grenzen is null ? null : (grenzen, name);
+            if (optimierer is null || !laufenderAutomodus)
+            {
+                return;
+            }
+
+            optimierer.Festlegen(grenzen, grenzen is null ? null : name);
+            if (plan is { Count: > 0 })
+            {
+                optimierer.PlanEinspielen(plan, $"Festgelegt: {name}", inselnNachziehen: true);
+            }
+
+            if (laufend is { } l)
+            {
+                TeilneuplanungStarten(Stufeneinteilung.AusText(l.Staffel.Kriterienstufen));
+            }
+        }
+    }
+
+    /// <summary>Holt den besten Plan des Automodus (nach der Basisoptimierung), z. B. als Startlösung für HiGHS.</summary>
+    /// <returns>Der Plan, oder <c>null</c>, wenn es (noch) keinen gibt.</returns>
+    public IReadOnlyList<Spiel>? BesterPlan()
+    {
+        lock (sperre)
+        {
+            return laufenderAutomodus ? optimierer?.BesterGelenkt()?.Plan : null;
         }
     }
 
@@ -211,6 +308,7 @@ public sealed class Optimierungsdienst : IDisposable
         beobachter = null;
         lock (sperre)
         {
+            TeilneuplanungBeenden();
             optimierer?.Dispose();
             optimierer = null;
         }
@@ -239,21 +337,35 @@ public sealed class Optimierungsdienst : IDisposable
             optimierer.SpezialKostenart,
             bester.Spiele,
             lenkung,
-            raum);
+            raum,
+            teilneuplaner?.Stand,
+            messung.Messen());
     }
 
     private void NeuStarten(Staffel staffel, Berechnungsoptionen optionen, bool ausgangsplanMelden, bool ohneGrundlauf = false)
     {
         // Der Automodus lenkt nach der Einteilung der Kriterien, die der Staffelleiter in der Qualitätsansicht gewählt hat.
-        optimierer = new Inseloptimierer(staffel, optionen, einstellungen with
+        Optimierungseinstellungen e = einstellungen with
         {
             Automodus = automodus,
             AutoStufen = Stufeneinteilung.AusText(staffel.Kriterienstufen),
             AutoOhneGrundlauf = ohneGrundlauf,
-        });
+            Fadenstart = Rechenfaeden.SucheBeginnt,
+        };
+        Rechenfaeden.SucheVergessen();
+        messung.Zuruecksetzen();
+
+        optimierer = new Inseloptimierer(staffel, optionen, e);
         laufenderAutomodus = automodus;
         optimierer.Pausiert = pausiert;
+        if (automodus && festlegung is { } f)
+        {
+            optimierer.Festlegen(f.Grenzen, f.Name);
+        }
+
         optimierer.Starten();
+        laufend = (staffel, optionen);
+        TeilneuplanungStarten(e.AutoStufen ?? Stufeneinteilung.Standard);
 
         // Ein vorgegebener Ausgangsplan (Start mit gemerktem Plan, neu bewerteter Plan nach einer Datenänderung) wird
         // sofort gemeldet: Er ist der beste Plan, und ohne Meldung blieben Ansichten und Pflichtregeln leer, bis er
@@ -261,6 +373,35 @@ public sealed class Optimierungsdienst : IDisposable
         letzteKosten = ausgangsplanMelden ? -1 : optimierer.BesterStand().Kosten;
         letzteVerbesserungen = ausgangsplanMelden ? -1 : optimierer.BesterStand().Verbesserungen;
         seitVerbesserung.Restart();
+    }
+
+    /// <summary>
+    /// Automodus mit HiGHS: Teilneuplanung nebenher (MIGRATIONSPLAN O7 Schritt 3) – nach der Basisoptimierung plant sie
+    /// Ausschnitte des besten Plans neu und spielt bessere Pläne ein. Eine laufende endet vorher.
+    /// </summary>
+    private void TeilneuplanungStarten(Stufeneinteilung einteilung)
+    {
+        // Der Optimierer läuft weiter: Die alte Teilneuplanung endet im Hintergrund (sie bricht ab, wartet aber bis zu 3 s auf
+        // HiGHS) – sonst hinge die Oberfläche, z. B. beim Umstufen eines Kriteriums.
+        if (teilneuplaner is { } alt)
+        {
+            teilneuplaner = null;
+            _ = Task.Run(alt.Dispose, CancellationToken.None);
+        }
+
+        if (optimierer is null || !laufenderAutomodus || laufend is not { } l || !Stufenschranke.Verfuegbar)
+        {
+            return;
+        }
+
+        teilneuplaner = new Teilneuplaner(optimierer, l.Staffel, l.Optionen, new Highsbruecke(), einteilung.Vervollstaendigt(), festlegung?.Grenzen, () => highsVorrang);
+        teilneuplaner.Starten();
+    }
+
+    private void TeilneuplanungBeenden()
+    {
+        teilneuplaner?.Dispose();
+        teilneuplaner = null;
     }
 
     private void Beobachten(CancellationToken token)
@@ -275,8 +416,12 @@ public sealed class Optimierungsdienst : IDisposable
                     continue;
                 }
 
+                // Vorrang für HiGHS (Automodus): So viele Rechen-Threads der Inseln ruhen, wie HiGHS gerade Rechnungen laufen hat
+                // (je Rechnung ein Kern; mindestens ein Thread sucht weiter).
+                optimierer.Ruhend = laufenderAutomodus ? Highsauslastung.Laufend : 0;
+
                 // Gemeldet wird jede Verbesserung des geltenden besten Plans (im Automodus nach Verstößen, dort kann er auch teurer
-                // werden) – dieselbe Zahl, die Kachel, Verlauf und Maschinenraum zeigen.
+                // werden) – dieselbe Zahl, die Kachel, Verlauf und Leitstand zeigen.
                 Optimierungsergebnis bester = optimierer.BesterStand();
                 double kosten = bester.Kosten;
                 bool besser = letzteKosten < 0 || bester.Verbesserungen != letzteVerbesserungen;

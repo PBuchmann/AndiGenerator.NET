@@ -26,6 +26,11 @@ internal sealed class OptimierenArgumente
           --hallen-wie-original  nur die Korrektur „Hallen nach Namen“ abschalten
           --intervall N     Statuszeile alle N Sekunden (Standard 10)
           --protokoll DATEI Verlauf als CSV (Sekunden;Durchläufe;Pläne/s;Kosten;Verbesserungen;Neustarts;Spezial)
+          --start PLAN      Startplan (gemerkter Plan .xml oder CSV, z. B. von "schranke --plan") für die ersten Inseln
+          --start-inseln N  so viele Inseln beginnen mit dem Startplan (Standard 1)
+          --auto            Automodus (Gewichte nach der Rangfolge A/B/C lenken)
+          --highs           Automodus mit HiGHS: Schranke beendet das Drängen, Plan aus HiGHS nach dem Grundlauf (schaltet --auto ein)
+          --neuplanen       Automodus mit Teilneuplanung (HiGHS) nebenher (schaltet --auto ein)
           --plan DATEI      besten Plan als gemerkten Plan (Format des Originals) speichern
           --ausgabe DATEI   Bildschirmausgabe zusätzlich in diese Datei schreiben
         Eine .modifications-Datei neben der XML-Datei wird automatisch berücksichtigt. Abbrechen mit Strg+C.
@@ -62,6 +67,16 @@ internal sealed class OptimierenArgumente
     public string? Protokoll { get; private set; }
 
     public string? Plan { get; private set; }
+
+    public string? Start { get; private set; }
+
+    public int StartInseln { get; private set; } = 1;
+
+    public bool Auto { get; private set; }
+
+    public bool Highs { get; private set; }
+
+    public bool Neuplanen { get; private set; }
 
     public string? Ausgabe { get; private set; }
 
@@ -127,6 +142,17 @@ internal sealed class OptimierenArgumente
             case "--leer":
                 Leer = true;
                 return true;
+            case "--auto":
+                Auto = true;
+                return true;
+            case "--highs":
+                Highs = true;
+                Auto = true;
+                return true;
+            case "--neuplanen":
+                Neuplanen = true;
+                Auto = true;
+                return true;
             case "--ohne-spezial":
                 OhneSpezial = true;
                 return true;
@@ -163,6 +189,12 @@ internal sealed class OptimierenArgumente
                 return Rundenplanung is not null;
             case "--protokoll" when Text(werte, arg, out text, out fehler):
                 Protokoll = text;
+                return true;
+            case "--start" when Text(werte, arg, out text, out fehler):
+                Start = text;
+                return true;
+            case "--start-inseln" when Zahl(werte, arg, out zahl, out fehler):
+                StartInseln = (int)Math.Clamp(zahl, 0, 256);
                 return true;
             case "--plan" when Text(werte, arg, out text, out fehler):
                 Plan = text;

@@ -6,7 +6,7 @@
              x:DataType="p:PflichtspieltageSeiteViewModel">
   <DockPanel Margin="12">
     <TextBlock DockPanel.Dock="Top" Classes="erklaerung" Text="{x:Static p:PflichtspieltageSeiteViewModel.Erklaerung}" TextWrapping="Wrap" MaxWidth="700" HorizontalAlignment="Left" Margin="0,0,0,12" />
-    <DockPanel HorizontalAlignment="Left">
+    <DockPanel HorizontalAlignment="Stretch" MaxWidth="716">
       <StackPanel DockPanel.Dock="Right" Classes="seitenknoepfe">
         <Button Classes="seitenknopf" Command="{Binding NeuCommand}">
           <StackPanel Orientation="Horizontal" Spacing="8">
@@ -32,7 +32,7 @@
         <TextBlock Grid.Column="1" Classes="spaltenkopf" Text="ANZAHL SPIELE" />
       </Grid>
       <TextBlock DockPanel.Dock="Top" Text="Keine Pflichtspieltermine vorhanden" IsVisible="{Binding Keine}" Classes="leer" Margin="10,4" />
-      <ListBox x:Name="Liste" ItemsSource="{Binding Zeilen}" SelectedItem="{Binding Auswahl}" MinHeight="200" Width="480">
+      <ListBox x:Name="Liste" ItemsSource="{Binding Zeilen}" SelectedItem="{Binding Auswahl}" MinHeight="200" MinWidth="320">
         <ListBox.ItemTemplate>
           <DataTemplate x:DataType="p:PflichtspielzeitZeile">
             <Grid ColumnDefinitions="310,*">

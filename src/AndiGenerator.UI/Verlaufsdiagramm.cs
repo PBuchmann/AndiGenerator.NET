@@ -13,7 +13,7 @@ using Avalonia.Media;
 namespace AndiGenerator.UI;
 
 /// <summary>
-/// Verlauf der Suche im Maschinenraum: übereinander kleine Diagramme mit gemeinsamer Zeitachse – bei der
+/// Verlauf der Suche im Leitstand: übereinander kleine Diagramme mit gemeinsamer Zeitachse – bei der
 /// Kostenoptimierung die Kosten des besten Plans, im Automodus je eines für die Verstöße A, B und C (jedes mit eigener
 /// Skala, keine zweite y-Achse) –, darunter die Pläne je Sekunde. Im Automodus zeigen Bänder die Phasen und kleine Striche,
 /// wann Gewichte angehoben wurden. Mit der Maus zeigt ein Fadenkreuz die Werte zu einem Zeitpunkt.

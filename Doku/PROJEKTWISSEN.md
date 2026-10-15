@@ -77,6 +77,18 @@ Entscheidungen mit Begründung stehen ausführlich im [MIGRATIONSPLAN](MIGRATION
 - Kompaktspieltage: vor der Berechnung sagen, dass es ohne Verstöße nicht geht und warum (Mannschaften ohne Meldung
   bzw. ohne Heimtermin) – vorgeschlagen, noch nicht entschieden. Fortschritt steht bei großen Modellen noch 20–40 s still,
   bis HiGHS sich meldet.
+- Neue Funktionen nach dem zweiten Blick auf die TT-Spielplan Engine (MIGRATIONSPLAN Abschnitt 10, Punkte 3–13), nach
+  Nutzen: **Datencheck vor dem Start** (regelbasiert, je Mannschaft was knapp ist), **„Warum nicht besser?“** je Spiel,
+  **Was-wäre-wenn für Meldungen** (welche Rückfrage beim Verein am meisten bringt), Spiel von Hand verschieben mit
+  Live-Bewertung, Neuplanung mit wenig Änderungen, untere Schranke mit HiGHS, verschiedene gute Pläne zur Wahl,
+  Fahrtstrecken im normalen Modus, Robustheit, mehrere Staffeln, Tour. Empfehlung: vorerst keine LLM-Anbindung.
+- **Nach dem Umzug des Projektverzeichnisses** (aus OneDrive nach `C:\Users\peter\source\repos\AndiGenerator\`)
+  teilweise angehen: die Punkte aus MIGRATIONSPLAN Abschnitt 10 (3–13, s. o.) und **HiGHS als Ergänzung der Suche**
+  (Abschnitt 11, O7 neu): untere Schranke für Stufe A, Startplan aus HiGHS, gezielte Reparatur als Suchplatz – zuerst
+  als Python-Prototyp auf den Referenzstaffeln messen.
+- Weitere Suchverfahren (MIGRATIONSPLAN 11, O9/O10): Tabu-Suche mit voller Nachbarschaft und Parallel Tempering,
+  beide später ggf. auf der GPU (ILGPU) – erst als CPU-Prototyp messen. **Reihenfolge:** zuerst HiGHS-Schranke und
+  -Startplan (O7 1–2) als Maßstab, parallel Datencheck; dann je nach Abstand O9, O7 3 bzw. O10.
 - Gewichte der Kompaktplanung einstellbar – erst auf Nachfrage (MIGRATIONSPLAN 12).
 - Idee: 6er-Spieltage (vier Mannschaften, jeder gegen jeden) bei gerader Mannschaftszahl (10/12) statt vieler
   Einzelbegegnungen – vorher klären, ob die Wettspielordnung drei Spiele am Tag erlaubt.

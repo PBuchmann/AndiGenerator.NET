@@ -22,7 +22,7 @@ public sealed class Inseloptimierer : IDisposable
     private const int AbgleicheJeOptimiererSchritt = 5;
     private const int SchritteJeAbgleich = 2_000;
 
-    /// <summary>So viele größte Verursacher zeigt der Maschinenraum je Insel.</summary>
+    /// <summary>So viele größte Verursacher zeigt der Leitstand je Insel.</summary>
     private const int Verursacher = 3;
 
     private readonly Lock sperre = new();
@@ -40,12 +40,14 @@ public sealed class Inseloptimierer : IDisposable
     private readonly Kostenverursacher[][] autoVerursacher;
     private readonly Random koordinatorZufall;
     private readonly ManualResetEventSlim laufen = new(true);
+    private readonly ManualResetEventSlim freigabe = new(true);
     private readonly Stopwatch uhr = new();
 
     /// <summary>Reine Rechenzeit ohne Pausen (für den Automodus, der nach Sekunden lenkt).</summary>
     private readonly Stopwatch laufzeit = new();
     private readonly List<Thread> threads = [];
     private Suchplatz[][] kernPlaetze = [];
+    private int ruhend;
     private CancellationTokenSource? abbruch;
     private KernDefinition definition;
     private Berechnungsoptionen optionen;
@@ -63,6 +65,9 @@ public sealed class Inseloptimierer : IDisposable
     private MannschaftsKostenart? spezialKostenart;
     private long durchlaeufeBeiMessbeginn;
     private Exception? fehler;
+
+    /// <summary>Plan aus HiGHS, der beim nächsten Schritt des Automodus nach dem Grundlauf eingespielt wird.</summary>
+    private Loesung? highsPlan;
 
     /// <summary>Lädt die Staffel und legt Inseln und Suchplätze an; die Rechnung beginnt mit <see cref="Starten"/> oder <see cref="Rechnen"/>.</summary>
     /// <param name="staffel">Staffel; ein bestehender Spielplan ist der Ausgangspunkt (ungültige Termine werden entfernt).</param>
@@ -104,6 +109,11 @@ public sealed class Inseloptimierer : IDisposable
         for (int i = 0; i < inseln.Length; i++)
         {
             inseln[i] = InselAnlegen(i + 1, referenz, samen, aktiv: true);
+        }
+
+        if (this.einstellungen.Startplan is { Count: > 0 } startplan)
+        {
+            StartplanVerteilen(startplan);
         }
 
         if (this.einstellungen.SpezialInsel && auto is null)
@@ -176,7 +186,7 @@ public sealed class Inseloptimierer : IDisposable
         }
     }
 
-    /// <summary>Blick in den Maschinenraum: Pläne je Rechenkern und der Stand jeder Insel.</summary>
+    /// <summary>Leitstand: Pläne je Rechenkern und der Stand jeder Insel.</summary>
     public Maschinenraum Maschinenraum
     {
         get
@@ -247,8 +257,152 @@ public sealed class Inseloptimierer : IDisposable
         }
     }
 
+    /// <summary>
+    /// Holt oder setzt, wie viele Rechen-Threads ruhen (Vorrang für HiGHS: solange es Stufe A, B und die Alternativen rechnet,
+    /// bekommen die Inseln nur die übrigen Kerne). Mindestens ein Thread rechnet immer.
+    /// </summary>
+    public int Ruhend
+    {
+        get => Volatile.Read(ref ruhend);
+        set
+        {
+            Volatile.Write(ref ruhend, Math.Clamp(value, 0, einstellungen.Kerne - 1));
+            if (Volatile.Read(ref ruhend) == 0)
+            {
+                freigabe.Set();
+            }
+            else
+            {
+                freigabe.Reset();
+            }
+        }
+    }
+
     /// <summary>Fehler, an dem ein Rechen-Thread abgebrochen ist; dann ist die Optimierung beendet.</summary>
     public Exception? Fehler => Volatile.Read(ref fehler);
+
+    /// <summary>
+    /// Automodus mit HiGHS (MIGRATIONSPLAN O7): übernimmt die untere Schranke und den in A und B bestmöglichen Plan. Die Schranke
+    /// beendet das Drängen einer Stufe, sobald der beste Plan bei ihr ist. Kommt der Plan während des Grundlaufs, endet dieser
+    /// beim nächsten Schritt des Automodus, frühestens nach 10 s (sein bester Plan ist der Maßstab für C). Der Plan wird dann
+    /// geprüft: Ist er nach Stufen besser, wird er bester
+    /// Plan, und die schlechtere Hälfte der Inseln beginnt mit ihm neu – die andere sucht mit ihren Plänen weiter (Vielfalt).
+    /// </summary>
+    /// <param name="plan">Plan aus HiGHS (leer = keiner).</param>
+    /// <param name="schrankeA">Bewiesene Schranke der Summe der Stufe A, oder <c>null</c>.</param>
+    /// <param name="schrankeB">Bewiesene Schranke der Summe der Stufe B (bei bestmöglichem A), oder <c>null</c>.</param>
+    public void HighsEinspielen(IReadOnlyList<Spiel> plan, int? schrankeA, int? schrankeB)
+    {
+        ArgumentNullException.ThrowIfNull(plan);
+        lock (sperre)
+        {
+            if (auto is null)
+            {
+                return;
+            }
+
+            auto.SchrankenSetzen(schrankeA, schrankeB, AutoSekunden());
+            highsPlan = plan.Count > 0 ? AlsLoesung(plan) : highsPlan;
+        }
+    }
+
+    /// <summary>
+    /// Automodus: bewertet einen Plan nach Stufen wie den besten Plan (mit C-Ausreißern gegenüber der Basisoptimierung);
+    /// <c>null</c> ohne Automodus oder während der Basisoptimierung.
+    /// </summary>
+    /// <param name="plan">Der Plan.</param>
+    /// <returns>Die Bewertung.</returns>
+    public Stufenwert? NachStufen(IReadOnlyList<Spiel> plan)
+    {
+        ArgumentNullException.ThrowIfNull(plan);
+        lock (sperre)
+        {
+            return auto is { Grundlauf: false } ? auto.NachStufen(AlsLoesung(plan)) : null;
+        }
+    }
+
+    /// <summary>
+    /// Automodus: der beste Plan nach Stufen mit seiner Bewertung; <c>null</c> ohne Automodus oder während der
+    /// Basisoptimierung.
+    /// </summary>
+    /// <returns>Plan und Bewertung.</returns>
+    public (IReadOnlyList<Spiel> Plan, Stufenwert Wert)? BesterGelenkt()
+    {
+        lock (sperre)
+        {
+            return auto is { Grundlauf: false } ? (BesterStand().Spiele, auto.BesterWert) : null;
+        }
+    }
+
+    /// <summary>
+    /// Automodus: Der Staffelleiter legt A und B fest (siehe <see cref="Automodus.Festlegen"/>); <c>null</c> hebt das auf.
+    /// </summary>
+    /// <param name="grenzen">Je Kriterium der Stufen A und B die Obergrenze, oder <c>null</c>.</param>
+    /// <param name="name">Was festgelegt wurde (für die Anzeige).</param>
+    public void Festlegen(IReadOnlyDictionary<Kostenkriterium, int>? grenzen, string? name)
+    {
+        lock (sperre)
+        {
+            auto?.Festlegen(grenzen, name, AutoSekunden());
+        }
+    }
+
+    /// <summary>Automodus: vergleicht zwei Bewertungen wie bei der Wahl des besten Plans (nach Stufen).</summary>
+    /// <param name="neu">Der neue Wert.</param>
+    /// <param name="alt">Der bisherige.</param>
+    /// <returns><c>true</c>, wenn <paramref name="neu"/> besser ist (ohne Automodus: nie).</returns>
+    public bool IstBesser(Stufenwert neu, Stufenwert alt)
+    {
+        lock (sperre)
+        {
+            return auto is not null && Stufenvergleich.Besser(neu, alt);
+        }
+    }
+
+    /// <summary>
+    /// Automodus: Plan der Teilneuplanung (MIGRATIONSPLAN O7 Schritt 3) oder aus HiGHS. Ist er nach Stufen besser, wird er
+    /// bester Plan, und die schlechteste Insel rechnet von ihm aus weiter – mit <paramref name="inselnNachziehen"/> jede Insel,
+    /// die in A oder B (oder bei den harten Fehlern) schlechter ist. Während der Basisoptimierung wird nichts übernommen.
+    /// </summary>
+    /// <param name="plan">Der Plan.</param>
+    /// <param name="herkunft">Für das Protokoll des Automodus.</param>
+    /// <param name="inselnNachziehen">
+    /// Alle Inseln, die in A oder B schlechter sind, beginnen sofort mit dem Plan (für die Pläne der unteren Schranke: Sie sind
+    /// in A und B oft weit besser – die Inseln würden sonst lange an ihren alten Plänen weiterrechnen).
+    /// </param>
+    /// <returns><c>true</c>, wenn er bester Plan geworden ist.</returns>
+    public bool PlanEinspielen(IReadOnlyList<Spiel> plan, string herkunft, bool inselnNachziehen = false)
+    {
+        ArgumentNullException.ThrowIfNull(plan);
+        lock (sperre)
+        {
+            if (auto is not { Grundlauf: false } || plan.Count == 0)
+            {
+                return false;
+            }
+
+            Loesung loesung = AlsLoesung(plan);
+            if (!auto.Einspielen(loesung, AutoSekunden(), herkunft, sofortLenken: false))
+            {
+                return false;
+            }
+
+            double kosten = Bewerten(bewerter, loesung);
+            Insel schlechteste = inseln.OrderByDescending(i => i.Kosten < 0 ? double.MaxValue : i.Kosten).First();
+            Stufenwert bester = auto.BesterWert;
+            for (int i = 0; i < inseln.Length; i++)
+            {
+                bool schlechter = autoWerte[i] is not { } w || (w.Harte, w.A, w.B).CompareTo((bester.Harte, bester.A, bester.B)) > 0;
+                if (inseln[i] == schlechteste || (inselnNachziehen && schlechter))
+                {
+                    inseln[i].Neustarten(loesung, kosten);
+                    autoStand[i] = -1;
+                }
+            }
+
+            return true;
+        }
+    }
 
     /// <summary>
     /// Übernimmt eine geänderte Einteilung der Kriterien in den laufenden Automodus (ohne neue Basisoptimierung); die Inseln
@@ -286,7 +440,8 @@ public sealed class Inseloptimierer : IDisposable
         {
             Suchplatz[] eigene = alle.Where((_, index) => index % kerne == k).ToArray();
             plaetze[k] = eigene;
-            threads.Add(ThreadStarten(() => Arbeiten(eigene, token), $"Suche {k + 1}", ThreadPriority.BelowNormal));
+            int nummer = k;
+            threads.Add(ThreadStarten(() => Arbeiten(eigene, nummer, token), $"Suche {k + 1}", ThreadPriority.BelowNormal));
         }
 
         kernPlaetze = plaetze;
@@ -368,8 +523,8 @@ public sealed class Inseloptimierer : IDisposable
     }
 
     /// <summary>
-    /// Bester Plan, Stand des Automodus und Maschinenraum aus demselben Augenblick (unter einer Sperre), damit Kacheln,
-    /// Verlauf und Maschinenraum dieselben Verbesserungen zeigen.
+    /// Bester Plan, Stand des Automodus und Leitstand aus demselben Augenblick (unter einer Sperre), damit Kacheln,
+    /// Verlauf und Leitstand dieselben Verbesserungen zeigen.
     /// </summary>
     /// <returns>Die drei Angaben.</returns>
     public (Optimierungsergebnis Bester, Lenkungsstand? Lenkung, Maschinenraum Raum) Momentaufnahme()
@@ -405,9 +560,10 @@ public sealed class Inseloptimierer : IDisposable
     {
         Stoppen();
         laufen.Dispose();
+        freigabe.Dispose();
     }
 
-    /// <summary>Stand einer Insel für den Maschinenraum (unter der Sperre des Koordinators).</summary>
+    /// <summary>Stand einer Insel für den Leitstand (unter der Sperre des Koordinators).</summary>
     /// <param name="insel">Die Insel.</param>
     /// <param name="spezial">Ist die Spezial-Insel.</param>
     /// <param name="laeuft">Rechnet gerade.</param>
@@ -499,8 +655,8 @@ public sealed class Inseloptimierer : IDisposable
     }
 
     /// <summary>
-    /// Die Kriterien des besten Plans (unter der Sperre des Koordinators): bei der Kostenoptimierung und im Grundlauf seine
-    /// Kosten je Kriterium, im Automodus danach die Verstöße je Kriterium. Neu berechnet nur, wenn sich der beste Plan geändert
+    /// Die Kriterien des besten Plans (unter der Sperre des Koordinators): bei der Kostenoptimierung seine Kosten je Kriterium,
+    /// im Automodus die Verstöße je Kriterium (im Grundlauf des besten Plans nach Kosten). Neu berechnet nur, wenn sich der beste Plan geändert
     /// hat, der gerade gilt (im Automodus nach dem Grundlauf der beste nach Stufen), oder die Bewertung wechselt.
     /// </summary>
     private Kriterienwert[] BesteKriterien()
@@ -510,7 +666,14 @@ public sealed class Inseloptimierer : IDisposable
         if (besteKriterienStand != stand)
         {
             besteKriterienStand = stand;
-            besteKriterien = gelenkt ? auto!.BesteKriterien() : KostenDesBesten();
+
+            // Im Automodus schon im Grundlauf die Verstöße (des besten Plans nach Kosten), sonst die Kosten je Kriterium.
+            besteKriterien = auto switch
+            {
+                { Grundlauf: false } => auto.BesteKriterien(),
+                not null when besteKosten >= 0 => auto.KriterienVon(beste),
+                _ => KostenDesBesten(),
+            };
         }
 
         return besteKriterien;
@@ -519,7 +682,7 @@ public sealed class Inseloptimierer : IDisposable
     /// <summary>
     /// Zählt die Verbesserungen des geltenden besten Plans: höchstens eine je Optimierer-Schritt, bei der Kostenoptimierung und
     /// im Grundlauf nach Kosten, im Automodus danach nach Stufen. Der Wechsel vom Grundlauf zur Lenkung zählt nicht. Diese Zahl
-    /// zeigen die Kachel „Verbesserungen“, der Verlauf und der Maschinenraum (ein grüner Punkt je Verbesserung).
+    /// zeigen die Kachel „Verbesserungen“, der Verlauf und der Leitstand (ein grüner Punkt je Verbesserung).
     /// </summary>
     private void PlanVerbesserungenZaehlen()
     {
@@ -551,6 +714,36 @@ public sealed class Inseloptimierer : IDisposable
         }
 
         return new Insel(nummer, plaetze.ToArray(), beste, startKosten);
+    }
+
+    /// <summary>Ein Plan als Lösung (ungültige Termine werden wie beim bestehenden Plan entfernt).</summary>
+    private Loesung AlsLoesung(IReadOnlyList<Spiel> spiele)
+    {
+        RefPlan referenz = RefPlan.Laden(staffel with { BestehenderSpielplan = spiele }, optionen);
+        KernPlan plan = NeuerPlan(referenz, new KernDefinition(referenz));
+        var loesung = new Loesung(plan.AnzahlErlaubt);
+        plan.LoesungSchreiben(loesung);
+        return loesung;
+    }
+
+    /// <summary>Die ersten Inseln beginnen mit dem Startplan.</summary>
+    private void StartplanVerteilen(IReadOnlyList<Spiel> startplan)
+    {
+        Loesung start = AlsLoesung(startplan);
+        double kosten = Bewerten(bewerter, start);
+        foreach (Insel insel in inseln.Take(einstellungen.StartplanInseln))
+        {
+            insel.Neustarten(start, kosten);
+        }
+
+        // Automodus: ohne Basisoptimierung – der Startplan ist sofort der beste Plan nach Stufen und Maßstab für C.
+        if (kosten < besteKosten || besteKosten < 0 || auto is not null)
+        {
+            start.KopierenNach(beste);
+            besteKosten = kosten;
+        }
+
+        auto?.GrundlaufBeenden(start, 0);
     }
 
     /// <summary>
@@ -607,14 +800,23 @@ public sealed class Inseloptimierer : IDisposable
         return kandidaten.Count == 0 ? MannschaftsKostenart.AbstandHeimAuswaerts : kandidaten[koordinatorZufall.Next(kandidaten.Count)];
     }
 
-    private void Arbeiten(Suchplatz[] eigene, CancellationToken token)
+    private void Arbeiten(Suchplatz[] eigene, int nummer, CancellationToken token)
     {
         try
         {
+            einstellungen.Fadenstart?.Invoke();
             int index = 0;
             while (!token.IsCancellationRequested)
             {
                 laufen.Wait(token);
+
+                // Vorrang für HiGHS: Die letzten Threads ruhen, bis sie wieder gebraucht werden.
+                if (nummer >= einstellungen.Kerne - Volatile.Read(ref ruhend))
+                {
+                    freigabe.Wait(250, token);
+                    continue;
+                }
+
                 eigene[index].Rechnen();
                 index = (index + 1) % eigene.Length;
             }
@@ -632,17 +834,30 @@ public sealed class Inseloptimierer : IDisposable
 
     private void Koordinieren(CancellationToken token)
     {
-        while (!token.WaitHandle.WaitOne(AbgleichMs))
+        try
         {
-            if (!laufen.IsSet)
+            while (!token.WaitHandle.WaitOne(AbgleichMs))
             {
-                continue;
-            }
+                if (!laufen.IsSet)
+                {
+                    continue;
+                }
 
-            lock (sperre)
-            {
-                Abgleichen(optimiererSchritt: MitOptimiererSchritt());
+                lock (sperre)
+                {
+                    Abgleichen(optimiererSchritt: MitOptimiererSchritt());
+                }
             }
+        }
+        catch (ObjectDisposedException)
+        {
+            // regulär beendet (Abbruch-Token freigegeben)
+        }
+        catch (Exception ex) when (ex is InvalidOperationException or IndexOutOfRangeException or ArgumentException or NullReferenceException or ArithmeticException)
+        {
+            // Wie bei den Rechen-Threads: Die Optimierung endet mit dem Fehler, statt das Programm zu beenden.
+            Volatile.Write(ref fehler, ex);
+            abbruch?.Cancel();
         }
     }
 
@@ -744,12 +959,35 @@ public sealed class Inseloptimierer : IDisposable
         if (auto.Grundlauf)
         {
             // Nach einem Wechsel von der Kostenoptimierung ist der Plan schon optimiert: gleich mit Stufe A beginnen.
-            if (besteKosten >= 0 && (einstellungen.AutoOhneGrundlauf || auto.GrundlaufVorbei(f)))
+            // Liegt der Plan aus HiGHS vor, endet sie sofort (frühestens nach 10 s): Er wird gleich geprüft und angezeigt.
+            bool highs = highsPlan is not null && (einstellungen.AutoOhneGrundlauf || auto.GrundlaufLangGenug(f));
+            if (besteKosten >= 0 && (einstellungen.AutoOhneGrundlauf || highs || auto.GrundlaufVorbei(f)))
             {
                 auto.GrundlaufBeenden(beste, f);
+                if (highs)
+                {
+                    auto.Melden($"{f:0} s Plan aus HiGHS liegt vor: Basisoptimierung beendet");
+                }
             }
 
-            return;
+            if (auto.Grundlauf || !highs)
+            {
+                return;
+            }
+        }
+
+        if (highsPlan is { } plan)
+        {
+            highsPlan = null;
+            if (auto.Einspielen(plan, f, "Plan aus HiGHS", sofortLenken: true))
+            {
+                // Die schlechtere Hälfte der Inseln beginnt mit dem Plan aus HiGHS, die andere sucht weiter.
+                double kosten = Bewerten(bewerter, plan);
+                foreach (Insel insel in inseln.OrderByDescending(i => i.Kosten < 0 ? double.MaxValue : i.Kosten).Take((inseln.Length + 1) / 2))
+                {
+                    insel.Neustarten(plan, kosten);
+                }
+            }
         }
 
         for (int i = 0; i < inseln.Length; i++)
@@ -758,7 +996,7 @@ public sealed class Inseloptimierer : IDisposable
             if (insel.Kosten >= 0 && insel.Stand != autoStand[i])
             {
                 autoStand[i] = insel.Stand;
-                autoWerte[i] = auto.Pruefen(insel.Loesung);
+                autoWerte[i] = auto.PruefenVonInsel(insel.Loesung, insel.Nummer);
                 autoVerursacher[i] = auto.Verursacher(Verursacher);
             }
         }
