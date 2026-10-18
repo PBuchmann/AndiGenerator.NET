@@ -203,11 +203,14 @@ public static class HighsLoeser
     /// <param name="aufhoeren">
     /// Wird während der Suche gefragt; <c>true</c> beendet sie mit der bis dahin besten Lösung (Abbruch, Pause), oder <c>null</c>.
     /// </param>
+    /// <param name="fortschritt">
+    /// Zeitgrenze nach Fortschritt (<paramref name="zeitgrenze"/> ist dann die Obergrenze), oder <c>null</c>.
+    /// </param>
     /// <returns>
     /// Die Werte der besten Lösung (oder <c>null</c>), ihre Kosten, die untere Schranke, ob die Lösung beweisbar die beste ist
     /// und ob das Problem keine Lösung hat.
     /// </returns>
-    public static (double[]? Werte, double Wert, double Schranke, bool Optimal, bool Unloesbar) LoesenMitSchranke(Ganzzahlproblem problem, TimeSpan zeitgrenze, double[]? start = null, Func<bool>? aufhoeren = null)
+    public static (double[]? Werte, double Wert, double Schranke, bool Optimal, bool Unloesbar) LoesenMitSchranke(Ganzzahlproblem problem, TimeSpan zeitgrenze, double[]? start = null, Func<bool>? aufhoeren = null, Fortschrittsgrenze? fortschritt = null)
     {
         ArgumentNullException.ThrowIfNull(problem);
         IntPtr h = Erzeugen();
@@ -216,9 +219,10 @@ public static class HighsLoeser
             return (null, double.PositiveInfinity, double.NegativeInfinity, false, false);
         }
 
-        Rueckruf rueckruf = (_, _, _, datenEin, _) =>
+        var stand = new Fortschrittsstand(fortschritt);
+        Rueckruf rueckruf = (_, _, datenAus, datenEin, _) =>
         {
-            if (datenEin != IntPtr.Zero && aufhoeren?.Invoke() == true)
+            if (datenEin != IntPtr.Zero && (aufhoeren?.Invoke() == true || stand.Steht(datenAus)))
             {
                 Marshal.WriteInt32(datenEin, 1);
             }
@@ -263,7 +267,7 @@ public static class HighsLoeser
                 SetzeLoesung(h, start, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero);
             }
 
-            if (aufhoeren is not null)
+            if (aufhoeren is not null || fortschritt is not null)
             {
                 SetzeRueckruf(h, Marshal.GetFunctionPointerForDelegate(rueckruf), IntPtr.Zero);
                 StarteRueckruf(h, MipUnterbrechung);
@@ -364,4 +368,50 @@ public static class HighsLoeser
 
     [DllImport(Bibliothek, EntryPoint = "Highs_startCallback", CallingConvention = CallingConvention.Cdecl)]
     private static extern int StarteRueckruf(IntPtr highs, int art);
+
+    /// <summary>
+    /// Verfolgt im Rückruf, ob HiGHS noch vorankommt: bester gefundener Wert (primal) und Untergrenze (dual) mit der Laufzeit
+    /// ihrer letzten Verbesserung.
+    /// </summary>
+    private sealed class Fortschrittsstand(Fortschrittsgrenze? grenze)
+    {
+        private double bester = double.PositiveInfinity;
+        private double untergrenze = double.NegativeInfinity;
+        private double zuletzt;
+
+        /// <summary>Gibt an, ob HiGHS aufhören soll: nach der Mindestzeit und so lange ohne Fortschritt.</summary>
+        public bool Steht(IntPtr datenAus)
+        {
+            if (grenze is null || Ausgabewert(datenAus, "running_time") is not double zeit)
+            {
+                return false;
+            }
+
+            const double Schritt = 1e-6;
+            if (Ausgabewert(datenAus, "mip_primal_bound") is double primal && double.IsFinite(primal) && primal < bester - Schritt)
+            {
+                bester = primal;
+                zuletzt = zeit;
+            }
+
+            if (Ausgabewert(datenAus, "mip_dual_bound") is double dual && double.IsFinite(dual) && dual > untergrenze + Schritt)
+            {
+                untergrenze = dual;
+                zuletzt = zeit;
+            }
+
+            // Ohne gefundenen Plan sucht HiGHS weiter (bis zur Obergrenze): Der erste Plan ist selbst der Fortschritt.
+            return double.IsFinite(bester) && zeit >= grenze.Mindestens && zeit - zuletzt >= grenze.Stillstand;
+        }
+
+        /// <summary>Ein Wert (double) aus den Daten des Rückrufs; <c>null</c>, wenn es ihn nicht gibt.</summary>
+        private static double? Ausgabewert(IntPtr datenAus, string name)
+        {
+            IntPtr zeiger = datenAus == IntPtr.Zero ? IntPtr.Zero : LeseRueckrufwert(datenAus, name);
+            return zeiger == IntPtr.Zero ? null : BitConverter.Int64BitsToDouble(Marshal.ReadInt64(zeiger));
+        }
+
+        [DllImport(Bibliothek, EntryPoint = "Highs_getCallbackDataOutItem", CallingConvention = CallingConvention.Cdecl)]
+        private static extern IntPtr LeseRueckrufwert(IntPtr datenAus, [MarshalAs(UnmanagedType.LPUTF8Str)] string name);
+    }
 }

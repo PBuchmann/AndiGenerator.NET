@@ -39,6 +39,20 @@ public sealed class AlternativendialogTests
         Assert.All(dialog.AuswahlDetails.SelectMany(a => a.Gruppen).SelectMany(g => g.Zeilen), z => Assert.Equal(0, z.Richtung));
     }
 
+    [Fact]
+    public void Ohne_Meldungen_steht_wenigstens_die_Anzahl()
+    {
+        Planstand aktuell = Stand(2);
+        Planstand variante = Stand(5);
+        var alternative = new Planalternative(Kostenkriterium.Sperrtermine, "Sperrtermine", variante.Spiele, Bewiesen: false);
+        var dialog = new AlternativendialogViewModel(aktuell, [(alternative, variante.Bewertung)], alternative, Stufeneinteilung.AusText("A:Hallenbelegung;B:Sperrtermine"), (_, _) => [], true);
+
+        Vergleichsabschnitt abschnitt = Assert.Single(dialog.AuswahlDetails);
+        Assert.Equal("B1 · Sperrtermine: 2 → 5", abschnitt.Titel);
+        Assert.Equal([("2 → 5 Verstöße (keine Einzelheiten)", 1)], Assert.Single(abschnitt.Gruppen).Zeilen.Select(z => (z.Text, z.Richtung)));
+        Assert.DoesNotContain("keine", dialog.DetailTitel, StringComparison.Ordinal);
+    }
+
     private static Planstand Stand(int sperrtermine)
     {
         Kostenzelle[] zellen = Enum.GetValues<MannschaftsKostenart>().Select(k => new Kostenzelle(k == MannschaftsKostenart.Sperrtermine ? sperrtermine : 0, 0, 0)).ToArray();

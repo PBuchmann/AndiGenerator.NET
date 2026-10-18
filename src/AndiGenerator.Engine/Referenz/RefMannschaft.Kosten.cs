@@ -173,11 +173,17 @@ internal sealed partial class RefMannschaft
             {
                 wert += faktor * (diff / Math.Pow(ziel, 1.25));
                 anzahl++;
+                if (meldungen)
+                {
+                    // Nicht im Original (dort ohne Meldung): Je Spiel, das zu spät gegen einen weit entfernten Gegner liegt.
+                    int stelle = plan.Mannschaften.Count - ziel;
+                    kosten.Meldungen.Add(
+                        $"Setzliste: {DelphiDatum.Text(Spiele[i].Datum)} gegen {Gegner(Spiele[i]).TeamName} ({diffs[i]} Plätze entfernt) ist das {stelle}. Spiel der Runde – erlaubt bis zum {plan.Mannschaften.Count - diffs[i]}.");
+                }
             }
         }
 
         kosten.Werte[(int)art].Anzahl = anzahl;
-        _ = meldungen;
         kosten.Werte[(int)art].GesamtKosten = Math.Pow(wert / 8.0, 3) * plan.MannschaftKostenFaktor(this, art);
     }
 

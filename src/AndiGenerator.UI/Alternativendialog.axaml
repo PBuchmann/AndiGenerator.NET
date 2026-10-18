@@ -50,6 +50,7 @@
   <DockPanel Margin="24,18">
     <TextBlock DockPanel.Dock="Top" Text="B-Varianten" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,6" />
     <TextBlock DockPanel.Dock="Top" Text="{Binding Erklaerung}" TextWrapping="Wrap" MaxWidth="1100" HorizontalAlignment="Left" Foreground="{StaticResource Tinte2}" Margin="0,0,0,12" />
+    <TextBlock DockPanel.Dock="Top" Text="{Binding Hinweis}" IsVisible="{Binding HatHinweis}" TextWrapping="Wrap" MaxWidth="1100" HorizontalAlignment="Left" Foreground="{StaticResource HighsDunkel}" FontWeight="SemiBold" Margin="0,0,0,12" />
     <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Spacing="12" HorizontalAlignment="Right" Margin="0,12,0,0">
       <Button x:Name="Uebernehmen" Classes="primaer" Content="{Binding UebernehmenText}" IsEnabled="{Binding UebernehmenMoeglich}" />
       <Button x:Name="Abbrechen" Content="Abbrechen" IsCancel="True" />

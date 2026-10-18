@@ -20,7 +20,7 @@ internal sealed partial class KernPlan
     public const double LueckeAb = 2.0;
 
     /// <summary>Ein Spieltag gilt als zu lang ab dieser Dauer (Tage, auf 10 Mannschaften bezogen wie im Original).</summary>
-    private const double SpieltagTage = 6.0;
+    internal const double SpieltagTage = 6.0;
 
     /// <summary>Zählt die Verstöße der Kriterien ohne Anzahl im Original.</summary>
     /// <param name="meldungen">Auch die Meldungen dazu (für die Qualitätsansicht).</param>

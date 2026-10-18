@@ -24,14 +24,18 @@ internal static class NeuplanenBefehl
           --optionen DATEI   Optionsdatei (.options); "auto" = Staffelordner des Originals; Standard: Standardoptionen
           --sekunden N       Zeit insgesamt (Standard 60)
           --schritt N        Zeitgrenze je Ausschnitt in Sekunden (Standard 5)
-          --mannschaften N   Mannschaften je Ausschnitt zu Beginn (Standard 2; wächst, wenn nichts mehr kommt)
+          --mannschaften N   Mannschaften je Ausschnitt mindestens (Standard 2; größere nach Erfolg je Sekunde)
           --ohne-wechsel     Wechsel H/A nicht ins Modell
-          --ohne-abstand     Abstand H/A nicht ins Modell (sonst genähert)
+          --ohne-abstand     Abstand H/A nicht ins Modell
           --ohne-setzliste   Setzliste nicht ins Modell (sonst genähert, wenn es eine gibt)
+          --ohne-spieltage   zu lange und überlappende Spieltage nicht ins Modell
+          --setzliste-genau  Setzliste genau nach der Reihenfolge der Spiele (sonst genähert; macht HiGHS langsamer)
+          --abstand-genau    Abstand H/A genau nach der Reihenfolge der Spiele (sonst genähert; macht HiGHS viel langsamer)
           --rundenplanung R  beide | halbrunde | vorrunde | rueckrunde (überschreibt die Optionsdatei)
           --stufen TEXT      Einteilung, z. B. "A:Hallenbelegung,ParalleleSpiele;B:Sperrtermine" (Standard: E14)
           --startwert N      Zufall für die Wahl der Ausschnitte (Standard 1)
           --ausgabe DATEI    besten Plan als gemerkten Plan speichern
+          --nur-zufall       nur zufällige Mannschaften als Ausschnitt (wie früher; sonst auch gezielt und Zeitfenster)
         """;
 
     public static int Ausfuehren(IReadOnlyList<string> args)
@@ -84,6 +88,9 @@ internal static class NeuplanenBefehl
                     e = e with { Startwert = zahl };
                     werte.Dequeue();
                     break;
+                case "--nur-zufall":
+                    e = e with { Gezielt = false };
+                    break;
                 case "--ohne-wechsel":
                     e = e with { MitWechsel = false };
                     break;
@@ -92,6 +99,15 @@ internal static class NeuplanenBefehl
                     break;
                 case "--ohne-setzliste":
                     e = e with { MitSetzliste = false };
+                    break;
+                case "--ohne-spieltage":
+                    e = e with { MitSpieltagen = false };
+                    break;
+                case "--setzliste-genau":
+                    e = e with { SetzlisteGenau = true };
+                    break;
+                case "--abstand-genau":
+                    e = e with { AbstandGenau = true };
                     break;
                 default:
                     if (arg.StartsWith("--", StringComparison.Ordinal) || datei is not null)
@@ -134,7 +150,9 @@ internal static class NeuplanenBefehl
         Console.WriteLine($"Optionen:     {herkunft}");
         Console.WriteLine($"Ausgangsplan: {startDatei}");
         Console.WriteLine();
-        Neuplanungsbericht bericht = Ligaschranke.Neuplanen(staffel, start, optionen, new SchrankeBefehl.Highsschranke(), stufen ?? Stufeneinteilung.Standard, e, Console.WriteLine);
+        Stufeneinteilung gewaehlt = stufen ?? Stufeneinteilung.Standard;
+        e = e with { Verstoesse = Ligaschranke.VerstoesseInC(staffel, optionen, gewaehlt) };
+        Neuplanungsbericht bericht = Ligaschranke.Neuplanen(staffel, start, optionen, new SchrankeBefehl.Highsschranke(), gewaehlt, e, Console.WriteLine);
         Console.WriteLine();
         Console.WriteLine($"Vorher:  {bericht.Vorher}");
         Console.WriteLine($"Nachher: {bericht.Nachher} ({bericht.Angenommen} von {bericht.Schritte} Ausschnitten angenommen)");

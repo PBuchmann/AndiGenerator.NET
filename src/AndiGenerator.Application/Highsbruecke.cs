@@ -21,10 +21,12 @@ public sealed class Highsbruecke : IGanzzahlloeser, ISchrankenloeser
     }
 
     /// <inheritdoc/>
-    public Schrankenloesung Loesen(Ganzzahlmodell modell, TimeSpan zeitgrenze, double[]? start = null, Func<bool>? aufhoeren = null)
+    public Schrankenloesung Loesen(Ganzzahlmodell modell, TimeSpan zeitgrenze, double[]? start = null, Func<bool>? aufhoeren = null, Laufzeitregel? regel = null)
     {
         ArgumentNullException.ThrowIfNull(modell);
-        (double[]? werte, double wert, double schranke, bool optimal, bool unloesbar) = HighsLoeser.LoesenMitSchranke(Problem(modell), zeitgrenze, start, aufhoeren);
+        (double[]? werte, double wert, double schranke, bool optimal, bool unloesbar) = regel is null
+            ? HighsLoeser.LoesenMitSchranke(Problem(modell), zeitgrenze, start, aufhoeren)
+            : HighsLoeser.LoesenMitSchranke(Problem(modell), regel.Hoechstens, start, aufhoeren, new Fortschrittsgrenze(regel.Mindestens.TotalSeconds, regel.Stillstand.TotalSeconds));
         return new Schrankenloesung(werte, wert, schranke, optimal, unloesbar);
     }
 

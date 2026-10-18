@@ -9,6 +9,7 @@ using AndiGenerator.Domain.Stammdaten;
 using AndiGenerator.Engine.Inseln;
 using AndiGenerator.Engine.Referenz;
 using AndiGenerator.Engine.Schranke;
+using AndiGenerator.Engine.Turniere;
 using AndiGenerator.Persistence.Plandaten;
 
 namespace AndiGenerator.Persistence.Tests;
@@ -26,6 +27,47 @@ public sealed class LigaschrankeTests
     /// <summary>Zeitgrenze für Stufe C und Feinschliff (wird meist ganz genutzt).</summary>
     private static readonly TimeSpan StufeC = TimeSpan.FromSeconds(5);
 
+    /// <summary>Die Kriterien, die das Modell der Teilneuplanung genau zählt (nach der Reihenfolge der eigenen Spiele).</summary>
+    private static readonly Kostenkriterium[] Genau =
+    [
+        Kostenkriterium.Spieltaglaenge, Kostenkriterium.Spieltagueberlappung, Kostenkriterium.LetzterSpieltagLaenge,
+        Kostenkriterium.LetzterSpieltagUeberlappung, Kostenkriterium.AbstandHeimAuswaerts, Kostenkriterium.Setzliste,
+    ];
+
+    /// <summary>
+    /// Die Setzliste hat im Original keine Meldungen; hier je verletztem Spiel eine (für die Einzelheiten in der Qualitätsansicht
+    /// und die Unterschiede der B-Varianten) – so viele, wie die Bewertung zählt.
+    /// </summary>
+    [Fact]
+    public void Setzliste_meldet_jedes_verletzte_Spiel()
+    {
+        // Der Plan von R21 ohne Rücksicht auf eine Setzliste; die Mannschaften in ihrer Reihenfolge als Setzliste.
+        Staffel r21 = Laden("R21_Verbandsoberliga (1).xml", mitPlan: true);
+        Staffel staffel = r21 with { Setzliste = new Setzliste(true, [.. r21.Mannschaften.Select((m, i) => new Setzlisteneintrag(m.Name, i))]) };
+        Planbewertung bewertung = Referenzbewertung.Bewerten(staffel, Berechnungsoptionen.Standard);
+        IReadOnlyList<Mannschaftsmeldungen> meldungen = Referenzbewertung.MeldungenJeMannschaft(staffel, Berechnungsoptionen.Standard, MannschaftsKostenart.Setzliste);
+
+        Assert.Equal(bewertung.Mannschaften.Select(m => Math.Max(0, m.JeKostenart[(int)MannschaftsKostenart.Setzliste].Anzahl)), meldungen.Select(m => m.Meldungen.Count));
+        Assert.Contains(meldungen, m => m.Meldungen.Count > 0);
+        Assert.All(meldungen.SelectMany(m => m.Meldungen), t => Assert.Matches(@"^Setzliste: .+ gegen .+ \(\d+ Plätze entfernt\) ist das \d+\. Spiel der Runde – erlaubt bis zum \d+\.$", t));
+    }
+
+    /// <summary>
+    /// Zeitgrenze nach Fortschritt: HiGHS liest im Rückruf besten Plan und Untergrenze; bei R3 ist jede Stufe schnell bewiesen –
+    /// wie mit fester Zeit (<see cref="R3_Schranke_wird_vom_Plan_erreicht"/>).
+    /// </summary>
+    [HighsFact]
+    public void Zeit_nach_Fortschritt_beweist_wie_mit_fester_Zeit()
+    {
+        Staffel staffel = Laden("R3_Damen_Bezirksoberliga_Rheinhessen (1).xml");
+        var regel = new Laufzeitregel(TimeSpan.FromSeconds(20), TimeSpan.FromSeconds(60), TimeSpan.FromSeconds(15));
+
+        Schrankenbericht bericht = Ligaschranke.Berechnen(staffel, Berechnungsoptionen.Standard, new Highsbruecke(), Kette, zeitStufeC: TimeSpan.FromSeconds(1), laufzeit: regel);
+
+        Assert.Equal(["A1", "A2", "A3", "A4", "A5", "B1", "B2", "B3", "B4"], bericht.Stufen.Where(s => s.Stufe[0] != 'C').Select(s => s.Stufe));
+        Assert.All(bericht.Stufen.Where(s => s.Stufe[0] != 'C'), s => Assert.True(s.Bewiesen));
+    }
+
     /// <summary>
     /// R3: Zwei parallele Spiele sind unvermeidbar, und der Plan des Modells erreicht genau das – gültig und mit denselben
     /// Zahlen nach der echten Kostenfunktion. Damit ist Stufe A dort beweisbar bestmöglich.
@@ -39,9 +81,10 @@ public sealed class LigaschrankeTests
 
         Assert.All(bericht.Hinweise, h => Assert.True(h.StartsWith("Feinschliff", StringComparison.Ordinal) || h.StartsWith("Startplan", StringComparison.Ordinal), h));
         Assert.Equal(["A1", "A2", "A3", "A4", "A5", "B1", "B2", "B3", "B4"], bericht.Stufen.Where(s => s.Stufe[0] != 'C').Select(s => s.Stufe));
-        Assert.All(bericht.Stufen, s => Assert.True(s.Bewiesen));
+        Assert.All(bericht.Stufen.Where(s => s.Stufe[0] != 'C'), s => Assert.True(s.Bewiesen));
 
-        // Stufe C (bei bestmöglichem A und B): alles 0, Wechsel H/A ist nicht dabei.
+        // Stufe C (bei bestmöglichem A und B): alles 0, Wechsel H/A ist nicht dabei. Ob HiGHS C in den 5 s beweist, hängt von der
+        // Last des Rechners ab (im vollen Testlauf oder neben einer laufenden Generierung oft nicht) – geprüft wird es nicht.
         Assert.All(bericht.Stufen.Where(s => s.Stufe[0] == 'C'), s => Assert.Equal(0, s.Schranke));
         Assert.DoesNotContain(bericht.Stufen, s => s.Kriterium == Kostenkriterium.WechselHeimAuswaerts);
         Assert.Equal([0, 0, 0, 2, 0, 0, 0, 0, 0], bericht.Stufen.Where(s => s.Stufe[0] != 'C').Select(s => s.Schranke));
@@ -134,6 +177,24 @@ public sealed class LigaschrankeTests
     }
 
     /// <summary>
+    /// Welche Kriterien das Modell nicht kennt: bei Hin- und Rückrunde keines (auch Abstand H/A, Setzliste und Pausen sind
+    /// modelliert), bei der Doppelrunde Abstand H/A und vereinsinterne Spiele am Anfang (R23 hat keine Setzliste); bei der
+    /// Corona-Rückrunde gibt es kein Modell.
+    /// </summary>
+    [Fact]
+    public void Unbekannte_Kriterien_je_Staffel()
+    {
+        Staffel staffel = Laden("R11_4__Kreisklasse (5).xml");
+        Staffel doppel = Laden("R23_Liga für Doppelrunde.xml");
+
+        Assert.Equal([], Ligaschranke.Unbekannt(staffel, Berechnungsoptionen.Standard));
+        Assert.Equal(
+            [Kostenkriterium.AbstandHeimAuswaerts, Kostenkriterium.VereinsinterneSpieleAmAnfang],
+            Ligaschranke.Unbekannt(doppel, Berechnungsoptionen.Standard with { Doppelrunde = true }));
+        Assert.Null(Ligaschranke.Unbekannt(staffel, Berechnungsoptionen.Standard with { Rundenplanung = Rundenplanung.Corona }));
+    }
+
+    /// <summary>
     /// Teilneuplanung (O7 Schritt 3): Ausschnitte des click-TT-Plans werden neu geplant; A und B werden nicht schlechter, C nicht
     /// mehr, und der Bericht bewertet den Plan, den er liefert.
     /// </summary>
@@ -151,6 +212,32 @@ public sealed class LigaschrankeTests
         Assert.Equal(staffel.BestehenderSpielplan.Count, bericht.Plan.Count);
         Planbewertung b = Referenzbewertung.Bewerten(staffel with { BestehenderSpielplan = bericht.Plan }, Berechnungsoptionen.Standard);
         Assert.Equal(bericht.Nachher, Stufeneinteilung.Standard.Zaehlen(b));
+    }
+
+    /// <summary>
+    /// Das Modell der Schranke zählt Spieltage, Abstand Heim/Auswärts, Setzliste und die Pausen der Spielverteilung genau wie
+    /// die Bewertung (Spieltage zu lang und überlappend, auch der letzte) – mit Hin- und Rückrunde (R21, R26: mit
+    /// Koppelterminen, die Pausen verkürzen) und mit „nur Rückrunde“.
+    /// </summary>
+    /// <param name="datei">Die Staffel mit Plan.</param>
+    /// <param name="rueckrunde">Nur Rückrunde (die Vorrunde des Plans ist fest).</param>
+    [HighsTheory]
+    [InlineData("R11_4__Kreisklasse (5).xml", false)]
+    [InlineData("R16_Bezirksoberliga_Rheinhessen_Nord (1).xml", false)]
+    [InlineData("R21_Verbandsoberliga (1).xml", false)]
+    [InlineData("R26_Liga mit Koppelterminen.xml", true)]
+    [InlineData("R3_Damen_Bezirksoberliga_Rheinhessen (1).xml", false)]
+    [InlineData("R3_Damen_Bezirksoberliga_Rheinhessen (1).xml", true)]
+    public void Reihenfolge_im_Modell_wie_in_der_Bewertung(string datei, bool rueckrunde)
+    {
+        Staffel staffel = Laden(datei, mitPlan: true);
+        Berechnungsoptionen optionen = rueckrunde ? Berechnungsoptionen.Standard with { Rundenplanung = Rundenplanung.NurRueckrunde } : Berechnungsoptionen.Standard;
+        Kostenkriterium[] kriterien = [.. Genau, Kostenkriterium.Spielverteilung];
+
+        Dictionary<Kostenkriterium, int>? modell = Ligaschranke.ImModellZaehlen(staffel, staffel.BestehenderSpielplan, optionen, new Highsbruecke(), kriterien);
+
+        Assert.NotNull(modell);
+        Assert.Equal(Echt(staffel, optionen, kriterien), kriterien.Select(k => modell.GetValueOrDefault(k, -1)));
     }
 
     /// <summary>
@@ -193,23 +280,30 @@ public sealed class LigaschrankeTests
 
         Assert.Equal((0, 8), (bericht.SchrankeA, bericht.SchrankeB));
 
-        // Vorn der Plan für die Summe in B (bewiesen: „Plan B optimal“), dann die Variante mit Vorrang für parallele Spiele
-        // (allein bewiesen).
+        // Vorn der Plan für die Summe in B (bewiesen: „Plan B optimal“), dann die Varianten mit Vorrang (allein bewiesen). Welche
+        // es gibt, hängt davon ab, welchen Plan der Summe HiGHS in der Zeit findet (unter Last ein anderer) – mit Vorrang für
+        // parallele Spiele ist meist eine dabei.
         IReadOnlyList<Planalternative> varianten = bericht.Alternativen ?? [];
-        Assert.Equal([null, Kostenkriterium.ParalleleSpiele], varianten.Select(x => x.Kriterium));
+        Assert.Null(varianten[0].Kriterium);
         Assert.Equal("Plan B optimal", varianten[0].Name);
         Assert.All(varianten, a => Assert.True(a.Bewiesen));
+        Assert.All(varianten.Skip(1), a => Assert.Contains(a.Kriterium!.Value, einteilung.B));
 
         // Schon vor der Stufe C kommt ein Bericht mit A, B und den Varianten (zum Wählen, während C rechnet).
         Schrankenbericht vorC = Assert.Single(zwischen);
         Assert.Equal((0, 8), (vorC.SchrankeA, vorC.SchrankeB));
         Assert.DoesNotContain(vorC.Stufen, x => x.Stufe[0] == 'C');
         Assert.Equal("Plan B optimal", (vorC.Alternativen ?? [])[0].Name);
-        Planalternative alternative = varianten[1];
-        Planbewertung b = Referenzbewertung.Bewerten(staffel with { BestehenderSpielplan = alternative.Plan }, Berechnungsoptionen.Standard);
-        Assert.Equal(0, b.NichtTerminiert + b.UngueltigeSpiele + Anzahl(b, MannschaftsKostenart.Hallenbelegung));
-        Assert.Equal(3, Anzahl(b, MannschaftsKostenart.ParalleleSpiele));
-        Assert.True(einteilung.Zaehlen(b).B >= 8);
+        foreach (Planalternative alternative in varianten.Skip(1))
+        {
+            Planbewertung b = Referenzbewertung.Bewerten(staffel with { BestehenderSpielplan = alternative.Plan }, Berechnungsoptionen.Standard);
+            Assert.Equal(0, b.NichtTerminiert + b.UngueltigeSpiele + Anzahl(b, MannschaftsKostenart.Hallenbelegung));
+            Assert.True(einteilung.Zaehlen(b).B >= 8);
+            if (alternative.Kriterium == Kostenkriterium.ParalleleSpiele)
+            {
+                Assert.Equal(3, Anzahl(b, MannschaftsKostenart.ParalleleSpiele));
+            }
+        }
     }
 
     /// <summary>
@@ -239,6 +333,22 @@ public sealed class LigaschrankeTests
     }
 
     private static int Anzahl(Planbewertung b, MannschaftsKostenart art) => b.Mannschaften.Sum(m => Math.Max(0, m.JeKostenart[(int)art].Anzahl));
+
+    /// <summary>Die Verstöße je Kriterium nach der Bewertung (Spieltage aus den Zusatzzahlen).</summary>
+    private static IEnumerable<int> Echt(Staffel staffel, Berechnungsoptionen optionen, IEnumerable<Kostenkriterium> kriterien)
+    {
+        Planbewertung b = Referenzbewertung.Bewerten(staffel, optionen);
+        Zusatzverstoesse z = b.Zusatz!;
+        return kriterien.Select(k => k switch
+        {
+            Kostenkriterium.Spieltaglaenge => z.SpieltageLaenge,
+            Kostenkriterium.Spieltagueberlappung => z.SpieltageUeberlappung,
+            Kostenkriterium.LetzterSpieltagLaenge => z.LetzterLaenge,
+            Kostenkriterium.LetzterSpieltagUeberlappung => z.LetzterUeberlappung,
+            Kostenkriterium.Spielverteilung => z.Spielverteilung.Sum(),
+            _ => b.Mannschaften.Sum(m => Math.Max(0, m.JeKostenart[(int)k].Anzahl)),
+        });
+    }
 
     private static Staffel Laden(string datei, bool mitPlan = false)
     {

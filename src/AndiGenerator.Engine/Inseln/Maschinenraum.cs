@@ -16,6 +16,7 @@ namespace AndiGenerator.Engine.Inseln;
 /// <param name="SpezialVerwendet">Wie oft die Lösung der Spezial-Insel eine Insel neu gestartet hat.</param>
 /// <param name="BesterPlan">Die Kriterien des besten Plans (Kosten bzw. im Automodus Verstöße je Kriterium).</param>
 /// <param name="BesterPlanNummer">Zählt weiter, sobald sich der geltende beste Plan ändert (zusammen mit <paramref name="BesterPlan"/> ermittelt).</param>
+/// <param name="Starts">Im Automodus je Startverfahren die Neustarts der Inseln und ihre Erfolge; leer, solange keine.</param>
 public sealed record Maschinenraum(
     IReadOnlyList<long> Kerne,
     IReadOnlyList<Inselstand> Inseln,
@@ -23,4 +24,5 @@ public sealed record Maschinenraum(
     MannschaftsKostenart? SpezialKostenart,
     int SpezialVerwendet,
     IReadOnlyList<Kriterienwert>? BesterPlan = null,
-    int BesterPlanNummer = 0);
+    int BesterPlanNummer = 0,
+    IReadOnlyList<Startstatistik>? Starts = null);

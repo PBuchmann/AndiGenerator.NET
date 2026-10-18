@@ -154,7 +154,11 @@
             <TextBlock Text="{Binding Zustand, Converter={x:Static ui:Konverter.ZustandSymbol}}" Foreground="White" FontSize="12" FontWeight="Bold"
                        HorizontalAlignment="Center" VerticalAlignment="Center" />
           </Border>
-          <TextBlock Grid.Column="3" Text="{Binding Name}" FontSize="13" VerticalAlignment="Center" TextWrapping="Wrap" Margin="0,0,12,0" />
+          <StackPanel Grid.Column="3" VerticalAlignment="Center" Margin="0,0,12,0" Spacing="2">
+            <TextBlock Text="{Binding Name}" FontSize="13" TextWrapping="Wrap" />
+            <!-- Beim Ziehen über A oder B: warum die Zeile dort nicht hin darf (HiGHS kennt das Kriterium nicht) -->
+            <TextBlock Text="{Binding Ablehnung}" IsVisible="{Binding HatAblehnung}" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource Schlecht}" TextWrapping="Wrap" />
+          </StackPanel>
           <TextBlock Grid.Column="4" Text="{Binding Verstoesse}" Classes="ziffer" FontSize="13" HorizontalAlignment="Right" VerticalAlignment="Center" />
           <!-- Untere Schranke (Automodus): grüner Haken, wenn der Plan sie erreicht – besser geht es nicht -->
           <Border Grid.Column="5" Width="170" Margin="16,0,0,0" Background="Transparent" VerticalAlignment="Center"
@@ -177,8 +181,8 @@
           <Border Grid.Column="8" Classes="einstufung" IsVisible="{Binding $parent[UserControl].((p:QualitaetAnsichtViewModel)DataContext).Bearbeitbar}">
           <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
             <StackPanel Orientation="Horizontal" IsVisible="{Binding IstEinstufbar}">
-              <Button Classes="stufe" Classes.gewaehlt="{Binding IstA}" CornerRadius="8,0,0,8" Content="A" Command="{Binding EinstufenACommand}" ToolTip.Tip="Stufe A: muss eingehalten werden" />
-              <Button Classes="stufe" Classes.gewaehlt="{Binding IstB}" CornerRadius="0" Content="B" Command="{Binding EinstufenBCommand}" ToolTip.Tip="Stufe B: soll eingehalten werden" />
+              <Button Classes="stufe" Classes.gewaehlt="{Binding IstA}" CornerRadius="8,0,0,8" Content="A" Command="{Binding EinstufenACommand}" ToolTip.Tip="{Binding ErklaerungA}" />
+              <Button Classes="stufe" Classes.gewaehlt="{Binding IstB}" CornerRadius="0" Content="B" Command="{Binding EinstufenBCommand}" ToolTip.Tip="{Binding ErklaerungB}" />
               <Button Classes="stufe" Classes.gewaehlt="{Binding IstC}" CornerRadius="0,8,8,0" Content="C" Command="{Binding EinstufenCCommand}" ToolTip.Tip="Stufe C: wird geglättet" />
             </StackPanel>
             <StackPanel Orientation="Horizontal" Spacing="4" IsVisible="{Binding IstEinstufbar}">

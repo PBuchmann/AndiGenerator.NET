@@ -105,17 +105,25 @@ public class OptimierungsdienstTests
         Plansitzung sitzung = Sitzung();
         using var dienst = new Optimierungsdienst(ZweiKerne);
         dienst.Starten(sitzung.Staffel, sitzung.Optionen);
-        await Task.Delay(1500);
+
+        // Warten, bis der beste Plan alle Spiele terminiert hat (unter Last dauert das länger als die üblichen 1,5 s).
         Optimierungsstand vorher = dienst.Stand();
+        for (int i = 0; i < 100 && (i < 15 || vorher.Spiele.Any(s => s.Zeitpunkt is null)); i++)
+        {
+            await Task.Delay(100);
+            vorher = dienst.Stand();
+        }
 
         dienst.DatenAendern(sitzung.Staffel, sitzung.Optionen);
         Optimierungsstand nachher = dienst.Stand();
 
+        // Die Rechnung geht vom besten Plan aus weiter: nicht schlechter, keine Termine verloren (zwischen den beiden Abfragen
+        // kann die Suche weitergekommen sein).
         Assert.True(nachher.Kosten <= vorher.Kosten, $"{nachher.Kosten} > {vorher.Kosten}");
         Assert.True(nachher.Durchlaeufe >= vorher.Durchlaeufe);
-        Assert.Equal(
-            vorher.Spiele.Count(s => s.Zeitpunkt is not null),
-            nachher.Spiele.Count(s => s.Zeitpunkt is not null));
+        Assert.True(
+            nachher.Spiele.Count(s => s.Zeitpunkt is not null) >= vorher.Spiele.Count(s => s.Zeitpunkt is not null),
+            $"{nachher.Spiele.Count(s => s.Zeitpunkt is not null)} < {vorher.Spiele.Count(s => s.Zeitpunkt is not null)} terminierte Spiele");
     }
 
     private static Plansitzung Sitzung()

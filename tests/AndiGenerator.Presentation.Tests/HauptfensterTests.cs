@@ -709,6 +709,46 @@ public sealed class HauptfensterTests : IDisposable
     }
 
     [Fact]
+    public async Task Kriterien_ohne_Modell_bleiben_in_C()
+    {
+        // Bei der Doppelrunde kennt HiGHS den Abstand H/A nicht: Die Zeile lässt sich weder mit den Knöpfen noch durch Ziehen
+        // nach A oder B bringen – beim Ziehen steht der Grund an der schwebenden Zeile, die Lücke bleibt.
+        await OeffnenAsync();
+        hf.EinstellungenCommand.Execute(null);
+        Assert.Single(Ansichten<OptionenAnsichtViewModel>()).Doppelrunde = true;
+        hf.QualitaetsansichtCommand.Execute(null);
+        QualitaetAnsichtViewModel qualitaet = Assert.Single(Ansichten<QualitaetAnsichtViewModel>());
+        qualitaet.Quelle = PlanQuelle.ClickTt;
+        hf.AutomodusCommand.Execute(null);
+        for (int i = 0; i < 600 && !qualitaet.Zeilen.Any(z => z.NurC); i++)
+        {
+            await Task.Delay(100);
+        }
+
+        Qualitaetszeile abstand = Assert.Single(qualitaet.Zeilen, z => z.Kriterium == Kostenkriterium.AbstandHeimAuswaerts);
+        Assert.True(abstand.NurC);
+        Assert.False(abstand.KannAB);
+        Assert.False(abstand.EinstufenBCommand.CanExecute(null));
+        Assert.Contains("HiGHS kennt", abstand.ErklaerungB, StringComparison.Ordinal);
+        Assert.True(Assert.Single(qualitaet.Zeilen, z => z.Kriterium == Kostenkriterium.Sperrtermine).KannAB);
+
+        string vorher = string.Join(",", qualitaet.Zeilen.Select(z => z.Stufe + z.Name));
+        Qualitaetszeile b = qualitaet.Zeilen.First(z => z.IstB && z.Kriterium is not null);
+        Assert.True(qualitaet.ZiehenBeginnen(abstand));
+        qualitaet.ZiehenUeber(b, davor: true);
+        Assert.NotNull(qualitaet.Schwebend);
+        Assert.True(qualitaet.Schwebend.HatAblehnung);
+        Assert.Equal("C", Assert.Single(qualitaet.Zeilen, z => z.Kriterium == Kostenkriterium.AbstandHeimAuswaerts).Klasse);
+
+        // Innerhalb von C geht es weiter: Vorschau ohne Ablehnung.
+        Qualitaetszeile c = qualitaet.Zeilen.Last(z => z.IstC && z.Kriterium is not null && z.Kriterium != Kostenkriterium.AbstandHeimAuswaerts);
+        qualitaet.ZiehenUeber(c, davor: false);
+        Assert.False(qualitaet.Schwebend.HatAblehnung);
+        qualitaet.ZiehenBeenden(uebernehmen: false);
+        Assert.Equal(vorher, string.Join(",", qualitaet.Zeilen.Select(z => z.Stufe + z.Name)));
+    }
+
+    [Fact]
     public async Task Verfahren_wird_vor_dem_Start_gewaehlt_und_laesst_sich_waehrend_der_Generierung_wechseln()
     {
         Assert.False(hf.AutomodusCommand.CanExecute(null));

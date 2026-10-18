@@ -195,6 +195,7 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
         TerminwunschansichtCommand = new RelayCommand(TerminwuenscheOeffnen, () => ZeigtArbeitsbereich);
         NachbarterminansichtCommand = new RelayCommand(NachbartermineOeffnen, () => ZeigtArbeitsbereich);
         LeitstandCommand = new RelayCommand(LeitstandOeffnen, () => ZeigtArbeitsbereich);
+        BVariantenCommand = new AsyncRelayCommand(BVariantenZeigenAsync);
         VerlaufCommand = new RelayCommand(VerlaufOeffnen, () => ZeigtArbeitsbereich);
 
         Zuletzt = Zeilen(Zuletztlesen());
@@ -461,6 +462,9 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
 
     /// <summary>Holt den Befehl „Leitstand“ (Rechenkerne und Inseln der laufenden Generierung, als andockbares Dokument).</summary>
     public IRelayCommand LeitstandCommand { get; }
+
+    /// <summary>Holt den Befehl „B-Varianten wählen“ der Kachel HiGHS (Dialog der B-Varianten).</summary>
+    public IAsyncRelayCommand BVariantenCommand { get; }
 
     /// <summary>Holt den Befehl „Verlauf“ (Verlauf der Suche seit dem Start, als andockbares Dokument).</summary>
     public IRelayCommand VerlaufCommand { get; }
@@ -2389,6 +2393,7 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
             {
                 Statuszeile = text;
                 Anzeige.Uebernehmen(stand);
+                Anzeige.HighsZeigen(HighsanzeigeBilden(stand));
                 Verlauf.Hinzufuegen(stand);
                 leitstandAnsicht?.Uebernehmen(stand);
             }

@@ -55,6 +55,7 @@ public sealed class Generierungsanzeige : ObservableObject
     private Prozessorlast? last;
     private Prozessorlast? letzteMessung;
     private IReadOnlyList<Lastpunkt> lastverlauf = [];
+    private Highsanzeige? highs;
 
     /// <summary>Wird ausgelöst, wenn zwischen Kosten und Verstößen umgeschaltet wird (Ziel des Klicks auf die Kachel).</summary>
     public event EventHandler? ZeigtVerstoesseGeaendert;
@@ -214,6 +215,22 @@ public sealed class Generierungsanzeige : ObservableObject
         }
     }
 
+    /// <summary>Holt, woran HiGHS gerade rechnet (rechte Hälfte der Kachel „Berechnete Pläne“); <c>null</c> außerhalb des Automodus.</summary>
+    public Highsanzeige? Highs
+    {
+        get => highs;
+        private set
+        {
+            if (SetProperty(ref highs, value))
+            {
+                OnPropertyChanged(nameof(ZeigtHighs));
+            }
+        }
+    }
+
+    /// <summary>Holt einen Wert, der angibt, ob die Kachel „Berechnete Pläne“ HiGHS zeigt.</summary>
+    public bool ZeigtHighs => Highs is not null;
+
     /// <summary>Holt einen Wert, der angibt, ob die Aufteilung des Prozessors gemessen wird.</summary>
     public bool ZeigtLast => Last is not null;
 
@@ -272,7 +289,7 @@ public sealed class Generierungsanzeige : ObservableObject
         Plaene = Kostenanzeige.Kurz(stand.Durchlaeufe);
         Tempo = stand.PlaeneProSekunde.ToString("N0", Deutsch) + " Pläne/s";
         ZeigtVerstoesse = stand.Lenkung is not null;
-        Titel = stand.Lenkung is { } lenkung ? "Automodus · " + lenkung.Bezeichnung : "Kostenoptimierung · Gesamtkosten";
+        Titel = stand.Lenkung is { } lenkung ? lenkung.Bezeichnung : "Kostenoptimierung · Gesamtkosten";
         LenkungZeigen(stand.Lenkung);
         if (stand.Kosten < 0)
         {
@@ -299,6 +316,10 @@ public sealed class Generierungsanzeige : ObservableObject
         };
     }
 
+    /// <summary>Zeigt, woran HiGHS gerade rechnet (nur im Automodus).</summary>
+    /// <param name="anzeige">Die Anzeige; <c>null</c> blendet sie aus.</param>
+    internal void HighsZeigen(Highsanzeige? anzeige) => Highs = anzeige;
+
     /// <summary>Setzt die Anzeige für eine neue Generierung oder Staffel zurück.</summary>
     /// <param name="hinweis">Text unter den Kosten.</param>
     internal void Zuruecksetzen(string hinweis)
@@ -321,13 +342,18 @@ public sealed class Generierungsanzeige : ObservableObject
         VerstossB = Leer;
         VerstossC = Leer;
         LenkungZeigen(null);
+        Highs = null;
         Last = null;
         letzteMessung = null;
         Lastverlauf = [];
     }
 
-    /// <summary>Die Generierung ist beendet: keine Prozessorlast mehr.</summary>
-    internal void Anhalten() => Last = null;
+    /// <summary>Die Generierung ist beendet: keine Prozessorlast mehr, HiGHS rechnet nicht mehr.</summary>
+    internal void Anhalten()
+    {
+        Last = null;
+        Highs = Highs is { } h ? h with { Zeit = "Generierung beendet", Anteil = null, Rechnet = false } : null;
+    }
 
     /// <summary>Zeigt vor dem Start einen gewählten Ausgangsplan: seine Kosten und Pflichtregeln, noch ohne Generierung.</summary>
     /// <param name="bewertung">Bewertung des Plans.</param>

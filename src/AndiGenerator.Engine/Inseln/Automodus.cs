@@ -84,6 +84,9 @@ internal sealed class Automodus
     private readonly Dictionary<int, Gewichtung> angehobenC = [];
     private readonly List<string> aenderungen = [];
 
+    /// <summary>Beim Glätten zählt die Suche Verstöße (siehe <see cref="Optimierungseinstellungen.AutoZaehlen"/>).</summary>
+    private readonly bool zaehlen;
+
     /// <summary>Die Auswertung des zuletzt geprüften Plans (<see cref="Pruefen"/>), für <see cref="Verursacher"/>.</summary>
     private Auswertung? letzte;
     private Phase phase = Phase.Grundlauf;
@@ -130,6 +133,13 @@ internal sealed class Automodus
     private double zuletzt;
     private bool sofort;
 
+    /// <summary>
+    /// Ein Plan aus HiGHS ist bester Plan geworden (seit dem letzten Lenken): A und B gelten dann als erreicht – HiGHS hat in
+    /// seiner Zeit nichts Besseres gefunden, die Inseln mit ihren abgestuften Gewichten finden es kaum. Sie werden geschützt, und
+    /// die Suche beginnt beim besten Plan, statt mit ihren in A und B viel schlechteren Plänen weiterzurechnen.
+    /// </summary>
+    private bool vonHighsUebernommen;
+
     /// <summary>Legt den Automodus an.</summary>
     /// <param name="referenz">Referenzmodell mit den Gewichtungen des Anwenders.</param>
     /// <param name="definition">Stammdaten dazu.</param>
@@ -143,6 +153,7 @@ internal sealed class Automodus
         namen = definition.Name;
         einteilung = (einstellungen.AutoStufen ?? Stufeneinteilung.Standard).Vervollstaendigt();
         stufen = einteilung.AlsFeld();
+        zaehlen = einstellungen.AutoZaehlen;
         reihenfolgeC = einteilung.C.Select(k => (int)k).ToArray();
         spielraum = einstellungen.AutoSpielraum;
         kostenToleranz = einstellungen.AutoKostenToleranz;
@@ -168,6 +179,15 @@ internal sealed class Automodus
 
     /// <summary>Gets a value indicating whether noch der Grundlauf läuft (keine Lenkung).</summary>
     public bool Grundlauf => phase == Phase.Grundlauf;
+
+    /// <summary>Holt einen Wert, der angibt, ob C geglättet wird (A und B sind dann entschieden).</summary>
+    public bool Glaettet => phase == Phase.Glaetten;
+
+    /// <summary>Holt einen Wert, der angibt, ob die Suche gerade Verstöße zählt statt Kosten (beim Glätten).</summary>
+    public bool Zaehlt => zaehlen && phase == Phase.Glaetten;
+
+    /// <summary>Holt die Stufe je Kriterium (Index = <see cref="Kostenkriterium"/>).</summary>
+    public IReadOnlyList<Stufe> Stufen => stufen;
 
     /// <summary>Gets den besten Plan nach Stufen (gültig nach dem Grundlauf).</summary>
     public Loesung Beste { get; }
@@ -331,7 +351,8 @@ internal sealed class Automodus
     /// Der Staffelleiter hat die Einteilung geändert (während der Generierung): Keine neue Basisoptimierung, die Gewichte
     /// bleiben. Basis und bester Plan werden nach der neuen Einteilung bewertet, und der Automodus macht beim wichtigsten
     /// geänderten Kriterium weiter – in Stufe A oder B mit dem Drängen dieser Stufe, in C mit dem Glätten ab diesem Kriterium –,
-    /// sofern er nicht ohnehin noch davor steht.
+    /// sofern er nicht ohnehin noch davor steht. Zählt die Suche schon die Verstöße, zählt sie gleich nach der neuen Einteilung
+    /// weiter. Die Inseln beginnen in jedem Fall beim besten Plan neu.
     /// </summary>
     /// <param name="neu">Die neue Einteilung.</param>
     /// <param name="jetzt">Sekunden reiner Rechenzeit.</param>
@@ -361,10 +382,24 @@ internal sealed class Automodus
         BesteKosten = gesamt;
         sucheVerstoesse = null;
 
+        // Die Inseln beginnen beim besten Plan neu und bewerten nach der neuen Einteilung (beim Zählen zählt ihr Ziel noch nach
+        // der alten; mit ihren Plänen suchten sie sonst lange in die alte Richtung weiter).
+        NeustartVomBesten = true;
         (int ziel, Kostenkriterium? geaendert) = ErsteAenderung(alt, neu);
-        if (ziel > Rang)
+        verschoben = geaendert;
+        verschobenBis = jetzt + AnzeigeVerschoben;
+        zuletzt = jetzt;
+        if (Zaehlt)
         {
-            Notieren($"{jetzt:0} s Einteilung geändert: weiter bei {PhaseText}");
+            sofort = true;
+        }
+
+        if (ziel > Rang || Zaehlt)
+        {
+            // Zählt die Suche schon (beim Glätten), zählt sie jetzt nach der neuen Einteilung – zuerst A, dann B, dann C. Zurück
+            // zum Drängen mit den Kosten des Originals ginge es nicht: Damit tauschten die Inseln Verstöße in A gegen die
+            // angehobenen Gewichte in B.
+            Notieren($"{jetzt:0} s Einteilung geändert, bester Plan {BesterWert}: weiter bei {PhaseText}");
             return;
         }
 
@@ -388,9 +423,6 @@ internal sealed class Automodus
 
         // Sofort lenken: nicht erst warten, bis die Suche wieder steht. Das verschobene Kriterium bleibt eine Weile sichtbar.
         sofort = true;
-        verschoben = geaendert;
-        verschobenBis = jetzt + AnzeigeVerschoben;
-        zuletzt = jetzt;
         Notieren($"{jetzt:0} s Einteilung geändert, bester Plan {BesterWert}: weiter bei {PhaseText}{(fokus is { } f ? " ab " + f : string.Empty)}");
     }
 
@@ -533,11 +565,12 @@ internal sealed class Automodus
         if (besser)
         {
             vonHighs++;
-            zuletztVon = "HiGHS";
+            zuletztVon = herkunft.StartsWith("Teilneuplanung", StringComparison.Ordinal) ? "Teilneuplanung" : "HiGHS";
         }
 
         Notieren($"{jetzt:0} s {herkunft} ({wert}): " + (besser ? "bester Plan" : "nicht besser"));
         sofort |= besser && sofortLenken;
+        vonHighsUebernommen |= besser && sofortLenken;
         return besser;
     }
 
@@ -580,6 +613,23 @@ internal sealed class Automodus
             .ToArray();
     }
 
+    /// <summary>
+    /// Beim Glätten: Wird der Plan der Suche durch die angehobenen C-Gewichte in A oder B schlechter als der Bezug, wird nicht
+    /// auf den Stillstand gewartet – die Anhebung wird beim nächsten Lenken zurückgezogen (frühestens nach der Mindestdauer
+    /// einer Phase), und die Inseln beginnen wieder beim besten Plan. Sonst wanderten sie lange zu Plänen, die in C billiger,
+    /// in A oder B aber schlechter sind und nie bester Plan werden.
+    /// </summary>
+    /// <param name="suche">Bester Plan nach den aktuellen Gewichten.</param>
+    /// <param name="jetzt">Sekunden reiner Rechenzeit.</param>
+    public void GlaettenPruefen(Loesung suche, double jetzt)
+    {
+        if (phase == Phase.Glaetten && angehobenC.Count > 0 && jetzt - letzteAenderung >= MinPhase
+            && Stufenvergleich.AOderBSchlechter(Auswerten(suche).Wert, bezugWert))
+        {
+            sofort = true;
+        }
+    }
+
     /// <summary>Entscheidet über die nächste Änderung der Gewichte, wenn die Suche steht (oder nach der Höchstdauer).</summary>
     /// <param name="suche">Bester Plan nach den aktuellen Gewichten.</param>
     /// <param name="jetzt">Sekunden reiner Rechenzeit.</param>
@@ -597,12 +647,15 @@ internal sealed class Automodus
 
         // Was sich ändert, bestimmt der Plan der Suche (wie ihn ein Anwender in der Oberfläche sieht).
         // Erst der beste Plan gegen die Schranke aus HiGHS: Ist eine Stufe dort, ist bei ihr nichts mehr zu holen.
-        amZiel = (AmZiel(Stufe.A), AmZiel(Stufe.B));
+        bool highs = vonHighsUebernommen && BesterWert.Harte == 0;
+        vonHighsUebernommen = false;
+        amZiel = (AmZiel(Stufe.A) || highs, AmZiel(Stufe.B) || highs);
         Auswertung plan = Auswerten(suche);
         Berechnungsoptionen neu = phase switch
         {
             Phase.Draengen when SchrankeErreicht() is { } erreicht => erreicht,
             Phase.Draengen => DraengenSchritt(plan),
+            _ when zaehlen => Optionen,
             _ => GlaettenSchritt(plan, Optionen),
         };
         if (neu == Optionen && !NeustartVomBesten)
@@ -793,6 +846,13 @@ internal sealed class Automodus
         angehobenC.Clear();
         bezugWert = BesterWert;
         NeustartVomBesten = true;
+        if (zaehlen)
+        {
+            // Die Suche zählt jetzt die Verstöße in C selbst: keine C-Gewichte anheben.
+            Notieren($"{letzteAenderung:0} s Suche zählt Verstöße (C)");
+            return neu;
+        }
+
         return GlaettenSchritt(beste, neu);
     }
 
@@ -809,12 +869,14 @@ internal sealed class Automodus
             return null;
         }
 
+        // Geschützt wird der beste Plan: Die Suche beginnt bei ihm (nicht bei ihrem Plan, der in der Stufe schlechter sein kann).
         Berechnungsoptionen neu = Schuetzen(Optionen, draengStufe);
+        NeustartVomBesten = true;
         draengBester = null;
         ohneDraengfortschritt = 0;
         if (draengStufe == Stufe.A)
         {
-            Notieren($"{letzteAenderung:0} s Stufe A bei der Schranke ({BesterWert}): A geschützt, Stufe B");
+            Notieren($"{letzteAenderung:0} s Stufe A bei der Schranke bzw. aus HiGHS ({BesterWert}): A geschützt, Stufe B");
             draengStufe = Stufe.B;
             if (!amZiel.B)
             {
@@ -822,7 +884,7 @@ internal sealed class Automodus
             }
         }
 
-        Notieren($"{letzteAenderung:0} s Stufe B bei der Schranke ({BesterWert}): B geschützt, C glätten");
+        Notieren($"{letzteAenderung:0} s Stufe B bei der Schranke bzw. aus HiGHS ({BesterWert}): B geschützt, C glätten");
         neu = Schuetzen(neu, Stufe.B);
         return GlaettenBeginnen(neu, Auswerten(Beste));
     }

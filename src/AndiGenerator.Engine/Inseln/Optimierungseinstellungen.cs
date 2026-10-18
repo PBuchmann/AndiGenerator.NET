@@ -51,6 +51,10 @@ namespace AndiGenerator.Engine.Inseln;
 /// <c>null</c>; die übrigen Inseln beginnen wie bisher.
 /// </param>
 /// <param name="StartplanInseln">Zahl der Inseln, die mit dem Startplan beginnen.</param>
+/// <param name="AutoZaehlen">
+/// Beim Glätten von C sucht die Suche nach der Zahl der Verstöße (wie der Automodus vergleicht), nicht nach den Kosten des
+/// Originals; der Automodus hebt dann keine C-Gewichte mehr an. <c>false</c> = wie früher (zum Vergleich).
+/// </param>
 /// <param name="Fadenstart">Wird zu Beginn jedes Rechen-Threads auf ihm aufgerufen (z. B. für die Messung der Rechenzeit), oder <c>null</c>.</param>
 public sealed record Optimierungseinstellungen(
     int Kerne,
@@ -74,7 +78,8 @@ public sealed record Optimierungseinstellungen(
     double AutoMaxGrundlauf = 180,
     IReadOnlyList<Spiel>? Startplan = null,
     int StartplanInseln = 1,
-    Action? Fadenstart = null)
+    Action? Fadenstart = null,
+    bool AutoZaehlen = true)
 {
     /// <summary>Standard: Topologie des Originals (4 Inseln × 14 feste + 10 dynamische Suchplätze, Spezial-Insel), alle Kerne bis auf einen.</summary>
     public static Optimierungseinstellungen Standard { get; } = new(

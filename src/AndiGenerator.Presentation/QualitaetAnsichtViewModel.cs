@@ -230,11 +230,23 @@ public sealed class QualitaetAnsichtViewModel : AnsichtViewModel
             return;
         }
 
+        // Kennt HiGHS das Kriterium nicht, bleibt es in C: Über A oder B zeigt die schwebende Zeile den Grund, die Lücke bleibt.
         Stufeneinteilung neu = ausgangslage.Platzieren(k, nachbar, davor);
+        string ablehnung = neu.StufeVon(k) != Stufe.C ? Hauptfenster.NurCGrund(k) : string.Empty;
+        if (ablehnung.Length > 0)
+        {
+            neu = ausgangslage;
+        }
+
         if (neu.Text() != vorschau?.Text())
         {
             vorschau = neu;
             Neu();
+        }
+
+        if (Schwebend is not null)
+        {
+            Schwebend.Ablehnung = ablehnung;
         }
     }
 
@@ -412,10 +424,11 @@ public sealed class QualitaetAnsichtViewModel : AnsichtViewModel
             zeile.BestmoeglichRechnet = schranke is null && ab;
 
             // A und B: der Wert des Kriteriums allein; C: der bestmögliche Wert bei bestmöglichem A und B – nur, wenn der Plan
-            // diese erreicht (sonst unbekannt). In einem Zug gesetzt (kein kurzes Leeren dazwischen).
-            (zeile.Bestmoeglich, zeile.BestmoeglichErreicht) = stufe is not null && (ab || (k.Stufe[0] == 'C' && b))
-                ? Schrankentext(k, stufe.Schranke)
-                : (string.Empty, false);
+            // diese erreicht (sonst unbekannt). Kennt HiGHS das Kriterium nicht, steht das dort. In einem Zug gesetzt (kein
+            // kurzes Leeren dazwischen).
+            bool unbekannt = ab && schranke is not null && k.Kriterium is { } x && bericht?.Unbekannt?.Contains(x) == true;
+            (string Text, bool Erreicht) ohne = (unbekannt ? "HiGHS kennt es nicht" : string.Empty, false);
+            (zeile.Bestmoeglich, zeile.BestmoeglichErreicht) = stufe is not null && (ab || (k.Stufe[0] == 'C' && b)) ? Schrankentext(k, stufe.Schranke) : ohne;
 
             // Erreicht der Plan die Grenze der Stufe A, sind die übrigen Verstöße dort unvermeidbar: kein rotes Kreuz.
             if (a && k.Stufe[0] == 'A' && zeile.Zustand == Qualitaetszustand.PflichtVerletzt)
@@ -484,7 +497,9 @@ public sealed class QualitaetAnsichtViewModel : AnsichtViewModel
                 return new Stufenkopf(titel, planText, grenze, "Optimum erreicht – besser geht es nicht", Spielraumzustand.Bestmoeglich);
             }
 
-            string text = summe.Bewiesen
+            // „Optimum ist …“ nur, wenn HiGHS alle Kriterien der Stufe kennt – sonst gilt der Beweis nur für die bekannten.
+            bool vollstaendig = bericht?.Vollstaendig(Hauptfenster.Einteilung, stufe == 'A' ? Stufe.A : Stufe.B) != false;
+            string text = summe.Bewiesen && vollstaendig
                 ? $"Optimum ist {Zahl(summe.Schranke)}: noch {Zahl(luft)} Verstöße weniger möglich"
                 : $"Optimum zwischen {Zahl(summe.Schranke)} und {Zahl(plan)}: höchstens {Zahl(luft)} Verstöße weniger möglich";
             return new Stufenkopf(titel, planText, grenze, text, Spielraumzustand.Offen, anteil);
@@ -653,12 +668,14 @@ public sealed class QualitaetAnsichtViewModel : AnsichtViewModel
         }
 
         // Hoch/runter innerhalb der Stufe; am Rand der Stufe in die Nachbarstufe: nach unten an deren erste Stelle,
-        // nach oben ans Ende (Stufeneinteilung.Einstufen). Spieltage ohne Anzahl bleiben in C.
+        // nach oben ans Ende (Stufeneinteilung.Einstufen). Spieltage ohne Anzahl bleiben in C, ebenso Kriterien, die HiGHS für
+        // diese Staffel nicht kennt.
         Stufe klasse = (Stufe)(k.Stufe[0] - 'A');
+        string nurC = Hauptfenster.NurCGrund(kriterium);
         Action? hoch = oben switch
         {
             Kostenkriterium o => () => _ = Hauptfenster.EinteilungAendernAsync(e => Vorbei(e, kriterium, o, -1)),
-            null when klasse > Stufe.A && Stufeneinteilung.HatAnzahl(kriterium) => () => _ = Hauptfenster.EinteilungAendernAsync(e => e.Einstufen(kriterium, klasse - 1)),
+            null when klasse > Stufe.A && Stufeneinteilung.HatAnzahl(kriterium) && nurC.Length == 0 => () => _ = Hauptfenster.EinteilungAendernAsync(e => e.Einstufen(kriterium, klasse - 1)),
             _ => null,
         };
         Action? runter = unten switch
@@ -668,6 +685,6 @@ public sealed class QualitaetAnsichtViewModel : AnsichtViewModel
             _ => null,
         };
         var bearbeitung = new Zeilenbearbeitung((x, stufe) => _ = Hauptfenster.EinteilungAendernAsync(e => e.Einstufen(x, stufe)), hoch, runter);
-        return new Qualitaetszeile(k.Stufe, k.Name, kriterium, bearbeitung, kriterium == gezogen);
+        return new Qualitaetszeile(k.Stufe, k.Name, kriterium, bearbeitung, kriterium == gezogen, nurC);
     }
 }

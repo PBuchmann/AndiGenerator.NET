@@ -25,7 +25,7 @@ namespace AndiGenerator.Engine.Inseln;
 /// <param name="SchrankeB">Die untere Schranke für die Summe der Stufe B bei bestmöglichem A; <c>null</c>, solange keine bekannt ist.</param>
 /// <param name="VonInseln">So oft ist der Plan einer Insel bester Plan geworden (nach der Basisoptimierung).</param>
 /// <param name="VonHighs">So oft ist ein Plan aus HiGHS bester Plan geworden.</param>
-/// <param name="ZuletztVon">Woher der beste Plan zuletzt kam, z. B. „Insel 3“ oder „HiGHS“; <c>null</c>, solange keiner.</param>
+/// <param name="ZuletztVon">Woher der beste Plan zuletzt kam: „Insel 3“, „HiGHS“ oder „Teilneuplanung“; <c>null</c>, solange keiner.</param>
 /// <param name="Festgelegt">Was der Staffelleiter festgelegt hat (A und B bleiben so), oder <c>null</c>.</param>
 public sealed record Lenkungsstand(
     Stufenwert? Basis,

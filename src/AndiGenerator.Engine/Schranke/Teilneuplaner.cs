@@ -27,6 +27,12 @@ public sealed class Teilneuplaner : IDisposable
     /// <summary>Zeitgrenze für HiGHS je Ausschnitt mit zwei Mannschaften (größere Ausschnitte entsprechend länger).</summary>
     private static readonly TimeSpan JeAusschnitt = TimeSpan.FromSeconds(5);
 
+    /// <summary>
+    /// So oft wird verglichen, ob Inseln oder Teilneuplanung je Rechen-Thread mehr verbessern (danach rechnet eine Teilneuplanung
+    /// mehr oder weniger).
+    /// </summary>
+    private static readonly TimeSpan Anpassabstand = TimeSpan.FromSeconds(30);
+
     /// <summary>So oft wird in der Pause gefragt, ob es weitergeht.</summary>
     private static readonly TimeSpan PauseAbfrage = TimeSpan.FromMilliseconds(300);
 
@@ -44,15 +50,21 @@ public sealed class Teilneuplaner : IDisposable
     private readonly Lock sperre = new();
     private readonly List<Ausschnittsergebnis> verlauf = [];
     private readonly SortedDictionary<int, (int Ausschnitte, int Besser, double Sekunden)> groessen = [];
-    private readonly System.Diagnostics.Stopwatch ausschnittUhr = new();
+    private readonly int arbeiter;
+    private readonly Ausschnittsbelegung belegung = new();
+    private readonly System.Diagnostics.Stopwatch anpassUhr = new();
+    private readonly Func<IReadOnlyList<Spiel>, IReadOnlyDictionary<string, int>> verstoesse;
     private Task? lauf;
+    private int erlaubt;
+    private (int Inseln, int Eigene) zuletztGezaehlt;
+    private (double Inseln, double InselSekunden, double Eigene, double EigeneSekunden) erfolge;
     private int beendet;
     private string zustand = "wartet auf das Ende der Basisoptimierung";
     private int ausschnitte;
     private int besser;
     private int eingespielt;
     private int wechsel;
-    private bool rechnet;
+    private int rechnende;
     private int? mannschaften;
     private Stufenwert? aktuell;
 
@@ -64,8 +76,15 @@ public sealed class Teilneuplaner : IDisposable
     /// <param name="einteilung">Die Einteilung der Kriterien.</param>
     /// <param name="obergrenzen">Festlegung des Staffelleiters (je Kriterium höchstens so viele Verstöße), oder <c>null</c>.</param>
     /// <param name="warten">Solange es <c>true</c> liefert, wartet die Teilneuplanung (Vorrang für HiGHS), oder <c>null</c>.</param>
-    public Teilneuplaner(Inseloptimierer optimierer, Staffel staffel, Berechnungsoptionen optionen, ISchrankenloeser loeser, Stufeneinteilung einteilung, IReadOnlyDictionary<Kostenkriterium, int>? obergrenzen = null, Func<bool>? warten = null)
+    /// <param name="arbeiter">
+    /// So viele Teilneuplanungen rechnen beim Glätten von C gleichzeitig (eine schon vorher); <c>null</c> = die Hälfte der
+    /// Kerne. Je laufender Rechnung ruht ein Rechen-Thread der Inseln.
+    /// </param>
+    public Teilneuplaner(Inseloptimierer optimierer, Staffel staffel, Berechnungsoptionen optionen, ISchrankenloeser loeser, Stufeneinteilung einteilung, IReadOnlyDictionary<Kostenkriterium, int>? obergrenzen = null, Func<bool>? warten = null, int? arbeiter = null)
     {
+        this.arbeiter = Math.Max(1, arbeiter ?? (Environment.ProcessorCount / 2));
+        erlaubt = this.arbeiter;
+        verstoesse = Ligaschranke.VerstoesseInC(staffel, optionen, einteilung);
         this.warten = warten ?? (() => false);
         this.optimierer = optimierer;
         this.staffel = staffel;
@@ -83,12 +102,12 @@ public sealed class Teilneuplaner : IDisposable
             lock (sperre)
             {
                 return new Teilneuplanungsstand(
-                    zustand,
+                    rechnende > 1 ? $"{zustand} ({rechnende} von {arbeiter} gleichzeitig)" : zustand,
                     ausschnitte,
                     besser,
                     eingespielt,
                     wechsel,
-                    rechnet,
+                    rechnende > 0,
                     mannschaften,
                     [.. verlauf],
                     aktuell,
@@ -97,8 +116,8 @@ public sealed class Teilneuplaner : IDisposable
         }
     }
 
-    /// <summary>Beginnt im Hintergrund.</summary>
-    public void Starten() => lauf = Task.Run(Schleife, CancellationToken.None);
+    /// <summary>Beginnt im Hintergrund: eine Teilneuplanung sofort, die weiteren, sobald der Automodus C glättet.</summary>
+    public void Starten() => lauf = Task.WhenAll(Enumerable.Range(0, arbeiter).Select(i => Task.Run(() => Schleife(i), CancellationToken.None)));
 
     /// <summary>
     /// Beendet die Teilneuplanung: HiGHS bricht seinen Lauf ab, danach wird nichts mehr eingespielt. Wartet kurz, bis sie
@@ -118,9 +137,10 @@ public sealed class Teilneuplaner : IDisposable
         }
     }
 
-    private async Task Schleife()
+    private async Task Schleife(int nummer)
     {
         CancellationToken token = abbruch.Token;
+        var uhr = new System.Diagnostics.Stopwatch();
         try
         {
             // Erst nach der Basisoptimierung (dann gibt es den Maßstab des Automodus).
@@ -142,21 +162,38 @@ public sealed class Teilneuplaner : IDisposable
 
             start = optimierer.BesterGelenkt() ?? start;
 
+            // Die weiteren erst beim Glätten von C: Dann sind A und B entschieden, und Ausschnitte bringen am meisten.
+            while (nummer > 0 && !optimierer.Glaettet)
+            {
+                await Task.Delay(Warten, token).ConfigureAwait(false);
+            }
+
+            start = optimierer.BesterGelenkt() ?? start;
+
             // Fortlaufend bis zum Ende der Generierung; angenommen wird nach dem Maßstab des Automodus (mit C-Ausreißern).
             var e = new Neuplanungseinstellungen(
                 TimeSpan.MaxValue,
                 JeAusschnitt,
                 Bewerten: optimierer.NachStufen,
                 Besser: optimierer.IstBesser,
+                Startwert: nummer + 1,
                 Obergrenzen: obergrenzen,
-                Ausschnitt: Ausschnitt,
+                Ausschnitt: m => Ausschnitt(m, uhr),
                 Verbessert: (plan, _) => Verbessert(plan),
-                Ausgangsplan: Ausgangsplan,
-                Unterbrechen: () => optimierer.Pausiert || warten());
+                Abgelehnt: optimierer.StartplanAnbieten,
+                Ausgangsplan: eigener => Ausgangsplan(eigener, nummer),
+                Unterbrechen: () => Ruht(nummer),
+                Verstoesse: verstoesse,
+                Belegung: belegung,
+                Platz: nummer);
             Neuplanungsbericht bericht;
             try
             {
-                Setzen("plant Ausschnitte neu");
+                if (nummer == 0)
+                {
+                    Setzen("plant Ausschnitte neu");
+                }
+
                 Rechnen(true);
                 bericht = Ligaschranke.Neuplanen(staffel, start.Value.Plan, optionen, loeser, einteilung, e, abbruch: token);
             }
@@ -179,7 +216,6 @@ public sealed class Teilneuplaner : IDisposable
             or NullReferenceException or DllNotFoundException or EntryPointNotFoundException)
         {
             // Nicht still verschwinden: Der Leitstand zeigt den Fehler.
-            Rechnen(false);
             Setzen("Fehler: " + fehler.Message);
         }
     }
@@ -202,23 +238,35 @@ public sealed class Teilneuplaner : IDisposable
     /// Vor jedem Ausschnitt: in der Pause und während HiGHS an A und B rechnet warten; haben die Inseln einen besseren Plan als die Teilneuplanung, wird er ihr neuer
     /// Ausgangsplan.
     /// </summary>
-    private IReadOnlyList<Spiel>? Ausgangsplan(Stufenwert eigener)
+    private IReadOnlyList<Spiel>? Ausgangsplan(Stufenwert eigener, int nummer)
     {
         lock (sperre)
         {
             aktuell = eigener;
+            if (nummer == 0)
+            {
+                Anpassen();
+            }
         }
 
-        if (optimierer.Pausiert || warten())
+        if (Ruht(nummer))
         {
-            Setzen(optimierer.Pausiert ? "angehalten" : "wartet auf HiGHS (Stufen A und B)");
+            if (nummer == 0)
+            {
+                Setzen(optimierer.Pausiert ? "angehalten" : "wartet auf HiGHS (Stufen A und B)");
+            }
+
             Rechnen(false);
-            while ((optimierer.Pausiert || warten()) && !abbruch.IsCancellationRequested)
+            while (Ruht(nummer) && !abbruch.IsCancellationRequested)
             {
                 abbruch.Token.WaitHandle.WaitOne(PauseAbfrage);
             }
 
-            Setzen("plant Ausschnitte neu");
+            if (nummer == 0)
+            {
+                Setzen("plant Ausschnitte neu");
+            }
+
             Rechnen(true);
         }
 
@@ -235,12 +283,66 @@ public sealed class Teilneuplaner : IDisposable
         return gesamt.Plan;
     }
 
+    /// <summary>
+    /// Pause, Vorrang für HiGHS, und die weiteren Teilneuplanungen außerhalb des Glättens oder wenn die Inseln je Rechen-Thread
+    /// mehr verbessern.
+    /// </summary>
+    private bool Ruht(int nummer) => optimierer.Pausiert || warten() || (nummer > 0 && (!optimierer.Glaettet || nummer >= Volatile.Read(ref erlaubt)));
+
+    /// <summary>
+    /// Teilt die Kerne beim Glätten nach dem Erfolg: Alle <see cref="Anpassabstand"/> werden die Verbesserungen des besten Plans je
+    /// Rechen-Thread verglichen (ältere zählen halb so viel). Bringt die Teilneuplanung je Thread mehr als die Inseln, rechnet
+    /// eine mehr (bis zur Hälfte der Kerne), bringt sie weniger als die Hälfte, eine weniger (mindestens eine); die freien Kerne
+    /// rechnen für die Inseln. Aufruf unter der Sperre.
+    /// </summary>
+    private void Anpassen()
+    {
+        int inseln = optimierer.Lenkung?.VonInseln ?? 0;
+        if (!optimierer.Glaettet || optimierer.Pausiert || !anpassUhr.IsRunning)
+        {
+            zuletztGezaehlt = (inseln, eingespielt);
+            anpassUhr.Restart();
+            return;
+        }
+
+        double sekunden = anpassUhr.Elapsed.TotalSeconds;
+        if (sekunden < Anpassabstand.TotalSeconds)
+        {
+            return;
+        }
+
+        int eigeneThreads = Volatile.Read(ref erlaubt);
+        int inselThreads = Math.Max(1, Environment.ProcessorCount - eigeneThreads);
+        erfolge = (
+            (erfolge.Inseln / 2) + (inseln - zuletztGezaehlt.Inseln),
+            (erfolge.InselSekunden / 2) + (sekunden * inselThreads),
+            (erfolge.Eigene / 2) + (eingespielt - zuletztGezaehlt.Eigene),
+            (erfolge.EigeneSekunden / 2) + (sekunden * eigeneThreads));
+        zuletztGezaehlt = (inseln, eingespielt);
+        anpassUhr.Restart();
+        if (erfolge.Inseln + erfolge.Eigene < 2)
+        {
+            return;
+        }
+
+        double jeInsel = erfolge.Inseln / erfolge.InselSekunden;
+        double jeEigene = erfolge.Eigene / erfolge.EigeneSekunden;
+        if (jeEigene > jeInsel && eigeneThreads < arbeiter)
+        {
+            Volatile.Write(ref erlaubt, eigeneThreads + 1);
+        }
+        else if (jeEigene * 2 < jeInsel && eigeneThreads > 1)
+        {
+            Volatile.Write(ref erlaubt, eigeneThreads - 1);
+        }
+    }
+
     private void Rechnen(bool ja)
     {
         lock (sperre)
         {
-            rechnet = ja;
-            if (!ja)
+            rechnende = Math.Max(0, rechnende + (ja ? 1 : -1));
+            if (rechnende == 0)
             {
                 mannschaften = null;
             }
@@ -256,7 +358,7 @@ public sealed class Teilneuplaner : IDisposable
     }
 
     /// <summary>Beginn und Ausgang eines Ausschnitts (aus <see cref="Ligaschranke.Neuplanen"/>), für das Schaubild.</summary>
-    private void Ausschnitt(Ausschnittsmeldung meldung)
+    private void Ausschnitt(Ausschnittsmeldung meldung, System.Diagnostics.Stopwatch ausschnittUhr)
     {
         lock (sperre)
         {

@@ -16,7 +16,7 @@ namespace AndiGenerator.Engine.Inseln;
 /// die Inseln ab, übernimmt etwa jede Sekunde die beste Insel als Gesamtergebnis und startet die schlechteste Insel neu,
 /// wenn sie zu lange keine Verbesserung gefunden hat. Im inneren Durchlauf gibt es keine Sperren.
 /// </summary>
-public sealed class Inseloptimierer : IDisposable
+public sealed partial class Inseloptimierer : IDisposable
 {
     private const int AbgleichMs = 200;
     private const int AbgleicheJeOptimiererSchritt = 5;
@@ -105,6 +105,8 @@ public sealed class Inseloptimierer : IDisposable
         autoStand = new int[inseln.Length];
         autoWerte = new Stufenwert?[inseln.Length];
         autoVerursacher = new Kostenverursacher[inseln.Length][];
+        startverfahren = new Startverfahren?[inseln.Length];
+        festeSpiele = [.. bewerter.Fest.Take(bewerter.AnzahlErlaubt)];
         Array.Fill(autoStand, -1);
         for (int i = 0; i < inseln.Length; i++)
         {
@@ -194,9 +196,10 @@ public sealed class Inseloptimierer : IDisposable
             long[] kerne = kernPlaetze.Select(eigene => eigene.Sum(p => p.Durchlaeufe)).ToArray();
             lock (sperre)
             {
-                // Die schlechteste Insel wie beim Neustart im Optimierer-Schritt: die mit den höchsten Kosten.
-                int schlechteste = -1;
-                for (int i = 0; i < inseln.Length; i++)
+                // Die Insel, die als Nächste neu beginnt, wie im Optimierer-Schritt: die mit den höchsten Kosten (im Automodus die
+                // schlechteste der feststeckenden).
+                int schlechteste = auto is { Grundlauf: false } ? NeustartKandidat(nurFeststeckende: false) : -1;
+                for (int i = 0; i < inseln.Length && auto is not { Grundlauf: false }; i++)
                 {
                     if (inseln[i].Kosten >= 0 && (schlechteste < 0 || inseln[i].Kosten > inseln[schlechteste].Kosten))
                     {
@@ -208,13 +211,26 @@ public sealed class Inseloptimierer : IDisposable
                     StandVon(insel, spezial: false, laeuft: true, autoWerte[i], autoWerte[i] is null ? Kostentreiber(insel) : autoVerursacher[i]) with
                     {
                         Schlechteste = i == schlechteste && inseln.Length > 1,
+                        Start = startverfahren[i],
                     });
                 if (spezial is not null)
                 {
                     stand = stand.Append(StandVon(spezial, spezial: true, laeuft: spezialLaeuft));
                 }
 
-                return new Maschinenraum(kerne, stand.ToArray(), einstellungen.DurchlaeufeVorNeustart, spezialKostenart, spezialVerwendet, BesteKriterien(), planVerbesserungen);
+                return new Maschinenraum(kerne, stand.ToArray(), einstellungen.DurchlaeufeVorNeustart, spezialKostenart, spezialVerwendet, BesteKriterien(), planVerbesserungen, Startstatistiken());
+            }
+        }
+    }
+
+    /// <summary>Holt einen Wert, der angibt, ob der Automodus gerade C glättet (A und B sind entschieden).</summary>
+    public bool Glaettet
+    {
+        get
+        {
+            lock (sperre)
+            {
+                return auto is { Glaettet: true };
             }
         }
     }
@@ -259,14 +275,15 @@ public sealed class Inseloptimierer : IDisposable
 
     /// <summary>
     /// Holt oder setzt, wie viele Rechen-Threads ruhen (Vorrang für HiGHS: solange es Stufe A, B und die Alternativen rechnet,
-    /// bekommen die Inseln nur die übrigen Kerne). Mindestens ein Thread rechnet immer.
+    /// bekommen die Inseln nur die übrigen Kerne). Höchstens die Hälfte ruht (mindestens ein Thread rechnet immer): Nach einer
+    /// geänderten Einteilung rechnet HiGHS neu, und die Inseln müssen dann ebenso dem neuen Ziel folgen.
     /// </summary>
     public int Ruhend
     {
         get => Volatile.Read(ref ruhend);
         set
         {
-            Volatile.Write(ref ruhend, Math.Clamp(value, 0, einstellungen.Kerne - 1));
+            Volatile.Write(ref ruhend, Math.Clamp(value, 0, einstellungen.Kerne / 2));
             if (Volatile.Read(ref ruhend) == 0)
             {
                 freigabe.Set();
@@ -382,24 +399,23 @@ public sealed class Inseloptimierer : IDisposable
             }
 
             Loesung loesung = AlsLoesung(plan);
-            if (!auto.Einspielen(loesung, AutoSekunden(), herkunft, sofortLenken: false))
+
+            // Aus HiGHS: gleich lenken (ist eine Stufe bei der Schranke, wird sie geschützt) und danach vom besten Plan aus weiter
+            // – sonst suchten die Inseln mit den alten Gewichten von ihren Plänen aus weiter.
+            if (!auto.Einspielen(loesung, AutoSekunden(), herkunft, sofortLenken: inselnNachziehen))
             {
                 return false;
             }
 
-            double kosten = Bewerten(bewerter, loesung);
-            Insel schlechteste = inseln.OrderByDescending(i => i.Kosten < 0 ? double.MaxValue : i.Kosten).First();
-            Stufenwert bester = auto.BesterWert;
-            for (int i = 0; i < inseln.Length; i++)
+            // Gleich zählen: Die Oberfläche zeigt den neuen besten Plan dann mit der nächsten Meldung (nicht erst nach dem
+            // nächsten Optimierer-Schritt).
+            PlanVerbesserungenZaehlen();
+            if (inselnNachziehen)
             {
-                bool schlechter = autoWerte[i] is not { } w || (w.Harte, w.A, w.B).CompareTo((bester.Harte, bester.A, bester.B)) > 0;
-                if (inseln[i] == schlechteste || (inselnNachziehen && schlechter))
-                {
-                    inseln[i].Neustarten(loesung, kosten);
-                    autoStand[i] = -1;
-                }
+                auto.NeustartVomBesten = true;
             }
 
+            InselnNeustarten(loesung, alleSchlechteren: inselnNachziehen);
             return true;
         }
     }
@@ -591,9 +607,9 @@ public sealed class Inseloptimierer : IDisposable
     }
 
     /// <summary>Plan wie beim Start eines Workers: bestehender Spielplan ohne ungültige Termine als gemerkte Lösung.</summary>
-    private static KernPlan NeuerPlan(RefPlan referenz, KernDefinition stammdaten)
+    private static KernPlan NeuerPlan(RefPlan referenz, KernDefinition stammdaten, Zaehlziel? ziel = null)
     {
-        var plan = new KernPlan(referenz, stammdaten);
+        var plan = new KernPlan(referenz, stammdaten) { Zaehlziel = ziel };
         plan.UngueltigeTermineEntfernen();
         plan.Merken();
         return plan;
@@ -682,13 +698,18 @@ public sealed class Inseloptimierer : IDisposable
     /// <summary>
     /// Zählt die Verbesserungen des geltenden besten Plans: höchstens eine je Optimierer-Schritt, bei der Kostenoptimierung und
     /// im Grundlauf nach Kosten, im Automodus danach nach Stufen. Der Wechsel vom Grundlauf zur Lenkung zählt nicht. Diese Zahl
-    /// zeigen die Kachel „Verbesserungen“, der Verlauf und der Leitstand (ein grüner Punkt je Verbesserung).
+    /// zeigen die Kachel „Verbesserungen“, der Verlauf und der Leitstand (ein grüner Punkt je Verbesserung). Ein besserer Plan
+    /// gleich beim Wechsel (aus HiGHS) zählt.
     /// </summary>
     private void PlanVerbesserungenZaehlen()
     {
         bool gelenkt = auto is { Grundlauf: false };
         (int Verbesserungen, bool Gelenkt) stand = gelenkt ? (auto!.Verbesserungen, true) : (verbesserungen, false);
-        if (stand.Gelenkt == zaehlStand.Gelenkt && stand.Verbesserungen > zaehlStand.Verbesserungen)
+
+        // Beim Wechsel zur Lenkung zählt nur, was danach besser wurde – etwa der Plan aus HiGHS, der die Basisoptimierung im selben
+        // Schritt beendet (sonst bliebe er in Kacheln und Verlauf unsichtbar, bis die Suche selbst etwas findet).
+        bool besser = stand.Gelenkt == zaehlStand.Gelenkt ? stand.Verbesserungen > zaehlStand.Verbesserungen : stand.Gelenkt && stand.Verbesserungen > 0;
+        if (besser)
         {
             planVerbesserungen++;
         }
@@ -887,6 +908,7 @@ public sealed class Inseloptimierer : IDisposable
 
         Insel? schlechteste = null;
         bool besser = false;
+        int feststeckende = auto is { Grundlauf: false } ? NeustartKandidat() : -1;
         foreach (Insel insel in inseln)
         {
             if (insel.Kosten < 0)
@@ -924,6 +946,17 @@ public sealed class Inseloptimierer : IDisposable
             SpezialNeuAufsetzen(spezial);
         }
 
+        if (auto is { Grundlauf: false })
+        {
+            // Automodus: Die schlechteste der feststeckenden Inseln beginnt neu, reihum mit einem anderen Startverfahren.
+            if (feststeckende >= 0)
+            {
+                Neustarten(feststeckende);
+            }
+
+            return;
+        }
+
         if (inseln.Length < 2 || schlechteste is null || schlechteste.OhneVerbesserung <= einstellungen.DurchlaeufeVorNeustart)
         {
             return;
@@ -939,6 +972,26 @@ public sealed class Inseloptimierer : IDisposable
         else
         {
             schlechteste.Neustarten(leer, -1);
+        }
+    }
+
+    /// <summary>
+    /// Ein neuer bester Plan (Automodus): Die schlechteste Insel beginnt mit ihm – mit <paramref name="alleSchlechteren"/> jede
+    /// Insel, die bei den harten Fehlern, in A oder in B schlechter ist (oder noch nicht bewertet).
+    /// </summary>
+    private void InselnNeustarten(Loesung plan, bool alleSchlechteren)
+    {
+        double kosten = Bewerten(bewerter, plan);
+        Insel schlechteste = inseln.OrderByDescending(i => i.Kosten < 0 ? double.MaxValue : i.Kosten).First();
+        Stufenwert bester = auto!.BesterWert;
+        for (int i = 0; i < inseln.Length; i++)
+        {
+            bool schlechter = autoWerte[i] is not { } w || (w.Harte, w.A, w.B).CompareTo((bester.Harte, bester.A, bester.B)) > 0;
+            if (inseln[i] == schlechteste || (alleSchlechteren && schlechter))
+            {
+                inseln[i].Neustarten(plan, kosten);
+                autoStand[i] = -1;
+            }
         }
     }
 
@@ -981,12 +1034,9 @@ public sealed class Inseloptimierer : IDisposable
             highsPlan = null;
             if (auto.Einspielen(plan, f, "Plan aus HiGHS", sofortLenken: true))
             {
-                // Die schlechtere Hälfte der Inseln beginnt mit dem Plan aus HiGHS, die andere sucht weiter.
-                double kosten = Bewerten(bewerter, plan);
-                foreach (Insel insel in inseln.OrderByDescending(i => i.Kosten < 0 ? double.MaxValue : i.Kosten).Take((inseln.Length + 1) / 2))
-                {
-                    insel.Neustarten(plan, kosten);
-                }
+                // Alle Inseln, die in A oder B schlechter sind, beginnen mit dem Plan aus HiGHS; nach dem Lenken auch der Rest.
+                auto.NeustartVomBesten = true;
+                InselnNeustarten(plan, alleSchlechteren: true);
             }
         }
 
@@ -996,7 +1046,9 @@ public sealed class Inseloptimierer : IDisposable
             if (insel.Kosten >= 0 && insel.Stand != autoStand[i])
             {
                 autoStand[i] = insel.Stand;
+                int vorher = auto.Verbesserungen;
                 autoWerte[i] = auto.PruefenVonInsel(insel.Loesung, insel.Nummer);
+                ErfolgZaehlen(i, auto.Verbesserungen > vorher);
                 autoVerursacher[i] = auto.Verursacher(Verursacher);
             }
         }
@@ -1004,6 +1056,7 @@ public sealed class Inseloptimierer : IDisposable
         if (besteKosten >= 0)
         {
             auto.Verfolgen(beste, f);
+            auto.GlaettenPruefen(beste, f);
         }
 
         if (besteKosten >= 0 && auto.Lenken(beste, f) is { } neu)
@@ -1022,10 +1075,13 @@ public sealed class Inseloptimierer : IDisposable
         RefPlan referenz = RefPlan.Laden(staffel, neu);
         var stammdaten = new KernDefinition(referenz);
         definition = stammdaten;
-        bewerter = NeuerPlan(referenz, stammdaten);
+
+        // Beim Glätten zählt die Suche die Verstöße wie der Automodus (sonst die Kosten des Originals).
+        Zaehlziel? ziel = auto!.Zaehlt ? new Zaehlziel(auto.Stufen) : null;
+        bewerter = NeuerPlan(referenz, stammdaten, ziel);
 
         // Normalerweise rechnet die Suche mit ihrem Plan weiter; beim Glätten beginnt sie beim besten Plan neu.
-        if (auto!.NeustartVomBesten)
+        if (auto.NeustartVomBesten)
         {
             auto.Beste.KopierenNach(beste);
             auto.NeustartVomBesten = false;
@@ -1034,7 +1090,7 @@ public sealed class Inseloptimierer : IDisposable
         besteKosten = Bewerten(bewerter, beste);
         foreach (Insel insel in inseln)
         {
-            insel.NeuAufsetzen(beste, besteKosten, () => NeuerPlan(referenz, stammdaten));
+            insel.NeuAufsetzen(beste, besteKosten, () => NeuerPlan(referenz, stammdaten, ziel));
         }
     }
 }

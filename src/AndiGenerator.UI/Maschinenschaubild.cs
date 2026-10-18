@@ -391,7 +391,7 @@ public sealed class Maschinenschaubild : Control
             double frei = breite;
             if (bild.ZuletztVon is { } von)
             {
-                IBrush farbe = von == "HiGHS" ? Pinsel.Farbe("HighsDunkel") : Pinsel.Farbe("Gut");
+                IBrush farbe = von is "HiGHS" or "Teilneuplanung" ? Pinsel.Farbe("HighsDunkel") : Pinsel.Farbe("Gut");
                 FormattedText zuletzt = Text("zuletzt von " + von, farbe, 10, true, breite / 2);
                 context.DrawText(zuletzt, new Point(x, y));
                 frei -= zuletzt.Width + 6;

@@ -17,6 +17,9 @@ public interface ISchrankenloeser
     /// <param name="aufhoeren">
     /// Wird während der Suche gefragt; <c>true</c> beendet sie mit der bis dahin besten Lösung (Abbruch, Pause), oder <c>null</c>.
     /// </param>
+    /// <param name="regel">
+    /// Zeitgrenze nach Fortschritt statt der festen <paramref name="zeitgrenze"/>, oder <c>null</c>.
+    /// </param>
     /// <returns>Das Ergebnis.</returns>
-    Schrankenloesung Loesen(Ganzzahlmodell modell, TimeSpan zeitgrenze, double[]? start = null, Func<bool>? aufhoeren = null);
+    Schrankenloesung Loesen(Ganzzahlmodell modell, TimeSpan zeitgrenze, double[]? start = null, Func<bool>? aufhoeren = null, Laufzeitregel? regel = null);
 }

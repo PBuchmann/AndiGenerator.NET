@@ -33,19 +33,22 @@ public sealed class AlternativendialogViewModel : ObservableObject
     /// <param name="einteilung">Die Einteilung der Kriterien.</param>
     /// <param name="meldungen">Liefert zu einem Plan und Kriterium die Verstöße je Mannschaft.</param>
     /// <param name="kannUebernehmen">Übernehmen ist möglich (die Generierung läuft im Automodus).</param>
+    /// <param name="hinweis">Hinweis unter der Erklärung, z. B. welche Kriterien HiGHS nicht kennt; leer = keiner.</param>
     public AlternativendialogViewModel(
         Planstand aktuell,
         IReadOnlyList<(Planalternative Alternative, Planbewertung Bewertung)> alternativen,
         Planalternative? start,
         Stufeneinteilung einteilung,
         Func<Planstand, Kostenkriterium, IReadOnlyList<Meldungsgruppe>> meldungen,
-        bool kannUebernehmen)
+        bool kannUebernehmen,
+        string hinweis = "")
     {
         ArgumentNullException.ThrowIfNull(aktuell);
         ArgumentNullException.ThrowIfNull(alternativen);
         ArgumentNullException.ThrowIfNull(einteilung);
         this.meldungen = meldungen ?? throw new ArgumentNullException(nameof(meldungen));
         KannUebernehmen = kannUebernehmen;
+        Hinweis = hinweis ?? string.Empty;
         Stufeneinteilung voll = einteilung.Vervollstaendigt();
 
         var spalten = new List<Alternativspalte>();
@@ -101,10 +104,16 @@ public sealed class AlternativendialogViewModel : ObservableObject
     /// <summary>Holt die Beschriftung von „Übernehmen“, z. B. <c>„Heimkoppel bestmöglich“ übernehmen – A und B festlegen</c>.</summary>
     public string UebernehmenText => Auswahl?.Alternative is null ? "Übernehmen" : $"„{Auswahl.Titel}“ übernehmen – A und B festlegen";
 
+    /// <summary>Holt den Hinweis unter der Erklärung (welche Kriterien HiGHS nicht kennt); leer, wenn keiner.</summary>
+    public string Hinweis { get; }
+
+    /// <summary>Holt einen Wert, der angibt, ob es einen Hinweis gibt.</summary>
+    public bool HatHinweis => Hinweis.Length > 0;
+
     /// <summary>Holt die Erklärung oben im Dialog.</summary>
     public string Erklaerung => KannUebernehmen
         ? "Jede Variante ist in Stufe A bestmöglich – außer „A+B“: Dort zählt jeder Verstoß in A und B gleich, A darf für deutlich weniger B-Verstöße schlechter werden. „Vorrang …“ hält ein B-Kriterium so niedrig, wie HiGHS es allein geschafft hat (mit „bestmöglich“: bewiesen), "
-            + "der Plan für die Summe in B hat die wenigsten B-Verstöße zusammen, die HiGHS gefunden hat („Plan B optimal“: bewiesen). Grün: besser als der aktuelle Plan, rot: schlechter. "
+            + "der Plan für die Summe in B hat die wenigsten B-Verstöße zusammen, die HiGHS gefunden hat („Plan B optimal“: bewiesen; kennt HiGHS nicht alle B-Kriterien, nur für die genannten). Grün: besser als der aktuelle Plan, rot: schlechter. "
             + "C ist in den Alternativen noch nicht geglättet – es wird nach dem Übernehmen besser. „Übernehmen“ legt A und B fest: Kein A- oder B-Kriterium "
             + "darf mehr Verstöße haben als in der gewählten Alternative, danach glättet der Automodus nur noch C. Die Einteilung bleibt."
         : "Übernehmen geht nur, solange die Generierung im Automodus läuft. Zum Vergleichen: Grün besser als der aktuelle Plan, rot schlechter; C ist in den Alternativen noch nicht geglättet.";
@@ -223,6 +232,13 @@ public sealed class AlternativendialogViewModel : ObservableObject
                     string anzahl = string.Join(" · ", new[] { dazu.Count > 0 ? $"+{dazu.Count} neu" : null, weg.Count > 0 ? $"−{weg.Count} entfällt" : null }.OfType<string>());
                     gruppen.Add(new Unterschiedsgruppe(mannschaft, anzahl, [.. dazu.Select(m => new Unterschied("+ " + m, 1)), .. weg.Select(m => new Unterschied("− " + m, -1))]));
                 }
+            }
+
+            if (gruppen.Count == 0 && vorher != (k.Anzahl ?? 0))
+            {
+                // Ohne Meldungen (oder mit gleichen) bleibt wenigstens die Anzahl: sonst stünde „keine Unterschiede“ da.
+                int d = (k.Anzahl ?? 0) - vorher;
+                gruppen.Add(new Unterschiedsgruppe("Ganzer Plan", string.Create(Deutsch, $"{d:+0;−0}"), [new Unterschied(string.Create(Deutsch, $"{vorher} → {k.Anzahl ?? 0} Verstöße (keine Einzelheiten)"), Math.Sign(d))]));
             }
 
             if (gruppen.Count > 0)

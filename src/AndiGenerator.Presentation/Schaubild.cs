@@ -322,6 +322,18 @@ public sealed class Schaubild : ObservableObject
         _ => karte.Kosten,
     };
 
+    /// <summary>Womit eine Insel neu beginnt, kurz (für ihre Karte).</summary>
+    /// <param name="start">Das Startverfahren.</param>
+    /// <returns>Z. B. <c>Zeitfenster neu</c>.</returns>
+    private static string Starttext(Startverfahren start) => start switch
+    {
+        Startverfahren.Leer => "leerer Plan",
+        Startverfahren.Mannschaften => "eine Mannschaft neu",
+        Startverfahren.Zeitfenster => "eine Woche neu",
+        Startverfahren.Spiele => "einige Spiele neu",
+        _ => "aus Teilneuplanung",
+    };
+
     /// <summary>Grob, was eine Insel gerade tut.</summary>
     private Inselzustand Zustand(Inselstand insel, Inselanzeige? karte, long grenze, int index, long jetzt)
     {
@@ -332,7 +344,7 @@ public sealed class Schaubild : ObservableObject
         {
             // Wie die Karte der Insel: Wer über der Grenze die schlechteste ist, beginnt gleich neu, auch wenn sie eben
             // noch verbessert hat (bei vielen Plänen je Sekunde ist die Grenze schnell wieder erreicht).
-            (true, _, _) => "beginnt neu",
+            (true, _, _) => insel.Start is { } start ? "beginnt neu: " + Starttext(start) : "beginnt neu",
             (_, _, >= 1) when insel.Schlechteste => "beginnt gleich neu",
             (_, true, _) => "kommt voran",
             (_, _, >= 1) => "steckt fest, rechnet weiter",

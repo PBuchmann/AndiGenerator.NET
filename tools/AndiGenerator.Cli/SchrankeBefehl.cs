@@ -24,6 +24,8 @@ internal static class SchrankeBefehl
         Aufruf: andigen schranke <click-TT-Exportdatei.xml> [Optionen]
           --optionen DATEI   Optionsdatei (.options); "auto" = Staffelordner des Originals; Standard: Standardoptionen
           --sekunden N       Zeitgrenze je Stufe (Standard 60)
+          --fortschritt      Zeitgrenze nach Fortschritt wie die Oberfläche: mindestens 20 s, dann solange HiGHS in den
+                             letzten 15 s vorankommt, höchstens 3 min (statt --sekunden für A und B)
           --stufen TEXT      Einteilung, z. B. "A:Hallenbelegung,ParalleleSpiele;B:Sperrtermine" (Standard: E14)
           --rundenplanung R  beide | halbrunde | vorrunde | rueckrunde (überschreibt die Optionsdatei)
           --plan DATEI       besten Plan des vereinfachten Modells als gemerkten Plan speichern (zum Prüfen mit "bewerten")
@@ -32,6 +34,9 @@ internal static class SchrankeBefehl
         """;
 
     private static readonly CultureInfo Deutsch = CultureInfo.GetCultureInfo("de-DE");
+
+    /// <summary>Zeitgrenze nach Fortschritt wie in der Oberfläche (Stufenschranke.Laufzeit).</summary>
+    internal static Laufzeitregel Laufzeit { get; } = new(Ligaschranke.StandardZeitJeStufe, TimeSpan.FromMinutes(3), TimeSpan.FromSeconds(15));
 
     public static int Ausfuehren(IReadOnlyList<string> args)
     {
@@ -42,6 +47,7 @@ internal static class SchrankeBefehl
         Rundenplanung? rundenplanung = null;
         Stufeneinteilung? stufen = null;
         int sekunden = 60;
+        bool fortschritt = false;
         var werte = new Queue<string>(args);
         while (werte.Count > 0)
         {
@@ -67,6 +73,10 @@ internal static class SchrankeBefehl
             {
                 rundenplanung = r;
                 werte.Dequeue();
+            }
+            else if (arg == "--fortschritt")
+            {
+                fortschritt = true;
             }
             else if (arg == "--sekunden" && werte.Count > 0 && int.TryParse(werte.Peek(), CultureInfo.InvariantCulture, out int s) && s > 0)
             {
@@ -114,7 +124,7 @@ internal static class SchrankeBefehl
             return 1;
         }
 
-        Schrankenbericht bericht = Ligaschranke.Berechnen(staffel, optionen, new Highsschranke(), TimeSpan.FromSeconds(sekunden), stufen, startplan: start is null ? null : () => start);
+        Schrankenbericht bericht = Ligaschranke.Berechnen(staffel, optionen, new Highsschranke(), TimeSpan.FromSeconds(sekunden), stufen, startplan: start is null ? null : () => start, laufzeit: fortschritt ? Laufzeit : null);
         Console.WriteLine(string.Create(Deutsch, $"Modell:       {bericht.Spalten:N0} Spalten, {bericht.Zeilen:N0} Zeilen"));
         Console.WriteLine();
         Console.WriteLine("Stufe  Kriterium                                            Schranke  allein  Modell  bewiesen     Zeit");
@@ -152,7 +162,7 @@ internal static class SchrankeBefehl
     /// <summary>Reicht HiGHS als <see cref="ISchrankenloeser"/> herein.</summary>
     internal sealed class Highsschranke : ISchrankenloeser
     {
-        public Schrankenloesung Loesen(Ganzzahlmodell modell, TimeSpan zeitgrenze, double[]? start = null, Func<bool>? aufhoeren = null)
+        public Schrankenloesung Loesen(Ganzzahlmodell modell, TimeSpan zeitgrenze, double[]? start = null, Func<bool>? aufhoeren = null, Laufzeitregel? regel = null)
         {
             var problem = new Ganzzahlproblem(
                 [.. modell.Kosten],
@@ -162,7 +172,9 @@ internal static class SchrankeBefehl
                 [.. modell.ZeilenAnfang],
                 [.. modell.EintragSpalten],
                 [.. modell.EintragWerte]);
-            (double[]? werte, double wert, double schranke, bool optimal, bool unloesbar) = HighsLoeser.LoesenMitSchranke(problem, zeitgrenze, start, aufhoeren);
+            (double[]? werte, double wert, double schranke, bool optimal, bool unloesbar) = regel is null
+                ? HighsLoeser.LoesenMitSchranke(problem, zeitgrenze, start, aufhoeren)
+                : HighsLoeser.LoesenMitSchranke(problem, regel.Hoechstens, start, aufhoeren, new Fortschrittsgrenze(regel.Mindestens.TotalSeconds, regel.Stillstand.TotalSeconds));
             return new Schrankenloesung(werte, wert, schranke, optimal, unloesbar);
         }
     }

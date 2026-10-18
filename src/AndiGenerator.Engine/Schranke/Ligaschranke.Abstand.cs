@@ -4,12 +4,13 @@
 
 using AndiGenerator.Domain.Optionen;
 using AndiGenerator.Engine.Kern;
+using AndiGenerator.Engine.Referenz;
 
 namespace AndiGenerator.Engine.Schranke;
 
 /// <summary>
-/// Abstand Heim/Auswärts und Setzliste genähert (nur für die Teilneuplanung), dazu die 60-km-Regel und die Pausen der
-/// Spielverteilung.
+/// Abstand Heim/Auswärts und Setzliste genähert (nur für die Teilneuplanung, wenn es die genaue Form nicht gibt – siehe
+/// <see cref="AbstandGenau"/> und <see cref="SetzlisteGenau"/>), dazu die 60-km-Regel und die Pausen der Spielverteilung.
 /// </summary>
 public sealed partial class Ligaschranke
 {
@@ -137,10 +138,16 @@ public sealed partial class Ligaschranke
     }
 
     /// <summary>
-    /// Pausen der Spielverteilung wie <c>KernPlan.ZusatzZaehlen</c>: eine Lücke zwischen zwei Spielen einer Mannschaft, in der im
-    /// Mittel mindestens zwei Spieltage liegen (am Rand der Runde anderthalb). Je Mannschaft und möglichem Spieltag a: Spielt
-    /// sie an a und bis zum Ende des Fensters, in dem zwei Spieltage liegen, nicht mehr, zählt ein Verstoß; ebenso, wenn sie
-    /// zu Beginn der Runde anderthalb Spieltage lang nicht spielt. Genähert: Koppeltermine verkürzen die Lücke hier nicht.
+    /// Pausen der Spielverteilung wie <c>KernPlan.ZusatzZaehlen</c>, genau: eine Lücke zwischen zwei Spielen einer Mannschaft, in der
+    /// im Mittel mindestens zwei Spieltage liegen (am Rand der Runde anderthalb). Grenzt ein gekoppeltes Paar an die Lücke (ihr
+    /// erstes Spiel ist das zweite eines Paares bzw. ihr zweites Spiel das erste eines Paares), teilt das Original die Spieltage
+    /// je Seite durch 1,5 – die Lücke muss dann drei bzw. viereinhalb Spieltage lang sein.
+    /// <para>
+    /// Je Mannschaft, Runde und möglichem Spieltag a eine Ja/Nein-Spalte p (Pause nach a) mit Zeilen für jeden möglichen nächsten
+    /// Spieltag n (über „spielt am Tag“ je Tag): Spielt sie an a und an n und dazwischen nicht, ist p 1 – außer die Koppelpaare
+    /// erlauben die Lücke (in [E2, E3): eines der beiden, ab E3 bis E4,5: beide; danach keines). Liegt bis E4,5 kein Spiel, ist
+    /// p 1 (ebenso am Rundenende ab anderthalb bzw. 2,25 Spieltagen); zu Beginn der Runde ebenso mit anderthalb Spieltagen.
+    /// </para>
     /// </summary>
     private List<(int Spalte, double Faktor)> Pausen()
     {
@@ -152,8 +159,9 @@ public sealed partial class Ligaschranke
                 continue;
             }
 
-            double rundeVon = d.ErstesEchtesDatum[r];
-            double rundeBis = d.LetztesEchtesDatum[r] + 1;
+            // Ganze Tage wie in SollSpiele (das erste und letzte echte Datum tragen eine Uhrzeit).
+            double rundeVon = DelphiDatum.Trunc(d.ErstesEchtesDatum[r]);
+            double rundeBis = DelphiDatum.Trunc(d.LetztesEchtesDatum[r]) + 1;
             for (int t = 0; t < d.N; t++)
             {
                 var spalten = jeMannschaft[t]
@@ -165,33 +173,117 @@ public sealed partial class Ligaschranke
                     continue;
                 }
 
-                // Zu Beginn der Runde: anderthalb Spieltage ohne Spiel.
-                double anfang = Fensterende(r, rundeVon, 1.5, rundeBis);
-                if (anfang <= rundeBis)
-                {
-                    Pause(ziel, [], spalten.Where(e => e.Tag < anfang).Select(e => e.Spalte));
-                }
-
-                foreach (int tag in spalten.Select(e => e.Tag).Distinct())
-                {
-                    double ende = Fensterende(r, tag, 2, rundeBis);
-                    if (ende > rundeBis)
-                    {
-                        // Bis zum Rundenende: dort reichen anderthalb Spieltage.
-                        if (d.SollSpiele(r, tag, rundeBis) < 1.5)
-                        {
-                            continue;
-                        }
-
-                        ende = rundeBis;
-                    }
-
-                    Pause(ziel, spalten.Where(e => e.Tag == tag).Select(e => e.Spalte), spalten.Where(e => e.Tag > tag && e.Tag < ende).Select(e => e.Spalte));
-                }
+                PausenDerMannschaft(ziel, r, t, spalten, rundeVon, rundeBis);
             }
         }
 
         return ziel;
+    }
+
+    /// <summary>Die Pausen einer Mannschaft in einer Runde (siehe <see cref="Pausen"/>).</summary>
+    private void PausenDerMannschaft(List<(int Spalte, double Faktor)> ziel, int r, int t, List<(int Tag, int Spalte)> spalten, double rundeVon, double rundeBis)
+    {
+        List<(int Spalte, int Tag1, int Tag2)> paare = KoppelPaare(t);
+        int[] tage = spalten.Select(e => e.Tag).Distinct().Order().ToArray();
+        List<(int Spalte, double Faktor)> Beginnt(int n) => paare.Where(p => p.Tag1 == n).Select(p => (p.Spalte, 1.0)).ToList();
+        List<(int Spalte, double Faktor)> Endet(int a) => paare.Where(p => p.Tag2 == a).Select(p => (p.Spalte, 1.0)).ToList();
+        List<(int Spalte, double Faktor)> Zwischen(double von, double bis) => spalten.Where(e => e.Tag > von && e.Tag < bis).Select(e => (e.Spalte, 1.0)).ToList();
+
+        // „Spielt am Tag“ q je Tag (eine Mannschaft hat je Tag viele mögliche Spiele, je Gegner eines; gespielt werden höchstens
+        // zwei, bei Koppelterminen): 2q ≥ Σ Spiele des Tages und q ≤ Σ.
+        var spielt = new Dictionary<int, int>();
+        foreach (IGrouping<int, int> tag in spalten.GroupBy(e => e.Tag, e => e.Spalte))
+        {
+            int q = modell.Spalte(0);
+            spielt[tag.Key] = q;
+            modell.Zeile([(q, 2.0), .. tag.Select(c => (c, -1.0))], 0, double.PositiveInfinity);
+            modell.Zeile([(q, 1.0), .. tag.Select(c => (c, -1.0))], double.NegativeInfinity, 0);
+        }
+
+        // Zu Beginn der Runde: p ≥ x(n) − Spiele davor − „n beginnt ein Paar“ für jeden ersten Spieltag n ab anderthalb
+        // Spieltagen; ab 2,25 Spieltagen ohne Spiel in jedem Fall.
+        double anfang = Fensterende(r, rundeVon, 1.5, rundeBis);
+        double anfangGekoppelt = Fensterende(r, rundeVon, 2.25, rundeBis);
+        if (anfang <= rundeBis)
+        {
+            int p = modell.Spalte(0);
+            ziel.Add((p, 1));
+            foreach (int n in tage.Where(n => n >= anfang && n < anfangGekoppelt))
+            {
+                modell.Zeile([(p, 1.0), (spielt[n], -1.0), .. Zwischen(double.NegativeInfinity, n), .. Beginnt(n)], 0, double.PositiveInfinity);
+            }
+
+            if (anfangGekoppelt <= rundeBis)
+            {
+                modell.Zeile([(p, 1.0), .. Zwischen(double.NegativeInfinity, anfangGekoppelt)], 1, double.PositiveInfinity);
+            }
+        }
+
+        foreach (int tag in tage)
+        {
+            double e2 = Fensterende(r, tag, 2, rundeBis);
+            double e3 = Fensterende(r, tag, 3, rundeBis);
+            double e45 = Fensterende(r, tag, 4.5, rundeBis);
+            List<(int Spalte, double Faktor)> endet = Endet(tag);
+            int p = -1;
+            int Pause()
+            {
+                if (p < 0)
+                {
+                    p = modell.Spalte(0);
+                    ziel.Add((p, 1));
+                }
+
+                return p;
+            }
+
+            // Nächster Spieltag n in [E2, E3): Pause, außer a endet ein Paar oder n beginnt eines.
+            foreach (int n in tage.Where(n => n >= e2 && n < e3))
+            {
+                modell.Zeile([(Pause(), 1.0), (spielt[tag], -1.0), (spielt[n], -1.0), .. Zwischen(tag, n), .. endet, .. Beginnt(n)], -1, double.PositiveInfinity);
+            }
+
+            // Nächster Spieltag n in [E3, E4,5): Pause, außer beides (w ≤ beide).
+            foreach (int n in tage.Where(n => n >= e3 && n < e45))
+            {
+                List<(int Spalte, double Faktor)> beginnt = Beginnt(n);
+                var erlaubt = new List<(int Spalte, double Faktor)>();
+                if (endet.Count > 0 && beginnt.Count > 0)
+                {
+                    int w = modell.Spalte(0);
+                    modell.Zeile([(w, 1.0), .. endet.Select(e => (e.Spalte, -1.0))], double.NegativeInfinity, 0);
+                    modell.Zeile([(w, 1.0), .. beginnt.Select(e => (e.Spalte, -1.0))], double.NegativeInfinity, 0);
+                    erlaubt.Add((w, 1.0));
+                }
+
+                modell.Zeile([(Pause(), 1.0), (spielt[tag], -1.0), (spielt[n], -1.0), .. Zwischen(tag, n), .. erlaubt], -1, double.PositiveInfinity);
+            }
+
+            // Kein Spiel bis E4,5 (bzw. bis zum Rundenende ab anderthalb Spieltagen, mit Paar davor ab 2,25): Pause.
+            List<(int Spalte, double Faktor)> rest;
+            double soll = d.SollSpiele(r, tag, rundeBis);
+            if (e45 <= rundeBis)
+            {
+                rest = [];
+                e45 = Math.Min(e45, rundeBis);
+            }
+            else if (soll >= 2.25)
+            {
+                rest = [];
+                e45 = rundeBis;
+            }
+            else if (soll >= 1.5)
+            {
+                rest = endet;
+                e45 = rundeBis;
+            }
+            else
+            {
+                continue;
+            }
+
+            modell.Zeile([(Pause(), 1.0), (spielt[tag], -1.0), .. Zwischen(tag, e45), .. rest], 0, double.PositiveInfinity);
+        }
     }
 
     /// <summary>Der erste Tag ab <paramref name="von"/>, bis zu dem im Mittel <paramref name="spieltage"/> Spieltage liegen.</summary>
@@ -204,27 +296,5 @@ public sealed partial class Ligaschranke
         }
 
         return bis;
-    }
-
-    /// <summary>
-    /// p ≥ (Spiel an diesem Tag, sonst 1) − Spiele im Fenster danach. Je Termin des Tages eine Zeile: Mit zwei Spielen am selben
-    /// Tag (Koppeltermin) wäre die Summe 2 und das Modell für p ≤ 1 unlösbar.
-    /// </summary>
-    private void Pause(List<(int Spalte, double Faktor)> ziel, IEnumerable<int> amTag, IEnumerable<int> danach)
-    {
-        int p = modell.Spalte(0);
-        List<int> tag = amTag.ToList();
-        List<(int Spalte, double Faktor)> spaeter = danach.Select(c => (c, 1.0)).ToList();
-        if (tag.Count == 0)
-        {
-            modell.Zeile([(p, 1.0), .. spaeter], 1, double.PositiveInfinity);
-        }
-
-        foreach (int c in tag)
-        {
-            modell.Zeile([(p, 1.0), (c, -1.0), .. spaeter], 0, double.PositiveInfinity);
-        }
-
-        ziel.Add((p, 1));
     }
 }

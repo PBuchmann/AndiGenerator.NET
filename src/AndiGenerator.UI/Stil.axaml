@@ -27,6 +27,9 @@
       <!-- HiGHS im Leitstand (Anteil am Prozessor, Kasten im Schaubild); dunkel für Schrift -->
       <SolidColorBrush x:Key="Highs" Color="#C2680E" />
       <SolidColorBrush x:Key="HighsDunkel" Color="#8F4C0A" />
+      <SolidColorBrush x:Key="HighsHell" Color="#F6E3CC" />
+      <SolidColorBrush x:Key="Teilneuplanung" Color="#7A4FB0" />
+      <SolidColorBrush x:Key="Fremdlast" Color="#B9BEC5" />
 
       <!-- Reiter der Ansichten (Dock.Avalonia): ruhig, weiß hinterlegt wenn gewählt, Akzentlinie unter der aktiven Gruppe -->
       <SolidColorBrush x:Key="DockDocumentTabStripMaskBrush" Color="Transparent" />

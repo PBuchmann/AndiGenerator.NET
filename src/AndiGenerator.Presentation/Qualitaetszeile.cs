@@ -26,6 +26,7 @@ public sealed class Qualitaetszeile : ObservableObject
     private bool bestmoeglichRechnet;
     private Stufenkopf? kopf;
     private string festgelegt = string.Empty;
+    private string ablehnung = string.Empty;
 
     /// <summary>Initialisiert die Zeile; Verstöße, Kosten und Zustand werden danach gesetzt.</summary>
     /// <param name="stufe">Stufe mit Nummer, z. B. <c>A2</c>.</param>
@@ -33,12 +34,14 @@ public sealed class Qualitaetszeile : ObservableObject
     /// <param name="kriterium">Das einstufbare Kriterium; <c>null</c> bei den harten Fehlern.</param>
     /// <param name="bearbeitung">Einstufen und Verschieben; <c>null</c> = nicht bearbeitbar (z. B. außerhalb des Automodus).</param>
     /// <param name="gezogen">Die Zeile wird gerade gezogen (Vorschau).</param>
-    internal Qualitaetszeile(string stufe, string name, Kostenkriterium? kriterium = null, Zeilenbearbeitung? bearbeitung = null, bool gezogen = false)
+    /// <param name="nurCGrund">Warum das Kriterium in C bleibt (HiGHS kennt es für diese Staffel nicht); leer = darf nach A oder B.</param>
+    internal Qualitaetszeile(string stufe, string name, Kostenkriterium? kriterium = null, Zeilenbearbeitung? bearbeitung = null, bool gezogen = false, string nurCGrund = "")
     {
         Stufe = stufe;
         Name = name;
         Kriterium = kriterium;
         IstGezogen = gezogen;
+        NurCGrund = nurCGrund ?? string.Empty;
         this.bearbeitung = kriterium is null ? null : bearbeitung;
         EinstufenACommand = new RelayCommand(() => Einstufen(Klassenstufe.A), () => KannAB && Klasse != "A");
         EinstufenBCommand = new RelayCommand(() => Einstufen(Klassenstufe.B), () => KannAB && Klasse != "B");
@@ -74,8 +77,42 @@ public sealed class Qualitaetszeile : ObservableObject
     /// <summary>Holt einen Wert, der angibt, ob die Zeile in Stufe C steht.</summary>
     public bool IstC => Klasse == "C";
 
-    /// <summary>Holt einen Wert, der angibt, ob das Kriterium in A oder B stehen darf (nicht bei den Spieltagen ohne Anzahl).</summary>
-    public bool KannAB => IstEinstufbar && Kriterium is Kostenkriterium k && Stufeneinteilung.HatAnzahl(k);
+    /// <summary>
+    /// Holt einen Wert, der angibt, ob das Kriterium in A oder B stehen darf (nicht bei den Spieltagen ohne Anzahl und nicht,
+    /// wenn HiGHS es für diese Staffel nicht kennt – siehe <see cref="NurCGrund"/>).
+    /// </summary>
+    public bool KannAB => IstEinstufbar && Kriterium is Kostenkriterium k && Stufeneinteilung.HatAnzahl(k) && NurCGrund.Length == 0;
+
+    /// <summary>Holt, warum das Kriterium in C bleibt (HiGHS kennt es für diese Staffel nicht); leer, wenn es nach A oder B darf.</summary>
+    public string NurCGrund { get; }
+
+    /// <summary>Holt einen Wert, der angibt, ob das Kriterium in C bleiben muss (<see cref="NurCGrund"/>).</summary>
+    public bool NurC => NurCGrund.Length > 0;
+
+    /// <summary>Holt die Erklärung der Knöpfe A und B: die Stufe oder, wenn das Kriterium in C bleibt, der Grund.</summary>
+    public string ErklaerungA => NurC ? NurCGrund : "Stufe A: muss eingehalten werden";
+
+    /// <summary>Holt die Erklärung des Knopfs B (siehe <see cref="ErklaerungA"/>).</summary>
+    public string ErklaerungB => NurC ? NurCGrund : "Stufe B: soll eingehalten werden";
+
+    /// <summary>
+    /// Holt beim Ziehen den Grund, warum die Zeile an der Stelle unter dem Zeiger nicht abgelegt werden kann (sie bleibt in C);
+    /// leer, wenn sie dort hin darf.
+    /// </summary>
+    public string Ablehnung
+    {
+        get => ablehnung;
+        internal set
+        {
+            if (SetProperty(ref ablehnung, value))
+            {
+                OnPropertyChanged(nameof(HatAblehnung));
+            }
+        }
+    }
+
+    /// <summary>Holt einen Wert, der angibt, ob die Zeile beim Ziehen gerade abgelehnt wird.</summary>
+    public bool HatAblehnung => ablehnung.Length > 0;
 
     /// <summary>Holt einen Wert, der angibt, ob die Zeile gewählt ist (ihre Verstöße stehen rechts daneben).</summary>
     public bool IstGewaehlt

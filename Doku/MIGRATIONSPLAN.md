@@ -830,7 +830,51 @@ HiGHS werden wie die der Inseln vollständig bewertet (`NachStufen`/`Einspielen`
 Offen: Gewichtung der C-Kriterien nach ihrer Reihenfolge (zählt jetzt jeder Verstoß
 gleich – wie `Stufenwert.CAnzahl`); Kriterien ohne Modell (Abstand H/A, Spielverteilung) lehnt nur die echte Bewertung ab.
 
-Nächste Schritte: Wechsel H/A beim Glätten im Blick behalten (längere Läufe auf Peters Rechner); Koppeltermine genau modellieren; Modellplan
+**Modell der Teilneuplanung genauer (19.10.2026):** `Spielzaehler` (Ligaschranke.Zaehler.cs) – je Mannschaft C(t, Tag) = Spiele
+bis zum Tag (nur an eigenen möglichen Tagen, Gleichungskette), daraus die Stelle eines Spiels in der Liste der eigenen Spiele.
+Darauf: **Spieltage** (Ligaschranke.Spieltage.cs) genau wie `KernPlan.Spieltage` – i-ter Spieltag zu lang, wenn eine Mannschaft
+ihr i-tes Spiel an a hat (M(a) ≥ i) und eine andere bis a + K − 1 noch nicht (m(x) ≤ i − 1), überlappend mit m(a − 1) ≤ i − 2;
+M/m je Tag mit Ja/Nein-Spalten nur für offene i (Schranken aus frühestem/spätestem Tag je Spiel). Geprüft gegen die Bewertung
+auf allen Referenzstaffeln mit Plan (gleich, wenn alle Spiele auf Wunschterminen liegen; Spiele ohne Termin verschieben die
+Stellen der Bewertung – Datum 0 sortiert vorn) und auf HiGHS-Plänen; Test `Reihenfolge_im_Modell_wie_in_der_Bewertung`.
+Bezirksliga Süd: Modell 30 800 statt 22 300 Zeilen. **Pausen:** Rundenbeginn/-ende als ganze Tage (vorher mit Uhrzeit – am
+Rundenbeginn fehlten Pausen); jetzt genau ohne Koppeltermine (mit Koppeln teilt das Original die Pause durch 1,5 – nicht
+modelliert, das Modell zählt dort mehr). **Abstand H/A und Setzliste genau** (Ligaschranke.Reihenfolge.cs: Stelle je Spiel mit
+Big-M an die Termin-Spalten gebunden; Abstand: n · z ≥ |n · d(j) − Σ d| − (⌈n/2⌉ − 1)) stimmen mit der Bewertung überein,
+machen die Ausschnitte aber so schwer, dass HiGHS in 5 s kaum noch etwas findet: Bezirksliga Süd, 300 s, 1 Kern ab dem Plan aus
+HiGHS – alles genau C 228/236, Setzliste genau 224/207/201, beides genähert 202/216/189 (Spieltage genau 200/210/198, ohne
+Spieltage 204/203/196). Darum nur über `andigen neuplanen --abstand-genau/--setzliste-genau`. Die Streuung zwischen Startwerten
+(±10) ist größer als die meisten Unterschiede. **Wahl der Ausschnitte:** Art × Größe nach eingesparten C-Verstößen je Sekunde,
+Gedächtnis mit Halbwertszeit 60 s Rechenzeit, jedes fünfte Mal zufällig – rein gierig blieb sie an billigen Zeitfenstern
+hängen (C 219 statt 192). Stand mit allem: C 184/201/216/192 (Mittel 198). Mit Inseln (`andigen optimieren --leer --highs
+--neuplanen`, 600 s, 2 Kerne) war die Teilneuplanung so aber schlechter als vorher (C 215/209 statt 206/196): Die zufällige Wahl
+nahm oft 3–5 Mannschaften (7,5–12,5 s, kein Erfolg), und der Vorschuss ließ große Ausschnitte immer wieder ausprobieren. Jetzt
+wählt der Zufall nur die Art in kleinster Größe, Vorschuss 0,3 Erfolge auf zwei Zeitgrenzen: C 196/205 (vorher 206/196).
+Abstand H/A genau zusätzlich vereinfacht: Spielt jede Mannschaft je Halbrunde einmal gegen jeden, ist Σ d = n · g/2 fest und
+z ≥ |d(j) − n| (ohne die Summe in jeder Zeile) – trotzdem C 221/225, die Bindung der Stellen an die Termin-Spalten (Big-M) bleibt
+für HiGHS zu schwach. Die Näherung zählt Abstand auf Plänen der Inseln deutlich zu hoch (72 echt, 84 genähert).
+
+**Alle Kriterien im Modell der Schranke (19.10.2026):** `Ziel(k)` liefert für die Schranke die genauen Formen (Abstand H/A,
+Setzliste, Spieltage über den `Spielzaehler`; sie zählen nur Spiele mit Termin und gelten erst, wenn A1 auf 0 festgehalten ist –
+`genauMoeglich`, Ziele entstehen deshalb erst nach A1), für die Teilneuplanung weiter die Näherungen (`naeherung: true`). Pausen
+jetzt genau auch mit Koppelterminen (gekoppeltes Paar am Rand der Lücke: Original teilt durch 1,5 → Lücke muss 3 bzw. 4,5
+Spieltage lang sein; je Tag „spielt“ q, je möglichem nächsten Tag n eine Zeile mit den Paarspalten als Erlaubnis, Fenster
+[E2, E3) eines, [E3, E4,5) beide (w ≤ beide), danach keines; je Mannschaft und Tag statt je Termin-Spalte – sonst 146 000
+Zeilen); Test `Reihenfolge_im_Modell_wie_in_der_Bewertung` jetzt auch R21/R26 mit Pausen. Für die Doppelrunde kennt das Modell
+Abstand, Setzliste und Vereinsintern nicht; `Ligaschranke.Unbekannt` listet das je Staffel (Schrankenbericht.Unbekannt nur für
+A/B), die Qualitätsansicht lehnt dann A/B für das Kriterium ab (NurCGrund, beim Ziehen `Ablehnung` an der schwebenden Zeile),
+Varianten heißen „Plan B1–B7 optimal“. Abstand/Setzliste genau machen das B-Modell für HiGHS schwer (Bezirksliga Süd, B mit
+allen neun: in 20 s keine Variante, Schranke B 4 statt bewiesen 0 für B1–B7; Abstand/Setzliste allein auch in 120 s Schranke
+0): Stufe B rechnet darum zweiphasig – erst „leicht“ (Kopie mit relaxierten schweren Zeilen; Varianten und Summe der übrigen
+B-Kriterien), die Pläne im vollen Modell ergänzt (`Ergaenzen`) als Starts der schweren Varianten/Summe. Ergebnis (2 Kerne):
+Varianten wieder da (Vorrang 2 Spiele/Woche: B1–B7 4, Abstand 76, Setzliste 64), der beste Plan für B bleibt Peters (102).
+In der Teilneuplanung bleiben Abstand/Setzliste in A/B außen vor (genau: unlösbar schwer, genähert: verbietet echte
+Verbesserungen) – die echte Bewertung entscheidet, wie vor dem 19.10. Im Feinschliff der Stufe C ebenfalls ausgelassen (Grenzen
+werden berechnet). Versucht: Setzliste über Schwellen-Indikatoren auf den Zählern („bis zum Vortag mindestens k Spiele“, fest, wo die
+Grenzen es entscheiden) statt Big-M-Stelle – exakt, Schranke allein 2 statt 0 (60 s), aber HiGHS findet damit schlechter
+(Bezirksliga Süd: 45 bleibt 45, Big-M 45 → 35) – verworfen, Big-M bleibt. Offen: eine Formulierung, die beides kann.
+
+Nächste Schritte: Wechsel H/A beim Glätten im Blick behalten (längere Läufe auf Peters Rechner); Modellplan
 als Startplan der Suche (Schritt 2), die A festhält und B/C verbessert; Schranke im Automodus anzeigen („Stufe A
 bestmöglich“).
 

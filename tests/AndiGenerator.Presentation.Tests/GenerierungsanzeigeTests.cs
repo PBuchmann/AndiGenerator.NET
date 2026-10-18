@@ -56,7 +56,7 @@ public sealed class GenerierungsanzeigeTests
         anzeige.Uebernehmen(Stand(1000) with { Lenkung = lenkung });
 
         Assert.True(anzeige.ZeigtVerstoesse);
-        Assert.Equal("Automodus · Optimierung Stufe C", anzeige.Titel);
+        Assert.Equal("Optimierung Stufe C", anzeige.Titel);
         Assert.Equal(Planqualitaet.Name(Kostenkriterium.Spielverteilung), anzeige.Phase);
 
         // Alle Kriterien werden genannt, auch viele (unten in der Kachel ist Platz).
@@ -93,6 +93,24 @@ public sealed class GenerierungsanzeigeTests
         Assert.Equal(1000, verlauf.Punkte[0].Kosten);
         Assert.Equal(800 - Suchverlauf.HoechstePunkte + 1, verlauf.Punkte[^1].Kosten);
         Assert.True(verlauf.Punkte.Zip(verlauf.Punkte.Skip(1)).All(p => p.First.Sekunden <= p.Second.Sekunden));
+    }
+
+    [Fact]
+    public void Verlauf_merkt_Verbesserungen_mit_Herkunft_und_Meilensteine()
+    {
+        Suchverlauf verlauf = Beispielverlauf.Erzeugen();
+
+        // Jede Verbesserung mit Herkunft und Werten danach; die erste aus HiGHS bringt A von 35 auf 10.
+        Assert.Equal(18, verlauf.Verbesserungen.Count);
+        Assert.Equal(["Inseln", "HiGHS", "Teilneuplanung"], verlauf.Verbesserungen.Select(v => v.Herkunft).Distinct());
+        Verlaufsverbesserung highs = verlauf.Verbesserungen.First(v => v.Herkunft == "HiGHS");
+        Assert.Equal((78, 10, 29), (highs.Sekunden, highs.A, highs.B));
+        Assert.Contains(highs.Aenderungen, a => a.Besser && a.Text.Contains("35 → 10", StringComparison.Ordinal));
+
+        // Meilensteine in zeitlicher Reihenfolge.
+        Assert.Equal(["Basisoptimierung fertig", "A bestmöglich", "Festgelegt: Plan B optimal"], verlauf.Meilensteine.Select(m => m.Text));
+        Assert.Equal(10, verlauf.Punkte[^1].SchrankeA);
+        Assert.True(verlauf.Punkte[^1].Suche > 0.8);
     }
 
     private static Optimierungsstand Stand(double kosten) =>

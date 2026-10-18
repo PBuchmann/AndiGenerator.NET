@@ -14,15 +14,54 @@ using AndiGenerator.Engine.Turniere;
 namespace AndiGenerator.Engine.Schranke;
 
 /// <summary>
-/// Teilneuplanung (MIGRATIONSPLAN O7 Schritt 3, „LNS“): Vom gegebenen Plan bleibt der größte Teil fest; ein Ausschnitt – alle
-/// Spiele einiger Mannschaften; bringt eine Größe eine Weile nichts mehr, eine Mannschaft mehr – wird mit HiGHS neu geplant.
-/// Bedingung: die Summen der Stufen A und B werden nicht schlechter; Ziel: weniger Verstöße in C. Ob es wirklich besser ist,
-/// entscheidet die echte Bewertung (auch die Kriterien, die das Modell nicht kennt).
+/// Teilneuplanung (MIGRATIONSPLAN O7 Schritt 3, „LNS“): Vom gegebenen Plan bleibt der größte Teil fest; ein Ausschnitt wird mit
+/// HiGHS neu geplant – alle Spiele einiger Mannschaften (zufällig gewählt oder gezielt die mit den meisten C-Verstößen) oder
+/// alle Spiele eines Zeitfensters von einigen Wochen. Art und Größe, die zuletzt die meisten Erfolge je Sekunde brachten, werden
+/// öfter gewählt.
+/// Bedingung: die Summen der Stufen A und B werden nicht schlechter; Ziel: weniger Verstöße in C – die Spieltage genau wie die
+/// Bewertung (wenn alle Spiele einen Termin haben), Abstand Heim/Auswärts, Setzliste und – bei Koppelterminen – die Pausen genähert
+/// (Abstand und Setzliste auf Wunsch genau, siehe <see cref="Neuplanungseinstellungen"/>). Ob es wirklich besser ist, entscheidet
+/// die echte Bewertung (auch die Kriterien, die das Modell nicht kennt, und die Ausreißer).
 /// </summary>
 public sealed partial class Ligaschranke
 {
     /// <summary>So viele Schritte behält das Protokoll der Teilneuplanung höchstens.</summary>
     private const int ProtokollHoechstens = 200;
+
+    /// <summary>
+    /// Je Mannschaft die Verstöße in C eines Plans (nach der Kostenfunktion; je Plan einmal berechnet) – für gezielte Ausschnitte
+    /// (<see cref="Neuplanungseinstellungen.Verstoesse"/>).
+    /// </summary>
+    /// <param name="staffel">Die Staffel.</param>
+    /// <param name="optionen">Die Optionen.</param>
+    /// <param name="einteilung">Die Einteilung (ihre Stufe C zählt).</param>
+    /// <returns>Die Funktion.</returns>
+    public static Func<IReadOnlyList<Spiel>, IReadOnlyDictionary<string, int>> VerstoesseInC(Staffel staffel, Berechnungsoptionen optionen, Stufeneinteilung einteilung)
+    {
+        ArgumentNullException.ThrowIfNull(einteilung);
+        int[] c = einteilung.Vervollstaendigt().C.Select(k => (int)k).Where(k => k < Berechnungsoptionen.AnzahlKostenarten).ToArray();
+        var sperre = new Lock();
+        (IReadOnlyList<Spiel>? Plan, IReadOnlyDictionary<string, int> Je) zuletzt = (null, new Dictionary<string, int>());
+        return plan =>
+        {
+            lock (sperre)
+            {
+                if (ReferenceEquals(zuletzt.Plan, plan))
+                {
+                    return zuletzt.Je;
+                }
+            }
+
+            Planbewertung bewertung = Referenzbewertung.Bewerten(staffel with { BestehenderSpielplan = plan }, optionen);
+            Dictionary<string, int> je = bewertung.Mannschaften.ToDictionary(m => m.Name, m => c.Sum(k => Math.Max(0, m.JeKostenart[k].Anzahl)));
+            lock (sperre)
+            {
+                zuletzt = (plan, je);
+            }
+
+            return je;
+        };
+    }
 
     /// <summary>Plant Ausschnitte des Plans neu, solange Zeit ist.</summary>
     /// <param name="staffel">Die Staffel (bei „nur Rückrunde“ mit der Vorrunde als bestehendem Plan).</param>
@@ -70,7 +109,50 @@ public sealed partial class Ligaschranke
         return d.Vorgegeben.Length > 0 ? "Vorgegebene Spiele werden von der Schranke noch nicht berücksichtigt." : null;
     }
 
-    private static double Wert(List<(int Spalte, double Faktor)> ziel, double[] werte) => ziel.Sum(e => e.Faktor * werte[e.Spalte]);
+    /// <summary>Der Wert eines Ziels in einer Lösung (Spalten, die die Lösung noch nicht kennt, zählen 0).</summary>
+    private static double Wert(List<(int Spalte, double Faktor)> ziel, double[] werte) => ziel.Sum(e => e.Spalte < werte.Length ? e.Faktor * werte[e.Spalte] : 0);
+
+    /// <summary>
+    /// Art und Größe des nächsten Ausschnitts: meist die mit den meisten Erfolgen (C-Verstöße weniger) je Sekunde, jedes fünfte Mal
+    /// eine zufällige Art in der kleinsten Größe (sonst bliebe die Teilneuplanung bei dem, was am Anfang zufällig Erfolg hatte;
+    /// große Ausschnitte kosten viel Zeit und bringen selten etwas). Jede beginnt mit 0,3 Erfolgen und zwei Versuchen bis zur
+    /// Zeitgrenze; größer wird eine Art erst, wenn die nächstkleinere Größe schon versucht wurde.
+    /// </summary>
+    private static (int Art, int Groesse) Waehlen(Dictionary<(int Art, int Groesse), (double Versuche, double Erfolge, double Sekunden)> statistik, int arten, int kleinste, int hoechstens, double sekundenJeVersuch, Random zufall)
+    {
+        var moeglich = new List<((int, int) Wahl, double Wert)>();
+        for (int art = 0; art < arten; art++)
+        {
+            for (int g = kleinste; g <= hoechstens; g++)
+            {
+                (double versuche, double erfolge, double sekunden) = statistik.GetValueOrDefault((art, g));
+                moeglich.Add(((art, g), (erfolge + 0.3) / (sekunden + (2 * sekundenJeVersuch * g / kleinste))));
+                if (versuche <= 0)
+                {
+                    break;
+                }
+            }
+        }
+
+        return zufall.NextDouble() < 0.2 ? (zufall.Next(arten), kleinste) : moeglich.MaxBy(m => m.Wert).Wahl;
+    }
+
+    /// <summary>
+    /// Ein Versuch dieser Art und Größe; alles Bisherige zählt dabei etwas weniger (nach einer Minute Rechenzeit halb so viel –
+    /// Erfolge werden mit der Zeit seltener, und was eben nichts brachte, kann später wieder etwas bringen).
+    /// </summary>
+    private static void Erfassen(Dictionary<(int Art, int Groesse), (double Versuche, double Erfolge, double Sekunden)> statistik, (int Art, int Groesse) wahl, double sekunden)
+    {
+        double vergessen = Math.Pow(0.5, sekunden / 60);
+        foreach ((int, int) k in statistik.Keys.ToArray())
+        {
+            (double v, double erf, double sek) = statistik[k];
+            statistik[k] = (v * vergessen, erf * vergessen, sek * vergessen);
+        }
+
+        (double versuche, double erfolge, double zeit) = statistik.GetValueOrDefault(wahl);
+        statistik[wahl] = (versuche + 1, erfolge, zeit + sekunden);
+    }
 
     private Neuplanungsbericht Neuplanung(Staffel staffel, IReadOnlyList<Spiel> plan, Berechnungsoptionen optionen, ISchrankenloeser loeser, Stufeneinteilung einteilung, Neuplanungseinstellungen e, Action<string> melden, CancellationToken abbruch)
     {
@@ -91,16 +173,26 @@ public sealed partial class Ligaschranke
         Stufenwert Bewerten(IReadOnlyList<Spiel> p) => e.Bewerten?.Invoke(p)
             ?? einteilung.Zaehlen(Referenzbewertung.Bewerten(staffel with { BestehenderSpielplan = p }, optionen));
 
+        setzlisteGenau = e.SetzlisteGenau;
+        abstandGenau = e.AbstandGenau;
+
         // Die Ziele: jedes Kriterium genau einmal ins Modell (die Bausteine legen Hilfsspalten an).
         List<(int Spalte, double Faktor)> ohne = ohneTermin.Select(u => (u.Spalte, 1.0)).ToList();
 
-        // A und B als Summe je Stufe (wie der Automodus vergleicht: innerhalb einer Stufe zählt jeder Verstoß gleich).
-        List<List<(int Spalte, double Faktor)>> a = [ohne, Zusammenfassen(einteilung.A.Select(k => Ziel(k)).OfType<List<(int Spalte, double Faktor)>>().SelectMany(z => z))];
-        List<List<(int Spalte, double Faktor)>> b = [Zusammenfassen(einteilung.B.Select(k => Ziel(k)).OfType<List<(int Spalte, double Faktor)>>().SelectMany(z => z))];
+        // A und B als Summe je Stufe (wie der Automodus vergleicht: innerhalb einer Stufe zählt jeder Verstoß gleich). Abstand H/A
+        // und Setzliste bleiben dabei außen vor (genau machen sie die Ausschnitte für HiGHS unlösbar schwer, genähert verbieten
+        // sie echte Verbesserungen): Ob A und B wirklich nicht schlechter werden, entscheidet die echte Bewertung.
+        List<(int Spalte, double Faktor)> Stufenziel(IEnumerable<Kostenkriterium> kriterien) => Zusammenfassen(kriterien
+            .Where(k => k is not (Kostenkriterium.AbstandHeimAuswaerts or Kostenkriterium.Setzliste))
+            .Select(k => Ziel(k, naeherung: true)).OfType<List<(int Spalte, double Faktor)>>().SelectMany(z => z));
+        List<List<(int Spalte, double Faktor)>> a = [ohne, Stufenziel(einteilung.A)];
+        List<List<(int Spalte, double Faktor)>> b = [Stufenziel(einteilung.B)];
         List<List<(int Spalte, double Faktor)>> c = [.. einteilung.C
             .Where(k => e.MitWechsel || k != Kostenkriterium.WechselHeimAuswaerts)
             .Where(k => e.MitAbstand || k != Kostenkriterium.AbstandHeimAuswaerts)
             .Where(k => e.MitSetzliste || k != Kostenkriterium.Setzliste)
+            .Where(k => e.MitSpieltagen || k is not (Kostenkriterium.Spieltaglaenge or Kostenkriterium.Spieltagueberlappung
+                or Kostenkriterium.LetzterSpieltagLaenge or Kostenkriterium.LetzterSpieltagUeberlappung))
             .Select(k => Ziel(k, naeherung: true)).OfType<List<(int Spalte, double Faktor)>>().Select(Zusammenfassen)];
 
         // Der Ausgangsplan im Modell: Ansetzungen festlegen (je Ansetzungsspalte eine Zeile), Hilfsspalten ergänzen.
@@ -147,7 +239,7 @@ public sealed partial class Ligaschranke
         string Werte(List<List<(int Spalte, double Faktor)>> stufe) =>
             string.Join(" + ", stufe.Select(z => Wert(z, aktuell!).ToString("0", CultureInfo.InvariantCulture)));
         List<(int Spalte, double Faktor)> ziel = Zusammenfassen(c.SelectMany(z => z));
-        Melden(string.Create(CultureInfo.InvariantCulture, $"Start: {vorher}, Modellziel {Wert(ziel, aktuell):0} (im Modell A {Werte(a)}; B {Werte(b)}; C {Werte(c)})"));
+        Melden(string.Create(CultureInfo.InvariantCulture, $"Start: {vorher}, Modellziel {Wert(ziel, aktuell):0} (im Modell A {Werte(a)}; B {Werte(b)}; C {Werte(c)}; {modell.Spalten} Spalten, {modell.Zeilen} Zeilen)"));
 
         var zufall = new Random(e.Startwert);
         var uhr = Stopwatch.StartNew();
@@ -189,13 +281,28 @@ public sealed partial class Ligaschranke
             return true;
         }
 
-        // Ausschnitte wachsen, wenn eine Größe eine Weile nichts mehr bringt (danach wieder von vorn).
+        // Gezielt: je Art (zufällige Mannschaften, Zeitfenster, Mannschaften mit den meisten C-Verstößen) und Größe Versuche,
+        // Erfolge und Sekunden (ältere zählen allmählich weniger); gewählt wird, was die meisten Erfolge je Sekunde bringt. Sonst
+        // nur zufällige Mannschaften, und die Ausschnitte wachsen, wenn eine Größe eine Weile nichts mehr bringt.
+        var statistik = new Dictionary<(int Art, int Groesse), (double Versuche, double Erfolge, double Sekunden)>();
+        int artenzahl = e.Verstoesse is null ? 2 : 3;
         int hoechstens = Math.Max(e.Mannschaften, d.N / 2);
         int groesse = e.Mannschaften;
+        int gewaehlt = 0;
         int ohneErfolg = 0;
         int geduld = Math.Max(4, d.N / 2);
+        void Freigeben(HashSet<int> frei)
+        {
+            for (int i = 0; i < ansetzung.Length; i++)
+            {
+                double v = Math.Round(aktuell[ansetzung[i]]);
+                modell.ZeileGrenzen(zeile[i], frei.Contains(ansetzung[i]) ? 0 : v, frei.Contains(ansetzung[i]) ? 1 : v);
+            }
+        }
+
         while (uhr.Elapsed < e.Gesamt && !abbruch.IsCancellationRequested)
         {
+            e.Belegung?.Belegen(e.Platz, []);
             if (e.Ausgangsplan?.Invoke(bester) is { } neuer)
             {
                 bool gewechselt = Wechseln(neuer);
@@ -214,29 +321,50 @@ public sealed partial class Ligaschranke
             }
 
             schritte++;
-            if (ohneErfolg >= geduld)
+            if (e.Gezielt)
+            {
+                (gewaehlt, groesse) = Waehlen(statistik, artenzahl, e.Mannschaften, hoechstens, e.JeSchritt.TotalSeconds, zufall);
+            }
+            else if (ohneErfolg >= geduld)
             {
                 groesse = groesse >= hoechstens ? e.Mannschaften : groesse + 1;
                 ohneErfolg = 0;
             }
 
             ohneErfolg++;
-            (HashSet<int> frei, string ausschnitt) = MannschaftenFrei(zufall, groesse);
-            for (int i = 0; i < ansetzung.Length; i++)
-            {
-                double v = Math.Round(aktuell[ansetzung[i]]);
-                modell.ZeileGrenzen(zeile[i], frei.Contains(ansetzung[i]) ? 0 : v, frei.Contains(ansetzung[i]) ? 1 : v);
-            }
-
+            HashSet<int> belegt = e.Belegung is null ? [] : [.. e.Belegung.Andere(e.Platz).Select(n => Array.IndexOf(d.Name, n)).Where(t => t >= 0)];
+            (HashSet<int> frei, string ausschnitt, int art, int[] wahl) = AusschnittBilden(zufall, gewaehlt, groesse, besterPlan, e.Verstoesse, belegt);
+            e.Belegung?.Belegen(e.Platz, wahl.Select(t => d.Name[t]));
+            Freigeben(frei);
             e.Ausschnitt?.Invoke(new Ausschnittsmeldung(groesse, Ausschnittsergebnis.Laeuft, bester));
             var schritt = Stopwatch.StartNew();
             double alt = Wert(ziel, aktuell);
-            (_, _, double[]? werte, _) = Minimieren(modell, ziel, loeser, e.JeSchritt * groesse / e.Mannschaften, aktuell, Aufhoeren);
+            (int grenze, _, double[]? werte, _) = Minimieren(modell, ziel, loeser, e.JeSchritt * groesse / e.Mannschaften, aktuell, Aufhoeren);
             double neu = werte is null ? alt : Wert(ziel, werte);
-            string zeit = schritt.Elapsed.TotalSeconds.ToString("0.0", CultureInfo.InvariantCulture);
+
+            // Ist der beste Plan inzwischen ein anderer (z. B. von den Inseln oder einer anderen Teilneuplanung), wäre das
+            // Ergebnis verloren: Derselbe Ausschnitt wird am neuen Plan nachgerechnet – er war ja erfolgversprechend.
+            if (werte is not null && neu <= alt - 0.5 && e.Ausgangsplan?.Invoke(bester) is { } spaeter)
+            {
+                if (!Wechseln(spaeter))
+                {
+                    werte = null;
+                }
+                else
+                {
+                    Freigeben(frei);
+                    alt = Wert(ziel, aktuell);
+                    (grenze, _, werte, _) = Minimieren(modell, ziel, loeser, e.JeSchritt * groesse / e.Mannschaften, aktuell, Aufhoeren);
+                    neu = werte is null ? alt : Wert(ziel, werte);
+                    Melden($"Ausgangsplan inzwischen überholt – Ausschnitt am neuen Plan nachgerechnet: {bester}");
+                }
+            }
+
+            string zeit = string.Create(CultureInfo.InvariantCulture, $"{schritt.Elapsed.TotalSeconds:0.0} s, im Modell mindestens {grenze}");
+            Erfassen(statistik, (art, groesse), schritt.Elapsed.TotalSeconds);
             if (werte is null || neu > alt - 0.5)
             {
-                Melden(string.Create(CultureInfo.InvariantCulture, $"{schritte}: {ausschnitt} ({frei.Count} Spalten frei, {zeit} s): {(werte is null ? "keine Lösung" : "nichts Besseres")}"));
+                Melden(string.Create(CultureInfo.InvariantCulture, $"{schritte}: {ausschnitt} ({frei.Count} Spalten frei, {zeit}): {(werte is null ? "keine Lösung" : "nichts Besseres")}"));
                 e.Ausschnitt?.Invoke(new Ausschnittsmeldung(groesse, Ausschnittsergebnis.NichtsBesseres, bester));
                 continue;
             }
@@ -245,17 +373,25 @@ public sealed partial class Ligaschranke
             List<Spiel> kandidat = Plan(werte);
             Stufenwert w = Bewerten(kandidat);
             bool besser = e.Besser?.Invoke(w, bester) ?? Stufenvergleich.Besser(w, bester);
-            Melden(string.Create(CultureInfo.InvariantCulture, $"{schritte}: {ausschnitt} ({frei.Count} Spalten frei, {zeit} s): Modell {alt:0} → {neu:0}, {w} – {(besser ? "angenommen" : "abgelehnt")}"));
+            Melden(string.Create(CultureInfo.InvariantCulture, $"{schritte}: {ausschnitt} ({frei.Count} Spalten frei, {zeit}): Modell {alt:0} → {neu:0}, {w} – {(besser ? "angenommen" : "abgelehnt")}"));
             if (besser)
             {
+                // Als Erfolg zählt, wie viele C-Verstöße weniger (mindestens einer): Große Schritte wiegen mehr als kleine.
+                double gewinn = Math.Max(1, bester.CAnzahl - w.CAnzahl);
                 aktuell = werte;
                 besterPlan = kandidat;
                 bester = w;
                 angenommen++;
                 ohneErfolg = 0;
+                (double v, double erfolge, double sek) = statistik[(art, groesse)];
+                statistik[(art, groesse)] = (v, erfolge + gewinn, sek);
 
                 // Gleich weitergeben (z. B. an den Automodus), nicht erst am Ende.
                 e.Verbessert?.Invoke(kandidat, w);
+            }
+            else
+            {
+                e.Abgelehnt?.Invoke(kandidat);
             }
 
             e.Ausschnitt?.Invoke(new Ausschnittsmeldung(groesse, besser ? Ausschnittsergebnis.Besser : Ausschnittsergebnis.Abgelehnt, bester));
@@ -315,12 +451,86 @@ public sealed partial class Ligaschranke
         return d.SpielHeim.Length + (Math.Min(h, g) * d.N) + Math.Max(h, g);
     }
 
-    /// <summary>Ausschnitt: alle Spiele einiger Mannschaften auf allen ihren Terminen.</summary>
-    private (HashSet<int> Frei, string Text) MannschaftenFrei(Random zufall, int anzahl)
+    /// <summary>
+    /// Bildet den Ausschnitt der gewählten Art: 0 = zufällige Mannschaften, 1 = Zeitfenster, 2 = Mannschaften mit den meisten
+    /// C-Verstößen (gewichtet gezogen).
+    /// </summary>
+    private (HashSet<int> Frei, string Text, int Art, int[] Wahl) AusschnittBilden(
+        Random zufall,
+        int art,
+        int groesse,
+        IReadOnlyList<Spiel> plan,
+        Func<IReadOnlyList<Spiel>, IReadOnlyDictionary<string, int>>? verstoesse,
+        HashSet<int> belegt)
     {
-        int[] wahl = Enumerable.Range(0, d.N).OrderBy(_ => zufall.Next()).Take(Math.Min(anzahl, d.N)).ToArray();
+        return art switch
+        {
+            1 => Zeitfenster(zufall, groesse) is { Frei.Count: > 0 } fenster ? (fenster.Frei, fenster.Text, 1, []) : Mit(MannschaftenFrei(zufall, groesse, belegt), 0),
+            2 when verstoesse is not null => Mit(MannschaftenMitVerstoessen(zufall, groesse, verstoesse(plan), belegt), 2),
+            _ => Mit(MannschaftenFrei(zufall, groesse, belegt), 0),
+        };
+
+        static (HashSet<int>, string, int, int[]) Mit((HashSet<int> Frei, string Text, int[] Wahl) a, int art) => (a.Frei, a.Text, art, a.Wahl);
+    }
+
+    /// <summary>
+    /// Ausschnitt: alle Spiele eines Zeitfensters (Wunschtermine darin frei, die übrigen fest) – etwa so viele Wochen der Saison,
+    /// wie <paramref name="groesse"/> Mannschaften Anteil an der Staffel haben (mindestens drei).
+    /// </summary>
+    private (HashSet<int> Frei, string Text) Zeitfenster(Random zufall, int groesse)
+    {
+        double[] daten = termine.Select(t => d.WunschDatum[t.Wunsch]).Distinct().Order().ToArray();
+        if (daten.Length == 0)
+        {
+            return ([], string.Empty);
+        }
+
+        double erstes = daten[0];
+        double dauer = Math.Max(21, (daten[^1] - erstes) * groesse / Math.Max(1, d.N));
+        double von = erstes + (zufall.NextDouble() * Math.Max(0, daten[^1] - erstes - dauer));
+        double bis = von + dauer;
+        var frei = termine.Where(t => d.WunschDatum[t.Wunsch] >= von && d.WunschDatum[t.Wunsch] <= bis).Select(t => t.Spalte).ToHashSet();
+        return (frei, string.Create(CultureInfo.InvariantCulture, $"Zeitfenster {DelphiDatum.ZuDateTime(von):dd.MM.} – {DelphiDatum.ZuDateTime(bis):dd.MM.}"));
+    }
+
+    /// <summary>Ausschnitt: Mannschaften gewichtet nach ihren C-Verstößen gezogen (mehr Verstöße, größere Chance).</summary>
+    private (HashSet<int> Frei, string Text, int[] Wahl) MannschaftenMitVerstoessen(Random zufall, int anzahl, IReadOnlyDictionary<string, int> verstoesse, HashSet<int> belegt)
+    {
+        List<int> uebrig = Waehlbar(anzahl, belegt);
+        var wahl = new List<int>();
+        while (wahl.Count < Math.Min(anzahl, d.N))
+        {
+            double[] gewicht = uebrig.Select(t => 0.5 + verstoesse.GetValueOrDefault(d.Name[t])).ToArray();
+            double wurf = zufall.NextDouble() * gewicht.Sum();
+            int i = 0;
+            while (i < gewicht.Length - 1 && wurf >= gewicht[i])
+            {
+                wurf -= gewicht[i];
+                i++;
+            }
+
+            wahl.Add(uebrig[i]);
+            uebrig.RemoveAt(i);
+        }
+
         var frei = termine.Where(t => wahl.Contains(d.SpielHeim[t.Spiel]) || wahl.Contains(d.SpielGast[t.Spiel])).Select(t => t.Spalte).ToHashSet();
         frei.UnionWith(ohneTermin.Where(u => wahl.Contains(d.SpielHeim[u.Spiel]) || wahl.Contains(d.SpielGast[u.Spiel])).Select(u => u.Spalte));
-        return (frei, "Mannschaften " + string.Join(", ", wahl.Select(t => d.Name[t])));
+        return (frei, "C-Verstöße: Mannschaften " + string.Join(", ", wahl.Select(t => d.Name[t])), [.. wahl]);
+    }
+
+    /// <summary>Ausschnitt: alle Spiele einiger Mannschaften auf allen ihren Terminen.</summary>
+    private (HashSet<int> Frei, string Text, int[] Wahl) MannschaftenFrei(Random zufall, int anzahl, HashSet<int> belegt)
+    {
+        int[] wahl = Waehlbar(anzahl, belegt).OrderBy(_ => zufall.Next()).Take(Math.Min(anzahl, d.N)).ToArray();
+        var frei = termine.Where(t => wahl.Contains(d.SpielHeim[t.Spiel]) || wahl.Contains(d.SpielGast[t.Spiel])).Select(t => t.Spalte).ToHashSet();
+        frei.UnionWith(ohneTermin.Where(u => wahl.Contains(d.SpielHeim[u.Spiel]) || wahl.Contains(d.SpielGast[u.Spiel])).Select(u => u.Spalte));
+        return (frei, "Mannschaften " + string.Join(", ", wahl.Select(t => d.Name[t])), wahl);
+    }
+
+    /// <summary>Die Mannschaften, aus denen gewählt wird: ohne die, die andere gerade neu planen, wenn genug übrig bleiben.</summary>
+    private List<int> Waehlbar(int anzahl, HashSet<int> belegt)
+    {
+        List<int> frei = Enumerable.Range(0, d.N).Where(t => !belegt.Contains(t)).ToList();
+        return frei.Count >= anzahl ? frei : [.. Enumerable.Range(0, d.N)];
     }
 }

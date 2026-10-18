@@ -64,44 +64,91 @@
     <Style Selector="Window.niedrig TextBlock.titel">
       <Setter Property="FontSize" Value="18" />
     </Style>
-    <!-- Kacheln: Ergebnis, Pflichtregeln, Verbesserungen, berechnete Pläne. Im Automodus entfällt die Kachel der
-         Pflichtregeln (die Verstöße stehen in der Ergebniskachel), und die Ergebniskachel nimmt ihren Platz ein;
-         Verbesserungen und Pläne bleiben stehen. Im engen Fenster 2 × 2 (jede Kachel über zwei Spalten). -->
+    <!-- Kacheln auf 24 Spalten: Ergebnis, Pflichtregeln, Verbesserungen, berechnete Pläne je sechs. Im Automodus entfällt die
+         Kachel der Pflichtregeln (die Verstöße stehen in der Ergebniskachel): Ergebnis sechs, Verbesserungen fünf, berechnete
+         Pläne mit HiGHS dreizehn. Im engen Fenster zwei Zeilen. -->
     <Style Selector="Grid.kacheln > Button.ergebnis">
       <Setter Property="Grid.Column" Value="0" />
-      <Setter Property="Grid.ColumnSpan" Value="1" />
-    </Style>
-    <Style Selector="Grid.kacheln.automodus > Button.ergebnis">
-      <Setter Property="Grid.ColumnSpan" Value="2" />
+      <Setter Property="Grid.ColumnSpan" Value="6" />
     </Style>
     <Style Selector="Grid.kacheln > Button.pflichtkachel">
-      <Setter Property="Grid.Column" Value="1" />
+      <Setter Property="Grid.Column" Value="6" />
+      <Setter Property="Grid.ColumnSpan" Value="6" />
     </Style>
     <Style Selector="Grid.kacheln > Button.verbesserungen">
-      <Setter Property="Grid.Column" Value="2" />
+      <Setter Property="Grid.Column" Value="12" />
+      <Setter Property="Grid.ColumnSpan" Value="6" />
     </Style>
     <Style Selector="Grid.kacheln > Button.plaene">
-      <Setter Property="Grid.Column" Value="3" />
+      <Setter Property="Grid.Column" Value="18" />
+      <Setter Property="Grid.ColumnSpan" Value="6" />
+    </Style>
+    <Style Selector="Grid.kacheln.automodus > Button.verbesserungen">
+      <Setter Property="Grid.Column" Value="6" />
+      <Setter Property="Grid.ColumnSpan" Value="5" />
+    </Style>
+    <Style Selector="Grid.kacheln.automodus > Button.plaene">
+      <Setter Property="Grid.Column" Value="11" />
+      <Setter Property="Grid.ColumnSpan" Value="13" />
     </Style>
     <Style Selector="Window.eng Grid.kacheln > Button.ergebnis">
-      <Setter Property="Grid.ColumnSpan" Value="2" />
-    </Style>
-    <Style Selector="Window.eng Grid.kacheln.automodus > Button.ergebnis">
-      <Setter Property="Grid.ColumnSpan" Value="4" />
+      <Setter Property="Grid.ColumnSpan" Value="12" />
     </Style>
     <Style Selector="Window.eng Grid.kacheln > Button.pflichtkachel">
-      <Setter Property="Grid.Column" Value="2" />
-      <Setter Property="Grid.ColumnSpan" Value="2" />
+      <Setter Property="Grid.Column" Value="12" />
+      <Setter Property="Grid.ColumnSpan" Value="12" />
     </Style>
     <Style Selector="Window.eng Grid.kacheln > Button.verbesserungen">
       <Setter Property="Grid.Row" Value="1" />
       <Setter Property="Grid.Column" Value="0" />
-      <Setter Property="Grid.ColumnSpan" Value="2" />
+      <Setter Property="Grid.ColumnSpan" Value="12" />
     </Style>
     <Style Selector="Window.eng Grid.kacheln > Button.plaene">
       <Setter Property="Grid.Row" Value="1" />
-      <Setter Property="Grid.Column" Value="2" />
-      <Setter Property="Grid.ColumnSpan" Value="2" />
+      <Setter Property="Grid.Column" Value="12" />
+      <Setter Property="Grid.ColumnSpan" Value="12" />
+    </Style>
+    <Style Selector="Window.eng Grid.kacheln.automodus > Button.verbesserungen">
+      <Setter Property="Grid.Row" Value="0" />
+      <Setter Property="Grid.Column" Value="12" />
+      <Setter Property="Grid.ColumnSpan" Value="12" />
+    </Style>
+    <Style Selector="Window.eng Grid.kacheln.automodus > Button.plaene">
+      <Setter Property="Grid.Column" Value="0" />
+      <Setter Property="Grid.ColumnSpan" Value="24" />
+    </Style>
+    <!-- Ohne HiGHS (Kostenoptimierung) nimmt der Teil „Berechnete Pläne“ die ganze Kachel ein -->
+    <Style Selector="Grid.plaeneinhalt:not(.mithighs) > StackPanel.plaenelinks">
+      <Setter Property="Grid.ColumnSpan" Value="3" />
+    </Style>
+    <Style Selector="Button.variantenknopf">
+      <Setter Property="Padding" Value="10,3" />
+      <Setter Property="MinHeight" Value="26" />
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="CornerRadius" Value="6" />
+      <Setter Property="Background" Value="{StaticResource AkzentHell}" />
+      <Setter Property="Foreground" Value="{StaticResource AkzentDunkel}" />
+    </Style>
+    <Style Selector="TextBlock.klein.highs">
+      <Setter Property="Foreground" Value="{StaticResource HighsDunkel}" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <!-- Punktreihe der Schritte von HiGHS: fertig gefüllt, gerade dran mit Ring, noch offen hell -->
+    <Style Selector="Ellipse.highsschritt">
+      <Setter Property="Width" Value="8" />
+      <Setter Property="Height" Value="8" />
+      <Setter Property="Fill" Value="#E4E1DA" />
+    </Style>
+    <Style Selector="Ellipse.highsschritt.fertig">
+      <Setter Property="Fill" Value="{StaticResource Highs}" />
+    </Style>
+    <Style Selector="Ellipse.highsschritt.aktiv">
+      <Setter Property="Width" Value="10" />
+      <Setter Property="Height" Value="10" />
+      <Setter Property="Fill" Value="{StaticResource HighsHell}" />
+      <Setter Property="Stroke" Value="{StaticResource Highs}" />
+      <Setter Property="StrokeThickness" Value="2" />
     </Style>
     <Style Selector="TextBlock.wert">
       <Setter Property="FontSize" Value="26" />
@@ -340,7 +387,7 @@
       <!-- Kacheln: Stand der Generierung (im Kompaktmodus ausgeblendet; die Kennzahlen stehen dort in der Ansicht) -->
       <Panel Grid.Row="1" IsVisible="{Binding ZeigtArbeitsbereich}">
       <Grid Classes="kacheln" Classes.automodus="{Binding Anzeige.ZeigtVerstoesse}" IsVisible="{Binding ZeigtGenerierung}" Margin="22,10,22,0"
-            ColumnDefinitions="*,*,*,*" RowDefinitions="Auto,Auto">
+            ColumnDefinitions="*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*" RowDefinitions="Auto,Auto">
         <Button Classes="kartenknopf ergebnis" Margin="6" Command="{Binding ErgebnisCommand}" ToolTip.Tip="{Binding ErgebnisHinweis}">
           <StackPanel Spacing="2">
             <Grid ColumnDefinitions="*,Auto">
@@ -349,23 +396,32 @@
             </Grid>
             <!-- Kostenoptimierung: Gesamtkosten; Automodus: Verstöße der Stufen A, B und C (klein davor: am Ende der Basisoptimierung) -->
             <TextBlock Text="{Binding Anzeige.Kosten}" Classes="ziffer wert" IsVisible="{Binding !Anzeige.ZeigtVerstoesse}" />
-            <Grid ColumnDefinitions="*,*,*" IsVisible="{Binding Anzeige.ZeigtVerstoesse}">
-              <StackPanel Grid.Column="0" Orientation="Horizontal" Spacing="6">
-                <TextBlock Text="A" Classes="klein" VerticalAlignment="Bottom" Margin="0,0,0,4" />
-                <TextBlock Text="{Binding Anzeige.BasisA}" Classes="klein ziffer" VerticalAlignment="Bottom" Margin="4,0,0,4" ToolTip.Tip="Verstöße am Ende der Basisoptimierung" />
-                <TextBlock Text="{Binding Anzeige.VerstossA}" Classes="ziffer wert" />
+            <!-- Passt die Zeile nicht in die Kachel (schmales Fenster, dreistellige Zahlen), wird sie kleiner statt abgeschnitten -->
+            <Viewbox Stretch="Uniform" StretchDirection="DownOnly" HorizontalAlignment="Left" IsVisible="{Binding Anzeige.ZeigtVerstoesse}">
+              <StackPanel Orientation="Horizontal" Spacing="28">
+                <StackPanel Spacing="0">
+                  <StackPanel Orientation="Horizontal" Spacing="6">
+                    <TextBlock Text="A" Classes="klein" FontWeight="SemiBold" />
+                    <TextBlock Text="{Binding Anzeige.BasisA}" Classes="klein ziffer" ToolTip.Tip="Verstöße am Ende der Basisoptimierung" />
+                  </StackPanel>
+                  <TextBlock Text="{Binding Anzeige.VerstossA}" Classes="ziffer wert" />
+                </StackPanel>
+                <StackPanel Spacing="0">
+                  <StackPanel Orientation="Horizontal" Spacing="6">
+                    <TextBlock Text="B" Classes="klein" FontWeight="SemiBold" />
+                    <TextBlock Text="{Binding Anzeige.BasisB}" Classes="klein ziffer" ToolTip.Tip="Verstöße am Ende der Basisoptimierung" />
+                  </StackPanel>
+                  <TextBlock Text="{Binding Anzeige.VerstossB}" Classes="ziffer wert" />
+                </StackPanel>
+                <StackPanel Spacing="0">
+                  <StackPanel Orientation="Horizontal" Spacing="6">
+                    <TextBlock Text="C" Classes="klein" FontWeight="SemiBold" />
+                    <TextBlock Text="{Binding Anzeige.BasisC}" Classes="klein ziffer" ToolTip.Tip="Verstöße am Ende der Basisoptimierung" />
+                  </StackPanel>
+                  <TextBlock Text="{Binding Anzeige.VerstossC}" Classes="ziffer wert" />
+                </StackPanel>
               </StackPanel>
-              <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="6">
-                <TextBlock Text="B" Classes="klein" VerticalAlignment="Bottom" Margin="0,0,0,4" />
-                <TextBlock Text="{Binding Anzeige.BasisB}" Classes="klein ziffer" VerticalAlignment="Bottom" Margin="4,0,0,4" ToolTip.Tip="Verstöße am Ende der Basisoptimierung" />
-                <TextBlock Text="{Binding Anzeige.VerstossB}" Classes="ziffer wert" />
-              </StackPanel>
-              <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6">
-                <TextBlock Text="C" Classes="klein" VerticalAlignment="Bottom" Margin="0,0,0,4" />
-                <TextBlock Text="{Binding Anzeige.BasisC}" Classes="klein ziffer" VerticalAlignment="Bottom" Margin="4,0,0,4" ToolTip.Tip="Verstöße am Ende der Basisoptimierung" />
-                <TextBlock Text="{Binding Anzeige.VerstossC}" Classes="ziffer wert" />
-              </StackPanel>
-            </Grid>
+            </Viewbox>
             <TextBlock Text="{Binding Anzeige.KostenHinweis}" Classes="klein hinweis" TextWrapping="Wrap" MaxLines="2" TextTrimming="CharacterEllipsis"
                        IsVisible="{Binding Anzeige.KostenHinweis, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
             <!-- Automodus: die Kriterien, deren Gewichte gerade angehoben werden (alle mit Namen) -->
@@ -392,38 +448,79 @@
           </StackPanel>
         </Button>
         <Button Classes="kartenknopf verbesserungen" Margin="6" Command="{Binding VerlaufCommand}" ToolTip.Tip="Verlauf der Suche öffnen: Kosten bzw. Verstöße seit dem Start">
-          <!-- Kopfzeile über die ganze Breite (Details rechts oben wie in der Ergebniskachel), darunter Werte und Diagramm -->
-          <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,*">
-            <Grid Grid.ColumnSpan="2" ColumnDefinitions="*,Auto">
+          <StackPanel Spacing="2">
+            <Grid ColumnDefinitions="*,Auto">
               <TextBlock Text="Verbesserungen" Classes="klein" TextTrimming="CharacterEllipsis" />
               <TextBlock Grid.Column="1" Text="Details ›" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource Akzent}" Margin="8,0,0,0" />
             </Grid>
-            <StackPanel Grid.Row="1" Spacing="2" Margin="0,2,0,0">
+            <!-- Rechts neben der Zahl der kleine Verlauf: Kosten bzw. Verstöße der wichtigsten Stufe, die noch welche hat -->
+            <Grid ColumnDefinitions="Auto,*">
               <TextBlock Text="{Binding Anzeige.Verbesserungen}" Classes="ziffer wert" />
-              <TextBlock Text="{Binding Anzeige.LetzteVerbesserung}" Classes="klein hinweis" />
-            </StackPanel>
-            <!-- Kleiner Verlauf: Kosten bzw. Verstöße der wichtigsten Stufe, die noch welche hat -->
-            <ui:Verlaufsdiagramm Grid.Row="1" Grid.Column="1" Kompakt="True" Verlauf="{Binding Verlauf}" Version="{Binding Verlauf.Version}"
-                                 Width="96" Height="34" VerticalAlignment="Bottom" Margin="12,0,0,4" />
-          </Grid>
-        </Button>
-        <Button Classes="kartenknopf plaene" Margin="6" Command="{Binding LeitstandCommand}" ToolTip.Tip="Leitstand öffnen: was die Rechenkerne und Inseln gerade tun">
-          <Grid ColumnDefinitions="*,Auto" RowDefinitions="Auto,*">
-            <Grid Grid.ColumnSpan="2" ColumnDefinitions="*,Auto">
-              <TextBlock Text="Berechnete Pläne" Classes="klein" TextTrimming="CharacterEllipsis" />
-              <TextBlock Grid.Column="1" Text="Details ›" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource Akzent}" Margin="8,0,0,0" />
+              <ui:Verlaufsdiagramm Grid.Column="1" Kompakt="True" Verlauf="{Binding Verlauf}" Version="{Binding Verlauf.Version}"
+                                   MaxWidth="110" MinWidth="40" Height="30" HorizontalAlignment="Stretch" VerticalAlignment="Center" Margin="16,0,0,0" />
             </Grid>
-            <StackPanel Grid.Row="1" Spacing="2" Margin="0,2,0,0">
+            <TextBlock Text="{Binding Anzeige.LetzteVerbesserung}" Classes="klein hinweis" TextTrimming="CharacterEllipsis" />
+          </StackPanel>
+        </Button>
+        <Button Classes="kartenknopf plaene" Margin="6" Command="{Binding LeitstandCommand}" ToolTip.Tip="Leitstand öffnen: was die Rechenkerne, Inseln und HiGHS gerade tun">
+          <!-- Links die berechneten Pläne und der Prozessor; im Automodus rechts daneben, woran HiGHS rechnet (Untergrenze bzw.
+               Teilneuplanung), mit dem Knopf zu den B-Varianten -->
+          <Grid ColumnDefinitions="5*,Auto,9*" Classes="plaeneinhalt" Classes.mithighs="{Binding Anzeige.ZeigtHighs}">
+            <StackPanel Classes="plaenelinks" Spacing="2">
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Text="Berechnete Pläne" Classes="klein" TextTrimming="CharacterEllipsis" />
+                <TextBlock Grid.Column="1" Text="Details ›" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource Akzent}" Margin="8,0,0,0"
+                           IsVisible="{Binding !Anzeige.ZeigtHighs}" />
+              </Grid>
               <TextBlock Text="{Binding Anzeige.Plaene}" Classes="ziffer wert" />
-              <TextBlock Text="{Binding Anzeige.Tempo}" Classes="klein hinweis" />
+              <Grid ColumnDefinitions="*,Auto">
+                <TextBlock Text="{Binding Anzeige.Tempo}" Classes="klein hinweis" TextTrimming="CharacterEllipsis" />
+                <TextBlock Grid.Column="1" Text="{Binding Anzeige.Auslastung}" Classes="klein" Margin="8,0,0,0" />
+              </Grid>
+              <!-- Der ganze Prozessor wie im Leitstand: blau die Suche, orange HiGHS, grau andere Programme, hell frei; je Kern ein Strich -->
+              <ui:Anteilsleiste Height="10" Margin="0,2,0,0" Kerne="{Binding Anzeige.Last.Prozessoren, FallbackValue=0}" Suche="{Binding Anzeige.Last.Suche, FallbackValue=0}"
+                                Highs="{Binding Anzeige.Last.Highs, FallbackValue=0}" Rest="{Binding Anzeige.Last.Sonstiges, FallbackValue=0}"
+                                ToolTip.Tip="Der ganze Prozessor: blau die Suche, orange HiGHS, grau andere Programme, hell frei – je Kern ein Strich" />
             </StackPanel>
-            <!-- Der ganze Prozessor wie im Leitstand: blau die Suche, orange HiGHS, grau andere Programme, hell frei; je Kern ein Strich -->
-            <StackPanel Grid.Row="1" Grid.Column="1" Width="96" Spacing="3" VerticalAlignment="Bottom" Margin="12,0,0,4"
-                        ToolTip.Tip="Der ganze Prozessor: blau die Suche, orange HiGHS, grau andere Programme, hell frei – je Kern ein Strich">
-              <TextBlock Text="{Binding Anzeige.Auslastung}" Classes="klein" HorizontalAlignment="Right" />
-              <ui:Anteilsleiste Height="10" Kerne="{Binding Anzeige.Last.Prozessoren, FallbackValue=0}" Suche="{Binding Anzeige.Last.Suche, FallbackValue=0}"
-                                Highs="{Binding Anzeige.Last.Highs, FallbackValue=0}" Rest="{Binding Anzeige.Last.Sonstiges, FallbackValue=0}" />
-            </StackPanel>
+            <Border Grid.Column="1" Width="1" Background="#E4E1DA" Margin="16,0" IsVisible="{Binding Anzeige.ZeigtHighs}" />
+              <StackPanel Grid.Column="2" Spacing="2" IsVisible="{Binding Anzeige.ZeigtHighs}">
+                <Grid ColumnDefinitions="*,Auto">
+                  <StackPanel Orientation="Horizontal" Spacing="6">
+                    <Ellipse Width="8" Height="8" Fill="{StaticResource Highs}" VerticalAlignment="Center" IsVisible="{Binding Anzeige.Highs.Rechnet, FallbackValue=False}" />
+                    <TextBlock Text="{Binding Anzeige.Highs.Titel, FallbackValue={x:Null}}" Classes="klein" TextTrimming="CharacterEllipsis"
+                               Classes.highs="{Binding Anzeige.Highs.Rechnet, FallbackValue=False}" />
+                  </StackPanel>
+                  <TextBlock Grid.Column="1" Text="Details ›" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource Akzent}" Margin="8,0,0,0" />
+                </Grid>
+                <TextBlock Text="{Binding Anzeige.Highs.Schritt, FallbackValue={x:Null}}" FontSize="16" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" Margin="0,2,0,0"
+                           Foreground="{StaticResource Tinte}" ToolTip.Tip="{Binding Anzeige.Highs.Schritt, FallbackValue={x:Null}}" />
+                <ProgressBar Minimum="0" Maximum="100" Value="{Binding Anzeige.Highs.Prozent, FallbackValue=0}" Height="6" MinHeight="6" CornerRadius="3" Margin="0,2"
+                             Foreground="{StaticResource Highs}" Background="{StaticResource HighsHell}" IsVisible="{Binding Anzeige.Highs.ZeigtAnteil, FallbackValue=False}" />
+                <!-- Zeit bzw. Erfolg, rechts daneben der Knopf zu den B-Varianten (wie in der Kopfzeile der Stufe B der Qualitätsansicht) -->
+                <Grid ColumnDefinitions="*,Auto">
+                  <TextBlock Text="{Binding Anzeige.Highs.Zeit, FallbackValue={x:Null}}" Classes="klein hinweis" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"
+                             ToolTip.Tip="{Binding Anzeige.Highs.Zeit, FallbackValue={x:Null}}" />
+                  <Button Grid.Column="1" Classes="variantenknopf" Content="{Binding Anzeige.Highs.VariantenText, FallbackValue={x:Null}}" Command="{Binding BVariantenCommand}"
+                          IsVisible="{Binding Anzeige.Highs.ZeigtVarianten, FallbackValue=False}" Margin="8,0,0,0"
+                          ToolTip.Tip="B-Varianten aus HiGHS vergleichen und eine wählen (wie in der Kopfzeile der Stufe B der Qualitätsansicht)" />
+                </Grid>
+                <!-- Die Schritte als Punkte und der nächste -->
+                <StackPanel Orientation="Horizontal" Spacing="8" Margin="0,2,0,0">
+                  <ItemsControl ItemsSource="{Binding Anzeige.Highs.Schritte, FallbackValue={x:Null}}" VerticalAlignment="Center">
+                    <ItemsControl.ItemsPanel>
+                      <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal" Spacing="4" />
+                      </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate x:DataType="p:Highsschritt">
+                        <Ellipse Classes="highsschritt" Classes.fertig="{Binding Fertig}" Classes.aktiv="{Binding Aktiv}" VerticalAlignment="Center" ToolTip.Tip="{Binding Hinweis}" />
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                  <TextBlock Text="{Binding Anzeige.Highs.Danach, FallbackValue={x:Null}}" Classes="klein hinweis" VerticalAlignment="Center" />
+                </StackPanel>
+              </StackPanel>
           </Grid>
         </Button>
       </Grid>

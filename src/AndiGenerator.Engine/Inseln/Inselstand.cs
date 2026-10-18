@@ -20,9 +20,10 @@ namespace AndiGenerator.Engine.Inseln;
 /// Automodus nach Verstößen (wichtigste Stufe zuerst).
 /// </param>
 /// <param name="Schlechteste">
-/// Sie ist die schlechteste Insel (höchste Kosten, im Automodus mit den aktuellen Gewichten): Nur sie beginnt neu, wenn sie
-/// länger als die Grenze nichts Besseres gefunden hat.
+/// Sie beginnt als Nächste neu, wenn sie länger als die Grenze nichts Besseres gefunden hat: die schlechteste Insel (höchste
+/// Kosten, im Automodus mit den aktuellen Gewichten bzw. nach Verstößen; bei Gleichstand die, die am längsten feststeckt).
 /// </param>
+/// <param name="Start">Womit sie im Automodus zuletzt neu begonnen hat; <c>null</c>, solange nicht.</param>
 public sealed record Inselstand(
     int Nummer,
     bool Spezial,
@@ -35,4 +36,5 @@ public sealed record Inselstand(
     Stufenwert? Verstoesse = null,
     int Erfolge = 0,
     IReadOnlyList<Kostenverursacher>? Kostentreiber = null,
-    bool Schlechteste = false);
+    bool Schlechteste = false,
+    Startverfahren? Start = null);

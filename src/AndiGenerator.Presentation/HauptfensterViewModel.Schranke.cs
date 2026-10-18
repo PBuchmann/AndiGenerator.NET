@@ -2,6 +2,7 @@
 // SPDX-FileCopyrightText: 2026 Peter Buchmann
 // SPDX-License-Identifier: GPL-3.0-only
 
+using System.Diagnostics;
 using AndiGenerator.Application;
 using AndiGenerator.Domain.Optionen;
 using AndiGenerator.Domain.Stammdaten;
@@ -38,8 +39,17 @@ public sealed partial class HauptfensterViewModel
     /// <summary>Letzter Fortschritt von HiGHS für den Leitstand (auch, wenn er erst während der Rechnung geöffnet wird).</summary>
     private Schrankenfortschritt? highsFortschritt;
 
+    /// <summary>Seit wann HiGHS am Schritt <see cref="highsFortschritt"/> rechnet (Zeitstempel).</summary>
+    private long highsSeit;
+
     /// <summary>Bricht die laufende Rechnung ab, wenn eine neue beginnt (andere Staffel, Optionen oder Einteilung).</summary>
     private CancellationTokenSource? schrankeAbbruch;
+
+    /// <summary>
+    /// Die Kriterien, die das Modell von HiGHS für die Staffel und Optionen nicht kennt (für <see cref="ModellUnbekannt"/>);
+    /// <c>null</c>, solange nicht bestimmt oder ohne Modell.
+    /// </summary>
+    private (Staffel? Staffel, Berechnungsoptionen? Optionen, IReadOnlyList<Kostenkriterium>? Unbekannt) modellUnbekannt;
 
     /// <summary>Holt, woran HiGHS gerade rechnet, z. B. <c>A3 Parallele Spiele</c>; leer, wenn nicht gerechnet wird.</summary>
     internal string SchrankeFortschritt => schrankeFortschritt;
@@ -47,7 +57,14 @@ public sealed partial class HauptfensterViewModel
     /// <summary>Holt die Festlegung des Staffelleiters (Name und Obergrenzen je Kriterium); <c>null</c> = keine.</summary>
     internal (string Name, IReadOnlyDictionary<Kostenkriterium, int> Grenzen)? Festlegung => festlegung;
 
-    /// <summary>Name einer Alternative, z. B. <c>Vorrang Heimkoppel (bestmöglich)</c> oder <c>Plan B optimal</c>.</summary>
+    /// <summary>
+    /// Holt die Kriterien, die HiGHS für die geöffnete Staffel nicht kennt: Sie bleiben in C (keine Grenze, keine Varianten – in A
+    /// oder B ergäben sie keinen Sinn); leer, wenn HiGHS alle kennt; <c>null</c>, wenn HiGHS fehlt oder es noch nicht bestimmt ist.
+    /// </summary>
+    internal IReadOnlyList<Kostenkriterium>? ModellUnbekannt =>
+        sitzung is Plansitzung s && ReferenceEquals(modellUnbekannt.Staffel, s.Staffel) && ReferenceEquals(modellUnbekannt.Optionen, s.Optionen) ? modellUnbekannt.Unbekannt : null;
+
+    /// <summary>Name einer Alternative, z. B. <c>Vorrang Heimkoppel (bestmöglich)</c>, <c>Plan B optimal</c> oder <c>Plan B1–B7 optimal</c>.</summary>
     /// <param name="alternative">Die Alternative.</param>
     /// <returns>Der Name.</returns>
     internal static string Alternativname(Planalternative alternative) => alternative switch
@@ -56,6 +73,14 @@ public sealed partial class HauptfensterViewModel
         { Bewiesen: true } => $"Vorrang {alternative.Name} (bestmöglich)",
         _ => $"Vorrang {alternative.Name}",
     };
+
+    /// <summary>Warum ein Kriterium in C bleibt (HiGHS kennt es für diese Staffel nicht); leer, wenn es nach A oder B darf.</summary>
+    /// <param name="k">Das Kriterium.</param>
+    /// <returns>Der Grund oder leer.</returns>
+    internal string NurCGrund(Kostenkriterium k) =>
+        ModellUnbekannt?.Contains(k) == true
+            ? "HiGHS kennt dieses Kriterium für diese Staffel nicht: In A oder B gäbe es dafür weder Grenze noch Varianten – es bleibt in C."
+            : string.Empty;
 
     /// <summary>
     /// Holt die untere Schranke für die geöffnete Staffel und die gespeicherte Einteilung. Ist sie noch nicht berechnet,
@@ -114,7 +139,8 @@ public sealed partial class HauptfensterViewModel
             start,
             Einteilung,
             (plan, k) => Kriteriumsdetails(false, k, plan),
-            Laeuft && dienst.Automodus);
+            Laeuft && dienst.Automodus,
+            UnbekanntHinweis());
         if (await oberflaeche.AlternativenZeigenAsync(dialog) && dialog.Gewaehlt is { } gewaehlt
             && liste.FirstOrDefault(a => ReferenceEquals(a.Alternative, gewaehlt)) is { Alternative: not null } paar)
         {
@@ -161,6 +187,25 @@ public sealed partial class HauptfensterViewModel
         (bericht.Alternativen ?? [])
             .Select(x => (x, Referenzbewertung.Bewerten(schluessel.Staffel with { BestehenderSpielplan = x.Plan }, schluessel.Optionen)))
             .ToList();
+
+    /// <summary>
+    /// Hinweis, welche A- und B-Kriterien HiGHS nicht kennt (sie fehlen in Grenzen und Varianten), z. B. <c>HiGHS kennt B8
+    /// Abstand H/A nicht: …</c>; leer, wenn es alle kennt.
+    /// </summary>
+    private string UnbekanntHinweis()
+    {
+        if (schranke is not { Unbekannt: { Count: > 0 } unbekannt })
+        {
+            return string.Empty;
+        }
+
+        Stufeneinteilung einteilung = Einteilung.Vervollstaendigt();
+        IEnumerable<string> namen = new[] { ("A", einteilung.A, 2), ("B", einteilung.B, 1) }
+            .SelectMany(s => s.Item2.Select((k, i) => (Stufe: $"{s.Item1}{i + s.Item3}", Kriterium: k)))
+            .Where(e => unbekannt.Contains(e.Kriterium))
+            .Select(e => $"{e.Stufe} {Planqualitaet.Name(e.Kriterium)}");
+        return $"HiGHS kennt {string.Join(", ", namen)} für diese Staffel nicht: In den Varianten und in der Grenze der Stufe fehlt es – „optimal“ gilt nur für die übrigen Kriterien der Stufe.";
+    }
 
     /// <summary>
     /// Automodus: Schranke und Plan aus HiGHS in die laufende Generierung übernehmen. Ist die Schranke noch nicht berechnet,
@@ -215,6 +260,11 @@ public sealed partial class HauptfensterViewModel
                 dienst.PlanAnbieten(plan, $"Zwischenplan aus HiGHS (vor {f.Text})");
             }
 
+            if (highsFortschritt?.Text != f.Text)
+            {
+                highsSeit = Stopwatch.GetTimestamp();
+            }
+
             schrankeFortschritt = f.Text;
             highsFortschritt = f;
             leitstandAnsicht?.HighsZeigen(f);
@@ -223,6 +273,41 @@ public sealed partial class HauptfensterViewModel
                 qualitaet.FortschrittZeigen();
             }
         });
+    }
+
+    /// <summary>Die rechte Hälfte der Kachel „Berechnete Pläne“: woran HiGHS gerade rechnet; <c>null</c> außerhalb des Automodus.</summary>
+    /// <param name="stand">Der Stand der Generierung.</param>
+    /// <returns>Die Anzeige.</returns>
+    private Highsanzeige? HighsanzeigeBilden(Optimierungsstand stand)
+    {
+        if (stand.Lenkung is null)
+        {
+            return null;
+        }
+
+        TimeSpan seit = highsFortschritt is null ? TimeSpan.Zero : Stopwatch.GetElapsedTime(highsSeit);
+        Highsanzeige anzeige = Highsanzeige.Bilden(
+            Stufenschranke.Verfuegbar,
+            stand.Pausiert,
+            highsFortschritt,
+            seit,
+            Stufenschranke.Laufzeit,
+            schranke is not null && highsFortschritt is null,
+            stand.Teilneuplanung);
+        return anzeige with { Varianten = festlegung is null ? AlternativenHolen().Count : 0 };
+    }
+
+    /// <summary>Kachel „HiGHS“: die B-Varianten im Dialog, zuerst ausgewählt der Plan mit der niedrigsten Summe in B.</summary>
+    private Task BVariantenZeigenAsync()
+    {
+        IReadOnlyList<(Planalternative Alternative, Planbewertung Bewertung)> liste = AlternativenHolen();
+        if (liste.Count == 0)
+        {
+            return Task.CompletedTask;
+        }
+
+        Planalternative start = liste.FirstOrDefault(e => e.Alternative.Kriterium is null).Alternative ?? liste[0].Alternative;
+        return AlternativenZeigenAsync(start, null);
     }
 
     /// <summary>Gibt an, ob ein Lauf für die aktuelle Staffel, Optionen und Einteilung rechnet.</summary>
@@ -235,6 +320,26 @@ public sealed partial class HauptfensterViewModel
         IReadOnlyList<(Planalternative, Planbewertung)> bewertet = [];
         try
         {
+            // Erst, was das Modell nicht kennt (schnell): Das zeigt die Qualitätsansicht beim Einstufen schon, bevor die
+            // Schranke da ist.
+            if (!ReferenceEquals(modellUnbekannt.Staffel, schluessel.Staffel) || !ReferenceEquals(modellUnbekannt.Optionen, schluessel.Optionen))
+            {
+                IReadOnlyList<Kostenkriterium>? unbekannt = await Task.Run(() => Stufenschranke.Unbekannt(schluessel.Staffel, schluessel.Optionen), CancellationToken.None).ConfigureAwait(false);
+                oberflaeche.AufOberflaeche(() =>
+                {
+                    if (!Aktuell(schluessel))
+                    {
+                        return;
+                    }
+
+                    modellUnbekannt = (schluessel.Staffel, schluessel.Optionen, unbekannt);
+                    foreach (QualitaetAnsichtViewModel qualitaet in ansichten.OfType<QualitaetAnsichtViewModel>())
+                    {
+                        qualitaet.VerfahrenGeaendert();
+                    }
+                });
+            }
+
             // Vorrang für HiGHS, bis A und B fertig sind (die Teilneuplanung wartet); Startlösung ist der beste Plan der Generierung.
             dienst.HighsVorrang = true;
             ergebnis = await Task.Run(() => Stufenschranke.Berechnen(schluessel.Staffel, schluessel.Optionen, einteilung, f => FortschrittMelden(f, schluessel), () => abbruch.IsCancellationRequested, dienst.BesterPlan), CancellationToken.None).ConfigureAwait(false);

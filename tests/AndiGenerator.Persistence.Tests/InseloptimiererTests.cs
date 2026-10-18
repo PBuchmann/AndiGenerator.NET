@@ -115,6 +115,29 @@ public class InseloptimiererTests
         Assert.Null(aufgehoben.Festgelegt);
         Assert.Equal(vorher.Harte, aufgehoben.Bester.Harte);
 
+        // Zählt die Suche beim Glätten schon und rückt ein Kriterium von C nach B, zählt sie gleich nach der neuen Einteilung
+        // weiter – kein Drängen mit den Kosten des Originals, bei dem die Inseln Verstöße in A gegen B tauschten.
+        fest.Festlegen(voll.A.Concat(voll.B).ToDictionary(k => k, _ => 9999), "Test");
+        fest.Rechnen(20_000);
+        Assert.Equal("Optimierung Stufe C", fest.Lenkung?.Bezeichnung);
+        Kostenkriterium nachB = voll.C.First(Stufeneinteilung.HatAnzahl);
+        fest.EinteilungAendern(voll.Einstufen(nachB, Stufe.B));
+        Lenkungsstand gezaehltNeu = Assert.IsType<Lenkungsstand>(fest.Lenkung);
+        Assert.Equal("Optimierung Stufe C", gezaehltNeu.Bezeichnung);
+        Assert.Contains("Einteilung geändert", gezaehltNeu.Aenderungen[^1], StringComparison.Ordinal);
+        fest.Rechnen(2_000);
+        Assert.Equal("Optimierung Stufe C", fest.Lenkung?.Bezeichnung);
+
+        // Feststeckende Inseln beginnen reihum mit einem anderen Startverfahren neu (ohne Teilneuplanung statt ihres Plans
+        // „Mannschaften“).
+        fest.Rechnen(40_000);
+        IReadOnlyList<Startstatistik> starts = fest.Maschinenraum.Starts ?? [];
+        Assert.True(starts.Count >= 2, string.Join(", ", starts));
+        Assert.Contains(starts, x => x.Verfahren == Startverfahren.Spiele);
+        Assert.Contains(starts, x => x.Verfahren == Startverfahren.Zeitfenster);
+        Assert.All(starts, x => Assert.True(x.Starts > 0));
+        Assert.Contains(fest.Maschinenraum.Inseln, i => i.Start is not null);
+
         // Wechsel von der Kostenoptimierung: Der Plan ist schon optimiert, also keine Basisoptimierung, gleich Stufe A.
         using var direkt = new Inseloptimierer(staffel, Berechnungsoptionen.Standard, einstellungen with { AutoOhneGrundlauf = true });
         direkt.Rechnen(20_000);
@@ -293,6 +316,11 @@ public class InseloptimiererTests
         Assert.True(optimierer.Durchlaeufe > anfang);
         optimierer.Ruhend = 0;
         Assert.Equal(0, optimierer.Ruhend);
+
+        // Mit acht Kernen ruhen höchstens vier.
+        using var achtKerne = new Inseloptimierer(LeereStaffel(R2), Berechnungsoptionen.Standard, Optimierungseinstellungen.Standard with { Kerne = 8 });
+        achtKerne.Ruhend = 8;
+        Assert.Equal(4, achtKerne.Ruhend);
     }
 
     [Fact]

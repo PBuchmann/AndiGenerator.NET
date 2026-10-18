@@ -123,22 +123,31 @@ internal static class OptimierenBefehl
             StartplanInseln = a.StartInseln,
         };
 
-        // Automodus mit HiGHS wie in der Oberfläche: Schranke und Plan werden nach dem Start eingespielt (ab Ende des Grundlaufs).
-        Schrankenbericht? highs = null;
-        if (a.Highs)
-        {
-            highs = Ligaschranke.Berechnen(staffel, optionen, new SchrankeBefehl.Highsschranke(), Ligaschranke.StandardZeitJeStufe, einteilung);
-            Console.WriteLine($"HiGHS:        A ≥ {highs.SchrankeA?.ToString(CultureInfo.InvariantCulture) ?? "?"}, B ≥ {highs.SchrankeB?.ToString(CultureInfo.InvariantCulture) ?? "?"}" + (highs.Plan.Count > 0 ? string.Empty : " (kein Plan)"));
-        }
-
+        List<Spiel>? start = null;
         if (a.Start is not null)
         {
-            List<Spiel>? start = BewertenBefehl.PlanLaden(staffel, a.Start);
+            start = BewertenBefehl.PlanLaden(staffel, a.Start);
             if (start is null)
             {
                 return 2;
             }
+        }
 
+        // Automodus mit HiGHS wie in der Oberfläche: Schranke und Plan werden nach dem Start eingespielt (ab Ende des Grundlaufs);
+        // der Startplan ist (wie dort der beste Plan der Generierung) auch Startlösung der Schranke.
+        Schrankenbericht? highs = null;
+        if (a.Highs)
+        {
+            highs = Ligaschranke.Berechnen(staffel, optionen, new SchrankeBefehl.Highsschranke(), Ligaschranke.StandardZeitJeStufe, einteilung, startplan: () => start, laufzeit: SchrankeBefehl.Laufzeit);
+            Console.WriteLine($"HiGHS:        A ≥ {highs.SchrankeA?.ToString(CultureInfo.InvariantCulture) ?? "?"}, B ≥ {highs.SchrankeB?.ToString(CultureInfo.InvariantCulture) ?? "?"}" + (highs.Plan.Count > 0 ? string.Empty : " (kein Plan)"));
+            foreach (string hinweis in highs.Hinweise.Where(h => h.Contains("kennt das Modell nicht", StringComparison.Ordinal)))
+            {
+                Console.WriteLine($"HiGHS:        {hinweis}");
+            }
+        }
+
+        if (start is not null)
+        {
             einstellungen = einstellungen with { Startplan = start };
             Console.WriteLine($"Startplan:    {a.Start} für {Math.Min(a.StartInseln, einstellungen.Inseln)} Insel(n)");
         }
@@ -188,6 +197,11 @@ internal static class OptimierenBefehl
             foreach (string aenderung in lenkung.Aenderungen)
             {
                 Console.WriteLine("  " + aenderung);
+            }
+
+            foreach (Startstatistik neustart in optimierer.Maschinenraum.Starts ?? [])
+            {
+                Console.WriteLine($"Neustarts {neustart.Verfahren}: {neustart.Starts}, danach bester Plan verbessert: {neustart.Erfolge}");
             }
         }
 
