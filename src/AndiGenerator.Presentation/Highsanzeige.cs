@@ -110,6 +110,7 @@ public sealed record Highsanzeige(string Titel, string Schritt, string Zeit, dou
     {
         _ when f.Text.StartsWith("A und B", StringComparison.Ordinal) => 3,
         _ when f.Text.StartsWith("Stufe C", StringComparison.Ordinal) => 4,
+        _ when f.Text.StartsWith("B-Varianten nachbessern", StringComparison.Ordinal) => 4,
         _ => Math.Clamp(f.Schritt, 0, 2),
     };
 }

@@ -285,6 +285,10 @@ public sealed class LeitstandAnsichtViewModel : Document
         return $"Gewichtet „{Gewichtungsanzeige.Name(art)}“ extrem hoch. Ihr Plan hat bisher {verwendet} eine Insel neu gestartet.";
     }
 
+    /// <summary>Die harten Fehler eines Plans in Worten.</summary>
+    private static string Hartetext(int harte) =>
+        (harte == 1 ? "1 Spiel" : harte.ToString(Deutsch) + " Spiele") + " ohne gültigen Termin – so nicht verwendbar";
+
     /// <summary>Baut die Gewichte nur neu auf, wenn sie sich geändert haben (sonst flackerte die Ansicht im Takt).</summary>
     /// <param name="anhebungen">Die geänderten Gewichte.</param>
     private void GewichteZeigen(IReadOnlyList<Gewichtsanhebung> anhebungen)
@@ -384,10 +388,12 @@ public sealed class LeitstandAnsichtViewModel : Document
                 anzeige.VerstossC = verstoesse.CAnzahl.ToString(Deutsch);
             }
 
+            anzeige.Harte = insel.Verstoesse is { Harte: > 0 and int harte } ? Hartetext(harte) : string.Empty;
+
             anzeige.Strategien = "Suchstrategien der Suchplätze: " + string.Join(" · ", insel.Strategien);
             anzeige.Kostentreiber = (insel.Kostentreiber ?? [])
                 .Select(k => new Kostentreiberzeile(
-                    Planqualitaet.Name(k.Kriterium),
+                    k.Stufe is { } stufe ? $"{stufe} · {Planqualitaet.Name(k.Kriterium)}" : Planqualitaet.Name(k.Kriterium),
                     Balkenbreite * k.Anteil,
                     k.Verstoesse is int verstoesse ? verstoesse.ToString(Deutsch) : k.Anteil.ToString("P0", Deutsch)))
                 .ToArray();

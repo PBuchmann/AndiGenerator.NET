@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 using System.Diagnostics;
+using System.Globalization;
 using AndiGenerator.Application;
 using AndiGenerator.Domain.Optionen;
 using AndiGenerator.Domain.Stammdaten;
@@ -118,6 +119,15 @@ public sealed partial class HauptfensterViewModel
     internal IReadOnlyList<(Planalternative Alternative, Planbewertung Bewertung)> AlternativenHolen() => schranke is null ? [] : alternativen;
 
     /// <summary>
+    /// Holt die B-Varianten, die gegenüber dem Plan etwas besser machen (siehe <see cref="Variantenauswahl"/>) – nur sie stehen
+    /// zur Wahl.
+    /// </summary>
+    /// <param name="angezeigt">Der Plan, mit dem verglichen wird; <c>null</c> = der laufende.</param>
+    /// <returns>Die Varianten mit einer Besonderheit.</returns>
+    internal IReadOnlyList<(Planalternative Alternative, Planbewertung Bewertung)> BesondereVarianten(Planstand? angezeigt) =>
+        Variantenauswahl.Besondere(AlternativenHolen(), (angezeigt ?? laufenderStand)?.Bewertung, Einteilung);
+
+    /// <summary>
     /// Zeigt die Alternativen in B im bildschirmfüllenden Dialog, zuerst ausgewählt <paramref name="start"/>; übernimmt der
     /// Staffelleiter eine, sind A und B damit festgelegt.
     /// </summary>
@@ -126,12 +136,24 @@ public sealed partial class HauptfensterViewModel
     /// <returns>Erledigt, wenn der Dialog geschlossen ist.</returns>
     internal async Task AlternativenZeigenAsync(Planalternative? start, Planstand? angezeigt)
     {
-        // Die Liste gilt für den Dialog, auch wenn währenddessen der Bericht nach der Stufe C kommt.
-        IReadOnlyList<(Planalternative Alternative, Planbewertung Bewertung)> liste = alternativen;
-        if (liste.Count == 0 || (angezeigt ?? laufenderStand) is not Planstand aktuell)
+        // Die Liste gilt für den Dialog, auch wenn währenddessen der Bericht nach der Stufe C kommt. Zur Wahl stehen nur Varianten,
+        // die gegenüber dem Plan etwas besser machen – die übrigen machten ihn nur schlechter.
+        if ((angezeigt ?? laufenderStand) is not Planstand aktuell)
         {
             return;
         }
+
+        int alle = AlternativenHolen().Count;
+        IReadOnlyList<(Planalternative Alternative, Planbewertung Bewertung)> liste = BesondereVarianten(aktuell);
+        if (liste.Count == 0)
+        {
+            return;
+        }
+
+        string ausgeblendet = alle > liste.Count
+            ? string.Create(CultureInfo.GetCultureInfo("de-DE"), $"{alle - liste.Count} weitere Varianten sind ausgeblendet: Der aktuelle Plan ist in ihrem Kriterium schon so gut oder besser.")
+            : string.Empty;
+        string hinweis = string.Join(" ", new[] { UnbekanntHinweis(), ausgeblendet }.Where(t => t.Length > 0));
 
         var dialog = new AlternativendialogViewModel(
             aktuell,
@@ -140,7 +162,7 @@ public sealed partial class HauptfensterViewModel
             Einteilung,
             (plan, k) => Kriteriumsdetails(false, k, plan),
             Laeuft && dienst.Automodus,
-            UnbekanntHinweis());
+            hinweis);
         if (await oberflaeche.AlternativenZeigenAsync(dialog) && dialog.Gewaehlt is { } gewaehlt
             && liste.FirstOrDefault(a => ReferenceEquals(a.Alternative, gewaehlt)) is { Alternative: not null } paar)
         {
@@ -255,6 +277,29 @@ public sealed partial class HauptfensterViewModel
                 }
             }
 
+            // Ein besserer Plan mitten in einem Schritt: nur anbieten.
+            if (f.NurPlan)
+            {
+                if (f.Plan is { Count: > 0 } neu && Laeuft && dienst.Automodus)
+                {
+                    dienst.PlanAnbieten(neu, $"HiGHS ({f.Text})", inselnNachziehen: false);
+                }
+
+                return;
+            }
+
+            // Stufe A fertig: Die Teilneuplanung wartet nicht länger (sie senkt B meist schneller als die weiteren Schritte).
+            if (f.AFertig)
+            {
+                dienst.HighsVorrang = false;
+            }
+
+            // Stufe A bewiesen: Der Automodus hört sofort auf, A zu drängen (nicht erst nach Stufe B).
+            if (f.SchrankeA is int a && Laeuft && dienst.Automodus)
+            {
+                dienst.HighsEinspielen([], a, null);
+            }
+
             if (f.Plan is { Count: > 0 } plan && Laeuft && dienst.Automodus)
             {
                 dienst.PlanAnbieten(plan, $"Zwischenplan aus HiGHS (vor {f.Text})");
@@ -294,13 +339,13 @@ public sealed partial class HauptfensterViewModel
             Stufenschranke.Laufzeit,
             schranke is not null && highsFortschritt is null,
             stand.Teilneuplanung);
-        return anzeige with { Varianten = festlegung is null ? AlternativenHolen().Count : 0 };
+        return anzeige with { Varianten = festlegung is null ? BesondereVarianten(null).Count : 0 };
     }
 
     /// <summary>Kachel „HiGHS“: die B-Varianten im Dialog, zuerst ausgewählt der Plan mit der niedrigsten Summe in B.</summary>
     private Task BVariantenZeigenAsync()
     {
-        IReadOnlyList<(Planalternative Alternative, Planbewertung Bewertung)> liste = AlternativenHolen();
+        IReadOnlyList<(Planalternative Alternative, Planbewertung Bewertung)> liste = BesondereVarianten(null);
         if (liste.Count == 0)
         {
             return Task.CompletedTask;

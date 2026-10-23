@@ -74,6 +74,10 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
     private string titel = UeberViewModel.Programm;
     private string statuszeile = "Bitte eine click-TT-Datei oder Plandatei öffnen.";
     private bool laeuft;
+
+    /// <summary>Ob die Oberfläche den Rechner gerade wach hält (siehe <see cref="IOberflaeche.WachHalten"/>).</summary>
+    private bool wachGehalten;
+
     private bool pausiert;
     private int naechsteAnsicht = 1;
     private string staffelname = string.Empty;
@@ -1754,6 +1758,14 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
 
     private void GenerierungGeaendert()
     {
+        // Solange gerechnet wird (nicht in der Pause), geht der Rechner nicht in den Energiesparmodus.
+        bool rechnet = (Laeuft && !Pausiert) || (KompaktRechnet && !KompaktPausiert);
+        if (rechnet != wachGehalten)
+        {
+            wachGehalten = rechnet;
+            oberflaeche.WachHalten(rechnet);
+        }
+
         VerfahrenGeaendert();
         OnPropertyChanged(nameof(GenerierungText));
         OnPropertyChanged(nameof(ZeigtPause));

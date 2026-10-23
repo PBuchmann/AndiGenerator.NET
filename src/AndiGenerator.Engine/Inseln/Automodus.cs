@@ -89,6 +89,9 @@ internal sealed class Automodus
 
     /// <summary>Die Auswertung des zuletzt geprüften Plans (<see cref="Pruefen"/>), für <see cref="Verursacher"/>.</summary>
     private Auswertung? letzte;
+
+    /// <summary>Verstöße je Kriterium im besten Plan (für die Anzeige, woran die zählende Suche arbeitet).</summary>
+    private double[] besteAnzahl = [];
     private Phase phase = Phase.Grundlauf;
 
     /// <summary>
@@ -210,6 +213,9 @@ internal sealed class Automodus
     /// <summary>Gets or sets a value indicating whether die Suche nach der nächsten Änderung beim besten Plan neu beginnen soll (sonst beim aktuellen Plan der Suche).</summary>
     public bool NeustartVomBesten { get; set; }
 
+    /// <summary>Holt einen Wert, der angibt, ob HiGHS die Schranke der Stufe A bewiesen hat.</summary>
+    public bool SchrankeABekannt => schranke.A is not null;
+
     /// <summary>Gets den aktuellen Stand für Anzeige und Auswertung.</summary>
     public Lenkungsstand Stand => new(
         Basis,
@@ -246,10 +252,11 @@ internal sealed class Automodus
     {
         get
         {
-            Kostenkriterium[] aktuell = phase switch
+            Kostenkriterium[] aktuell = (phase, zaehlen) switch
             {
-                Phase.Draengen => draengKriterien,
-                Phase.Glaetten when indexC < reihenfolgeC.Length => [(Kostenkriterium)reihenfolgeC[indexC]],
+                (Phase.Draengen, _) => draengKriterien,
+                (Phase.Glaetten, true) => Zaehlkriterien(),
+                (Phase.Glaetten, _) when indexC < reihenfolgeC.Length => [(Kostenkriterium)reihenfolgeC[indexC]],
                 _ => [],
             };
             return verschoben is Kostenkriterium v && zuletzt < verschobenBis && !aktuell.Contains(v) ? [v, .. aktuell] : aktuell;
@@ -257,18 +264,33 @@ internal sealed class Automodus
     }
 
     /// <summary>Bezeichnung der Phase für die Oberfläche: Basisoptimierung, dann Optimierung der Stufe A, B oder C.</summary>
-    private string Bezeichnung => phase switch
+    private string Bezeichnung => (phase, zaehlen) switch
     {
-        Phase.Grundlauf => "Basisoptimierung",
-        Phase.Draengen => draengStufe == Stufe.A ? "Optimierung Stufe A" : "Optimierung Stufe B",
+        (Phase.Grundlauf, _) => "Basisoptimierung",
+        (Phase.Draengen, _) => draengStufe == Stufe.A ? "Optimierung Stufe A" : "Optimierung Stufe B",
+        (_, true) => "Optimierung Stufe " + Zaehlstufe,
         _ => "Optimierung Stufe C",
     };
 
-    private string PhaseText => phase switch
+    private string PhaseText => (phase, zaehlen) switch
     {
-        Phase.Grundlauf => "Grundlauf",
-        Phase.Draengen => "Drängen",
+        (Phase.Grundlauf, _) => "Grundlauf",
+        (Phase.Draengen, _) => "Drängen",
+        (_, true) => "Zählen",
         _ => indexC < reihenfolgeC.Length ? $"Glätten {(Kostenkriterium)reihenfolgeC[indexC]}" : "Glätten",
+    };
+
+    /// <summary>
+    /// Die Stufe, in der die zählende Suche gerade etwas zu holen hat: A, solange der beste Plan harte Fehler hat oder über der
+    /// Grenze aus HiGHS liegt (ohne Grenze: noch Verstöße hat), dann B ebenso, sonst C. Mit Festlegung sind A und B entschieden.
+    /// </summary>
+    private Stufe Zaehlstufe => BesterWert switch
+    {
+        { Harte: > 0 } => Stufe.A,
+        _ when obergrenze is not null => Stufe.C,
+        { A: > 0 } w when schranke.A is not int sa || w.A > sa => Stufe.A,
+        { B: > 0 } w when schranke.B is not int sb || w.B > sb => Stufe.B,
+        _ => Stufe.C,
     };
 
     /// <summary>Übernimmt die Zahl der bisher berechneten Pläne (für den Stillstand nach Rechenleistung statt nur nach Zeit).</summary>
@@ -341,6 +363,7 @@ internal sealed class Automodus
         beste.KopierenNach(basisLoesung);
         BesterWert = wert;
         BesteKosten = gesamt;
+        besteAnzahl = basis.Anzahl;
         letzteAenderung = jetzt;
         UhrNeu(jetzt);
         sofort = true;
@@ -378,8 +401,10 @@ internal sealed class Automodus
         }
 
         Basis = Bewerten(basisLoesung, out _);
-        BesterWert = Bewerten(Beste, out double gesamt);
-        BesteKosten = gesamt;
+        Auswertung bester = Auswerten(Beste);
+        BesterWert = bester.Wert;
+        BesteKosten = bester.Gesamt;
+        besteAnzahl = bester.Anzahl;
         sucheVerstoesse = null;
 
         // Die Inseln beginnen beim besten Plan neu und bewerten nach der neuen Einteilung (beim Zählen zählt ihr Ziel noch nach
@@ -456,6 +481,7 @@ internal sealed class Automodus
             loesung.KopierenNach(Beste);
             BesterWert = wert;
             BesteKosten = letzte.Gesamt;
+            besteAnzahl = letzte.Anzahl;
             Verbesserungen++;
         }
 
@@ -517,13 +543,13 @@ internal sealed class Automodus
         BesterWert = Bewerten(Beste, out double gesamt);
         BesteKosten = gesamt;
         sucheVerstoesse = null;
+        sofort = true;
         phase = Phase.Draengen;
         draengStufe = Stufe.A;
         draengBester = null;
         ohneDraengfortschritt = 0;
         draengKriterien = [];
         fokus = null;
-        sofort = true;
     }
 
     /// <summary>
@@ -575,26 +601,27 @@ internal sealed class Automodus
     }
 
     /// <summary>
-    /// Die Kriterien mit den meisten Verstößen im zuletzt bewerteten Plan (<see cref="Pruefen"/>): wichtigste Stufe zuerst,
-    /// innerhalb der Stufe die meisten Verstöße zuerst.
+    /// Die Verstöße im zuletzt bewerteten Plan (<see cref="Pruefen"/>): alle Kriterien der Stufen A und B mit Verstößen, dazu
+    /// die <paramref name="ausC"/> Kriterien der Stufe C mit den meisten – wichtigste Stufe zuerst, innerhalb der Stufe die
+    /// meisten Verstöße zuerst.
     /// </summary>
-    /// <param name="hoechstens">Höchstens so viele.</param>
-    /// <returns>Die Kriterien mit ihren Verstößen.</returns>
-    public Kostenverursacher[] Verursacher(int hoechstens)
+    /// <param name="ausC">So viele Kriterien der Stufe C höchstens.</param>
+    /// <returns>Die Kriterien mit ihren Verstößen und ihrer Stufe.</returns>
+    public Kostenverursacher[] Verursacher(int ausC)
     {
         if (letzte is not { Anzahl: { } anzahl })
         {
             return [];
         }
 
-        int[] auswahl = Enumerable.Range(0, stufen.Length)
+        int[] mitVerstoessen = Enumerable.Range(0, stufen.Length)
             .Where(k => Stufeneinteilung.HatAnzahl((Kostenkriterium)k) && anzahl[k] > 0)
             .OrderBy(k => stufen[k])
             .ThenByDescending(k => anzahl[k])
-            .Take(hoechstens)
             .ToArray();
+        int[] auswahl = [.. mitVerstoessen.Where(k => stufen[k] != Stufe.C), .. mitVerstoessen.Where(k => stufen[k] == Stufe.C).Take(ausC)];
         double groesste = auswahl.Select(k => anzahl[k]).DefaultIfEmpty(1).Max();
-        return auswahl.Select(k => new Kostenverursacher((Kostenkriterium)k, anzahl[k] / groesste, (int)anzahl[k])).ToArray();
+        return auswahl.Select(k => new Kostenverursacher((Kostenkriterium)k, anzahl[k] / groesste, (int)anzahl[k], stufen[k])).ToArray();
     }
 
     /// <summary>Die Verstöße je Kriterium im besten Plan nach Stufen mit der Stufe des Kriteriums.</summary>
@@ -741,6 +768,18 @@ internal sealed class Automodus
         }
     }
 
+    /// <summary>
+    /// Zählende Suche: die Kriterien der <see cref="Zaehlstufe"/> mit Verstößen im besten Plan (in C das erste in der Reihenfolge).
+    /// </summary>
+    private Kostenkriterium[] Zaehlkriterien()
+    {
+        Stufe stufe = Zaehlstufe;
+        IEnumerable<Kostenkriterium> mitVerstoessen = (stufe == Stufe.C ? reihenfolgeC : Enumerable.Range(0, stufen.Length).Where(k => stufen[k] == stufe))
+            .Where(k => k < besteAnzahl.Length && besteAnzahl[k] > 0)
+            .Select(k => (Kostenkriterium)k);
+        return stufe == Stufe.C ? [.. mitVerstoessen.Take(1)] : [.. mitVerstoessen];
+    }
+
     /// <summary>Startet die Uhr des Stillstands neu: Zeit und Zahl der berechneten Pläne der letzten Verbesserung.</summary>
     /// <param name="jetzt">Sekunden reiner Rechenzeit.</param>
     private void UhrNeu(double jetzt)
@@ -816,6 +855,15 @@ internal sealed class Automodus
             draengStufe = Stufe.B;
             draengBester = null;
             ohneDraengfortschritt = 0;
+            if (zaehlen)
+            {
+                // Wie bei der Schranke: B nicht mit angehobenen Gewichten drängen – damit liefen die Inseln vom besten Plan weg
+                // (A 18 bis 22 und Spiele ohne Termin bei A 10) –, sondern zählend suchen: A und B nie schlechter als im besten
+                // Plan, erst B, dann C.
+                Notieren($"{letzteAenderung:0} s bei A geht nichts mehr ({wert}): A geschützt, Suche zählt B und C");
+                return GlaettenBeginnen(Schuetzen(Optionen, Stufe.A), Auswerten(Beste));
+            }
+
             Notieren($"{letzteAenderung:0} s bei A geht nichts mehr ({wert}): Stufe B");
             anhebung = Draengen(Stufe.B, plan);
             if (anhebung.Neu != Optionen)
@@ -876,8 +924,16 @@ internal sealed class Automodus
         ohneDraengfortschritt = 0;
         if (draengStufe == Stufe.A)
         {
-            Notieren($"{letzteAenderung:0} s Stufe A bei der Schranke bzw. aus HiGHS ({BesterWert}): A geschützt, Stufe B");
             draengStufe = Stufe.B;
+            if (!amZiel.B && zaehlen)
+            {
+                // A ist bewiesen bestmöglich: B nicht mit angehobenen Gewichten drängen (damit liefen die Inseln vom besten Plan
+                // weg, bis A 19 bis 23), sondern gleich zählend suchen – erst B, dann C, A und B nie schlechter als im besten Plan.
+                Notieren($"{letzteAenderung:0} s Stufe A bei der Schranke bzw. aus HiGHS ({BesterWert}): A geschützt, Suche zählt B und C");
+                return GlaettenBeginnen(neu, Auswerten(Beste));
+            }
+
+            Notieren($"{letzteAenderung:0} s Stufe A bei der Schranke bzw. aus HiGHS ({BesterWert}): A geschützt, Stufe B");
             if (!amZiel.B)
             {
                 return neu;

@@ -113,6 +113,27 @@ public sealed class GenerierungsanzeigeTests
         Assert.True(verlauf.Punkte[^1].Suche > 0.8);
     }
 
+    /// <summary>
+    /// Ein Plan mit Spielen ohne gültigen Termin (zu Beginn der Basisoptimierung) erscheint im Verlauf nicht: Er hat weniger
+    /// Verstöße, und die Treppe sähe aus, als wäre ein besserer Plan verloren gegangen.
+    /// </summary>
+    [Fact]
+    public void Plan_mit_Spielen_ohne_Termin_erscheint_im_Verlauf_ohne_Verstoesse()
+    {
+        var verlauf = new Suchverlauf();
+        Optimierungsstand Basis(int a, int harte)
+        {
+            var lenkung = new Lenkungsstand(null, new Stufenwert(harte, a, 30, 0, 300, 0), null, string.Empty, "Basisoptimierung", 0, 0, Berechnungsoptionen.Standard, []);
+            var raum = new Maschinenraum([], [], 0, null, 0, [new(Kostenkriterium.ParalleleSpiele, a, Stufe.A)], 1, BesterHarte: harte);
+            return new Optimierungsstand(true, false, 100, 10, 1000, 1, TimeSpan.Zero, null, [], lenkung, raum);
+        }
+
+        verlauf.Hinzufuegen(Basis(12, 40), 1);
+        verlauf.Hinzufuegen(Basis(40, 0), 2);
+
+        Assert.Equal([null, 40], verlauf.Punkte.Select(p => p.A));
+    }
+
     private static Optimierungsstand Stand(double kosten) =>
         new(true, false, 100, 10, kosten, 1, TimeSpan.Zero, null, []);
 }

@@ -179,6 +179,33 @@ public sealed class HauptfensterTests : IDisposable
         Assert.Equal(PlanQuelle.ClickTt, Assert.Single(Ansichten<QualitaetAnsichtViewModel>()).Quelle);
     }
 
+    /// <summary>Im Automodus nennt die Karte einer Insel alle Verstöße in A und B mit Stufe und ihre harten Fehler.</summary>
+    /// <returns>Der Testlauf.</returns>
+    [Fact]
+    public async Task Leitstand_zeigt_Verstoesse_in_A_und_B_und_harte_Fehler_der_Inseln()
+    {
+        await OeffnenAsync();
+        hf.LeitstandCommand.Execute(null);
+        LeitstandAnsichtViewModel raum = Assert.Single(Ansichten<LeitstandAnsichtViewModel>());
+        Inselstand[] inseln =
+        [
+            new(1, false, true, 900, 500_000, 50_000, 2, ["2"], new Stufenwert(3, 7, 44, 0, 347, 0), Kostentreiber:
+            [
+                new Kostenverursacher(Kostenkriterium.ParalleleSpiele, 1, 7, Stufe.A),
+                new Kostenverursacher(Kostenkriterium.Sperrtermine, 0.5, 30, Stufe.B),
+                new Kostenverursacher(Kostenkriterium.Spielverteilung, 0.3, 20, Stufe.C),
+            ]),
+            new(2, false, true, 1200, 400_000, 100_000, 0, ["2"], new Stufenwert(0, 10, 36, 0, 365, 0)),
+        ];
+        raum.Uebernehmen(new Optimierungsstand(true, false, 900_000, 5000, 900, 3, TimeSpan.Zero, null, [], null, new Maschinenraum([600_000, 300_000], inseln, 100_000, null, 0)));
+
+        Assert.True(raum.Inseln[0].HatHarte);
+        Assert.StartsWith("3 Spiele ohne gültigen Termin", raum.Inseln[0].Harte, StringComparison.Ordinal);
+        Assert.False(raum.Inseln[1].HatHarte);
+        Assert.Equal(["A · " + Planqualitaet.Name(Kostenkriterium.ParalleleSpiele), "B · " + Planqualitaet.Name(Kostenkriterium.Sperrtermine), "C · " + Planqualitaet.Name(Kostenkriterium.Spielverteilung)], raum.Inseln[0].Kostentreiber.Select(k => k.Name));
+        Assert.Equal("7", raum.Inseln[0].Kostentreiber[0].Prozent);
+    }
+
     [Fact]
     public async Task Leitstand_zeigt_Inseln_mit_bestem_Plan_und_Spezial_Insel()
     {
@@ -785,6 +812,9 @@ public sealed class HauptfensterTests : IDisposable
 
         hf.StoppenCommand.Execute(null);
         Assert.Equal("Start", hf.GenerierungText);
+
+        // Wach gehalten, solange gerechnet wird – nicht in der Pause und nicht danach.
+        Assert.Equal([true, false, true, false], o.Wach);
     }
 
     [Fact]

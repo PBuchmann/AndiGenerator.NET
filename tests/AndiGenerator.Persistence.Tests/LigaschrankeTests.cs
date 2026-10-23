@@ -114,8 +114,10 @@ public sealed class LigaschrankeTests
         Staffel staffel = Laden("R11_4__Kreisklasse (5).xml");
         Stufeneinteilung hinten = Stufeneinteilung.Standard.Platzieren(Kostenkriterium.VereinsinterneSpieleAmAnfang, Kostenkriterium.Pflichtspieltage, davor: false);
 
-        // Die Summe von B ist hier schwer zu beweisen; geprüft wird nur A (kurze Zeitgrenze).
-        Schrankenbericht bericht = Ligaschranke.Berechnen(staffel, Berechnungsoptionen.Standard, new Highsbruecke(), TimeSpan.FromSeconds(10), hinten, zeitStufeC: StufeC);
+        // Die Summe von B ist hier schwer zu beweisen; geprüft wird nur A – die Rechnung endet, sobald B beginnt (sonst rechnet
+        // die Kette mit dem besten gefundenen B weiter).
+        bool beiB = false;
+        Schrankenbericht bericht = Ligaschranke.Berechnen(staffel, Berechnungsoptionen.Standard, new Highsbruecke(), TimeSpan.FromSeconds(10), hinten, f => beiB |= f.Schritt >= 2, StufeC, () => beiB);
 
         Assert.Equal(3, bericht.SchrankeA);
         Assert.Equal(0, bericht.Stufen.Single(s => s.Kriterium == Kostenkriterium.VereinsinterneSpieleAmAnfang).Einzeln);
@@ -302,6 +304,22 @@ public sealed class LigaschrankeTests
             if (alternative.Kriterium == Kostenkriterium.ParalleleSpiele)
             {
                 Assert.Equal(3, Anzahl(b, MannschaftsKostenart.ParalleleSpiele));
+            }
+        }
+
+        // Nachbessern (Teilneuplanung je Variante): Das Kriterium der Variante bleibt bei seinem Wert, und keine Variante wird
+        // nach Stufen schlechter.
+        Schrankenbericht nachgebessert = Ligaschranke.VariantenNachbessern(staffel, Berechnungsoptionen.Standard, new Highsbruecke(), einteilung, bericht, TimeSpan.FromSeconds(5));
+        IReadOnlyList<Planalternative> neu = nachgebessert.Alternativen ?? [];
+        Assert.Equal(varianten.Select(v => v.Name), neu.Select(v => v.Name));
+        for (int i = 0; i < varianten.Count; i++)
+        {
+            Planbewertung vorher = Referenzbewertung.Bewerten(staffel with { BestehenderSpielplan = varianten[i].Plan }, Berechnungsoptionen.Standard);
+            Planbewertung nachher = Referenzbewertung.Bewerten(staffel with { BestehenderSpielplan = neu[i].Plan }, Berechnungsoptionen.Standard);
+            Assert.False(Stufenvergleich.Besser(einteilung.Zaehlen(vorher), einteilung.Zaehlen(nachher)), varianten[i].Name);
+            if (varianten[i].Kriterium == Kostenkriterium.ParalleleSpiele)
+            {
+                Assert.True(Anzahl(nachher, MannschaftsKostenart.ParalleleSpiele) <= 3);
             }
         }
     }

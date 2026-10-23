@@ -317,10 +317,32 @@ public class InseloptimiererTests
         optimierer.Ruhend = 0;
         Assert.Equal(0, optimierer.Ruhend);
 
-        // Mit acht Kernen ruhen höchstens vier.
+        // Mit acht Kernen ruhen höchstens vier (die Hälfte).
         using var achtKerne = new Inseloptimierer(LeereStaffel(R2), Berechnungsoptionen.Standard, Optimierungseinstellungen.Standard with { Kerne = 8 });
         achtKerne.Ruhend = 8;
         Assert.Equal(4, achtKerne.Ruhend);
+    }
+
+    /// <summary>
+    /// Ein Platz, der ruhte, bekommt den neuen Plan (andere Gewichte, Zählziel) auch dann, wenn vor seiner Übernahme ein
+    /// Neustart ohne neuen Plan kam – sonst rechnete er mit den alten Gewichten weiter.
+    /// </summary>
+    [Fact]
+    public void Neustart_ersetzt_den_neuen_Plan_eines_Auftrags_nicht()
+    {
+        RefPlan referenz = RefPlan.Laden(LeereStaffel(R2), Berechnungsoptionen.Standard);
+        var definition = new KernDefinition(referenz);
+        var alt = new KernPlan(referenz, definition);
+        alt.Merken();
+        var platz = new Suchplatz(alt, new Zufall(1), Tauschstrategie.Lesen("2"), false, -1);
+        var neu = new KernPlan(referenz, definition) { Zaehlziel = new Zaehlziel([.. Enumerable.Repeat(Stufe.C, 64)], 1000) };
+        neu.Merken();
+        var start = new Loesung(alt.AnzahlErlaubt);
+        alt.LoesungSchreiben(start);
+        platz.Auftragen(new Auftrag(start, -1, neu));
+        platz.Auftragen(new Auftrag(start.Kopie(), -1));
+        platz.Rechnen();
+        Assert.True(platz.Spaet);
     }
 
     [Fact]
@@ -399,6 +421,32 @@ public class InseloptimiererTests
         Assert.Contains(lenkung.Aenderungen, z => z.Contains("Stufe A bei der Schranke", StringComparison.Ordinal));
         Assert.Contains(lenkung.Aenderungen, z => z.Contains("Stufe B bei der Schranke", StringComparison.Ordinal));
         Assert.Equal((1000, 1000), (lenkung.SchrankeA, lenkung.SchrankeB));
+        Assert.Equal(0, lenkung.Bester.Harte);
+    }
+
+    /// <summary>
+    /// Ohne Schranke aus HiGHS: Geht bei A nichts mehr, drängt der Automodus B nicht mit angehobenen Gewichten (damit liefen die
+    /// Inseln vom besten Plan weg, bis zu Spielen ohne Termin), sondern schützt A und sucht zählend weiter.
+    /// </summary>
+    [Fact]
+    public void Ohne_Schranke_sucht_der_Automodus_nach_Stufe_A_zaehlend()
+    {
+        const string R3 = "R3_Damen_Bezirksoberliga_Rheinhessen (1).xml";
+        Optimierungseinstellungen einstellungen = Optimierungseinstellungen.Standard with
+        {
+            Kerne = 1,
+            Startwert = 3,
+            Automodus = true,
+            AutoOhneGrundlauf = true,
+            AutoStillstandPlaene = 2_000,
+            Zeitbudget = 2_000,
+        };
+        using var optimierer = new Inseloptimierer(LeereStaffel(R3), Berechnungsoptionen.Standard, einstellungen);
+        optimierer.Rechnen(300_000);
+
+        Lenkungsstand lenkung = Assert.IsType<Lenkungsstand>(optimierer.Lenkung);
+        Assert.Contains(lenkung.Aenderungen, z => z.Contains("bei A geht nichts mehr", StringComparison.Ordinal) && z.EndsWith("A geschützt, Suche zählt B und C", StringComparison.Ordinal));
+        Assert.DoesNotContain(lenkung.Aenderungen, z => z.EndsWith("): Stufe B", StringComparison.Ordinal));
         Assert.Equal(0, lenkung.Bester.Harte);
     }
 

@@ -111,8 +111,8 @@ public sealed class Optimierungsdienst : IDisposable
     }
 
     /// <summary>
-    /// Vorrang für HiGHS: Solange die untere Schranke die Stufen A und B rechnet, wartet die Teilneuplanung – ihre Arbeit wäre
-    /// verloren, wenn danach eine Variante in B gewählt wird, und HiGHS bekommt die Kerne.
+    /// Vorrang für HiGHS: Solange die untere Schranke die Stufe A rechnet, wartet die Teilneuplanung – HiGHS bekommt die Kerne.
+    /// Danach rechnet sie gleich mit: Sie senkt B meist schneller als die weiteren Schritte der Kette.
     /// </summary>
     public bool HighsVorrang
     {
@@ -211,7 +211,11 @@ public sealed class Optimierungsdienst : IDisposable
     /// </summary>
     /// <param name="plan">Der Plan.</param>
     /// <param name="herkunft">Für das Protokoll des Automodus.</param>
-    public void PlanAnbieten(IReadOnlyList<Spiel> plan, string herkunft)
+    /// <param name="inselnNachziehen">
+    /// Alle Inseln, die in A oder B schlechter sind, beginnen mit ihm (am Ende eines Schritts); <c>false</c> für Pläne mitten
+    /// in einem Schritt – dann nur die schlechteste, sonst begännen alle Inseln alle paar Sekunden neu.
+    /// </param>
+    public void PlanAnbieten(IReadOnlyList<Spiel> plan, string herkunft, bool inselnNachziehen = true)
     {
         Inseloptimierer? o;
         lock (sperre)
@@ -219,7 +223,7 @@ public sealed class Optimierungsdienst : IDisposable
             o = laufenderAutomodus ? optimierer : null;
         }
 
-        o?.PlanEinspielen(plan, herkunft, inselnNachziehen: true);
+        o?.PlanEinspielen(plan, herkunft, inselnNachziehen);
     }
 
     /// <summary>
@@ -394,7 +398,7 @@ public sealed class Optimierungsdienst : IDisposable
             return;
         }
 
-        teilneuplaner = new Teilneuplaner(optimierer, l.Staffel, l.Optionen, new Highsbruecke(), einteilung.Vervollstaendigt(), festlegung?.Grenzen, () => highsVorrang);
+        teilneuplaner = new Teilneuplaner(optimierer, l.Staffel, l.Optionen, new Highsbruecke(), einteilung.Vervollstaendigt(), festlegung?.Grenzen, () => highsVorrang, linienloeser: Stufenschranke.Linienloeser, linien: Stufenschranke.Linien);
         teilneuplaner.Starten();
     }
 

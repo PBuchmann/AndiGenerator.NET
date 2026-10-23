@@ -560,7 +560,7 @@ public sealed class QualitaetAnsichtViewModel : AnsichtViewModel
         }
 
         ZeigtFestlegung = false;
-        IReadOnlyList<(Planalternative Alternative, Planbewertung Bewertung)> liste = Hauptfenster.Automodus && gezogen is null ? Hauptfenster.AlternativenHolen() : [];
+        IReadOnlyList<(Planalternative Alternative, Planbewertung Bewertung)> liste = Hauptfenster.Automodus && gezogen is null ? Hauptfenster.BesondereVarianten(letzter) : [];
         if (kopfzeileB is { Kopf: { } kopf } && liste.Count > 0)
         {
             // Zuerst ausgewählt: der Plan mit der niedrigsten Summe in B (A und B zusammen bestmöglich).

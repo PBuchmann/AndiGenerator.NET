@@ -29,6 +29,12 @@ public sealed partial class Ligaschranke
     private const int ProtokollHoechstens = 200;
 
     /// <summary>
+    /// Gewicht eines B-Verstoßes im Ziel der Teilneuplanung (C zählt 1): Ein Ausschnitt senkt zuerst B, dann C – so wie der
+    /// Automodus vergleicht. Vorher zählte nur C, und B wurde nie besser als im Ausgangsplan.
+    /// </summary>
+    private const int GewichtB = 20;
+
+    /// <summary>
     /// Je Mannschaft die Verstöße in C eines Plans (nach der Kostenfunktion; je Plan einmal berechnet) – für gezielte Ausschnitte
     /// (<see cref="Neuplanungseinstellungen.Verstoesse"/>).
     /// </summary>
@@ -219,7 +225,7 @@ public sealed partial class Ligaschranke
             return new Neuplanungsbericht(plan, vorher, vorher, 0, 0, protokoll);
         }
 
-        // Bedingungen: A und B als Summe nicht schlechter als im Ausgangsplan. Ziel: C.
+        // Bedingungen: A und B als Summe nicht schlechter als im Ausgangsplan. Ziel: erst B, dann C.
         List<List<(int Spalte, double Faktor)>> bedingt = [.. a.Concat(b)];
         int ersteBedingung = modell.Zeilen;
         foreach (List<(int Spalte, double Faktor)> z in bedingt)
@@ -238,7 +244,7 @@ public sealed partial class Ligaschranke
 
         string Werte(List<List<(int Spalte, double Faktor)>> stufe) =>
             string.Join(" + ", stufe.Select(z => Wert(z, aktuell!).ToString("0", CultureInfo.InvariantCulture)));
-        List<(int Spalte, double Faktor)> ziel = Zusammenfassen(c.SelectMany(z => z));
+        List<(int Spalte, double Faktor)> ziel = Zusammenfassen(b.SelectMany(z => z).Select(e => (e.Spalte, e.Faktor * GewichtB)).Concat(c.SelectMany(z => z)));
         Melden(string.Create(CultureInfo.InvariantCulture, $"Start: {vorher}, Modellziel {Wert(ziel, aktuell):0} (im Modell A {Werte(a)}; B {Werte(b)}; C {Werte(c)}; {modell.Spalten} Spalten, {modell.Zeilen} Zeilen)"));
 
         var zufall = new Random(e.Startwert);
@@ -376,8 +382,8 @@ public sealed partial class Ligaschranke
             Melden(string.Create(CultureInfo.InvariantCulture, $"{schritte}: {ausschnitt} ({frei.Count} Spalten frei, {zeit}): Modell {alt:0} → {neu:0}, {w} – {(besser ? "angenommen" : "abgelehnt")}"));
             if (besser)
             {
-                // Als Erfolg zählt, wie viele C-Verstöße weniger (mindestens einer): Große Schritte wiegen mehr als kleine.
-                double gewinn = Math.Max(1, bester.CAnzahl - w.CAnzahl);
+                // Als Erfolg zählt, wie viele Verstöße weniger (B gewichtet, mindestens einer): Große Schritte wiegen mehr als kleine.
+                double gewinn = Math.Max(1, ((bester.B - w.B) * GewichtB) + bester.CAnzahl - w.CAnzahl);
                 aktuell = werte;
                 besterPlan = kandidat;
                 bester = w;

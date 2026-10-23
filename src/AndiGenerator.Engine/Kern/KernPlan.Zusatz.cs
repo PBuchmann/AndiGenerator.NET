@@ -57,92 +57,165 @@ internal sealed partial class KernPlan
     }
 
     /// <summary>
+    /// Die Anzahlen von <see cref="ZusatzZaehlen"/> ohne Meldungen und Listen (für die Suche, die sie bei jedem Plan braucht):
+    /// Pausen aller Mannschaften, zu lange und überlappende Spieltage, der letzte zu lang bzw. überlappend.
+    /// </summary>
+    public (int Pausen, int Laenge, int Ueberlappung, bool LetzteLaenge, bool LetzteUeberlappung) ZusatzAnzahlen()
+    {
+        int pausen = 0;
+        int spieltage = 0;
+        for (int t = 0; t < D.N; t++)
+        {
+            pausen += Pausen(t);
+            spieltage = Math.Max(spieltage, SpieleAnzahl[t]);
+        }
+
+        int laenge = 0;
+        int ueberlappung = 0;
+        bool letzteLaenge = false;
+        bool letzteUeberlappung = false;
+        int bisherEnde = int.MinValue;
+        for (int i = 0; i < spieltage; i++)
+        {
+            double max = 0.0;
+            double min = 0.0;
+            for (int t = 0; t < D.N; t++)
+            {
+                int s = SpieleAnzahl[t] > i ? Spiele[t][i] : -1;
+                double datum = s >= 0 ? Datum[s] : 0.0;
+                if (datum != 0.0 && InPlanung[s])
+                {
+                    max = Math.Max(max, datum);
+                    min = min == 0.0 ? datum : Math.Min(min, datum);
+                }
+            }
+
+            if (max <= 0 || min <= 0)
+            {
+                continue;
+            }
+
+            bool letzter = i == spieltage - 1;
+            if ((DelphiDatum.Trunc(max) - DelphiDatum.Trunc(min)) * D.N / 10.0 > SpieltagTage)
+            {
+                laenge++;
+                letzteLaenge |= letzter;
+            }
+
+            // Wie Spieltage: Überlappung, wenn ein früherer Spieltag erst an oder nach seinem Beginn endet.
+            if (DelphiDatum.Trunc(min) <= bisherEnde)
+            {
+                ueberlappung++;
+                letzteUeberlappung |= letzter;
+            }
+
+            bisherEnde = Math.Max(bisherEnde, DelphiDatum.Trunc(max));
+        }
+
+        return (pausen, laenge, ueberlappung, letzteLaenge, letzteUeberlappung);
+    }
+
+    /// <summary>
     /// Die Lücken zwischen den Spielen einer Mannschaft je Runde wie bei <c>Spielverteilung</c>: Start, Ende und wie viele
     /// Spieltage im Mittel darin liegen (am Rand der Runde +0,5, an Koppelterminen geteilt durch 1,5).
     /// </summary>
     private List<(double Start, double Ende, double Soll)> Luecken(int t)
     {
         var luecken = new List<(double Start, double Ende, double Soll)>();
-        int[] liste = Spiele[t];
-        int spiele = SpieleAnzahl[t];
-        if (spiele == 0)
-        {
-            return luecken;
-        }
-
-        bool[] gekoppelt = new bool[spiele + 1];
-        for (int i = 0; i <= spiele; i++)
-        {
-            gekoppelt[i] = GekoppeltDanach(t, i) >= 0;
-        }
-
         for (int runde = 0; runde < D.Runden.Length; runde++)
         {
-            if (!D.RundeZuPlanen[runde])
+            for (int i = -1; D.RundeZuPlanen[runde] && i < SpieleAnzahl[t]; i++)
             {
-                continue;
-            }
-
-            for (int i = -1; i < spiele; i++)
-            {
-                bool erstes = false;
-                bool letztes = false;
-                double start;
-                double ende;
-                if (i < 0 || runde > Runde[liste[i]])
+                if (Luecke(t, runde, i, out double start, out double ende, out double soll))
                 {
-                    if (i + 1 >= spiele || runde != Runde[liste[i + 1]])
-                    {
-                        continue;
-                    }
-
-                    erstes = true;
-                    start = D.ErstesEchtesDatum[runde];
-                    ende = Datum[liste[i + 1]];
+                    luecken.Add((start, ende, soll));
                 }
-                else if (i >= spiele - 1 || runde < Runde[liste[i + 1]])
-                {
-                    if (runde != Runde[liste[i]])
-                    {
-                        continue;
-                    }
-
-                    letztes = true;
-                    ende = D.LetztesEchtesDatum[runde] + 1;
-                    start = Datum[liste[i]];
-                }
-                else
-                {
-                    start = Datum[liste[i]];
-                    ende = Datum[liste[i + 1]];
-                }
-
-                if (ende <= 0 || start <= 0)
-                {
-                    continue;
-                }
-
-                double soll = D.SollSpiele(erstes ? runde : Runde[liste[i]], start, ende);
-                if (!letztes && gekoppelt[i + 1])
-                {
-                    soll /= 1.5;
-                }
-
-                if (!erstes && i > 0 && gekoppelt[i - 1])
-                {
-                    soll /= 1.5;
-                }
-
-                if (erstes || letztes)
-                {
-                    soll += 0.5;
-                }
-
-                luecken.Add((start, ende, soll));
             }
         }
 
         return luecken;
+    }
+
+    /// <summary>Zählt die Pausen einer Mannschaft wie <see cref="Luecken"/> (ohne Liste, für die Suche).</summary>
+    private int Pausen(int t)
+    {
+        int pausen = 0;
+        for (int runde = 0; runde < D.Runden.Length; runde++)
+        {
+            for (int i = -1; D.RundeZuPlanen[runde] && i < SpieleAnzahl[t]; i++)
+            {
+                if (Luecke(t, runde, i, out _, out _, out double soll) && soll >= LueckeAb)
+                {
+                    pausen++;
+                }
+            }
+        }
+
+        return pausen;
+    }
+
+    /// <summary>Die Lücke nach dem i-ten Spiel einer Mannschaft (−1: vor dem ersten) in einer Runde, wenn es dort eine gibt.</summary>
+    private bool Luecke(int t, int runde, int i, out double start, out double ende, out double soll)
+    {
+        int[] liste = Spiele[t];
+        int spiele = SpieleAnzahl[t];
+        bool erstes = false;
+        bool letztes = false;
+        soll = 0;
+        if (i < 0 || runde > Runde[liste[i]])
+        {
+            start = 0;
+            ende = 0;
+            if (i + 1 >= spiele || runde != Runde[liste[i + 1]])
+            {
+                return false;
+            }
+
+            erstes = true;
+            start = D.ErstesEchtesDatum[runde];
+            ende = Datum[liste[i + 1]];
+        }
+        else if (i >= spiele - 1 || runde < Runde[liste[i + 1]])
+        {
+            start = 0;
+            ende = 0;
+            if (runde != Runde[liste[i]])
+            {
+                return false;
+            }
+
+            letztes = true;
+            ende = D.LetztesEchtesDatum[runde] + 1;
+            start = Datum[liste[i]];
+        }
+        else
+        {
+            start = Datum[liste[i]];
+            ende = Datum[liste[i + 1]];
+        }
+
+        if (ende <= 0 || start <= 0)
+        {
+            return false;
+        }
+
+        soll = D.SollSpiele(erstes ? runde : Runde[liste[i]], start, ende);
+        if (!letztes && GekoppeltDanach(t, i + 1) >= 0)
+        {
+            soll /= 1.5;
+        }
+
+        if (!erstes && i > 0 && GekoppeltDanach(t, i - 1) >= 0)
+        {
+            soll /= 1.5;
+        }
+
+        if (erstes || letztes)
+        {
+            soll += 0.5;
+        }
+
+        return true;
     }
 
     /// <summary>

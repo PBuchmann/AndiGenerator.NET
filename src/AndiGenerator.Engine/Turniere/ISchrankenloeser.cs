@@ -20,6 +20,7 @@ public interface ISchrankenloeser
     /// <param name="regel">
     /// Zeitgrenze nach Fortschritt statt der festen <paramref name="zeitgrenze"/>, oder <c>null</c>.
     /// </param>
+    /// <param name="zwischenloesung">Bekommt jede bessere Lösung schon während der Suche (Werte der Spalten), oder <c>null</c>.</param>
     /// <returns>Das Ergebnis.</returns>
-    Schrankenloesung Loesen(Ganzzahlmodell modell, TimeSpan zeitgrenze, double[]? start = null, Func<bool>? aufhoeren = null, Laufzeitregel? regel = null);
+    Schrankenloesung Loesen(Ganzzahlmodell modell, TimeSpan zeitgrenze, double[]? start = null, Func<bool>? aufhoeren = null, Laufzeitregel? regel = null, Action<double[]>? zwischenloesung = null);
 }

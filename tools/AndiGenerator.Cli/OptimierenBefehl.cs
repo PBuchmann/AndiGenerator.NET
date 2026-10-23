@@ -24,6 +24,9 @@ internal static class OptimierenBefehl
 {
     private static readonly CultureInfo Deutsch = CultureInfo.GetCultureInfo("de-DE");
 
+    /// <summary>Zu diesen Zeiten (Sekunden) merkt sich der Automodus den besten Plan für den Verlauf am Ende.</summary>
+    private static readonly int[] Verlaufspunkte = [30, 60, 90, 120, 180, 240, 300, 420, 600, 900, 1200, 1800];
+
     public static async Task<int> Ausfuehren(IReadOnlyList<string> args)
     {
         OptimierenArgumente? a = OptimierenArgumente.Lesen(args, out string fehler);
@@ -121,6 +124,7 @@ internal static class OptimierenBefehl
             SpezialInsel = !a.OhneSpezial,
             Automodus = a.Auto,
             StartplanInseln = a.StartInseln,
+            AutoSpaetannahme = a.Spaet ?? Optimierungseinstellungen.Standard.AutoSpaetannahme,
         };
 
         List<Spiel>? start = null;
@@ -136,10 +140,16 @@ internal static class OptimierenBefehl
         // Automodus mit HiGHS wie in der Oberfläche: Schranke und Plan werden nach dem Start eingespielt (ab Ende des Grundlaufs);
         // der Startplan ist (wie dort der beste Plan der Generierung) auch Startlösung der Schranke.
         Schrankenbericht? highs = null;
-        if (a.Highs)
+        if (a.Highs && !a.Nebenher)
         {
             highs = Ligaschranke.Berechnen(staffel, optionen, new SchrankeBefehl.Highsschranke(), Ligaschranke.StandardZeitJeStufe, einteilung, startplan: () => start, laufzeit: SchrankeBefehl.Laufzeit);
-            Console.WriteLine($"HiGHS:        A ≥ {highs.SchrankeA?.ToString(CultureInfo.InvariantCulture) ?? "?"}, B ≥ {highs.SchrankeB?.ToString(CultureInfo.InvariantCulture) ?? "?"}" + (highs.Plan.Count > 0 ? string.Empty : " (kein Plan)"));
+            string b = (highs.SchrankeB, highs.SummeB) switch
+            {
+                ({ } sb, _) => sb.ToString(CultureInfo.InvariantCulture),
+                (null, { Gefunden: int g } unbewiesen) => string.Create(CultureInfo.InvariantCulture, $"{unbewiesen.Schranke} (nicht bewiesen, bester Plan {g})"),
+                _ => "?",
+            };
+            Console.WriteLine($"HiGHS:        A ≥ {highs.SchrankeA?.ToString(CultureInfo.InvariantCulture) ?? "?"}, B ≥ {b}" + (highs.Plan.Count > 0 ? string.Empty : " (kein Plan)"));
             foreach (string hinweis in highs.Hinweise.Where(h => h.Contains("kennt das Modell nicht", StringComparison.Ordinal)))
             {
                 Console.WriteLine($"HiGHS:        {hinweis}");
@@ -172,20 +182,84 @@ internal static class OptimierenBefehl
             optimierer.HighsEinspielen(highs.Plan, highs.SchrankeA, highs.SchrankeB);
         }
 
-        // Automodus mit Teilneuplanung (HiGHS) nebenher, fortlaufend.
+        // Automodus mit Teilneuplanung (HiGHS) nebenher, fortlaufend; mit --nebenher wartet sie wie in der Oberfläche, bis die
+        // Untergrenze Stufe A fertig hat (die HiGHS-Linien nicht).
+        var vorrang = new System.Runtime.CompilerServices.StrongBox<bool>(a.Nebenher);
         using Teilneuplaner? teilneuplaner = a.Neuplanen && a.Auto && HighsLoeser.Verfuegbar
-            ? new Teilneuplaner(optimierer, staffel, optionen, new SchrankeBefehl.Highsschranke(), einteilung.Vervollstaendigt())
+            ? new Teilneuplaner(
+                optimierer,
+                staffel,
+                optionen,
+                new SchrankeBefehl.Highsschranke(),
+                einteilung.Vervollstaendigt(),
+                warten: () => Volatile.Read(ref vorrang.Value),
+                linienloeser: lauf => new SchrankeBefehl.Highsschranke(new Highsvorgabe(lauf + 1, (lauf % 3) switch { 0 => 0.05, 1 => 0.2, _ => 0.5 }, OhneNeustart: true)),
+                linien: a.Linien ?? StandardLinien())
             : null;
+        Task? nebenher = null;
+        if (a.Nebenher)
+        {
+            var nebenUhr = Stopwatch.StartNew();
+            nebenher = Task.Run(() =>
+            {
+                Schrankenbericht bericht = Ligaschranke.Berechnen(
+                    staffel,
+                    optionen,
+                    new SchrankeBefehl.Highsschranke(),
+                    Ligaschranke.StandardZeitJeStufe,
+                    einteilung,
+                    f =>
+                    {
+                        if (f.AFertig)
+                        {
+                            Volatile.Write(ref vorrang.Value, false);
+                        }
+
+                        NebenherMelden(optimierer, f, nebenUhr);
+                    },
+                    startplan: () => optimierer.BesterStand().Spiele,
+                    laufzeit: SchrankeBefehl.Laufzeit);
+                Console.WriteLine($"  [{nebenUhr.Elapsed.TotalSeconds:0} s] HiGHS: B-Varianten nachbessern");
+                bericht = Ligaschranke.VariantenNachbessern(staffel, optionen, new SchrankeBefehl.Highsschranke(), einteilung, bericht, TimeSpan.FromSeconds(30));
+                Console.WriteLine($"  [{nebenUhr.Elapsed.TotalSeconds:0} s] HiGHS fertig: A ≥ {bericht.SchrankeA?.ToString(CultureInfo.InvariantCulture) ?? "?"}, B ≥ {bericht.SchrankeB?.ToString(CultureInfo.InvariantCulture) ?? "?"}");
+                foreach (string hinweis in bericht.Hinweise)
+                {
+                    Console.WriteLine($"  HiGHS-Hinweis: {hinweis}");
+                }
+
+                foreach (Schrankenstufe st in bericht.Stufen.Where(x => x.Kriterium is null))
+                {
+                    Console.WriteLine($"  HiGHS-Stufe {st.Stufe} {st.Name}: Grenze {st.Schranke}, gefunden {st.Gefunden?.ToString(CultureInfo.InvariantCulture) ?? "-"}, bewiesen {st.Bewiesen}, {st.Sekunden:0} s");
+                }
+
+                Console.WriteLine($"  HiGHS-Summe A: {bericht.SummeA}; Summe B: {bericht.SummeB}");
+                foreach (Planalternative alternative in bericht.Alternativen ?? [])
+                {
+                    Planbewertung bewertung = Referenzbewertung.Bewerten(staffel with { BestehenderSpielplan = alternative.Plan }, optionen);
+                    Console.WriteLine($"  HiGHS-Variante {alternative.Name}: {einteilung.Zaehlen(bewertung)}");
+                }
+
+                BerichtEinspielen(optimierer, bericht);
+                Volatile.Write(ref vorrang.Value, false);
+            });
+        }
+
         teilneuplaner?.Starten();
 
         var uhr = Stopwatch.StartNew();
+        var verlauf = new List<string>();
         if (a.Durchlaeufe is long ziel && einstellungen.Kerne == 1)
         {
             optimierer.Rechnen(ziel);
         }
         else
         {
-            await ImHintergrundRechnen(optimierer, a, uhr, protokoll, teilneuplaner);
+            await ImHintergrundRechnen(optimierer, a, uhr, protokoll, teilneuplaner, verlauf);
+        }
+
+        if (nebenher is not null)
+        {
+            Console.WriteLine(nebenher.IsCompleted ? "HiGHS war fertig." : "HiGHS rechnete noch.");
         }
 
         await Status(optimierer, uhr, protokoll);
@@ -194,6 +268,12 @@ internal static class OptimierenBefehl
         if (optimierer.Lenkung is { } lenkung)
         {
             Console.WriteLine($"Automodus: bester Plan {lenkung.Bester}");
+            if (verlauf.Count > 0)
+            {
+                // Wie früh ein guter Plan da ist: der beste Plan (A·B·C) zu festen Zeiten.
+                Console.WriteLine("Verlauf: " + string.Join("  ", verlauf));
+            }
+
             foreach (string aenderung in lenkung.Aenderungen)
             {
                 Console.WriteLine("  " + aenderung);
@@ -214,7 +294,57 @@ internal static class OptimierenBefehl
         return 0;
     }
 
-    private static async Task ImHintergrundRechnen(Inseloptimierer optimierer, OptimierenArgumente a, Stopwatch uhr, StreamWriter? protokoll, Teilneuplaner? teilneuplaner)
+    /// <summary>Wie die Oberfläche: Zwischenbericht (A und B fertig) einspielen, den Plan des letzten Schritts sofort anbieten.</summary>
+    private static void NebenherMelden(Inseloptimierer optimierer, Schrankenfortschritt f, Stopwatch uhr)
+    {
+        if (f.NurPlan)
+        {
+            if (f.Plan is { Count: > 0 } neu)
+            {
+                optimierer.PlanEinspielen(neu, $"HiGHS ({f.Text})");
+            }
+
+            return;
+        }
+
+        Console.WriteLine($"  [{uhr.Elapsed.TotalSeconds:0} s] HiGHS: {f.Text}");
+        if (f.Zwischenbericht is { } bericht)
+        {
+            BerichtEinspielen(optimierer, bericht);
+        }
+
+        if (f.SchrankeA is int a)
+        {
+            optimierer.HighsEinspielen([], a, null);
+        }
+
+        if (f.Plan is { Count: > 0 } plan)
+        {
+            bool besser = optimierer.PlanEinspielen(plan, $"Zwischenplan aus HiGHS (vor {f.Text})", inselnNachziehen: true);
+            Console.WriteLine($"  [{uhr.Elapsed.TotalSeconds:0} s] Zwischenplan vor {f.Text}: " + (besser ? "bester Plan" : "nicht übernommen"));
+        }
+    }
+
+    /// <summary>Wie die Oberfläche: Schranke und Plan einspielen, die Varianten anbieten.</summary>
+    private static void BerichtEinspielen(Inseloptimierer optimierer, Schrankenbericht bericht)
+    {
+        optimierer.HighsEinspielen(bericht.Plan, bericht.SchrankeA, bericht.SchrankeB);
+        foreach (Planalternative alternative in bericht.Alternativen ?? [])
+        {
+            optimierer.PlanEinspielen(alternative.Plan, "Alternative aus HiGHS", inselnNachziehen: true);
+        }
+    }
+
+    /// <summary>HiGHS-Linien wie in der Oberfläche: zwei ab acht logischen Prozessoren, sonst eine.</summary>
+    /// <summary>Wie im Programm (Stufenschranke.Linien): zwei ab zwölf logischen Prozessoren, eine ab acht, darunter keine.</summary>
+    private static int StandardLinien() => Environment.ProcessorCount switch
+    {
+        >= 12 => 2,
+        >= 8 => 1,
+        _ => 0,
+    };
+
+    private static async Task ImHintergrundRechnen(Inseloptimierer optimierer, OptimierenArgumente a, Stopwatch uhr, StreamWriter? protokoll, Teilneuplaner? teilneuplaner, List<string> verlauf)
     {
         using var abbruch = new CancellationTokenSource();
         ConsoleCancelEventHandler strgC = (_, e) =>
@@ -226,11 +356,24 @@ internal static class OptimierenBefehl
 
         optimierer.Starten();
         TimeSpan naechsterStatus = TimeSpan.FromSeconds(a.Intervall);
+        int naechsterPunkt = 0;
         try
         {
             while (!Fertig(optimierer, a, uhr))
             {
                 await Task.Delay(200, abbruch.Token);
+                if (naechsterPunkt < Verlaufspunkte.Length && uhr.Elapsed.TotalSeconds >= Verlaufspunkte[naechsterPunkt])
+                {
+                    if (optimierer.Lenkung is { } l)
+                    {
+                        verlauf.Add(string.Create(CultureInfo.InvariantCulture, $"{Verlaufspunkte[naechsterPunkt] / 60}:{Verlaufspunkte[naechsterPunkt] % 60:00} {l.Bester.A}·{l.Bester.B}·{l.Bester.CAnzahl}"));
+                    }
+
+                    naechsterPunkt++;
+                }
+
+                // Vorrang für HiGHS wie in der Oberfläche: So viele Rechen-Threads der Inseln ruhen, wie HiGHS Rechnungen laufen hat.
+                optimierer.Ruhend = a.Auto ? Highsauslastung.Laufend : 0;
                 if (uhr.Elapsed >= naechsterStatus)
                 {
                     await Status(optimierer, uhr, protokoll);
@@ -270,6 +413,26 @@ internal static class OptimierenBefehl
         Console.WriteLine(string.Create(
             Deutsch,
             $"{uhr.Elapsed:hh\\:mm\\:ss} {durchlaeufe,14:N0} {rate,11:N0} {Kostenanzeige.Kurz(stand.Kosten),12} {stand.Verbesserungen,6} {optimierer.Neustarts,7}  {spezial}"));
+        if (optimierer.Lenkung is { } lenkung)
+        {
+            // Im Automodus: der beste Plan und je Insel ihr bester Plan nach Stufen (womit sie zuletzt neu begonnen hat).
+            static string Insel(Inselstand i)
+            {
+                string start = i.Start is { } st ? " " + st : string.Empty;
+                if (i.Verstoesse is not { } w)
+                {
+                    return "–";
+                }
+
+                // Harte Fehler (z. B. Spiele ohne Termin) vorn: Ein Plan mit weniger A, aber harten Fehlern ist nicht besser.
+                string harte = w.Harte > 0 ? $"H{w.Harte}·" : string.Empty;
+                return $"{harte}{w.A}·{w.B}·{w.CAnzahl}{start}";
+            }
+
+            IEnumerable<string> inseln = optimierer.Maschinenraum.Inseln.Where(i => !i.Spezial).Select(Insel);
+            Console.WriteLine($"         bester {lenkung.Bester.A}·{lenkung.Bester.B}·{lenkung.Bester.CAnzahl} (Verbesserungen: Inseln {lenkung.VonInseln}, HiGHS {lenkung.VonHighs}; {Highsauslastung.Laufend} HiGHS-Rechnungen) | Inseln {string.Join("  ", inseln)}");
+        }
+
         if (protokoll is not null)
         {
             await protokoll.WriteLineAsync(string.Create(

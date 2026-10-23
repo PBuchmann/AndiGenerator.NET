@@ -53,6 +53,27 @@ public sealed class AlternativendialogTests
         Assert.DoesNotContain("keine", dialog.DetailTitel, StringComparison.Ordinal);
     }
 
+    /// <summary>Zur Wahl stehen nur Varianten, die gegenüber dem aktuellen Plan etwas besser machen.</summary>
+    [Fact]
+    public void Nur_Varianten_mit_einer_Besonderheit_stehen_zur_Wahl()
+    {
+        Stufeneinteilung einteilung = Stufeneinteilung.AusText("A:Hallenbelegung;B:Sperrtermine");
+        Planstand aktuell = Stand(2);
+        (Planalternative, Planbewertung) Variante(Kostenkriterium? k, int sperrtermine, bool aUndB = false) =>
+            (new Planalternative(k, "x", [], Bewiesen: false, AUndB: aUndB), Stand(sperrtermine).Bewertung);
+        var besser = Variante(Kostenkriterium.Sperrtermine, 1);
+        var gleich = Variante(Kostenkriterium.Sperrtermine, 2);
+        var summeSchlechter = Variante(null, 5);
+        var summeBesser = Variante(null, 1);
+        var aUndBGleich = Variante(null, 2, aUndB: true);
+
+        IReadOnlyList<(Planalternative Alternative, Planbewertung Bewertung)> wahl =
+            Variantenauswahl.Besondere([besser, gleich, summeSchlechter, summeBesser, aUndBGleich], aktuell.Bewertung, einteilung);
+
+        Assert.Equal([besser.Item1, summeBesser.Item1], wahl.Select(w => w.Alternative));
+        Assert.Equal(5, Variantenauswahl.Besondere([besser, gleich, summeSchlechter, summeBesser, aUndBGleich], null, einteilung).Count);
+    }
+
     private static Planstand Stand(int sperrtermine)
     {
         Kostenzelle[] zellen = Enum.GetValues<MannschaftsKostenart>().Select(k => new Kostenzelle(k == MannschaftsKostenart.Sperrtermine ? sperrtermine : 0, 0, 0)).ToArray();

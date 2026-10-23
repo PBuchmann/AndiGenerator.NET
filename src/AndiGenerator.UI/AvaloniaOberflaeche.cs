@@ -20,6 +20,9 @@ public sealed class AvaloniaOberflaeche(Window fenster) : IOberflaeche
     public void AufOberflaeche(Action aktion) => Dispatcher.UIThread.Post(aktion);
 
     /// <inheritdoc/>
+    public void WachHalten(bool an) => Dispatcher.UIThread.Post(() => Energiesparen.Setzen(an));
+
+    /// <inheritdoc/>
     public async Task<string?> DateiOeffnenAsync(string titel, IReadOnlyList<Dateifilter> filter)
     {
         ArgumentNullException.ThrowIfNull(filter);

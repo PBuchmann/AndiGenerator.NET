@@ -39,6 +39,9 @@ public sealed class Teilneuplaner : IDisposable
     /// <summary>So lange wartet <see cref="Dispose"/> höchstens auf das Ende.</summary>
     private static readonly TimeSpan Abschied = TimeSpan.FromSeconds(3);
 
+    /// <summary>So lange rechnet ein Lauf einer HiGHS-Linie, danach beginnt sie mit neuem Startwert an ihrem besten Plan.</summary>
+    private static readonly TimeSpan Linienlauf = TimeSpan.FromMinutes(20);
+
     private readonly Inseloptimierer optimierer;
     private readonly Staffel staffel;
     private readonly Berechnungsoptionen optionen;
@@ -54,6 +57,9 @@ public sealed class Teilneuplaner : IDisposable
     private readonly Ausschnittsbelegung belegung = new();
     private readonly System.Diagnostics.Stopwatch anpassUhr = new();
     private readonly Func<IReadOnlyList<Spiel>, IReadOnlyDictionary<string, int>> verstoesse;
+    private readonly Func<int, ISchrankenloeser>? linienloeser;
+    private readonly (IReadOnlyList<Spiel> Plan, Stufenwert? Wert)?[] linienBester;
+    private readonly int linienArbeiter;
     private Task? lauf;
     private int erlaubt;
     private (int Inseln, int Eigene) zuletztGezaehlt;
@@ -77,12 +83,24 @@ public sealed class Teilneuplaner : IDisposable
     /// <param name="obergrenzen">Festlegung des Staffelleiters (je Kriterium höchstens so viele Verstöße), oder <c>null</c>.</param>
     /// <param name="warten">Solange es <c>true</c> liefert, wartet die Teilneuplanung (Vorrang für HiGHS), oder <c>null</c>.</param>
     /// <param name="arbeiter">
-    /// So viele Teilneuplanungen rechnen beim Glätten von C gleichzeitig (eine schon vorher); <c>null</c> = die Hälfte der
-    /// Kerne. Je laufender Rechnung ruht ein Rechen-Thread der Inseln.
+    /// So viele Teilneuplanungen rechnen beim Glätten von C gleichzeitig (eine schon vorher); <c>null</c> = bis zu drei Viertel der
+    /// Kerne (anfangs die Hälfte, mehr, wenn sie je Kern mehr bringt als die Inseln). Je laufender Rechnung ruht ein Rechen-Thread der Inseln.
     /// </param>
-    public Teilneuplaner(Inseloptimierer optimierer, Staffel staffel, Berechnungsoptionen optionen, ISchrankenloeser loeser, Stufeneinteilung einteilung, IReadOnlyDictionary<Kostenkriterium, int>? obergrenzen = null, Func<bool>? warten = null, int? arbeiter = null)
+    /// <param name="linienloeser">
+    /// Der Löser je HiGHS-Linie (Nummer des Laufs, für verschiedene Startwerte), oder <c>null</c> = keine Linien.
+    /// </param>
+    /// <param name="linien">
+    /// So viele HiGHS-Linien (<see cref="Ligaschranke.Linie"/>): lange Läufe für A und B ab dem Start der Generierung, je
+    /// zwei Teilneuplanungen verfeinern ihre Pläne (sie rechnen von Anfang an, nicht erst beim Glätten).
+    /// </param>
+    public Teilneuplaner(Inseloptimierer optimierer, Staffel staffel, Berechnungsoptionen optionen, ISchrankenloeser loeser, Stufeneinteilung einteilung, IReadOnlyDictionary<Kostenkriterium, int>? obergrenzen = null, Func<bool>? warten = null, int? arbeiter = null, Func<int, ISchrankenloeser>? linienloeser = null, int linien = 0)
     {
-        this.arbeiter = Math.Max(1, arbeiter ?? (Environment.ProcessorCount / 2));
+        this.linienloeser = linienloeser;
+        linienBester = new (IReadOnlyList<Spiel>, Stufenwert?)?[linienloeser is null ? 0 : Math.Max(0, linien)];
+
+        // Höchstens die Hälfte der Kerne (die andere Hälfte bleibt den Inseln).
+        this.arbeiter = Math.Max(1 + (2 * linienBester.Length), arbeiter ?? (Environment.ProcessorCount / 2));
+        linienArbeiter = 2 * linienBester.Length;
         erlaubt = this.arbeiter;
         verstoesse = Ligaschranke.VerstoesseInC(staffel, optionen, einteilung);
         this.warten = warten ?? (() => false);
@@ -101,8 +119,9 @@ public sealed class Teilneuplaner : IDisposable
         {
             lock (sperre)
             {
+                string linienText = linienBester.Length == 0 ? string.Empty : $" · {linienBester.Length} HiGHS-Linien";
                 return new Teilneuplanungsstand(
-                    rechnende > 1 ? $"{zustand} ({rechnende} von {arbeiter} gleichzeitig)" : zustand,
+                    (rechnende > 1 ? $"{zustand} ({rechnende} von {arbeiter} gleichzeitig)" : zustand) + linienText,
                     ausschnitte,
                     besser,
                     eingespielt,
@@ -117,7 +136,8 @@ public sealed class Teilneuplaner : IDisposable
     }
 
     /// <summary>Beginnt im Hintergrund: eine Teilneuplanung sofort, die weiteren, sobald der Automodus C glättet.</summary>
-    public void Starten() => lauf = Task.WhenAll(Enumerable.Range(0, arbeiter).Select(i => Task.Run(() => Schleife(i), CancellationToken.None)));
+    public void Starten() => lauf = Task.WhenAll(Enumerable.Range(0, arbeiter).Select(i => Task.Run(() => Schleife(i), CancellationToken.None))
+        .Concat(Enumerable.Range(0, linienBester.Length).Select(i => Task.Run(() => Linie(i), CancellationToken.None))));
 
     /// <summary>
     /// Beendet die Teilneuplanung: HiGHS bricht seinen Lauf ab, danach wird nichts mehr eingespielt. Wartet kurz, bis sie
@@ -162,13 +182,24 @@ public sealed class Teilneuplaner : IDisposable
 
             start = optimierer.BesterGelenkt() ?? start;
 
-            // Die weiteren erst beim Glätten von C: Dann sind A und B entschieden, und Ausschnitte bringen am meisten.
-            while (nummer > 0 && !optimierer.Glaettet)
+            // Die weiteren erst beim Glätten von C: Dann sind A und B entschieden, und Ausschnitte bringen am meisten. Die
+            // Teilneuplanungen der HiGHS-Linien beginnen, sobald ihre Linie einen Plan hat, der nicht schlechter ist als der beste.
+            int? linie = Linienindex(nummer);
+            while (nummer > 0 && linie is null && !optimierer.Glaettet)
             {
                 await Task.Delay(Warten, token).ConfigureAwait(false);
             }
 
             start = optimierer.BesterGelenkt() ?? start;
+            while (linie is int l && LinieBereit(l) is null)
+            {
+                await Task.Delay(Warten, token).ConfigureAwait(false);
+            }
+
+            if (linie is int l2 && LinieBereit(l2) is { } bereit)
+            {
+                start = bereit;
+            }
 
             // Fortlaufend bis zum Ende der Generierung; angenommen wird nach dem Maßstab des Automodus (mit C-Ausreißern).
             var e = new Neuplanungseinstellungen(
@@ -179,10 +210,18 @@ public sealed class Teilneuplaner : IDisposable
                 Startwert: nummer + 1,
                 Obergrenzen: obergrenzen,
                 Ausschnitt: m => Ausschnitt(m, uhr),
-                Verbessert: (plan, _) => Verbessert(plan),
+                Verbessert: (plan, wert) =>
+                {
+                    if (linie is int l)
+                    {
+                        LinieMerken(l, plan, wert);
+                    }
+
+                    Verbessert(plan);
+                },
                 Abgelehnt: optimierer.StartplanAnbieten,
-                Ausgangsplan: eigener => Ausgangsplan(eigener, nummer),
-                Unterbrechen: () => Ruht(nummer),
+                Ausgangsplan: eigener => linie is int l ? LinienAusgangsplan(l, eigener) : Ausgangsplan(eigener, nummer),
+                Unterbrechen: () => linie is null ? Ruht(nummer) : optimierer.Pausiert,
                 Verstoesse: verstoesse,
                 Belegung: belegung,
                 Platz: nummer);
@@ -217,6 +256,106 @@ public sealed class Teilneuplaner : IDisposable
         {
             // Nicht still verschwinden: Der Leitstand zeigt den Fehler.
             Setzen("Fehler: " + fehler.Message);
+        }
+    }
+
+    /// <summary>Die Linie, der eine Teilneuplanung folgt (Nummern 1 bis 2 · Linien), sonst <c>null</c>.</summary>
+    private int? Linienindex(int nummer) => nummer >= 1 && nummer <= linienArbeiter ? (nummer - 1) % linienBester.Length : null;
+
+    /// <summary>Der beste Plan einer Linie, sobald er nach dem Maßstab des Automodus bewertet ist und A und B einhält.</summary>
+    private (IReadOnlyList<Spiel> Plan, Stufenwert Wert)? LinieBereit(int linie)
+    {
+        (IReadOnlyList<Spiel> Plan, Stufenwert? Wert)? b;
+        lock (sperre)
+        {
+            b = linienBester[linie];
+        }
+
+        if (b is not { } x || (x.Wert ?? optimierer.NachStufen(x.Plan)) is not { } wert)
+        {
+            return null;
+        }
+
+        return optimierer.BesterGelenkt() is { } gesamt && (gesamt.Wert.Harte, gesamt.Wert.A).CompareTo((wert.Harte, wert.A)) < 0 ? null : (x.Plan, wert);
+    }
+
+    /// <summary>Merkt einen Plan der Linie (aus HiGHS oder ihrer Teilneuplanung), wenn er besser ist.</summary>
+    private void LinieMerken(int linie, IReadOnlyList<Spiel> plan, Stufenwert? wert)
+    {
+        wert ??= optimierer.NachStufen(plan);
+        lock (sperre)
+        {
+            if (linienBester[linie] is not { } alt || alt.Wert is not { } altWert || wert is not { } neu || optimierer.IstBesser(neu, altWert))
+            {
+                linienBester[linie] = (plan, wert);
+            }
+        }
+    }
+
+    /// <summary>Vor jedem Ausschnitt einer Linien-Teilneuplanung: Hat ihre Linie einen besseren Plan, wird er Ausgangsplan.</summary>
+    private IReadOnlyList<Spiel>? LinienAusgangsplan(int linie, Stufenwert eigener)
+    {
+        while (optimierer.Pausiert && !abbruch.IsCancellationRequested)
+        {
+            abbruch.Token.WaitHandle.WaitOne(PauseAbfrage);
+        }
+
+        return LinieBereit(linie) is { } b && optimierer.IstBesser(b.Wert, eigener) ? b.Plan : null;
+    }
+
+    /// <summary>
+    /// Eine HiGHS-Linie: lange Läufe für A und B (je <see cref="Linienlauf"/>, danach mit neuem Startwert an ihrem besten Plan),
+    /// jeder bessere Plan geht sofort an den Automodus. In der Pause ruht sie.
+    /// </summary>
+    private async Task Linie(int linie)
+    {
+        CancellationToken token = abbruch.Token;
+        try
+        {
+            int runde = 0;
+            while (!token.IsCancellationRequested)
+            {
+                while (optimierer.Pausiert)
+                {
+                    await Task.Delay(PauseAbfrage, token).ConfigureAwait(false);
+                }
+
+                ISchrankenloeser l = linienloeser!(linie + (runde * linienBester.Length));
+                runde++;
+                bool fertig = Ligaschranke.Linie(
+                    staffel,
+                    optionen,
+                    l,
+                    einteilung,
+                    () =>
+                    {
+                        lock (sperre)
+                        {
+                            return linienBester[linie]?.Plan;
+                        }
+                    },
+                    plan =>
+                    {
+                        LinieMerken(linie, plan, null);
+                        optimierer.PlanEinspielen(plan, $"HiGHS-Linie {linie + 1}");
+                    },
+                    Linienlauf,
+                    () => token.IsCancellationRequested || optimierer.Pausiert);
+                if (fertig)
+                {
+                    // Bewiesen bestmöglich (kleine Staffel): Die Linie ist fertig, ihre Teilneuplanungen verfeinern C weiter.
+                    return;
+                }
+            }
+        }
+        catch (Exception fehler) when (fehler is OperationCanceledException or ObjectDisposedException)
+        {
+            // Beendet.
+        }
+        catch (Exception fehler) when (fehler is InvalidOperationException or ArgumentException or IndexOutOfRangeException
+            or NullReferenceException or DllNotFoundException or EntryPointNotFoundException)
+        {
+            Setzen($"Fehler in HiGHS-Linie {linie + 1}: " + fehler.Message);
         }
     }
 
@@ -292,7 +431,7 @@ public sealed class Teilneuplaner : IDisposable
     /// <summary>
     /// Teilt die Kerne beim Glätten nach dem Erfolg: Alle <see cref="Anpassabstand"/> werden die Verbesserungen des besten Plans je
     /// Rechen-Thread verglichen (ältere zählen halb so viel). Bringt die Teilneuplanung je Thread mehr als die Inseln, rechnet
-    /// eine mehr (bis zur Hälfte der Kerne), bringt sie weniger als die Hälfte, eine weniger (mindestens eine); die freien Kerne
+    /// eine mehr (bis zu drei Vierteln der Kerne), bringt sie weniger als die Hälfte, eine weniger (mindestens eine); die freien Kerne
     /// rechnen für die Inseln. Aufruf unter der Sperre.
     /// </summary>
     private void Anpassen()

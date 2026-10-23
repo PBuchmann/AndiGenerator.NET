@@ -11,4 +11,5 @@ namespace AndiGenerator.Engine.Inseln;
 /// <param name="Kriterium">Das Kriterium.</param>
 /// <param name="Anteil">Kostenoptimierung: Anteil an den Kosten aller Kriterien; Automodus: Verstöße im Verhältnis zum größten (0 bis 1).</param>
 /// <param name="Verstoesse">Im Automodus die Zahl der Verstöße; sonst <c>null</c>.</param>
-public sealed record Kostenverursacher(Kostenkriterium Kriterium, double Anteil, int? Verstoesse = null);
+/// <param name="Stufe">Im Automodus die Stufe des Kriteriums; sonst <c>null</c>.</param>
+public sealed record Kostenverursacher(Kostenkriterium Kriterium, double Anteil, int? Verstoesse = null, Stufe? Stufe = null);

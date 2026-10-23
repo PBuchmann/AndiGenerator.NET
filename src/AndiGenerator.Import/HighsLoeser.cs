@@ -39,6 +39,9 @@ public static class HighsLoeser
     /// <summary>Rückruf während der ganzzahligen Suche mit der Frage nach Abbruch (kCallbackMipInterrupt).</summary>
     private const int MipUnterbrechung = 6;
 
+    /// <summary>Rückruf von HiGHS bei jeder besseren Lösung (<c>kCallbackMipImprovingSolution</c>).</summary>
+    private const int MipBessereLoesung = 4;
+
     /// <summary>Ab so vielen Spalten ohne Vorverarbeitung (die üblichen Modelle haben 2.000 bis 4.000).</summary>
     private const int GrossesModell = 10_000;
 
@@ -206,11 +209,12 @@ public static class HighsLoeser
     /// <param name="fortschritt">
     /// Zeitgrenze nach Fortschritt (<paramref name="zeitgrenze"/> ist dann die Obergrenze), oder <c>null</c>.
     /// </param>
+    /// <param name="vorgabe">Startwert, Aufwand der Heuristiken und Zwischenstände (für Vergleiche), oder <c>null</c>.</param>
     /// <returns>
     /// Die Werte der besten Lösung (oder <c>null</c>), ihre Kosten, die untere Schranke, ob die Lösung beweisbar die beste ist
     /// und ob das Problem keine Lösung hat.
     /// </returns>
-    public static (double[]? Werte, double Wert, double Schranke, bool Optimal, bool Unloesbar) LoesenMitSchranke(Ganzzahlproblem problem, TimeSpan zeitgrenze, double[]? start = null, Func<bool>? aufhoeren = null, Fortschrittsgrenze? fortschritt = null)
+    public static (double[]? Werte, double Wert, double Schranke, bool Optimal, bool Unloesbar) LoesenMitSchranke(Ganzzahlproblem problem, TimeSpan zeitgrenze, double[]? start = null, Func<bool>? aufhoeren = null, Fortschrittsgrenze? fortschritt = null, Highsvorgabe? vorgabe = null)
     {
         ArgumentNullException.ThrowIfNull(problem);
         IntPtr h = Erzeugen();
@@ -220,8 +224,28 @@ public static class HighsLoeser
         }
 
         var stand = new Fortschrittsstand(fortschritt);
-        Rueckruf rueckruf = (_, _, datenAus, datenEin, _) =>
+        int spalten = problem.Kosten.Length;
+        Rueckruf rueckruf = (art, _, datenAus, datenEin, _) =>
         {
+            if (art == MipBessereLoesung)
+            {
+                // Eine bessere Lösung (im ursprünglichen Modell): sofort weitergeben.
+                IntPtr zeiger = Fortschrittsstand.Rueckrufzeiger(datenAus, "mip_solution");
+                if (zeiger != IntPtr.Zero && vorgabe?.Loesung is { } loesung)
+                {
+                    var x = new double[spalten];
+                    Marshal.Copy(zeiger, x, 0, spalten);
+                    loesung(x);
+                }
+
+                return;
+            }
+
+            if (vorgabe?.Zwischenstand is { } melden && Fortschrittsstand.Ausgabewert(datenAus, "running_time") is double zeit)
+            {
+                melden(zeit, Fortschrittsstand.Ausgabewert(datenAus, "mip_primal_bound") ?? double.PositiveInfinity, Fortschrittsstand.Ausgabewert(datenAus, "mip_dual_bound") ?? double.NegativeInfinity);
+            }
+
             if (datenEin != IntPtr.Zero && (aufhoeren?.Invoke() == true || stand.Steht(datenAus)))
             {
                 Marshal.WriteInt32(datenEin, 1);
@@ -232,6 +256,19 @@ public static class HighsLoeser
         {
             SetzeSchalter(h, "output_flag", 0);
             SetzeZahl(h, "time_limit", zeitgrenze.TotalSeconds);
+            if (vorgabe is not null)
+            {
+                SetzeGanzzahl(h, "random_seed", Math.Abs(vorgabe.Startwert % 2_000_000_000));
+                if (vorgabe.Heuristik is double heuristik)
+                {
+                    SetzeZahl(h, "mip_heuristic_effort", heuristik);
+                }
+
+                if (vorgabe.OhneNeustart)
+                {
+                    SetzeSchalter(h, "mip_allow_restart", 0);
+                }
+            }
 
             // Hier bleibt die Vorverarbeitung an (anders als bei den Kompaktspieltagen): Ohne sie fand die Teilneuplanung in der
             // Zeitgrenze nichts mehr (Kreisklasse (7): 0 von 10 Ausschnitten), und abbrechen lässt sich jetzt über den Rückruf.
@@ -267,10 +304,14 @@ public static class HighsLoeser
                 SetzeLoesung(h, start, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero);
             }
 
-            if (aufhoeren is not null || fortschritt is not null)
+            if (aufhoeren is not null || fortschritt is not null || vorgabe?.Zwischenstand is not null || vorgabe?.Loesung is not null)
             {
                 SetzeRueckruf(h, Marshal.GetFunctionPointerForDelegate(rueckruf), IntPtr.Zero);
                 StarteRueckruf(h, MipUnterbrechung);
+                if (vorgabe?.Loesung is not null)
+                {
+                    StarteRueckruf(h, MipBessereLoesung);
+                }
             }
 
             using IDisposable messung = Rechenfaeden.HighsRechnet();
@@ -405,10 +446,17 @@ public static class HighsLoeser
         }
 
         /// <summary>Ein Wert (double) aus den Daten des Rückrufs; <c>null</c>, wenn es ihn nicht gibt.</summary>
-        private static double? Ausgabewert(IntPtr datenAus, string name)
+        internal static double? Ausgabewert(IntPtr datenAus, string name)
         {
             IntPtr zeiger = datenAus == IntPtr.Zero ? IntPtr.Zero : LeseRueckrufwert(datenAus, name);
             return zeiger == IntPtr.Zero ? null : BitConverter.Int64BitsToDouble(Marshal.ReadInt64(zeiger));
+        }
+
+        /// <summary>Ein Zeiger aus den Daten des Rückrufs (bei „mip_solution“ die Werte der Spalten).</summary>
+        internal static IntPtr Rueckrufzeiger(IntPtr datenAus, string name)
+        {
+            ArgumentException.ThrowIfNullOrEmpty(name);
+            return datenAus == IntPtr.Zero ? IntPtr.Zero : LeseRueckrufwert(datenAus, name);
         }
 
         [DllImport(Bibliothek, EntryPoint = "Highs_getCallbackDataOutItem", CallingConvention = CallingConvention.Cdecl)]

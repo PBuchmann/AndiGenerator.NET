@@ -160,10 +160,11 @@ internal static class SchrankeBefehl
     }
 
     /// <summary>Reicht HiGHS als <see cref="ISchrankenloeser"/> herein.</summary>
-    internal sealed class Highsschranke : ISchrankenloeser
+    internal sealed class Highsschranke(Highsvorgabe? vorgabe = null) : ISchrankenloeser
     {
-        public Schrankenloesung Loesen(Ganzzahlmodell modell, TimeSpan zeitgrenze, double[]? start = null, Func<bool>? aufhoeren = null, Laufzeitregel? regel = null)
+        public Schrankenloesung Loesen(Ganzzahlmodell modell, TimeSpan zeitgrenze, double[]? start = null, Func<bool>? aufhoeren = null, Laufzeitregel? regel = null, Action<double[]>? zwischenloesung = null)
         {
+            Highsvorgabe? v = zwischenloesung is null ? vorgabe : (vorgabe ?? new Highsvorgabe()) with { Loesung = zwischenloesung };
             var problem = new Ganzzahlproblem(
                 [.. modell.Kosten],
                 [.. modell.SpalteOben],
@@ -173,8 +174,8 @@ internal static class SchrankeBefehl
                 [.. modell.EintragSpalten],
                 [.. modell.EintragWerte]);
             (double[]? werte, double wert, double schranke, bool optimal, bool unloesbar) = regel is null
-                ? HighsLoeser.LoesenMitSchranke(problem, zeitgrenze, start, aufhoeren)
-                : HighsLoeser.LoesenMitSchranke(problem, regel.Hoechstens, start, aufhoeren, new Fortschrittsgrenze(regel.Mindestens.TotalSeconds, regel.Stillstand.TotalSeconds));
+                ? HighsLoeser.LoesenMitSchranke(problem, zeitgrenze, start, aufhoeren, vorgabe: v)
+                : HighsLoeser.LoesenMitSchranke(problem, regel.Hoechstens, start, aufhoeren, new Fortschrittsgrenze(regel.Mindestens.TotalSeconds, regel.Stillstand.TotalSeconds), v);
             return new Schrankenloesung(werte, wert, schranke, optimal, unloesbar);
         }
     }

@@ -25,6 +25,9 @@ public sealed partial class Inseloptimierer : IDisposable
     /// <summary>So viele größte Verursacher zeigt der Leitstand je Insel.</summary>
     private const int Verursacher = 3;
 
+    /// <summary>Im Automodus zeigt der Leitstand je Insel alle Kriterien der Stufen A und B mit Verstößen und so viele aus C.</summary>
+    private const int VerursacherC = 2;
+
     private readonly Lock sperre = new();
     private readonly Optimierungseinstellungen einstellungen;
     private readonly Staffel staffel;
@@ -59,6 +62,9 @@ public sealed partial class Inseloptimierer : IDisposable
     private int planVerbesserungen;
     private (int Verbesserungen, bool Gelenkt)? besteKriterienStand;
     private Kriterienwert[] besteKriterien = [];
+
+    /// <summary>Die harten Fehler des besten Plans (zusammen mit <see cref="besteKriterien"/> ermittelt).</summary>
+    private int besteHarte;
     private int abgleiche;
     private bool spezialLaeuft;
     private int spezialVerwendet;
@@ -66,8 +72,17 @@ public sealed partial class Inseloptimierer : IDisposable
     private long durchlaeufeBeiMessbeginn;
     private Exception? fehler;
 
+    /// <summary>Das Zählziel der Suche beim Glätten (mit der Grenze in A und B für die späte Annahme); <c>null</c> sonst.</summary>
+    private Zaehlziel? zaehlziel;
+
     /// <summary>Plan aus HiGHS, der beim nächsten Schritt des Automodus nach dem Grundlauf eingespielt wird.</summary>
     private Loesung? highsPlan;
+
+    /// <summary>
+    /// Zwischenplan aus HiGHS, der während der Basisoptimierung kam: wird nach ihrem Ende geprüft (vorher ging er verloren – etwa
+    /// der in A bestmögliche Plan, wenn die Basisoptimierung länger dauerte als Stufe A).
+    /// </summary>
+    private (Loesung Plan, string Herkunft)? vorgemerkt;
 
     /// <summary>Lädt die Staffel und legt Inseln und Suchplätze an; die Rechnung beginnt mit <see cref="Starten"/> oder <see cref="Rechnen"/>.</summary>
     /// <param name="staffel">Staffel; ein bestehender Spielplan ist der Ausgangspunkt (ungültige Termine werden entfernt).</param>
@@ -218,7 +233,7 @@ public sealed partial class Inseloptimierer : IDisposable
                     stand = stand.Append(StandVon(spezial, spezial: true, laeuft: spezialLaeuft));
                 }
 
-                return new Maschinenraum(kerne, stand.ToArray(), einstellungen.DurchlaeufeVorNeustart, spezialKostenart, spezialVerwendet, BesteKriterien(), planVerbesserungen, Startstatistiken());
+                return new Maschinenraum(kerne, stand.ToArray(), einstellungen.DurchlaeufeVorNeustart, spezialKostenart, spezialVerwendet, BesteKriterien(), planVerbesserungen, Startstatistiken(), besteHarte);
             }
         }
     }
@@ -275,7 +290,7 @@ public sealed partial class Inseloptimierer : IDisposable
 
     /// <summary>
     /// Holt oder setzt, wie viele Rechen-Threads ruhen (Vorrang für HiGHS: solange es Stufe A, B und die Alternativen rechnet,
-    /// bekommen die Inseln nur die übrigen Kerne). Höchstens die Hälfte ruht (mindestens ein Thread rechnet immer): Nach einer
+    /// bekommen die Inseln nur die übrigen Kerne). Höchstens die Hälfte ruht (die Inseln suchen immer weiter): Nach einer
     /// geänderten Einteilung rechnet HiGHS neu, und die Inseln müssen dann ebenso dem neuen Ziel folgen.
     /// </summary>
     public int Ruhend
@@ -283,7 +298,9 @@ public sealed partial class Inseloptimierer : IDisposable
         get => Volatile.Read(ref ruhend);
         set
         {
-            Volatile.Write(ref ruhend, Math.Clamp(value, 0, einstellungen.Kerne / 2));
+            // Höchstens die Hälfte: Ruhten drei Viertel, kamen die Inseln kaum noch voran und brachten fast nichts mehr bei
+            // (Verbandsoberliga ohne Linien: B 32 statt 26 nach 10 Minuten).
+            Volatile.Write(ref ruhend, Math.Clamp(value, 0, Math.Max(0, einstellungen.Kerne / 2)));
             if (Volatile.Read(ref ruhend) == 0)
             {
                 freigabe.Set();
@@ -393,17 +410,25 @@ public sealed partial class Inseloptimierer : IDisposable
         ArgumentNullException.ThrowIfNull(plan);
         lock (sperre)
         {
-            if (auto is not { Grundlauf: false } || plan.Count == 0)
+            if (auto is null || plan.Count == 0)
             {
                 return false;
             }
 
             Loesung loesung = AlsLoesung(plan);
+            if (auto.Grundlauf)
+            {
+                // Der neueste Zwischenplan ist der beste (jede Stufe hält die vorigen); geprüft wird er nach der Basisoptimierung.
+                vorgemerkt = (loesung, herkunft);
+                return false;
+            }
 
             // Aus HiGHS: gleich lenken (ist eine Stufe bei der Schranke, wird sie geschützt) und danach vom besten Plan aus weiter
             // – sonst suchten die Inseln mit den alten Gewichten von ihren Plänen aus weiter.
             if (!auto.Einspielen(loesung, AutoSekunden(), herkunft, sofortLenken: inselnNachziehen))
             {
+                // Ein anderer guter Plan (oft aus einer anderen Gegend): Startplan für eine Insel, die feststeckt.
+                AndererPlan(plan, herkunft);
                 return false;
             }
 
@@ -689,6 +714,12 @@ public sealed partial class Inseloptimierer : IDisposable
                 { Grundlauf: false } => auto.BesteKriterien(),
                 not null when besteKosten >= 0 => auto.KriterienVon(beste),
                 _ => KostenDesBesten(),
+            };
+            besteHarte = auto switch
+            {
+                { Grundlauf: false } => auto.BesterWert.Harte,
+                not null when besteKosten >= 0 => auto.NachStufen(beste).Harte,
+                _ => 0,
             };
         }
 
@@ -1013,7 +1044,9 @@ public sealed partial class Inseloptimierer : IDisposable
         {
             // Nach einem Wechsel von der Kostenoptimierung ist der Plan schon optimiert: gleich mit Stufe A beginnen.
             // Liegt der Plan aus HiGHS vor, endet sie sofort (frühestens nach 10 s): Er wird gleich geprüft und angezeigt.
-            bool highs = highsPlan is not null && (einstellungen.AutoOhneGrundlauf || auto.GrundlaufLangGenug(f));
+            // Ebenso, sobald Stufe A bewiesen ist und ihr Plan vorgemerkt: Die Basisoptimierung brächte A nicht mehr weiter
+            // (Verbandsoberliga auf zwei Kernen: A 10 nach 60 s, die Basisoptimierung lief bis 155 s).
+            bool highs = (highsPlan is not null || (vorgemerkt is not null && auto.SchrankeABekannt)) && (einstellungen.AutoOhneGrundlauf || auto.GrundlaufLangGenug(f));
             if (besteKosten >= 0 && (einstellungen.AutoOhneGrundlauf || highs || auto.GrundlaufVorbei(f)))
             {
                 auto.GrundlaufBeenden(beste, f);
@@ -1040,6 +1073,16 @@ public sealed partial class Inseloptimierer : IDisposable
             }
         }
 
+        if (vorgemerkt is { } z)
+        {
+            vorgemerkt = null;
+            if (auto.Einspielen(z.Plan, f, z.Herkunft + ", aus der Basisoptimierung", sofortLenken: true))
+            {
+                auto.NeustartVomBesten = true;
+                InselnNeustarten(z.Plan, alleSchlechteren: true);
+            }
+        }
+
         for (int i = 0; i < inseln.Length; i++)
         {
             Insel insel = inseln[i];
@@ -1049,7 +1092,7 @@ public sealed partial class Inseloptimierer : IDisposable
                 int vorher = auto.Verbesserungen;
                 autoWerte[i] = auto.PruefenVonInsel(insel.Loesung, insel.Nummer);
                 ErfolgZaehlen(i, auto.Verbesserungen > vorher);
-                autoVerursacher[i] = auto.Verursacher(Verursacher);
+                autoVerursacher[i] = auto.Verursacher(VerursacherC);
             }
         }
 
@@ -1058,6 +1101,8 @@ public sealed partial class Inseloptimierer : IDisposable
             auto.Verfolgen(beste, f);
             auto.GlaettenPruefen(beste, f);
         }
+
+        GrenzeSetzen();
 
         if (besteKosten >= 0 && auto.Lenken(beste, f) is { } neu)
         {
@@ -1077,7 +1122,9 @@ public sealed partial class Inseloptimierer : IDisposable
         definition = stammdaten;
 
         // Beim Glätten zählt die Suche die Verstöße wie der Automodus (sonst die Kosten des Originals).
-        Zaehlziel? ziel = auto!.Zaehlt ? new Zaehlziel(auto.Stufen) : null;
+        Zaehlziel? ziel = auto!.Zaehlt ? new Zaehlziel(auto.Stufen, einstellungen.AutoSpaetannahme) : null;
+        zaehlziel = ziel;
+        GrenzeSetzen();
         bewerter = NeuerPlan(referenz, stammdaten, ziel);
 
         // Normalerweise rechnet die Suche mit ihrem Plan weiter; beim Glätten beginnt sie beim besten Plan neu.

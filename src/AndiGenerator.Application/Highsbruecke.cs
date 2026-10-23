@@ -8,7 +8,8 @@ using AndiGenerator.Import;
 namespace AndiGenerator.Application;
 
 /// <summary>Reicht den Löser HiGHS (Baustein Import) an den Rechenkern weiter (nicht im Original).</summary>
-public sealed class Highsbruecke : IGanzzahlloeser, ISchrankenloeser
+/// <param name="vorgabe">Startwert, Heuristik und Neustart für die Läufe mit Schranke (z. B. je HiGHS-Linie verschieden), oder <c>null</c>.</param>
+public sealed class Highsbruecke(Highsvorgabe? vorgabe = null) : IGanzzahlloeser, ISchrankenloeser
 {
     /// <summary>Holt einen Wert, der angibt, ob HiGHS auf diesem Rechner geladen werden kann.</summary>
     public static bool Verfuegbar => HighsLoeser.Verfuegbar;
@@ -21,12 +22,13 @@ public sealed class Highsbruecke : IGanzzahlloeser, ISchrankenloeser
     }
 
     /// <inheritdoc/>
-    public Schrankenloesung Loesen(Ganzzahlmodell modell, TimeSpan zeitgrenze, double[]? start = null, Func<bool>? aufhoeren = null, Laufzeitregel? regel = null)
+    public Schrankenloesung Loesen(Ganzzahlmodell modell, TimeSpan zeitgrenze, double[]? start = null, Func<bool>? aufhoeren = null, Laufzeitregel? regel = null, Action<double[]>? zwischenloesung = null)
     {
         ArgumentNullException.ThrowIfNull(modell);
+        Highsvorgabe? v = zwischenloesung is null ? vorgabe : (vorgabe ?? new Highsvorgabe()) with { Loesung = zwischenloesung };
         (double[]? werte, double wert, double schranke, bool optimal, bool unloesbar) = regel is null
-            ? HighsLoeser.LoesenMitSchranke(Problem(modell), zeitgrenze, start, aufhoeren)
-            : HighsLoeser.LoesenMitSchranke(Problem(modell), regel.Hoechstens, start, aufhoeren, new Fortschrittsgrenze(regel.Mindestens.TotalSeconds, regel.Stillstand.TotalSeconds));
+            ? HighsLoeser.LoesenMitSchranke(Problem(modell), zeitgrenze, start, aufhoeren, vorgabe: v)
+            : HighsLoeser.LoesenMitSchranke(Problem(modell), regel.Hoechstens, start, aufhoeren, new Fortschrittsgrenze(regel.Mindestens.TotalSeconds, regel.Stillstand.TotalSeconds), v);
         return new Schrankenloesung(werte, wert, schranke, optimal, unloesbar);
     }
 

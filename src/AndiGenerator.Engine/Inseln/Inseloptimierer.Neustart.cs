@@ -4,6 +4,7 @@
 
 using AndiGenerator.Domain.Stammdaten;
 using AndiGenerator.Engine.Kern;
+using AndiGenerator.Engine.Referenz;
 
 namespace AndiGenerator.Engine.Inseln;
 
@@ -28,6 +29,15 @@ public sealed partial class Inseloptimierer
     /// <summary>So lange (in Plänen der Inseln) taugt ein Plan der Teilneuplanung als Startplan.</summary>
     private const long TeilneuplanungFrisch = 5_000_000;
 
+    /// <summary>So viele Suchschritte macht ein Stoß, die A und B nicht verschlechtern.</summary>
+    private const int Stossschritte = 4;
+
+    /// <summary>So viele Suchschritte versucht ein Stoß höchstens.</summary>
+    private const int Stossversuche = 40;
+
+    /// <summary>So viele andere gute Pläne merkt sich der Optimierer (je Herkunft der jüngste).</summary>
+    private const int AnderePlaene = 8;
+
     /// <summary>
     /// Die Startverfahren reihum: vor allem kleine Stöße am besten Plan und Pläne der Teilneuplanung, seltener eine Mannschaft
     /// und nur jedes achte Mal ein leerer Plan (der braucht lange, bis er in A und B mithält).
@@ -38,6 +48,18 @@ public sealed partial class Inseloptimierer
         Startverfahren.Spiele, Startverfahren.Zeitfenster, Startverfahren.Teilneuplanung, Startverfahren.Leer,
     ];
 
+    /// <summary>
+    /// Die Startverfahren reihum bei später Annahme: vor allem Stöße, dazwischen Pläne aus anderen Gegenden (Teilneuplanung,
+    /// HiGHS) und der beste Plan selbst – sucht dort schon eine andere Insel, stattdessen ein anderer guter Plan.
+    /// </summary>
+    private static readonly Startverfahren[] ReihumSpaet =
+    [
+        Startverfahren.Stoss, Startverfahren.Teilneuplanung, Startverfahren.Stoss, Startverfahren.Anderer, Startverfahren.Stoss, Startverfahren.Bester,
+    ];
+
+    /// <summary>Der Suchschritt, mit dem ein Stoß den besten Plan verändert (2 % der Spiele neu verteilt).</summary>
+    private static readonly Tauschstrategie Stossschritt = Tauschstrategie.Lesen("2");
+
     /// <summary>Je Insel, womit sie zuletzt neu begonnen hat (<c>null</c>: noch nicht im Automodus).</summary>
     private readonly Startverfahren?[] startverfahren;
 
@@ -46,6 +68,9 @@ public sealed partial class Inseloptimierer
 
     /// <summary>Je Startverfahren die Neustarts und die Verbesserungen des besten Plans danach.</summary>
     private readonly Dictionary<Startverfahren, (int Starts, int Erfolge)> startstatistik = [];
+
+    /// <summary>Andere gute Pläne, die nicht bester Plan wurden, je Herkunft der jüngste (Zugriff unter der Sperre).</summary>
+    private readonly Dictionary<string, Startkandidat> anderePlaene = [];
 
     /// <summary>Das nächste Startverfahren (reihum).</summary>
     private int naechstesVerfahren;
@@ -113,11 +138,103 @@ public sealed partial class Inseloptimierer
         return insel.SeitNeustart > Aufholgrenzen * grenze && autoWerte[i] is { } w && (w.Harte, w.A, w.B).CompareTo((bester.Harte, bester.A, bester.B)) > 0;
     }
 
+    /// <summary>
+    /// Späte Annahme: Die Suchplätze dürfen A und B nie schlechter machen als im besten Plan (harte Fehler, A, B als Grenze im
+    /// Zählziel).
+    /// </summary>
+    private void GrenzeSetzen()
+    {
+        if (zaehlziel is { Spaetannahme: > 0 } ziel && auto is { Grundlauf: false })
+        {
+            Stufenwert bester = auto.BesterWert;
+            ziel.Grenze = (bester.Harte, bester.A, bester.B);
+        }
+    }
+
+    /// <summary>
+    /// Merkt einen Plan, der nicht bester Plan wurde, als Startplan für eine Insel (<see cref="Startverfahren.Anderer"/>): je
+    /// Herkunft der jüngste, höchstens <see cref="AnderePlaene"/>. Erst beim Neustart umgewandelt und geprüft.
+    /// </summary>
+    private void AndererPlan(IReadOnlyList<Spiel> plan, string herkunft)
+    {
+        anderePlaene[herkunft] = new Startkandidat(plan, Durchlaeufe);
+        if (anderePlaene.Count > AnderePlaene)
+        {
+            anderePlaene.Remove(anderePlaene.MinBy(e => e.Value.Bei).Key);
+        }
+    }
+
+    /// <summary>
+    /// Ein anderer guter Plan als Startplan: frisch, ohne mehr harte Fehler, in A so gut wie der beste Plan, in B höchstens ein
+    /// Zehntel (mindestens 2) schlechter – der beste davon in A und B. Er wird danach vergessen (sonst begännen mehrere Inseln
+    /// mit ihm).
+    /// </summary>
+    /// <returns>Der Plan oder <c>null</c>.</returns>
+    private Loesung? AndererStart()
+    {
+        Stufenwert bester = auto!.BesterWert;
+        int spielraum = Math.Max(2, bester.B / 10);
+        (string Herkunft, Loesung Plan, Stufenwert Wert)? gewaehlt = null;
+        foreach ((string herkunft, Startkandidat k) in anderePlaene.ToList())
+        {
+            if (Durchlaeufe - k.Bei > TeilneuplanungFrisch)
+            {
+                anderePlaene.Remove(herkunft);
+                continue;
+            }
+
+            Loesung plan = AlsLoesung(k.Plan);
+            Stufenwert w = auto.NachStufen(plan);
+            if (w.Harte > bester.Harte || w.A > bester.A || w.B > bester.B + spielraum || w == bester)
+            {
+                anderePlaene.Remove(herkunft);
+            }
+            else if (gewaehlt is not { } g || (w.A, w.B).CompareTo((g.Wert.A, g.Wert.B)) < 0)
+            {
+                gewaehlt = (herkunft, plan, w);
+            }
+        }
+
+        if (gewaehlt is not { } ergebnis)
+        {
+            return null;
+        }
+
+        anderePlaene.Remove(ergebnis.Herkunft);
+        return ergebnis.Plan;
+    }
+
+    /// <summary>Ob eine andere Insel als <paramref name="i"/> gerade genau beim besten Plan sucht (gleiche Werte).</summary>
+    private bool AndereBeimBesten(int i)
+    {
+        Stufenwert bester = auto!.BesterWert;
+        for (int j = 0; j < inseln.Length; j++)
+        {
+            if (j != i && autoWerte[j] == bester)
+            {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /// <summary>Startet eine Insel mit dem nächsten Startverfahren neu.</summary>
     private void Neustarten(int i)
     {
-        Startverfahren verfahren = Reihum[naechstesVerfahren];
-        naechstesVerfahren = (naechstesVerfahren + 1) % Reihum.Length;
+        // Mit später Annahme braucht es keine großen Umbauten: Die Insel beginnt beim besten Plan, einem kleinen Stoß daran oder
+        // einem Plan der Teilneuplanung, und die Plätze gehen von dort ihre eigenen Wege.
+        Startverfahren[] reihum = zaehlziel is { Spaetannahme: > 0 } ? ReihumSpaet : Reihum;
+        Startverfahren verfahren = reihum[naechstesVerfahren % reihum.Length];
+        naechstesVerfahren = (naechstesVerfahren + 1) % (Reihum.Length * ReihumSpaet.Length);
+
+        // Steht schon eine andere Insel beim besten Plan, beginnt diese mit einem anderen guten Plan (sonst einem Stoß): Eine
+        // weitere Kopie des besten Plans brächte kaum Neues (Verbandsoberliga: viermal 10·31·319 über Minuten).
+        if (verfahren == Startverfahren.Bester && AndereBeimBesten(i))
+        {
+            verfahren = Startverfahren.Anderer;
+        }
+
         Loesung start = Startplan(ref verfahren);
         inseln[i].Neustarten(start, ReferenceEquals(start, leer) ? -1 : Bewerten(bewerter, start));
         autoStand[i] = -1;
@@ -143,12 +260,36 @@ public sealed partial class Inseloptimierer
                 }
             }
 
-            verfahren = Startverfahren.Mannschaften;
+            verfahren = zaehlziel is { Spaetannahme: > 0 } ? Startverfahren.Bester : Startverfahren.Mannschaften;
+            if (verfahren == Startverfahren.Bester)
+            {
+                return auto!.Beste.Kopie();
+            }
+        }
+
+        if (verfahren == Startverfahren.Anderer)
+        {
+            if (AndererStart() is { } anderer)
+            {
+                return anderer;
+            }
+
+            verfahren = Startverfahren.Stoss;
         }
 
         if (verfahren == Startverfahren.Leer)
         {
             return leer;
+        }
+
+        if (verfahren == Startverfahren.Bester)
+        {
+            return auto!.Beste.Kopie();
+        }
+
+        if (verfahren == Startverfahren.Stoss)
+        {
+            return Stossen();
         }
 
         // Bester Plan; die freigegebenen Spiele verlieren ihren Termin, die Insel plant sie neu.
@@ -215,6 +356,38 @@ public sealed partial class Inseloptimierer
 
     private Startstatistik[] Startstatistiken() =>
         [.. Enum.GetValues<Startverfahren>().Where(startstatistik.ContainsKey).Select(v => new Startstatistik(v, startstatistik[v].Starts, startstatistik[v].Erfolge))];
+
+    /// <summary>
+    /// Stoß am besten Plan: einige Suchschritte, die A und B nicht verschlechtern (C darf schlechter werden). Die Spiele werden
+    /// gleich wieder terminiert – kein Spiel bleibt ohne Termin –, und die Insel beginnt in A und B so gut wie der beste Plan,
+    /// nur anders verteilt (ein Stoß, der A verschlechtert, ließe sie lange mit Verstößen in A suchen).
+    /// </summary>
+    private Loesung Stossen()
+    {
+        var zufall = new Zufall(koordinatorZufall.Next());
+        Stufenwert bester = auto!.BesterWert;
+        Loesung plan = auto.Beste.Kopie();
+        int schritte = 0;
+        for (int versuch = 0; versuch < Stossversuche && schritte < Stossschritte; versuch++)
+        {
+            bewerter.LoesungUebernehmen(plan);
+            bewerter.Zuruecksetzen();
+            bewerter.VorgegebeneSpieleSetzen();
+            bewerter.NeuWuerfeln(Stossschritt, zufall);
+            bewerter.TermineFuellen(zufall);
+            bewerter.Merken();
+            var gestossen = new Loesung(bewerter.AnzahlErlaubt);
+            bewerter.LoesungSchreiben(gestossen);
+            Stufenwert wert = auto.NachStufen(gestossen);
+            if ((wert.Harte, wert.A, wert.B).CompareTo((bester.Harte, bester.A, bester.B)) <= 0)
+            {
+                plan = gestossen;
+                schritte++;
+            }
+        }
+
+        return plan;
+    }
 
     /// <summary>Ein Plan der Teilneuplanung als möglicher Startplan.</summary>
     /// <param name="Plan">Der Plan.</param>

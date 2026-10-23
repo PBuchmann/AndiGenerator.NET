@@ -30,7 +30,11 @@ internal sealed class OptimierenArgumente
           --start-inseln N  so viele Inseln beginnen mit dem Startplan (Standard 1)
           --auto            Automodus (Gewichte nach der Rangfolge A/B/C lenken)
           --highs           Automodus mit HiGHS: Schranke beendet das Drängen, Plan aus HiGHS nach dem Grundlauf (schaltet --auto ein)
+          --nebenher        mit --highs: HiGHS rechnet wie in der Oberfläche nebenher (Zwischenpläne sofort angeboten,
+                            Teilneuplanung erst danach) statt vor dem Start
+          --linien N        mit --neuplanen: so viele HiGHS-Linien (Standard wie die Oberfläche: 2 ab 8 Prozessoren, sonst 1)
           --neuplanen       Automodus mit Teilneuplanung (HiGHS) nebenher (schaltet --auto ein)
+          --spaet N         beim Glätten späte Annahme mit Gedächtnis N je Suchplatz (0 = nur Verbesserungen; Standard wie die Oberfläche)
           --plan DATEI      besten Plan als gemerkten Plan (Format des Originals) speichern
           --ausgabe DATEI   Bildschirmausgabe zusätzlich in diese Datei schreiben
         Eine .modifications-Datei neben der XML-Datei wird automatisch berücksichtigt. Abbrechen mit Strg+C.
@@ -76,9 +80,18 @@ internal sealed class OptimierenArgumente
 
     public bool Highs { get; private set; }
 
+    /// <summary>Holt einen Wert, der angibt, ob HiGHS nebenher rechnet (wie in der Oberfläche).</summary>
+    public bool Nebenher { get; private set; }
+
     public bool Neuplanen { get; private set; }
 
+    /// <summary>Holt die Zahl der HiGHS-Linien (<c>null</c> = wie die Oberfläche).</summary>
+    public int? Linien { get; private set; }
+
     public string? Ausgabe { get; private set; }
+
+    /// <summary>Holt das Gedächtnis der späten Annahme (<c>null</c> = wie die Oberfläche).</summary>
+    public int? Spaet { get; private set; }
 
     /// <summary>Liest die Argumente nach dem Befehlswort; <c>null</c> bei Fehlern (Meldung in <paramref name="fehler"/>).</summary>
     public static OptimierenArgumente? Lesen(IReadOnlyList<string> args, out string fehler)
@@ -149,6 +162,14 @@ internal sealed class OptimierenArgumente
                 Highs = true;
                 Auto = true;
                 return true;
+            case "--nebenher":
+                Nebenher = true;
+                Highs = true;
+                Auto = true;
+                return true;
+            case "--linien" when Zahl(werte, arg, out zahl, out fehler):
+                Linien = (int)Math.Clamp(zahl, 0, 16);
+                return true;
             case "--neuplanen":
                 Neuplanen = true;
                 Auto = true;
@@ -167,6 +188,9 @@ internal sealed class OptimierenArgumente
                 return true;
             case "--durchlaeufe" when Zahl(werte, arg, out zahl, out fehler):
                 Durchlaeufe = zahl;
+                return true;
+            case "--spaet" when Zahl(werte, arg, out zahl, out fehler):
+                Spaet = (int)Math.Clamp(zahl, 0, 1_000_000);
                 return true;
             case "--kerne" when Zahl(werte, arg, out zahl, out fehler):
                 Kerne = (int)Math.Clamp(zahl, 1, 1024);

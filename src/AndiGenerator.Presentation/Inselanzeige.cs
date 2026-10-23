@@ -22,6 +22,7 @@ public sealed class Inselanzeige : ObservableObject
     private string verstossA = string.Empty;
     private string verstossB = string.Empty;
     private string verstossC = string.Empty;
+    private string harte = string.Empty;
 
     /// <summary>Initialisiert die Insel.</summary>
     /// <param name="titel">Überschrift, z. B. „Insel 2“ oder „Spezial-Insel“.</param>
@@ -121,6 +122,25 @@ public sealed class Inselanzeige : ObservableObject
         get => verstossC;
         internal set => SetProperty(ref verstossC, value);
     }
+
+    /// <summary>
+    /// Holt die harten Fehler ihres besten Plans (Spiele ohne gültigen Termin), z. B. „3 Spiele ohne gültigen Termin – der Plan
+    /// ist so nicht verwendbar“; leer, wenn es keine gibt. Ein solcher Plan kann in A weniger Verstöße haben als jeder gültige.
+    /// </summary>
+    public string Harte
+    {
+        get => harte;
+        internal set
+        {
+            if (SetProperty(ref harte, value))
+            {
+                OnPropertyChanged(nameof(HatHarte));
+            }
+        }
+    }
+
+    /// <summary>Holt einen Wert, der angibt, ob ihr bester Plan harte Fehler hat.</summary>
+    public bool HatHarte => harte.Length > 0;
 
     /// <summary>Holt einen erklärenden Hinweis (Spezial-Insel).</summary>
     public string Hinweis

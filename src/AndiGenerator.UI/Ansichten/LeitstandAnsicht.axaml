@@ -213,6 +213,7 @@
                     <TextBlock Text="{Binding VerstossC}" Classes="ziffer wert" />
                   </StackPanel>
                 </Grid>
+                <TextBlock Text="{Binding Harte}" Classes="klein" Foreground="{StaticResource Schlecht}" FontWeight="SemiBold" TextWrapping="Wrap" IsVisible="{Binding HatHarte}" />
                 <StackPanel Spacing="3" IsVisible="{Binding !IstSpezial}">
                   <ProgressBar Value="{Binding Fortschritt}" Maximum="100" Height="6" MinHeight="6" ToolTip.Tip="Weg bis zur Neustart-Grenze. Neu beginnt nur die schlechteste Insel, und erst wenn ihr Balken voll ist; die anderen rechnen auch mit vollem Balken weiter." />
                   <TextBlock Text="{Binding FortschrittText}" Classes="klein hinweis" TextWrapping="Wrap" />

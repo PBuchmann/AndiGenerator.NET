@@ -17,6 +17,10 @@ namespace AndiGenerator.Engine.Inseln;
 /// <param name="BesterPlan">Die Kriterien des besten Plans (Kosten bzw. im Automodus Verstöße je Kriterium).</param>
 /// <param name="BesterPlanNummer">Zählt weiter, sobald sich der geltende beste Plan ändert (zusammen mit <paramref name="BesterPlan"/> ermittelt).</param>
 /// <param name="Starts">Im Automodus je Startverfahren die Neustarts der Inseln und ihre Erfolge; leer, solange keine.</param>
+/// <param name="BesterHarte">
+/// Im Automodus die harten Fehler des besten Plans (Spiele ohne gültigen Termin) – zu Beginn der Basisoptimierung hat er oft
+/// noch welche, und seine Verstöße in A sind dann nicht vergleichbar (weniger Spiele mit Termin, weniger Verstöße).
+/// </param>
 public sealed record Maschinenraum(
     IReadOnlyList<long> Kerne,
     IReadOnlyList<Inselstand> Inseln,
@@ -25,4 +29,5 @@ public sealed record Maschinenraum(
     int SpezialVerwendet,
     IReadOnlyList<Kriterienwert>? BesterPlan = null,
     int BesterPlanNummer = 0,
-    IReadOnlyList<Startstatistik>? Starts = null);
+    IReadOnlyList<Startstatistik>? Starts = null,
+    int BesterHarte = 0);

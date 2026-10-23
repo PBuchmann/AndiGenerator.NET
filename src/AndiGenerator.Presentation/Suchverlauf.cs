@@ -96,10 +96,18 @@ public sealed class Suchverlauf : ObservableObject
 
     /// <summary>
     /// Verstöße je Stufe des besten Plans: im Automodus nach der Basisoptimierung die Bewertung nach Stufen, in der
-    /// Basisoptimierung die Verstöße des besten Plans nach Kosten; bei der Kostenoptimierung keine.
+    /// Basisoptimierung die Verstöße des besten Plans nach Kosten; bei der Kostenoptimierung und für einen Plan mit Spielen ohne
+    /// gültigen Termin keine.
     /// </summary>
     private static (int? A, int? B, int? C) Stufen(Optimierungsstand stand)
     {
+        // Ein Plan mit Spielen ohne gültigen Termin (zu Beginn der Basisoptimierung) hat weniger Verstöße, weil weniger Spiele
+        // einen Termin haben – im Verlauf sähe es aus, als wäre ein besserer Plan verloren gegangen. Er erscheint nicht.
+        if (stand.Maschinenraum is { BesterHarte: > 0 })
+        {
+            return (null, null, null);
+        }
+
         if (stand.Lenkung is { Basis: not null } lenkung)
         {
             return (lenkung.Bester.A, lenkung.Bester.B, lenkung.Bester.CAnzahl);

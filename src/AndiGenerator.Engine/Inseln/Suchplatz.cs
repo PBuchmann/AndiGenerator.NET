@@ -33,6 +33,15 @@ internal sealed class Suchplatz
     private int uebersprungen;
     private bool aktiv;
 
+    /// <summary>Späte Annahme: die Werte des aktuellen Plans der letzten Schritte (Ringpuffer); <c>null</c> = nur Verbesserungen.</summary>
+    private double[]? verlauf;
+
+    /// <summary>Späte Annahme: Stelle im <see cref="verlauf"/>.</summary>
+    private int verlaufStelle;
+
+    /// <summary>Späte Annahme: Wert des aktuellen Plans (der gemerkte, von dem aus der Platz weitersucht).</summary>
+    private double aktuellerWert;
+
     /// <summary>Legt den Platz an; ein inaktiver Platz (Spezial-Insel vor ihrem Start) rechnet erst nach einem Auftrag mit neuem Plan.</summary>
     public Suchplatz(KernPlan plan, Zufall zufall, Tauschstrategie strategie, bool dynamisch, double startKosten, bool aktiv = true)
     {
@@ -57,11 +66,35 @@ internal sealed class Suchplatz
         set => Volatile.Write(ref strategie, value);
     }
 
+    /// <summary>Holt einen Wert, der angibt, ob der Platz mit später Annahme sucht (Late Acceptance, siehe <see cref="Zaehlziel.Spaetannahme"/>).</summary>
+    public bool Spaet => verlauf is not null;
+
     /// <summary>Bisher gerechnete Durchläufe (kumulativ).</summary>
     public long Durchlaeufe => Volatile.Read(ref durchlaeufe);
 
-    /// <summary>Stellt einen Neustart-Auftrag zu; ein noch nicht ausgeführter wird ersetzt.</summary>
-    public void Auftragen(Auftrag neu) => Volatile.Write(ref auftrag, neu);
+    /// <summary>
+    /// Stellt einen Neustart-Auftrag zu; ein noch nicht ausgeführter wird ersetzt – bringt er einen neuen Plan (andere Gewichte,
+    /// Zählziel), bleibt der aber: Sonst rechnete ein Platz, der eben ruhte, mit den alten Gewichten weiter, seine Kosten passten
+    /// nicht mehr zu denen der Insel, und sie übernahm Pläne mit viel mehr A-Verstößen (R16: A 8 bis 15 bei A 3). Bis der Platz
+    /// den Auftrag übernimmt, liefert er kein Ergebnis mehr: Sonst holte die Insel nach einem Neustart den alten (oft billigeren)
+    /// Plan zurück und der Neustart verpuffte.
+    /// </summary>
+    public void Auftragen(Auftrag neu)
+    {
+        lock (sperre)
+        {
+            Auftrag? alt;
+            Auftrag zustellen;
+            do
+            {
+                alt = Volatile.Read(ref auftrag);
+                zustellen = neu.NeuerPlan is null && alt?.NeuerPlan is { } bleibt ? neu with { NeuerPlan = bleibt } : neu;
+            }
+            while (Interlocked.CompareExchange(ref auftrag, zustellen, alt) != alt);
+
+            ergebnisKosten = -1;
+        }
+    }
 
     /// <summary>Holt die beste Lösung dieses Platzes, falls sie besser als <paramref name="schwelle"/> ist (−1 = jede).</summary>
     /// <returns>Ihre Kosten, sonst −1.</returns>
@@ -110,14 +143,38 @@ internal sealed class Suchplatz
         plan.NeuWuerfeln(aktuell, zufall);
         plan.TermineFuellen(zufall);
         double kosten = plan.Kosten();
-        if (kosten >= 0 && (kosten < beste || beste < 0))
+        bool besser = kosten >= 0 && (kosten < beste || beste < 0);
+        if (verlauf is not null)
+        {
+            // Späte Annahme: weiter vom neuen Plan aus, wenn er nicht schlechter ist als der aktuelle oder als der aktuelle vor
+            // L Schritten. So kommt die Suche über Kämme, ohne davonzulaufen; über der Grenze in A und B liegt kein Plan je
+            // darunter (Strafe im Zählziel).
+            int i = verlaufStelle;
+            if (kosten >= 0 && (aktuellerWert < 0 || kosten <= aktuellerWert || kosten <= verlauf[i]))
+            {
+                plan.Merken();
+                aktuellerWert = kosten;
+            }
+
+            verlauf[i] = aktuellerWert < 0 ? double.MaxValue : aktuellerWert;
+            verlaufStelle = (i + 1) % verlauf.Length;
+        }
+        else if (besser)
         {
             plan.Merken();
+        }
+
+        if (besser)
+        {
             beste = kosten;
             lock (sperre)
             {
-                plan.LoesungSchreiben(ergebnis);
-                ergebnisKosten = kosten;
+                // Ein inzwischen zugestellter Auftrag macht diesen Plan hinfällig.
+                if (Volatile.Read(ref auftrag) is null)
+                {
+                    plan.LoesungSchreiben(ergebnis);
+                    ergebnisKosten = kosten;
+                }
             }
         }
 
@@ -147,5 +204,15 @@ internal sealed class Suchplatz
 
         seitNeustart = 0;
         uebersprungen = 0;
+
+        // Späte Annahme, wenn das Ziel des Plans sie verlangt: Das Gedächtnis beginnt beim neuen Plan.
+        int laenge = plan.Zaehlziel?.Spaetannahme ?? 0;
+        verlauf = laenge > 0 ? new double[laenge] : null;
+        aktuellerWert = neu.Kosten;
+        verlaufStelle = 0;
+        if (verlauf is not null)
+        {
+            Array.Fill(verlauf, aktuellerWert < 0 ? double.MaxValue : aktuellerWert);
+        }
     }
 }

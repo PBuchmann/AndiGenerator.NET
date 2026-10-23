@@ -55,6 +55,12 @@ namespace AndiGenerator.Engine.Inseln;
 /// Beim Glätten von C sucht die Suche nach der Zahl der Verstöße (wie der Automodus vergleicht), nicht nach den Kosten des
 /// Originals; der Automodus hebt dann keine C-Gewichte mehr an. <c>false</c> = wie früher (zum Vergleich).
 /// </param>
+/// <param name="AutoSpaetannahme">
+/// Beim Glätten von C (mit <paramref name="AutoZaehlen"/>): Länge des Gedächtnisses der späten Annahme je Suchplatz – ein
+/// Platz nimmt auch Pläne an, die in C nicht schlechter sind als sein Plan vor so vielen Schritten; A und B dürfen nie
+/// schlechter werden als im besten Plan. 0 = nur Verbesserungen (wie im Original). Standard 1000 (Bezirksliga Süd, 600 s:
+/// C 210/207 statt 211/221 mit 0 und 212/216 mit 5000).
+/// </param>
 /// <param name="Fadenstart">Wird zu Beginn jedes Rechen-Threads auf ihm aufgerufen (z. B. für die Messung der Rechenzeit), oder <c>null</c>.</param>
 public sealed record Optimierungseinstellungen(
     int Kerne,
@@ -79,7 +85,8 @@ public sealed record Optimierungseinstellungen(
     IReadOnlyList<Spiel>? Startplan = null,
     int StartplanInseln = 1,
     Action? Fadenstart = null,
-    bool AutoZaehlen = true)
+    bool AutoZaehlen = true,
+    int AutoSpaetannahme = 1000)
 {
     /// <summary>Standard: Topologie des Originals (4 Inseln × 14 feste + 10 dynamische Suchplätze, Spezial-Insel), alle Kerne bis auf einen.</summary>
     public static Optimierungseinstellungen Standard { get; } = new(

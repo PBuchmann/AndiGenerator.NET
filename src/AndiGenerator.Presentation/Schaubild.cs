@@ -318,6 +318,7 @@ public sealed class Schaubild : ObservableObject
     private static string Wert(Inselanzeige? karte) => karte switch
     {
         null => string.Empty,
+        { ZeigtVerstoesse: true, HatHarte: true } => $"ungültig · {karte.VerstossA} · {karte.VerstossB} · {karte.VerstossC}",
         { ZeigtVerstoesse: true } => $"{karte.VerstossA} · {karte.VerstossB} · {karte.VerstossC}",
         _ => karte.Kosten,
     };
@@ -331,6 +332,9 @@ public sealed class Schaubild : ObservableObject
         Startverfahren.Mannschaften => "eine Mannschaft neu",
         Startverfahren.Zeitfenster => "eine Woche neu",
         Startverfahren.Spiele => "einige Spiele neu",
+        Startverfahren.Bester => "bester Plan",
+        Startverfahren.Stoss => "bester Plan mit Stoß",
+        Startverfahren.Anderer => "anderer guter Plan",
         _ => "aus Teilneuplanung",
     };
 

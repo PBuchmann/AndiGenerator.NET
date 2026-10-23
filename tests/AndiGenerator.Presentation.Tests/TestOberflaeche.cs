@@ -24,6 +24,9 @@ internal sealed class TestOberflaeche : IOberflaeche
     /// </summary>
     public bool Sammeln { get; set; }
 
+    /// <summary>Holt, wie die Oberfläche wach gehalten bzw. freigegeben wurde (in der Reihenfolge der Aufrufe).</summary>
+    public List<bool> Wach { get; } = [];
+
     /// <summary>Holt die Titel aller angezeigten Dialoge in der Reihenfolge der Aufrufe.</summary>
     public List<string> Aufrufe { get; } = [];
 
@@ -213,6 +216,9 @@ internal sealed class TestOberflaeche : IOberflaeche
         Meldungen.Add(titel + ": " + text);
         return Task.CompletedTask;
     }
+
+    /// <inheritdoc/>
+    public void WachHalten(bool an) => Wach.Add(an);
 
     private Task<T> Merken<T>(string titel, T ergebnis)
     {

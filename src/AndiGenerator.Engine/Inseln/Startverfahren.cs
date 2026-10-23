@@ -24,9 +24,25 @@ public enum Startverfahren
     /// <summary>Bester Plan, einige zufällige Spiele ohne Termin (ein kleiner Stoß).</summary>
     Spiele,
 
+    /// <summary>Der beste Plan unverändert (bei später Annahme: die Plätze gehen von dort ihre eigenen Wege).</summary>
+    Bester,
+
+    /// <summary>
+    /// Der beste Plan mit einem kleinen Stoß: einige zufällige Spiele neu verteilt, wie ein Suchschritt – alle Spiele behalten
+    /// einen Termin.
+    /// </summary>
+    Stoss,
+
     /// <summary>
     /// Ein Plan der Teilneuplanung, den HiGHS im Modell für besser hielt, die Bewertung aber nicht (A und B gleich gut, anders
     /// verteilt); ohne einen solchen wie <see cref="Mannschaften"/>.
     /// </summary>
     Teilneuplanung,
+
+    /// <summary>
+    /// Ein anderer guter Plan, der nicht bester Plan wurde (HiGHS-Linie, B-Variante, Zwischenplan der Untergrenze, Teilneuplanung):
+    /// in A so gut wie der beste, in B höchstens wenig schlechter, aber aus einer anderen Gegend. Ohne einen solchen ein
+    /// <see cref="Stoss"/>.
+    /// </summary>
+    Anderer,
 }

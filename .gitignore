@@ -70,6 +70,13 @@ messen-log.txt
 inselvergleich-*.txt
 korrekturvergleich/
 hallenvergleich/
+highsvergleich.txt
+highsvergleich/
+highsvalidierung/
+highsvalidierung2/
+linienvergleich/
+vielfaltvergleich/
+zeitvergleich/
 pdftext-log.txt
 bildschirmfotos-log.txt
 anleitung-log.txt
