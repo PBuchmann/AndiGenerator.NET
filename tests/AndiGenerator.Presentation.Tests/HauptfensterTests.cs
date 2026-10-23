@@ -1166,6 +1166,54 @@ public sealed class HauptfensterTests : IDisposable
         Assert.True(schritt.IstGewaehlt);
     }
 
+    /// <summary>Klick auf eine Mannschaft über dem Raster: Ihre Halle lässt sich für alle Heimspiele umstellen.</summary>
+    /// <returns>Der Testlauf.</returns>
+    [Fact]
+    public async Task Kompaktspieltage_Halle_fuer_alle_Heimspiele_einer_Mannschaft()
+    {
+        string kompakt = Path.Combine(ordner, "daten", "Jugend_19_Testliga_(HR).xml");
+        File.Copy(Path.Combine(Testdaten.Referenz, "..", "kompakt", "Jugend_19_Testliga_(HR).xml"), kompakt);
+        Plansitzung vorher = Plansitzung.Oeffnen(kompakt, Path.Combine(ordner, "basis-kompakt"));
+        Datenbearbeitung b = vorher.DatenBearbeiten();
+        b.KompaktspieltageSetzen(Kompaktmodus.Bestaetigt);
+        vorher.DatenUebernehmen(b);
+        o.DateiZumOeffnen = kompakt;
+        await hf.OeffnenCommand.ExecuteAsync(null);
+        if (hf.Einrichtung is { } einrichtung)
+        {
+            await einrichtung.AbschliessenCommand.ExecuteAsync(null);
+        }
+
+        hf.KompaktspieltageCommand.Execute(null);
+        KompaktspieltageAnsichtViewModel ansicht = Assert.Single(Ansichten<KompaktspieltageAnsichtViewModel>());
+        Assert.True(ansicht.Eingeschaltet);
+
+        // Ohne Plan keine Spieltage: Die Legende zeigt keine ihrer Farben.
+        Assert.False(ansicht.LegendeZweiter || ansicht.LegendeDritter || ansicht.LegendeEinzel);
+        string team = ansicht.Spalten[0].Name;
+        string anderes = ansicht.Spalten[1].Name;
+        Assert.False(ansicht.ZeigtHalle);
+
+        ansicht.MannschaftWaehlenCommand.Execute(team);
+        Assert.True(ansicht.ZeigtHalle);
+        Assert.Equal("Halle aller Heimspiele von " + team, ansicht.HalleTitel);
+        Assert.NotEmpty(ansicht.HalleLokale);
+
+        // Eine andere Halle als die Standardhalle wählen (gibt es nur eine, die erste).
+        Kompaktlokal neu = ansicht.HalleLokale.FirstOrDefault(l => l != ansicht.HalleLokal) ?? ansicht.HalleLokale[0];
+        ansicht.HalleLokal = neu;
+        await ansicht.HalleFuerAlleCommand.ExecuteAsync(null);
+        Assert.StartsWith($"„{neu}“ gilt jetzt für alle Heimtermine von {team}", ansicht.HalleMeldung, StringComparison.Ordinal);
+
+        // Neu gewählt ist sie die Standardhalle der Mannschaft.
+        ansicht.MannschaftWaehlenCommand.Execute(anderes);
+        ansicht.MannschaftWaehlenCommand.Execute(team);
+        Assert.Equal(neu.Nummer, ansicht.HalleLokal?.Nummer);
+
+        ansicht.MannschaftWaehlenCommand.Execute(team);
+        Assert.False(ansicht.ZeigtHalle);
+    }
+
     [Fact]
     public async Task Oeffnen_mit_zwei_XML_Dateien_wird_abgelehnt()
     {

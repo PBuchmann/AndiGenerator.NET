@@ -29,7 +29,7 @@ public sealed partial class Datenbearbeitung
 
     /// <summary>Liest die spielfreien Tage des click-TT-Stands.</summary>
     /// <returns>Die Tage oder <c>null</c> ohne Standard.</returns>
-    public IReadOnlyList<DateOnly>? SpielfreieTageStandard() => standard is null ? null : SpielfreieTageAus(standard);
+    public IReadOnlyList<DateOnly>? SpielfreieTageStandard() => Standard is null ? null : SpielfreieTageAus(Standard);
 
     /// <summary>
     /// Schreibt die spielfreien Tage (Original <c>FormToData</c>). Abweichend vom Original bleiben spielfreie Tage erhalten,

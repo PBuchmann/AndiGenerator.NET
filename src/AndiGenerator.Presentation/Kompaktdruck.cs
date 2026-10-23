@@ -285,7 +285,9 @@ public static class Kompaktdruck
             }
         }
 
-        Legende(f, oben + kopf + (zeilen.Count * Zeilenhoehe) + 12);
+        // Die Legende nennt nur die Farben, die im Plan vorkommen.
+        List<Kompaktzelle> alle = [.. zeilen.SelectMany(z => z.Zellen)];
+        Legende(f, oben + kopf + (zeilen.Count * Zeilenhoehe) + 12, (alle.Exists(z => z.ZweiterSpieltag), alle.Exists(z => z.DritterSpieltag), alle.Exists(z => z.Einzel)));
     }
 
     /// <summary>Ein Feld des Rasters: Meldung als Farbe, Ring für Spitzen- und Abstiegsspieltag, ★ bzw. ● bzw. ?.</summary>
@@ -359,8 +361,8 @@ public static class Kompaktdruck
         f.Vieleck(punkte, farbe, null, 0, geschlossen: true);
     }
 
-    /// <summary>Legende unter dem Raster, wie in der Ansicht.</summary>
-    private static void Legende(IZeichenflaeche f, double y)
+    /// <summary>Legende unter dem Raster, wie in der Ansicht – mit den Farben, die im Plan vorkommen.</summary>
+    private static void Legende(IZeichenflaeche f, double y, (bool Zweiter, bool Dritter, bool Einzel) farben)
     {
         const double G = 10;
         double x = 0;
@@ -388,22 +390,22 @@ public static class Kompaktdruck
         y += 20;
         Eintrag((ex, ey) => Stern(f, ex + 8, ey + 6, 5.5, Farbe.Tinte), "richtet aus", 14);
         Eintrag((ex, ey) => f.Kreis(ex + 8, ey + 6, 4, Farbe.Tinte, null, 0), "Gast", 14);
-        Eintrag(
-            (ex, ey) =>
-            {
-                Stern(f, ex + 4, ey + 6, 5, Zweiter);
-                f.Kreis(ex + 14, ey + 6, 4, Zweiter, null, 0);
-            },
-            "zweiter Spieltag am selben Tag",
-            14);
-        Eintrag(
-            (ex, ey) =>
-            {
-                Stern(f, ex + 4, ey + 6, 5, EinzelGelb);
-                f.Kreis(ex + 14, ey + 6, 4, EinzelGelb, null, 0);
-            },
-            "Einzelbegegnung",
-            14);
+        foreach ((_, Farbe farbe, string text) in new[]
+        {
+            (farben.Zweiter, Zweiter, "zweiter Spieltag am selben Tag"),
+            (farben.Dritter, Dritter, "dritter Spieltag am selben Tag"),
+            (farben.Einzel, EinzelGelb, "Einzelbegegnung"),
+        }.Where(e => e.Item1))
+        {
+            Eintrag(
+                (ex, ey) =>
+                {
+                    Stern(f, ex + 4, ey + 6, 5, farbe);
+                    f.Kreis(ex + 14, ey + 6, 4, farbe, null, 0);
+                },
+                text,
+                14);
+        }
 
         x = 0;
         y += 20;

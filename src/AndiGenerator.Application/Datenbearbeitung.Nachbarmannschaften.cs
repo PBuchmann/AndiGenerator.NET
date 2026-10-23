@@ -82,7 +82,7 @@ public sealed partial class Datenbearbeitung
     /// <param name="mannschaft">Mannschaftsname.</param>
     /// <returns><c>true</c>, wenn gleich oder ohne Standard.</returns>
     public bool NachbarmannschaftenSindStandard(string mannschaft) =>
-        standard is not DatenKnoten std || GleicheKinder(Team(mannschaft), Teams(std).FirstOrDefault(t => t.Lesen("teamname") == mannschaft), "sisterteam");
+        Standard is not DatenKnoten std || GleicheKinder(Team(mannschaft), Teams(std).FirstOrDefault(t => t.Lesen("teamname") == mannschaft), "sisterteam");
 
     /// <summary>Original <c>toDefault</c>: Nachbarmannschaften aus der click-TT-Datei übernehmen.</summary>
     /// <param name="mannschaft">Mannschaftsname.</param>
@@ -90,7 +90,7 @@ public sealed partial class Datenbearbeitung
     {
         DatenKnoten team = Team(mannschaft);
         team.KinderEntfernen("sisterteam");
-        DatenKnoten? vorlage = standard is null ? null : Teams(standard).FirstOrDefault(t => t.Lesen("teamname") == mannschaft);
+        DatenKnoten? vorlage = Standard is null ? null : Teams(Standard).FirstOrDefault(t => t.Lesen("teamname") == mannschaft);
         foreach (DatenKnoten k in vorlage?.KinderMitNamen("sisterteam") ?? [])
         {
             new DatenKnoten("sisterteam", team).Zuweisen(k);

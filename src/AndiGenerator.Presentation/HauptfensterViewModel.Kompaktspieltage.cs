@@ -101,7 +101,7 @@ public sealed partial class HauptfensterViewModel
     }
 
     /// <summary>Holt, ob die geöffnete Staffel mit Kompaktspieltagen geplant wird.</summary>
-    internal Kompaktmodus Kompaktmodus => sitzung?.DatenBearbeiten().Kompaktspieltage ?? Kompaktmodus.Offen;
+    internal Kompaktmodus Kompaktmodus => sitzung?.Kompaktmodus ?? Kompaktmodus.Offen;
 
     /// <summary>Holt einen Wert, der angibt, ob die Kompaktspieltage eingeschaltet sind (die Ansicht zeigt dann Plan und Karte).</summary>
     internal bool KompaktEingeschaltet => Kompaktmodus is Kompaktmodus.Ein or Kompaktmodus.Bestaetigt;

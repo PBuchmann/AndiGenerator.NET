@@ -17,6 +17,12 @@ public sealed record Kartenfahrt(Kartenpunkt Von, Kartenpunkt Nach, bool Kraefti
     /// </summary>
     public double Versatz { get; init; }
 
+    /// <summary>
+    /// Holt den Spieltag am Sonntag der Fahrt (0 = erster, 1 = zweiter, 2 = dritter …): Die Linie hat dann die Farbe seiner Punkte
+    /// im Raster (schwarz, orangerot, violett); −1 = ohne (blau).
+    /// </summary>
+    public int Spieltag { get; init; } = -1;
+
     /// <summary>Holt einen Wert, der angibt, ob es zwischen denselben Hallen mehrere Fahrten gibt (dann eigener Zielpunkt je Linie).</summary>
     public bool Mehrfach { get; init; }
 }

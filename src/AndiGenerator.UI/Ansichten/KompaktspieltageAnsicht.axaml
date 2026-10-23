@@ -176,7 +176,7 @@
                 <ToggleSwitch Grid.Column="1" IsChecked="{Binding Bearbeiten}" OnContent="Bearbeiten" OffContent="Anzeigen" Margin="12,0,0,0"
                               IsEnabled="{Binding !Rechnet}" ToolTip.Tip="Meldungen direkt im Raster erfassen (nicht während einer Berechnung; solange lässt sich keine starten)" />
               </Grid>
-              <TextBlock Text="Klick auf einen Sonntag oder eine Mannschaft zeigt ihre Fahrten; ein zweiter Klick wieder alle." Classes="klein" TextWrapping="Wrap" MaxWidth="460" HorizontalAlignment="Left"
+              <TextBlock Text="Klick auf einen Sonntag oder eine Mannschaft zeigt ihre Fahrten (bei einer Mannschaft auch ihre Halle zum Umstellen); ein zweiter Klick wieder alle." Classes="klein" TextWrapping="Wrap" MaxWidth="460" HorizontalAlignment="Left"
                          IsVisible="{Binding !Bearbeiten}" />
               <TextBlock Text="Feld anklicken oder mit den Pfeiltasten wählen · A auswärts · H nur Heim · B beides · Entf oder Leertaste kann nicht. Gespeichert wird sofort."
                          Classes="klein" TextWrapping="Wrap" MaxWidth="460" HorizontalAlignment="Left" IsVisible="{Binding Bearbeiten}" />
@@ -250,12 +250,26 @@
                 <TextBlock Text="leer: kann nicht" Classes="klein" Margin="0,0,14,4" />
                 <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,14,4"><Border Width="16" Height="12" CornerRadius="3" BorderBrush="{StaticResource Rand}" BorderThickness="1" /><TextBlock Text="? keine Meldung" Classes="klein" /></StackPanel>
                 <TextBlock Text="★ richtet aus   ● Gast" Classes="klein" Margin="0,0,14,4" IsVisible="{Binding !Bearbeiten}" />
-                <StackPanel Orientation="Horizontal" Spacing="4" Margin="0,0,14,4" IsVisible="{Binding !Bearbeiten}">
+                <!-- Nur die Farben, die im Plan vorkommen (in Raster und Karte je Sonntag bzw. Spieltag) -->
+                <StackPanel Orientation="Horizontal" Spacing="4" Margin="0,0,14,4">
+                  <StackPanel.IsVisible>
+                    <MultiBinding Converter="{x:Static BoolConverters.And}">
+                      <Binding Path="!Bearbeiten" />
+                      <Binding Path="LegendeZweiter" />
+                    </MultiBinding>
+                  </StackPanel.IsVisible>
                   <TextBlock Text="★●" Foreground="{StaticResource Tinte}" FontSize="13" />
                   <TextBlock Text="★●" Foreground="#C2410C" FontSize="13" />
-                  <TextBlock Text="zwei Spieltage am selben Sonntag" Classes="klein" VerticalAlignment="Center" />
+                  <TextBlock Text="★●" Foreground="#7E22CE" FontSize="13" IsVisible="{Binding LegendeDritter}" />
+                  <TextBlock Text="mehrere Spieltage am selben Sonntag" Classes="klein" VerticalAlignment="Center" />
                 </StackPanel>
-                <StackPanel Orientation="Horizontal" Spacing="4" Margin="0,0,14,4" IsVisible="{Binding !Bearbeiten}">
+                <StackPanel Orientation="Horizontal" Spacing="4" Margin="0,0,14,4">
+                  <StackPanel.IsVisible>
+                    <MultiBinding Converter="{x:Static BoolConverters.And}">
+                      <Binding Path="!Bearbeiten" />
+                      <Binding Path="LegendeEinzel" />
+                    </MultiBinding>
+                  </StackPanel.IsVisible>
                   <TextBlock Text="★●" Foreground="#EAB308" FontWeight="Black" FontSize="13" />
                   <TextBlock Text="Einzelbegegnung" Classes="klein" VerticalAlignment="Center" />
                 </StackPanel>
@@ -269,6 +283,22 @@
                   <TextBlock Text="Abstiegsspieltag" Classes="klein" VerticalAlignment="Center" />
                 </StackPanel>
               </WrapPanel>
+
+              <!-- Gewählte Mannschaft (Klick auf ihren Namen): Halle aller Heimspiele, auch künftiger -->
+              <Border IsVisible="{Binding ZeigtHalle}" BorderBrush="{StaticResource Rand}" BorderThickness="0,1,0,0" Padding="0,10,0,0" MaxWidth="460" HorizontalAlignment="Left">
+                <StackPanel Spacing="6">
+                  <TextBlock Text="{Binding HalleTitel}" FontWeight="SemiBold" TextWrapping="Wrap" />
+                  <Grid ColumnDefinitions="*,8,Auto">
+                    <ComboBox ItemsSource="{Binding HalleLokale}" SelectedItem="{Binding HalleLokal}" HorizontalAlignment="Stretch" />
+                    <Button Grid.Column="2" Content="Für alle Heimspiele" Command="{Binding HalleFuerAlleCommand}" IsEnabled="{Binding !Rechnet}"
+                            ToolTip.Tip="Die Halle wird Standardhalle der Mannschaft und gilt für alle ihre Heimtermine – auch für die, die noch eingetragen werden." />
+                  </Grid>
+                  <TextBlock Text="Gilt für alle Heimtermine der Mannschaft und für neue, die noch eingetragen werden." Classes="klein" TextWrapping="Wrap"
+                             IsVisible="{Binding HalleMeldung, Converter={x:Static StringConverters.IsNullOrEmpty}}" />
+                  <TextBlock Text="{Binding HalleMeldung}" Classes="klein" Foreground="{StaticResource Gut}" TextWrapping="Wrap"
+                             IsVisible="{Binding HalleMeldung, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+                </StackPanel>
+              </Border>
 
               <!-- Bearbeiten: Feld unter dem Rahmen, Heimtermin und weitere Tage -->
               <Border IsVisible="{Binding Bearbeiten}" BorderBrush="{StaticResource Rand}" BorderThickness="0,1,0,0" Padding="0,10,0,0" MaxWidth="460" HorizontalAlignment="Left">

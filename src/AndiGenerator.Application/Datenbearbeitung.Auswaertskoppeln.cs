@@ -133,7 +133,7 @@ public sealed partial class Datenbearbeitung
             return false;
         }
 
-        DatenKnoten? vorlage = standard is null ? null : Teams(standard).FirstOrDefault(t => t.Lesen("teamname") == mannschaft);
+        DatenKnoten? vorlage = Standard is null ? null : Teams(Standard).FirstOrDefault(t => t.Lesen("teamname") == mannschaft);
         return GleicheKinder(Team(mannschaft), vorlage, "roadcouple");
     }
 
@@ -145,7 +145,7 @@ public sealed partial class Datenbearbeitung
     {
         DatenKnoten team = Team(mannschaft);
         team.KinderEntfernen("roadcouple");
-        DatenKnoten? vorlage = standard is null ? null : Teams(standard).FirstOrDefault(t => t.Lesen("teamname") == mannschaft);
+        DatenKnoten? vorlage = Standard is null ? null : Teams(Standard).FirstOrDefault(t => t.Lesen("teamname") == mannschaft);
         foreach (DatenKnoten k in vorlage?.KinderMitNamen("roadcouple") ?? [])
         {
             new DatenKnoten("roadcouple", team).Zuweisen(k);

@@ -4,6 +4,7 @@
 
 using AndiGenerator.Domain.Geo;
 using AndiGenerator.Persistence.Geo;
+using AndiGenerator.Rendering;
 
 namespace AndiGenerator.Presentation.Tests;
 
@@ -79,6 +80,53 @@ public sealed class KartenbauTests
                 Assert.False(ueberlappt, $"{marken[i].Text} und {marken[j].Text} überdecken sich.");
             }
         }
+    }
+
+    /// <summary>
+    /// Zweimal dieselbe Fahrt (zwei Spieltage beim selben Ausrichter): Linie, Pfeilspitze und Zielpunkt sind geteilt, mit
+    /// heller Trennlinie – sonst sähe es aus wie eine Fahrt.
+    /// </summary>
+    [Fact]
+    public void Zwei_gleiche_Fahrten_teilen_Linie_und_Ziel()
+    {
+        Kartenort Ort(string name, string plz, string ort) => new(name, name, Postleitzahlen.Lage(plz, ort)!.Value, true, false, string.Empty);
+        Kartenort[] orte = [Ort("TV Dienheim", "55276", "Dienheim"), Ort("TTC Zugbrücke Grenzau", "56203", "Höhr-Grenzhausen")];
+        (string, string, bool, bool) fahrt = ("TV Dienheim", "TTC Zugbrücke Grenzau", true, false);
+        Messflaeche Zeichnen(params (string, string, bool, bool)[] fahrten)
+        {
+            Kartenbild bild = Kartenbau.Bauen(orte, fahrten, Kartendaten.Laender, Kartendaten.Staedte);
+            var f = new Messflaeche();
+            new Kartenzeichner(f).Zeichnen(bild, bild.Breite, bild.Hoehe);
+            return f;
+        }
+
+        Messflaeche einmal = Zeichnen(fahrt);
+        Messflaeche zweimal = Zeichnen(fahrt, fahrt);
+
+        // Ziel in zwei Hälften (statt eines Kreises) und zwei halbe Pfeilspitzen; je Hälfte eine Linie, dazu die Trennlinien.
+        Assert.Equal(einmal.Vielecke + 3, zweimal.Vielecke);
+        Assert.Equal(einmal.Punkte.Count(p => p.Art == "Kreis"), zweimal.Punkte.Count(p => p.Art == "Kreis"));
+        Assert.True(zweimal.Linien >= einmal.Linien + 4, $"{zweimal.Linien} Linien statt mindestens {einmal.Linien + 4}.");
+    }
+
+    /// <summary>Fahrten haben die Farbe ihres Spieltags wie die Punkte im Raster: erster schwarz, zweiter orangerot, ohne blau.</summary>
+    [Fact]
+    public void Fahrten_haben_die_Farbe_ihres_Spieltags()
+    {
+        Kartenort Ort(string name, string plz, string ort) => new(name, name, Postleitzahlen.Lage(plz, ort)!.Value, true, false, string.Empty);
+        Kartenort[] orte = [Ort("TV Dienheim", "55276", "Dienheim"), Ort("TTC Zugbrücke Grenzau", "56203", "Höhr-Grenzhausen")];
+        List<Farbe> Farben(int spieltag)
+        {
+            Kartenbild bild = Kartenbau.MitSpieltagen(orte, [("TV Dienheim", "TTC Zugbrücke Grenzau", true, false, spieltag)], Kartendaten.Laender, Kartendaten.Staedte);
+            var f = new Messflaeche();
+            new Kartenzeichner(f).Zeichnen(bild, bild.Breite, bild.Hoehe);
+            return f.Linienfarben;
+        }
+
+        Assert.Contains(Farbe.Tinte, Farben(0));
+        Assert.Contains(new Farbe(0xC2, 0x41, 0x0C), Farben(1));
+        Assert.Contains(Farbe.Akzent, Farben(-1));
+        Assert.DoesNotContain(Farbe.Akzent, Farben(1));
     }
 
     [Fact]

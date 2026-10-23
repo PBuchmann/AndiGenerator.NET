@@ -18,6 +18,9 @@ internal sealed class Messflaeche : IZeichenflaeche
     /// <summary>Holt die Anzahl der gezeichneten Linien.</summary>
     public int Linien { get; private set; }
 
+    /// <summary>Holt die Farben der gezeichneten Linien.</summary>
+    public List<Farbe> Linienfarben { get; } = [];
+
     /// <summary>Holt die Anzahl der gezeichneten Rechtecke.</summary>
     public int Rechtecke { get; private set; }
 
@@ -38,7 +41,11 @@ internal sealed class Messflaeche : IZeichenflaeche
         Punkte.Add(("Senkrecht", x, y, groesse));
     }
 
-    public void Linie(double x1, double y1, double x2, double y2, Farbe farbe, double staerke) => Linien++;
+    public void Linie(double x1, double y1, double x2, double y2, Farbe farbe, double staerke)
+    {
+        Linien++;
+        Linienfarben.Add(farbe);
+    }
 
     public void Rechteck(double x, double y, double breite, double hoehe, Farbe farbe) => Rechtecke++;
 

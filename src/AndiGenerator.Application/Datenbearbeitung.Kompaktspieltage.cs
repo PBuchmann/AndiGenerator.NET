@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 using AndiGenerator.Domain.Geo;
+using AndiGenerator.Persistence.Plandaten;
 
 namespace AndiGenerator.Application;
 
@@ -13,13 +14,7 @@ public sealed partial class Datenbearbeitung
     private const string KompaktAttribut = "kompaktspieltage";
 
     /// <summary>Holt, ob die Staffel mit Kompaktspieltagen geplant wird.</summary>
-    public Kompaktmodus Kompaktspieltage => Arbeitsstand.Lesen(KompaktAttribut) switch
-    {
-        "ein" => Kompaktmodus.Ein,
-        "bestaetigt" => Kompaktmodus.Bestaetigt,
-        "aus" => Kompaktmodus.Aus,
-        _ => Kompaktmodus.Offen,
-    };
+    public Kompaktmodus Kompaktspieltage => KompaktmodusVon(Arbeitsstand);
 
     /// <summary>Setzt, ob die Staffel mit Kompaktspieltagen geplant wird.</summary>
     /// <param name="modus">Der neue Zustand.</param>
@@ -59,4 +54,15 @@ public sealed partial class Datenbearbeitung
             .Where(x => x.Text.Length > 0)
             .GroupBy(x => x.Name, StringComparer.Ordinal)
             .ToDictionary(g => g.Key, g => g.First().Text, StringComparer.Ordinal);
+
+    /// <summary>Liest, ob die Staffel mit Kompaktspieltagen geplant wird (ohne Arbeitskopie).</summary>
+    /// <param name="stand">Der Stand der Spielplandaten.</param>
+    /// <returns>Der Zustand.</returns>
+    internal static Kompaktmodus KompaktmodusVon(DatenKnoten stand) => stand.Lesen(KompaktAttribut) switch
+    {
+        "ein" => Kompaktmodus.Ein,
+        "bestaetigt" => Kompaktmodus.Bestaetigt,
+        "aus" => Kompaktmodus.Aus,
+        _ => Kompaktmodus.Offen,
+    };
 }

@@ -16,15 +16,17 @@ namespace AndiGenerator.Application;
 /// </summary>
 public sealed partial class Datenbearbeitung
 {
-    private readonly DatenKnoten? standard;
+    /// <summary>Der unveränderte click-TT-Import, erst bei Bedarf geladen (die meisten Bearbeitungen brauchen ihn nicht).</summary>
+    private readonly Lazy<DatenKnoten?> standardLaden;
 
-    /// <summary>Initialisiert die Arbeitskopie.</summary>
+    /// <summary>Initialisiert die Arbeitskopie; der Standard wird erst geladen, wenn er gebraucht wird.</summary>
     /// <param name="stand">Aktueller Stand (wird kopiert).</param>
-    /// <param name="standard">Unveränderter click-TT-Import oder <c>null</c>.</param>
-    internal Datenbearbeitung(DatenKnoten stand, DatenKnoten? standard)
+    /// <param name="standard">Lädt den unveränderten click-TT-Import, oder <c>null</c>, wenn es keinen gibt.</param>
+    internal Datenbearbeitung(DatenKnoten stand, Func<DatenKnoten>? standard)
     {
         Arbeitsstand = stand.Kopie();
-        this.standard = standard;
+        standardLaden = new Lazy<DatenKnoten?>(() => standard?.Invoke(), LazyThreadSafetyMode.ExecutionAndPublication);
+        HatStandard = standard is not null;
     }
 
     /// <summary>
@@ -34,7 +36,7 @@ public sealed partial class Datenbearbeitung
     public bool FreitagZaehltZumWochenende { get; init; } = true;
 
     /// <summary>Holt einen Wert, der angibt, ob es einen Standard (click-TT-Import) gibt („Standard wiederherstellen“).</summary>
-    public bool HatStandard => standard is not null;
+    public bool HatStandard { get; }
 
     /// <summary>Holt oder setzt die allgemeinen Daten der Staffel (Original <c>DataToForm</c>/<c>FormToData</c>).</summary>
     public Ligadaten Ligadaten
@@ -53,12 +55,15 @@ public sealed partial class Datenbearbeitung
     }
 
     /// <summary>Holt die allgemeinen Daten des Standards oder <c>null</c> ohne Standard.</summary>
-    public Ligadaten? StandardLigadaten => standard is null ? null : LigadatenLesen(standard);
+    public Ligadaten? StandardLigadaten => Standard is null ? null : LigadatenLesen(Standard);
 
     /// <summary>Holt die Arbeitskopie.</summary>
     internal DatenKnoten Arbeitsstand { get; }
 
     private static DateOnly Nullpunkt => DateOnly.FromDateTime(DelphiKompatibel.DelphiNull);
+
+    /// <summary>Holt den unveränderten click-TT-Import oder <c>null</c> (erst bei Bedarf geladen).</summary>
+    private DatenKnoten? Standard => standardLaden.Value;
 
     /// <summary>
     /// Original <c>TDialogPanelMainData.DataToForm</c>: Ohne Vorrundenbeginn werden 1.7., 30.12. und 1.5. des Folgejahres

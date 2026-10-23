@@ -21,7 +21,7 @@ public sealed partial class Datenbearbeitung
     /// <param name="mannschaft">Mannschaftsname.</param>
     /// <returns>Die Gegner oder <c>null</c> ohne Standard.</returns>
     public IReadOnlyList<string>? NurWochenendeStandard(string mannschaft) =>
-        standard is null ? null : NurWochenendeAus(standard, mannschaft);
+        Standard is null ? null : NurWochenendeAus(Standard, mannschaft);
 
     /// <summary>Schreibt die Gegner (Original <c>FormToData</c>): alle bisherigen Einträge werden ersetzt.</summary>
     /// <param name="mannschaft">Mannschaftsname.</param>
