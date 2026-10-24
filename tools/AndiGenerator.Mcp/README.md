@@ -51,6 +51,7 @@ die verbleibenden Sperrtermin-Verstöße.“
 |---|---|
 | `status` | Staffel, Einrichtung, Verfahren, ob gerechnet wird, Kacheln, nächster Schritt, Meldungen |
 | `staffel_oeffnen`, `staffel_schliessen` | XML-Export aus click-TT öffnen bzw. schließen |
+| `beispiel_oeffnen` | Eine der beiliegenden Beispielstaffeln öffnen (Kopie im Datenordner); ohne Namen die Liste |
 | `einrichtung`, `einrichtung_waehlen`, `einrichtung_abschliessen` | Punkte der Einrichtung ansehen, entscheiden, abschließen |
 | `verfahren_waehlen`, `startplan_waehlen` | Automodus oder Kostenoptimierung; Ausgangsplan |
 | `starten`, `anhalten`, `fortsetzen`, `stoppen`, `warten` | Generierung bzw. Berechnung steuern und verfolgen |

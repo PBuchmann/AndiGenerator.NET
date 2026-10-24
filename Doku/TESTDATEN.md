@@ -32,7 +32,7 @@ Saison: 49 Dateien 2026/27 (17.08.2026–09.05.2027), 1 Datei 2025/26 (`Verbands
 | Doppelrunde | 1 (Testplan des Autors) | knapp, aber vorhanden |
 
 ## 2a. Testpläne des Autors (`AndiGenerator\Exe\Testplaene`)
-Fünf click-TT-Exporte aus der Saison 2015/16, **älteres Exportformat** (ohne `seasonType`) – damit lässt sich die Abwärtskompatibilität des Imports prüfen.
+Fünf click-TT-Exporte aus der Saison 2015/16, **älteres Exportformat** (ohne `seasonType`) – damit lässt sich die Abwärtskompatibilität des Imports prüfen. Die Originale liegen seit 0.9.9 dem Programm als Beispiele bei (`src/AndiGenerator.Desktop/Beispiele`); die Tests nutzen weiter die anonymisierten Fassungen R23–R27.
 | Datei | Mannschaften | Besonderheit |
 |---|---|---|
 | `Liga für Doppelrunde.xml` | 6 | **Doppelrunde** (einziger Fall) |

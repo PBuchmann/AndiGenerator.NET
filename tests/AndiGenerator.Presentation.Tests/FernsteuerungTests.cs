@@ -387,6 +387,52 @@ public sealed class FernsteuerungTests : IDisposable
     }
 
     [Fact]
+    public async Task Beispiele_auflisten()
+    {
+        Aktionsergebnis liste = await w.BeispielOeffnen();
+        Assert.False(liste.Erfolg);
+        Assert.Contains("Liga mit Koppelterminen", liste.Text, StringComparison.Ordinal);
+    }
+
+    /// <summary>Die Beispielklassen für Kompaktspieltage lassen sich öffnen und planen.</summary>
+    /// <param name="name">Name des Beispiels.</param>
+    /// <param name="mannschaften">Zahl der Mannschaften.</param>
+    /// <returns>Der Testlauf.</returns>
+    [Theory]
+    [InlineData("jugend 19 hessenliga (hr)", 10)]
+    [InlineData("Jugend 19 NRW-Liga 1 (HR)", 8)]
+    public async Task Kompaktbeispiel_oeffnen_und_planen(string name, int mannschaften)
+    {
+        Aktionsergebnis geoeffnet = await w.BeispielOeffnen(name);
+        Assert.True(geoeffnet.Erfolg, geoeffnet.Text);
+        await w.EinrichtungAbschliessen();
+        Assert.Equal("Kompaktspieltage", (await w.Status()).Verfahren);
+        Assert.Equal(mannschaften, (await w.Spielplandaten())!.Mannschaften.Count);
+
+        Assert.True((await w.Starten()).Erfolg);
+        Stand stand = await w.Status();
+        for (int i = 0; i < 300 && stand.Laeuft && !stand.Statuszeile.Contains("geplant – ", StringComparison.Ordinal); i++)
+        {
+            await Task.Delay(100);
+            stand = await w.Status();
+        }
+
+        if (stand.Laeuft)
+        {
+            await w.Stoppen();
+        }
+
+        for (int i = 0; i < 60 && (await w.Status()).Laeuft; i++)
+        {
+            await Task.Delay(500);
+        }
+
+        Kompaktstand k = Assert.IsType<Kompaktstand>(await w.Kompakt());
+        Assert.Contains(k.Plaene, p => !p.Contains("Plan aus click-TT", StringComparison.Ordinal));
+        Assert.NotEmpty(k.Spieltage);
+    }
+
+    [Fact]
     public async Task Drucken_schreibt_ein_PDF()
     {
         await NormaleRundeOeffnenAsync();

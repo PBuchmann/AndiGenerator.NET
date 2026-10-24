@@ -611,6 +611,28 @@
               </ItemsControl>
             </StackPanel>
           </Border>
+          <Border Classes="karte" Padding="14" CornerRadius="18" IsVisible="{Binding HatBeispiele}">
+            <StackPanel>
+              <TextBlock Text="Beispiele zum Ausprobieren" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource Tinte2}" Margin="18,6,18,2" />
+              <TextBlock Text="Die Testpläne aus dem Original (Saison 2015/16) und eine Klasse mit Kompaktspieltagen. Geöffnet wird eine Kopie im Datenordner; Änderungen bleiben dort erhalten."
+                         Classes="klein" TextWrapping="Wrap" Margin="18,0,18,8" />
+              <ItemsControl ItemsSource="{Binding Beispiele}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="p:Beispielzeile">
+                    <Button Classes="zuletzt" Command="{Binding $parent[Window].((p:HauptfensterViewModel)DataContext).BeispielOeffnenCommand}" CommandParameter="{Binding Pfad}">
+                      <Grid ColumnDefinitions="Auto,*">
+                        <ui:Symbol Daten="{StaticResource SymbolKalender}" Farbe="{StaticResource Akzent}" Groesse="26" VerticalAlignment="Center" Margin="0,0,16,0" />
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                          <TextBlock Text="{Binding Name}" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource Tinte}" TextTrimming="CharacterEllipsis" />
+                          <TextBlock Text="{Binding Beschreibung}" Classes="klein" TextWrapping="Wrap" />
+                        </StackPanel>
+                      </Grid>
+                    </Button>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+          </Border>
           <Grid ColumnDefinitions="Auto,*">
             <Button Classes="link" Command="{Binding UeberCommand}" Content="Über AndiGenerator.NET" />
             <TextBlock Grid.Column="1" Text="Portierung des AndiGenerators von Andreas Hofmann · GPL-3.0" Classes="klein" HorizontalAlignment="Right" VerticalAlignment="Center" TextWrapping="Wrap" />

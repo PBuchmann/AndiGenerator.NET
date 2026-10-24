@@ -12,6 +12,8 @@
   <ItemGroup>
     <!-- Anleitung (erzeugt mit tools/anleitung aus Doku/ANLEITUNG.md); das Programm öffnet sie über „Anleitung“. -->
     <None Include="..\..\Doku\Anleitung.pdf" Link="Anleitung.pdf" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <!-- Beispielstaffeln (Testpläne des Originals, Saison 2015/16, und Kompaktklasse Hessenliga); die Startseite bietet sie an und öffnet eine Kopie im Datenordner. -->
+    <None Include="Beispiele\*.xml;Beispiele\*.modifications" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\AndiGenerator.UI\AndiGenerator.UI.csproj" />

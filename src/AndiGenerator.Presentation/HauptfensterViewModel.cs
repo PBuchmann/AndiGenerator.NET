@@ -290,6 +290,7 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
                 OeffnenCommand.NotifyCanExecuteChanged();
                 NeuCommand.NotifyCanExecuteChanged();
                 ZuletztOeffnenCommand.NotifyCanExecuteChanged();
+                beispielOeffnen?.NotifyCanExecuteChanged();
                 AnsichtsbefehleAktualisieren();
             }
         }

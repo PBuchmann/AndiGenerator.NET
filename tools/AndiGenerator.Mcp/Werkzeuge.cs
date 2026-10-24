@@ -18,7 +18,7 @@ internal sealed class Werkzeuge
 {
     /// <summary>Anleitung für die KI (wird beim Verbinden übermittelt).</summary>
     internal const string Anleitung =
-        "AndiGenerator.NET plant Spielpläne für Tischtennis-Staffeln aus click-TT. Ablauf: staffel_oeffnen (XML-Export aus click-TT) → "
+        "AndiGenerator.NET plant Spielpläne für Tischtennis-Staffeln aus click-TT. Ablauf: staffel_oeffnen (XML-Export aus click-TT; zum Ausprobieren beispiel_oeffnen) → "
         + "einrichtung (offene Punkte ansehen, mit einrichtung_waehlen entscheiden) → einrichtung_abschliessen → verfahren_waehlen "
         + "(automodus empfohlen; bei Kompaktspieltagen entfällt das) → starten → warten (wiederholt) und qualitaet bzw. kompakt lesen → "
         + "bei Bedarf einstufen oder b_variante_festlegen → stoppen → plan_merken → csv_exportieren bzw. drucken. Bei der Kostenoptimierung "
@@ -47,6 +47,13 @@ internal sealed class Werkzeuge
     [McpServerTool(Name = "staffel_oeffnen")]
     [Description("Öffnet eine Staffel: den XML-Export aus click-TT (Änderungen in der .modifications-Datei daneben werden übernommen). Eine laufende Generierung wird beendet.")]
     public Task<Aktionsergebnis> StaffelOeffnen([Description("Vollständiger Pfad der XML-Datei.")] string pfad) => s.OeffnenAsync(pfad);
+
+    /// <summary>Beispiel öffnen.</summary>
+    /// <param name="name">Name.</param>
+    /// <returns>Das Ergebnis.</returns>
+    [McpServerTool(Name = "beispiel_oeffnen")]
+    [Description("Öffnet eine der beiliegenden Beispielstaffeln (Testpläne des Originals) als Kopie im Datenordner – zum Ausprobieren ohne eigene Daten. Ohne passenden Namen nennt die Antwort die Beispiele.")]
+    public Task<Aktionsergebnis> BeispielOeffnen([Description("Name des Beispiels, z. B. „Liga mit idealen Meldungen“; leer = auflisten.")] string name = "") => s.BeispielOeffnenAsync(name);
 
     /// <summary>Staffel schließen.</summary>
     /// <returns>Das Ergebnis.</returns>

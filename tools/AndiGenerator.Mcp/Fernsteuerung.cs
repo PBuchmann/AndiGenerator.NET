@@ -68,6 +68,31 @@ internal sealed partial class Fernsteuerung : IDisposable
         return Ergebnis(true, hf.ZeigtEinrichtung ? "Geöffnet. Die Einrichtung ist offen: „einrichtung“ zeigt die Punkte, „einrichtung_abschliessen“ übernimmt sie." : "Geöffnet.");
     });
 
+    /// <summary>Öffnet ein beiliegendes Beispiel (als Kopie im Datenordner wie auf der Startseite).</summary>
+    /// <param name="name">Name des Beispiels; leer = nur auflisten.</param>
+    /// <returns>Das Ergebnis.</returns>
+    public Task<Aktionsergebnis> BeispielOeffnenAsync(string name) => faden.Ausfuehren(async () =>
+    {
+        string liste = string.Join("; ", hf.Beispiele.Select(b => b.Name + (b.Beschreibung.Length > 0 ? " – " + b.Beschreibung : string.Empty)));
+        if (hf.Beispiele.FirstOrDefault(b => Gleich(b.Name, name)) is not { } beispiel)
+        {
+            return Ergebnis(false, hf.HatBeispiele ? $"Beispiele: {liste}" : "Es liegen keine Beispiele bei.");
+        }
+
+        if (hf.Laeuft || hf.KompaktRechnet)
+        {
+            hf.StoppenCommand.Execute(null);
+        }
+
+        await hf.BeispielOeffnenCommand.ExecuteAsync(beispiel.Pfad);
+        if (!hf.IstGeoeffnet)
+        {
+            return Ergebnis(false, "Das Beispiel ließ sich nicht öffnen.");
+        }
+
+        return Ergebnis(true, hf.ZeigtEinrichtung ? "Geöffnet. Die Einrichtung ist offen: „einrichtung“ zeigt die Punkte, „einrichtung_abschliessen“ übernimmt sie." : "Geöffnet.");
+    });
+
     /// <summary>Schließt die Staffel (der Plan wird vorher gesichert wie in der Oberfläche).</summary>
     /// <returns>Das Ergebnis.</returns>
     public Task<Aktionsergebnis> SchliessenAsync() => faden.Ausfuehren(async () =>
