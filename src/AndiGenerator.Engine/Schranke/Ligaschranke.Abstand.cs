@@ -9,8 +9,8 @@ using AndiGenerator.Engine.Referenz;
 namespace AndiGenerator.Engine.Schranke;
 
 /// <summary>
-/// Abstand Heim/Auswärts und Setzliste genähert (nur für die Teilneuplanung, wenn es die genaue Form nicht gibt – siehe
-/// <see cref="AbstandGenau"/> und <see cref="SetzlisteGenau"/>), dazu die 60-km-Regel und die Pausen der Spielverteilung.
+/// Abstand Heim/Auswärts und Setzliste genähert (für die Teilneuplanung; die genaue Form, siehe <see cref="AbstandGenau"/> und
+/// <see cref="SetzlisteGenau"/>, macht die Ausschnitte zu schwer), dazu die 60-km-Regel und die Pausen der Spielverteilung.
 /// </summary>
 public sealed partial class Ligaschranke
 {

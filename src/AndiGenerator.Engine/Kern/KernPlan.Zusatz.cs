@@ -29,12 +29,15 @@ internal sealed partial class KernPlan
     {
         int[] verteilung = new int[D.N];
         var verteilungsmeldungen = new List<string>[D.N];
+        var pausen = new List<(double Start, double Ende)>[D.N];
         for (int t = 0; t < D.N; t++)
         {
             verteilungsmeldungen[t] = [];
+            pausen[t] = [];
             foreach ((double start, double ende, double soll) in Luecken(t).Where(l => l.Soll >= LueckeAb))
             {
                 verteilung[t]++;
+                pausen[t].Add((start, ende));
                 if (meldungen)
                 {
                     verteilungsmeldungen[t].Add(string.Create(
@@ -44,7 +47,7 @@ internal sealed partial class KernPlan
             }
         }
 
-        (int laenge, int ueberlappung, bool letzteLaenge, bool letzteUeberlappung, List<string> spieltage, List<string> letzter) = Spieltage(meldungen);
+        (int laenge, int ueberlappung, bool letzteLaenge, bool letzteUeberlappung, List<string> spieltage, List<string> letzter, List<int> zuLang, List<int> ueberlappend) = Spieltage(meldungen);
         return new Zusatzverstoesse(
             verteilung,
             laenge,
@@ -53,7 +56,10 @@ internal sealed partial class KernPlan
             letzteUeberlappung ? 1 : 0,
             spieltage,
             verteilungsmeldungen.Select(m => (IReadOnlyList<string>)m).ToArray(),
-            letzter);
+            letzter,
+            pausen.Select(p => (IReadOnlyList<(double Start, double Ende)>)p).ToArray(),
+            zuLang,
+            ueberlappend);
     }
 
     /// <summary>
@@ -222,7 +228,7 @@ internal sealed partial class KernPlan
     /// Wie <c>SpieltagsKosten</c>: Der i-te Spieltag sind die i-ten Spiele aller Mannschaften. Zu lang ist er, wenn er (auf 10
     /// Mannschaften bezogen) mehr als 6 Tage umfasst; er überlappt, wenn er beginnt, bevor ein früherer zu Ende ist.
     /// </summary>
-    private (int Laenge, int Ueberlappung, bool LetzteLaenge, bool LetzteUeberlappung, List<string> Meldungen, List<string> Letzter) Spieltage(bool meldungen)
+    private (int Laenge, int Ueberlappung, bool LetzteLaenge, bool LetzteUeberlappung, List<string> Meldungen, List<string> Letzter, List<int> ZuLang, List<int> Ueberlappend) Spieltage(bool meldungen)
     {
         int spieltage = 0;
         for (int t = 0; t < D.N; t++)
@@ -233,6 +239,8 @@ internal sealed partial class KernPlan
         var texte = new List<string>();
         var letzterTexte = new List<string>();
         var maxima = new List<(int Spieltag, double Max)>();
+        var zuLang = new List<int>();
+        var ueberlappend = new List<int>();
         int laenge = 0;
         int ueberlappung = 0;
         bool letzteLaenge = false;
@@ -263,6 +271,7 @@ internal sealed partial class KernPlan
             {
                 laenge++;
                 letzteLaenge |= letzter;
+                zuLang.Add(i);
                 if (meldungen)
                 {
                     texte.Add($"{i + 1}. Spieltag dauert {dauer} Tage: {DelphiDatum.Text(min)} bis {DelphiDatum.Text(max)}");
@@ -279,6 +288,7 @@ internal sealed partial class KernPlan
             {
                 ueberlappung++;
                 letzteUeberlappung |= letzter;
+                ueberlappend.Add(i);
                 if (meldungen)
                 {
                     texte.Add($"{i + 1}. Spieltag beginnt {DelphiDatum.Text(min)}, der {f.Spieltag + 1}. endet erst {DelphiDatum.Text(f.Max)}");
@@ -292,6 +302,6 @@ internal sealed partial class KernPlan
             maxima.Add((i, max));
         }
 
-        return (laenge, ueberlappung, letzteLaenge, letzteUeberlappung, texte, letzterTexte);
+        return (laenge, ueberlappung, letzteLaenge, letzteUeberlappung, texte, letzterTexte, zuLang, ueberlappend);
     }
 }

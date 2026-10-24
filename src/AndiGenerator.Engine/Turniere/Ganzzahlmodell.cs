@@ -147,11 +147,6 @@ public sealed class Ganzzahlmodell
     /// <param name="preis">Die neuen Kosten.</param>
     public void Preis(int spalte, double preis) => kosten[spalte] = preis;
 
-    /// <summary>Ändert die obere Grenze einer Zeile (z. B. um das Ergebnis einer früheren Stufe festzuhalten).</summary>
-    /// <param name="zeile">Die Zeile.</param>
-    /// <param name="oben">Die neue Grenze.</param>
-    public void ZeileBegrenzen(int zeile, double oben) => zeileOben[zeile] = oben;
-
     /// <summary>Ändert beide Grenzen einer Zeile (z. B. um eine vorübergehende Festlegung wieder zu lösen).</summary>
     /// <param name="zeile">Die Zeile.</param>
     /// <param name="unten">Die neue untere Grenze.</param>

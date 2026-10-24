@@ -13,6 +13,6 @@ public partial class DiagrammAnsicht : UserControl
     public DiagrammAnsicht()
     {
         InitializeComponent();
-        Mausradzoom.Anmelden(this);
+        Ansichtszoom.Anmelden(this);
     }
 }

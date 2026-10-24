@@ -66,18 +66,6 @@ public sealed partial class Ligaschranke
     private Func<bool>? aufhoeren;
 
     /// <summary>
-    /// Die Setzliste in der Teilneuplanung genau nach der Reihenfolge der eigenen Spiele (sonst genähert). Die genaue Form macht die
-    /// Ausschnitte für HiGHS schwerer; in der Bezirksliga Süd kam die Teilneuplanung damit nicht weiter – darum nur auf Wunsch.
-    /// </summary>
-    private bool setzlisteGenau;
-
-    /// <summary>
-    /// Abstand Heim/Auswärts in der Teilneuplanung genau (sonst genähert): Die genaue Form verbindet die Stellen aller Spiele
-    /// und macht die Ausschnitte für HiGHS so schwer, dass es in der Zeitgrenze kaum noch etwas findet – darum nur auf Wunsch.
-    /// </summary>
-    private bool abstandGenau;
-
-    /// <summary>
     /// Die genauen Formen (Spieltage, Abstand Heim/Auswärts, Setzliste) zählen nur Spiele mit Termin: Für eine Schranke gelten sie
     /// erst, wenn die Spiele ohne Termin (A1) auf 0 festgehalten sind.
     /// </summary>
@@ -974,8 +962,8 @@ public sealed partial class Ligaschranke
     /// </param>
     private List<(int Spalte, double Faktor)>? Ziel(Kostenkriterium k, bool naeherung = false) => k switch
     {
-        Kostenkriterium.AbstandHeimAuswaerts when naeherung => (abstandGenau ? AbstandGenau() : null) ?? AbstandHeimAuswaerts(),
-        Kostenkriterium.Setzliste when naeherung => (setzlisteGenau ? SetzlisteGenau() : null) ?? Setzliste(),
+        Kostenkriterium.AbstandHeimAuswaerts when naeherung => AbstandHeimAuswaerts(),
+        Kostenkriterium.Setzliste when naeherung => Setzliste(),
         Kostenkriterium.AbstandHeimAuswaerts => genauMoeglich ? AbstandGenau() : null,
         Kostenkriterium.Setzliste => genauMoeglich ? SetzlisteGenau() : null,
         Kostenkriterium.Spielverteilung => Pausen(),

@@ -13,6 +13,6 @@ public partial class MeldungenAnsicht : UserControl
     public MeldungenAnsicht()
     {
         InitializeComponent();
-        Mausradzoom.Anmelden(this);
+        Ansichtszoom.Anmelden(this);
     }
 }

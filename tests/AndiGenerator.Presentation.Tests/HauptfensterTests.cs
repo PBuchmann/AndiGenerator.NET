@@ -708,11 +708,15 @@ public sealed class HauptfensterTests : IDisposable
         Assert.False(qualitaet.ZeigtSchranke);
         Assert.All(qualitaet.Zeilen, z => Assert.Empty(z.Bestmoeglich));
 
+        // Die Meldungen von HiGHS laufen wie auf dem UI-Thread nur hier, nie gleichzeitig mit den Prüfungen (sonst sah der Test
+        // gelegentlich eine Ansicht mitten im Erneuern).
+        o.Sammeln = true;
         hf.AutomodusCommand.Execute(null);
         Assert.True(qualitaet.ZeigtSchranke);
         for (int i = 0; i < 600 && qualitaet.Zeilen.Any(z => z.BestmoeglichRechnet); i++)
         {
             await Task.Delay(100);
+            o.Abarbeiten();
         }
 
         Assert.True(qualitaet.ZeigtSchranke);
@@ -1017,8 +1021,8 @@ public sealed class HauptfensterTests : IDisposable
 
         Assert.Contains("Spieltage", flaeche.Texte);
         Assert.Contains("Wechsel Heim/Auswärts", flaeche.Texte);
-        Assert.Contains("Anzahl Spiele pro Woche", flaeche.Texte);
-        Assert.Contains("Sperrtermin", flaeche.Texte);
+        Assert.Contains("Spiele pro Woche", flaeche.Texte);
+        Assert.Contains("frei (Sperrtermin)", flaeche.Texte);
         Assert.Contains(flaeche.Punkte, p => p.Art == "Senkrecht");
         Assert.Contains(flaeche.Punkte, p => p.Art == "Kreis");
         Assert.StartsWith("Seite ", flaeche.Texte[^1], StringComparison.Ordinal);

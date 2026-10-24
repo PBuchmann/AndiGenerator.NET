@@ -11,6 +11,7 @@
         WindowStartupLocation="CenterScreen" WindowState="Maximized">
   <Window.KeyBindings>
     <!-- Zoom der aktiven Ansicht wie im Browser; Haupttastatur und Ziffernblock. -->
+    <KeyBinding Gesture="F1" Command="{Binding FuehrungCommand}" />
     <KeyBinding Gesture="Ctrl+OemPlus" Command="{Binding ZoomGroesserCommand}" />
     <KeyBinding Gesture="Ctrl+Add" Command="{Binding ZoomGroesserCommand}" />
     <KeyBinding Gesture="Ctrl+OemMinus" Command="{Binding ZoomKleinerCommand}" />
@@ -221,6 +222,7 @@
       <Setter Property="Foreground" Value="{StaticResource Schlecht}" />
     </Style>
   </Window.Styles>
+  <Panel>
   <DockPanel>
     <!-- Navigation links; bei schmalem Fenster nur Symbole (Klasse „schmal“, siehe Code). -->
     <Border x:Name="Navigation" Classes="navigation" DockPanel.Dock="Left" Background="{StaticResource Flaeche}" BorderBrush="{StaticResource Linie}" BorderThickness="0,0,1,0">
@@ -235,6 +237,9 @@
           </StackPanel>
         </StackPanel>
         <StackPanel DockPanel.Dock="Bottom" Margin="12,4,12,14">
+          <Button Classes="nav" Classes.aktiv="{Binding ZeigtFuehrung}" Command="{Binding FuehrungCommand}" ToolTip.Tip="Schritt für Schritt durch die Optimierung (F1): zeigt nach und nach, was zu tun ist">
+            <StackPanel Orientation="Horizontal" Spacing="12"><ui:Symbol Daten="{StaticResource SymbolHilfe}" /><TextBlock Classes="navtext" Text="Schritt für Schritt" VerticalAlignment="Center" /></StackPanel>
+          </Button>
           <Button Classes="nav" Command="{Binding AnleitungCommand}" ToolTip.Tip="Anleitung als PDF öffnen">
             <StackPanel Orientation="Horizontal" Spacing="12"><ui:Symbol Daten="{StaticResource SymbolAnleitung}" /><TextBlock Classes="navtext" Text="Anleitung" VerticalAlignment="Center" /></StackPanel>
           </Button>
@@ -257,10 +262,10 @@
               <Button Classes="nav" Command="{Binding NeuCommand}" ToolTip.Tip="Neue Datei zur komplett manuellen Eingabe erstellen">
                 <StackPanel Orientation="Horizontal" Spacing="12"><ui:Symbol Daten="{StaticResource SymbolNeu}" /><TextBlock Classes="navtext" Text="Neu" VerticalAlignment="Center" /></StackPanel>
               </Button>
-              <Button Classes="nav" Command="{Binding DatenCommand}" ToolTip.Tip="Spielplandaten bearbeiten">
+              <Button Classes="nav" Command="{Binding DatenCommand}" ui:Fuehrungsmarke.Ziel="NavDaten" ToolTip.Tip="Spielplandaten bearbeiten">
                 <StackPanel Orientation="Horizontal" Spacing="12"><ui:Symbol Daten="{StaticResource SymbolDaten}" /><TextBlock Classes="navtext" Text="Spielplandaten" VerticalAlignment="Center" /></StackPanel>
               </Button>
-              <Button Classes="nav" Classes.aktiv="{Binding AktiveAnsicht, Converter={x:Static ui:Konverter.Gleich}, ConverterParameter=Einstellungen}" Command="{Binding EinstellungenCommand}" ToolTip.Tip="Einstellungen der Staffel">
+              <Button Classes="nav" Classes.aktiv="{Binding AktiveAnsicht, Converter={x:Static ui:Konverter.Gleich}, ConverterParameter=Einstellungen}" Command="{Binding EinstellungenCommand}" ui:Fuehrungsmarke.Ziel="NavEinstellungen" ToolTip.Tip="Einstellungen der Staffel">
                 <StackPanel Orientation="Horizontal" Spacing="12"><ui:Symbol Daten="{StaticResource SymbolEinstellungen}" /><TextBlock Classes="navtext" Text="Einstellungen" VerticalAlignment="Center" /></StackPanel>
               </Button>
             </StackPanel>
@@ -271,22 +276,22 @@
               </Grid>
             </ToggleButton>
             <StackPanel Classes="sektionsinhalt" Classes.zu="{Binding !#KopfAnsichten.IsChecked}">
-              <Button Classes="nav" Classes.aktiv="{Binding AktiveAnsicht, Converter={x:Static ui:Konverter.Gleich}, ConverterParameter=Kompakt}" Command="{Binding KompaktspieltageCommand}" IsVisible="{Binding ZeigtKompaktspieltage}" ToolTip.Tip="Kompaktspieltage: Meldungen, Plan und Karte der Spielorte">
+              <Button Classes="nav" Classes.aktiv="{Binding AktiveAnsicht, Converter={x:Static ui:Konverter.Gleich}, ConverterParameter=Kompakt}" Command="{Binding KompaktspieltageCommand}" ui:Fuehrungsmarke.Ziel="NavKompakt" IsVisible="{Binding ZeigtKompaktspieltage}" ToolTip.Tip="Kompaktspieltage: Meldungen, Plan und Karte der Spielorte">
                 <StackPanel Orientation="Horizontal" Spacing="12"><ui:Symbol Daten="{StaticResource SymbolKarte}" /><TextBlock Classes="navtext" Text="Kompaktspieltage" VerticalAlignment="Center" /></StackPanel>
               </Button>
-              <Button Classes="nav" Classes.aktiv="{Binding AktiveAnsicht, Converter={x:Static ui:Konverter.Gleich}, ConverterParameter=Kosten}" IsVisible="{Binding ZeigtGenerierung}" Command="{Binding KostenansichtCommand}" ToolTip.Tip="Kosten">
+              <Button Classes="nav" Classes.aktiv="{Binding AktiveAnsicht, Converter={x:Static ui:Konverter.Gleich}, ConverterParameter=Kosten}" IsVisible="{Binding ZeigtGenerierung}" Command="{Binding KostenansichtCommand}" ui:Fuehrungsmarke.Ziel="NavKosten" ToolTip.Tip="Kosten">
                 <StackPanel Orientation="Horizontal" Spacing="12"><ui:Symbol Daten="{StaticResource SymbolKosten}" /><TextBlock Classes="navtext" Text="Kosten" VerticalAlignment="Center" /></StackPanel>
               </Button>
-              <Button Classes="nav" Classes.aktiv="{Binding AktiveAnsicht, Converter={x:Static ui:Konverter.Gleich}, ConverterParameter=Qualitaet}" IsVisible="{Binding ZeigtGenerierung}" Command="{Binding QualitaetsansichtCommand}" ToolTip.Tip="Qualität">
+              <Button Classes="nav" Classes.aktiv="{Binding AktiveAnsicht, Converter={x:Static ui:Konverter.Gleich}, ConverterParameter=Qualitaet}" IsVisible="{Binding ZeigtGenerierung}" Command="{Binding QualitaetsansichtCommand}" ToolTip.Tip="Qualität" ui:Fuehrungsmarke.Ziel="NavQualitaet">
                 <StackPanel Orientation="Horizontal" Spacing="12"><ui:Symbol Daten="{StaticResource SymbolQualitaet}" /><TextBlock Classes="navtext" Text="Qualität" VerticalAlignment="Center" /></StackPanel>
               </Button>
-              <Button Classes="nav" Classes.aktiv="{Binding AktiveAnsicht, Converter={x:Static ui:Konverter.Gleich}, ConverterParameter=Meldungen}" IsVisible="{Binding ZeigtGenerierung}" Command="{Binding MeldungsansichtCommand}" ToolTip.Tip="Meldungen je Mannschaft">
+              <Button Classes="nav" Classes.aktiv="{Binding AktiveAnsicht, Converter={x:Static ui:Konverter.Gleich}, ConverterParameter=Meldungen}" IsVisible="{Binding ZeigtGenerierung}" Command="{Binding MeldungsansichtCommand}" ui:Fuehrungsmarke.Ziel="NavMeldungen" ToolTip.Tip="Meldungen je Mannschaft">
                 <StackPanel Orientation="Horizontal" Spacing="12"><ui:Symbol Daten="{StaticResource SymbolMeldungen}" /><TextBlock Classes="navtext" Text="Meldungen" VerticalAlignment="Center" /></StackPanel>
               </Button>
               <Button Classes="nav" Classes.aktiv="{Binding AktiveAnsicht, Converter={x:Static ui:Konverter.Gleich}, ConverterParameter=Terminplan}" Command="{Binding TerminplanansichtCommand}" ToolTip.Tip="Terminplan">
                 <StackPanel Orientation="Horizontal" Spacing="12"><ui:Symbol Daten="{StaticResource SymbolTerminplan}" /><TextBlock Classes="navtext" Text="Terminplan" VerticalAlignment="Center" /></StackPanel>
               </Button>
-              <Button Classes="nav" Classes.aktiv="{Binding AktiveAnsicht, Converter={x:Static ui:Konverter.Gleich}, ConverterParameter=Diagramme}" Command="{Binding DiagrammansichtCommand}" ToolTip.Tip="Diagramme">
+              <Button Classes="nav" Classes.aktiv="{Binding AktiveAnsicht, Converter={x:Static ui:Konverter.Gleich}, ConverterParameter=Diagramme}" Command="{Binding DiagrammansichtCommand}" ui:Fuehrungsmarke.Ziel="NavDiagramme" ToolTip.Tip="Diagramme">
                 <StackPanel Orientation="Horizontal" Spacing="12"><ui:Symbol Daten="{StaticResource SymbolDiagramme}" /><TextBlock Classes="navtext" Text="Diagramme" VerticalAlignment="Center" /></StackPanel>
               </Button>
               <Button Classes="nav" Classes.aktiv="{Binding AktiveAnsicht, Converter={x:Static ui:Konverter.Gleich}, ConverterParameter=Terminwuensche}" Command="{Binding TerminwunschansichtCommand}" ToolTip.Tip="Terminwünsche">
@@ -304,10 +309,10 @@
             </ToggleButton>
             <StackPanel Classes="sektionsinhalt" Classes.zu="{Binding !#KopfAusgabe.IsChecked}">
               <!-- Das Ergebnis der Arbeit: exportiert den gerade angezeigten Plan; farblich hervorgehoben, deaktiviert ohne Plan -->
-              <Button Classes="nav hervorgehoben" Command="{Binding CsvExportierenCommand}" ToolTip.Tip="{Binding CsvHinweis}" ToolTip.ShowOnDisabled="True">
+              <Button Classes="nav hervorgehoben" Command="{Binding CsvExportierenCommand}" ui:Fuehrungsmarke.Ziel="NavExport" ToolTip.Tip="{Binding CsvHinweis}" ToolTip.ShowOnDisabled="True">
                 <StackPanel Orientation="Horizontal" Spacing="12"><ui:Symbol Daten="{StaticResource SymbolExport}" /><TextBlock Classes="navtext" Text="Für click-TT exportieren" VerticalAlignment="Center" /></StackPanel>
               </Button>
-              <Button Classes="nav" Command="{Binding DruckenCommand}" ToolTip.Tip="Ausdruck als PDF-Datei">
+              <Button Classes="nav" Command="{Binding DruckenCommand}" ui:Fuehrungsmarke.Ziel="NavDrucken" ToolTip.Tip="Ausdruck als PDF-Datei">
                 <StackPanel Orientation="Horizontal" Spacing="12"><ui:Symbol Daten="{StaticResource SymbolDrucken}" /><TextBlock Classes="navtext" Text="Drucken (PDF)" VerticalAlignment="Center" /></StackPanel>
               </Button>
             </StackPanel>
@@ -317,8 +322,23 @@
     </Border>
 
     <Border DockPanel.Dock="Bottom" Padding="16,4" BorderThickness="0,1,0,0" BorderBrush="{StaticResource Linie}" Background="{StaticResource Flaeche}">
-      <TextBlock Text="{Binding Statuszeile}" Classes="klein" TextTrimming="CharacterEllipsis" />
+      <Grid ColumnDefinitions="*,Auto">
+        <TextBlock Text="{Binding Statuszeile}" Classes="klein" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+        <!-- Führung „Schritt für Schritt“: der nächste Schritt, der zur Lage passt; ein Klick öffnet die Begleitleiste -->
+        <Button Grid.Column="1" Classes="link" Command="{Binding FuehrungCommand}" IsVisible="{Binding HatFuehrungsHinweis}" Margin="16,0,0,0" Padding="4,0"
+                ToolTip.Tip="Schritt für Schritt öffnen (F1)">
+          <StackPanel Orientation="Horizontal" Spacing="6">
+            <ui:Symbol Daten="{StaticResource SymbolHilfe}" Groesse="14" />
+            <TextBlock Text="{Binding FuehrungsHinweis}" FontSize="12" VerticalAlignment="Center" />
+          </StackPanel>
+        </Button>
+      </Grid>
     </Border>
+
+    <!-- Begleitleiste „Schritt für Schritt“ -->
+    <Panel DockPanel.Dock="Right" IsVisible="{Binding ZeigtFuehrung}">
+      <ui:FuehrungLeiste DataContext="{Binding Fuehrung}" />
+    </Panel>
 
     <Grid RowDefinitions="Auto,Auto,*">
       <!-- Kopf: Staffel und Steuerung der Generierung -->
@@ -331,7 +351,7 @@
           <WrapPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center" HorizontalAlignment="Right">
             <StackPanel Spacing="4" Margin="0,0,8,0">
               <TextBlock Text="Start mit" Classes="klein" FontSize="11" />
-              <ComboBox Classes="gross" MinWidth="170" MaxWidth="260" ItemsSource="{Binding Startplaene}" SelectedItem="{Binding Startplan}" IsEnabled="{Binding StartplanWaehlbar}"
+              <ComboBox Classes="gross" MinWidth="170" ui:Fuehrungsmarke.Ziel="StartMit" MaxWidth="260" ItemsSource="{Binding Startplaene}" SelectedItem="{Binding Startplan}" IsEnabled="{Binding StartplanWaehlbar}"
                         ToolTip.Tip="Ausgangsplan für den nächsten Start. Eine laufende oder angehaltene Generierung setzt ihren eigenen besten Plan fort – für einen anderen Ausgangsplan zuerst „Stopp“."
                         ToolTip.ShowOnDisabled="True">
                 <ComboBox.ItemTemplate>
@@ -343,7 +363,7 @@
             </StackPanel>
             <!-- An derselben Stelle: „Plan merken“ während/nach der Generierung, „Plan löschen“ vor dem Start bei gewähltem gemerkten Plan -->
             <Panel VerticalAlignment="Bottom" Margin="0,0,16,0">
-              <Button Classes="gross" Command="{Binding PlanMerkenCommand}" IsVisible="{Binding !ZeigtPlanLoeschen}" ToolTip.Tip="Besten Plan der Generierung unter einem Namen merken">
+              <Button Classes="gross" Command="{Binding PlanMerkenCommand}" ui:Fuehrungsmarke.Ziel="PlanMerken" IsVisible="{Binding !ZeigtPlanLoeschen}" ToolTip.Tip="Besten Plan der Generierung unter einem Namen merken">
                 <StackPanel Orientation="Horizontal" Spacing="10"><ui:Symbol Daten="{StaticResource SymbolMerken}" Groesse="20" /><TextBlock Text="Plan merken" VerticalAlignment="Center" /></StackPanel>
               </Button>
               <Button Classes="gross" Command="{Binding PlanLoeschenCommand}" IsVisible="{Binding ZeigtPlanLoeschen}" ToolTip.Tip="Den unter „Start mit“ gewählten gemerkten Plan endgültig löschen">
@@ -353,7 +373,7 @@
             <!-- Verfahren: zwei Optionsfelder nebeneinander, gestaltet wie die Umschalter der Ansichten (genau eines ist gewählt); vor dem Start wählen sie, während der Generierung wechseln sie -->
             <StackPanel Spacing="4" Margin="0,0,12,0" VerticalAlignment="Bottom" IsVisible="{Binding ZeigtGenerierung}">
               <TextBlock Text="Verfahren" Classes="klein" FontSize="11" />
-              <Border Background="#ECEAE4" CornerRadius="12" Padding="4" ToolTip.Tip="{Binding VerfahrenErklaerung}">
+              <Border Background="#ECEAE4" CornerRadius="12" Padding="4" ToolTip.Tip="{Binding VerfahrenErklaerung}" ui:Fuehrungsmarke.Ziel="Verfahren">
                 <StackPanel Orientation="Horizontal" Spacing="4">
                   <RadioButton Classes="segment" GroupName="Verfahren" Content="Kostenoptimierung" IsChecked="{Binding KostenoptimierungGewaehlt}" IsEnabled="{Binding IstGeoeffnet}" />
                   <RadioButton Classes="segment" GroupName="Verfahren" Content="Automodus" IsChecked="{Binding AutomodusGewaehlt}" IsEnabled="{Binding IstGeoeffnet}" />
@@ -362,7 +382,7 @@
             </StackPanel>
             <!-- Hauptknopf: Play vor dem Start, Pause während der Generierung, in der Pause „Fortsetzen“ (Strich und Play); rechts daneben vor dem Start
                  „Staffel schließen“ (✕), während der Generierung „Stopp“ (■) -->
-            <Button Classes="gross primaer" Command="{Binding GenerierungCommand}" Width="56" Padding="0" HorizontalContentAlignment="Center" VerticalAlignment="Bottom"
+            <Button Classes="gross primaer" Command="{Binding GenerierungCommand}" ui:Fuehrungsmarke.Ziel="Start" Width="56" Padding="0" HorizontalContentAlignment="Center" VerticalAlignment="Bottom"
                     ToolTip.Tip="{Binding GenerierungText}">
               <Panel>
                 <ui:Symbol Daten="{StaticResource SymbolStart}" Gefuellt="True" Groesse="22" IsVisible="{Binding ZeigtStart}" />
@@ -371,7 +391,7 @@
               </Panel>
             </Button>
             <Panel VerticalAlignment="Bottom" Margin="8,0,0,0">
-              <Button Classes="gross" Command="{Binding StoppenCommand}" IsVisible="{Binding ZeigtStopp}" Width="56" Padding="0" HorizontalContentAlignment="Center"
+              <Button Classes="gross" Command="{Binding StoppenCommand}" ui:Fuehrungsmarke.Ziel="Stopp" IsVisible="{Binding ZeigtStopp}" Width="56" Padding="0" HorizontalContentAlignment="Center"
                       ToolTip.Tip="Stopp: Generierung bzw. Planung der Kompaktspieltage beenden. Der bisher beste Plan bleibt erhalten.">
                 <ui:Symbol Daten="{StaticResource SymbolStopp}" Gefuellt="True" Groesse="22" />
               </Button>
@@ -386,9 +406,9 @@
 
       <!-- Kacheln: Stand der Generierung (im Kompaktmodus ausgeblendet; die Kennzahlen stehen dort in der Ansicht) -->
       <Panel Grid.Row="1" IsVisible="{Binding ZeigtArbeitsbereich}">
-      <Grid Classes="kacheln" Classes.automodus="{Binding Anzeige.ZeigtVerstoesse}" IsVisible="{Binding ZeigtGenerierung}" Margin="22,10,22,0"
+      <Grid Classes="kacheln" ui:Fuehrungsmarke.Ziel="Kacheln" Classes.automodus="{Binding Anzeige.ZeigtVerstoesse}" IsVisible="{Binding ZeigtGenerierung}" Margin="22,10,22,0"
             ColumnDefinitions="*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*,*" RowDefinitions="Auto,Auto">
-        <Button Classes="kartenknopf ergebnis" Margin="6" Command="{Binding ErgebnisCommand}" ToolTip.Tip="{Binding ErgebnisHinweis}">
+        <Button Classes="kartenknopf ergebnis" ui:Fuehrungsmarke.Ziel="KachelErgebnis" Margin="6" Command="{Binding ErgebnisCommand}" ToolTip.Tip="{Binding ErgebnisHinweis}">
           <StackPanel Spacing="2">
             <Grid ColumnDefinitions="*,Auto">
               <TextBlock Text="{Binding Anzeige.Titel}" Classes="klein" TextTrimming="CharacterEllipsis" />
@@ -447,7 +467,7 @@
             <TextBlock Text="{Binding Anzeige.PflichtHinweis}" Classes="klein hinweis" TextWrapping="Wrap" MaxLines="2" TextTrimming="CharacterEllipsis" />
           </StackPanel>
         </Button>
-        <Button Classes="kartenknopf verbesserungen" Margin="6" Command="{Binding VerlaufCommand}" ToolTip.Tip="Verlauf der Suche öffnen: Kosten bzw. Verstöße seit dem Start">
+        <Button Classes="kartenknopf verbesserungen" ui:Fuehrungsmarke.Ziel="KachelVerlauf" Margin="6" Command="{Binding VerlaufCommand}" ToolTip.Tip="Verlauf der Suche öffnen: Kosten bzw. Verstöße seit dem Start">
           <StackPanel Spacing="2">
             <Grid ColumnDefinitions="*,Auto">
               <TextBlock Text="Verbesserungen" Classes="klein" TextTrimming="CharacterEllipsis" />
@@ -462,7 +482,7 @@
             <TextBlock Text="{Binding Anzeige.LetzteVerbesserung}" Classes="klein hinweis" TextTrimming="CharacterEllipsis" />
           </StackPanel>
         </Button>
-        <Button Classes="kartenknopf plaene" Margin="6" Command="{Binding LeitstandCommand}" ToolTip.Tip="Leitstand öffnen: was die Rechenkerne, Inseln und HiGHS gerade tun">
+        <Button Classes="kartenknopf plaene" ui:Fuehrungsmarke.Ziel="KachelLeitstand" Margin="6" Command="{Binding LeitstandCommand}" ToolTip.Tip="Leitstand öffnen: was die Rechenkerne, Inseln und HiGHS gerade tun">
           <!-- Links die berechneten Pläne und der Prozessor; im Automodus rechts daneben, woran HiGHS rechnet (Untergrenze bzw.
                Teilneuplanung), mit dem Knopf zu den B-Varianten -->
           <Grid ColumnDefinitions="5*,Auto,9*" Classes="plaeneinhalt" Classes.mithighs="{Binding Anzeige.ZeigtHighs}">
@@ -500,7 +520,7 @@
                 <Grid ColumnDefinitions="*,Auto">
                   <TextBlock Text="{Binding Anzeige.Highs.Zeit, FallbackValue={x:Null}}" Classes="klein hinweis" TextTrimming="CharacterEllipsis" VerticalAlignment="Center"
                              ToolTip.Tip="{Binding Anzeige.Highs.Zeit, FallbackValue={x:Null}}" />
-                  <Button Grid.Column="1" Classes="variantenknopf" Content="{Binding Anzeige.Highs.VariantenText, FallbackValue={x:Null}}" Command="{Binding BVariantenCommand}"
+                  <Button Grid.Column="1" Classes="variantenknopf" ui:Fuehrungsmarke.Ziel="BVarianten" Content="{Binding Anzeige.Highs.VariantenText, FallbackValue={x:Null}}" Command="{Binding BVariantenCommand}"
                           IsVisible="{Binding Anzeige.Highs.ZeigtVarianten, FallbackValue=False}" Margin="8,0,0,0"
                           ToolTip.Tip="B-Varianten aus HiGHS vergleichen und eine wählen (wie in der Kopfzeile der Stufe B der Qualitätsansicht)" />
                 </Grid>
@@ -599,4 +619,7 @@
       </ScrollViewer>
     </Grid>
   </DockPanel>
+  <!-- Scheinwerfer der Führung: dunkelt kurz ab, nur das gezeigte Element bleibt hell -->
+  <ui:Scheinwerfer x:Name="Licht" />
+  </Panel>
 </Window>

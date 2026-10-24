@@ -179,9 +179,6 @@ public sealed partial class Ligaschranke
         Stufenwert Bewerten(IReadOnlyList<Spiel> p) => e.Bewerten?.Invoke(p)
             ?? einteilung.Zaehlen(Referenzbewertung.Bewerten(staffel with { BestehenderSpielplan = p }, optionen));
 
-        setzlisteGenau = e.SetzlisteGenau;
-        abstandGenau = e.AbstandGenau;
-
         // Die Ziele: jedes Kriterium genau einmal ins Modell (die Bausteine legen Hilfsspalten an).
         List<(int Spalte, double Faktor)> ohne = ohneTermin.Select(u => (u.Spalte, 1.0)).ToList();
 
@@ -194,11 +191,6 @@ public sealed partial class Ligaschranke
         List<List<(int Spalte, double Faktor)>> a = [ohne, Stufenziel(einteilung.A)];
         List<List<(int Spalte, double Faktor)>> b = [Stufenziel(einteilung.B)];
         List<List<(int Spalte, double Faktor)>> c = [.. einteilung.C
-            .Where(k => e.MitWechsel || k != Kostenkriterium.WechselHeimAuswaerts)
-            .Where(k => e.MitAbstand || k != Kostenkriterium.AbstandHeimAuswaerts)
-            .Where(k => e.MitSetzliste || k != Kostenkriterium.Setzliste)
-            .Where(k => e.MitSpieltagen || k is not (Kostenkriterium.Spieltaglaenge or Kostenkriterium.Spieltagueberlappung
-                or Kostenkriterium.LetzterSpieltagLaenge or Kostenkriterium.LetzterSpieltagUeberlappung))
             .Select(k => Ziel(k, naeherung: true)).OfType<List<(int Spalte, double Faktor)>>().Select(Zusammenfassen)];
 
         // Der Ausgangsplan im Modell: Ansetzungen festlegen (je Ansetzungsspalte eine Zeile), Hilfsspalten ergänzen.
@@ -295,8 +287,6 @@ public sealed partial class Ligaschranke
         int hoechstens = Math.Max(e.Mannschaften, d.N / 2);
         int groesse = e.Mannschaften;
         int gewaehlt = 0;
-        int ohneErfolg = 0;
-        int geduld = Math.Max(4, d.N / 2);
         void Freigeben(HashSet<int> frei)
         {
             for (int i = 0; i < ansetzung.Length; i++)
@@ -317,7 +307,6 @@ public sealed partial class Ligaschranke
                 {
                     e.Ausschnitt?.Invoke(new Ausschnittsmeldung(0, Ausschnittsergebnis.Ausgangsplan, bester));
                     groesse = e.Mannschaften;
-                    ohneErfolg = 0;
                 }
             }
 
@@ -327,17 +316,7 @@ public sealed partial class Ligaschranke
             }
 
             schritte++;
-            if (e.Gezielt)
-            {
-                (gewaehlt, groesse) = Waehlen(statistik, artenzahl, e.Mannschaften, hoechstens, e.JeSchritt.TotalSeconds, zufall);
-            }
-            else if (ohneErfolg >= geduld)
-            {
-                groesse = groesse >= hoechstens ? e.Mannschaften : groesse + 1;
-                ohneErfolg = 0;
-            }
-
-            ohneErfolg++;
+            (gewaehlt, groesse) = Waehlen(statistik, artenzahl, e.Mannschaften, hoechstens, e.JeSchritt.TotalSeconds, zufall);
             HashSet<int> belegt = e.Belegung is null ? [] : [.. e.Belegung.Andere(e.Platz).Select(n => Array.IndexOf(d.Name, n)).Where(t => t >= 0)];
             (HashSet<int> frei, string ausschnitt, int art, int[] wahl) = AusschnittBilden(zufall, gewaehlt, groesse, besterPlan, e.Verstoesse, belegt);
             e.Belegung?.Belegen(e.Platz, wahl.Select(t => d.Name[t]));
@@ -388,7 +367,6 @@ public sealed partial class Ligaschranke
                 besterPlan = kandidat;
                 bester = w;
                 angenommen++;
-                ohneErfolg = 0;
                 (double v, double erfolge, double sek) = statistik[(art, groesse)];
                 statistik[(art, groesse)] = (v, erfolge + gewinn, sek);
 

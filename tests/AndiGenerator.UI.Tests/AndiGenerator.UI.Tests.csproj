@@ -22,6 +22,7 @@
     <Compile Include="..\AndiGenerator.Presentation.Tests\Arbeitsplatz.cs" Link="Gemeinsam\Arbeitsplatz.cs" />
     <Compile Include="..\AndiGenerator.Presentation.Tests\Namen.cs" Link="Gemeinsam\Namen.cs" />
     <Compile Include="..\AndiGenerator.Presentation.Tests\Beispielverlauf.cs" Link="Gemeinsam\Beispielverlauf.cs" />
+    <Compile Include="..\AndiGenerator.Presentation.Tests\Kompaktklasse.cs" Link="Gemeinsam\Kompaktklasse.cs" />
     <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
       <_Parameter1>Referenz</_Parameter1>
       <_Parameter2>$(MSBuildThisFileDirectory)../../testdaten/referenz</_Parameter2>

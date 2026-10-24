@@ -13,6 +13,12 @@ public class OptimierungsdienstTests
 {
     private static readonly Optimierungseinstellungen ZweiKerne = Optimierungseinstellungen.Standard with { Kerne = 2 };
 
+    /// <summary>
+    /// Obergrenze für das Warten auf die erste Meldung – nur gegen Hängen: Gewartet wird, bis sie kommt (meist nach einer
+    /// Sekunde). Im vollen Testlauf unter Last dauerte es auch schon über 10 s.
+    /// </summary>
+    private static readonly TimeSpan Hoechstens = TimeSpan.FromSeconds(60);
+
     [Fact]
     public async Task Verbesserungen_werden_gemeldet_und_Stoppen_beendet()
     {
@@ -22,7 +28,7 @@ public class OptimierungsdienstTests
         dienst.Verbessert += (_, stand) => gemeldet.TrySetResult(stand);
 
         dienst.Starten(sitzung.Staffel, sitzung.Optionen);
-        Optimierungsstand erster = await gemeldet.Task.WaitAsync(TimeSpan.FromSeconds(10));
+        Optimierungsstand erster = await gemeldet.Task.WaitAsync(Hoechstens);
 
         Assert.True(erster.Laeuft);
         Assert.True(erster.Kosten >= 0);
@@ -45,7 +51,7 @@ public class OptimierungsdienstTests
             var gefunden = new TaskCompletionSource<Optimierungsstand>(TaskCreationOptions.RunContinuationsAsynchronously);
             erster.Verbessert += (_, stand) => gefunden.TrySetResult(stand);
             erster.Starten(sitzung.Staffel, sitzung.Optionen);
-            ausgangsplan = (await gefunden.Task.WaitAsync(TimeSpan.FromSeconds(10))).Spiele;
+            ausgangsplan = (await gefunden.Task.WaitAsync(Hoechstens)).Spiele;
         }
 
         using var dienst = new Optimierungsdienst(ZweiKerne);
@@ -54,7 +60,7 @@ public class OptimierungsdienstTests
         dienst.Pausiert = true;
         dienst.Starten(sitzung.Staffel, sitzung.Optionen, ausgangsplan);
 
-        Optimierungsstand stand = await gemeldet.Task.WaitAsync(TimeSpan.FromSeconds(10));
+        Optimierungsstand stand = await gemeldet.Task.WaitAsync(Hoechstens);
         Assert.True(stand.Kosten >= 0);
         Assert.Equal(ausgangsplan.Count, stand.Spiele.Count);
     }
@@ -76,7 +82,7 @@ public class OptimierungsdienstTests
         dienst.Verbessert += (_, stand) => gemeldet.TrySetResult(stand);
 
         dienst.Starten(sitzung.Staffel, optionen);
-        Optimierungsstand stand = await gemeldet.Task.WaitAsync(TimeSpan.FromSeconds(10));
+        Optimierungsstand stand = await gemeldet.Task.WaitAsync(Hoechstens);
 
         Assert.All(vorrunde, v => Assert.Contains(v, stand.Spiele));
         Assert.DoesNotContain(stand.Spiele, s => s.Zeitpunkt is not null && !vorrunde.Contains(s)

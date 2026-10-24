@@ -14,6 +14,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\AndiGenerator.Presentation\AndiGenerator.Presentation.csproj" />
     <ProjectReference Include="..\..\src\AndiGenerator.Persistence\AndiGenerator.Persistence.csproj" />
+    <ProjectReference Include="..\..\tools\AndiGenerator.Mcp\AndiGenerator.Mcp.csproj" />
   </ItemGroup>
   <ItemGroup>
     <!-- Anonymisierte Testdaten im Repository (tools/anonymisieren), siehe Doku/TESTDATEN.md. -->

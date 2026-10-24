@@ -1,0 +1,27 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <AssemblyName>andigen-mcp</AssemblyName>
+    <RootNamespace>AndiGenerator.Mcp</RootNamespace>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="ModelContextProtocol" />
+    <PackageReference Include="Microsoft.Extensions.Hosting" />
+    <PackageReference Include="SkiaSharp" />
+    <PackageReference Include="SkiaSharp.NativeAssets.Linux" />
+  </ItemGroup>
+  <ItemGroup>
+    <!-- PDF-Ausdruck wie in der Oberfläche (dieselben Dateien, ohne Avalonia); die Schriften sind eingebettet. -->
+    <Compile Include="..\..\src\AndiGenerator.UI\PdfAusdruck.cs" Link="Ausdruck\PdfAusdruck.cs" />
+    <Compile Include="..\..\src\AndiGenerator.UI\SkiaZeichenflaeche.cs" Link="Ausdruck\SkiaZeichenflaeche.cs" />
+    <EmbeddedResource Include="..\..\src\AndiGenerator.UI\Assets\Fonts\IBMPlexSans-Regular.ttf" Link="Ausdruck\IBMPlexSans-Regular.ttf" LogicalName="Schrift.IBMPlexSans-Regular.ttf" />
+    <EmbeddedResource Include="..\..\src\AndiGenerator.UI\Assets\Fonts\IBMPlexSans-SemiBold.ttf" Link="Ausdruck\IBMPlexSans-SemiBold.ttf" LogicalName="Schrift.IBMPlexSans-SemiBold.ttf" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\src\AndiGenerator.Presentation\AndiGenerator.Presentation.csproj" />
+    <ProjectReference Include="..\..\src\AndiGenerator.Application\AndiGenerator.Application.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="AndiGenerator.Presentation.Tests" />
+  </ItemGroup>
+</Project>

@@ -3,6 +3,10 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 using AndiGenerator.Domain.Optionen;
+using AndiGenerator.Domain.Stammdaten;
+using AndiGenerator.Engine.Inseln;
+using AndiGenerator.Engine.Referenz;
+using AndiGenerator.Engine.Schranke;
 using AndiGenerator.Presentation;
 using AndiGenerator.Presentation.Tests;
 using AndiGenerator.UI.Seiten;
@@ -10,6 +14,7 @@ using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Headless;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using Avalonia.VisualTree;
 using Xunit.Abstractions;
 
@@ -76,10 +81,76 @@ public sealed class DialogTests
         return Task.CompletedTask;
     });
 
+    /// <summary>Der Dialog der B-Varianten: jede Spalte wählen, Abbrechen und Übernehmen schließen ihn.</summary>
+    /// <returns>Der Testlauf.</returns>
+    [Fact]
+    public Task Alternativendialog_wird_angezeigt_und_geschlossen() => oberflaeche.Ausfuehren(() =>
+    {
+        using var a = new Arbeitsplatz("datendialoge/D01_Allgemein.xml");
+        IReadOnlyList<Spiel> spiele = a.Sitzung.Staffel.BestehenderSpielplan;
+        Planbewertung bewertung = Referenzbewertung.Bewerten(a.Sitzung.Staffel, a.Sitzung.Optionen);
+        var aktuell = new Planstand(spiele, bewertung);
+        var sperren = new Planalternative(Kostenkriterium.Sperrtermine, "Sperrtermine", spiele, Bewiesen: true);
+        var summe = new Planalternative(null, "Summe in B", spiele, Bewiesen: false);
+        string mannschaft = a.Sitzung.Staffel.Mannschaften[0].Name;
+        IReadOnlyList<Meldungsgruppe> Meldungen(Planstand plan, Kostenkriterium k) => ReferenceEquals(plan, aktuell)
+            ? [new Meldungsgruppe(mannschaft, "1 Verstoß", ["Sperrtermin: Sa 03.10."])]
+            : [new Meldungsgruppe(mannschaft, "1 Verstoß", ["Sperrtermin: Sa 10.10."])];
+
+        foreach (bool uebernehmen in new[] { false, true })
+        {
+            var dialog = new AlternativendialogViewModel(
+                aktuell,
+                [(sperren, bewertung), (summe, bewertung)],
+                sperren,
+                Stufeneinteilung.Standard,
+                Meldungen,
+                true,
+                "Ein Hinweis zu den Varianten.");
+            var fenster = new Alternativendialog(dialog);
+            fenster.Show();
+            Oberflaeche.Zeichnen(fenster);
+            foreach (Alternativspalte spalte in dialog.Spalten)
+            {
+                spalte.AuswaehlenCommand.Execute(null);
+                Oberflaeche.Zeichnen(fenster);
+            }
+
+            dialog.Spalten[^1].AuswaehlenCommand.Execute(null);
+            Oberflaeche.Zeichnen(fenster);
+            Button knopf = Knopf(fenster, uebernehmen ? "Uebernehmen" : "Abbrechen");
+            Assert.True(knopf.IsEffectivelyEnabled);
+            knopf.RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            Assert.False(fenster.IsVisible);
+        }
+
+        oberflaeche.KeineFehler(ausgabe);
+        return Task.CompletedTask;
+    });
+
     [Fact]
     public Task Doppelklick_auf_einen_Wunschtermin_oeffnet_den_Dialog() => oberflaeche.Ausfuehren(() =>
     {
         using var a = new Arbeitsplatz("datendialoge/D01_Allgemein.xml");
+        bool geschlossen = false;
+        a.Oberflaeche.Wunschtermin = d =>
+        {
+            // Alle Arten einmal zeigen, dann mit OK schließen.
+            var wunsch = new Wunschtermindialog(d);
+            wunsch.Show();
+            Oberflaeche.Zeichnen(wunsch);
+            d.ArtSperrtermin = true;
+            Oberflaeche.Zeichnen(wunsch);
+            d.ArtKeinHeimspiel = true;
+            Oberflaeche.Zeichnen(wunsch);
+            d.ArtHeimspiel = true;
+            d.Uhrzeit = new TimeSpan(19, 30, 0);
+            Oberflaeche.Zeichnen(wunsch);
+            Knopf(wunsch, "Ok").RaiseEvent(new RoutedEventArgs(Button.ClickEvent));
+            geschlossen = !wunsch.IsVisible;
+            wunsch.Close();
+            return false;
+        };
         var fenster = new Datendialog(a.Dialog);
         fenster.Show();
         try
@@ -107,10 +178,13 @@ public sealed class DialogTests
             fenster.Close();
         }
 
-        Assert.Contains("Wunschtermin", a.Oberflaeche.Aufrufe);
+        Assert.True(geschlossen);
         oberflaeche.KeineFehler(ausgabe);
         return Task.CompletedTask;
     });
+
+    private static Button Knopf(Window fenster, string name) =>
+        fenster.GetVisualDescendants().OfType<Button>().Single(b => b.Name == name);
 
     private static ListBox Seitenliste(Window fenster) =>
         fenster.GetVisualDescendants().OfType<ListBox>().Single(l => l.Classes.Contains("seitenliste"));

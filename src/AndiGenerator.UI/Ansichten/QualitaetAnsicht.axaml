@@ -247,7 +247,7 @@
             </Grid>
           </Border>
           <!-- Im Automodus: Zeilen am Griff links ziehen; die Zeile hängt am Mauszeiger, die Tabelle macht an der Ablagestelle Platz und nummeriert schon um. -->
-          <ItemsControl x:Name="Liste" ItemsSource="{Binding Zeilen}" Background="Transparent"
+          <ItemsControl x:Name="Liste" ui:Fuehrungsmarke.Ziel="QualitaetTabelle" ItemsSource="{Binding Zeilen}" Background="Transparent"
                         ItemTemplate="{StaticResource Zeilenvorlage}"
                         PointerPressed="ListeGedrueckt" PointerMoved="ListeBewegt" PointerReleased="ListeLosgelassen" PointerCaptureLost="ListeVerloren" />
         </DockPanel>

@@ -225,7 +225,9 @@ internal sealed class Verlaufszeichnung
             return;
         }
 
-        double bis = X(punkte.First(p => p.Sekunden > letzte.Sekunden).Sekunden);
+        // Der erste Punkt nach der Basisoptimierung kann in derselben Sekunde liegen (oder ein Punkt einer anderen Phase davor):
+        // dann endet das Band beim letzten Punkt der Basisoptimierung.
+        double bis = X(punkte.FirstOrDefault(p => p.Sekunden > letzte.Sekunden)?.Sekunden ?? letzte.Sekunden);
         context.FillRectangle(band, new Rect(alle.Left, alle.Top, Math.Max(0, bis - alle.Left), alle.Height));
         Text("Basis", new Point(alle.Left + 4, alle.Top + 2), grau, 9);
     }

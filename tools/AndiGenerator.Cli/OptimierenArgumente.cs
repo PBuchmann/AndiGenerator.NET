@@ -15,26 +15,18 @@ internal sealed class OptimierenArgumente
           --sekunden N      Laufzeit in Sekunden (Standard 120)
           --durchlaeufe N   stattdessen bis N Durchläufe insgesamt; mit --kerne 1 und --startwert reproduzierbar
           --kerne N         Rechen-Threads (Standard: Prozessorkerne - 1)
-          --inseln N        Zahl der Inseln (Standard 4)
           --startwert N     Startwert der Zufallsfolgen
           --optionen DATEI  Optionsdatei (.options); "auto" = Staffelordner des Originals; Standard: Standardoptionen
           --rundenplanung R beide | halbrunde | vorrunde | rueckrunde (überschreibt die Optionsdatei)
           --leer            mit leerem Plan beginnen (sonst mit dem bestehenden Spielplan der Datei)
-          --ohne-spezial    ohne Spezial-Insel
-          --original        Suche und Kosten wie im Original (ohne die Korrekturen der Klasse-3-Befunde
-                            und ohne die Regel für den Pflichtspieltag; zum Vergleich)
-          --hallen-wie-original  nur die Korrektur „Hallen nach Namen“ abschalten
           --intervall N     Statuszeile alle N Sekunden (Standard 10)
           --protokoll DATEI Verlauf als CSV (Sekunden;Durchläufe;Pläne/s;Kosten;Verbesserungen;Neustarts;Spezial)
-          --start PLAN      Startplan (gemerkter Plan .xml oder CSV, z. B. von "schranke --plan") für die ersten Inseln
-          --start-inseln N  so viele Inseln beginnen mit dem Startplan (Standard 1)
+          --start PLAN      Startplan (gemerkter Plan .xml oder CSV, z. B. von "schranke --plan") für die erste Insel
           --auto            Automodus (Gewichte nach der Rangfolge A/B/C lenken)
           --highs           Automodus mit HiGHS: Schranke beendet das Drängen, Plan aus HiGHS nach dem Grundlauf (schaltet --auto ein)
           --nebenher        mit --highs: HiGHS rechnet wie in der Oberfläche nebenher (Zwischenpläne sofort angeboten,
                             Teilneuplanung erst danach) statt vor dem Start
-          --linien N        mit --neuplanen: so viele HiGHS-Linien (Standard wie die Oberfläche: 2 ab 8 Prozessoren, sonst 1)
           --neuplanen       Automodus mit Teilneuplanung (HiGHS) nebenher (schaltet --auto ein)
-          --spaet N         beim Glätten späte Annahme mit Gedächtnis N je Suchplatz (0 = nur Verbesserungen; Standard wie die Oberfläche)
           --plan DATEI      besten Plan als gemerkten Plan (Format des Originals) speichern
           --ausgabe DATEI   Bildschirmausgabe zusätzlich in diese Datei schreiben
         Eine .modifications-Datei neben der XML-Datei wird automatisch berücksichtigt. Abbrechen mit Strg+C.
@@ -48,8 +40,6 @@ internal sealed class OptimierenArgumente
 
     public int? Kerne { get; private set; }
 
-    public int? Inseln { get; private set; }
-
     public int? Startwert { get; private set; }
 
     public string? Optionen { get; private set; }
@@ -58,14 +48,6 @@ internal sealed class OptimierenArgumente
 
     public bool Leer { get; private set; }
 
-    public bool OhneSpezial { get; private set; }
-
-    /// <summary>Holt einen Wert, der angibt, ob ohne Korrekturen gerechnet wird (wie das Original).</summary>
-    public bool Original { get; private set; }
-
-    /// <summary>Holt einen Wert, der angibt, ob die Hallenbelegung wie im Original nur nach Spiellokal-Nummer zählt.</summary>
-    public bool HallenWieOriginal { get; private set; }
-
     public int Intervall { get; private set; } = 10;
 
     public string? Protokoll { get; private set; }
@@ -73,8 +55,6 @@ internal sealed class OptimierenArgumente
     public string? Plan { get; private set; }
 
     public string? Start { get; private set; }
-
-    public int StartInseln { get; private set; } = 1;
 
     public bool Auto { get; private set; }
 
@@ -85,13 +65,7 @@ internal sealed class OptimierenArgumente
 
     public bool Neuplanen { get; private set; }
 
-    /// <summary>Holt die Zahl der HiGHS-Linien (<c>null</c> = wie die Oberfläche).</summary>
-    public int? Linien { get; private set; }
-
     public string? Ausgabe { get; private set; }
-
-    /// <summary>Holt das Gedächtnis der späten Annahme (<c>null</c> = wie die Oberfläche).</summary>
-    public int? Spaet { get; private set; }
 
     /// <summary>Liest die Argumente nach dem Befehlswort; <c>null</c> bei Fehlern (Meldung in <paramref name="fehler"/>).</summary>
     public static OptimierenArgumente? Lesen(IReadOnlyList<string> args, out string fehler)
@@ -167,21 +141,9 @@ internal sealed class OptimierenArgumente
                 Highs = true;
                 Auto = true;
                 return true;
-            case "--linien" when Zahl(werte, arg, out zahl, out fehler):
-                Linien = (int)Math.Clamp(zahl, 0, 16);
-                return true;
             case "--neuplanen":
                 Neuplanen = true;
                 Auto = true;
-                return true;
-            case "--ohne-spezial":
-                OhneSpezial = true;
-                return true;
-            case "--original":
-                Original = true;
-                return true;
-            case "--hallen-wie-original":
-                HallenWieOriginal = true;
                 return true;
             case "--sekunden" when Zahl(werte, arg, out zahl, out fehler):
                 Sekunden = (int)Math.Min(zahl, int.MaxValue);
@@ -189,14 +151,8 @@ internal sealed class OptimierenArgumente
             case "--durchlaeufe" when Zahl(werte, arg, out zahl, out fehler):
                 Durchlaeufe = zahl;
                 return true;
-            case "--spaet" when Zahl(werte, arg, out zahl, out fehler):
-                Spaet = (int)Math.Clamp(zahl, 0, 1_000_000);
-                return true;
             case "--kerne" when Zahl(werte, arg, out zahl, out fehler):
                 Kerne = (int)Math.Clamp(zahl, 1, 1024);
-                return true;
-            case "--inseln" when Zahl(werte, arg, out zahl, out fehler):
-                Inseln = (int)Math.Clamp(zahl, 1, 256);
                 return true;
             case "--startwert" when Zahl(werte, arg, out zahl, out fehler):
                 Startwert = (int)Math.Min(zahl, int.MaxValue);
@@ -216,9 +172,6 @@ internal sealed class OptimierenArgumente
                 return true;
             case "--start" when Text(werte, arg, out text, out fehler):
                 Start = text;
-                return true;
-            case "--start-inseln" when Zahl(werte, arg, out zahl, out fehler):
-                StartInseln = (int)Math.Clamp(zahl, 0, 256);
                 return true;
             case "--plan" when Text(werte, arg, out text, out fehler):
                 Plan = text;

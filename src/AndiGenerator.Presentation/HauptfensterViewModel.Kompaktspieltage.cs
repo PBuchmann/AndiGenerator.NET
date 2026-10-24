@@ -547,6 +547,12 @@ public sealed partial class HauptfensterViewModel
     private void KompaktFortschritt(Kompaktfortschritt stand) =>
         oberflaeche.AufOberflaeche(() =>
         {
+            // Eine verspätete Meldung überschreibt nicht das Ergebnis der beendeten Berechnung.
+            if (!KompaktRechnet)
+            {
+                return;
+            }
+
             Statuszeile = "Kompaktspieltage werden geplant – " + stand.Text;
             kompaktAnsicht?.FortschrittZeigen(stand.Anteil * 100, stand.Text);
         });

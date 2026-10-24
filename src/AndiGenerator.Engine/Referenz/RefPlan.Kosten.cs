@@ -347,9 +347,6 @@ internal sealed partial class RefPlan
         _ => true,
     };
 
-    /// <summary>Original <c>NoGames</c>.</summary>
-    public bool KeineSpiele() => SpieleErlaubt.TrueForAll(s => s.Datum == 0);
-
     /// <summary>
     /// Original <c>getTeamsNotAtBegin</c>: die Spiele gegen fremde Vereine, die in ihrer Runde vor einem Spiel gegen eine
     /// Mannschaft des eigenen Vereins liegen (je Mannschaft gezählt).

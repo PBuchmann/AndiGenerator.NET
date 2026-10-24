@@ -51,6 +51,9 @@ public sealed partial class Inseloptimierer : IDisposable
     private readonly List<Thread> threads = [];
     private Suchplatz[][] kernPlaetze = [];
     private int ruhend;
+
+    /// <summary>Suchfäden, die gerade in der Pause warten (für Tests: erst dann steht die Rechnung wirklich).</summary>
+    private int wartend;
     private CancellationTokenSource? abbruch;
     private KernDefinition definition;
     private Berechnungsoptionen optionen;
@@ -141,6 +144,9 @@ public sealed partial class Inseloptimierer : IDisposable
         Insel[] mitSpezial = spezial is null ? inseln : [.. inseln, spezial];
         alle = mitSpezial.SelectMany(i => i.Plaetze).ToArray();
     }
+
+    /// <summary>Holt die Zahl der Suchfäden, die gerade in der Pause warten; sind es alle, ändert sich nichts mehr.</summary>
+    public int WartendeSuchfaeden => Volatile.Read(ref wartend);
 
     /// <summary>Summe aller Durchläufe.</summary>
     public long Durchlaeufe
@@ -860,7 +866,18 @@ public sealed partial class Inseloptimierer : IDisposable
             int index = 0;
             while (!token.IsCancellationRequested)
             {
-                laufen.Wait(token);
+                if (!laufen.IsSet)
+                {
+                    Interlocked.Increment(ref wartend);
+                    try
+                    {
+                        laufen.Wait(token);
+                    }
+                    finally
+                    {
+                        Interlocked.Decrement(ref wartend);
+                    }
+                }
 
                 // Vorrang für HiGHS: Die letzten Threads ruhen, bis sie wieder gebraucht werden.
                 if (nummer >= einstellungen.Kerne - Volatile.Read(ref ruhend))

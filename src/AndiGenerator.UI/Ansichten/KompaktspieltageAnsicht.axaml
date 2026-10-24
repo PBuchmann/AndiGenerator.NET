@@ -110,7 +110,7 @@
 
       <StackPanel Spacing="16" IsVisible="{Binding Eingeschaltet}">
         <!-- Pläne: Plan aus click-TT und Varianten des Planers (wie im Entwurf: eine Zeile Karten) -->
-        <StackPanel Spacing="6">
+        <StackPanel ui:Fuehrungsmarke.Ziel="KompaktPlaene" Spacing="6">
           <TextBlock Text="Pläne" FontSize="15" FontWeight="SemiBold" />
           <!-- Während der Berechnung: Fortschritt bis 100 % und was gerade geschieht -->
           <StackPanel Spacing="4" IsVisible="{Binding Rechnet}">
@@ -169,11 +169,11 @@
 
         <Grid ColumnDefinitions="Auto,18,*">
           <!-- Raster: Meldungen und Plan -->
-          <Border x:Name="Raster" Classes="karte" VerticalAlignment="Top" Focusable="True">
+          <Border x:Name="Raster" ui:Fuehrungsmarke.Ziel="KompaktRaster" Classes="karte" VerticalAlignment="Top" Focusable="True">
             <StackPanel Spacing="8">
               <Grid ColumnDefinitions="*,Auto">
                 <TextBlock Text="Meldungen und Plan" FontSize="15" FontWeight="SemiBold" VerticalAlignment="Center" />
-                <ToggleSwitch Grid.Column="1" IsChecked="{Binding Bearbeiten}" OnContent="Bearbeiten" OffContent="Anzeigen" Margin="12,0,0,0"
+                <ToggleSwitch Grid.Column="1" IsChecked="{Binding Bearbeiten}" ui:Fuehrungsmarke.Ziel="KompaktBearbeiten" OnContent="Bearbeiten" OffContent="Anzeigen" Margin="12,0,0,0"
                               IsEnabled="{Binding !Rechnet}" ToolTip.Tip="Meldungen direkt im Raster erfassen (nicht während einer Berechnung; solange lässt sich keine starten)" />
               </Grid>
               <TextBlock Text="Klick auf einen Sonntag oder eine Mannschaft zeigt ihre Fahrten (bei einer Mannschaft auch ihre Halle zum Umstellen); ein zweiter Klick wieder alle." Classes="klein" TextWrapping="Wrap" MaxWidth="460" HorizontalAlignment="Left"
@@ -347,7 +347,7 @@
           </Border>
 
           <!-- Karte und km je Mannschaft -->
-          <Border Grid.Column="2" Classes="karte" VerticalAlignment="Top" MinWidth="360" MaxWidth="560" HorizontalAlignment="Left">
+          <Border ui:Fuehrungsmarke.Ziel="KompaktKarte" Grid.Column="2" Classes="karte" VerticalAlignment="Top" MinWidth="360" MaxWidth="560" HorizontalAlignment="Left">
             <StackPanel Spacing="10">
               <Grid ColumnDefinitions="*,Auto">
                 <TextBlock Text="{Binding Kartentitel}" FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap" />
@@ -386,7 +386,7 @@
         </Grid>
 
         <!-- Spieltage -->
-        <Border Classes="karte">
+        <Border ui:Fuehrungsmarke.Ziel="KompaktSpieltage" Classes="karte">
           <StackPanel Spacing="10">
             <TextBlock Text="Spieltage" FontSize="15" FontWeight="SemiBold" />
             <ItemsControl ItemsSource="{Binding Spieltage}">

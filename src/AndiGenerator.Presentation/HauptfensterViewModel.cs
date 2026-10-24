@@ -201,6 +201,9 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
         LeitstandCommand = new RelayCommand(LeitstandOeffnen, () => ZeigtArbeitsbereich);
         BVariantenCommand = new AsyncRelayCommand(BVariantenZeigenAsync);
         VerlaufCommand = new RelayCommand(VerlaufOeffnen, () => ZeigtArbeitsbereich);
+        FuehrungCommand = new RelayCommand(FuehrungUmschalten, () => ZeigtArbeitsbereich);
+        PropertyChanged += (_, e) => FuehrungAktualisieren(e.PropertyName);
+        Anzeige.PropertyChanged += (_, e) => FuehrungAktualisieren(e.PropertyName);
 
         Zuletzt = Zeilen(Zuletztlesen());
         statusTakt = new Timer(_ => StatusAbfragen(), null, TimeSpan.FromMilliseconds(500), TimeSpan.FromMilliseconds(500));

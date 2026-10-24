@@ -205,9 +205,6 @@ internal sealed partial class KernPlan
 
     public int AnzahlErlaubt => anzahlErlaubt;
 
-    /// <summary>Erlaubte und (noch vorhandene) nicht erlaubte Spiele; Letztere liegen hinter den erlaubten.</summary>
-    public int AnzahlAktiv => anzahlAktiv;
-
     public int[] Heim { get; }
 
     public int[] Gast { get; }
@@ -371,9 +368,6 @@ internal sealed partial class KernPlan
 
         return -1;
     }
-
-    /// <summary>Original <c>getKoppeledGameBefore</c>.</summary>
-    public int GekoppeltDavor(int t, int index) => index > 0 && GekoppeltDanach(t, index - 1) >= 0 ? Spiele[t][index - 1] : -1;
 
     /// <summary>Original <c>getKoppeledGame(Index)</c>.</summary>
     public int Gekoppelt(int t, int index)

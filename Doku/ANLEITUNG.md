@@ -73,6 +73,8 @@ Solange das Programm noch nicht digital signiert ist, warnt Windows beim ersten 
 
 Das installierte Programm sucht nach dem Start selbst nach einer neuen Version und lädt sie im Hintergrund. Danach fragt es, ob es gleich neu starten soll; andernfalls wird die neue Version beim nächsten Beenden eingespielt. Ihre Einstellungen, gemerkten Pläne und Staffeldateien bleiben dabei erhalten. Dabei fragt das Programm nur GitHub nach der neuesten Version; Daten aus Ihren Staffeln werden nicht übertragen. Wer das nicht möchte, schaltet im Dialog **Über** die Einstellung **Beim Start nach neuen Versionen suchen** ab.
 
+![Dialog Über: Version, Lizenzen und Suche nach neuen Versionen](Anleitung/Bilder/40-ueber.png)
+
 **Deinstallieren**
 
 Über *Einstellungen → Apps → Installierte Apps → AndiGenerator.NET → Deinstallieren*. Ihre Daten im Ordner `%LOCALAPPDATA%\AndiGenerator.NET` und Ihre click-TT-Dateien bleiben erhalten.
@@ -184,6 +186,7 @@ Nach der Einrichtung plant das Programm die Staffel auf eine von zwei Arten. Wel
 - **Staffel:** Öffnen, Neu, Spielplandaten, Einstellungen
 - **Ansichten:** Kosten, Qualität, Meldungen, Terminplan, Diagramme, Terminwünsche, Nachbarmannschaften, bei Halbrunden Kompaktspieltage
 - **Ausgabe:** Für click-TT exportieren (farblich hervorgehoben), Drucken (PDF)
+- **Schritt für Schritt** (auch **F1**): öffnet rechts die Begleitleiste, die Schritt für Schritt durch die Optimierung führt – Kostenoptimierung, Automodus oder Kompaktspieltage, je nachdem, womit Sie gerade arbeiten (Abschnitt [5.1](#51-der-weg-zum-plan) bzw. [6.2](#62-der-weg-zum-plan))
 - **Anleitung:** öffnet diese Anleitung als PDF
 - **Über:** Version, Urheber und Lizenzen
 
@@ -195,7 +198,7 @@ Darunter stehen **Kacheln** mit dem Stand der Generierung (Abschnitt [5.2](#52-d
 
 Im **Kompaktmodus** sieht das Hauptfenster etwas anders aus: Die Ansicht *Kompaktspieltage* ist die Hauptansicht, *Kosten*, *Qualität* und *Meldungen* sowie die Wahl des Verfahrens entfallen, und ▶ berechnet die Pläne der Kompaktspieltage (Abschnitt [6.3](#63-der-kompaktmodus)).
 
-Den **Hauptbereich** füllen die Ansichten. Jede Ansicht öffnet sich als Reiter; Sie können mehrere öffnen, zwischen ihnen wechseln, sie per Maus nebeneinander anordnen und mit dem **×** am Reiter schließen. In vielen Ansichten vergrößert oder verkleinert **Strg + Mausrad** (auf dem Mac auch **⌘ + Mausrad**, oder der Zoomregler) die Darstellung.
+Den **Hauptbereich** füllen die Ansichten. Jede Ansicht öffnet sich als Reiter; Sie können mehrere öffnen, zwischen ihnen wechseln, sie per Maus nebeneinander anordnen und mit dem **×** am Reiter schließen. In vielen Ansichten vergrößert oder verkleinert **Strg + Mausrad** (auf dem Mac auch **⌘ + Mausrad**, oder der Zoomregler) die Darstellung – auf einem Touchbildschirm oder Touchpad auch zwei Finger, die Sie auseinander- oder zusammenschieben.
 
 Ganz unten zeigt die **Statuszeile** den Stand in einer Zeile.
 
@@ -223,6 +226,35 @@ Schon nach wenigen Sekunden steht ein erster Plan. Nach einigen hunderttausend b
 **Plan beurteilen, nachsteuern und exportieren.** Während die Generierung läuft, beurteilen Sie den Plan in den Ansichten **Kosten**, **Qualität** und **Diagramme** und steuern über die Gewichtungen nach (Abschnitt [5.10](#510-gewichtungen-anpassen)). Die Generierung muss dafür nicht angehalten werden. In der Regel reichen Kosten, Qualität und Diagramme, um einen Plan zu beurteilen; die einzelnen Termine müssen Sie meist nicht durchsehen.
 
 Passt der Plan, **pausieren** Sie und exportieren ihn mit **Für click-TT exportieren** als CSV-Datei (Abschnitt [8.1](#81-für-click-tt-exportieren)). Die CSV-Datei importieren Sie in click-TT als Spielplan.
+
+#### Schritt für Schritt: Kostenoptimierung
+
+1. **Verfahren und Ausgangsplan wählen** – Wählen Sie oben rechts unter „Verfahren“ die Kostenoptimierung. Unter „Start mit“ legen Sie fest, wovon die Suche ausgeht: von einem leeren Plan, dem Plan aus click-TT oder einem gemerkten Plan. (Abschnitt 5.1)
+2. **Generierung starten** – Der blaue Knopf ▶ startet die Suche. Sie rechnet mit allen Kernen bis auf einen und zeigt laufend den besten Plan; nach wenigen Sekunden steht ein erster Plan. (Abschnitt 5.3)
+3. **Kacheln lesen** – Die Kacheln zeigen die Gesamtkosten des besten Plans, ob die Pflichtregeln (Stufe A) eingehalten sind und wie oft der Plan besser wurde. Solange Verbesserungen schnell kommen: einfach rechnen lassen. (Abschnitt 5.2)
+4. **Teuerste Kosten finden** – In der Ansicht „Kosten“ stehen die teuersten Mannschaften und Kostenarten links oben; je röter eine Zelle, desto mehr kostet sie. Ein Klick auf eine Zelle zeigt rechts, was genau verletzt ist. (Abschnitt 5.7)
+5. **Verstöße nachlesen** – Die Ansicht „Meldungen“ listet je Mannschaft jeden Verstoß mit Datum – so sehen Sie, ob ein Verstoß wirklich stört. (Abschnitt 5.9)
+6. **Gewichtung anpassen** – Stört ein Verstoß, heben Sie seine Gewichtung an: in der Kostenansicht im Detailfeld rechts (Kostenart, Mannschaft oder eine Zelle) oder in den Einstellungen. Ändern Sie immer nur eine Gewichtung; die laufende Suche übernimmt sie sofort. (Abschnitt 5.10)
+7. **Fortschritt beobachten** – Die Kachel „Verbesserungen“ öffnet den Verlauf, „Berechnete Pläne“ den Leitstand. Wird die Kurve flach und kommen kaum noch Verbesserungen, bringt längeres Rechnen wenig. (Abschnitt 5.6)
+8. **Qualität und Diagramme prüfen** – Die Ansicht „Qualität“ zeigt, ob die Pflichtregeln eingehalten sind und wie viele Verstöße je Kriterium bleiben; die Diagramme zeigen Spieltage, Wechsel Heim/Auswärts und Spielverteilung auf einen Blick. (Abschnitt 5.8)
+9. **Anhalten und Plan merken** – Passt der Plan, halten Sie mit ⏸ an und merken ihn unter einem Namen. Gemerkte Pläne lassen sich später vergleichen oder als Ausgangsplan wählen. (Abschnitt 5.11)
+10. **Exportieren und drucken** – „Für click-TT exportieren“ schreibt den Plan als CSV-Datei für den Import in click-TT; „Drucken“ erzeugt ein PDF. (Abschnitt 8.1)
+
+#### Schritt für Schritt: Automodus
+
+1. **Automodus wählen** – Wählen Sie oben rechts unter „Verfahren“ den Automodus. Er lenkt die Gewichte selbst: erst die Pflichtstufe A, dann B, danach glättet er C. (Abschnitt 5.4)
+2. **Einteilung prüfen** – In der Ansicht „Qualität“ legen Sie fest, welche Kriterien in A (muss), B (soll) und C (wird geglättet) stehen: mit den Knöpfen A, B, C und den Pfeilen oder durch Ziehen am Griff links. Die Standard-Einteilung passt für die meisten Staffeln. (Abschnitt 5.8)
+3. **Generierung starten** – Der blaue Knopf ▶ startet den Automodus. Er läuft ohne Zeitgrenze, bis Sie anhalten oder stoppen. (Abschnitt 5.3)
+4. **Phasen verfolgen** – Die Ergebniskachel zeigt die Phase (Basisoptimierung, Stufe A, B, C) und die Verstöße je Stufe; rechts rechnet HiGHS mit. Warten Sie, bis die Basisoptimierung vorbei ist. (Abschnitt 5.4)
+5. **Bestmöglich ablesen** – In der Qualität steht je Kriterium, wie viele Verstöße jeder Plan mindestens hat. Ein grüner Haken heißt: besser geht es nicht; „Optimum erreicht“ über einer Stufe heißt, weiteres Rechnen bringt dort nichts mehr. (Abschnitt 5.8)
+6. **B-Varianten prüfen** – Hat HiGHS Varianten für Stufe B gefunden, zeigt die Kachel „B-Varianten wählen“. Im Dialog vergleichen Sie sie mit dem Plan; „Übernehmen“ legt A und B fest, danach glättet der Automodus nur noch C. Ohne Knopf gibt es keine bessere Variante – weiter. (Abschnitt 5.8)
+7. **C glätten lassen** – Nun glättet der Automodus die übrigen Kriterien. Verlauf und Leitstand (Kacheln) zeigen, ob noch etwas vorangeht; werden die Verbesserungen selten, ist der Plan fertig. (Abschnitt 5.6)
+8. **Stoppen und Plan merken** – Mit ■ beenden Sie den Automodus; der beste Plan bleibt erhalten. Merken Sie ihn unter einem Namen, um ihn später zu vergleichen. (Abschnitt 5.11)
+9. **Exportieren und drucken** – „Für click-TT exportieren“ schreibt den Plan als CSV-Datei für den Import in click-TT; „Drucken“ erzeugt ein PDF. (Abschnitt 8.1)
+
+Dieselben Schritte zeigt das Programm in der Begleitleiste **Schritt für Schritt** (links unten oder **F1**): rechts erscheinen die Schritte, der aktuelle mit Text; **Zeigen** öffnet bei Bedarf die Ansicht und hebt die Stelle in der Oberfläche kurz hervor, **Weiter** geht zum nächsten Schritt. Schritte wie „Generierung starten“ hakt die Führung selbst ab, sobald es so weit ist. Die Statuszeile unten rechts nennt jederzeit den nächsten Schritt; ein Klick darauf öffnet die Leiste an dieser Stelle.
+
+![Schritt für Schritt im Automodus: rechts die Begleitleiste, der aktuelle Schritt mit Text](Anleitung/Bilder/59-schritt-fuer-schritt.png)
 
 ### 5.2 Die Kacheln
 
@@ -385,6 +417,8 @@ Die Zusammenfassung meldet entsprechend **Pflichtstufe A: Optimum erreicht** bzw
 
 Der Knopf übernimmt noch nichts: Es öffnet sich bildschirmfüllend der Dialog **B-Varianten**. Dort stehen der angezeigte Plan und die Varianten zur Wahl nebeneinander – je A- und B-Kriterium die Verstöße mit Differenz zum aktuellen Plan (grün besser, rot schlechter), die Summen der Stufen und die C-Verstöße (in den Varianten noch nicht geglättet, sie werden danach weniger). Ausgewählt ist zuerst der Plan für die Summe in B; ein Klick auf eine Spaltenüberschrift wählt einen anderen. Darunter steht je A- und B-Kriterium, was sich gegenüber dem aktuellen Plan ändert: je Mannschaft rot mit **+** die Verstöße, die in der Variante dazukommen, grün mit **−** die, die entfallen; Gleiches fehlt. Hat ein Kriterium keine Einzelheiten, steht dort wenigstens die Anzahl vorher und nachher. Beim aktuellen Plan selbst stehen dort seine Verstöße. **„…“ übernehmen – A und B festlegen** (nur während der Generierung) entscheidet A und B: Kein A- oder B-Kriterium darf danach mehr Verstöße haben als in der Variante, der Plan wird bester Plan, und der Automodus glättet nur noch C; die Einteilung bleibt, wie sie ist. Weniger Verstöße sind erlaubt – findet der Automodus beim Glätten noch einen Plan, der auch in A oder B besser ist, nimmt er ihn. Die Kopfzeilen zeigen „festgelegt: … – bleibt so, C wird geglättet“, die Spalte **Festgelegt** je Kriterium „höchstens n“, und der Leitstand nennt die Festlegung. **Festlegung aufheben** (Kopfzeile der Stufe B) lässt den Automodus wieder A und B nach der Einteilung drängen; ein neuer Start hebt sie ebenfalls auf. Wollen Sie bei einem A-Kriterium wählen, schieben Sie es vorher nach B.
 
+![Dialog B-Varianten: Varianten im Vergleich mit dem angezeigten Plan](Anleitung/Bilder/39-b-varianten.png)
+
 **Was kostet es, ein B-Kriterium bestmöglich zu machen?** Klicken Sie ein B-Kriterium an, steht rechts unter seinen Verstößen **Wenn das Kriterium Vorrang hat**: wie viele Verstöße es in der Variante mit Vorrang für es hätte (bzw. im Plan für die Summe in B, wenn es dort schon so gut ist), etwa „Mit „Vorrang Ausweichtermine (bestmöglich)“: 0 statt 8 Verstöße – dafür:“, darunter je anderem A- und B-Kriterium die Änderung (rot mehr, grün weniger) und C vor dem Glätten. Hat der Plan dort schon so wenige Verstöße, entfällt der Hinweis.
 
 Die Spalte **Kosten** erscheint nur bei der Kostenoptimierung. Rot markiert sind verletzte Pflichten der Stufe A. Die Kachel **Pflichtregeln (Stufe A)** im Kopf zeigt denselben Stand für die laufende Generierung.
@@ -459,7 +493,7 @@ In der Standardgewichtung haben die Kostenarten schon ein sinnvolles Verhältnis
 
 #### Kosten des ganzen Plans
 
-**Überlappung Spieltage** – Eine Mannschaft hat zu einem Zeitpunkt schon mehr als ein Spiel mehr absolviert als eine andere. Im Diagramm *Spieltage* sind diese Überlappungen grau hinterlegt.
+**Überlappung Spieltage** – Eine Mannschaft hat zu einem Zeitpunkt schon mehr als ein Spiel mehr absolviert als eine andere. Im Diagramm *Spieltage* sind diese Überlappungen rot markiert.
 
 **Länge Spieltage** – Ein Spieltag soll sich über möglichst wenige Tage erstrecken.
 
@@ -529,6 +563,24 @@ Jede Mannschaft soll mindestens einen 3er- oder 4er-Spieltag ausrichten; ein Ein
 4. **Pläne berechnen** mit **▶** (Abschnitt [6.5](#65-pläne-berechnen)).
 5. **Plan wählen.** Die Varianten vergleichen, einen Plan wählen und merken (Abschnitte [6.6](#66-pläne-und-punkte) und [6.10](#610-pläne-sichern-und-merken)).
 6. **Drucken und exportieren.** Die Übersicht für die Vereine drucken, den Plan für click-TT exportieren und dort beim 4er-Spieltag die Spiele der zweiten „Heimmannschaft“ in die Halle des Ausrichters verlegen (Abschnitt [6.11](#611-drucken-und-export-für-click-tt)).
+
+![Einrichtung: Die Klasse wird als Klasse mit Kompaktspieltagen erkannt](Anleitung/Bilder/55-kompakt-einrichtung.png)
+
+#### Schritt für Schritt: Kompaktspieltage
+
+1. **Ansicht Kompaktspieltage öffnen** – Links unter „Ansichten“ öffnet „Kompaktspieltage“ die Hauptansicht: Pläne, Raster „Meldungen und Plan“, Karte, Spieltage und Hinweise. (Abschnitt 6.3)
+2. **Meldungen und Hinweise prüfen** – Das Raster zeigt je Sonntag und Mannschaft, was gemeldet ist: Heim, auswärts, beides oder kann nicht. Darunter stehen Hinweise, etwa Hallen ohne bekannte Lage. (Abschnitt 6.7)
+3. **Meldungen korrigieren** – Mit dem Schalter „Bearbeiten“ steht ein Rahmen auf einem Feld; A, H, B und Entf setzen auswärts, nur Heim, beides oder kann nicht. Für Heimtermine lassen sich Beginn, Halle und zwei Tische einstellen. (Abschnitt 6.9)
+4. **Pläne berechnen** – Der blaue Knopf ▶ berechnet die Pläne mit HiGHS; der Balken zeigt den Fortschritt. Warten Sie, bis die Varianten vorliegen. (Abschnitt 6.5)
+5. **Pläne vergleichen** – Jede Variante steht für ein Ziel (z. B. „Bestes Gesamtpaket“, „Kürzeste Fahrten“). Ein Klick zeigt sie im Raster und erläutert, wie sie im Vergleich abschneidet. (Abschnitt 6.6)
+6. **Karte und Spieltage ansehen** – Die Karte zeigt die Fahrten; ein Klick auf einen Sonntag, eine Mannschaft oder einen Spieltag zeigt nur deren Fahrten. Die Spieltage nennen Spielfolge, Ausrichter und die in click-TT zu verlegenden Hallen. (Abschnitt 6.7)
+7. **Ausrichter im Diagramm** – Unter „Diagramme“ zeigt „Ausrichter und Spielorte“ je Mannschaft, wann sie ausrichtet und wo sie spielt. (Abschnitt 7.2)
+8. **Plan merken** – „Plan merken…“ an der gewählten Variante oder oben rechts speichert den Plan; gemerkte Pläne stehen beim nächsten Öffnen wieder zur Wahl. (Abschnitt 6.10)
+9. **Drucken und exportieren** – „Drucken“ erzeugt die Übersicht für die Vereine, „Für click-TT exportieren“ die CSV-Datei. Beim 4er-Spieltag die Spiele der zweiten Heimmannschaft in click-TT in die Halle des Ausrichters verlegen. (Abschnitt 6.11)
+
+Auch diese Schritte zeigt die Begleitleiste **Schritt für Schritt** (F1) im Programm.
+
+![Schritt für Schritt bei Kompaktspieltagen: Der Scheinwerfer zeigt die Pläne](Anleitung/Bilder/60-kompakt-schritt-fuer-schritt.png)
 
 ### 6.3 Der Kompaktmodus
 
@@ -637,21 +689,37 @@ Der Terminplan zeigt die Spiele in drei Darstellungen (Umschalter oben):
 
 Die Diagramme zeigen auf einen Blick, wie sich der Plan für die Mannschaften anfühlt. Oben wählen Sie das Diagramm; jedes hat eine kurze Beschreibung.
 
-**Spieltage** – wann jede Mannschaft spielt und über welchen Zeitraum sich jeder Spieltag erstreckt. Überlappungen der Spieltage sind grau hinterlegt. Große dunkle Flächen bedeuten, dass die Spieltage stark ineinanderlaufen: Manche Mannschaften sind schon zwei Spiele weiter als andere.
+**Spieltage** – wann jeder Spieltag gespielt wird, eine Zeile je Spieltag (Spieltag n ist das n-te Spiel jeder Mannschaft). Je Woche (Montag bis Sonntag) steht ein Kreis; die Zahl darin sagt, wie viele Mannschaften in dieser Woche ihr Spiel dieses Spieltags austragen – an welchem Wochentag, spielt keine Rolle. Der Balken reicht von der ersten bis zur letzten Woche des Spieltags; rot ist er dort, wo zugleich andere Spieltage laufen. Rechts stehen die Spanne und die Spieltage, mit denen er sich überschneidet; rot ist, was die Qualitätsansicht als zu langen bzw. überlappenden Spieltag zählt (die Überschrift nennt beide Anzahlen). Die Felder über den Zeilen zeigen je Woche, wie viele Spieltage gleichzeitig laufen – je dunkler, desto stärker laufen die Spieltage ineinander. Spielen alle Mannschaften zwei Spieltage am selben Termin (Kompakt- oder Doppelspieltage), verbindet eine Klammer die beiden Zeilen; der Balken zeigt dann keine Überschneidung, die Bewertung zählt sie aber, wenn sie Überlappungen berücksichtigt. Fahren Sie mit der Maus über einen Kreis, nennt ein Hinweis die Mannschaften dieser Woche je Spieltag mit Tag und Heim oder Gast.
 
 ![Diagramm Spieltage](Anleitung/Bilder/07-diagramm-spieltage.png)
 
-**Wechsel Heim/Auswärts** – die Folge der Heim- und Auswärtsspiele je Mannschaft. Ideal ist ein Zickzack: auf ein Heimspiel folgt ein Auswärtsspiel. Waagerechte Stücke sind Serien von Heim- oder Auswärtsspielen. Ganz ohne Serien geht es selbst bei idealen Meldungen nicht.
+**Wechsel Heim/Auswärts** – je Mannschaft eine Reihe gleich breiter Kacheln, eine je Spiel in der Folge der Termine: blau für Heim, grau für Auswärts. Ideal ist ein gleichmäßiges Schachbrett – auf ein Heimspiel folgt ein Auswärtsspiel. Serien ab drei gleichen Spielen hintereinander sind rot unterstrichen; eine Lücke markiert den Beginn der Rückrunde. Rechts stehen die Brüche (Spiele, die nicht wechseln) als grauer Balken mit Zahl – dieselbe Zahl wie in der Qualitätsansicht, Koppeltermine zählen also nicht. Mit der Maus über einer Kachel nennt ein Hinweis Spiel, Tag, Gegner und die Länge der Serie. Ganz ohne Brüche geht es selbst bei idealen Meldungen nicht.
 
-**Spielverteilung** – die Termine jeder Mannschaft über die Saison. Hier sieht man, ob die Spiele gleichmäßig verteilt sind oder ob sich Spiele ballen und dazwischen lange Pausen liegen. Kleine Quadrate markieren Koppeltermine.
+![Diagramm Wechsel Heim/Auswärts](Anleitung/Bilder/35-diagramm-wechsel.png)
+
+**Ausrichter und Spielorte** (statt *Wechsel Heim/Auswärts* im Kompaktmodus) – bei Kompaktspieltagen zählt nicht der Wechsel und nicht das Heimrecht laut Plan, sondern wer wie oft ausrichtet und wo gespielt wird. Je Mannschaft steht für jeden ihrer Spieltage eine Karte mit runden Ecken: blau, wenn sie ausrichtet (eigene Halle), sonst „in …“ mit dem Ausrichter. Rechts steht, wie oft die Mannschaft ausrichtet. Fahren Sie mit der Maus über eine Karte, nennt ein Hinweis den Tag, den Ausrichter und alle Begegnungen des Spieltags; dazu werden die Karten aller Mannschaften dieses Spieltags orange umrahmt (wie in der Spielverteilung). Der Hinweis steht daneben, damit er die Rahmen nicht verdeckt.
+
+![Diagramm Ausrichter und Spielorte (Kompaktmodus)](Anleitung/Bilder/56-kompakt-diagramm-ausrichter.png)
+
+**Spielverteilung** – jedes Spiel jeder Mannschaft als Punkt am genauen Tag (gefüllt Heim, hohl Auswärts). Zwei Spiele am selben Tag (Doppelspieltag, bei Kompaktspieltagen die Regel) stehen übereinander in einer grünen Kapsel. Rot sind Spiele kurz nacheinander – höchstens 3 Tage auseinander, außer am Koppeltermin; ein Doppelspieltag, der so zählt, hat eine rote Kapsel –, orange die Pausen, die die Bewertung als zu lang zählt (im Mittel mindestens zwei Spieltage dazwischen). Die Abstände stehen über oder unter der Linie, wo sie Platz haben. Rechts stehen je Mannschaft die Verstöße wie in der Qualitätsansicht: „≤ 3 Tage“, „2 je Woche“ und „Pausen“ („–“, wenn die Bewertung das Kriterium nicht berücksichtigt). Mit der Maus über einem Punkt nennt ein Hinweis Tag und Uhrzeit, Gegner, Heim oder Auswärts und den Abstand zum vorigen Spiel. Bei Kompaktspieltagen zählt, wo gespielt wird: Gefüllt sind die Spiele in der eigenen Halle (die Mannschaft richtet aus), hohl die in der Halle eines anderen Ausrichters – auch wenn sie dort laut Plan Heimrecht hat. Der Hinweis nennt dann die Halle statt Heim oder Auswärts, und alle Spiele desselben Spieltags sind mit einem Ring hervorgehoben.
 
 ![Diagramm Spielverteilung](Anleitung/Bilder/17-diagramm-spielverteilung.png)
 
-**Abstand Hin-/Rückspiel** – wie weit Heim- und Auswärtsspiel gegen denselben Gegner auseinanderliegen. Ungünstige Konstellationen, etwa Hin- und Rückspiel kurz hintereinander, sind rot markiert.
+![Diagramm Spielverteilung im Kompaktmodus: gefüllt = eigene Halle](Anleitung/Bilder/57-kompakt-diagramm-spielverteilung.png)
 
-**Spiele pro Woche** – wie viele Spiele jede Mannschaft je Woche hat, und nach dem Schrägstrich, wie viele sie bis dahin insgesamt gespielt hat. Die letzte Zeile nennt die größte Differenz zwischen den Mannschaften am Ende der Woche: Hat nach der dritten Woche eine Mannschaft drei Spiele gemacht und eine andere keines, steht dort 3.
+**Abstand Hin-/Rückspiel** (nur mit Hin- und Rückrunde) – je Mannschaft ein Streifen über den Abstand in Spielen (1 = das Rückspiel ist gleich das nächste Spiel). Jeder Gegner sitzt beim Abstand zwischen den beiden Spielen gegen ihn. Ideal ist eine Runde (so viele Spiele, wie die Mannschaft je Runde hat; die Zahl ist oben grün); das grüne Band reicht zwei Spiele darum herum. Gegner im Soll werden zu einem grünen Punkt zusammengefasst (Zahl = Anzahl Gegner), knappe oder zu lange Abstände sind orange. Rot ist ein Abstand, der um die Hälfte einer Runde oder mehr daneben liegt – nach unten wie nach oben gleich (bei 9 Spielen je Runde: bis 4 oder ab 14). Mit der Maus über einem Punkt nennt ein Hinweis die Gegner mit den Terminen beider Spiele. Rechts steht die Abweichung wie in der Qualitätsansicht: der größte Unterschied eines Abstands zum Mittel der Mannschaft.
 
-**Setzliste** (nur mit aktiver Setzliste) – für jedes Spiel als Balken, wie weit die beiden Gegner in der Setzliste auseinanderliegen. Mannschaften, die nah beieinander gesetzt sind, sollen erst gegen Ende gegeneinander spielen – Erster gegen Zweiten möglichst am letzten Spieltag. Ideal liegen alle Balken unter der grauen Linie. Überbewerten sollte man das nicht: Die Setzliste ist nur eine Vermutung, und Sperrtermine oder enge Spielfolgen sind den Mannschaften meist wichtiger.
+![Diagramm Abstand Hin-/Rückspiel](Anleitung/Bilder/36-diagramm-abstand.png)
+
+**Spiele pro Woche** – je Runde ein Raster: eine Zeile je Mannschaft, eine Spalte je Woche (Montag bis Sonntag). In jeder Zelle steht ein Punkt je Spiel; leere Wochen bleiben leer, so sieht man den Rhythmus jeder Mannschaft. Rosa hinterlegt sind die Wochen, die die Bewertung als „2 Spiele die Woche“ zählt (jedes Spiel nach einem in derselben Woche, außer am Koppeltermin). Rechts stehen die Spiele der Runde und diese Verstöße wie in der Qualitätsansicht. Unten zeigt je Woche eine Säule, wie weit die Mannschaft mit den meisten und die mit den wenigsten absolvierten Spielen auseinanderliegen: grün bis 2, orange 3 bis 4, rot ab 5. Mit der Maus über einer Zelle nennt ein Hinweis die Spiele der Woche mit Tag und Gegner – bei Kompaktspieltagen mit der Halle – und den Stand danach. Das Diagramm gibt es bei normalen und bei Kompaktspieltagen.
+
+![Diagramm Spiele pro Woche](Anleitung/Bilder/37-diagramm-woche.png)
+
+![Spiele pro Woche im Kompaktmodus](Anleitung/Bilder/58-kompakt-diagramm-woche.png)
+
+**Setzliste** (nur mit aktiver Setzliste) – je Mannschaft und Runde eine Treppe: Für jedes Spiel zeigt ein Balken, wie weit die beiden Gegner in der Setzliste auseinanderliegen. Mannschaften, die nah beieinander gesetzt sind, sollen erst gegen Ende gegeneinander spielen – Erster gegen Zweiten möglichst am letzten Spieltag. Die grüne Treppe dahinter ist der gewünschte Abstand (beim k-ten Spiel der Runde N − k Plätze). Die Farbe folgt der Bewertung: Grün ist kein Verstoß (der Gegner ist höchstens so weit entfernt wie gewünscht), orange ein Verstoß um 1 bis 2 Plätze, rot ab 3 Plätzen. Rechts steht die Anzahl der Verstöße wie in der Qualitätsansicht. Überbewerten sollte man das nicht: Die Setzliste ist nur eine Vermutung, und Sperrtermine oder enge Spielfolgen sind den Mannschaften meist wichtiger.
+
+![Diagramm Setzliste](Anleitung/Bilder/38-diagramm-setzliste.png)
 
 ### 7.3 Terminwünsche
 
@@ -659,7 +727,7 @@ Die Diagramme zeigen auf einen Blick, wie sich der Plan für die Mannschaften an
 
 Die Ansicht zeigt, was die Vereine gemeldet haben, auf zwei Seiten (Umschalter oben):
 
-- **Übersicht:** ein Raster aller Heimspielwünsche (dunkle Striche), Koppeltermine (blau) und Sperrtermine (rot) über die ganze Saison, darunter allgemeine Hinweise zur Staffel.
+- **Übersicht:** je Mannschaft ein kleiner Kalender über die ganze Saison – eine Spalte je Kalenderwoche, sieben Zeilen Mo bis So. So hat jeder Tag seinen festen Platz, auch ein freier Dienstag. Dunkel sind Heimspielwünsche, blau Koppeltermine, rot die freien Tage (Sperrtermine, in click-TT `frei`), hellgrau Tage ohne Eintrag; stehen an einem Tag mehrere Arten (etwa Wunsch und Sperre), teilen sie sich das Feld. Mit der Maus über einer Woche nennt ein Hinweis alle Einträge der Woche mit Datum. Darunter stehen allgemeine Hinweise zur Staffel.
 - **Je Mannschaft:** eine Karte pro Mannschaft mit ihren Wünschen, Koppelpartnern, Spiellokal, Hallenbelegung durch Nachbarn, Sperrterminen, Auswärtskoppeln, 60-km-Regel, Heimrecht und der Auswertung, ob die gemeldeten Termine ausreichen. Karten mit Problemen stehen vorn.
 
 ![Terminwünsche – je Mannschaft](Anleitung/Bilder/14-terminwuensche-karten.png)
@@ -720,6 +788,10 @@ Die Stammdaten der Liga: Name, Liganummer, Art (Herren, Damen …) sowie Start d
 
 Mannschaften anlegen, bearbeiten und löschen. Über die **Vereins-ID** erkennt das Programm, welche Mannschaften zu einem Verein gehören; über die **Mannschaftsnummer** (1., 2., 3. Mannschaft …) die echten Nachbarmannschaften. Ein Spiellokal tragen Sie nur ein, wenn der Verein in mehreren Hallen spielt.
 
+![Mannschaften](Anleitung/Bilder/41-daten-mannschaften.png)
+
+![Mannschaft bearbeiten](Anleitung/Bilder/49-dialog-mannschaft.png)
+
 ### Setzliste
 
 Mit der Setzliste geben Sie die erwartete Abschlusstabelle vor. Ziel ist, dass die Spiele, in denen es um Auf- und Abstieg geht, am Ende der Saison stattfinden – und nicht Mannschaften beteiligt sind, für die es um nichts mehr geht. So bleibt die Spannung bis zum Schluss.
@@ -736,6 +808,8 @@ click-TT überträgt keine Spiellokale. Meist ist das egal, weil die Vereine nur
 
 Je Mannschaft tragen Sie das **Standardspiellokal** ein („nur eines“, wenn der Verein nur in einer Halle spielt; sonst *Spiellokal 1* bis *5*, die Nummern der Spiellokale des Vereins in click-TT) und darunter, falls nötig, abweichende Spiellokale für einzelne Heimspieltage (*Standard* = das Standardspiellokal). Die Tabelle **Spiellokale der Nachbarmannschaften** enthält das Standardspiellokal jeder Nachbarmannschaft; spielt eine Nachbarmannschaft nur bei einzelnen Spielen woanders, öffnet ein Doppelklick auf ihren Namen die Bearbeitung.
 
+![Spiellokale](Anleitung/Bilder/42-daten-spiellokale.png)
+
 ### Heimkoppel und Doppelspieltage
 
 Vor allem in höheren Ligen möchten Mannschaften an einem Wochenende zwei Spiele bestreiten. Die Meldungen dazu sind kompliziert und nicht immer eindeutig; das Programm leitet ab, was vermutlich gemeint ist. **Bitte immer kontrollieren.**
@@ -745,11 +819,17 @@ Vor allem in höheren Ligen möchten Mannschaften an einem Wochenende zwei Spiel
 
 Diese Seite fasst die Koppeloptionen aller Wunschtermine zusammen. Neue Koppeltermine und die zweite Anfangszeit legen Sie in den **Wunschterminen** an.
 
+![Heimkoppel und Doppelspieltage](Anleitung/Bilder/43-daten-heimkoppeln.png)
+
 ### Auswärtskoppeltermine
 
 Hier geben Mannschaften an, bei welchen zwei Gegnern sie an einem Wochenende auswärts spielen möchten – meist, um eine lange Anfahrt nur einmal zu machen. Je Wunsch legen Sie fest, ob beide Spiele an **einem Tag**, an **zwei Tagen** (mit Übernachtung) oder wahlweise stattfinden sollen. Für einen Gegner sind auch mehrere Wünsche möglich.
 
 Sollen beide Spiele an einem Tag stattfinden, braucht es genug Abstand zwischen den Anfangszeiten. Meist spielen die Mannschaften aber zu festen Zeiten; das Programm darf deshalb bei einer der beteiligten Heimmannschaften die Anfangszeit verschieben. Unter **Alternative Anfangszeiten** legen Sie fest, an welchen Terminen welcher Mannschaft das erlaubt ist; das leere Feld zeigt den Vorschlag (z. B. „z. B. 14:00“), **Vorschläge für alle eintragen** übernimmt ihn überall, **Alle Zeiten leeren** entfernt alle. Die genaue zweite Uhrzeit steht im jeweiligen Wunschtermin.
+
+![Auswärtskoppeltermine](Anleitung/Bilder/44-daten-auswaertskoppeln.png)
+
+![Auswärtskoppelwunsch bearbeiten](Anleitung/Bilder/50-dialog-auswaertskoppel.png)
 
 ### Wunschtermine
 
@@ -787,6 +867,12 @@ Die Spiele der Nachbarmannschaften braucht das Programm für die Hallenbelegung 
 
 dazu die einzelnen **Begegnungen** dieser Mannschaft.
 
+![Spiele der Nachbarmannschaften](Anleitung/Bilder/45-daten-nachbarmannschaften.png)
+
+![Nachbarmannschaft bearbeiten](Anleitung/Bilder/52-dialog-nachbarmannschaft.png)
+
+![Begegnung einer Nachbarmannschaft](Anleitung/Bilder/51-dialog-nachbarspiel.png)
+
 ### Wochenende (60-km-Regel)
 
 Ist die Anfahrt zu einem Gegner zu weit, sollen die Spiele gegen ihn am Wochenende stattfinden. Hier legen Sie fest, für welche Paarungen das gilt. Ob der Freitag zum Wochenende zählt, stellen Sie in den **Einstellungen** ein.
@@ -807,9 +893,17 @@ Hier legen Sie fest, wie viele Spiele jede Mannschaft in einem Zeitraum mindeste
 
 Setzen Sie Pflichtspieltage sparsam ein: Sie nehmen dem Programm Freiheit und verschlechtern den Plan meist. Sinnvoll sind sie vor allem für einen gemeinsamen letzten Spieltag, falls das Programm ihn nicht ohnehin so plant. Bei **ungerader Mannschaftszahl** muss am Pflichtspieltag zwangsläufig eine Mannschaft pausieren. Das Original bestraft diese Mannschaft immer; AndiGenerator.NET lässt in einem Pflichtzeitraum mit einem Spiel genau eine fehlende Mannschaft zu, wenn sie in der Woche davor gespielt hat – sie spielt dann also am vorletzten Spieltag. Abschalten lässt sich das in den **Einstellungen** (*Bei ungerader Mannschaftszahl darf am Pflichtspieltag eine Mannschaft spielfrei sein …*); dann gilt die Strafe wie im Original.
 
+![Pflichtspieltage](Anleitung/Bilder/46-daten-pflichtspieltage.png)
+
+![Pflichtspielzeit bearbeiten](Anleitung/Bilder/53-dialog-pflichtspielzeit.png)
+
 ### Manuell festgelegte Begegnungen
 
 Stehen Spiele schon vor der Planung fest – etwa weil zwei befreundete Vereine immer am Tag des Weinfests gegeneinander spielen –, tragen Sie sie hier mit Datum, Uhrzeit und Spiellokal ein. Der Plan wird um diese Spiele herum erstellt.
+
+![Manuell festgelegte Begegnungen](Anleitung/Bilder/47-daten-vorgabespiele.png)
+
+![Begegnung festlegen](Anleitung/Bilder/54-dialog-vorgabespiel.png)
 
 ### Heimrecht
 
@@ -819,6 +913,8 @@ Zu beachten:
 
 - Soll eine Mannschaft in einer Runde nur Heim- oder nur Auswärtsspiele haben, steigen ihre Kosten für den Wechsel von Heim- und Auswärtsspielen stark an. Stellen Sie *Wechsel H/A* für diese Mannschaft dann auf **Nicht berücksichtigen**.
 - Ob die Vorgaben überhaupt erfüllbar sind, prüft das Programm nicht. Es ließe sich zum Beispiel eingeben, dass sowohl A gegen B als auch B gegen A das Heimrecht in der Vorrunde hat.
+
+![Heimrecht](Anleitung/Bilder/48-daten-heimrecht.png)
 
 ## 10. Tipps und häufige Fragen
 

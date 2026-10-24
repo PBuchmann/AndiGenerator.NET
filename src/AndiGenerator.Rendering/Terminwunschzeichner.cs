@@ -8,34 +8,40 @@ using AndiGenerator.Engine.Referenz;
 namespace AndiGenerator.Rendering;
 
 /// <summary>
-/// Zeitachse der Terminwünsche wie im Original (<c>PaintSpielPlanMeldungen</c>): Kalenderwochen oben, je Mannschaft eine
-/// Zeile mit Strichen für Heimspielwünsche (schwarz), Koppeltermine (blau) und Sperrtermine (rot). Dieselbe Routine
-/// zeichnet auf den Bildschirm und in den Ausdruck und misst ohne Zeichenfläche.
+/// Die Terminwünsche als Kalender je Mannschaft (nicht im Original, dort <c>PaintSpielPlanMeldungen</c>): eine Spalte je
+/// Kalenderwoche, je Mannschaft sieben Zeilen Mo bis So – jeder Tag hat seinen festen Platz, auch ein freier Dienstag. Dunkel
+/// Heimspielwünsche, blau Koppeltermine, rot Sperrtermine („frei“); mehrere Arten an einem Tag teilen sich das Feld. Dieselbe
+/// Routine zeichnet auf den Bildschirm und in den Ausdruck und misst ohne Zeichenfläche.
 /// </summary>
 public sealed class Terminwunschzeichner
 {
-    private const double NamenBreite = 300;
-    private const double ProTag = 4;
-    private const double Zeilenhoehe = 30;
-    private const double Kopfhoehe = 25;
+    private const double NamenBreite = 260;
+    private const double Wochenbreite = 30;
+    private const double Tageshoehe = 4;
+    private const double Tagesluecke = 1.2;
+    private const double Blockabstand = 12;
+    private const double Kopfhoehe = 24;
     private const double Schrift = 12;
+    private const double Klein = 8;
 
     private static readonly CultureInfo Deutsch = CultureInfo.GetCultureInfo("de-DE");
+    private static readonly string[] Wochentage = ["Mo", "Di", "Mi", "Do", "Fr", "Sa", "So"];
 
-    // Töne der Gestaltung von AndiGenerator.NET statt Hellgrau, reinem Blau und Rot.
-    private static readonly Farbe Grau = Farbe.Flaeche;
-    private static readonly Farbe Linienfarbe = Farbe.Linie;
-    private static readonly Farbe Koppel = Farbe.Akzent;
+    private static readonly Farbe Leer = new(0xE9, 0xEC, 0xF0);
+    private static readonly Farbe Wunsch = new(0x2E, 0x3A, 0x46);
+    private static readonly Farbe Koppel = new(0x3B, 0x82, 0xC4);
     private static readonly Farbe Sperre = Farbe.Schlecht;
+    private static readonly Farbe Band = new(0xF7, 0xF6, 0xF2);
 
     private readonly Terminwunschuebersicht u;
     private readonly IZeichenflaeche? f;
     private readonly bool mitLegende;
+    private readonly List<Diagrammhinweis> hinweise = [];
 
     /// <summary>Initialisiert den Zeichner.</summary>
     /// <param name="uebersicht">Die Terminwünsche.</param>
     /// <param name="flaeche">Zeichenfläche oder <c>null</c> zum reinen Messen.</param>
-    /// <param name="mitLegende">Legende unter dem Raster zeichnen (Ausdruck wie im Original).</param>
+    /// <param name="mitLegende">Legende unter dem Kalender zeichnen (Ausdruck).</param>
     public Terminwunschzeichner(Terminwunschuebersicht uebersicht, IZeichenflaeche? flaeche, bool mitLegende)
     {
         ArgumentNullException.ThrowIfNull(uebersicht);
@@ -44,92 +50,164 @@ public sealed class Terminwunschzeichner
         this.mitLegende = mitLegende;
     }
 
-    /// <summary>Zeichnet das Raster.</summary>
+    /// <summary>Holt die Stellen der letzten Zeichnung (je Mannschaft und Woche mit Einträgen) mit ihren Texten.</summary>
+    public IReadOnlyList<Diagrammhinweis> Hinweise => hinweise;
+
+    private static double Blockhoehe => (7 * (Tageshoehe + Tagesluecke)) + Blockabstand;
+
+    /// <summary>Zeichnet den Kalender.</summary>
     /// <returns>Benötigte Größe; leer, wenn es keine Termine gibt.</returns>
     public Zeichengroesse Zeichnen()
     {
+        hinweise.Clear();
         if (u is not { Erster: DateOnly erster, Letzter: DateOnly letzter })
         {
             return default;
         }
 
-        int anzahl = u.Mannschaften.Count;
         DateOnly montag = Montag(erster);
-        double breite = X(montag.AddDays((((letzter.DayNumber - montag.DayNumber) / 7) + 1) * 7), erster);
-        for (int i = 0; i < anzahl; i++)
+        int wochen = ((letzter.DayNumber - montag.DayNumber) / 7) + 1;
+        double breite = NamenBreite + (wochen * Wochenbreite) + 10;
+        Text("KW", 0, 4, Schrift, Farbe.Grau);
+        for (int w = 0; w < wochen; w++)
         {
-            double y = Kopfhoehe + (i * Zeilenhoehe);
-            if (i % 2 == 0)
+            DateOnly tag = montag.AddDays(7 * w);
+            string kw = ISOWeek.GetWeekOfYear(tag.ToDateTime(TimeOnly.MinValue)).ToString(Deutsch);
+            Mittig(kw, NamenBreite + (w * Wochenbreite) + (Wochenbreite / 2), 4, Schrift - 1, Farbe.Grau);
+        }
+
+        for (int i = 0; i < u.Mannschaften.Count; i++)
+        {
+            double oben = Kopfhoehe + (i * Blockhoehe);
+            if (i % 2 == 1)
             {
-                f?.Rechteck(0, y, breite, Zeilenhoehe, Grau);
+                f?.Rechteck(0, oben - (Blockabstand / 2), breite, Blockhoehe, Band);
             }
 
-            Text(u.Mannschaften[i].Name, 0, y + 7);
+            Mannschaft(u.Mannschaften[i], oben, montag, wochen);
         }
 
-        Text("KW", 0, 3);
-        for (DateOnly tag = montag; tag <= letzter; tag = tag.AddDays(7))
-        {
-            double x = X(tag, erster);
-            f?.Linie(x, 0, x, Kopfhoehe + (anzahl * Zeilenhoehe), Linienfarbe, 1);
-            Text(ISOWeek.GetWeekOfYear(tag.ToDateTime(TimeOnly.MinValue)).ToString(Deutsch), x + 10, 3);
-        }
-
-        for (int i = 0; i < anzahl; i++)
-        {
-            double y = Kopfhoehe + (i * Zeilenhoehe) + 10;
-            foreach (Terminwunschmarke marke in u.Mannschaften[i].Marken)
-            {
-                // Wünsche stehen im Original mittags auf dem Tag, Sperrtermine am Tagesanfang.
-                double x = X(marke.Tag, erster) + (marke.Art == Terminwunschart.Sperrtermin ? 0 : ProTag / 2);
-                f?.Rechteck(x - 1, y, 2, 10, Markenfarbe(marke.Art));
-            }
-        }
-
-        double hoehe = Kopfhoehe + (anzahl * Zeilenhoehe) + 5;
+        double hoehe = Kopfhoehe + (u.Mannschaften.Count * Blockhoehe);
         if (mitLegende)
         {
-            Legende(hoehe + 10);
-            hoehe += 35;
+            Legende(hoehe + 4);
+            hoehe += 30;
         }
 
-        return new Zeichengroesse(X(letzter, erster) + 60, hoehe);
+        return new Zeichengroesse(breite, hoehe);
     }
 
     private static DateOnly Montag(DateOnly tag) => tag.AddDays(-(((int)tag.DayOfWeek + 6) % 7));
-
-    private static double X(DateOnly tag, DateOnly erster) => NamenBreite + ((tag.DayNumber - erster.DayNumber) * ProTag);
 
     private static Farbe Markenfarbe(Terminwunschart art) => art switch
     {
         Terminwunschart.Koppel => Koppel,
         Terminwunschart.Sperrtermin => Sperre,
-        _ => Farbe.Tinte,
+        _ => Wunsch,
     };
 
-    /// <summary>Legende wie im Ausdruck des Originals.</summary>
+    private static string Artname(Terminwunschart art) => art switch
+    {
+        Terminwunschart.Koppel => "Koppeltermin",
+        Terminwunschart.Sperrtermin => "frei (Sperrtermin)",
+        _ => "Heimspielwunsch",
+    };
+
+    /// <summary>Der Text zu einer Woche: Mannschaft, Woche und je Tag die Einträge.</summary>
+    private static string Wochenhinweis(string name, DateOnly montag, IEnumerable<Terminwunschmarke> marken)
+    {
+        int kw = ISOWeek.GetWeekOfYear(montag.ToDateTime(TimeOnly.MinValue));
+        var zeilen = new List<string>
+        {
+            string.Create(Deutsch, $"{name}, KW {kw} ({montag:dd.MM.} – {montag.AddDays(6):dd.MM.yyyy})"),
+        };
+        zeilen.AddRange(marken
+            .OrderBy(m => m.Tag)
+            .ThenBy(m => m.Art)
+            .Select(m => Wochentage[((int)m.Tag.DayOfWeek + 6) % 7] + " " + m.Tag.ToString("dd.MM.", Deutsch) + "  " + Artname(m.Art)));
+        return string.Join(Environment.NewLine, zeilen);
+    }
+
+    /// <summary>Der Kalender einer Mannschaft: sieben Zeilen Mo bis So, eine Spalte je Woche.</summary>
+    private void Mannschaft(MannschaftsTerminwuensche m, double oben, DateOnly montag, int wochen)
+    {
+        double hoehe = 7 * (Tageshoehe + Tagesluecke);
+        Text(m.Name, 0, oben + (hoehe / 2) - 8, Schrift, Farbe.Tinte);
+        foreach (int d in new[] { 0, 5, 6 })
+        {
+            Text(Wochentage[d], NamenBreite - 16, oben + (d * (Tageshoehe + Tagesluecke)) - 3, Klein - 1, Farbe.Grau);
+        }
+
+        Dictionary<int, List<Terminwunschmarke>> jeTag = m.Marken
+            .GroupBy(x => x.Tag.DayNumber - montag.DayNumber)
+            .ToDictionary(g => g.Key, g => g.Select(x => x).Distinct().ToList());
+        for (int w = 0; w < wochen; w++)
+        {
+            double x = NamenBreite + (w * Wochenbreite) + 3;
+            double b = Wochenbreite - 6;
+            for (int d = 0; d < 7; d++)
+            {
+                double y = oben + (d * (Tageshoehe + Tagesluecke));
+                if (!jeTag.TryGetValue((7 * w) + d, out List<Terminwunschmarke>? marken))
+                {
+                    f?.Rechteck(x, y, b, Tageshoehe, Leer);
+                    continue;
+                }
+
+                // Mehrere Arten an einem Tag (etwa Wunsch und Sperre) teilen sich das Feld nebeneinander.
+                List<Terminwunschart> arten = marken.Select(z => z.Art).Distinct().Order().ToList();
+                double teil = b / arten.Count;
+                for (int a = 0; a < arten.Count; a++)
+                {
+                    f?.Rechteck(x + (a * teil), y, teil - (a < arten.Count - 1 ? 0.6 : 0), Tageshoehe, Markenfarbe(arten[a]));
+                }
+            }
+
+            List<Terminwunschmarke> woche = Enumerable.Range(7 * w, 7).Where(jeTag.ContainsKey).SelectMany(k => jeTag[k]).ToList();
+            if (woche.Count > 0)
+            {
+                hinweise.Add(new Diagrammhinweis(
+                    x + (b / 2), oben + (hoehe / 2), 0, Wochenhinweis(m.Name, montag.AddDays(7 * w), woche), Wochenbreite, hoehe + 4));
+            }
+        }
+    }
+
+    /// <summary>Die Legende unter dem Kalender (Ausdruck).</summary>
     private void Legende(double y)
     {
         double x = 4;
-        foreach ((string text, Terminwunschart art) in Legendeneintraege())
+        foreach ((string text, Farbe farbe) in Legendeneintraege())
         {
-            f?.Rechteck(x, y, 2, 12, Markenfarbe(art));
-            Text(text, x + 8, y);
-            x += 150;
+            f?.Rechteck(x, y + 5, 22, Tageshoehe + 1, farbe);
+            Text(text, x + 28, y, Schrift, Farbe.Tinte);
+            x += 32 + (text.Length * Schrift * 0.58) + 18;
         }
+
+        Text("je Mannschaft Zeilen Mo bis So, eine Spalte je Woche", x, y, Schrift, Farbe.Grau);
     }
 
-    private List<(string Text, Terminwunschart Art)> Legendeneintraege()
+    private List<(string Text, Farbe Farbe)> Legendeneintraege()
     {
-        var eintraege = new List<(string Text, Terminwunschart Art)> { ("Terminwunsch", Terminwunschart.Wunsch) };
+        var eintraege = new List<(string Text, Farbe Farbe)> { ("Heimspielwunsch", Wunsch) };
         if (u.HatKoppeltermine)
         {
-            eintraege.Add(("Koppeltermin", Terminwunschart.Koppel));
+            eintraege.Add(("Koppeltermin", Koppel));
         }
 
-        eintraege.Add(("Sperrtermin", Terminwunschart.Sperrtermin));
+        eintraege.Add(("frei (Sperrtermin)", Sperre));
+        eintraege.Add(("nichts gemeldet", Leer));
         return eintraege;
     }
 
-    private void Text(string text, double x, double y) => f?.Text(text, x, y, Schrift, Farbe.Tinte, false);
+    private void Text(string text, double x, double y, double groesse, Farbe farbe) => f?.Text(text, x, y, groesse, farbe, false);
+
+    private void Mittig(string text, double x, double y, double groesse, Farbe farbe)
+    {
+        if (f is null)
+        {
+            return;
+        }
+
+        f.Text(text, x - (f.TextBreite(text, groesse, false) / 2), y, groesse, farbe, false);
+    }
 }

@@ -56,6 +56,20 @@ public sealed class ZoomTests
     }
 
     [Fact]
+    public void Zwei_Finger_skalieren_ab_dem_Beginn_der_Geste()
+    {
+        var zoom = new Zoom { Prozent = 100 };
+        zoom.Skalieren(100, 1.42);
+        Assert.Equal(140, zoom.Prozent);
+        zoom.Skalieren(100, 0.5);
+        Assert.Equal(50, zoom.Prozent);
+        zoom.Skalieren(100, 10);
+        Assert.Equal(Zoom.Maximum, zoom.Prozent);
+        zoom.Skalieren(100, double.NaN);
+        Assert.Equal(Zoom.Maximum, zoom.Prozent);
+    }
+
+    [Fact]
     public void Startzoom_passt_sich_dem_Platz_an()
     {
         Assert.Equal(100, Zoom.Vorschlag(Zoom.Bezugsbreite, Zoom.Bezugshoehe));

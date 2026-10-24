@@ -16,6 +16,9 @@ namespace AndiGenerator.Engine.Referenz;
 /// <param name="Spieltagmeldungen">Meldungen zu den Spieltagen (leer, wenn nicht angefordert).</param>
 /// <param name="Verteilungsmeldungen">Je Mannschaft die Meldungen zu ihren Pausen (leer, wenn nicht angefordert).</param>
 /// <param name="LetzterMeldungen">Die Meldungen zum letzten Spieltag (leer, wenn nicht angefordert).</param>
+/// <param name="Pausen">Je Mannschaft Beginn und Ende ihrer zu langen Pausen (Delphi-Datum); <c>null</c> = nicht ermittelt.</param>
+/// <param name="ZuLangeSpieltage">Die zu langen Spieltage (0 = erster); <c>null</c> = nicht ermittelt.</param>
+/// <param name="UeberlappendeSpieltage">Die überlappenden Spieltage (0 = erster); <c>null</c> = nicht ermittelt.</param>
 public sealed record Zusatzverstoesse(
     IReadOnlyList<int> Spielverteilung,
     int SpieltageLaenge,
@@ -24,4 +27,7 @@ public sealed record Zusatzverstoesse(
     int LetzterUeberlappung,
     IReadOnlyList<string> Spieltagmeldungen,
     IReadOnlyList<IReadOnlyList<string>> Verteilungsmeldungen,
-    IReadOnlyList<string> LetzterMeldungen);
+    IReadOnlyList<string> LetzterMeldungen,
+    IReadOnlyList<IReadOnlyList<(double Start, double Ende)>>? Pausen = null,
+    IReadOnlyList<int>? ZuLangeSpieltage = null,
+    IReadOnlyList<int>? UeberlappendeSpieltage = null);

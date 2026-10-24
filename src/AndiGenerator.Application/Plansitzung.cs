@@ -375,11 +375,19 @@ public sealed class Plansitzung
     /// <returns>Je Mannschaft die Nachbartermine nach Tagen.</returns>
     public IReadOnlyList<MannschaftsNachbartermine> Nachbartermine() => Nachbarterminauswertung.Ermitteln(Staffel, Optionen);
 
-    /// <summary>Daten der Diagramme (Tab „Diagramme“ des Originals) für einen Plan.</summary>
+    /// <summary>
+    /// Daten der Diagramme (Tab „Diagramme“ des Originals) für einen Plan; im Kompaktmodus mit den Spieltagen und ihren
+    /// Ausrichtern.
+    /// </summary>
     /// <param name="spiele">Spiele des Plans.</param>
     /// <returns>Die Diagrammdaten.</returns>
-    public Diagrammdaten Diagramme(IReadOnlyList<Spiel> spiele) =>
-        Diagrammauswertung.Ermitteln(Staffel with { BestehenderSpielplan = spiele }, Optionen);
+    public Diagrammdaten Diagramme(IReadOnlyList<Spiel> spiele)
+    {
+        Diagrammdaten daten = Diagrammauswertung.Ermitteln(Staffel with { BestehenderSpielplan = spiele }, Optionen);
+        return Kompaktmodus is Kompaktmodus.Ein or Kompaktmodus.Bestaetigt
+            ? daten with { Kompakttage = Kompaktplanung.Ausrichtertage(spiele) }
+            : daten;
+    }
 
     /// <summary>Terminplan mit den Hinweisen und Nachbarterminen des Originals (Tab „Terminplan“).</summary>
     /// <param name="spiele">Spiele des Plans.</param>

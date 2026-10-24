@@ -6,13 +6,15 @@ using AndiGenerator.Engine.Referenz;
 using AndiGenerator.Rendering;
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Media;
 
 namespace AndiGenerator.UI;
 
 /// <summary>
 /// Diagramme wie im Original (<c>PaintVerteilung</c>) untereinander; gezeichnet mit dem <see cref="Diagrammzeichner"/>,
-/// derselben Routine wie im Ausdruck.
+/// derselben Routine wie im Ausdruck. Über einer Stelle mit Hinweis (Kreis der Spieltage, Karte der Ausrichter) zeigt sie
+/// einen Kasten mit dem Text und hebt verbundene Stellen hervor.
 /// </summary>
 public sealed class Diagrammzeichnung : Control
 {
@@ -23,6 +25,12 @@ public sealed class Diagrammzeichnung : Control
     /// <summary>Definiert die Eigenschaft <see cref="Teile"/>.</summary>
     public static readonly StyledProperty<IReadOnlyList<Diagrammteil>?> TeileProperty =
         AvaloniaProperty.Register<Diagrammzeichnung, IReadOnlyList<Diagrammteil>?>(nameof(Teile));
+
+    /// <summary>Die Kreise der letzten Zeichnung mit ihren Texten.</summary>
+    private IReadOnlyList<Diagrammhinweis> hinweise = [];
+
+    /// <summary>Die Nummer der Stelle, deren Hinweis gerade gezeigt wird; −1 = keiner.</summary>
+    private int gezeigt = -1;
 
     static Diagrammzeichnung()
     {
@@ -50,7 +58,17 @@ public sealed class Diagrammzeichnung : Control
         base.Render(context);
         if (Daten is Diagrammdaten daten)
         {
-            Zeichnen(new Diagrammzeichner(daten, new AvaloniaZeichenflaeche(context), mitTiteln: Teile is not { Count: 1 }));
+            var zeichner = new Diagrammzeichner(daten, new AvaloniaZeichenflaeche(context), mitTiteln: Teile is not { Count: 1 });
+            Zeichnen(zeichner);
+            hinweise = zeichner.Hinweise;
+            if (gezeigt >= 0 && gezeigt < hinweise.Count)
+            {
+                Hinweiszeichner.Zeichnen(new AvaloniaZeichenflaeche(context), hinweise[gezeigt], Bounds.Width, Bounds.Height);
+            }
+        }
+        else
+        {
+            hinweise = [];
         }
     }
 
@@ -64,6 +82,47 @@ public sealed class Diagrammzeichnung : Control
 
         Zeichengroesse groesse = Zeichnen(new Diagrammzeichner(daten, null, mitTiteln: Teile is not { Count: 1 }));
         return new Size(groesse.Breite, groesse.Hoehe);
+    }
+
+    /// <inheritdoc/>
+    protected override void OnPointerMoved(PointerEventArgs e)
+    {
+        base.OnPointerMoved(e);
+        Point p = e.GetPosition(this);
+        int neu = -1;
+        for (int i = 0; i < hinweise.Count && neu < 0; i++)
+        {
+            neu = hinweise[i].Trifft(p.X, p.Y) ? i : -1;
+        }
+
+        Hinweisen(neu);
+    }
+
+    /// <inheritdoc/>
+    protected override void OnPointerExited(PointerEventArgs e)
+    {
+        base.OnPointerExited(e);
+        Hinweisen(-1);
+    }
+
+    /// <inheritdoc/>
+    protected override void OnPropertyChanged(AvaloniaPropertyChangedEventArgs change)
+    {
+        base.OnPropertyChanged(change);
+        if (change.Property == DatenProperty || change.Property == TeileProperty)
+        {
+            gezeigt = -1;
+        }
+    }
+
+    /// <summary>Zeigt den Hinweis einer Stelle (Kasten und Marken werden mit der Zeichnung gezeichnet) oder keinen.</summary>
+    private void Hinweisen(int stelle)
+    {
+        if (stelle != gezeigt)
+        {
+            gezeigt = stelle;
+            InvalidateVisual();
+        }
     }
 
     /// <summary>Zeichnet die gewählten Diagramme untereinander (wie <see cref="Diagrammzeichner.Alles"/>) oder alle.</summary>

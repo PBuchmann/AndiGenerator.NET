@@ -9,7 +9,7 @@ using AndiGenerator.Persistence.Plandaten;
 // Kommandozeile für Tests, Benchmarks und Läufe ohne Oberfläche (MIGRATIONSPLAN E5).
 Console.OutputEncoding = System.Text.Encoding.UTF8;
 
-// Lange Läufe (Vergleiche über Nacht) nicht vom Energiesparmodus unterbrechen lassen.
+// Lange Läufe nicht vom Energiesparmodus unterbrechen lassen.
 Wachhalten.Einschalten();
 try
 {
@@ -26,21 +26,6 @@ try
     if (args.Length >= 1 && args[0] == "schranke")
     {
         return SchrankeBefehl.Ausfuehren(args[1..]);
-    }
-
-    if (args.Length >= 1 && args[0] == "highsvergleich")
-    {
-        return HighsvergleichBefehl.Ausfuehren(args[1..]);
-    }
-
-    if (args.Length >= 1 && args[0] == "neuplanen")
-    {
-        return NeuplanenBefehl.Ausfuehren(args[1..]);
-    }
-
-    if (args.Length >= 1 && args[0] == "turnier")
-    {
-        return await TurnierBefehl.Ausfuehren(args[1..]);
     }
 
     if (args.Length is 2 or 3 && args[0] == "pdftext")
@@ -63,7 +48,4 @@ Console.WriteLine("Aufruf: andigen info <click-TT-Exportdatei.xml>");
 Console.WriteLine("        andigen optimieren <click-TT-Exportdatei.xml> [Optionen]   (Hilfe: andigen optimieren --hilfe)");
 Console.WriteLine("        andigen bewerten <click-TT-Exportdatei.xml> <Plan> [<Plan> ...] [Optionen]   (Hilfe: andigen bewerten --hilfe)");
 Console.WriteLine("        andigen schranke <click-TT-Exportdatei.xml> [Optionen]   (untere Schranke der Stufe A mit HiGHS)");
-Console.WriteLine("        andigen highsvergleich <click-TT-Exportdatei.xml> [Optionen]   (Verfahren mit HiGHS vergleichen; Hilfe: --hilfe)");
-Console.WriteLine("        andigen neuplanen <click-TT-Exportdatei.xml> --start PLAN [Optionen]   (Teilneuplanung mit HiGHS)");
-Console.WriteLine("        andigen turnier pruefen <click-TT-Exportdatei.xml> <Meldungen.csv> [--ausgabe DATEI]");
 return 1;

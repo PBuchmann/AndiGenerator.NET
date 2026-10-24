@@ -8,6 +8,7 @@ using AndiGenerator.Domain.Geo;
 using AndiGenerator.Domain.Optionen;
 using AndiGenerator.Domain.Stammdaten;
 using AndiGenerator.Domain.Turniere;
+using AndiGenerator.Engine.Referenz;
 using AndiGenerator.Engine.Turniere;
 
 namespace AndiGenerator.Application;
@@ -67,6 +68,22 @@ public static partial class Kompaktplanung
         ArgumentNullException.ThrowIfNull(spiele);
         List<Turnier> turniere = Turniererkennung.Erkennen(spiele).Select(AusrichterMitLokal).ToList();
         return AuswertenFuer(staffel, daten, planung, heute, turniere);
+    }
+
+    /// <summary>
+    /// Die Spieltage eines Plans mit ihrem Ausrichter für das Diagramm „Ausrichter und Spielorte“: erkannt wie in
+    /// <see cref="SpieleAuswerten"/>; kommen zwei Mannschaften in Frage und klärt das Spiellokal es nicht, bleibt er offen.
+    /// </summary>
+    /// <param name="spiele">Die Spiele des Plans.</param>
+    /// <returns>Die Spieltage nach Tag.</returns>
+    public static IReadOnlyList<Ausrichtertag> Ausrichtertage(IEnumerable<Spiel> spiele)
+    {
+        ArgumentNullException.ThrowIfNull(spiele);
+        return Turniererkennung.Erkennen(spiele)
+            .Select(AusrichterMitLokal)
+            .OrderBy(t => t.Tag)
+            .Select(t => new Ausrichtertag(t.Tag, t.MoeglicheAusrichter.Count == 1 ? t.MoeglicheAusrichter[0] : null, t.Spiele))
+            .ToList();
     }
 
     /// <summary>

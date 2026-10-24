@@ -89,18 +89,6 @@ internal static class OptimierenBefehl
     {
         Staffel staffel = StaffelLaden(a.Datei, leer: false);
         (Berechnungsoptionen optionen, string herkunft) = OptionenLaden(a.Optionen, staffel);
-        if (a.HallenWieOriginal)
-        {
-            optionen = optionen with { Korrekturen = optionen.Korrekturen with { HallenNachNamen = false } };
-            herkunft += ", Hallen wie im Original";
-        }
-
-        if (a.Original)
-        {
-            optionen = optionen with { Korrekturen = Korrekturen.Keine, SpielfreiAmPflichtspieltag = false };
-            herkunft += ", wie im Original (ohne Korrekturen)";
-        }
-
         if (a.Rundenplanung is Rundenplanung runde)
         {
             optionen = optionen with { Rundenplanung = runde };
@@ -119,12 +107,8 @@ internal static class OptimierenBefehl
         {
             AutoStufen = einteilung,
             Kerne = a.Kerne ?? Optimierungseinstellungen.Standard.Kerne,
-            Inseln = a.Inseln ?? Optimierungseinstellungen.Standard.Inseln,
             Startwert = a.Startwert,
-            SpezialInsel = !a.OhneSpezial,
             Automodus = a.Auto,
-            StartplanInseln = a.StartInseln,
-            AutoSpaetannahme = a.Spaet ?? Optimierungseinstellungen.Standard.AutoSpaetannahme,
         };
 
         List<Spiel>? start = null;
@@ -159,7 +143,7 @@ internal static class OptimierenBefehl
         if (start is not null)
         {
             einstellungen = einstellungen with { Startplan = start };
-            Console.WriteLine($"Startplan:    {a.Start} für {Math.Min(a.StartInseln, einstellungen.Inseln)} Insel(n)");
+            Console.WriteLine($"Startplan:    {a.Start} für die erste Insel");
         }
 
         Console.WriteLine($"Staffel:      {staffel.Name} ({staffel.Mannschaften.Count} Mannschaften, bestehender Plan {staffel.BestehenderSpielplan.Count(s => s.Zeitpunkt is not null)} Spiele terminiert)");
@@ -194,7 +178,7 @@ internal static class OptimierenBefehl
                 einteilung.Vervollstaendigt(),
                 warten: () => Volatile.Read(ref vorrang.Value),
                 linienloeser: lauf => new SchrankeBefehl.Highsschranke(new Highsvorgabe(lauf + 1, (lauf % 3) switch { 0 => 0.05, 1 => 0.2, _ => 0.5 }, OhneNeustart: true)),
-                linien: a.Linien ?? StandardLinien())
+                linien: StandardLinien())
             : null;
         Task? nebenher = null;
         if (a.Nebenher)
@@ -335,7 +319,6 @@ internal static class OptimierenBefehl
         }
     }
 
-    /// <summary>HiGHS-Linien wie in der Oberfläche: zwei ab acht logischen Prozessoren, sonst eine.</summary>
     /// <summary>Wie im Programm (Stufenschranke.Linien): zwei ab zwölf logischen Prozessoren, eine ab acht, darunter keine.</summary>
     private static int StandardLinien() => Environment.ProcessorCount switch
     {

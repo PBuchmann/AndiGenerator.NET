@@ -12,12 +12,14 @@ Die Umrisse der Bundesländer `src/AndiGenerator.Persistence/Geo/umrisse-de.json
 |---|---|---|
 | .NET 10 Runtime/BCL | MIT | Laufzeit |
 | Avalonia, Avalonia.Desktop, Avalonia.Themes.Fluent | MIT | Oberfläche (E2) |
-| Avalonia.Skia (mit SkiaSharp, HarfBuzzSharp) | MIT | PDF-Ausdruck (`SKDocument`, Phase 7) |
+| Avalonia.Skia (mit SkiaSharp, HarfBuzzSharp) | MIT | PDF-Ausdruck (`SKDocument`, Phase 7); SkiaSharp (mit SkiaSharp.NativeAssets.Linux) auch direkt im MCP-Server |
 | Dock.Avalonia, Dock.Avalonia.Themes.Fluent, Dock.Model.Mvvm | MIT | Andock-Layout der Ansichten (E15) |
 | CommunityToolkit.Mvvm | MIT | ViewModels (E3) |
 | PdfPig (UglyToad.PdfPig) | Apache-2.0 | Bericht „Terminwünsche“ aus click-TT lesen (nur im Baustein `AndiGenerator.Import`) |
 | HiGHS (Paket Highs.Native, © die HiGHS-Entwickler, University of Edinburgh) | MIT | Löser für die gezielte Konstruktion der Kompaktspieltage (ganzzahlige Optimierung, nur die native Bibliothek über die C-Schnittstelle, im Baustein `AndiGenerator.Import`; der Rechenkern kennt nur seine Schnittstelle); https://highs.dev |
 | Velopack | MIT | Installation und Updates über GitHub Releases (E12); Version gemeinsam mit `VPK_VERSION` in `release.yml` |
+| ModelContextProtocol (mit ModelContextProtocol.Core), © Anthropic und Mitwirkende | Apache-2.0 | MCP-Server `andigen-mcp` (`tools/AndiGenerator.Mcp`, liegt den Installationspaketen bei): Steuerung durch eine KI-Anwendung über stdio |
+| Microsoft.Extensions.Hosting und Microsoft.Extensions.AI.Abstractions (mit weiteren Microsoft.Extensions-/System-Paketen) | MIT | Rahmen des MCP-Servers (`andigen-mcp`, liegt den Installationspaketen bei) |
 | Schriften IBM Plex Sans und IBM Plex Mono (je Regular, Medium, SemiBold, Bold), © 2017 IBM Corp. | SIL OFL 1.1 | Schrift der Oberfläche, eingebettet unter `src/AndiGenerator.UI/Assets/Fonts` mit `OFL.txt` |
 | xunit | Apache-2.0 | nur Tests |
 | xunit.runner.visualstudio | Apache-2.0 | nur Tests |

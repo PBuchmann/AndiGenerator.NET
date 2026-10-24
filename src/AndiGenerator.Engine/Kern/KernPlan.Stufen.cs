@@ -84,9 +84,4 @@ internal sealed partial class KernPlan
 
         return new Stufenwert(harte, (int)jeStufe[0], (int)jeStufe[1], 0, (int)jeStufe[2], kostenC);
     }
-
-    /// <summary>Vereinsinterne Spiele liegen nicht alle am Anfang (und die Kostenart wird berücksichtigt).</summary>
-    /// <returns><c>true</c> bei einem Verstoß.</returns>
-    public bool VereinsinternVerletzt() =>
-        D.Optionen.VereinsinterneSpieleAmAnfang != Gewichtung.NichtBeruecksichtigen && TeamsNichtAmAnfang() > 0;
 }

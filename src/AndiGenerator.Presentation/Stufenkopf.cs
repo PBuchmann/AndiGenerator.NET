@@ -36,7 +36,4 @@ public sealed record Stufenkopf(
 
     /// <summary>Holt einen Wert, der angibt, ob der Plan in der Stufe bestmöglich ist (grün).</summary>
     public bool IstBestmoeglich => Zustand == Spielraumzustand.Bestmoeglich;
-
-    /// <summary>Holt einen Wert, der angibt, ob der Plan in der Stufe noch besser werden kann (orange).</summary>
-    public bool IstOffen => Zustand == Spielraumzustand.Offen;
 }

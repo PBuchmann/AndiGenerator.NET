@@ -21,10 +21,6 @@ internal sealed class BewertenArgumente
 
     public bool Details { get; private set; }
 
-    public bool Original { get; private set; }
-
-    public bool HallenWieOriginal { get; private set; }
-
     public string? Ausgabe { get; private set; }
 
     /// <summary>Liest die Argumente nach dem Befehlswort; <c>null</c> bei Fehlern (Meldung in <paramref name="fehler"/>).</summary>
@@ -73,13 +69,6 @@ internal sealed class BewertenArgumente
         if (arg == "--details")
         {
             Details = true;
-            return true;
-        }
-
-        if (arg is "--original" or "--hallen-wie-original")
-        {
-            Original |= arg == "--original";
-            HallenWieOriginal |= arg == "--hallen-wie-original";
             return true;
         }
 

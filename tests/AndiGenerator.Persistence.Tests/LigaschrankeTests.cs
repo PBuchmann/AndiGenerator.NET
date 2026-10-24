@@ -350,6 +350,47 @@ public sealed class LigaschrankeTests
         Assert.True((nachher.Harte, nachher.A, nachher.B).CompareTo((vorher.Harte, vorher.A, vorher.B)) <= 0, $"{vorher} → {nachher}");
     }
 
+    /// <summary>
+    /// Die Teilneuplanung des Automodus mit einer HiGHS-Linie: Sie beginnt nach der Basisoptimierung, plant Ausschnitte neu und
+    /// meldet den Stand für den Leitstand; die Linie rechnet A und B zusammen. Beenden bricht HiGHS ab.
+    /// </summary>
+    /// <returns>Der Testlauf.</returns>
+    [HighsFact]
+    public async Task Teilneuplanung_mit_Linie_plant_Ausschnitte_und_endet_sofort()
+    {
+        Staffel staffel = Laden("R3_Damen_Bezirksoberliga_Rheinhessen (1).xml", mitPlan: true);
+        Optimierungseinstellungen einstellungen = Optimierungseinstellungen.Standard with
+        {
+            Kerne = 1,
+            Startwert = 11,
+            Automodus = true,
+            AutoOhneGrundlauf = true,
+        };
+        using var optimierer = new Inseloptimierer(staffel, Berechnungsoptionen.Standard, einstellungen);
+        optimierer.Rechnen(5_000);
+        Assert.NotNull(optimierer.BesterGelenkt());
+
+        var planer = new Teilneuplaner(optimierer, staffel, Berechnungsoptionen.Standard, new Highsbruecke(), Stufeneinteilung.Standard, arbeiter: 1, linienloeser: _ => new Highsbruecke(), linien: 1);
+        Assert.Equal("wartet auf das Ende der Basisoptimierung · 1 HiGHS-Linien", planer.Stand.Zustand);
+        planer.Starten();
+        var uhr = System.Diagnostics.Stopwatch.StartNew();
+        while (planer.Stand.Ausschnitte < 2 && uhr.Elapsed < TimeSpan.FromSeconds(90))
+        {
+            await Task.Delay(200);
+        }
+
+        Teilneuplanungsstand stand = planer.Stand;
+        Assert.True(stand.Ausschnitte >= 2, stand.Zustand);
+        Assert.DoesNotContain("Fehler", stand.Zustand, StringComparison.Ordinal);
+        Assert.NotEmpty(stand.Verlauf ?? []);
+        Assert.NotEmpty(stand.Groessen ?? []);
+
+        uhr.Restart();
+        planer.Dispose();
+        planer.Dispose();
+        Assert.True(uhr.Elapsed < TimeSpan.FromSeconds(5), $"Beenden dauerte {uhr.Elapsed}.");
+    }
+
     private static int Anzahl(Planbewertung b, MannschaftsKostenart art) => b.Mannschaften.Sum(m => Math.Max(0, m.JeKostenart[(int)art].Anzahl));
 
     /// <summary>Die Verstöße je Kriterium nach der Bewertung (Spieltage aus den Zusatzzahlen).</summary>

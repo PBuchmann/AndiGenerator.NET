@@ -22,7 +22,4 @@ public sealed record Terminspiel(
 
     /// <summary>Holt einen Wert, der angibt, ob es Spiele von Nachbar- oder Vereinsmannschaften am selben Tag gibt.</summary>
     public bool HatNachbarn => Nachbarn.Count > 0;
-
-    /// <summary>Holt einen Wert, der angibt, ob ein Hinweis ein Verstoß ist.</summary>
-    public bool HatProblem => Chips.Any(c => c.Art == Hinweisart.Problem);
 }

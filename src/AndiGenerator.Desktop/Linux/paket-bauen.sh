@@ -28,11 +28,12 @@ ln -s /opt/andigenerator-net/AndiGenerator.NET "$wurzel/usr/bin/andigenerator-ne
 cp "$hier/andigenerator-net.desktop" "$wurzel/usr/share/applications/"
 cp "$hier/andigenerator-net.png" "$wurzel/usr/share/icons/hicolor/256x256/apps/"
 
-# Rechte wie bei Systempaketen: Ordner 755, Dateien 644, das Programm ausführbar.
+# Rechte wie bei Systempaketen: Ordner 755, Dateien 644, das Programm (und der MCP-Server) ausführbar.
 chmod 755 "$wurzel"
 find "$wurzel" -type d -exec chmod 755 {} +
 find "$wurzel" -type f -exec chmod 644 {} +
 chmod 755 "$wurzel/opt/andigenerator-net/AndiGenerator.NET"
+if [ -f "$wurzel/opt/andigenerator-net/andigen-mcp" ]; then chmod 755 "$wurzel/opt/andigenerator-net/andigen-mcp"; fi
 
 # Debian-Versionen: „-“ trennt die Paketrevision ab, Vorabversionen (1.0.0-beta.1) werden deshalb zu 1.0.0~beta.1.
 debversion="${version//-/\~}"

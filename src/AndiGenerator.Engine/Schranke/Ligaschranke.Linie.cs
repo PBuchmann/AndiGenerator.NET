@@ -78,4 +78,21 @@ public sealed partial class Ligaschranke
         Melden(ende);
         return gefunden is int g && schranke >= g && !aufhoeren();
     }
+
+    /// <summary>Die Summe der Verstöße einer Stufe im Modell (Kriterien, die das Modell nicht kennt, fehlen).</summary>
+    private List<(int Spalte, double Faktor)> Stufensumme(IEnumerable<Kostenkriterium> kriterien) =>
+        Zusammenfassen(kriterien.Select(k => Ziel(k)).OfType<List<(int Spalte, double Faktor)>>().SelectMany(z => z));
+
+    /// <summary>Ein Plan als Lösung des Modells (Ansetzungen fest, Hilfsspalten von HiGHS ergänzt); <c>null</c>, wenn er nicht passt.</summary>
+    private double[]? Einbetten(Ganzzahlmodell basis, IReadOnlyList<Spiel> plan, List<(int Spalte, double Faktor)> ziel, ISchrankenloeser loeser)
+    {
+        double[] x = Abbilden(plan, out _);
+        Ganzzahlmodell kopie = basis.Kopie();
+        foreach (int spalte in termine.Select(t => t.Spalte).Concat(ohneTermin.Select(u => u.Spalte)))
+        {
+            kopie.Zeile([spalte], x[spalte], x[spalte]);
+        }
+
+        return Minimieren(kopie, ziel, loeser, TimeSpan.FromSeconds(30)).Werte;
+    }
 }
