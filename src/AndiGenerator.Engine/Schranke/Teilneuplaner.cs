@@ -151,7 +151,11 @@ public sealed class Teilneuplaner : IDisposable
         }
 
         abbruch.Cancel();
+
+        // Dispose ist synchron; der Lauf endet nach dem Abbruch von selbst, gewartet wird höchstens „Abschied“.
+#pragma warning disable VSTHRD002
         if (lauf is null || lauf.Wait(Abschied, CancellationToken.None))
+#pragma warning restore VSTHRD002
         {
             abbruch.Dispose();
         }

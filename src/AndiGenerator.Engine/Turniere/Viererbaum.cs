@@ -149,7 +149,7 @@ internal sealed class Viererbaum
             gesamtArbeit = arbeit.Count;
             Parallel.ForEach(arbeit, parallel, a =>
             {
-                Teilbaum(a.Wurzel, a.Erster, token, fortschritt);
+                Teilbaum(a.Wurzel, a.Erster, fortschritt, token);
                 Interlocked.Increment(ref erledigt);
             });
         }
@@ -263,7 +263,7 @@ internal sealed class Viererbaum
         }
     }
 
-    private void Teilbaum(Viererzweig wurzel, Viererblock? erster, CancellationToken token, Action<string>? fortschritt)
+    private void Teilbaum(Viererzweig wurzel, Viererblock? erster, Action<string>? fortschritt, CancellationToken token)
     {
         if (erster is null)
         {
@@ -278,11 +278,11 @@ internal sealed class Viererbaum
 
         Viererzweig zweig = wurzel.Kopie();
         zweig.Setzen(erster, 1);
-        Tiefe(zweig, token, fortschritt);
+        Tiefe(zweig, fortschritt, token);
         Interlocked.Add(ref knoten, zweig.Knoten);
     }
 
-    private void Tiefe(Viererzweig z, CancellationToken token, Action<string>? fortschritt)
+    private void Tiefe(Viererzweig z, Action<string>? fortschritt, CancellationToken token)
     {
         Zaehlen(z, fortschritt);
         if (token.IsCancellationRequested)
@@ -310,7 +310,7 @@ internal sealed class Viererbaum
             }
 
             z.Setzen(b, 1);
-            Tiefe(z, token, fortschritt);
+            Tiefe(z, fortschritt, token);
             z.Setzen(b, -1);
         }
     }

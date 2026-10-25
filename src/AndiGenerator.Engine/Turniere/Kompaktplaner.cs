@@ -25,10 +25,10 @@ public static class Kompaktplaner
     /// <summary>Plant.</summary>
     /// <param name="aufgabe">Die Aufgabe.</param>
     /// <param name="optionen">Dauer, Threads und Startwert.</param>
-    /// <param name="abbruch">Bricht die Suche ab; die bis dahin besten Pläne werden zurückgegeben.</param>
     /// <param name="fortschritt">Wird gelegentlich (aus einem Hintergrund-Thread) mit dem Stand aufgerufen (Text und Anteil bis 100 %).</param>
+    /// <param name="abbruch">Bricht die Suche ab; die bis dahin besten Pläne werden zurückgegeben.</param>
     /// <returns>Varianten und Hinweise.</returns>
-    public static Kompaktergebnis Planen(Kompaktaufgabe aufgabe, Kompaktplanoptionen optionen, CancellationToken abbruch, Action<Kompaktfortschritt>? fortschritt)
+    public static Kompaktergebnis Planen(Kompaktaufgabe aufgabe, Kompaktplanoptionen optionen, Action<Kompaktfortschritt>? fortschritt, CancellationToken abbruch)
     {
         using var steuerung = new Kompaktsteuerung(abbruch);
         return Planen(aufgabe, optionen, steuerung, fortschritt);

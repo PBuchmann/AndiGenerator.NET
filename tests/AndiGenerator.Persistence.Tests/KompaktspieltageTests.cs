@@ -197,7 +197,7 @@ public sealed class KompaktspieltageTests : IDisposable
         Assert.Equal(Rundenplanung.NurVorrunde, sitzung.Optionen.Rundenplanung);
 
         Kompaktaufgabe aufgabe = Kompaktplanung.Aufgabe(sitzung.Staffel, sitzung.DatenBearbeiten(), sitzung.Optionen.Rundenplanung, new DateOnly(2026, 7, 1));
-        Kompaktergebnis ergebnis = Kompaktplaner.Planen(aufgabe, new Kompaktplanoptionen(TimeSpan.FromSeconds(3), 2, 1, null, TimeSpan.FromSeconds(20)), CancellationToken.None, null);
+        Kompaktergebnis ergebnis = Kompaktplaner.Planen(aufgabe, new Kompaktplanoptionen(TimeSpan.FromSeconds(3), 2, 1, null, TimeSpan.FromSeconds(20)), null, CancellationToken.None);
         Kompaktvariante variante = Assert.IsType<Kompaktvariante>(ergebnis.Varianten.FirstOrDefault());
         Kompaktauswertung plan = Kompaktplanung.Auswerten(sitzung.Staffel, sitzung.DatenBearbeiten(), sitzung.Optionen.Rundenplanung, new DateOnly(2026, 7, 1), variante.Turniere);
         Assert.Equal(36, plan.Spieltage.Sum(s => s.Spiele.Count));

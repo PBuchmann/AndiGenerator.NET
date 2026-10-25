@@ -35,6 +35,7 @@ Geprüft vor der Veröffentlichung (01.10.2026): SonarAnalyzer.CSharp steht seit
 | Paket | Lizenz | Verwendung |
 |---|---|---|
 | StyleCop.Analyzers | MIT | Stilprüfung (Konfiguration: `stylecop.json`, `.editorconfig`) |
+| Microsoft.VisualStudio.Threading.Analyzers, © Microsoft | MIT | Prüfung von async/await und Threads (Konfiguration: `.editorconfig`) |
 | anchore/sbom-action (GitHub Action, nutzt Syft) | Apache-2.0 | Stückliste (SBOM) im Release-Workflow |
 | actions/attest-build-provenance, actions/attest-sbom (GitHub Actions) | MIT | Herkunftsnachweise im Release-Workflow |
 | SonarAnalyzer.CSharp | Sonar Source-Available License v1 (kein OSI-Open-Source; bis 10.32 LGPL-3.0) | Qualitätsprüfung |

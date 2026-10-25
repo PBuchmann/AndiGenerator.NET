@@ -34,9 +34,13 @@ internal sealed partial class Fernsteuerung : IDisposable
     public Fernsteuerung(string? eigeneBasis, string? uebernahmeAus)
     {
         oberflaeche = new Fernoberflaeche(faden);
+
+        // Konstruktor und Dispose laufen auf dem Faden des Servers, nie auf dem Bedienfaden: synchrones Warten ist hier sicher.
+#pragma warning disable VSTHRD002
         hf = faden.Ausfuehren(() => eigeneBasis is null
             ? new HauptfensterViewModel(oberflaeche, KeinFenster)
             : new HauptfensterViewModel(oberflaeche, KeinFenster, eigeneBasis, uebernahmeAus)).GetAwaiter().GetResult();
+#pragma warning restore VSTHRD002
     }
 
     /// <summary>Holt den Stand.</summary>
@@ -499,6 +503,7 @@ internal sealed partial class Fernsteuerung : IDisposable
     /// <inheritdoc/>
     public void Dispose()
     {
+#pragma warning disable VSTHRD002 // siehe Konstruktor
         faden.Ausfuehren(() =>
         {
             if (hf.StoppenCommand.CanExecute(null))
@@ -509,6 +514,7 @@ internal sealed partial class Fernsteuerung : IDisposable
             hf.Dispose();
             return true;
         }).Wait(TimeSpan.FromSeconds(10));
+#pragma warning restore VSTHRD002
         faden.Dispose();
     }
 

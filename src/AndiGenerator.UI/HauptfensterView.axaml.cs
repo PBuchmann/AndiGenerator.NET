@@ -109,7 +109,10 @@ public partial class HauptfensterView : Window
     /// Vor dem Beenden des Programms: Ein noch nicht gesicherter Plan wird gesichert bzw. es wird gefragt, ob er den
     /// gesicherten ersetzen soll. Dafür wird das Schließen zunächst abgebrochen und nach der Antwort wiederholt.
     /// </summary>
+    // Ereignisbehandlung des Fensters: muss void sein; Fehler landen über den Dispatcher in der Fehlerbehandlung.
+#pragma warning disable VSTHRD100
     private async void BeimSchliessen(object? sender, WindowClosingEventArgs e)
+#pragma warning restore VSTHRD100
     {
         if (beendenBestaetigt || DataContext is not HauptfensterViewModel modell)
         {
