@@ -225,7 +225,7 @@
                   <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="p:Kostentreiberzeile">
                       <Grid ColumnDefinitions="*,96,36" Margin="0,1">
-                        <TextBlock Text="{Binding Name}" Classes="klein" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                        <TextBlock ToolTip.Tip="{Binding Name}" Text="{Binding Name}" Classes="klein mannschaft" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
                         <Border Grid.Column="1" Height="6" CornerRadius="3" Background="{StaticResource Schwebe}" VerticalAlignment="Center">
                           <Border Width="{Binding Breite}" CornerRadius="3" Background="{StaticResource Rand}" HorizontalAlignment="Left" />
                         </Border>

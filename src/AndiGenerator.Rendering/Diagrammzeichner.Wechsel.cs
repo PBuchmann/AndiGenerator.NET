@@ -91,7 +91,7 @@ public sealed partial class Diagrammzeichner
         for (int i = 0; i < d.Mannschaften.Count; i++)
         {
             y += 30;
-            Text(d.Mannschaften[i].Name, 0, y);
+            Name(d.Mannschaften[i].Name, y);
             List<Diagrammspiel> spiele = folgen[i];
             int rueckrunde = spiele.FindIndex(s => s.Runde > spiele[0].Runde);
             IReadOnlyList<(bool Heim, int Start, int Laenge)> serien = Serien(d.Mannschaften[i]);

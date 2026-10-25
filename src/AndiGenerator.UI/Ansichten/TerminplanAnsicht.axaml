@@ -101,9 +101,9 @@
                     <DataTemplate x:DataType="p:Terminspiel">
                       <Button Classes="spiel" Command="{Binding $parent[UserControl].((p:TerminplanAnsichtViewModel)DataContext).SpielWaehlenCommand}" CommandParameter="{Binding}">
                         <StackPanel Orientation="Horizontal" Spacing="6">
-                          <TextBlock Text="{Binding Heim}" FontWeight="SemiBold" />
+                          <TextBlock ToolTip.Tip="{Binding Heim}" Classes="mannschaft" Text="{Binding Heim}" FontWeight="SemiBold" />
                           <TextBlock Text="–" Foreground="{StaticResource Grau}" />
-                          <TextBlock Text="{Binding Gast}" />
+                          <TextBlock ToolTip.Tip="{Binding Gast}" Classes="mannschaft" Text="{Binding Gast}" />
                           <TextBlock Text="{Binding Runde, StringFormat='· {0}'}" Classes="klein" VerticalAlignment="Center" />
                         </StackPanel>
                       </Button>
@@ -135,9 +135,9 @@
                                   </Border>
                                   <TextBlock Grid.Column="1" Text="{Binding Zeit}" Classes="ziffer" FontSize="12" VerticalAlignment="Center" Foreground="{StaticResource Tinte2}" />
                                   <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center">
-                                    <TextBlock Text="{Binding Heim}" FontWeight="SemiBold" />
+                                    <TextBlock ToolTip.Tip="{Binding Heim}" Classes="mannschaft" Text="{Binding Heim}" FontWeight="SemiBold" />
                                     <TextBlock Text="–" Foreground="{StaticResource Grau}" />
-                                    <TextBlock Text="{Binding Gast}" />
+                                    <TextBlock ToolTip.Tip="{Binding Gast}" Classes="mannschaft" Text="{Binding Gast}" />
                                   </StackPanel>
                                   <Panel Grid.Column="3" Margin="12,0,0,0">
                                     <ItemsControl ItemsSource="{Binding Chips}" VerticalAlignment="Center">
@@ -178,7 +178,7 @@
                   <Border Classes="karte" Padding="14,12" Margin="0,0,12,12" VerticalAlignment="Top">
                     <StackPanel Spacing="8">
                       <Grid ColumnDefinitions="*,Auto">
-                        <TextBlock Text="{Binding Name}" FontSize="14" FontWeight="Bold" TextTrimming="CharacterEllipsis" />
+                        <TextBlock ToolTip.Tip="{Binding Name}" Classes="mannschaft" Text="{Binding Name}" FontSize="14" FontWeight="Bold" TextTrimming="CharacterEllipsis" />
                         <TextBlock Grid.Column="1" Text="{Binding Bilanz}" Classes="klein" VerticalAlignment="Center" Margin="8,0,0,0" />
                       </Grid>
                       <ItemsControl ItemsSource="{Binding Folge}" ToolTip.Tip="Heim/Auswärts-Folge: gefüllt = Heimspiel, hohl = Auswärtsspiel">
@@ -206,7 +206,7 @@
                                   <TextBlock Grid.Column="1" Text="{Binding Spiel.Tag}" Classes="ziffer" FontSize="12" VerticalAlignment="Center" />
                                   <TextBlock Grid.Column="2" Text="{Binding Spiel.Zeit}" Classes="ziffer" FontSize="12" VerticalAlignment="Center" Foreground="{StaticResource Tinte2}" />
                                   <StackPanel Grid.Column="3" Spacing="2" VerticalAlignment="Center">
-                                    <TextBlock Text="{Binding Gegner}" TextTrimming="CharacterEllipsis" />
+                                    <TextBlock ToolTip.Tip="{Binding Gegner}" Classes="mannschaft" Text="{Binding Gegner}" TextTrimming="CharacterEllipsis" />
                                     <ItemsControl ItemsSource="{Binding Spiel.Chips}" IsVisible="{Binding Spiel.HatChips}">
                                       <ItemsControl.ItemsPanel>
                                         <ItemsPanelTemplate>

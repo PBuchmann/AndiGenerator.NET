@@ -117,7 +117,7 @@ public sealed partial class Diagrammzeichner
 
     private void Setzlistenzeile(Diagrammmannschaft m, double grund, List<int> runden, double rundenbreite, double einheit, double rechts)
     {
-        Text(m.Name, 0, grund - 16);
+        Name(m.Name, grund - 16);
         List<Diagrammspiel> spiele = m.Spiele.Where(s => s.Zeitpunkt is not null).ToList();
         int runde = -1;
         int k = 0;

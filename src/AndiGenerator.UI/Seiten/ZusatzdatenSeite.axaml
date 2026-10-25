@@ -31,7 +31,7 @@
             <DataTemplate x:DataType="p:Staerkezeile">
               <Grid ColumnDefinitions="44,*,110,130" MinHeight="32">
                 <TextBlock Text="{Binding PlatzText}" Classes="ziffer" FontWeight="SemiBold" Foreground="{StaticResource Tinte2}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,12,0" />
-                <TextBlock Grid.Column="1" Text="{Binding Mannschaft}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                <TextBlock ToolTip.Tip="{Binding Mannschaft}" Classes="mannschaft" Grid.Column="1" Text="{Binding Mannschaft}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
                 <TextBlock Grid.Column="2" Text="{Binding SchnittText}" Classes="ziffer" VerticalAlignment="Center" />
                 <TextBlock Grid.Column="3" Text="{Binding SpielerText}" Foreground="{StaticResource Tinte2}" VerticalAlignment="Center" />
               </Grid>
@@ -84,7 +84,7 @@
             <Border Classes="karte" Padding="16,12" Margin="0,0,0,10">
               <StackPanel Spacing="8">
                 <Grid ColumnDefinitions="*,Auto">
-                  <TextBlock Text="{Binding Mannschaft}" FontSize="15" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                  <TextBlock ToolTip.Tip="{Binding Mannschaft}" Classes="mannschaft" Text="{Binding Mannschaft}" FontSize="15" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
                   <Border Grid.Column="1" CornerRadius="10" Padding="10,3" Background="{StaticResource AkzentHell}">
                     <TextBlock Text="{Binding Marke}" FontSize="12" Foreground="{StaticResource AkzentDunkel}" />
                   </Border>
@@ -161,9 +161,9 @@
                 <DataTemplate x:DataType="p:Wochenspielzeile">
                   <Grid ColumnDefinitions="18,*,Auto,*,Auto" Margin="0,1">
                     <TextBlock Text="!" FontWeight="Bold" Foreground="{StaticResource Schlecht}" />
-                    <TextBlock Grid.Column="1" Text="{Binding Gast}" TextTrimming="CharacterEllipsis" />
+                    <TextBlock ToolTip.Tip="{Binding Gast}" Classes="mannschaft" Grid.Column="1" Text="{Binding Gast}" TextTrimming="CharacterEllipsis" />
                     <TextBlock Grid.Column="2" Text="bei" Foreground="{StaticResource Tinte2}" Margin="8,0" />
-                    <TextBlock Grid.Column="3" Text="{Binding Heim}" TextTrimming="CharacterEllipsis" />
+                    <TextBlock ToolTip.Tip="{Binding Heim}" Classes="mannschaft" Grid.Column="3" Text="{Binding Heim}" TextTrimming="CharacterEllipsis" />
                     <TextBlock Grid.Column="4" Text="{Binding Entfernung}" Classes="ziffer" HorizontalAlignment="Right" MinWidth="64" TextAlignment="Right" Margin="8,0,0,0" />
                   </Grid>
                 </DataTemplate>
@@ -196,9 +196,9 @@
                 <DataTemplate x:DataType="p:Wochenspielzeile">
                   <Grid ColumnDefinitions="18,*,Auto,*,Auto" Margin="0,1">
                     <TextBlock Text="!" FontWeight="Bold" Foreground="{StaticResource Tinte2}" />
-                    <TextBlock Grid.Column="1" Text="{Binding Gast}" TextTrimming="CharacterEllipsis" />
+                    <TextBlock ToolTip.Tip="{Binding Gast}" Classes="mannschaft" Grid.Column="1" Text="{Binding Gast}" TextTrimming="CharacterEllipsis" />
                     <TextBlock Grid.Column="2" Text="bei" Foreground="{StaticResource Tinte2}" Margin="8,0" />
-                    <TextBlock Grid.Column="3" Text="{Binding Heim}" TextTrimming="CharacterEllipsis" />
+                    <TextBlock ToolTip.Tip="{Binding Heim}" Classes="mannschaft" Grid.Column="3" Text="{Binding Heim}" TextTrimming="CharacterEllipsis" />
                     <TextBlock Grid.Column="4" Text="{Binding Entfernung}" Classes="ziffer" HorizontalAlignment="Right" MinWidth="64" TextAlignment="Right" Margin="8,0,0,0" />
                   </Grid>
                 </DataTemplate>

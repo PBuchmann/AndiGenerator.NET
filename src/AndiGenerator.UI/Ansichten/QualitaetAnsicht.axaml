@@ -279,7 +279,7 @@
               <DataTemplate x:DataType="p:Meldungsgruppe">
                 <StackPanel Spacing="4" Margin="0,0,0,12">
                   <Grid ColumnDefinitions="*,Auto">
-                    <TextBlock Text="{Binding Name}" FontSize="13" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                    <TextBlock ToolTip.Tip="{Binding Name}" Classes="mannschaft" Text="{Binding Name}" FontSize="13" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
                     <Border Grid.Column="1" Background="#FBEDEB" CornerRadius="8" Padding="8,2" Margin="8,0,0,0" VerticalAlignment="Center">
                       <TextBlock Text="{Binding Anzahl}" FontSize="11" FontWeight="SemiBold" Foreground="#7A1A12" />
                     </Border>

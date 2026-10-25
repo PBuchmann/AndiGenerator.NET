@@ -3,9 +3,9 @@
 """Erzeugt Beispielklassen für Kompaktspieltage im Format des click-TT-Exports aus Tabellen von myTischtennis.
 
 Übernommen sind nur die Mannschaften (Name, Mannschafts-ID, Mannschaftsnummer) aus der Tabelle der Saison 2026/27
-(abgerufen am 25.10.2026). Alles andere ist erfunden: Vereins-IDs, Hallen (nach dem Ort benannt), Heimtermine (Samstag
-15 Uhr bzw. Sonntag 11 Uhr, je Halle zwei Tische frei) und Sperren an den Wochenenden der Hinrunde außerhalb der
-Herbstferien, fester Zufall – die Dateien sind bei jedem Lauf gleich. Die Hallenadressen (nur Postleitzahl und Ort, für
+(abgerufen am 25.10.2026). Alles andere ist erfunden: Vereins-IDs, Hallen (nach dem Ort benannt), Heimtermine (Sonntag
+11 Uhr, je Halle zwei Tische frei – Kompaktspieltage sind Sonntage) und Sperren an den Sonntagen der Hinrunde außerhalb
+der Herbstferien, fester Zufall – die Dateien sind bei jedem Lauf gleich. Die Hallenadressen (nur Postleitzahl und Ort, für
 Karte und Entfernungen) schreibt tools/kompaktklasse/mytischtennis-adressen.cs in die .modifications-Datei daneben.
 
 Aufruf im Repository: python3 tools/kompaktklasse/mytischtennis.py
@@ -61,18 +61,18 @@ MITTE = dt.date(2026, 12, 7)
 ENDE = dt.date(2027, 5, 9)
 
 
-def wochenenden(ferien):
-    """Samstage und Sonntage von Mitte September bis Ende November ohne die Herbstferien."""
-    t = dt.date(2026, 9, 12)
+def sonntage(ferien):
+    """Sonntage von Mitte September bis Ende November ohne die Herbstferien."""
+    t = dt.date(2026, 9, 13)
     while t < dt.date(2026, 11, 30):
-        if t.weekday() in (5, 6) and not ferien[0] <= t <= ferien[1]:
+        if not ferien[0] <= t <= ferien[1]:
             yield t
-        t += dt.timedelta(days=1)
+        t += dt.timedelta(days=7)
 
 
 def klasse(k):
     zufall = random.Random(k["zufall"])
-    tage = list(wochenenden(k["herbstferien"]))
+    tage = list(sonntage(k["herbstferien"]))
     teams = []
     for name, nummer, verein, mannschaftsnummer, halle in k["mannschaften"]:
         heim, sperren = set(), set()
@@ -84,7 +84,7 @@ def klasse(k):
                 sperren.add(t)
         spiele = "".join(
             f'<homeGame secondary="false" courtHall="{halle}" maxParallelGames="2" day="{t:%d.%m.%Y}" '
-            f'time="{"15:00" if t.weekday() == 5 else "11:00"}" /> '
+            f'time="11:00" /> '
             for t in sorted(heim))
         frei = "".join(f'<noGame from="{t:%d.%m.%Y}" until="{t:%d.%m.%Y}" /> ' for t in sorted(sperren))
         teams.append(f"""
@@ -113,7 +113,7 @@ def klasse(k):
     ziel = ORDNER / (k["name"] + ".xml")
     ziel.parent.mkdir(parents=True, exist_ok=True)
     ziel.write_bytes(text.replace("\n", "\r\n").encode("iso-8859-15"))
-    print(f"{ziel}: {len(k['mannschaften'])} Mannschaften, {len(tage)} Wochenendtage")
+    print(f"{ziel}: {len(k['mannschaften'])} Mannschaften, {len(tage)} Sonntage")
 
 
 if __name__ == "__main__":

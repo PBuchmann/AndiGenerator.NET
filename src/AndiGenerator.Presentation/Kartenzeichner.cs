@@ -249,7 +249,7 @@ public sealed class Kartenzeichner(IZeichenflaeche f)
         {
             double x = halle.Punkt.X * s;
             double y = halle.Punkt.Y * s;
-            string text = halle.Ort.Beschriftung;
+            string text = Textkuerzung.Kuerzen(f, halle.Ort.Beschriftung, Textkuerzung.Namensbreite, 12, true);
             double w = f.TextBreite(text, 12, true) + 6;
             (double X, double Y)? lage = Erste(NaheLagen(x, y, w, H), w);
             bool leitlinie = false;
@@ -263,7 +263,7 @@ public sealed class Kartenzeichner(IZeichenflaeche f)
             {
                 // Kein Platz für den Namen: eine Nummer am Punkt, der Name steht in der Legende.
                 text = (nummeriert.Count + 1).ToString(Deutsch);
-                nummeriert.Add((text, halle.Ort.Beschriftung));
+                nummeriert.Add((text, Textkuerzung.Kuerzen(f, halle.Ort.Beschriftung, Textkuerzung.Namensbreite, 11, false)));
                 w = f.TextBreite(text, 12, true) + 6;
                 lage = Erste(NaheLagen(x, y, w, H), w)
                     ?? (Math.Clamp(x + 9, 2, Math.Max(2, breite - 2 - w)), Math.Clamp(y - 10, 2, Math.Max(2, hoehe - 2 - H)));

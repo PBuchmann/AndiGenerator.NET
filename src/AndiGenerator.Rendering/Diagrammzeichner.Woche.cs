@@ -144,7 +144,7 @@ public sealed partial class Diagrammzeichner
     private void Wochenzeile(Diagrammmannschaft m, Wochenstatistik w, int index, double oben, double rechts)
     {
         double mitte = oben + (Wochenhoehe / 2);
-        Text(m.Name, 0, mitte - 8);
+        Name(m.Name, mitte - 8);
         IReadOnlyList<int> spiele = w.Spiele[index];
         Mannschaftsverstoesse? v = d.Verstoesse?.Von(m.Name);
         bool zaehlt = d.Verstoesse is null || v?.ZweiSpieleProWoche is not null;

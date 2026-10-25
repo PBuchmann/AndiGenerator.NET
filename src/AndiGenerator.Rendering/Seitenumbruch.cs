@@ -226,11 +226,11 @@ public sealed class Seitenumbruch
             if (layout.Senkrecht(s))
             {
                 double mitte = x + (layout.Inhaltsbreite(s) / 2);
-                elemente.Add(new SenkrechtElement(kopf[s], mitte - (layout.Groesse * 0.6), unten - 3, layout.Groesse, Farbe.Grau));
+                elemente.Add(new SenkrechtElement(layout.Kopftext(s), mitte - (layout.Groesse * 0.6), unten - 3, layout.Groesse, Farbe.Grau));
             }
             else
             {
-                elemente.Add(new TextElement(kopf[s], x, unten - layout.Zeilenhoehe, layout.Groesse, Farbe.Grau, true));
+                elemente.Add(new TextElement(layout.Kopftext(s), x, unten - layout.Zeilenhoehe, layout.Groesse, Farbe.Grau, true));
             }
         }
 
@@ -245,7 +245,8 @@ public sealed class Seitenumbruch
         {
             double groesse = layout.Groesse * 1.15;
             y += layout.Zeilenhoehe * 0.3;
-            elemente.Add(new TextElement(zeile.Zellen.Count > 0 ? zeile.Zellen[0].Text : string.Empty, format.Rand, y, groesse, zeile.Farbe, true));
+            string ueberschrift = zeile.Zellen.Count > 0 ? zeile.Zellen[0].Text : string.Empty;
+            elemente.Add(new TextElement(Textkuerzung.Kuerzen(messung, ueberschrift, format.Nutzbreite, groesse, true), format.Rand, y, groesse, zeile.Farbe, true));
             y += groesse * Zeilenfaktor;
             return;
         }

@@ -26,7 +26,7 @@ public sealed record Druckseite(string Abschnitt, IReadOnlyList<IDruckelement> E
         ArgumentNullException.ThrowIfNull(format);
         double links = format.Rand;
         double rechts = format.Breite - format.Rand;
-        flaeche.Text(Abschnitt, links, format.Rand, 14, Farbe.Tinte, true);
+        flaeche.Text(Textkuerzung.Kuerzen(flaeche, Abschnitt, rechts - links, 14, true), links, format.Rand, 14, Farbe.Tinte, true);
         double linie = format.Rand + 22;
         flaeche.Linie(links, linie, rechts, linie, Farbe.Linie, 0.8);
         flaeche.Linie(links, linie, links + 36, linie, Farbe.Akzent, 2);
@@ -39,8 +39,9 @@ public sealed record Druckseite(string Abschnitt, IReadOnlyList<IDruckelement> E
         double fuss = format.Hoehe - format.Rand - 8;
         flaeche.Linie(links, fuss - 4, rechts, fuss - 4, Farbe.Linie, 0.5);
         string angaben = string.Join(" · ", new[] { dokument.Staffel, dokument.Plan, dokument.Erstellt.ToString("dd.MM.yyyy HH:mm", Deutsch) }.Where(t => t.Length > 0));
-        flaeche.Text(angaben, links, fuss, 7, Farbe.Grau, false);
         string seite = string.Create(Deutsch, $"Seite {nummer} von {anzahl}");
-        flaeche.Text(seite, rechts - flaeche.TextBreite(seite, 7, false), fuss, 7, Farbe.Grau, false);
+        double seitenbreite = flaeche.TextBreite(seite, 7, false);
+        flaeche.Text(Textkuerzung.Kuerzen(flaeche, angaben, rechts - links - seitenbreite - 12, 7, false), links, fuss, 7, Farbe.Grau, false);
+        flaeche.Text(seite, rechts - seitenbreite, fuss, 7, Farbe.Grau, false);
     }
 }

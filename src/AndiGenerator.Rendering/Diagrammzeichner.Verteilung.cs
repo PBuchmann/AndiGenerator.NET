@@ -163,7 +163,7 @@ public sealed partial class Diagrammzeichner
 
     private void Verteilungszeile(string name, IReadOnlyList<(DateOnly Tag, IReadOnlyList<Diagrammspiel> Spiele)> tage, double mitte, double rechts)
     {
-        Text(name, 0, mitte - 8);
+        Name(name, mitte - 8);
         if (tage.Count == 0)
         {
             return;

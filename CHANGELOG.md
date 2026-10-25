@@ -76,6 +76,7 @@ Die letzte Vorabversion vor 1.0: Alle Diagramme und die Übersicht der Terminwü
 
 ### Behoben
 
+- **Sehr lange Mannschaftsnamen** (z. B. mit Sponsor und Abteilung) sprengen weder die Ansichten noch den Ausdruck: In Terminplan, Mannschaftsplänen, Meldungen, Terminwünschen, Kompaktspieltagen (Raster, Karte, km je Mannschaft), Diagrammen und PDF-Tabellen werden sie mit „…“ gekürzt; der Hinweis beim Darauf-Zeigen nennt den vollen Namen. PDF-Tabellen werden dadurch nicht mehr insgesamt verkleinert, Überschriften und Fußzeilen laufen nicht mehr über den Rand.
 - **Terminwünsche laden:** Eine nicht (mehr) vorhandene PDF-Datei beendete das Programm mit einem Fehler; jetzt steht der Hinweis auf der Seite „Daten aus click-TT“.
 - **Kompaktspieltage:** Eine verspätete Fortschrittsmeldung überschrieb nach dem Ende der Berechnung das Ergebnis in der Statuszeile.
 - **Hinweise in den Diagrammen:** Der Kasten ist jetzt breit genug für die fette erste Zeile; sie ragte oft ein, zwei Zeichen über den Rand.

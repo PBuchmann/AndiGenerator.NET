@@ -132,7 +132,7 @@ public sealed class Terminwunschzeichner
     private void Mannschaft(MannschaftsTerminwuensche m, double oben, DateOnly montag, int wochen)
     {
         double hoehe = 7 * (Tageshoehe + Tagesluecke);
-        Text(m.Name, 0, oben + (hoehe / 2) - 8, Schrift, Farbe.Tinte);
+        Text(Textkuerzung.Kuerzen(f, m.Name, NamenBreite - 24, Schrift, false), 0, oben + (hoehe / 2) - 8, Schrift, Farbe.Tinte);
         foreach (int d in new[] { 0, 5, 6 })
         {
             Text(Wochentage[d], NamenBreite - 16, oben + (d * (Tageshoehe + Tagesluecke)) - 3, Klein - 1, Farbe.Grau);

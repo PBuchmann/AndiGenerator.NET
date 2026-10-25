@@ -168,6 +168,9 @@ public sealed partial class Diagrammzeichner
     private void Text(string text, double x, double y, double groesse = Normal, Farbe? farbe = null) =>
         f?.Text(text, x, y, groesse, farbe ?? Tinte, false);
 
+    /// <summary>Schreibt einen Mannschaftsnamen in die linke Spalte, bei Bedarf gekürzt, damit er nicht ins Diagramm läuft.</summary>
+    private void Name(string name, double y) => Text(Textkuerzung.Kuerzen(f, name, Links - 16, Normal, false), 0, y);
+
     private void Linie(Farbe farbe, double x1, double y1, double x2, double y2, double staerke = 1) => f?.Linie(x1, y1, x2, y2, farbe, staerke);
 
     private void Rechteck(Farbe farbe, double x1, double y1, double x2, double y2) => f?.Rechteck(x1, y1, x2 - x1, y2 - y1, farbe);

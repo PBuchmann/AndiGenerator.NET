@@ -11,7 +11,7 @@
       <team gender="Jugend 19" clubId="92001" number="1" id="3146940">
         <name>TTC G.-W. Staffel 1953</name>
         <gameDays>
-           <homeGame secondary="false" courtHall="Sporthalle Staffel" maxParallelGames="2" day="19.09.2026" time="15:00" /> <homeGame secondary="false" courtHall="Sporthalle Staffel" maxParallelGames="2" day="04.10.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Staffel" maxParallelGames="2" day="08.11.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Staffel" maxParallelGames="2" day="14.11.2026" time="15:00" /> <homeGame secondary="false" courtHall="Sporthalle Staffel" maxParallelGames="2" day="29.11.2026" time="11:00" /> <noGame from="12.09.2026" until="12.09.2026" /> <noGame from="20.09.2026" until="20.09.2026" /> <noGame from="25.10.2026" until="25.10.2026" /> 
+           <homeGame secondary="false" courtHall="Sporthalle Staffel" maxParallelGames="2" day="20.09.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Staffel" maxParallelGames="2" day="04.10.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Staffel" maxParallelGames="2" day="25.10.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Staffel" maxParallelGames="2" day="08.11.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Staffel" maxParallelGames="2" day="29.11.2026" time="11:00" /> <noGame from="13.09.2026" until="13.09.2026" /> <noGame from="18.10.2026" until="18.10.2026" /> <noGame from="15.11.2026" until="15.11.2026" /> 
         </gameDays>
         <sisterTeams>
         </sisterTeams>
@@ -19,7 +19,7 @@
       <team gender="Jugend 19" clubId="92002" number="1" id="3155427">
         <name>TV Eschersheim 1895</name>
         <gameDays>
-           <homeGame secondary="false" courtHall="Sporthalle Eschersheim" maxParallelGames="2" day="13.09.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Eschersheim" maxParallelGames="2" day="18.10.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Eschersheim" maxParallelGames="2" day="24.10.2026" time="15:00" /> <homeGame secondary="false" courtHall="Sporthalle Eschersheim" maxParallelGames="2" day="21.11.2026" time="15:00" /> <homeGame secondary="false" courtHall="Sporthalle Eschersheim" maxParallelGames="2" day="22.11.2026" time="11:00" /> <noGame from="03.10.2026" until="03.10.2026" /> <noGame from="25.10.2026" until="25.10.2026" /> <noGame from="29.11.2026" until="29.11.2026" /> 
+           <homeGame secondary="false" courtHall="Sporthalle Eschersheim" maxParallelGames="2" day="13.09.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Eschersheim" maxParallelGames="2" day="04.10.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Eschersheim" maxParallelGames="2" day="18.10.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Eschersheim" maxParallelGames="2" day="22.11.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Eschersheim" maxParallelGames="2" day="29.11.2026" time="11:00" /> <noGame from="25.10.2026" until="25.10.2026" /> <noGame from="08.11.2026" until="08.11.2026" /> <noGame from="15.11.2026" until="15.11.2026" /> 
         </gameDays>
         <sisterTeams>
         </sisterTeams>
@@ -27,7 +27,7 @@
       <team gender="Jugend 19" clubId="92003" number="1" id="3143021">
         <name>TV 1874 Bergen-Enkheim</name>
         <gameDays>
-           <homeGame secondary="false" courtHall="Sporthalle Bergen-Enkheim" maxParallelGames="2" day="18.10.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Bergen-Enkheim" maxParallelGames="2" day="08.11.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Bergen-Enkheim" maxParallelGames="2" day="15.11.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Bergen-Enkheim" maxParallelGames="2" day="22.11.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Bergen-Enkheim" maxParallelGames="2" day="28.11.2026" time="15:00" /> <noGame from="13.09.2026" until="13.09.2026" /> <noGame from="01.11.2026" until="01.11.2026" /> <noGame from="21.11.2026" until="21.11.2026" /> 
+           <homeGame secondary="false" courtHall="Sporthalle Bergen-Enkheim" maxParallelGames="2" day="13.09.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Bergen-Enkheim" maxParallelGames="2" day="27.09.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Bergen-Enkheim" maxParallelGames="2" day="01.11.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Bergen-Enkheim" maxParallelGames="2" day="15.11.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Bergen-Enkheim" maxParallelGames="2" day="29.11.2026" time="11:00" /> <noGame from="20.09.2026" until="20.09.2026" /> <noGame from="04.10.2026" until="04.10.2026" /> <noGame from="25.10.2026" until="25.10.2026" /> 
         </gameDays>
         <sisterTeams>
         </sisterTeams>
@@ -35,7 +35,7 @@
       <team gender="Jugend 19" clubId="92004" number="1" id="3155928">
         <name>SV Darmstadt 98</name>
         <gameDays>
-           <homeGame secondary="false" courtHall="Sporthalle Darmstadt" maxParallelGames="2" day="20.09.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Darmstadt" maxParallelGames="2" day="27.09.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Darmstadt" maxParallelGames="2" day="03.10.2026" time="15:00" /> <homeGame secondary="false" courtHall="Sporthalle Darmstadt" maxParallelGames="2" day="25.10.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Darmstadt" maxParallelGames="2" day="29.11.2026" time="11:00" /> <noGame from="19.09.2026" until="19.09.2026" /> <noGame from="24.10.2026" until="24.10.2026" /> <noGame from="15.11.2026" until="15.11.2026" /> 
+           <homeGame secondary="false" courtHall="Sporthalle Darmstadt" maxParallelGames="2" day="20.09.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Darmstadt" maxParallelGames="2" day="04.10.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Darmstadt" maxParallelGames="2" day="18.10.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Darmstadt" maxParallelGames="2" day="15.11.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Darmstadt" maxParallelGames="2" day="29.11.2026" time="11:00" /> <noGame from="13.09.2026" until="13.09.2026" /> <noGame from="01.11.2026" until="01.11.2026" /> <noGame from="22.11.2026" until="22.11.2026" /> 
         </gameDays>
         <sisterTeams>
         </sisterTeams>
@@ -43,7 +43,7 @@
       <team gender="Jugend 19" clubId="92005" number="1" id="3150705">
         <name>TTC OE Clarity Telefonie-Systeme Bad Homburg e.V.</name>
         <gameDays>
-           <homeGame secondary="false" courtHall="Sporthalle Bad Homburg" maxParallelGames="2" day="13.09.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Bad Homburg" maxParallelGames="2" day="03.10.2026" time="15:00" /> <homeGame secondary="false" courtHall="Sporthalle Bad Homburg" maxParallelGames="2" day="31.10.2026" time="15:00" /> <homeGame secondary="false" courtHall="Sporthalle Bad Homburg" maxParallelGames="2" day="01.11.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Bad Homburg" maxParallelGames="2" day="22.11.2026" time="11:00" /> <noGame from="20.09.2026" until="20.09.2026" /> <noGame from="07.11.2026" until="07.11.2026" /> <noGame from="14.11.2026" until="14.11.2026" /> 
+           <homeGame secondary="false" courtHall="Sporthalle Bad Homburg" maxParallelGames="2" day="13.09.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Bad Homburg" maxParallelGames="2" day="20.09.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Bad Homburg" maxParallelGames="2" day="25.10.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Bad Homburg" maxParallelGames="2" day="01.11.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Bad Homburg" maxParallelGames="2" day="08.11.2026" time="11:00" /> <noGame from="18.10.2026" until="18.10.2026" /> <noGame from="15.11.2026" until="15.11.2026" /> <noGame from="29.11.2026" until="29.11.2026" /> 
         </gameDays>
         <sisterTeams>
         </sisterTeams>
@@ -51,7 +51,7 @@
       <team gender="Jugend 19" clubId="92006" number="1" id="3152914">
         <name>TTC 1957 Lampertheim</name>
         <gameDays>
-           <homeGame secondary="false" courtHall="Sporthalle Lampertheim" maxParallelGames="2" day="20.09.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Lampertheim" maxParallelGames="2" day="18.10.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Lampertheim" maxParallelGames="2" day="08.11.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Lampertheim" maxParallelGames="2" day="15.11.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Lampertheim" maxParallelGames="2" day="29.11.2026" time="11:00" /> <noGame from="13.09.2026" until="13.09.2026" /> <noGame from="03.10.2026" until="03.10.2026" /> <noGame from="31.10.2026" until="31.10.2026" /> 
+           <homeGame secondary="false" courtHall="Sporthalle Lampertheim" maxParallelGames="2" day="13.09.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Lampertheim" maxParallelGames="2" day="27.09.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Lampertheim" maxParallelGames="2" day="04.10.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Lampertheim" maxParallelGames="2" day="25.10.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Lampertheim" maxParallelGames="2" day="29.11.2026" time="11:00" /> <noGame from="18.10.2026" until="18.10.2026" /> <noGame from="01.11.2026" until="01.11.2026" /> <noGame from="08.11.2026" until="08.11.2026" /> 
         </gameDays>
         <sisterTeams>
         </sisterTeams>
@@ -59,7 +59,7 @@
       <team gender="Jugend 19" clubId="92007" number="1" id="3144406">
         <name>TV Niederrad</name>
         <gameDays>
-           <homeGame secondary="false" courtHall="Sporthalle Niederrad" maxParallelGames="2" day="13.09.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Niederrad" maxParallelGames="2" day="27.09.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Niederrad" maxParallelGames="2" day="24.10.2026" time="15:00" /> <homeGame secondary="false" courtHall="Sporthalle Niederrad" maxParallelGames="2" day="01.11.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Niederrad" maxParallelGames="2" day="08.11.2026" time="11:00" /> <noGame from="31.10.2026" until="31.10.2026" /> <noGame from="07.11.2026" until="07.11.2026" /> <noGame from="21.11.2026" until="21.11.2026" /> 
+           <homeGame secondary="false" courtHall="Sporthalle Niederrad" maxParallelGames="2" day="20.09.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Niederrad" maxParallelGames="2" day="18.10.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Niederrad" maxParallelGames="2" day="25.10.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Niederrad" maxParallelGames="2" day="01.11.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Niederrad" maxParallelGames="2" day="15.11.2026" time="11:00" /> <noGame from="13.09.2026" until="13.09.2026" /> <noGame from="27.09.2026" until="27.09.2026" /> <noGame from="08.11.2026" until="08.11.2026" /> 
         </gameDays>
         <sisterTeams>
         </sisterTeams>
@@ -67,7 +67,7 @@
       <team gender="Jugend 19" clubId="92008" number="1" id="3150546">
         <name>TSV 1907 Allendorf/Lda</name>
         <gameDays>
-           <homeGame secondary="false" courtHall="Sporthalle Allendorf" maxParallelGames="2" day="19.09.2026" time="15:00" /> <homeGame secondary="false" courtHall="Sporthalle Allendorf" maxParallelGames="2" day="26.09.2026" time="15:00" /> <homeGame secondary="false" courtHall="Sporthalle Allendorf" maxParallelGames="2" day="18.10.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Allendorf" maxParallelGames="2" day="08.11.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Allendorf" maxParallelGames="2" day="15.11.2026" time="11:00" /> <noGame from="13.09.2026" until="13.09.2026" /> <noGame from="14.11.2026" until="14.11.2026" /> <noGame from="22.11.2026" until="22.11.2026" /> 
+           <homeGame secondary="false" courtHall="Sporthalle Allendorf" maxParallelGames="2" day="27.09.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Allendorf" maxParallelGames="2" day="18.10.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Allendorf" maxParallelGames="2" day="01.11.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Allendorf" maxParallelGames="2" day="08.11.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Allendorf" maxParallelGames="2" day="22.11.2026" time="11:00" /> <noGame from="04.10.2026" until="04.10.2026" /> <noGame from="25.10.2026" until="25.10.2026" /> <noGame from="15.11.2026" until="15.11.2026" /> 
         </gameDays>
         <sisterTeams>
         </sisterTeams>
@@ -75,7 +75,7 @@
       <team gender="Jugend 19" clubId="92009" number="1" id="3154439">
         <name>TTC Langen 1950</name>
         <gameDays>
-           <homeGame secondary="false" courtHall="Sporthalle Langen" maxParallelGames="2" day="27.09.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Langen" maxParallelGames="2" day="31.10.2026" time="15:00" /> <homeGame secondary="false" courtHall="Sporthalle Langen" maxParallelGames="2" day="01.11.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Langen" maxParallelGames="2" day="22.11.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Langen" maxParallelGames="2" day="28.11.2026" time="15:00" /> <noGame from="04.10.2026" until="04.10.2026" /> <noGame from="18.10.2026" until="18.10.2026" /> <noGame from="14.11.2026" until="14.11.2026" /> 
+           <homeGame secondary="false" courtHall="Sporthalle Langen" maxParallelGames="2" day="20.09.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Langen" maxParallelGames="2" day="04.10.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Langen" maxParallelGames="2" day="25.10.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Langen" maxParallelGames="2" day="08.11.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Langen" maxParallelGames="2" day="22.11.2026" time="11:00" /> <noGame from="27.09.2026" until="27.09.2026" /> <noGame from="15.11.2026" until="15.11.2026" /> <noGame from="29.11.2026" until="29.11.2026" /> 
         </gameDays>
         <sisterTeams>
         </sisterTeams>
@@ -83,7 +83,7 @@
       <team gender="Jugend 19" clubId="92010" number="1" id="3153269">
         <name>Neuenhainer TTV 1955</name>
         <gameDays>
-           <homeGame secondary="false" courtHall="Sporthalle Neuenhain" maxParallelGames="2" day="26.09.2026" time="15:00" /> <homeGame secondary="false" courtHall="Sporthalle Neuenhain" maxParallelGames="2" day="18.10.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Neuenhain" maxParallelGames="2" day="01.11.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Neuenhain" maxParallelGames="2" day="21.11.2026" time="15:00" /> <homeGame secondary="false" courtHall="Sporthalle Neuenhain" maxParallelGames="2" day="28.11.2026" time="15:00" /> <noGame from="19.09.2026" until="19.09.2026" /> <noGame from="20.09.2026" until="20.09.2026" /> <noGame from="14.11.2026" until="14.11.2026" /> 
+           <homeGame secondary="false" courtHall="Sporthalle Neuenhain" maxParallelGames="2" day="27.09.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Neuenhain" maxParallelGames="2" day="04.10.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Neuenhain" maxParallelGames="2" day="18.10.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Neuenhain" maxParallelGames="2" day="22.11.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Neuenhain" maxParallelGames="2" day="29.11.2026" time="11:00" /> <noGame from="13.09.2026" until="13.09.2026" /> <noGame from="08.11.2026" until="08.11.2026" /> <noGame from="15.11.2026" until="15.11.2026" /> 
         </gameDays>
         <sisterTeams>
         </sisterTeams>

@@ -139,7 +139,9 @@ public sealed class DruckTests
     {
         string lang = string.Join(' ', Enumerable.Repeat("Wort", 60));
         var gefuellt = new Tabellenzelle("teuer", new Farbe(255, 128, 128));
-        var verkleinert = new Tabelle(null, [new Tabellenzeile([new Tabellenzelle("links"), new Tabellenzelle(lang)], Farbe.Tinte)], 10);
+
+        // Viele mittelbreite Spalten: zusammen zu breit, keine einzelne über der Höchstbreite.
+        var verkleinert = new Tabelle(null, [new Tabellenzeile([new Tabellenzelle("links"), .. Enumerable.Repeat(new Tabellenzelle("Wort Wort Wort Wort Wort"), 9)], Farbe.Tinte)], 10);
         var umbrechend = new Tabelle(null, [new Tabellenzeile([gefuellt, new Tabellenzelle(lang)], Farbe.Akzent, Fett: true)], 10, LetzteSpalteUmbrechen: true);
         var dokument = Dokument(new Abschnitt("T", [verkleinert, umbrechend]));
 
@@ -147,13 +149,35 @@ public sealed class DruckTests
 
         List<TextElement> texte = seite.Elemente.OfType<TextElement>().ToList();
         Assert.True(texte[0].Groesse < 10);
-        Assert.Equal(texte[0].Groesse, texte[1].Groesse);
-        Assert.All(texte.Skip(2), t => Assert.Equal(10, t.Groesse));
-        Assert.True(texte.Count > 4);
-        Assert.All(texte.Skip(2), t => Assert.True(t.Fett && t.Farbe == Farbe.Akzent));
+        Assert.All(texte.Take(10), t => Assert.Equal(texte[0].Groesse, t.Groesse));
+        Assert.All(texte.Take(10), t => Assert.DoesNotContain("…", t.Text, StringComparison.Ordinal));
+        texte = texte.Skip(10).ToList();
+        Assert.All(texte, t => Assert.Equal(10, t.Groesse));
+        Assert.True(texte.Count > 2);
+        Assert.All(texte, t => Assert.True(t.Fett && t.Farbe == Farbe.Akzent));
         RechteckElement rechteck = Assert.Single(seite.Elemente.OfType<RechteckElement>());
         Assert.Equal(new Farbe(255, 128, 128), rechteck.Farbe);
         Assert.True(rechteck.Hoehe > 13);
+    }
+
+    [Fact]
+    public void Ein_sehr_langer_Text_wird_gekuerzt_statt_die_Tabelle_zu_verkleinern()
+    {
+        string lang = "TTC OE Clarity Telefonie-Systeme Bad Homburg e.V. Tischtennisabteilung der Spielgemeinschaft Taunus-Main-Kinzig";
+        var tabelle = new Tabelle(["Datum", "Heim", "Gast"], [new Tabellenzeile([new Tabellenzelle("Sa 12.09.2026"), new Tabellenzelle(lang), new Tabellenzelle("TV Niederrad")], Farbe.Tinte)], 10);
+        var dokument = Dokument(new Abschnitt("Spielplan – " + lang + " " + lang, [tabelle, new Tabelle(null, [new Tabellenzeile([new Tabellenzelle(lang + " " + lang)], Farbe.Tinte, Art: Zeilenart.Ueberschrift)], 10)]));
+
+        Druckseite seite = Assert.Single(Seitenumbruch.Umbrechen(dokument, Hoch, Messung));
+
+        List<TextElement> texte = seite.Elemente.OfType<TextElement>().ToList();
+        Assert.All(texte, t => Assert.True(t.Groesse >= 10));
+        Assert.Contains(texte, t => t.Text == "Sa 12.09.2026");
+        Assert.Contains(texte, t => t.Text == "TV Niederrad");
+        TextElement heim = Assert.Single(texte, t => t.Text.StartsWith("TTC OE", StringComparison.Ordinal) && !t.Fett);
+        Assert.EndsWith("…", heim.Text, StringComparison.Ordinal);
+        Assert.True(Messung.TextBreite(heim.Text, 10, false) <= Textkuerzung.Namensbreite * 10 / 11);
+        TextElement ueberschrift = Assert.Single(texte, t => t.Fett && t.Text.StartsWith("TTC OE", StringComparison.Ordinal));
+        Assert.True(Messung.TextBreite(ueberschrift.Text, ueberschrift.Groesse, true) <= Hoch.Nutzbreite);
     }
 
     [Fact]

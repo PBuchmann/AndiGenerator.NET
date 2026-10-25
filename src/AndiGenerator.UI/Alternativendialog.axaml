@@ -133,7 +133,7 @@
                       <DataTemplate x:DataType="p:Unterschiedsgruppe">
                         <StackPanel Spacing="2" Margin="0,4,0,4">
                           <Grid ColumnDefinitions="*,Auto">
-                            <TextBlock Text="{Binding Name}" FontSize="12" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                            <TextBlock ToolTip.Tip="{Binding Name}" Classes="mannschaft" Text="{Binding Name}" FontSize="12" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
                             <TextBlock Grid.Column="1" Text="{Binding Anzahl}" FontSize="11" Foreground="{StaticResource Tinte2}" Margin="8,0,0,0" />
                           </Grid>
                           <ItemsControl ItemsSource="{Binding Zeilen}">

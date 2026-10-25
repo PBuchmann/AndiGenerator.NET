@@ -32,18 +32,6 @@ public sealed partial class Diagrammzeichner
         return string.Join(Environment.NewLine, zeilen);
     }
 
-    /// <summary>Kürzt einen Text auf eine Breite (geschätzt) mit „…“.</summary>
-    private static string Kuerzen(string text, double breite, double groesse)
-    {
-        if (Schaetzen(text, groesse) <= breite)
-        {
-            return text;
-        }
-
-        int zeichen = Math.Max(1, (int)(breite / (groesse * 0.58)) - 1);
-        return string.Concat(text.AsSpan(0, Math.Min(zeichen, text.Length)), "…");
-    }
-
     /// <summary>Die Rahmen beim Überfahren: um die Karten aller Mannschaften, die an diesem Tag zusammen spielen.</summary>
     private static List<Diagrammmarke> Tagesrahmen(Ausrichtertag t, Dictionary<(DateOnly Tag, string Name), (double X, double Y)> karten) =>
         t.Spiele
@@ -98,7 +86,7 @@ public sealed partial class Diagrammzeichner
             }
 
             double mitte = oben + (Zeilenabstand / 2);
-            Text(name, 0, mitte - 8);
+            Name(name, mitte - 8);
             List<Ausrichtertag> eigene = tage.Where(t => Spielt(t, name)).ToList();
             foreach (Ausrichtertag t in eigene)
             {
@@ -131,7 +119,7 @@ public sealed partial class Diagrammzeichner
         double mitte = y + (Kartenhoehe / 2);
         Text(t.Tag.ToString("dd.MM.", Deutsch), x + 8, mitte - 7, Klein + 1, richtetAus ? Blasstext : Beschriftung);
         string ort = richtetAus ? "Ausrichter" : "in " + (t.Ausrichter ?? "Halle offen");
-        f?.Text(Kuerzen(ort, Kartenbreite - 52 - 8, Normal), x + 52, mitte - 8, Normal, richtetAus ? Weiss : Tinte, richtetAus);
+        f?.Text(Textkuerzung.Kuerzen(f, ort, Kartenbreite - 52 - 8, Normal, richtetAus), x + 52, mitte - 8, Normal, richtetAus ? Weiss : Tinte, richtetAus);
     }
 
     private void Rahmen(double links, double oben, double rechts, double unten, Farbe farbe, double staerke) =>

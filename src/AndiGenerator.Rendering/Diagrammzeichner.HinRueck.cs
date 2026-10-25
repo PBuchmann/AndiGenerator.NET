@@ -109,7 +109,7 @@ public sealed partial class Diagrammzeichner
     private void Streifen(Diagrammmannschaft m, double oben, int bis, double rechts)
     {
         double mitte = oben + (Streifenhoehe / 2);
-        Text(m.Name, 0, mitte - 8);
+        Name(m.Name, mitte - 8);
         List<Abstandslinie> linien = m.Abstaende.SelectMany(z => z).ToList();
         if (linien.Count == 0)
         {

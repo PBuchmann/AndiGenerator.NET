@@ -98,6 +98,11 @@
     <Setter Property="FontSize" Value="12" />
     <Setter Property="Foreground" Value="{StaticResource Grau}" />
   </Style>
+  <!-- Mannschaftsnamen: sehr lange Namen (z. B. mit Sponsor) werden mit „…“ gekürzt, der Hinweis zeigt den vollen Namen -->
+  <Style Selector="TextBlock.mannschaft">
+    <Setter Property="MaxWidth" Value="260" />
+    <Setter Property="TextTrimming" Value="CharacterEllipsis" />
+  </Style>
   <Style Selector="TextBlock.ziffer">
     <Setter Property="FontFamily" Value="{StaticResource Ziffernschrift}" />
   </Style>

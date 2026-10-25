@@ -131,7 +131,8 @@ public static class Kompaktdruck
     /// <summary>
     /// Ein Mannschaftsname für den senkrechten Rasterkopf: bis 15 Zeichen eine Zeile, sonst zwei – geteilt nach „/“, „-“ oder
     /// an einem Leerzeichen, und zwar dort, wo die längere Hälfte am kürzesten ist (Peter, 14.10.2026), z. B.
-    /// „TTG Mündersbach/“ und „Höchstenbach“. Ohne solche Stelle bleibt es bei einer Zeile.
+    /// „TTG Mündersbach/“ und „Höchstenbach“. Ohne solche Stelle bleibt es bei einer Zeile. Jede Zeile hat höchstens 22 Zeichen
+    /// (sonst mit „…“ gekürzt), damit sehr lange Namen den Kopf nicht beliebig hoch machen.
     /// </summary>
     /// <param name="name">Der Mannschaftsname.</param>
     /// <returns>Eine oder zwei Zeilen.</returns>
@@ -139,6 +140,8 @@ public static class Kompaktdruck
     {
         ArgumentNullException.ThrowIfNull(name);
         const int Einzeilig = 15;
+        const int Zeichen = 22;
+        static string Kurz(string zeile) => zeile.Length <= Zeichen ? zeile : zeile[..(Zeichen - 1)].TrimEnd() + "…";
         if (name.Length <= Einzeilig)
         {
             return [name];
@@ -152,11 +155,11 @@ public static class Kompaktdruck
             .ToList();
         if (stellen.Count == 0)
         {
-            return [name];
+            return [Kurz(name)];
         }
 
         (string erste, string zweite) = stellen.MinBy(t => Math.Max(t.Erste.Length, t.Zweite.Length));
-        return [erste.TrimEnd(), zweite.TrimStart()];
+        return [Kurz(erste.TrimEnd()), Kurz(zweite.TrimStart())];
     }
 
     /// <summary>„km je Mannschaft“ wie in der Ansicht: je Mannschaft Ausrichtungen, ein Balken und die km, die weiteste zuerst.</summary>
@@ -181,8 +184,9 @@ public static class Kompaktdruck
                     ? string.Create(Deutsch, $"{m.Ausgerichtet}× Ausrichter, {m.EinzelHeim}× Einzel zuhause")
                     : string.Create(Deutsch, $"{m.Ausgerichtet}× Ausrichter");
 
-                // Spalten nach den gemessenen Namen (volle Mannschaftsnamen sind unterschiedlich lang), Balken bis vor die km.
-                double xAusrichter = Math.Max(140, liste.Select(m => f.TextBreite(m.Name, 11, false)).DefaultIfEmpty(0).Max() + 12);
+                // Spalten nach den gemessenen Namen (volle Mannschaftsnamen sind unterschiedlich lang, sehr lange gekürzt), Balken bis vor die km.
+                double namensbreite = Math.Min(Textkuerzung.Namensbreite, liste.Select(m => f.TextBreite(m.Name, 11, false)).DefaultIfEmpty(0).Max());
+                double xAusrichter = Math.Max(140, namensbreite + 12);
                 double xBalken = Math.Max(350, xAusrichter + liste.Select(m => f.TextBreite(Ausrichter(m), 10, false)).DefaultIfEmpty(0).Max() + 12);
                 double balken = Math.Max(30, Math.Min(120, Kartenbreite - 50 - xBalken));
                 for (int i = 0; i < liste.Count; i++)
@@ -190,7 +194,7 @@ public static class Kompaktdruck
                     Kompaktmannschaft m = liste[i];
                     double y = Kopf + (i * Zeile);
                     string km = m.Km.ToString("N0", Deutsch);
-                    f.Text(m.Name, 0, y, 11, Farbe.Tinte, false);
+                    f.Text(Textkuerzung.Kuerzen(f, m.Name, namensbreite, 11, false), 0, y, 11, Farbe.Tinte, false);
                     f.Text(Ausrichter(m), xAusrichter, y + 1, 10, Farbe.Tinte2, false);
                     f.Rechteck(xBalken, y + 4, balken * m.Km / weiteste, 7, Farbe.Akzent);
                     f.Text(km, Kartenbreite - f.TextBreite(km, 11, false), y, 11, Farbe.Tinte, false);

@@ -11,7 +11,7 @@
       <team gender="Jugend 19" clubId="92021" number="1" id="3105642">
         <name>DJK Roland Rauxel</name>
         <gameDays>
-           <homeGame secondary="false" courtHall="Sporthalle Rauxel" maxParallelGames="2" day="12.09.2026" time="15:00" /> <homeGame secondary="false" courtHall="Sporthalle Rauxel" maxParallelGames="2" day="27.09.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Rauxel" maxParallelGames="2" day="10.10.2026" time="15:00" /> <homeGame secondary="false" courtHall="Sporthalle Rauxel" maxParallelGames="2" day="11.10.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Rauxel" maxParallelGames="2" day="14.11.2026" time="15:00" /> <noGame from="13.09.2026" until="13.09.2026" /> <noGame from="15.11.2026" until="15.11.2026" /> <noGame from="21.11.2026" until="21.11.2026" /> 
+           <homeGame secondary="false" courtHall="Sporthalle Rauxel" maxParallelGames="2" day="13.09.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Rauxel" maxParallelGames="2" day="27.09.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Rauxel" maxParallelGames="2" day="11.10.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Rauxel" maxParallelGames="2" day="15.11.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Rauxel" maxParallelGames="2" day="22.11.2026" time="11:00" /> <noGame from="20.09.2026" until="20.09.2026" /> <noGame from="08.11.2026" until="08.11.2026" /> <noGame from="29.11.2026" until="29.11.2026" /> 
         </gameDays>
         <sisterTeams>
         </sisterTeams>
@@ -19,7 +19,7 @@
       <team gender="Jugend 19" clubId="92022" number="1" id="3108782">
         <name>SV Union Velbert</name>
         <gameDays>
-           <homeGame secondary="false" courtHall="Sporthalle Velbert" maxParallelGames="2" day="19.09.2026" time="15:00" /> <homeGame secondary="false" courtHall="Sporthalle Velbert" maxParallelGames="2" day="11.10.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Velbert" maxParallelGames="2" day="08.11.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Velbert" maxParallelGames="2" day="22.11.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Velbert" maxParallelGames="2" day="29.11.2026" time="11:00" /> <noGame from="20.09.2026" until="20.09.2026" /> <noGame from="04.10.2026" until="04.10.2026" /> <noGame from="07.11.2026" until="07.11.2026" /> 
+           <homeGame secondary="false" courtHall="Sporthalle Velbert" maxParallelGames="2" day="20.09.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Velbert" maxParallelGames="2" day="04.10.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Velbert" maxParallelGames="2" day="08.11.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Velbert" maxParallelGames="2" day="22.11.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Velbert" maxParallelGames="2" day="29.11.2026" time="11:00" /> <noGame from="13.09.2026" until="13.09.2026" /> <noGame from="11.10.2026" until="11.10.2026" /> <noGame from="15.11.2026" until="15.11.2026" /> 
         </gameDays>
         <sisterTeams>
         </sisterTeams>
@@ -27,7 +27,7 @@
       <team gender="Jugend 19" clubId="92023" number="1" id="3105844">
         <name>TSV Hahlen</name>
         <gameDays>
-           <homeGame secondary="false" courtHall="Sporthalle Hahlen" maxParallelGames="2" day="10.10.2026" time="15:00" /> <homeGame secondary="false" courtHall="Sporthalle Hahlen" maxParallelGames="2" day="07.11.2026" time="15:00" /> <homeGame secondary="false" courtHall="Sporthalle Hahlen" maxParallelGames="2" day="14.11.2026" time="15:00" /> <homeGame secondary="false" courtHall="Sporthalle Hahlen" maxParallelGames="2" day="21.11.2026" time="15:00" /> <homeGame secondary="false" courtHall="Sporthalle Hahlen" maxParallelGames="2" day="28.11.2026" time="15:00" /> <noGame from="12.09.2026" until="12.09.2026" /> <noGame from="11.10.2026" until="11.10.2026" /> <noGame from="08.11.2026" until="08.11.2026" /> 
+           <homeGame secondary="false" courtHall="Sporthalle Hahlen" maxParallelGames="2" day="13.09.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Hahlen" maxParallelGames="2" day="20.09.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Hahlen" maxParallelGames="2" day="08.11.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Hahlen" maxParallelGames="2" day="15.11.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Hahlen" maxParallelGames="2" day="29.11.2026" time="11:00" /> <noGame from="04.10.2026" until="04.10.2026" /> <noGame from="11.10.2026" until="11.10.2026" /> <noGame from="22.11.2026" until="22.11.2026" /> 
         </gameDays>
         <sisterTeams>
         </sisterTeams>
@@ -35,7 +35,7 @@
       <team gender="Jugend 19" clubId="92024" number="1" id="3110579">
         <name>TTF Bönen</name>
         <gameDays>
-           <homeGame secondary="false" courtHall="Sporthalle Bönen" maxParallelGames="2" day="12.09.2026" time="15:00" /> <homeGame secondary="false" courtHall="Sporthalle Bönen" maxParallelGames="2" day="20.09.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Bönen" maxParallelGames="2" day="08.11.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Bönen" maxParallelGames="2" day="15.11.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Bönen" maxParallelGames="2" day="28.11.2026" time="15:00" /> <noGame from="19.09.2026" until="19.09.2026" /> <noGame from="04.10.2026" until="04.10.2026" /> <noGame from="29.11.2026" until="29.11.2026" /> 
+           <homeGame secondary="false" courtHall="Sporthalle Bönen" maxParallelGames="2" day="13.09.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Bönen" maxParallelGames="2" day="11.10.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Bönen" maxParallelGames="2" day="08.11.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Bönen" maxParallelGames="2" day="15.11.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Bönen" maxParallelGames="2" day="22.11.2026" time="11:00" /> <noGame from="20.09.2026" until="20.09.2026" /> <noGame from="27.09.2026" until="27.09.2026" /> <noGame from="29.11.2026" until="29.11.2026" /> 
         </gameDays>
         <sisterTeams>
         </sisterTeams>
@@ -43,7 +43,7 @@
       <team gender="Jugend 19" clubId="92025" number="1" id="3108674">
         <name>TTV Ronsdorf</name>
         <gameDays>
-           <homeGame secondary="false" courtHall="Sporthalle Ronsdorf" maxParallelGames="2" day="19.09.2026" time="15:00" /> <homeGame secondary="false" courtHall="Sporthalle Ronsdorf" maxParallelGames="2" day="20.09.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Ronsdorf" maxParallelGames="2" day="04.10.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Ronsdorf" maxParallelGames="2" day="10.10.2026" time="15:00" /> <homeGame secondary="false" courtHall="Sporthalle Ronsdorf" maxParallelGames="2" day="08.11.2026" time="11:00" /> <noGame from="12.09.2026" until="12.09.2026" /> <noGame from="11.10.2026" until="11.10.2026" /> <noGame from="22.11.2026" until="22.11.2026" /> 
+           <homeGame secondary="false" courtHall="Sporthalle Ronsdorf" maxParallelGames="2" day="20.09.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Ronsdorf" maxParallelGames="2" day="27.09.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Ronsdorf" maxParallelGames="2" day="11.10.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Ronsdorf" maxParallelGames="2" day="15.11.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Ronsdorf" maxParallelGames="2" day="22.11.2026" time="11:00" /> <noGame from="13.09.2026" until="13.09.2026" /> <noGame from="04.10.2026" until="04.10.2026" /> <noGame from="08.11.2026" until="08.11.2026" /> 
         </gameDays>
         <sisterTeams>
         </sisterTeams>
@@ -51,7 +51,7 @@
       <team gender="Jugend 19" clubId="92026" number="1" id="3108720">
         <name>TSSV Bottrop</name>
         <gameDays>
-           <homeGame secondary="false" courtHall="Sporthalle Bottrop" maxParallelGames="2" day="12.09.2026" time="15:00" /> <homeGame secondary="false" courtHall="Sporthalle Bottrop" maxParallelGames="2" day="10.10.2026" time="15:00" /> <homeGame secondary="false" courtHall="Sporthalle Bottrop" maxParallelGames="2" day="07.11.2026" time="15:00" /> <homeGame secondary="false" courtHall="Sporthalle Bottrop" maxParallelGames="2" day="15.11.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Bottrop" maxParallelGames="2" day="22.11.2026" time="11:00" /> <noGame from="19.09.2026" until="19.09.2026" /> <noGame from="21.11.2026" until="21.11.2026" /> <noGame from="29.11.2026" until="29.11.2026" /> 
+           <homeGame secondary="false" courtHall="Sporthalle Bottrop" maxParallelGames="2" day="13.09.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Bottrop" maxParallelGames="2" day="27.09.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Bottrop" maxParallelGames="2" day="08.11.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Bottrop" maxParallelGames="2" day="22.11.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Bottrop" maxParallelGames="2" day="29.11.2026" time="11:00" /> <noGame from="20.09.2026" until="20.09.2026" /> <noGame from="04.10.2026" until="04.10.2026" /> <noGame from="11.10.2026" until="11.10.2026" /> 
         </gameDays>
         <sisterTeams>
         </sisterTeams>
@@ -59,7 +59,7 @@
       <team gender="Jugend 19" clubId="92027" number="1" id="3108071">
         <name>RW Stiepel</name>
         <gameDays>
-           <homeGame secondary="false" courtHall="Sporthalle Stiepel" maxParallelGames="2" day="19.09.2026" time="15:00" /> <homeGame secondary="false" courtHall="Sporthalle Stiepel" maxParallelGames="2" day="07.11.2026" time="15:00" /> <homeGame secondary="false" courtHall="Sporthalle Stiepel" maxParallelGames="2" day="14.11.2026" time="15:00" /> <homeGame secondary="false" courtHall="Sporthalle Stiepel" maxParallelGames="2" day="28.11.2026" time="15:00" /> <homeGame secondary="false" courtHall="Sporthalle Stiepel" maxParallelGames="2" day="29.11.2026" time="11:00" /> <noGame from="13.09.2026" until="13.09.2026" /> <noGame from="20.09.2026" until="20.09.2026" /> <noGame from="21.11.2026" until="21.11.2026" /> 
+           <homeGame secondary="false" courtHall="Sporthalle Stiepel" maxParallelGames="2" day="20.09.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Stiepel" maxParallelGames="2" day="27.09.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Stiepel" maxParallelGames="2" day="04.10.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Stiepel" maxParallelGames="2" day="22.11.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Stiepel" maxParallelGames="2" day="29.11.2026" time="11:00" /> <noGame from="13.09.2026" until="13.09.2026" /> <noGame from="11.10.2026" until="11.10.2026" /> <noGame from="08.11.2026" until="08.11.2026" /> 
         </gameDays>
         <sisterTeams>
         </sisterTeams>
@@ -67,7 +67,7 @@
       <team gender="Jugend 19" clubId="92022" number="2" id="3108692">
         <name>SV Union Velbert II</name>
         <gameDays>
-           <homeGame secondary="false" courtHall="Sporthalle Velbert" maxParallelGames="2" day="19.09.2026" time="15:00" /> <homeGame secondary="false" courtHall="Sporthalle Velbert" maxParallelGames="2" day="20.09.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Velbert" maxParallelGames="2" day="26.09.2026" time="15:00" /> <homeGame secondary="false" courtHall="Sporthalle Velbert" maxParallelGames="2" day="15.11.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Velbert" maxParallelGames="2" day="21.11.2026" time="15:00" /> <noGame from="10.10.2026" until="10.10.2026" /> <noGame from="11.10.2026" until="11.10.2026" /> <noGame from="14.11.2026" until="14.11.2026" /> 
+           <homeGame secondary="false" courtHall="Sporthalle Velbert" maxParallelGames="2" day="13.09.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Velbert" maxParallelGames="2" day="04.10.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Velbert" maxParallelGames="2" day="08.11.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Velbert" maxParallelGames="2" day="15.11.2026" time="11:00" /> <homeGame secondary="false" courtHall="Sporthalle Velbert" maxParallelGames="2" day="22.11.2026" time="11:00" /> <noGame from="20.09.2026" until="20.09.2026" /> <noGame from="11.10.2026" until="11.10.2026" /> <noGame from="29.11.2026" until="29.11.2026" /> 
         </gameDays>
         <sisterTeams>
         </sisterTeams>
