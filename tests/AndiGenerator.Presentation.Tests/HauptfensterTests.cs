@@ -452,7 +452,9 @@ public sealed class HauptfensterTests : IDisposable
         Assert.True(hf.HatPlan);
         Assert.True(hf.KostenansichtCommand.CanExecute(null));
         Assert.True(hf.TerminwunschansichtCommand.CanExecute(null));
-        Assert.Equal("Kosten", hf.AktiveAnsicht);
+
+        // Nach dem Öffnen liegen die Terminwünsche vorn, die Kostenansicht dahinter.
+        Assert.Equal("Terminwuensche", hf.AktiveAnsicht);
         Assert.Single(Ansichten<KostenAnsichtViewModel>());
         Assert.Empty(Ansichten<TerminplanAnsichtViewModel>());
         Assert.Empty(Ansichten<QualitaetAnsichtViewModel>());
@@ -1165,7 +1167,7 @@ public sealed class HauptfensterTests : IDisposable
 
         await OeffnenAsync();
         Assert.True(hf.IstGeoeffnet);
-        Assert.Equal("Kosten", hf.AktiveAnsicht);
+        Assert.Equal("Terminwuensche", hf.AktiveAnsicht);
     }
 
     [Fact]
@@ -1204,6 +1206,34 @@ public sealed class HauptfensterTests : IDisposable
         await hf.DruckenCommand.ExecuteAsync(null);
         Assert.Contains("Drucken: Datei gesperrt", o.Meldungen);
         Assert.Empty(o.Angezeigt);
+    }
+
+    [Fact]
+    public async Task Nach_dem_Oeffnen_liegen_die_Terminwuensche_vorn_und_der_zuletzt_gespeicherte_Plan_unter_Start_mit()
+    {
+        // Erstes Öffnen: noch nichts gespeichert – leerer Plan, vorn die Terminwünsche.
+        await OeffnenAsync();
+        Assert.Equal("Terminwuensche", hf.AktiveAnsicht);
+        Assert.Null(hf.Startplan!.Quelle);
+
+        // Einen Plan merken, dann schließen (sichert den neueren besten Plan) und wieder öffnen.
+        o.Antwort = true;
+        await PlanErrechnenAsync();
+        o.Texteingabe = "Erster";
+        await hf.PlanMerkenCommand.ExecuteAsync(null);
+        await PlanErrechnenAsync(weiter: true);
+        hf.StoppenCommand.Execute(null);
+        await hf.SchliessenCommand.ExecuteAsync(null);
+        await OeffnenAsync();
+
+        Assert.Equal("Terminwuensche", hf.AktiveAnsicht);
+        Assert.Equal(PlanQuellenArt.GesicherterPlan, hf.Startplan.Quelle?.Art);
+        Assert.Contains("Start mit dem zuletzt gespeicherten Plan", hf.Statuszeile, StringComparison.Ordinal);
+        Assert.False(hf.ZeigtPlanLoeschen);
+
+        // Gemerkte Pläne lassen sich löschen, der gesicherte nicht.
+        hf.Startplan = hf.Startplaene.Single(p => p.Quelle?.Art == PlanQuellenArt.GemerkterPlan);
+        Assert.True(hf.ZeigtPlanLoeschen);
     }
 
     private static void Sammeln<T>(IDockable dockable, List<T> liste)

@@ -287,11 +287,13 @@ Im Automodus entfällt die Kachel *Pflichtregeln*; dafür wird *Berechnete Plän
 
 **Start mit** legt fest, wovon die nächste Generierung ausgeht:
 
-- **leerem Plan** – das Programm plant von Grund auf neu (Standard);
+- **leerem Plan** – das Programm plant von Grund auf neu (Standard, solange noch kein Plan gespeichert ist);
 - **bestem Plan der letzten Generierung** – nach *Stopp* dort weitermachen;
 - **gesichertem Plan** – der automatisch gesicherte Plan (siehe unten);
 - **in click-TT vorhandenem Plan** – ein schon in click-TT eingetragener Plan wird verbessert;
 - **gemerktem Plan „…“** – ein früher gemerkter Plan (Abschnitt [5.11](#511-pläne-merken-und-vergleichen)).
+
+Beim Öffnen einer Staffel (normale Runde) steht unter *Start mit* der **zuletzt gespeicherte Plan** – gesichert oder gemerkt, je nachdem, welcher jünger ist –, sofern es schon einen gibt. Alle Ansichten und die Kacheln zeigen ihn sofort, und **▶ Start** optimiert mit ihm weiter; wer neu beginnen will, wählt *leerem Plan*. Vorn liegt nach dem Öffnen die Ansicht **Terminwünsche** (Abschnitt [7.3](#73-terminwünsche)), damit man die Meldungen der Vereine gleich vor Augen hat.
 
 Solange eine Generierung läuft oder pausiert ist, ist *Start mit* gesperrt: Eine laufende Generierung setzt immer ihren eigenen besten Plan fort. Für einen anderen Ausgangsplan zuerst **Stopp**.
 
@@ -468,7 +470,7 @@ Um Pläne aus verschiedenen Einstellungen zu vergleichen, merken Sie sich Zwisch
 1. **Plan merken** (oben) anklicken – gemerkt wird der beste Plan der laufenden Generierung.
 2. Einen Namen eingeben, z. B. „Sperrtermine hoch“.
 
-Der Plan erscheint danach in jeder Ansicht in der Auswahl **Plan** und unter **Start mit**. Sie können ihn so ansehen, mit dem aktuellen vergleichen, als Ausgangsplan für eine neue Generierung nehmen oder entfernen: Ist er vor dem Start unter **Start mit** gewählt, steht oben an der Stelle von *Plan merken* der Knopf **Plan löschen**.
+Der Plan erscheint danach in jeder Ansicht in der Auswahl **Plan** und unter **Start mit**. Sie können ihn so ansehen, mit dem aktuellen vergleichen, als Ausgangsplan für eine neue Generierung nehmen oder löschen: Ist er vor dem Start unter **Start mit** gewählt, steht oben an der Stelle von *Plan merken* der Knopf **Plan löschen**. Den gesicherten Plan löscht dieser Knopf nicht – er wird nur durch einen neueren ersetzt (Abschnitt [5.3](#53-die-generierung-steuern)).
 
 Gemerkte Pläne liegen im Datenordner der Staffel und stehen auch nach einem Neustart zur Verfügung.
 
