@@ -6,7 +6,7 @@ AndiGenerator.NET ist die Weiterentwicklung des **AndiGenerators** von Andreas H
 
 **Inhalt**
 
-1. [Allgemeines](#1-allgemeines)
+1. [Allgemeines](#1-allgemeines) – [Was ist anders als im Original?](#11-was-ist-anders-als-im-original)
 2. [Installation](#2-installation)
 3. [Erste Schritte](#3-erste-schritte) – Staffel öffnen und einrichten, [Zwei Arten zu planen](#35-zwei-arten-zu-planen)
 4. [Das Hauptfenster](#4-das-hauptfenster)
@@ -40,6 +40,35 @@ AndiGenerator.NET ist Freie Software: Sie können es unter den Bedingungen der G
 
 Wenn Sie vorher mit dem Original-AndiGenerator gearbeitet haben, übernimmt AndiGenerator.NET beim ersten Öffnen einer Staffel deren Einstellungen und gemerkte Pläne als **Kopie**. Die Dateien des Originals werden nicht verändert; Sie können beide Programme nebeneinander verwenden. Eine vorhandene `.modifications`-Datei wird von beiden Programmen gelesen.
 
+### 1.1 Was ist anders als im Original?
+
+Für alle, die bisher mit dem AndiGenerator von Andreas Hofmann geplant haben – kurz, was gleich bleibt und was neu ist.
+
+**Gleich geblieben**
+
+- Die **Kostenoptimierung** sucht und bewertet die Pläne wie das Original: dieselben Kostenarten, dieselben Gewichtungen, dieselben Dateien (click-TT-XML, `.modifications`, CSV für den Import in click-TT).
+- Einstellungen und gemerkte Pläne des Originals werden beim ersten Öffnen als Kopie übernommen; beide Programme lassen sich nebeneinander verwenden.
+
+**Neu**
+
+- **Oberfläche:** Startseite mit den zuletzt geöffneten Staffeln und [Beispielen](#32-staffel-öffnen), alle Rückfragen nach dem Öffnen auf einer Seite ([Einrichtung](#33-die-staffel-einrichten)), Ansichten als Registerkarten nebeneinander, Kacheln mit dem Stand der Generierung, Zoom, Begleitleiste **Schritt für Schritt** (F1).
+- **Automodus** ([5.4](#54-der-automodus)): Statt Gewichte von Hand zu verschieben, sortiert man die Kriterien in Stufen – A muss, B soll, C wird geglättet –, und die Suche lenkt sich selbst. Der freie Löser **HiGHS** rechnet nebenher aus, wie gut es in A und B höchstens geht, schlägt Varianten für B vor und plant Teile des Plans neu.
+- **Kompaktspieltage** ([Kapitel 6](#6-kompaktspieltage-planen)): Pläne aus 3er- und 4er-Spieltagen in einer Halle, mit Karte und Fahrten – im Original gibt es das nicht.
+- **Mehr Daten aus click-TT** ([3.3](#33-die-staffel-einrichten)): Mannschaftsmeldung (TTR-Werte als Vorschlag für die Setzliste) und Bericht „Terminwünsche“ (Hallen, Bemerkungen der Vereine, Prüfung der 60-km-Regel).
+- **Neue Ansichten:** Qualität (Verstöße je Kriterium und Mannschaft), [Leitstand](#55-der-leitstand) und [Verlauf](#56-der-verlauf); alle [Diagramme](#72-diagramme) und die [Terminwünsche](#73-terminwünsche) sind neu gestaltet.
+- **Sicherheit:** Bevor ein Plan verloren ginge, wird er **gesichert**; nach einem unerwarteten Fehler liegt er als „Notfallsicherung“ unter den gemerkten Plänen.
+- **Ausdruck als PDF** mit Auswahl der Abschnitte ([8.2](#82-drucken-pdf)).
+- **Plattformen und Updates:** Windows (auch auf ARM), Mac, Linux und Chromebook; unter Windows sucht und installiert das Programm neue Versionen selbst.
+- **Steuerung durch eine KI** ([Kapitel 10](#10-steuerung-durch-eine-ki-mcp)) – für Fortgeschrittene.
+
+**Bewusst korrigiert** – deshalb können die Kosten etwas von denen des Originals abweichen:
+
+- Ein Wunschtermin gilt beim Zurücksetzen eines Spiels nicht mehr fälschlich als frei.
+- Beim Füllen über die Auswärtskoppel wird kein schon terminiertes Spiel mehr umgesetzt.
+- Das Startraster legt bei ungerader Mannschaftszahl alle Spieltage an.
+- Beim letzten Spieltag zählen alle Überlappungen.
+- Am Pflichtspieltag wird bei ungerader Mannschaftszahl die zwangsläufig spielfreie Mannschaft nicht mehr bestraft, wenn sie in der Woche davor spielt (abschaltbar in den Einstellungen, siehe [Pflichtspieltage](#pflichtspieltage)).
+
 ## 2. Installation
 
 AndiGenerator.NET läuft unter Windows 10 und 11 (64 Bit), auf dem Mac (macOS 14 oder neuer), auf Chromebooks und unter Linux (siehe unten). Administratorrechte sind nicht nötig, und .NET muss nicht installiert sein – alles Nötige ist dabei.
@@ -55,11 +84,11 @@ AndiGenerator.NET läuft unter Windows 10 und 11 (64 Bit), auf dem Mac (macOS 14
 | Chromebook oder Linux mit Intel/AMD | [andigenerator-net_amd64.deb](https://github.com/PBuchmann/AndiGenerator.NET/releases/latest/download/andigenerator-net_amd64.deb) |
 | Chromebook oder Linux mit ARM-Prozessor | [andigenerator-net_arm64.deb](https://github.com/PBuchmann/AndiGenerator.NET/releases/latest/download/andigenerator-net_arm64.deb) |
 
-Im Zweifel bei Windows die erste Datei nehmen: Sie läuft auch auf ARM-Laptops mit Windows 11, nur langsamer. Die übrigen Dateien auf der Release-Seite (`.nupkg`, `RELEASES`, `releases.*.json`, Stückliste) braucht das Programm für seine Updates bzw. dienen als Nachweis – sie müssen Sie nicht herunterladen.
+Im Zweifel bei Windows die erste Datei nehmen: Sie läuft auch auf ARM-Laptops mit Windows 11, nur langsamer. **Auf ARM-Laptops** ist die Wahl ein Abwägen: Die ARM-Fassung rechnet schneller, bringt aber den Löser **HiGHS** nicht mit (es gibt ihn für Windows auf ARM noch nicht) – ohne ihn fehlen im Automodus die Schranke, die B-Varianten und die Teilneuplanung, und Kompaktspieltage werden ohne Löser gesucht (siehe [6.12](#612-grenzen)). Wer diese Funktionen braucht, nimmt auch dort die normale Fassung. Die übrigen Dateien auf der Release-Seite (`.nupkg`, `RELEASES`, `releases.*.json`, Stückliste) braucht das Programm für seine Updates bzw. dienen als Nachweis – sie müssen Sie nicht herunterladen.
 
 **Mit Setup (empfohlen)**
 
-1. Auf der Seite [Releases](https://github.com/PBuchmann/AndiGenerator.NET/releases) bei der neuesten Version die Datei `AndiGeneratorNET-win-Setup.exe` herunterladen. Für Windows-Laptops mit ARM-Prozessor (z. B. Snapdragon) gibt es `AndiGeneratorNET-win-arm64-Setup.exe`; sie rechnet dort deutlich schneller. Welcher Prozessor eingebaut ist, steht unter *Einstellungen → System → Info → Systemtyp* („ARM-basierter Prozessor“).
+1. Auf der Seite [Releases](https://github.com/PBuchmann/AndiGenerator.NET/releases) bei der neuesten Version die Datei `AndiGeneratorNET-win-Setup.exe` herunterladen. Für Windows-Laptops mit ARM-Prozessor (z. B. Snapdragon) gibt es `AndiGeneratorNET-win-arm64-Setup.exe`; sie rechnet dort deutlich schneller, aber ohne HiGHS (siehe oben). Welcher Prozessor eingebaut ist, steht unter *Einstellungen → System → Info → Systemtyp* („ARM-basierter Prozessor“).
 2. Die Datei starten. Das Programm wird für Ihr Benutzerkonto installiert (im Ordner `%LOCALAPPDATA%\AndiGeneratorNET`), erscheint im Startmenü und auf dem Desktop und startet gleich.
 
 **Ohne Installation**
@@ -323,7 +352,7 @@ Der Automodus arbeitet in **Phasen**; die laufende steht oben in der Ergebniskac
 
 - **HiGHS-Linien:** Von Anfang an – schon während der Basisoptimierung – rechnen ab 8 logischen Prozessoren eine, ab 12 zwei lange HiGHS-Läufe für A und B zusammen, ohne erst A zu beweisen (ein A-Verstoß zählt dabei wie 100 B-Verstöße), jede mit eigenem Startwert. Jeder bessere Plan geht sofort an den Automodus. Je Linie verfeinern zwei Teilneuplanungen ihre Pläne – auch solche aus einer anderen Gegend, die noch nicht der beste Plan sind; oft wird gerade daraus der beste. Nach 20 Minuten beginnt eine Linie mit neuem Startwert an ihrem besten Plan; hat HiGHS den Plan als bestmöglich bewiesen (kleine Staffeln), endet sie. Im Vergleich an der Verbandsoberliga (nur HiGHS, 5 Minuten) kam das auf B 24 statt 33 bis 37 mit einem oder vielen Läufen allein; in einer schwereren Einteilung auf B 34 statt 52 bis 66.
 
-So nähern sich beide von zwei Seiten: HiGHS sagt, wo unten Schluss ist; die Suche kommt von oben.
+So nähern sich beide von zwei Seiten: HiGHS sagt, wo unten Schluss ist; die Suche kommt von oben. Ohne HiGHS (Fassung für Windows auf ARM, siehe Abschnitt [2](#2-installation)) arbeitet der Automodus nur mit der Suche: Stufen und Glätten wie beschrieben, aber ohne „bestmöglich“, ohne B-Varianten und ohne Teilneuplanung.
 
 Der Automodus hat keine Zeitgrenze; er läuft, bis Sie **Pausieren** oder **Stopp** wählen. Unter **In Arbeit** zeigt die Ergebniskachel, an welchen Kriterien er gerade arbeitet (Abschnitt [5.2](#52-die-kacheln)).
 
@@ -610,7 +639,7 @@ Die Ansicht **Kompaktspieltage** steht links oben unter *Ansichten* – nur bei 
 
 Der Knopf **▶** berechnet die Pläne. Jede mögliche Kombination aus Spieltag und Tag ist dabei eine Ja/Nein-Entscheidung, die der freie Löser **HiGHS** als ganzzahlige Optimierung löst: jede Paarung genau einmal, jede Mannschaft höchstens einmal am Tag, jede richtet mindestens einen Spieltag aus, möglichst ohne Verstöße gegen die Meldungen. So findet der Planer den kürzesten Plan und den Plan mit den wenigsten Punkten nachweisbar – auch bei knappen Meldungen. Unabhängige Schritte rechnen gleichzeitig, und jeder Schritt lässt mehrere Läufe des Lösers mit verschiedenen Startwerten parallel laufen; der erste, der den besten Plan beweist, beendet die anderen. Eine Zufallssuche liefert die Startpunkte und ergänzt am Ende weitere Varianten. Bei 9 Mannschaften (oder 10 mit je einer Einzelbegegnung) geht der Plan genau mit 4er-Spieltagen auf; Pläne mit 3er-Spieltagen erscheinen dann nur, wenn sie ein Ziel besser treffen als jeder reine 4er-Plan (*Mit 3er-Spieltagen: kürzer*, *… gleich weite Fahrten* usw., höchstens drei).
 
-> **Windows-Laptops mit ARM-Prozessor:** Für die ARM-Fassung des Programms (`…-win-arm64-Setup.exe`) gibt es HiGHS noch nicht. Sie plant Kompaktspieltage mit der vollständigen Suche ohne Löser – das dauert länger und findet bei knappen Meldungen nicht immer den kürzesten Plan. Wer dort Kompaktspieltage plant, installiert besser die normale Fassung (`AndiGeneratorNET-win-Setup.exe`); sie läuft auch auf ARM-Laptops und bringt HiGHS mit.
+> **Windows-Laptops mit ARM-Prozessor:** Für die ARM-Fassung des Programms (`…-win-arm64-Setup.exe`) gibt es HiGHS noch nicht. Sie plant Kompaktspieltage mit der vollständigen Suche ohne Löser – das dauert länger und findet bei knappen Meldungen nicht immer den kürzesten Plan. Ohne Löser entstehen die Pläne außerdem oft erst am Ende der Berechnung – wer vorher **■ Stopp** drückt, hat dann noch keinen Plan. Wer dort Kompaktspieltage plant, installiert besser die normale Fassung (`AndiGeneratorNET-win-Setup.exe`); sie läuft auch auf ARM-Laptops und bringt HiGHS mit.
 
 Während der Berechnung zeigt ein Fortschrittsbalken den laufenden Schritt. Der Hauptknopf (Pause) hält sie an: Die Ansicht zeigt dann die bisher besten Pläne; Fortsetzen rechnet weiter und behält dabei nur den gewählten. **Stopp** (■) beendet die Berechnung mit den bis dahin besten Plänen. Solange die Meldungen bearbeitet werden (Abschnitt [6.9](#69-meldungen-im-raster-bearbeiten)), lässt sich die Berechnung nicht starten.
 
@@ -669,6 +698,8 @@ Der **Export für click-TT** prüft den Plan vorher mit den Hinweisen der Kompak
 ### 6.12 Grenzen
 
 Bei wenigen Mannschaften (5 oder 6) gibt es zu wenige Spieltage, als dass jede Mannschaft einen ausrichten könnte; der Planer sagt das dann. Lässt sich kein Plan ohne Verstöße gegen die Meldungen finden, erlaubt er welche und nennt sie.
+
+In der Fassung für Windows-Laptops mit ARM-Prozessor fehlt der Löser HiGHS (Abschnitt [2](#2-installation)). Dann sucht der Planer zuerst vollständig nach Plänen nur aus 4er-Spieltagen und danach zufällig; diese Suche beginnt streng und lässt erst mit der Zeit Verstöße zu. Gibt es keine reinen 4er-Pläne (etwa bei 8 Mannschaften), liegen Pläne deshalb oft erst am Ende der Berechnung vor – lassen Sie sie dann zu Ende laufen. Bei großen Klassen kann der Fortschritt auch mit HiGHS 20 bis 40 Sekunden stillstehen, bis der Löser sich meldet; die Berechnung läuft trotzdem.
 
 ## 7. Ansichten für beide Arten der Planung
 
