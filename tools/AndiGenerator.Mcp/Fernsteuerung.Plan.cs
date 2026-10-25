@@ -68,7 +68,8 @@ internal sealed partial class Fernsteuerung
             }
 
             IReadOnlyList<string> namen = d.Auswahl.Select(w => Diagrammnamen.First(n => n.Teil == w.Teil).Name).ToList();
-            string gesucht = teil.Trim().Length == 0 ? namen.FirstOrDefault() ?? string.Empty : teil.Trim();
+            string erstes = namen.Count > 0 ? namen[0] : string.Empty;
+            string gesucht = teil.Trim().Length > 0 ? teil.Trim() : erstes;
             if (d.Daten is null || !namen.Any(n => Gleich(n, gesucht)))
             {
                 return (null, default, string.Empty, namen, $"Kein Diagramm „{teil}“ für diesen Plan. Möglich: {string.Join(", ", namen)}.");
@@ -163,9 +164,10 @@ internal sealed partial class Fernsteuerung
         fehler = null;
         if (ansicht is not null)
         {
+            PlanQuelle? erste = ansicht.Quellen.Count > 0 ? ansicht.Quellen[0] : null;
             PlanQuelle? quelle = plan.Trim().Length > 0
                 ? ansicht.Quellen.FirstOrDefault(q => Gleich(q.Name, plan))
-                : ansicht.Quellen.FirstOrDefault(q => q == ansicht.Quelle) ?? ansicht.Quellen.FirstOrDefault();
+                : ansicht.Quellen.FirstOrDefault(q => q == ansicht.Quelle) ?? erste;
             if (quelle is null)
             {
                 fehler = $"Keinen Plan „{plan}“. Möglich: {string.Join(", ", ansicht.Quellen.Select(q => q.Name))}.";

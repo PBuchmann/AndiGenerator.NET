@@ -4,12 +4,18 @@
 
 using System.Runtime.InteropServices;
 
+// CA2101: Jede Zeichenkette hat ihr Format ausdrücklich ([MarshalAs(UnmanagedType.LPUTF8Str)], wie HiGHS es erwartet); die Regel
+// verlangt zusätzlich CharSet am DllImport, das hier nichts ändern würde.
+#pragma warning disable CA2101
+
 namespace AndiGenerator.Import;
 
 /// <summary>
 /// Löst ein ganzzahliges lineares Programm (<see cref="Ganzzahlproblem"/>) mit HiGHS (nicht im Original; https://highs.dev,
 /// MIT-Lizenz, Paket Highs.Native) über dessen C-Schnittstelle. Der Löser fragt während der Suche regelmäßig nach, ob er
-/// aufhören soll; dabei kann die Planung auch anhalten (Pause).
+/// aufhören soll; dabei kann die Planung auch anhalten (Pause). Die Rückgaben der Aufrufe, die Optionen, Startlösung und
+/// Rückruf setzen oder die Lösung lesen, werden bewusst verworfen: Schlägt einer fehl, rechnet HiGHS mit dem Standard weiter;
+/// ob gerechnet wurde, zeigen die Rückgaben von Übergabe und Lauf.
 /// </summary>
 public static class HighsLoeser
 {
@@ -121,24 +127,24 @@ public static class HighsLoeser
 
         try
         {
-            SetzeSchalter(h, "output_flag", 0);
-            SetzeZahl(h, "mip_heuristic_effort", Heuristik);
+            _ = SetzeSchalter(h, "output_flag", 0);
+            _ = SetzeZahl(h, "mip_heuristic_effort", Heuristik);
 
             // Große Modelle (z. B. mit Verstößen, wenn Mannschaften keine Heimtermine haben) ohne Vorverarbeitung: Deren
             // „Probing“ dauerte bei 25.000 Spalten rund 20 Minuten – ohne Rückruf, also ohne Fortschritt und ohne Abbruch.
             // Ohne sie findet HiGHS in Sekunden erste Lösungen (Peter, 14.10.2026).
             if (problem.Kosten.Length > GrossesModell)
             {
-                SetzeText(h, "presolve", "off");
+                _ = SetzeText(h, "presolve", "off");
             }
 
             // Harte Zeitgrenze als Rückfallebene für Phasen ohne Rückruf.
             if (zeitgrenze is TimeSpan grenze && grenze > TimeSpan.Zero)
             {
-                SetzeZahl(h, "time_limit", grenze.TotalSeconds);
+                _ = SetzeZahl(h, "time_limit", grenze.TotalSeconds);
             }
 
-            SetzeGanzzahl(h, "random_seed", Math.Abs(startwert % 2_000_000_000));
+            _ = SetzeGanzzahl(h, "random_seed", Math.Abs(startwert % 2_000_000_000));
             double unendlich = Unendlich(h);
             int n = problem.Kosten.Length;
             int m = problem.ZeileUnten.Length;
@@ -167,11 +173,11 @@ public static class HighsLoeser
 
             if (start is not null && start.Length == n)
             {
-                SetzeLoesung(h, start, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero);
+                _ = SetzeLoesung(h, start, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero);
             }
 
-            SetzeRueckruf(h, Marshal.GetFunctionPointerForDelegate(rueckruf), IntPtr.Zero);
-            StarteRueckruf(h, MipUnterbrechung);
+            _ = SetzeRueckruf(h, Marshal.GetFunctionPointerForDelegate(rueckruf), IntPtr.Zero);
+            _ = StarteRueckruf(h, MipUnterbrechung);
             using IDisposable messung = Rechenfaeden.HighsRechnet();
             if (Ausfuehren(h) < 0)
             {
@@ -186,7 +192,7 @@ public static class HighsLoeser
             }
 
             var werte = new double[n];
-            LeseLoesung(h, werte, new double[n], new double[m], new double[m]);
+            _ = LeseLoesung(h, werte, new double[n], new double[m], new double[m]);
             return (werte, Modellstatus(h) == Optimal);
         }
         finally
@@ -254,19 +260,19 @@ public static class HighsLoeser
 
         try
         {
-            SetzeSchalter(h, "output_flag", 0);
-            SetzeZahl(h, "time_limit", zeitgrenze.TotalSeconds);
+            _ = SetzeSchalter(h, "output_flag", 0);
+            _ = SetzeZahl(h, "time_limit", zeitgrenze.TotalSeconds);
             if (vorgabe is not null)
             {
-                SetzeGanzzahl(h, "random_seed", Math.Abs(vorgabe.Startwert % 2_000_000_000));
+                _ = SetzeGanzzahl(h, "random_seed", Math.Abs(vorgabe.Startwert % 2_000_000_000));
                 if (vorgabe.Heuristik is double heuristik)
                 {
-                    SetzeZahl(h, "mip_heuristic_effort", heuristik);
+                    _ = SetzeZahl(h, "mip_heuristic_effort", heuristik);
                 }
 
                 if (vorgabe.OhneNeustart)
                 {
-                    SetzeSchalter(h, "mip_allow_restart", 0);
+                    _ = SetzeSchalter(h, "mip_allow_restart", 0);
                 }
             }
 
@@ -301,16 +307,16 @@ public static class HighsLoeser
 
             if (start is not null && start.Length == n)
             {
-                SetzeLoesung(h, start, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero);
+                _ = SetzeLoesung(h, start, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero);
             }
 
             if (aufhoeren is not null || fortschritt is not null || vorgabe?.Zwischenstand is not null || vorgabe?.Loesung is not null)
             {
-                SetzeRueckruf(h, Marshal.GetFunctionPointerForDelegate(rueckruf), IntPtr.Zero);
-                StarteRueckruf(h, MipUnterbrechung);
+                _ = SetzeRueckruf(h, Marshal.GetFunctionPointerForDelegate(rueckruf), IntPtr.Zero);
+                _ = StarteRueckruf(h, MipUnterbrechung);
                 if (vorgabe?.Loesung is not null)
                 {
-                    StarteRueckruf(h, MipBessereLoesung);
+                    _ = StarteRueckruf(h, MipBessereLoesung);
                 }
             }
 
@@ -334,7 +340,7 @@ public static class HighsLoeser
             }
 
             var werte = new double[n];
-            LeseLoesung(h, werte, new double[n], new double[m], new double[m]);
+            _ = LeseLoesung(h, werte, new double[n], new double[m], new double[m]);
             _ = LeseZahlInfo(h, "objective_function_value", out double wert);
             bool optimal = modellstatus == Optimal;
             return (werte, wert, optimal ? wert : schranke, optimal, false);

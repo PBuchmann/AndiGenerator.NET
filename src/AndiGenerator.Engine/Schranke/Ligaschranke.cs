@@ -278,8 +278,8 @@ public sealed partial class Ligaschranke
                 einzelne.Add((stufe, Name(k), k, ziel));
             }
 
-            einzelne.Sort((x, y) => string.CompareOrdinal(x.Stufe[..1], y.Stufe[..1]) != 0
-                ? string.CompareOrdinal(x.Stufe[..1], y.Stufe[..1])
+            einzelne.Sort((x, y) => x.Stufe[0] != y.Stufe[0]
+                ? x.Stufe[0].CompareTo(y.Stufe[0])
                 : int.Parse(x.Stufe[1..], CultureInfo.InvariantCulture).CompareTo(int.Parse(y.Stufe[1..], CultureInfo.InvariantCulture)));
             kettenziele.Add(("A", "Stufe A gesamt", Zusammenfassen(einzelne.Where(z => z.Stufe[0] == 'A').SelectMany(z => z.Ziel))));
             kettenziele.Add(("B", "Stufe B gesamt", Zusammenfassen(einzelne.Where(z => z.Stufe[0] == 'B').SelectMany(z => z.Ziel))));
@@ -483,10 +483,14 @@ public sealed partial class Ligaschranke
             {
                 // Die frühe Summe B endet hier; ihr Plan ist Startlösung, wenn er besser ist.
                 Volatile.Write(ref hauptBeginnt.Value, true);
+
+                // Die Schranke rechnet auf einem Hintergrund-Thread ohne Synchronisationskontext: Warten blockiert keine Oberfläche.
+#pragma warning disable VSTHRD002
                 if (summeFrueh.GetAwaiter().GetResult() is { } f && (start is null || Wert(ziel, f) < Wert(ziel, start)))
                 {
                     start = f;
                 }
+#pragma warning restore VSTHRD002
 
                 summeFrueh = null;
             }

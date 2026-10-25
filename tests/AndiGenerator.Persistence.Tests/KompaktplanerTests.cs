@@ -174,8 +174,8 @@ public class KompaktplanerTests
         Kompaktergebnis ergebnis = Kompaktplaner.Planen(
             aufgabe,
             new Kompaktplanoptionen(TimeSpan.FromSeconds(1), 1, 17, 20, TimeSpan.FromSeconds(20)) { Loeser = new Highsbruecke() },
-            CancellationToken.None,
-            null);
+            null,
+            CancellationToken.None);
 
         Assert.NotEmpty(ergebnis.Varianten);
 
@@ -216,7 +216,7 @@ public class KompaktplanerTests
     /// (Visual Studio) fertig wird – sonst ist „Kürzeste Fahrten“ nicht sicher der kürzeste Plan.
     /// </summary>
     private static Kompaktergebnis Planen(Kompaktaufgabe aufgabe) =>
-        Kompaktplaner.Planen(aufgabe, new Kompaktplanoptionen(TimeSpan.FromMinutes(1), 1, 17, 400, TimeSpan.FromMinutes(10)), CancellationToken.None, null);
+        Kompaktplaner.Planen(aufgabe, new Kompaktplanoptionen(TimeSpan.FromMinutes(1), 1, 17, 400, TimeSpan.FromMinutes(10)), null, CancellationToken.None);
 
     /// <summary>Mannschaften M1 … Mn auf einem Kreis (Entfernung = Abstand der Punkte in km), zehn Sonntage, alle Heim und auswärts.</summary>
     private static Kompaktaufgabe Aufgabe(int anzahl, IReadOnlyList<(string Mannschaft, DateOnly Tag)> sperren)

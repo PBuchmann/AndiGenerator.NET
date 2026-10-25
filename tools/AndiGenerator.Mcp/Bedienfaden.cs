@@ -49,11 +49,14 @@ internal sealed class Bedienfaden : SynchronizationContext, IDisposable
             return;
         }
 
+        // Send ist synchron per Vertrag; auf dem eigenen Faden wurde oben direkt ausgeführt, hier wartet ein fremder Faden.
+#pragma warning disable VSTHRD002
         Ausfuehren(() =>
         {
             d(state);
             return true;
         }).GetAwaiter().GetResult();
+#pragma warning restore VSTHRD002
     }
 
     /// <inheritdoc/>
@@ -86,6 +89,8 @@ internal sealed class Bedienfaden : SynchronizationContext, IDisposable
                     return;
                 }
 
+                // Die Fortsetzung überträgt das Ergebnis; beobachtet wird es über „ergebnis“.
+#pragma warning disable VSTHRD110
                 lauf.ContinueWith(
                     t =>
                     {
@@ -105,6 +110,7 @@ internal sealed class Bedienfaden : SynchronizationContext, IDisposable
                     CancellationToken.None,
                     TaskContinuationOptions.ExecuteSynchronously,
                     TaskScheduler.Default);
+#pragma warning restore VSTHRD110
             },
             null);
         return ergebnis.Task;

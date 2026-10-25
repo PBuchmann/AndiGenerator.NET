@@ -289,36 +289,13 @@ public sealed class LeitstandAnsichtViewModel : Document
     private static string Hartetext(int harte) =>
         (harte == 1 ? "1 Spiel" : harte.ToString(Deutsch) + " Spiele") + " ohne gültigen Termin – so nicht verwendbar";
 
-    /// <summary>Baut die Gewichte nur neu auf, wenn sie sich geändert haben (sonst flackerte die Ansicht im Takt).</summary>
-    /// <param name="anhebungen">Die geänderten Gewichte.</param>
-    private void GewichteZeigen(IReadOnlyList<Gewichtsanhebung> anhebungen)
-    {
-        Stufeneinteilung einteilung = hauptfenster.Einteilung.Vervollstaendigt();
-        string schluessel = string.Join(';', anhebungen.Select(a => $"{a.Kriterium},{a.Mannschaft},{a.Vorher},{a.Jetzt}"));
-        if (schluessel == gewichteSchluessel)
-        {
-            return;
-        }
-
-        gewichteSchluessel = schluessel;
-        Kostenkriterium[] reihenfolge = [.. einteilung.A, .. einteilung.B, .. einteilung.C];
-        Gewichte = anhebungen
-            .GroupBy(a => a.Kriterium)
-            .OrderBy(g => Array.IndexOf(reihenfolge, g.Key))
-            .Select(g => new Gewichtsgruppe(
-                StufeMitNummer(einteilung, g.Key),
-                Planqualitaet.Name(g.Key),
-                Zeilen(g)))
-            .ToArray();
-    }
-
     /// <summary>
     /// Was der Automodus aus HiGHS weiß und wie er danach arbeitet: Schranke je Stufe gegen den besten Plan, geschützte
     /// Stufen.
     /// </summary>
     /// <param name="lenkung">Der Stand des Automodus.</param>
     /// <returns>Der Text; leer ohne Schranke.</returns>
-    private string Verfahrenstext(Lenkungsstand lenkung)
+    private static string Verfahrenstext(Lenkungsstand lenkung)
     {
         Stufenwert b = lenkung.Bester;
         var teile = new List<string>();
@@ -348,6 +325,29 @@ public sealed class LeitstandAnsichtViewModel : Document
         }
 
         return string.Join(" ", teile);
+    }
+
+    /// <summary>Baut die Gewichte nur neu auf, wenn sie sich geändert haben (sonst flackerte die Ansicht im Takt).</summary>
+    /// <param name="anhebungen">Die geänderten Gewichte.</param>
+    private void GewichteZeigen(IReadOnlyList<Gewichtsanhebung> anhebungen)
+    {
+        Stufeneinteilung einteilung = hauptfenster.Einteilung.Vervollstaendigt();
+        string schluessel = string.Join(';', anhebungen.Select(a => $"{a.Kriterium},{a.Mannschaft},{a.Vorher},{a.Jetzt}"));
+        if (schluessel == gewichteSchluessel)
+        {
+            return;
+        }
+
+        gewichteSchluessel = schluessel;
+        Kostenkriterium[] reihenfolge = [.. einteilung.A, .. einteilung.B, .. einteilung.C];
+        Gewichte = anhebungen
+            .GroupBy(a => a.Kriterium)
+            .OrderBy(g => Array.IndexOf(reihenfolge, g.Key))
+            .Select(g => new Gewichtsgruppe(
+                StufeMitNummer(einteilung, g.Key),
+                Planqualitaet.Name(g.Key),
+                Zeilen(g)))
+            .ToArray();
     }
 
     private void InselnUebernehmen(Maschinenraum raum)

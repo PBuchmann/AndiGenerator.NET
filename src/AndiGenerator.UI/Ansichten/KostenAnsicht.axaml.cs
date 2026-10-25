@@ -185,6 +185,147 @@ public partial class KostenAnsicht : UserControl
         return eintrag;
     }
 
+    /// <summary>Kopf einer Kostenart: Name senkrecht, darunter Gewichtungsmarke und Anteilsbalken.</summary>
+    private static Border Kopfzelle(KostenAnsichtViewModel m, Matrixspalte spalte, double texthoehe)
+    {
+        var inhalt = new StackPanel { Spacing = 6, VerticalAlignment = VerticalAlignment.Bottom, HorizontalAlignment = HorizontalAlignment.Center };
+        inhalt.Children.Add(new LayoutTransformControl
+        {
+            LayoutTransform = new RotateTransform(-90),
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Bottom,
+            Child = new TextBlock
+            {
+                Text = spalte.Name,
+                FontSize = Kopfschrift,
+                FontWeight = spalte.HatKosten ? FontWeight.SemiBold : FontWeight.Normal,
+                Foreground = spalte.HatKosten ? Tinte : Blass,
+            },
+        });
+        var marke = new Panel { Height = 18, HorizontalAlignment = HorizontalAlignment.Center };
+        if (spalte.Marke.Length > 0)
+        {
+            marke.Children.Add(Marke(spalte.Marke));
+        }
+
+        inhalt.Children.Add(marke);
+        inhalt.Children.Add(Balken(spalte.Balken, spalte.HatKosten ? 40 : 20));
+        var kopf = new Border
+        {
+            Child = inhalt,
+            Height = texthoehe + 44,
+            Margin = new Thickness(1, 0, 1, 4),
+            Padding = new Thickness(0, 4, 0, 6),
+            CornerRadius = new CornerRadius(8),
+            Background = spalte.Gewaehlt ? AkzentHell : Brushes.Transparent,
+            BorderBrush = spalte.Gewaehlt ? Akzent : Brushes.Transparent,
+            BorderThickness = new Thickness(spalte.Gewaehlt ? 2 : 0),
+        };
+        Klickbar(kopf, m.SpalteWaehlenCommand, spalte, spalte.Name + " – klicken: Details und Gewichtung für alle Mannschaften");
+        return kopf;
+    }
+
+    /// <summary>
+    /// Kopf der schmalen Spalte hinter den Kostenarten: blendet die Kostenarten ohne Kosten dort ein, wo sie erscheinen,
+    /// bzw. wieder aus.
+    /// </summary>
+    private static Border LeereUmschalter(KostenAnsichtViewModel m, Kostenmatrix matrix, double texthoehe)
+    {
+        bool offen = m.LeereZeigen;
+        string text = UmschalterText(m, matrix);
+        var inhalt = new StackPanel { Spacing = 6, VerticalAlignment = VerticalAlignment.Bottom, HorizontalAlignment = HorizontalAlignment.Center };
+        inhalt.Children.Add(new LayoutTransformControl
+        {
+            LayoutTransform = new RotateTransform(-90),
+            HorizontalAlignment = HorizontalAlignment.Center,
+            Child = new TextBlock { Text = text, FontSize = 12, FontWeight = FontWeight.SemiBold, Foreground = Akzent },
+        });
+        var kopf = new Border
+        {
+            Child = inhalt,
+            Height = texthoehe + 44,
+            Margin = new Thickness(4, 0, 2, 4),
+            Padding = new Thickness(0, 6),
+            CornerRadius = new CornerRadius(8),
+            Background = AkzentHell,
+        };
+        string hinweis = offen
+            ? "Kostenarten ohne Kosten wieder ausblenden"
+            : $"{matrix.OhneKosten} Kostenarten ohne Kosten einblenden (erscheinen als schmale graue Spalten)";
+        Klickbar(kopf, m.LeereUmschaltenCommand, null, hinweis);
+        return kopf;
+    }
+
+    private static Border Namenszelle(KostenAnsichtViewModel m, Matrixzeile zeile)
+    {
+        var inhalt = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 6, VerticalAlignment = VerticalAlignment.Center };
+        inhalt.Children.Add(new TextBlock
+        {
+            Text = zeile.Name,
+            FontSize = 13,
+            FontWeight = zeile.Gewaehlt ? FontWeight.Bold : FontWeight.Medium,
+            TextTrimming = TextTrimming.CharacterEllipsis,
+            MaxWidth = zeile.Marke.Length > 0 ? 160 : 190,
+            VerticalAlignment = VerticalAlignment.Center,
+        });
+        if (zeile.Marke.Length > 0)
+        {
+            inhalt.Children.Add(Marke(zeile.Marke));
+        }
+
+        var name = new Border
+        {
+            Child = inhalt,
+            Height = Zeilenhoehe,
+            Margin = new Thickness(0, 1, 6, 1),
+            Padding = new Thickness(8, 0),
+            CornerRadius = new CornerRadius(6),
+            Background = zeile.Gewaehlt ? AkzentHell : Brushes.Transparent,
+        };
+        Klickbar(name, m.ZeileWaehlenCommand, zeile, zeile.Name + " – klicken: Details und Gewichtung der ganzen Mannschaft");
+        return name;
+    }
+
+    private static Border Zelle(KostenAnsichtViewModel m, Matrixzelle zelle)
+    {
+        (IBrush hintergrund, IBrush schrift) = Einfaerbung(zelle.Anteil);
+        var inhalt = new Panel();
+        inhalt.Children.Add(new TextBlock
+        {
+            Text = zelle.Text,
+            FontFamily = Ziffern,
+            FontSize = 11,
+            Foreground = schrift,
+            HorizontalAlignment = HorizontalAlignment.Center,
+            VerticalAlignment = VerticalAlignment.Center,
+        });
+        if (zelle.Geaendert)
+        {
+            inhalt.Children.Add(new Ellipse
+            {
+                Width = 7,
+                Height = 7,
+                Fill = Akzent,
+                HorizontalAlignment = HorizontalAlignment.Right,
+                VerticalAlignment = VerticalAlignment.Top,
+                Margin = new Thickness(0, 3, 3, 0),
+            });
+        }
+
+        var rahmen = new Border
+        {
+            Child = inhalt,
+            Height = Zeilenhoehe,
+            Margin = new Thickness(1),
+            CornerRadius = new CornerRadius(5),
+            Background = hintergrund,
+            BorderBrush = zelle.Gewaehlt ? Akzent : Linie,
+            BorderThickness = new Thickness(zelle.Gewaehlt ? 2 : 0),
+        };
+        Klickbar(rahmen, m.ZelleWaehlenCommand, zelle, zelle.Hinweis);
+        return rahmen;
+    }
+
     /// <summary>Meldet sich nur an, solange die Ansicht angezeigt wird.</summary>
     private void Verbinden()
     {
@@ -335,147 +476,6 @@ public partial class KostenAnsicht : UserControl
             gesamt.Children.Add(new TextBlock { Text = zeile.Gesamt, FontFamily = Ziffern, FontSize = 12, FontWeight = FontWeight.SemiBold, VerticalAlignment = VerticalAlignment.Center });
             Setzen(Tabelle, gesamt, z + 1, gesamtSpalte);
         }
-    }
-
-    /// <summary>Kopf einer Kostenart: Name senkrecht, darunter Gewichtungsmarke und Anteilsbalken.</summary>
-    private Border Kopfzelle(KostenAnsichtViewModel m, Matrixspalte spalte, double texthoehe)
-    {
-        var inhalt = new StackPanel { Spacing = 6, VerticalAlignment = VerticalAlignment.Bottom, HorizontalAlignment = HorizontalAlignment.Center };
-        inhalt.Children.Add(new LayoutTransformControl
-        {
-            LayoutTransform = new RotateTransform(-90),
-            HorizontalAlignment = HorizontalAlignment.Center,
-            VerticalAlignment = VerticalAlignment.Bottom,
-            Child = new TextBlock
-            {
-                Text = spalte.Name,
-                FontSize = Kopfschrift,
-                FontWeight = spalte.HatKosten ? FontWeight.SemiBold : FontWeight.Normal,
-                Foreground = spalte.HatKosten ? Tinte : Blass,
-            },
-        });
-        var marke = new Panel { Height = 18, HorizontalAlignment = HorizontalAlignment.Center };
-        if (spalte.Marke.Length > 0)
-        {
-            marke.Children.Add(Marke(spalte.Marke));
-        }
-
-        inhalt.Children.Add(marke);
-        inhalt.Children.Add(Balken(spalte.Balken, spalte.HatKosten ? 40 : 20));
-        var kopf = new Border
-        {
-            Child = inhalt,
-            Height = texthoehe + 44,
-            Margin = new Thickness(1, 0, 1, 4),
-            Padding = new Thickness(0, 4, 0, 6),
-            CornerRadius = new CornerRadius(8),
-            Background = spalte.Gewaehlt ? AkzentHell : Brushes.Transparent,
-            BorderBrush = spalte.Gewaehlt ? Akzent : Brushes.Transparent,
-            BorderThickness = new Thickness(spalte.Gewaehlt ? 2 : 0),
-        };
-        Klickbar(kopf, m.SpalteWaehlenCommand, spalte, spalte.Name + " – klicken: Details und Gewichtung für alle Mannschaften");
-        return kopf;
-    }
-
-    /// <summary>
-    /// Kopf der schmalen Spalte hinter den Kostenarten: blendet die Kostenarten ohne Kosten dort ein, wo sie erscheinen,
-    /// bzw. wieder aus.
-    /// </summary>
-    private Border LeereUmschalter(KostenAnsichtViewModel m, Kostenmatrix matrix, double texthoehe)
-    {
-        bool offen = m.LeereZeigen;
-        string text = UmschalterText(m, matrix);
-        var inhalt = new StackPanel { Spacing = 6, VerticalAlignment = VerticalAlignment.Bottom, HorizontalAlignment = HorizontalAlignment.Center };
-        inhalt.Children.Add(new LayoutTransformControl
-        {
-            LayoutTransform = new RotateTransform(-90),
-            HorizontalAlignment = HorizontalAlignment.Center,
-            Child = new TextBlock { Text = text, FontSize = 12, FontWeight = FontWeight.SemiBold, Foreground = Akzent },
-        });
-        var kopf = new Border
-        {
-            Child = inhalt,
-            Height = texthoehe + 44,
-            Margin = new Thickness(4, 0, 2, 4),
-            Padding = new Thickness(0, 6),
-            CornerRadius = new CornerRadius(8),
-            Background = AkzentHell,
-        };
-        string hinweis = offen
-            ? "Kostenarten ohne Kosten wieder ausblenden"
-            : $"{matrix.OhneKosten} Kostenarten ohne Kosten einblenden (erscheinen als schmale graue Spalten)";
-        Klickbar(kopf, m.LeereUmschaltenCommand, null, hinweis);
-        return kopf;
-    }
-
-    private Border Namenszelle(KostenAnsichtViewModel m, Matrixzeile zeile)
-    {
-        var inhalt = new StackPanel { Orientation = Orientation.Horizontal, Spacing = 6, VerticalAlignment = VerticalAlignment.Center };
-        inhalt.Children.Add(new TextBlock
-        {
-            Text = zeile.Name,
-            FontSize = 13,
-            FontWeight = zeile.Gewaehlt ? FontWeight.Bold : FontWeight.Medium,
-            TextTrimming = TextTrimming.CharacterEllipsis,
-            MaxWidth = zeile.Marke.Length > 0 ? 160 : 190,
-            VerticalAlignment = VerticalAlignment.Center,
-        });
-        if (zeile.Marke.Length > 0)
-        {
-            inhalt.Children.Add(Marke(zeile.Marke));
-        }
-
-        var name = new Border
-        {
-            Child = inhalt,
-            Height = Zeilenhoehe,
-            Margin = new Thickness(0, 1, 6, 1),
-            Padding = new Thickness(8, 0),
-            CornerRadius = new CornerRadius(6),
-            Background = zeile.Gewaehlt ? AkzentHell : Brushes.Transparent,
-        };
-        Klickbar(name, m.ZeileWaehlenCommand, zeile, zeile.Name + " – klicken: Details und Gewichtung der ganzen Mannschaft");
-        return name;
-    }
-
-    private Border Zelle(KostenAnsichtViewModel m, Matrixzelle zelle)
-    {
-        (IBrush hintergrund, IBrush schrift) = Einfaerbung(zelle.Anteil);
-        var inhalt = new Panel();
-        inhalt.Children.Add(new TextBlock
-        {
-            Text = zelle.Text,
-            FontFamily = Ziffern,
-            FontSize = 11,
-            Foreground = schrift,
-            HorizontalAlignment = HorizontalAlignment.Center,
-            VerticalAlignment = VerticalAlignment.Center,
-        });
-        if (zelle.Geaendert)
-        {
-            inhalt.Children.Add(new Ellipse
-            {
-                Width = 7,
-                Height = 7,
-                Fill = Akzent,
-                HorizontalAlignment = HorizontalAlignment.Right,
-                VerticalAlignment = VerticalAlignment.Top,
-                Margin = new Thickness(0, 3, 3, 0),
-            });
-        }
-
-        var rahmen = new Border
-        {
-            Child = inhalt,
-            Height = Zeilenhoehe,
-            Margin = new Thickness(1),
-            CornerRadius = new CornerRadius(5),
-            Background = hintergrund,
-            BorderBrush = zelle.Gewaehlt ? Akzent : Linie,
-            BorderThickness = new Thickness(zelle.Gewaehlt ? 2 : 0),
-        };
-        Klickbar(rahmen, m.ZelleWaehlenCommand, zelle, zelle.Hinweis);
-        return rahmen;
     }
 
     /// <summary>

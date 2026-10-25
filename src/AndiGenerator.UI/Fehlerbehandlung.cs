@@ -32,13 +32,24 @@ internal static class Fehlerbehandlung
         TaskScheduler.UnobservedTaskException += Unbeobachtet;
     }
 
+    // Ereignisbehandlung des Dispatchers: muss void sein. Ein Fehler beim Melden selbst darf nicht wieder hierher führen.
+#pragma warning disable VSTHRD100
     private static async void AufDerOberflaeche(object? sender, DispatcherUnhandledExceptionEventArgs e)
+#pragma warning restore VSTHRD100
     {
         e.Handled = true;
         string text = Festhalten(e.Exception, "Oberfläche", sichern: true);
         if (oberflaeche is not null && Interlocked.Exchange(ref gemeldet, 1) == 0)
         {
-            await oberflaeche.MeldenAsync("Unerwarteter Fehler", text);
+            try
+            {
+                await oberflaeche.MeldenAsync("Unerwarteter Fehler", text);
+            }
+            catch (Exception fehler)
+            {
+                // Die Meldung ließ sich nicht zeigen; der Fehler steht im Protokoll.
+                Festhalten(fehler, "Meldung eines Fehlers", sichern: false);
+            }
         }
     }
 

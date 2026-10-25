@@ -93,7 +93,7 @@ public sealed partial class KompaktspieltageAnsichtViewModel
             HalleLokale = lokale;
         }
 
-        HalleLokal = lokale.FirstOrDefault(l => l.Nummer == gewaehlt) ?? lokale.FirstOrDefault();
+        HalleLokal = lokale.FirstOrDefault(l => l.Nummer == gewaehlt) ?? (lokale.Count > 0 ? lokale[0] : null);
         if (andere)
         {
             HalleMeldung = string.Empty;

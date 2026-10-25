@@ -194,7 +194,7 @@ public sealed partial class KompaktspieltageAnsichtViewModel
         CursorLokale = lokale;
         CursorZeit = termin?.Zeit?.ToString("HH:mm", CultureInfo.InvariantCulture) ?? string.Empty;
         string lokal = termin?.Spiellokal ?? string.Empty;
-        CursorLokal = lokale.FirstOrDefault(l => l.Nummer == lokal) ?? lokale.FirstOrDefault();
+        CursorLokal = lokale.FirstOrDefault(l => l.Nummer == lokal) ?? (lokale.Count > 0 ? lokale[0] : null);
         CursorZweiTische = termin?.ZweiTische ?? false;
     }
 

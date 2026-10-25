@@ -91,7 +91,8 @@ public abstract class MehrMannschaftenSeiteViewModel : DatenSeiteViewModel
     public override void Laden()
     {
         Namen = Bearbeitung.Mannschaftsnamen();
-        string? wahl = letzteMannschaft is string letzte && Namen.Contains(letzte) ? letzte : Namen.FirstOrDefault();
+        string? erste = Namen.Count > 0 ? Namen[0] : null;
+        string? wahl = letzteMannschaft is string letzte && Namen.Contains(letzte) ? letzte : erste;
         mannschaft = null;
         detail = null;
         if (wahl is not null)

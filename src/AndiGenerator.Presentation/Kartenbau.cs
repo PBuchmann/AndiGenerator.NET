@@ -19,6 +19,9 @@ public static class Kartenbau
     private const double Schrifthoehe = 15;
     private const int HoechstensStaedte = 10;
 
+    /// <summary>Mögliche Längen des Maßstabsbalkens in km, die längste zuerst.</summary>
+    private static readonly int[] Massstaebe = [200, 100, 50, 20, 10, 5];
+
     /// <summary>Baut das Kartenbild.</summary>
     /// <param name="orte">Spielorte (nur solche mit bekannter Lage).</param>
     /// <param name="fahrten">Fahrten von Gast zu Ausrichter (Mannschaftsnamen), mit Kennzeichen für Einzelbegegnungen.</param>
@@ -117,7 +120,7 @@ public static class Kartenbau
 
         List<Kartenfahrt> linien = Nebeneinander(fahrten.Where(f => punkte.ContainsKey(f.Von) && punkte.ContainsKey(f.Nach)).ToList(), punkte);
         double kmJePunkt = projektion.Massstab * Gradmass / 111.2;
-        int massstab = new[] { 200, 100, 50, 20, 10, 5 }.FirstOrDefault(km => km * kmJePunkt <= 140, 5);
+        int massstab = Massstaebe.FirstOrDefault(km => km * kmJePunkt <= 140, 5);
         return new Kartenbild(Breite, projektion.Hoehe, flaechen, landnamen, stadtnamen, hallen, linien, massstab, massstab * kmJePunkt);
     }
 

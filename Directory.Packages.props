@@ -41,5 +41,6 @@
   <ItemGroup>
     <GlobalPackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556" />
     <GlobalPackageReference Include="SonarAnalyzer.CSharp" Version="10.35.0.4138" />
+    <GlobalPackageReference Include="Microsoft.VisualStudio.Threading.Analyzers" Version="18.12.1" />
   </ItemGroup>
 </Project>
