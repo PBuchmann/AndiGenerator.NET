@@ -4,6 +4,7 @@
 
 using System.Reflection;
 using AndiGenerator.Mcp;
+using AndiGenerator.Persistence.Tests;
 using ModelContextProtocol;
 using ModelContextProtocol.Client;
 using ModelContextProtocol.Protocol;
@@ -409,26 +410,10 @@ public sealed class FernsteuerungTests : IDisposable
         Assert.Equal("Kompaktspieltage", (await w.Status()).Verfahren);
         Assert.Equal(mannschaften, (await w.Spielplandaten())!.Mannschaften.Count);
 
-        Assert.True((await w.Starten()).Erfolg);
-        Stand stand = await w.Status();
-        for (int i = 0; i < 300 && stand.Laeuft && !stand.Statuszeile.Contains("geplant – ", StringComparison.Ordinal); i++)
-        {
-            await Task.Delay(100);
-            stand = await w.Status();
-        }
-
-        if (stand.Laeuft)
-        {
-            await w.Stoppen();
-        }
-
-        for (int i = 0; i < 60 && (await w.Status()).Laeuft; i++)
-        {
-            await Task.Delay(500);
-        }
+        Stand stand = await KompaktPlanenAsync();
 
         Kompaktstand k = Assert.IsType<Kompaktstand>(await w.Kompakt());
-        Assert.Contains(k.Plaene, p => !p.Contains("Plan aus click-TT", StringComparison.Ordinal));
+        Assert.True(k.Plaene.Any(p => !p.Contains("Plan aus click-TT", StringComparison.Ordinal)), stand.Statuszeile);
         Assert.NotEmpty(k.Spieltage);
     }
 
@@ -464,24 +449,8 @@ public sealed class FernsteuerungTests : IDisposable
         Assert.Contains("Jugend 19 Testliga", vorher.Kopf, StringComparison.Ordinal);
         Assert.Empty(vorher.Spieltage);
 
-        // Beenden nach der ersten Fortschrittsmeldung: Der Planer liefert die bis dahin besten Pläne.
-        Assert.True((await w.Starten()).Erfolg);
-        Stand stand = await w.Status();
-        for (int i = 0; i < 300 && stand.Laeuft && !stand.Statuszeile.Contains("geplant – ", StringComparison.Ordinal); i++)
-        {
-            await Task.Delay(100);
-            stand = await w.Status();
-        }
-
-        if (stand.Laeuft)
-        {
-            Assert.True((await w.Stoppen()).Erfolg);
-        }
-
-        for (int i = 0; i < 60 && (await w.Status()).Laeuft; i++)
-        {
-            await Task.Delay(500);
-        }
+        // Beenden, sobald es einen Plan gibt: Der Planer liefert die bis dahin besten Pläne.
+        await KompaktPlanenAsync();
 
         Kompaktstand k = Assert.IsType<Kompaktstand>(await w.Kompakt());
         Assert.False(k.Rechnet);
@@ -495,6 +464,38 @@ public sealed class FernsteuerungTests : IDisposable
         Assert.Equal(zweiter, gewaehlt.Erlaeuterung[0]);
         Assert.NotEmpty(gewaehlt.Spieltage);
         Assert.Null(await w.Qualitaet());
+    }
+
+    /// <summary>
+    /// Berechnet Kompaktspieltage und beendet, sobald es einen Plan gibt: mit HiGHS nach der ersten Meldung (HiGHS liefert
+    /// seinen besten Plan), ohne HiGHS (win-arm64, siehe HighsPlattform), sobald die vollständige 4er-Suche einen Plan hat („kürzester bisher“).
+    /// Die Zufallssuche ohne HiGHS beginnt streng und lockert erst mit der Zeit; ohne 4er-Spieltage (z. B. NRW-Liga mit 8
+    /// Mannschaften) hat sie erst am Ende Pläne – dort endet der Lauf von selbst (etwa 30 s).
+    /// </summary>
+    /// <returns>Der Stand beim Beenden.</returns>
+    private async Task<Stand> KompaktPlanenAsync()
+    {
+        Assert.True((await w.Starten()).Erfolg);
+        static bool PlanDa(Stand s) => s.Statuszeile.Contains("geplant – ", StringComparison.Ordinal)
+            && (HighsPlattform.Grund is null || s.Statuszeile.Contains("kürzester bisher", StringComparison.Ordinal));
+        Stand stand = await w.Status();
+        for (int i = 0; i < 1200 && stand.Laeuft && !PlanDa(stand); i++)
+        {
+            await Task.Delay(100);
+            stand = await w.Status();
+        }
+
+        if (stand.Laeuft)
+        {
+            await w.Stoppen();
+        }
+
+        for (int i = 0; i < 60 && (await w.Status()).Laeuft; i++)
+        {
+            await Task.Delay(500);
+        }
+
+        return stand;
     }
 
     private async Task NormaleRundeOeffnenAsync(bool kopieren = true)

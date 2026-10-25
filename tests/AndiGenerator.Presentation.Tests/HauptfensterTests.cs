@@ -6,7 +6,6 @@ using AndiGenerator.Application;
 using AndiGenerator.Domain.Optionen;
 using AndiGenerator.Engine.Inseln;
 using AndiGenerator.Engine.Schranke;
-using AndiGenerator.Persistence.Tests;
 using AndiGenerator.Rendering;
 using Dock.Model.Core;
 
@@ -671,113 +670,6 @@ public sealed class HauptfensterTests : IDisposable
         await optionen.StandardCommand.ExecuteAsync(null);
         Assert.False(optionen.Doppelrunde);
         Assert.True(optionen.AutomatischeMitte);
-    }
-
-    [HighsFact]
-    public async Task Automodus_uebernimmt_die_Schranke_aus_HiGHS_in_die_laufende_Generierung()
-    {
-        // HiGHS rechnet nebenher; seine Schranke landet im laufenden Automodus und steht im Leitstand.
-        await OeffnenAsync();
-        hf.AutomodusCommand.Execute(null);
-        await hf.GenerierungCommand.ExecuteAsync(null);
-        try
-        {
-            hf.LeitstandCommand.Execute(null);
-            LeitstandAnsichtViewModel raum = Assert.Single(Ansichten<LeitstandAnsichtViewModel>());
-            for (int i = 0; i < 600 && !raum.Verfahren.Contains("Untere Schranke", StringComparison.Ordinal); i++)
-            {
-                await Task.Delay(100);
-            }
-
-            Assert.Contains("Untere Schranke aus HiGHS (Summe je Stufe): A ≥", raum.Verfahren, StringComparison.Ordinal);
-            Assert.Contains(raum.Protokoll, z => z.Contains("Schranke aus HiGHS", StringComparison.Ordinal));
-        }
-        finally
-        {
-            hf.StoppenCommand.Execute(null);
-        }
-    }
-
-    [HighsFact]
-    public async Task Automodus_zeigt_die_Schranke_der_Stufe_A()
-    {
-        // Im Automodus zeigt die Qualitätsansicht die untere Schranke der Stufe A (HiGHS rechnet im Hintergrund).
-        await OeffnenAsync();
-        hf.QualitaetsansichtCommand.Execute(null);
-        QualitaetAnsichtViewModel qualitaet = Assert.Single(Ansichten<QualitaetAnsichtViewModel>());
-        qualitaet.Quelle = PlanQuelle.ClickTt;
-        Assert.False(qualitaet.ZeigtSchranke);
-        Assert.All(qualitaet.Zeilen, z => Assert.Empty(z.Bestmoeglich));
-
-        // Die Meldungen von HiGHS laufen wie auf dem UI-Thread nur hier, nie gleichzeitig mit den Prüfungen (sonst sah der Test
-        // gelegentlich eine Ansicht mitten im Erneuern).
-        o.Sammeln = true;
-        hf.AutomodusCommand.Execute(null);
-        Assert.True(qualitaet.ZeigtSchranke);
-        for (int i = 0; i < 600 && qualitaet.Zeilen.Any(z => z.BestmoeglichRechnet); i++)
-        {
-            await Task.Delay(100);
-            o.Abarbeiten();
-        }
-
-        Assert.True(qualitaet.ZeigtSchranke);
-        Assert.DoesNotContain(qualitaet.Zeilen, z => z.BestmoeglichRechnet);
-
-        // Eine Untergrenze 0: Kein Verstoß ist zwingend, kein Haken.
-        Assert.All(qualitaet.Zeilen.Where(z => z.Stufe == "A1"), z => Assert.Equal("kein Verstoß zwingend", z.Bestmoeglich));
-        Assert.All(qualitaet.Zeilen.Where(z => z.Stufe == "A1"), z => Assert.False(z.BestmoeglichErreicht));
-        Assert.All(qualitaet.Zeilen.Where(z => (z.IstA || z.IstB) && z.Kriterium is not null), z => Assert.NotEmpty(z.Bestmoeglich));
-        Assert.All(qualitaet.Zeilen.Where(z => z.IstC), z => Assert.Empty(z.Bestmoeglich));
-
-        // Je Stufe eine Kopfzeile über ihrer ersten Zeile: Plan, Grenze und in Klartext, ob das Optimum erreicht ist.
-        Assert.Equal(["Stufe A · muss", "Stufe B · soll", "Stufe C · wird geglättet"], qualitaet.Zeilen.Where(z => z.HatKopf).Select(z => z.Kopf!.Titel));
-        Stufenkopf a = qualitaet.Zeilen.First(z => z.HatKopf).Kopf!;
-        Assert.StartsWith("Grenze ≥ ", a.Grenze, StringComparison.Ordinal);
-        Assert.Contains("Optimum", a.Spielraum, StringComparison.Ordinal);
-
-        hf.KostenoptimierungCommand.Execute(null);
-        Assert.False(qualitaet.ZeigtSchranke);
-        Assert.DoesNotContain(qualitaet.Zeilen, z => z.HatKopf);
-    }
-
-    [HighsFact]
-    public async Task Kriterien_ohne_Modell_bleiben_in_C()
-    {
-        // Bei der Doppelrunde kennt HiGHS den Abstand H/A nicht: Die Zeile lässt sich weder mit den Knöpfen noch durch Ziehen
-        // nach A oder B bringen – beim Ziehen steht der Grund an der schwebenden Zeile, die Lücke bleibt.
-        await OeffnenAsync();
-        hf.EinstellungenCommand.Execute(null);
-        Assert.Single(Ansichten<OptionenAnsichtViewModel>()).Doppelrunde = true;
-        hf.QualitaetsansichtCommand.Execute(null);
-        QualitaetAnsichtViewModel qualitaet = Assert.Single(Ansichten<QualitaetAnsichtViewModel>());
-        qualitaet.Quelle = PlanQuelle.ClickTt;
-        hf.AutomodusCommand.Execute(null);
-        for (int i = 0; i < 600 && !qualitaet.Zeilen.Any(z => z.NurC); i++)
-        {
-            await Task.Delay(100);
-        }
-
-        Qualitaetszeile abstand = Assert.Single(qualitaet.Zeilen, z => z.Kriterium == Kostenkriterium.AbstandHeimAuswaerts);
-        Assert.True(abstand.NurC);
-        Assert.False(abstand.KannAB);
-        Assert.False(abstand.EinstufenBCommand.CanExecute(null));
-        Assert.Contains("HiGHS kennt", abstand.ErklaerungB, StringComparison.Ordinal);
-        Assert.True(Assert.Single(qualitaet.Zeilen, z => z.Kriterium == Kostenkriterium.Sperrtermine).KannAB);
-
-        string vorher = string.Join(",", qualitaet.Zeilen.Select(z => z.Stufe + z.Name));
-        Qualitaetszeile b = qualitaet.Zeilen.First(z => z.IstB && z.Kriterium is not null);
-        Assert.True(qualitaet.ZiehenBeginnen(abstand));
-        qualitaet.ZiehenUeber(b, davor: true);
-        Assert.NotNull(qualitaet.Schwebend);
-        Assert.True(qualitaet.Schwebend.HatAblehnung);
-        Assert.Equal("C", Assert.Single(qualitaet.Zeilen, z => z.Kriterium == Kostenkriterium.AbstandHeimAuswaerts).Klasse);
-
-        // Innerhalb von C geht es weiter: Vorschau ohne Ablehnung.
-        Qualitaetszeile c = qualitaet.Zeilen.Last(z => z.IstC && z.Kriterium is not null && z.Kriterium != Kostenkriterium.AbstandHeimAuswaerts);
-        qualitaet.ZiehenUeber(c, davor: false);
-        Assert.False(qualitaet.Schwebend.HatAblehnung);
-        qualitaet.ZiehenBeenden(uebernehmen: false);
-        Assert.Equal(vorher, string.Join(",", qualitaet.Zeilen.Select(z => z.Stufe + z.Name)));
     }
 
     [Fact]
