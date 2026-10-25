@@ -5,6 +5,8 @@
 using AndiGenerator.Application;
 using AndiGenerator.Domain.Optionen;
 using AndiGenerator.Engine.Inseln;
+using AndiGenerator.Engine.Schranke;
+using AndiGenerator.Persistence.Tests;
 using AndiGenerator.Rendering;
 using Dock.Model.Core;
 
@@ -138,11 +140,12 @@ public sealed class HauptfensterTests : IDisposable
         Assert.Equal(Schrittzustand.Erledigt, stufen.Zustand);
         await einrichtung.AbschliessenCommand.ExecuteAsync(null);
 
-        // In dieser Sitzung gilt der Standard (Hallenbelegung wieder A2), gespeichert bleibt die eigene Einteilung.
+        // In dieser Sitzung gilt der Standard (Hallenbelegung wieder A3 nach den vereinsinternen Spielen), gespeichert bleibt die
+        // eigene Einteilung.
         hf.QualitaetsansichtCommand.Execute(null);
         QualitaetAnsichtViewModel qualitaet = Assert.Single(Ansichten<QualitaetAnsichtViewModel>());
         qualitaet.Quelle = PlanQuelle.ClickTt;
-        Assert.Equal(halle, qualitaet.Zeilen.First(z => z.Stufe == "A2").Name);
+        Assert.Equal(halle, qualitaet.Zeilen.First(z => z.Stufe == "A3").Name);
         Assert.Equal(eigene, Plansitzung.Oeffnen(datei, basis).Staffel.Kriterienstufen);
 
         // Beim nächsten Öffnen mit „Diese Reihenfolge verwenden“ gilt die eigene Einteilung.
@@ -177,12 +180,39 @@ public sealed class HauptfensterTests : IDisposable
         Assert.Equal(PlanQuelle.ClickTt, Assert.Single(Ansichten<QualitaetAnsichtViewModel>()).Quelle);
     }
 
+    /// <summary>Im Automodus nennt die Karte einer Insel alle Verstöße in A und B mit Stufe und ihre harten Fehler.</summary>
+    /// <returns>Der Testlauf.</returns>
     [Fact]
-    public async Task Maschinenraum_zeigt_Inseln_mit_bestem_Plan_und_Spezial_Insel()
+    public async Task Leitstand_zeigt_Verstoesse_in_A_und_B_und_harte_Fehler_der_Inseln()
     {
         await OeffnenAsync();
-        hf.MaschinenraumCommand.Execute(null);
-        MaschinenraumAnsichtViewModel raum = Assert.Single(Ansichten<MaschinenraumAnsichtViewModel>());
+        hf.LeitstandCommand.Execute(null);
+        LeitstandAnsichtViewModel raum = Assert.Single(Ansichten<LeitstandAnsichtViewModel>());
+        Inselstand[] inseln =
+        [
+            new(1, false, true, 900, 500_000, 50_000, 2, ["2"], new Stufenwert(3, 7, 44, 0, 347, 0), Kostentreiber:
+            [
+                new Kostenverursacher(Kostenkriterium.ParalleleSpiele, 1, 7, Stufe.A),
+                new Kostenverursacher(Kostenkriterium.Sperrtermine, 0.5, 30, Stufe.B),
+                new Kostenverursacher(Kostenkriterium.Spielverteilung, 0.3, 20, Stufe.C),
+            ]),
+            new(2, false, true, 1200, 400_000, 100_000, 0, ["2"], new Stufenwert(0, 10, 36, 0, 365, 0)),
+        ];
+        raum.Uebernehmen(new Optimierungsstand(true, false, 900_000, 5000, 900, 3, TimeSpan.Zero, null, [], null, new Maschinenraum([600_000, 300_000], inseln, 100_000, null, 0)));
+
+        Assert.True(raum.Inseln[0].HatHarte);
+        Assert.StartsWith("3 Spiele ohne gültigen Termin", raum.Inseln[0].Harte, StringComparison.Ordinal);
+        Assert.False(raum.Inseln[1].HatHarte);
+        Assert.Equal(["A · " + Planqualitaet.Name(Kostenkriterium.ParalleleSpiele), "B · " + Planqualitaet.Name(Kostenkriterium.Sperrtermine), "C · " + Planqualitaet.Name(Kostenkriterium.Spielverteilung)], raum.Inseln[0].Kostentreiber.Select(k => k.Name));
+        Assert.Equal("7", raum.Inseln[0].Kostentreiber[0].Prozent);
+    }
+
+    [Fact]
+    public async Task Leitstand_zeigt_Inseln_mit_bestem_Plan_und_Spezial_Insel()
+    {
+        await OeffnenAsync();
+        hf.LeitstandCommand.Execute(null);
+        LeitstandAnsichtViewModel raum = Assert.Single(Ansichten<LeitstandAnsichtViewModel>());
         Assert.Equal("Keine Generierung aktiv", raum.Ueberschrift);
         Assert.Empty(raum.Inseln);
 
@@ -195,7 +225,8 @@ public sealed class HauptfensterTests : IDisposable
         var stand = new Optimierungsstand(true, false, 900_000, 5000, 900, 3, TimeSpan.Zero, null, [], null, new Maschinenraum([600_000, 300_000], inseln, 100_000, null, 0));
         raum.Uebernehmen(stand);
 
-        Assert.StartsWith("2 Rechenkerne · 2 Inseln und Spezial-Insel", raum.Ueberschrift, StringComparison.Ordinal);
+        Assert.StartsWith("2 Rechenkerne der Suche · 2 Inseln und Spezial-Insel", raum.Ueberschrift, StringComparison.Ordinal);
+        Assert.Equal("Koordinator", raum.Schaubild.Lenkung);
         Assert.Equal(3, raum.Inseln.Count);
         Assert.True(raum.Inseln[0].IstBeste);
         Assert.False(raum.Inseln[1].IstBeste);
@@ -245,6 +276,50 @@ public sealed class HauptfensterTests : IDisposable
         Assert.Equal(4, zeile.Segmente.ToList().FindIndex(x => x.Jetzt));
         bool[] linie = [false, false, true, true, false, false];
         Assert.Equal(linie, zeile.Segmente.Select(x => x.RechtsWeg).ToArray());
+        Assert.False(raum.HatVerfahren);
+
+        // Mit Schranke: Text dazu, letzte Schritte; dieselbe Änderung bei vielen Mannschaften als eine Zeile.
+        var highs = lenkung with
+        {
+            SchrankeA = 1,
+            SchrankeB = 4,
+            Aenderungen = ["1 s C DreiTageAbstand angehoben"],
+            Gewichte = [.. new[] { "A", "B", "C", "D", "E" }.Select(t => new Gewichtsanhebung(Kostenkriterium.Sperrtermine, "TSV " + t, Gewichtung.Normal, Gewichtung.ExtremHoch))],
+        };
+        raum.Uebernehmen(stand with { Lenkung = highs, Maschinenraum = stand.Maschinenraum with { Inseln = auto } });
+        Assert.Equal("5 Mannschaften", Assert.Single(Assert.Single(raum.Gewichte).Zeilen).Wer);
+        Assert.Contains("Untere Schranke aus HiGHS", raum.Verfahren, StringComparison.Ordinal);
+        Assert.Contains("A ≥ 1 (bester Plan 1 – bestmöglich), B ≥ 4 (bester Plan 4 – bestmöglich)", raum.Verfahren, StringComparison.Ordinal);
+        Assert.Equal("1 s C DreiTageAbstand angehoben", Assert.Single(raum.Protokoll));
+
+        // Teilneuplanung mit HiGHS: im Schaubild (oben rechts); ihr Anteil am Prozessor (kein eigener Kern) in der Leiste.
+        Assert.False(raum.ZeigtTeilneuplanung);
+        Assert.False(raum.Schaubild.ZeigtHighs);
+        Teilneuplanungsstand teil = new("plant Ausschnitte neu", 9, 3, 2, 1, Rechnet: true, Mannschaften: 2, Verlauf: [Ausschnittsergebnis.Besser, Ausschnittsergebnis.Ausgangsplan]);
+        var last = new Prozessorlast(0.80, 0.0625, 0.02, 16);
+        Optimierungsstand mitTeil = stand with { Lenkung = highs, Maschinenraum = stand.Maschinenraum with { Inseln = auto }, Teilneuplanung = teil, Last = last };
+        hf.Anzeige.Uebernehmen(mitTeil);
+        raum.Uebernehmen(mitTeil);
+        Assert.True(raum.ZeigtTeilneuplanung);
+        Assert.Same(teil, raum.Schaubild.Teilneuplanung);
+        Assert.True(raum.Schaubild.HighsRechnet);
+        Assert.Equal("Automodus", raum.Schaubild.Lenkung);
+        Assert.StartsWith("Stufe A", raum.Schaubild.LenkungText, StringComparison.Ordinal);
+        Assert.Contains("HiGHS 6 % des Prozessors", raum.Ueberschrift, StringComparison.Ordinal);
+        Assert.Equal("88 %", hf.Anzeige.Auslastung);
+        Assert.Equal(["Suche", "HiGHS", "Rest", "frei"], hf.Anzeige.Prozessorzeilen.Select(z => z.Name));
+        Assert.Equal("1,0 Kern", hf.Anzeige.Prozessorzeilen[1].Kerne);
+        Assert.Equal("12,8 Kerne", hf.Anzeige.Prozessorzeilen[0].Kerne);
+        Assert.Equal("16 Kerne", hf.Anzeige.SkalaEnde);
+        Assert.Single(hf.Anzeige.Lastverlauf);
+
+        // Untere Schranke: zeigt ihren Schritt im Schaubild.
+        raum.HighsZeigen(new Schrankenfortschritt("A3 Parallele Spiele", 2, 5, null));
+        Assert.NotNull(raum.Schaubild.Schranke);
+        raum.HighsZeigen(null);
+        Assert.Null(raum.Schaubild.Schranke);
+        raum.Uebernehmen(stand);
+        Assert.False(raum.HatVerfahren);
     }
 
     [Fact]
@@ -598,6 +673,113 @@ public sealed class HauptfensterTests : IDisposable
         Assert.True(optionen.AutomatischeMitte);
     }
 
+    [HighsFact]
+    public async Task Automodus_uebernimmt_die_Schranke_aus_HiGHS_in_die_laufende_Generierung()
+    {
+        // HiGHS rechnet nebenher; seine Schranke landet im laufenden Automodus und steht im Leitstand.
+        await OeffnenAsync();
+        hf.AutomodusCommand.Execute(null);
+        await hf.GenerierungCommand.ExecuteAsync(null);
+        try
+        {
+            hf.LeitstandCommand.Execute(null);
+            LeitstandAnsichtViewModel raum = Assert.Single(Ansichten<LeitstandAnsichtViewModel>());
+            for (int i = 0; i < 600 && !raum.Verfahren.Contains("Untere Schranke", StringComparison.Ordinal); i++)
+            {
+                await Task.Delay(100);
+            }
+
+            Assert.Contains("Untere Schranke aus HiGHS (Summe je Stufe): A ≥", raum.Verfahren, StringComparison.Ordinal);
+            Assert.Contains(raum.Protokoll, z => z.Contains("Schranke aus HiGHS", StringComparison.Ordinal));
+        }
+        finally
+        {
+            hf.StoppenCommand.Execute(null);
+        }
+    }
+
+    [HighsFact]
+    public async Task Automodus_zeigt_die_Schranke_der_Stufe_A()
+    {
+        // Im Automodus zeigt die Qualitätsansicht die untere Schranke der Stufe A (HiGHS rechnet im Hintergrund).
+        await OeffnenAsync();
+        hf.QualitaetsansichtCommand.Execute(null);
+        QualitaetAnsichtViewModel qualitaet = Assert.Single(Ansichten<QualitaetAnsichtViewModel>());
+        qualitaet.Quelle = PlanQuelle.ClickTt;
+        Assert.False(qualitaet.ZeigtSchranke);
+        Assert.All(qualitaet.Zeilen, z => Assert.Empty(z.Bestmoeglich));
+
+        // Die Meldungen von HiGHS laufen wie auf dem UI-Thread nur hier, nie gleichzeitig mit den Prüfungen (sonst sah der Test
+        // gelegentlich eine Ansicht mitten im Erneuern).
+        o.Sammeln = true;
+        hf.AutomodusCommand.Execute(null);
+        Assert.True(qualitaet.ZeigtSchranke);
+        for (int i = 0; i < 600 && qualitaet.Zeilen.Any(z => z.BestmoeglichRechnet); i++)
+        {
+            await Task.Delay(100);
+            o.Abarbeiten();
+        }
+
+        Assert.True(qualitaet.ZeigtSchranke);
+        Assert.DoesNotContain(qualitaet.Zeilen, z => z.BestmoeglichRechnet);
+
+        // Eine Untergrenze 0: Kein Verstoß ist zwingend, kein Haken.
+        Assert.All(qualitaet.Zeilen.Where(z => z.Stufe == "A1"), z => Assert.Equal("kein Verstoß zwingend", z.Bestmoeglich));
+        Assert.All(qualitaet.Zeilen.Where(z => z.Stufe == "A1"), z => Assert.False(z.BestmoeglichErreicht));
+        Assert.All(qualitaet.Zeilen.Where(z => (z.IstA || z.IstB) && z.Kriterium is not null), z => Assert.NotEmpty(z.Bestmoeglich));
+        Assert.All(qualitaet.Zeilen.Where(z => z.IstC), z => Assert.Empty(z.Bestmoeglich));
+
+        // Je Stufe eine Kopfzeile über ihrer ersten Zeile: Plan, Grenze und in Klartext, ob das Optimum erreicht ist.
+        Assert.Equal(["Stufe A · muss", "Stufe B · soll", "Stufe C · wird geglättet"], qualitaet.Zeilen.Where(z => z.HatKopf).Select(z => z.Kopf!.Titel));
+        Stufenkopf a = qualitaet.Zeilen.First(z => z.HatKopf).Kopf!;
+        Assert.StartsWith("Grenze ≥ ", a.Grenze, StringComparison.Ordinal);
+        Assert.Contains("Optimum", a.Spielraum, StringComparison.Ordinal);
+
+        hf.KostenoptimierungCommand.Execute(null);
+        Assert.False(qualitaet.ZeigtSchranke);
+        Assert.DoesNotContain(qualitaet.Zeilen, z => z.HatKopf);
+    }
+
+    [HighsFact]
+    public async Task Kriterien_ohne_Modell_bleiben_in_C()
+    {
+        // Bei der Doppelrunde kennt HiGHS den Abstand H/A nicht: Die Zeile lässt sich weder mit den Knöpfen noch durch Ziehen
+        // nach A oder B bringen – beim Ziehen steht der Grund an der schwebenden Zeile, die Lücke bleibt.
+        await OeffnenAsync();
+        hf.EinstellungenCommand.Execute(null);
+        Assert.Single(Ansichten<OptionenAnsichtViewModel>()).Doppelrunde = true;
+        hf.QualitaetsansichtCommand.Execute(null);
+        QualitaetAnsichtViewModel qualitaet = Assert.Single(Ansichten<QualitaetAnsichtViewModel>());
+        qualitaet.Quelle = PlanQuelle.ClickTt;
+        hf.AutomodusCommand.Execute(null);
+        for (int i = 0; i < 600 && !qualitaet.Zeilen.Any(z => z.NurC); i++)
+        {
+            await Task.Delay(100);
+        }
+
+        Qualitaetszeile abstand = Assert.Single(qualitaet.Zeilen, z => z.Kriterium == Kostenkriterium.AbstandHeimAuswaerts);
+        Assert.True(abstand.NurC);
+        Assert.False(abstand.KannAB);
+        Assert.False(abstand.EinstufenBCommand.CanExecute(null));
+        Assert.Contains("HiGHS kennt", abstand.ErklaerungB, StringComparison.Ordinal);
+        Assert.True(Assert.Single(qualitaet.Zeilen, z => z.Kriterium == Kostenkriterium.Sperrtermine).KannAB);
+
+        string vorher = string.Join(",", qualitaet.Zeilen.Select(z => z.Stufe + z.Name));
+        Qualitaetszeile b = qualitaet.Zeilen.First(z => z.IstB && z.Kriterium is not null);
+        Assert.True(qualitaet.ZiehenBeginnen(abstand));
+        qualitaet.ZiehenUeber(b, davor: true);
+        Assert.NotNull(qualitaet.Schwebend);
+        Assert.True(qualitaet.Schwebend.HatAblehnung);
+        Assert.Equal("C", Assert.Single(qualitaet.Zeilen, z => z.Kriterium == Kostenkriterium.AbstandHeimAuswaerts).Klasse);
+
+        // Innerhalb von C geht es weiter: Vorschau ohne Ablehnung.
+        Qualitaetszeile c = qualitaet.Zeilen.Last(z => z.IstC && z.Kriterium is not null && z.Kriterium != Kostenkriterium.AbstandHeimAuswaerts);
+        qualitaet.ZiehenUeber(c, davor: false);
+        Assert.False(qualitaet.Schwebend.HatAblehnung);
+        qualitaet.ZiehenBeenden(uebernehmen: false);
+        Assert.Equal(vorher, string.Join(",", qualitaet.Zeilen.Select(z => z.Stufe + z.Name)));
+    }
+
     [Fact]
     public async Task Verfahren_wird_vor_dem_Start_gewaehlt_und_laesst_sich_waehrend_der_Generierung_wechseln()
     {
@@ -635,6 +817,9 @@ public sealed class HauptfensterTests : IDisposable
 
         hf.StoppenCommand.Execute(null);
         Assert.Equal("Start", hf.GenerierungText);
+
+        // Wach gehalten, solange gerechnet wird – nicht in der Pause und nicht danach.
+        Assert.Equal([true, false, true, false], o.Wach);
     }
 
     [Fact]
@@ -837,8 +1022,8 @@ public sealed class HauptfensterTests : IDisposable
 
         Assert.Contains("Spieltage", flaeche.Texte);
         Assert.Contains("Wechsel Heim/Auswärts", flaeche.Texte);
-        Assert.Contains("Anzahl Spiele pro Woche", flaeche.Texte);
-        Assert.Contains("Sperrtermin", flaeche.Texte);
+        Assert.Contains("Spiele pro Woche", flaeche.Texte);
+        Assert.Contains("frei (Sperrtermin)", flaeche.Texte);
         Assert.Contains(flaeche.Punkte, p => p.Art == "Senkrecht");
         Assert.Contains(flaeche.Punkte, p => p.Art == "Kreis");
         Assert.StartsWith("Seite ", flaeche.Texte[^1], StringComparison.Ordinal);
@@ -984,6 +1169,54 @@ public sealed class HauptfensterTests : IDisposable
 
         // Gilt wie angeklickt: Abschließen übernimmt die Wahl auch ohne Klick.
         Assert.True(schritt.IstGewaehlt);
+    }
+
+    /// <summary>Klick auf eine Mannschaft über dem Raster: Ihre Halle lässt sich für alle Heimspiele umstellen.</summary>
+    /// <returns>Der Testlauf.</returns>
+    [Fact]
+    public async Task Kompaktspieltage_Halle_fuer_alle_Heimspiele_einer_Mannschaft()
+    {
+        string kompakt = Path.Combine(ordner, "daten", "Jugend_19_Testliga_(HR).xml");
+        File.Copy(Path.Combine(Testdaten.Referenz, "..", "kompakt", "Jugend_19_Testliga_(HR).xml"), kompakt);
+        Plansitzung vorher = Plansitzung.Oeffnen(kompakt, Path.Combine(ordner, "basis-kompakt"));
+        Datenbearbeitung b = vorher.DatenBearbeiten();
+        b.KompaktspieltageSetzen(Kompaktmodus.Bestaetigt);
+        vorher.DatenUebernehmen(b);
+        o.DateiZumOeffnen = kompakt;
+        await hf.OeffnenCommand.ExecuteAsync(null);
+        if (hf.Einrichtung is { } einrichtung)
+        {
+            await einrichtung.AbschliessenCommand.ExecuteAsync(null);
+        }
+
+        hf.KompaktspieltageCommand.Execute(null);
+        KompaktspieltageAnsichtViewModel ansicht = Assert.Single(Ansichten<KompaktspieltageAnsichtViewModel>());
+        Assert.True(ansicht.Eingeschaltet);
+
+        // Ohne Plan keine Spieltage: Die Legende zeigt keine ihrer Farben.
+        Assert.False(ansicht.LegendeZweiter || ansicht.LegendeDritter || ansicht.LegendeEinzel);
+        string team = ansicht.Spalten[0].Name;
+        string anderes = ansicht.Spalten[1].Name;
+        Assert.False(ansicht.ZeigtHalle);
+
+        ansicht.MannschaftWaehlenCommand.Execute(team);
+        Assert.True(ansicht.ZeigtHalle);
+        Assert.Equal("Halle aller Heimspiele von " + team, ansicht.HalleTitel);
+        Assert.NotEmpty(ansicht.HalleLokale);
+
+        // Eine andere Halle als die Standardhalle wählen (gibt es nur eine, die erste).
+        Kompaktlokal neu = ansicht.HalleLokale.FirstOrDefault(l => l != ansicht.HalleLokal) ?? ansicht.HalleLokale[0];
+        ansicht.HalleLokal = neu;
+        await ansicht.HalleFuerAlleCommand.ExecuteAsync(null);
+        Assert.StartsWith($"„{neu}“ gilt jetzt für alle Heimtermine von {team}", ansicht.HalleMeldung, StringComparison.Ordinal);
+
+        // Neu gewählt ist sie die Standardhalle der Mannschaft.
+        ansicht.MannschaftWaehlenCommand.Execute(anderes);
+        ansicht.MannschaftWaehlenCommand.Execute(team);
+        Assert.Equal(neu.Nummer, ansicht.HalleLokal?.Nummer);
+
+        ansicht.MannschaftWaehlenCommand.Execute(team);
+        Assert.False(ansicht.ZeigtHalle);
     }
 
     [Fact]

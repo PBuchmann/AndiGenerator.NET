@@ -5,6 +5,7 @@
 using AndiGenerator.Domain.Optionen;
 using AndiGenerator.Domain.Stammdaten;
 using AndiGenerator.Engine.Inseln;
+using AndiGenerator.Engine.Schranke;
 
 namespace AndiGenerator.Application;
 
@@ -19,7 +20,9 @@ namespace AndiGenerator.Application;
 /// <param name="SpezialKostenart">Kostenart der Spezial-Insel, wenn sie läuft.</param>
 /// <param name="Spiele">Der beste Plan (alle Spiele; <see cref="Spiel.Zeitpunkt"/> = <c>null</c> für nicht terminierte).</param>
 /// <param name="Lenkung">Stand des Automodus; <c>null</c>, wenn er nicht läuft.</param>
-/// <param name="Maschinenraum">Was Rechenkerne und Inseln gerade tun; <c>null</c> ohne laufende Generierung.</param>
+/// <param name="Maschinenraum">Was Rechenkerne und Inseln gerade tun (für den Leitstand); <c>null</c> ohne laufende Generierung.</param>
+/// <param name="Teilneuplanung">Stand der Teilneuplanung mit HiGHS im Automodus; <c>null</c>, wenn sie nicht läuft.</param>
+/// <param name="Last">Wie sich der Prozessor auf Suche, HiGHS und Rest aufteilt; <c>null</c>, wenn nicht gemessen werden kann.</param>
 public sealed record Optimierungsstand(
     bool Laeuft,
     bool Pausiert,
@@ -31,7 +34,9 @@ public sealed record Optimierungsstand(
     MannschaftsKostenart? SpezialKostenart,
     IReadOnlyList<Spiel> Spiele,
     Lenkungsstand? Lenkung = null,
-    Maschinenraum? Maschinenraum = null)
+    Maschinenraum? Maschinenraum = null,
+    Teilneuplanungsstand? Teilneuplanung = null,
+    Prozessorlast? Last = null)
 {
     /// <summary>Stand ohne laufende Generierung.</summary>
     public static Optimierungsstand Leer { get; } = new(false, false, 0, 0, -1, 0, TimeSpan.Zero, null, []);

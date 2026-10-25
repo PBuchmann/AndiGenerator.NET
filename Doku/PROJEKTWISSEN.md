@@ -1,7 +1,7 @@
 # Projektwissen für die Arbeit mit Claude
 
 Ergänzt `CLAUDE.md` (Regeln) um das, was sich in der Zusammenarbeit zwischen Peter und Claude angesammelt hat: wie wir
-arbeiten, was Peter wichtig ist, wie die Kompaktspieltage gebaut sind und was offen ist. Stand: 14.10.2026 (Version 0.9.8).
+arbeiten, was Peter wichtig ist, wie die Kompaktspieltage gebaut sind und was offen ist. Stand: 25.10.2026 (Version 0.9.9).
 Entscheidungen mit Begründung stehen ausführlich im [MIGRATIONSPLAN](MIGRATIONSPLAN.md); Änderungen für Anwender im
 [CHANGELOG](../CHANGELOG.md).
 
@@ -12,7 +12,7 @@ Entscheidungen mit Begründung stehen ausführlich im [MIGRATIONSPLAN](MIGRATION
 - **Rückmeldungen** kommen kurz, oft mit Bildschirmfoto. Erst die Ursache benennen, dann die Lösung; nichts als
   „funktioniert“ melden, was nicht gebaut und – wo möglich – geprüft ist.
 - **Antworten** auf Deutsch, knapp; bei Fragen zur Gestaltung lieber einmal kurz nachfragen als groß umbauen.
-- **Branches:** Gearbeitet wird auf Feature-Branches (derzeit `feature/setzliste-qttr`); Peter führt sie über Pull
+- **Branches:** Gearbeitet wird auf Feature-Branches (derzeit `feature/highs-schranke`); Peter führt sie über Pull
   Requests auf GitHub nach `main` zusammen und pusht selbst.
 - **Werkzeuge:** `bauen.cmd` (Build + Tests, Protokoll `build-log.txt`), `bildschirmfotos.cmd` (Bilder der Anleitung,
   Protokoll `bildschirmfotos-log.txt`), `anleitung.cmd` (PDF der Anleitung), `starten.cmd` (Programm starten), `abdeckung.cmd` (Testabdeckung).
@@ -70,13 +70,36 @@ Entscheidungen mit Begründung stehen ausführlich im [MIGRATIONSPLAN](MIGRATION
 - Nach Änderungen an der Oberfläche: betroffene Bilder neu erzeugen und ansehen (die übrigen zurücksetzen, weil die
   rechnenden Ansichten von Lauf zu Lauf leicht abweichen). Das PDF erst vor einem Pull Request neu erzeugen.
 
-## Offene Punkte (Stand 14.10.2026)
+## Offene Punkte (Stand 24.10.2026)
+
+- **Vor 1.0 (Bestandsaufnahme 24.10.2026):** Abdeckung nach den neuen Tests 91,7 % der Zeilen des eigenen Codes (unter
+  Linux gemessen, vorher 87,0 %; Domain 100 %, Rendering 97,6 %, Engine 92,9 %, Application 92,8 %, Persistence 92,6 %,
+  Presentation 92,4 %, Import 88,4 %, UI 87,0 %). Offen: B-Varianten über das Hauptfenster (HiGHS braucht dafür Minuten),
+  Ausnahmepfade der Oberfläche (AvaloniaOberflaeche, Fehlerbehandlung, Aktualisierung). `bildschirmfotos.cmd` zeigt
+  jetzt alle Ansichten, Diagramme, Dialoge und Seiten der Spielplandaten (Bilder 01–58). Forschungscode ist entfernt (24.10.2026:
+  `highsvergleich`, `neuplanen`, `turnier`, Forschungsoptionen, `Ligaschranke.Vergleich`, `Highsverfahren`,
+  `TurniermeldungenCsv`, Vergleichsskripte). Bewusst geblieben: `Korrekturen` (Paritätstests), `Ligaschranke.Linie`
+  (Automodus), `messen.cmd`/`optimieren.cmd`, `andigen schranke`; nur von Tests genutzt: `NachPlanDaten`,
+  `GewichtungAendern`, `OptionenWeichenVomStandardAb`.
 
 - Karte, zweiter Schritt: Punkte je Halle statt je Mannschaft, Fahrten zur tatsächlichen Halle des Spieltags (auch km),
   Hinweis bzw. genauere Lage, wenn Hallen mit gleicher PLZ zusammenfallen (Hamburg: Ritterstraße/Richardstraße).
 - Kompaktspieltage: vor der Berechnung sagen, dass es ohne Verstöße nicht geht und warum (Mannschaften ohne Meldung
   bzw. ohne Heimtermin) – vorgeschlagen, noch nicht entschieden. Fortschritt steht bei großen Modellen noch 20–40 s still,
   bis HiGHS sich meldet.
+- Neue Funktionen nach dem zweiten Blick auf die TT-Spielplan Engine (MIGRATIONSPLAN Abschnitt 10, Punkte 3–13), nach
+  Nutzen: **Datencheck vor dem Start** (regelbasiert, je Mannschaft was knapp ist), **„Warum nicht besser?“** je Spiel,
+  **Was-wäre-wenn für Meldungen** (welche Rückfrage beim Verein am meisten bringt), Spiel von Hand verschieben mit
+  Live-Bewertung, Neuplanung mit wenig Änderungen, untere Schranke mit HiGHS, verschiedene gute Pläne zur Wahl,
+  Fahrtstrecken im normalen Modus, Robustheit, mehrere Staffeln, Tour. Empfehlung: vorerst keine LLM-Anbindung im Programm; seit 25.10.2026 gibt es dafür den MCP-Server
+  `andigen-mcp` (tools/AndiGenerator.Mcp, README dort): KI-Anwendungen steuern die Planung von außen, das Programm bleibt offline.
+- **Nach dem Umzug des Projektverzeichnisses** (aus OneDrive nach `C:\Users\peter\source\repos\AndiGenerator\`)
+  teilweise angehen: die Punkte aus MIGRATIONSPLAN Abschnitt 10 (3–13, s. o.) und **HiGHS als Ergänzung der Suche**
+  (Abschnitt 11, O7 neu): untere Schranke für Stufe A, Startplan aus HiGHS, gezielte Reparatur als Suchplatz – zuerst
+  als Python-Prototyp auf den Referenzstaffeln messen.
+- Weitere Suchverfahren (MIGRATIONSPLAN 11, O9/O10): Tabu-Suche mit voller Nachbarschaft und Parallel Tempering,
+  beide später ggf. auf der GPU (ILGPU) – erst als CPU-Prototyp messen. **Reihenfolge:** zuerst HiGHS-Schranke und
+  -Startplan (O7 1–2) als Maßstab, parallel Datencheck; dann je nach Abstand O9, O7 3 bzw. O10.
 - Gewichte der Kompaktplanung einstellbar – erst auf Nachfrage (MIGRATIONSPLAN 12).
 - Idee: 6er-Spieltage (vier Mannschaften, jeder gegen jeden) bei gerader Mannschaftszahl (10/12) statt vieler
   Einzelbegegnungen – vorher klären, ob die Wettspielordnung drei Spiele am Tag erlaubt.

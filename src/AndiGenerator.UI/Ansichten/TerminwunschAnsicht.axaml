@@ -16,17 +16,18 @@
     <Border Classes="karte" Padding="16,8" VerticalAlignment="Center">
       <StackPanel Orientation="Horizontal" Spacing="20">
         <StackPanel Orientation="Horizontal" Spacing="8">
-          <Rectangle Width="4" Height="16" RadiusX="1" RadiusY="1" Fill="{StaticResource Tinte}" VerticalAlignment="Center" />
+          <Rectangle Width="18" Height="5" RadiusX="1" RadiusY="1" Fill="#2E3A46" VerticalAlignment="Center" />
           <TextBlock Text="Heimspielwunsch" FontSize="13" VerticalAlignment="Center" />
         </StackPanel>
         <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding Uebersicht.HatKoppeltermine, FallbackValue=False}">
-          <Rectangle Width="4" Height="16" RadiusX="1" RadiusY="1" Fill="{StaticResource Akzent}" VerticalAlignment="Center" />
+          <Rectangle Width="18" Height="5" RadiusX="1" RadiusY="1" Fill="#3B82C4" VerticalAlignment="Center" />
           <TextBlock Text="Koppeltermin" FontSize="13" VerticalAlignment="Center" />
         </StackPanel>
         <StackPanel Orientation="Horizontal" Spacing="8">
-          <Rectangle Width="4" Height="16" RadiusX="1" RadiusY="1" Fill="{StaticResource Schlecht}" VerticalAlignment="Center" />
-          <TextBlock Text="Sperrtermin" FontSize="13" VerticalAlignment="Center" />
+          <Rectangle Width="18" Height="5" RadiusX="1" RadiusY="1" Fill="{StaticResource Schlecht}" VerticalAlignment="Center" />
+          <TextBlock Text="frei (Sperrtermin)" FontSize="13" VerticalAlignment="Center" />
         </StackPanel>
+        <TextBlock Text="je Mannschaft Zeilen Mo bis So, eine Spalte je Woche" FontSize="12" Foreground="{StaticResource Grau}" VerticalAlignment="Center" />
       </StackPanel>
     </Border>
   </StackPanel>
@@ -69,7 +70,7 @@
               <Border Classes="karte" Padding="16,12" Margin="0,0,12,12" VerticalAlignment="Top">
                 <StackPanel Spacing="8">
                   <Grid ColumnDefinitions="*,Auto">
-                    <TextBlock Text="{Binding Name}" FontSize="14" FontWeight="Bold" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                    <TextBlock ToolTip.Tip="{Binding Name}" Classes="mannschaft" Text="{Binding Name}" FontSize="14" FontWeight="Bold" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
                     <Border Grid.Column="1" CornerRadius="8" Padding="8,2" Margin="8,0,0,0" VerticalAlignment="Center" IsVisible="{Binding HatStatus}"
                             Background="{Binding StatusFarbe, Converter={x:Static ui:Konverter.WunschHintergrund}}">
                       <TextBlock Text="{Binding Status}" FontSize="11" FontWeight="SemiBold" Foreground="{Binding StatusFarbe, Converter={x:Static ui:Konverter.WunschSchrift}}" />

@@ -13,7 +13,8 @@ internal sealed partial class KernPlan
 {
     /// <summary>
     /// Bewertet den aktuellen Stand je Kriterium (Anzahl der Verstöße und Kosten) und fasst nach Stufen zusammen; danach
-    /// stehen in <see cref="KostenAnzahl"/> die Verstöße je Mannschaft.
+    /// stehen in <see cref="StufenAnzahl"/> die Verstöße je Mannschaft (wie <see cref="KostenAnzahl"/>, dazu die Pausen der
+    /// Spielverteilung).
     /// </summary>
     /// <param name="stufen">Stufe je Kriterium (Index = <see cref="Kostenkriterium"/>).</param>
     /// <param name="anzahl">Wird gefüllt: Verstöße je Kriterium.</param>
@@ -28,6 +29,13 @@ internal sealed partial class KernPlan
         Array.Clear(anzahl);
         Array.Clear(kosten);
         Berechnungsoptionen optionen = D.Optionen;
+        Zusatzverstoesse zusatz = ZusatzZaehlen(meldungen: false);
+        Array.Copy(KostenAnzahl, StufenAnzahl, KostenAnzahl.Length);
+        for (int t = 0; t < D.N; t++)
+        {
+            StufenAnzahl[(t * KernDefinition.AnzahlArten) + (int)MannschaftsKostenart.Spielverteilung] = zusatz.Spielverteilung[t];
+        }
+
         foreach (MannschaftsKostenart art in Enum.GetValues<MannschaftsKostenart>())
         {
             if (optionen.Fuer(art) == Gewichtung.NichtBeruecksichtigen)
@@ -38,7 +46,7 @@ internal sealed partial class KernPlan
             for (int t = 0; t < D.N; t++)
             {
                 int k = (t * KernDefinition.AnzahlArten) + (int)art;
-                anzahl[(int)art] += Math.Max(0, KostenAnzahl[k]);
+                anzahl[(int)art] += Math.Max(0, StufenAnzahl[k]);
                 kosten[(int)art] += KostenWert[k];
             }
         }
@@ -47,7 +55,7 @@ internal sealed partial class KernPlan
         {
             double vereinsintern = VereinsinterneSpieleAmAnfangKosten();
             kosten[(int)Kostenkriterium.VereinsinterneSpieleAmAnfang] = vereinsintern;
-            anzahl[(int)Kostenkriterium.VereinsinterneSpieleAmAnfang] = vereinsintern > 0 ? 1 : 0;
+            anzahl[(int)Kostenkriterium.VereinsinterneSpieleAmAnfang] = vereinsintern > 0 ? TeamsNichtAmAnfang() : 0;
         }
 
         if (optionen.Spieltag != Gewichtung.NichtBeruecksichtigen || optionen.SpieltagUeberlappung != Gewichtung.NichtBeruecksichtigen)
@@ -57,6 +65,10 @@ internal sealed partial class KernPlan
             kosten[(int)Kostenkriterium.Spieltagueberlappung] = s.Ueberlappung;
             kosten[(int)Kostenkriterium.LetzterSpieltagLaenge] = s.LetzteBreite;
             kosten[(int)Kostenkriterium.LetzterSpieltagUeberlappung] = s.LetzteUeberlappung;
+            anzahl[(int)Kostenkriterium.Spieltaglaenge] = s.Breite > 0 ? zusatz.SpieltageLaenge : 0;
+            anzahl[(int)Kostenkriterium.Spieltagueberlappung] = s.Ueberlappung > 0 ? zusatz.SpieltageUeberlappung : 0;
+            anzahl[(int)Kostenkriterium.LetzterSpieltagLaenge] = s.LetzteBreite > 0 ? zusatz.LetzterLaenge : 0;
+            anzahl[(int)Kostenkriterium.LetzterSpieltagUeberlappung] = s.LetzteUeberlappung > 0 ? zusatz.LetzterUeberlappung : 0;
         }
 
         double[] jeStufe = new double[3];
@@ -72,9 +84,4 @@ internal sealed partial class KernPlan
 
         return new Stufenwert(harte, (int)jeStufe[0], (int)jeStufe[1], 0, (int)jeStufe[2], kostenC);
     }
-
-    /// <summary>Vereinsinterne Spiele liegen nicht alle am Anfang (und die Kostenart wird berücksichtigt).</summary>
-    /// <returns><c>true</c> bei einem Verstoß.</returns>
-    public bool VereinsinternVerletzt() =>
-        D.Optionen.VereinsinterneSpieleAmAnfang != Gewichtung.NichtBeruecksichtigen && TeamsNichtAmAnfang() > 0;
 }

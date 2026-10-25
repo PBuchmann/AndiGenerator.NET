@@ -21,7 +21,7 @@ public sealed partial class Datenbearbeitung
     /// <param name="mannschaft">Mannschaftsname.</param>
     /// <returns>Die Wünsche oder <c>null</c> ohne Standard.</returns>
     public IReadOnlyList<Heimkoppel>? HeimkoppelnStandard(string mannschaft) =>
-        standard is null ? null : HeimkoppelnAus(standard, mannschaft);
+        Standard is null ? null : HeimkoppelnAus(Standard, mannschaft);
 
     /// <summary>
     /// Schreibt die Heimkoppelwünsche (Original <c>FormToData</c>): Koppel- und Doppelspieltagsangaben aller Heimspieltage

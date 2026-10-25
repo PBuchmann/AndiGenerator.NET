@@ -20,6 +20,9 @@ public sealed class AvaloniaOberflaeche(Window fenster) : IOberflaeche
     public void AufOberflaeche(Action aktion) => Dispatcher.UIThread.Post(aktion);
 
     /// <inheritdoc/>
+    public void WachHalten(bool an) => Dispatcher.UIThread.Post(() => Energiesparen.Setzen(an));
+
+    /// <inheritdoc/>
     public async Task<string?> DateiOeffnenAsync(string titel, IReadOnlyList<Dateifilter> filter)
     {
         ArgumentNullException.ThrowIfNull(filter);
@@ -66,6 +69,10 @@ public sealed class AvaloniaOberflaeche(Window fenster) : IOberflaeche
     /// <inheritdoc/>
     public Task<Sicherungswahl> SicherungAbfragenAsync(Planvergleich vergleich) =>
         Zeigen<Sicherungswahl>(new Sicherungsdialog(vergleich));
+
+    /// <inheritdoc/>
+    public Task<bool> AlternativenZeigenAsync(AlternativendialogViewModel dialog) =>
+        Zeigen<bool>(new Alternativendialog(dialog));
 
     /// <inheritdoc/>
     public Task<bool> EntscheidenAsync(string titel, string text, IReadOnlyList<string> details, string ja, string nein) =>

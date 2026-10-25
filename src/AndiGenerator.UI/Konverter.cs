@@ -19,7 +19,6 @@ public static class Konverter
     private static readonly IImmutableSolidColorBrush Schlecht = new ImmutableSolidColorBrush(Color.FromRgb(0xB4, 0x23, 0x18));
     private static readonly IImmutableSolidColorBrush Warnung = new ImmutableSolidColorBrush(Color.FromRgb(0xB5, 0x6A, 0x00));
     private static readonly IImmutableSolidColorBrush Grau = new ImmutableSolidColorBrush(Color.FromRgb(0x5B, 0x64, 0x70));
-    private static readonly IImmutableSolidColorBrush Akzent = new ImmutableSolidColorBrush(Color.FromRgb(0x1D, 0x5F, 0xA8));
     private static readonly IImmutableSolidColorBrush Tinte = new ImmutableSolidColorBrush(Color.FromRgb(0x1B, 0x1F, 0x24));
     private static readonly IImmutableSolidColorBrush AkzentHell = new ImmutableSolidColorBrush(Color.FromRgb(0xE6, 0xEE, 0xF8));
     private static readonly IImmutableSolidColorBrush AkzentDunkel = new ImmutableSolidColorBrush(Color.FromRgb(0x16, 0x4A, 0x84));
@@ -46,29 +45,32 @@ public static class Konverter
         _ => "!",
     });
 
+    /// <summary>Holt die Farbe des Spielraums einer Stufe (grün: Optimum erreicht, orange: noch besser möglich, sonst grau).</summary>
+    public static IValueConverter SpielraumFarbe { get; } = new FuncValueConverter<Spielraumzustand, IBrush>(z => z switch
+    {
+        Spielraumzustand.Bestmoeglich => Gut,
+        Spielraumzustand.Offen => Warnung,
+        _ => Grau,
+    });
+
+    /// <summary>Holt, ob eine Zahl negativ ist (z. B. Differenz: besser).</summary>
+    public static IValueConverter IstNegativ { get; } = new FuncValueConverter<int, bool>(r => r < 0);
+
+    /// <summary>Holt, ob eine Zahl positiv ist (z. B. Differenz: schlechter).</summary>
+    public static IValueConverter IstPositiv { get; } = new FuncValueConverter<int, bool>(r => r > 0);
+
+    /// <summary>Holt die Schriftstärke: fett für <c>true</c>.</summary>
+    public static IValueConverter Fett { get; } = new FuncValueConverter<bool, FontWeight>(fett => fett ? FontWeight.SemiBold : FontWeight.Normal);
+
+    /// <summary>Holt die Breite eines Anteils (0 bis 100) an einer Leiste, deren Breite der Parameter angibt.</summary>
+    public static IValueConverter Anteilsbreite { get; } = new FuncValueConverter<double?, object?, double>((anteil, breite) =>
+        Math.Clamp(anteil ?? 0, 0, 100) / 100 * (breite is null ? 100 : Convert.ToDouble(breite, System.Globalization.CultureInfo.InvariantCulture)));
+
     /// <summary>Holt die Farbe der Zusammenfassung (grün, wenn die Pflichtstufe erfüllt ist, sonst rot).</summary>
     public static IValueConverter PflichtFarbe { get; } = new FuncValueConverter<bool, IBrush>(erfuellt => erfuellt ? Gut : Schlecht);
 
-    /// <summary>Holt die Schriftfarbe einer Terminplanzeile (Nachbarspiele grau, echte Nachbarmannschaften blau).</summary>
-    public static IValueConverter ZeilenFarbe { get; } = new FuncValueConverter<Planzeilenart, IBrush>(art => art switch
-    {
-        Planzeilenart.Nachbarspiel => Grau,
-        Planzeilenart.EchtesNachbarspiel => Akzent,
-        _ => Tinte,
-    });
-
-    /// <summary>Holt die Schriftstärke einer Terminplanzeile (Überschriften fett).</summary>
-    public static IValueConverter ZeilenGewicht { get; } =
-        new FuncValueConverter<Planzeilenart, FontWeight>(art => art == Planzeilenart.Ueberschrift ? FontWeight.SemiBold : FontWeight.Normal);
-
     /// <summary>Holt die Schriftstärke einer Meldungszeile (Mannschaftsnamen fett).</summary>
     public static IValueConverter MeldungGewicht { get; } = new FuncValueConverter<bool, FontWeight>(ueberschrift => ueberschrift ? FontWeight.SemiBold : FontWeight.Normal);
-
-    /// <summary>Holt die Schriftgröße einer Meldungszeile (Mannschaftsnamen größer wie im Original).</summary>
-    public static IValueConverter MeldungGroesse { get; } = new FuncValueConverter<bool, double>(ueberschrift => ueberschrift ? 14 : 12);
-
-    /// <summary>Holt den Abstand einer Meldungszeile (Abstand vor jedem Mannschaftsnamen).</summary>
-    public static IValueConverter MeldungAbstand { get; } = new FuncValueConverter<bool, Thickness>(ueberschrift => ueberschrift ? new Thickness(0, 14, 0, 4) : new Thickness(16, 1, 0, 1));
 
     /// <summary>Holt einen Vergleich mit dem Konverterparameter (z. B. aktive Ansicht = „Kosten“) für die Hervorhebung links.</summary>
     public static IValueConverter Gleich { get; } =
@@ -84,15 +86,6 @@ public static class Konverter
 
     /// <summary>Holt die Skalierung einer vergrößerbaren Ansicht zu ihrem Zoomfaktor (für <c>LayoutTransformControl</c>).</summary>
     public static IValueConverter Skalierung { get; } = new FuncValueConverter<double, ITransform>(faktor => new ScaleTransform(faktor, faktor));
-
-    /// <summary>Holt die Schriftfarbe einer Terminwunschzeile (Hervorhebungen des Originals: gelb, rot, grün).</summary>
-    public static IValueConverter WunschFarbe { get; } = new FuncValueConverter<Terminwunschfarbe, IBrush>(farbe => farbe switch
-    {
-        Terminwunschfarbe.Gelb => Warnung,
-        Terminwunschfarbe.Rot => Schlecht,
-        Terminwunschfarbe.Gruen => Gut,
-        _ => Tinte,
-    });
 
     /// <summary>Holt den Hintergrund einer hervorgehobenen Terminwunschzeile bzw. Statusmarke (ocker, rot, grün).</summary>
     public static IValueConverter WunschHintergrund { get; } = new FuncValueConverter<Terminwunschfarbe, IBrush>(farbe => farbe switch
@@ -116,9 +109,6 @@ public static class Konverter
     public static IValueConverter EintragAbstand { get; } =
         new FuncValueConverter<bool, Thickness>(hervorgehoben => hervorgehoben ? new Thickness(8, 3) : new Thickness(0, 1));
 
-    /// <summary>Holt den Einzug einer Terminwunschzeile nach ihrer Ebene.</summary>
-    public static IValueConverter WunschEinzug { get; } = new FuncValueConverter<int, Thickness>(ebene => new Thickness(ebene * 16, ebene == 0 ? 8 : 0, 0, 0));
-
     /// <summary>Holt den Hintergrund eines Hinweis-Chips im Terminplan (rot, ocker, blau, grau).</summary>
     public static IValueConverter HinweisHintergrund { get; } = new FuncValueConverter<Hinweisart, IBrush>(art => art switch
     {
@@ -136,8 +126,4 @@ public static class Konverter
         Hinweisart.Info => AkzentDunkel,
         _ => Grau,
     });
-
-    /// <summary>Holt die Schriftstärke einer Terminwunschzeile (Mannschaften und Zwischenüberschriften fett).</summary>
-    public static IValueConverter WunschGewicht { get; } =
-        new FuncValueConverter<int, FontWeight>(ebene => ebene < 2 ? FontWeight.SemiBold : FontWeight.Normal);
 }

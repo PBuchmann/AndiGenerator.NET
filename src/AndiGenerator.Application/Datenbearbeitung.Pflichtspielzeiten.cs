@@ -16,7 +16,7 @@ public sealed partial class Datenbearbeitung
 
     /// <summary>Liest die Pflichtspielzeiträume des click-TT-Stands.</summary>
     /// <returns>Die Zeiträume oder <c>null</c> ohne Standard.</returns>
-    public IReadOnlyList<Pflichtspielzeit>? PflichtspielzeitenStandard() => standard is null ? null : PflichtspielzeitenAus(standard);
+    public IReadOnlyList<Pflichtspielzeit>? PflichtspielzeitenStandard() => Standard is null ? null : PflichtspielzeitenAus(Standard);
 
     /// <summary>Schreibt die Pflichtspielzeiträume in der angegebenen Reihenfolge (Original <c>FormToData</c>).</summary>
     /// <param name="zeiten">Die Zeiträume.</param>

@@ -76,6 +76,8 @@ public sealed partial class KompaktspieltageAnsichtViewModel
 
         // Sonntage wie bisher nur mit Datum, Samstage und Wochentage mit Kürzel (z. B. „Sa 12.09.“).
         string datum = tag.DayOfWeek == DayOfWeek.Sunday ? tag.ToString("dd.MM.", Deutsch) : tag.ToString("ddd dd.MM.", Deutsch);
-        return new Kompaktrasterzeile(tag, datum, gewaehlt, zellen);
+
+        // Beobachtbar: Ändert eine Eingabe nur einzelne Felder, ersetzt der Abgleich nur diese (siehe ZeileGleich).
+        return new Kompaktrasterzeile(tag, datum, gewaehlt, new System.Collections.ObjectModel.ObservableCollection<Kompaktzelle>(zellen));
     }
 }

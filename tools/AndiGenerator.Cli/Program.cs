@@ -8,6 +8,9 @@ using AndiGenerator.Persistence.Plandaten;
 
 // Kommandozeile für Tests, Benchmarks und Läufe ohne Oberfläche (MIGRATIONSPLAN E5).
 Console.OutputEncoding = System.Text.Encoding.UTF8;
+
+// Lange Läufe nicht vom Energiesparmodus unterbrechen lassen.
+Wachhalten.Einschalten();
 try
 {
     if (args.Length >= 2 && args[0] == "optimieren")
@@ -20,9 +23,9 @@ try
         return await BewertenBefehl.Ausfuehren(args[1..]);
     }
 
-    if (args.Length >= 1 && args[0] == "turnier")
+    if (args.Length >= 1 && args[0] == "schranke")
     {
-        return await TurnierBefehl.Ausfuehren(args[1..]);
+        return SchrankeBefehl.Ausfuehren(args[1..]);
     }
 
     if (args.Length is 2 or 3 && args[0] == "pdftext")
@@ -44,5 +47,5 @@ catch (Exception ex) when (ex is ClickTtFormatException or PlanDatenFormatExcept
 Console.WriteLine("Aufruf: andigen info <click-TT-Exportdatei.xml>");
 Console.WriteLine("        andigen optimieren <click-TT-Exportdatei.xml> [Optionen]   (Hilfe: andigen optimieren --hilfe)");
 Console.WriteLine("        andigen bewerten <click-TT-Exportdatei.xml> <Plan> [<Plan> ...] [Optionen]   (Hilfe: andigen bewerten --hilfe)");
-Console.WriteLine("        andigen turnier pruefen <click-TT-Exportdatei.xml> <Meldungen.csv> [--ausgabe DATEI]");
+Console.WriteLine("        andigen schranke <click-TT-Exportdatei.xml> [Optionen]   (untere Schranke der Stufe A mit HiGHS)");
 return 1;

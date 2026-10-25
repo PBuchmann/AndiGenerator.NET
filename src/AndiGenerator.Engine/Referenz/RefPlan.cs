@@ -91,8 +91,6 @@ internal sealed partial class RefPlan
 
     public RefMannschaft? FindeNachName(string name) => Mannschaften.Find(m => m.TeamName == name);
 
-    public RefMannschaft? FindeNachId(string id) => Mannschaften.Find(m => m.TeamId == id);
-
     /// <summary>Original <c>GetRoundNumberByDate</c>.</summary>
     public int RundeZuDatum(double datum) => Runden.FindIndex(r => r.Enthaelt(datum));
 

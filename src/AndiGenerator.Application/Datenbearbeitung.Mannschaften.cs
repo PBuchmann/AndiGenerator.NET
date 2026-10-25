@@ -13,7 +13,7 @@ public sealed partial class Datenbearbeitung
     /// Holt einen Wert, der angibt, ob die Mannschaften dem click-TT-Stand entsprechen (Original <c>isDefault</c>:
     /// jede Mannschaft hat eine gleiche im anderen Stand); ohne Standard immer <c>true</c>.
     /// </summary>
-    public bool MannschaftenSindStandard => standard is not DatenKnoten std
+    public bool MannschaftenSindStandard => Standard is not DatenKnoten std
         || (Teams(Arbeitsstand).All(a => Teams(std).Any(b => GleicheMannschaft(a, b)))
             && Teams(std).All(b => Teams(Arbeitsstand).Any(a => GleicheMannschaft(a, b))));
 
@@ -132,7 +132,7 @@ public sealed partial class Datenbearbeitung
     /// </summary>
     public void MannschaftenZuruecksetzen()
     {
-        if (standard is not DatenKnoten std)
+        if (Standard is not DatenKnoten std)
         {
             return;
         }

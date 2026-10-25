@@ -13,6 +13,6 @@ public partial class TerminwunschAnsicht : UserControl
     public TerminwunschAnsicht()
     {
         InitializeComponent();
-        Mausradzoom.Anmelden(this);
+        Ansichtszoom.Anmelden(this);
     }
 }

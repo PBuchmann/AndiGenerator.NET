@@ -157,6 +157,18 @@ public sealed partial class Datenbearbeitung
     }
 
     /// <summary>
+    /// Die Standardhalle einer Mannschaft: ihr Standardlokal, sonst das ihrer meisten Heimtermine, sonst „1“ – so bekommen
+    /// auch neue Heimtermine ihre Halle.
+    /// </summary>
+    /// <param name="mannschaft">Mannschaftsname.</param>
+    /// <returns>Die Nummer des Spiellokals.</returns>
+    public string KompaktStandardlokal(string mannschaft)
+    {
+        string lokal = NeuerHeimtermin(mannschaft, DateOnly.MinValue, Heimtage(mannschaft).ToList()).Spiellokal;
+        return lokal.Length > 0 ? lokal : "1";
+    }
+
+    /// <summary>
     /// Setzt ein Spiellokal für die ganze Mannschaft: als ihr Standardlokal und für alle ihre Heimtermine.
     /// </summary>
     /// <param name="mannschaft">Mannschaftsname.</param>

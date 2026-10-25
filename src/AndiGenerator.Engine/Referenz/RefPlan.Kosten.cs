@@ -347,18 +347,27 @@ internal sealed partial class RefPlan
         _ => true,
     };
 
-    /// <summary>Original <c>NoGames</c>.</summary>
-    public bool KeineSpiele() => SpieleErlaubt.TrueForAll(s => s.Datum == 0);
+    /// <summary>
+    /// Original <c>getTeamsNotAtBegin</c>: die Spiele gegen fremde Vereine, die in ihrer Runde vor einem Spiel gegen eine
+    /// Mannschaft des eigenen Vereins liegen (je Mannschaft gezählt).
+    /// </summary>
+    /// <returns>Die Anzahl.</returns>
+    public int TeamsNichtAmAnfang() => VereinsinterneVerstoesse().Count;
 
-    /// <summary>Original <c>getTeamsNotAtBegin</c>.</summary>
-    private int TeamsNichtAmAnfang()
+    /// <summary>
+    /// Die Verstöße gegen „vereinsinterne Spiele am Anfang“ wie in <see cref="TeamsNichtAmAnfang"/>: je Mannschaft das Spiel gegen
+    /// einen fremden Verein, das vor einem vereinsinternen Spiel liegt, mit einer Meldung für die Anzeige.
+    /// </summary>
+    /// <returns>Mannschaft und Meldung je Verstoß.</returns>
+    public List<(string Mannschaft, string Meldung)> VereinsinterneVerstoesse()
     {
-        int ergebnis = 0;
+        var ergebnis = new List<(string Mannschaft, string Meldung)>();
         foreach (RefMannschaft mannschaft in Mannschaften.Where(m => m.VereinsteamsImPlan.Count > 0))
         {
             foreach (RefRunde runde in Runden.Where(IstZuPlanendeRunde))
             {
                 int gefunden = 0;
+                var vorher = new List<RefSpiel>();
                 foreach (RefSpiel spiel in mannschaft.Spiele.Where(s => s.DatumGueltig))
                 {
                     if (runde.Enthaelt(spiel.Datum))
@@ -366,10 +375,14 @@ internal sealed partial class RefPlan
                         if (mannschaft.VereinsteamsImPlan.Contains(spiel.Heim) || mannschaft.VereinsteamsImPlan.Contains(spiel.Gast))
                         {
                             gefunden++;
+                            RefMannschaft verein = spiel.Heim == mannschaft ? spiel.Gast : spiel.Heim;
+                            ergebnis.AddRange(vorher.Select(v => (mannschaft.TeamName,
+                                $"{Spieltext(v, mannschaft)} – vor dem vereinsinternen Spiel gegen {verein.TeamName} ({DelphiDatum.Text(spiel.Datum)})")));
+                            vorher.Clear();
                         }
                         else
                         {
-                            ergebnis++;
+                            vorher.Add(spiel);
                         }
                     }
 
@@ -378,11 +391,20 @@ internal sealed partial class RefPlan
                         break;
                     }
                 }
+
+                // Fremde Spiele nach dem letzten gefundenen Vereinsspiel zählt das Original mit, solange noch eins fehlt.
+                if (gefunden < mannschaft.VereinsteamsImPlan.Count)
+                {
+                    ergebnis.AddRange(vorher.Select(v => (mannschaft.TeamName, $"{Spieltext(v, mannschaft)} – ein vereinsinternes Spiel fehlt in dieser Runde noch")));
+                }
             }
         }
 
         return ergebnis;
     }
+
+    private static string Spieltext(RefSpiel spiel, RefMannschaft mannschaft) =>
+        $"{DelphiDatum.Text(spiel.Datum)} gegen {(spiel.Heim == mannschaft ? spiel.Gast : spiel.Heim).TeamName}";
 
     /// <summary>Ergebnis von <see cref="SpieltagsKosten"/>.</summary>
     public readonly record struct Spieltagskosten(double Breite, double Ueberlappung, double LetzteBreite, double LetzteUeberlappung);

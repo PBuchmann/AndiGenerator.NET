@@ -1,6 +1,6 @@
 # Erzeugt eine neue Version auf GitHub Releases, sobald ein Tag wie v1.0.0 gepusht wird:
 # bauen und testen, veröffentlichen (win-x64 und win-arm64, eigenständig), mit Velopack Setup, portable ZIP und Update-Pakete
-# erzeugen und alles als Release hochladen. Das installierte Programm findet die neue Version dort selbst.
+# erzeugen und alles als Release hochladen. Jedes Paket enthält auch den MCP-Server andigen-mcp (tools/AndiGenerator.Mcp). Das installierte Programm findet die neue Version dort selbst.
 # Danach kommen Linux-Pakete für Chromebooks dazu (x64 und arm64, je .deb und portables tar.gz; ohne Selbst-Update)
 # und macOS-Pakete (Apple-Chip und Intel, je .dmg mit ad hoc signiertem App-Paket; ohne Selbst-Update).
 name: Release
@@ -44,10 +44,19 @@ jobs:
       - name: Veröffentlichen
         run: dotnet publish src/AndiGenerator.Desktop -c Release -r win-x64 --self-contained -nologo -o publish -p:Version=${{ steps.version.outputs.version }}
 
+      # MCP-Server für KI-Assistenten (andigen-mcp.exe) im selben Ordner; bricht ab, wenn er andere Bibliotheken bräuchte.
+      - name: MCP-Server beilegen
+        shell: pwsh
+        run: tools/AndiGenerator.Mcp/beilegen.ps1 win-x64 ${{ steps.version.outputs.version }} publish
+
       # Windows-Laptops mit ARM-Prozessor (Snapdragon): eigener Velopack-Kanal win-arm64 mit eigenem Setup; ein so
       # installiertes Programm sucht Updates nur in diesem Kanal.
       - name: Veröffentlichen (ARM64)
         run: dotnet publish src/AndiGenerator.Desktop -c Release -r win-arm64 --self-contained -nologo -o publish-arm64 -p:Version=${{ steps.version.outputs.version }}
+
+      - name: MCP-Server beilegen (ARM64)
+        shell: pwsh
+        run: tools/AndiGenerator.Mcp/beilegen.ps1 win-arm64 ${{ steps.version.outputs.version }} publish-arm64
 
       - name: Velopack installieren
         run: dotnet tool install -g vpk --version ${{ env.VPK_VERSION }}
@@ -184,6 +193,10 @@ jobs:
       - name: Veröffentlichen
         run: dotnet publish src/AndiGenerator.Desktop -c Release -r ${{ matrix.rid }} --self-contained -nologo -o publish -p:Version=${{ steps.version.outputs.version }}
 
+      - name: MCP-Server beilegen
+        shell: pwsh
+        run: tools/AndiGenerator.Mcp/beilegen.ps1 ${{ matrix.rid }} ${{ steps.version.outputs.version }} publish
+
       - name: Pakete erzeugen
         run: |
           mkdir -p pakete
@@ -222,6 +235,10 @@ jobs:
 
       - name: Veröffentlichen
         run: dotnet publish src/AndiGenerator.Desktop -c Release -r ${{ matrix.rid }} --self-contained -nologo -o publish -p:Version=${{ steps.version.outputs.version }}
+
+      - name: MCP-Server beilegen
+        shell: pwsh
+        run: tools/AndiGenerator.Mcp/beilegen.ps1 ${{ matrix.rid }} ${{ steps.version.outputs.version }} publish
 
       - name: Paket erzeugen
         run: |

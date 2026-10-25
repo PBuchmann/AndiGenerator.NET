@@ -34,6 +34,8 @@ public sealed class Plansitzung
     private const string Uebernahmevermerk = "uebernommen-aus-AndiGeneratorNeu.txt";
 
     private readonly DatenKnoten stand;
+    private readonly Lock importSperre = new();
+    private (DateTime Geaendert, DatenKnoten Knoten)? import;
     private bool standardKriterienstufen;
 
     private Plansitzung(string pfad, DatenKnoten stand, bool istClickTt, bool ersterStart, string basisordner, string? uebernahmeAus)
@@ -64,6 +66,9 @@ public sealed class Plansitzung
 
     /// <summary>Die Staffel (Stammdaten mit allen Änderungen; bestehender Plan = „in Click-TT vorhandener Plan“).</summary>
     public Staffel Staffel { get; private set; }
+
+    /// <summary>Holt, ob die Staffel mit Kompaktspieltagen geplant wird (ohne Arbeitskopie – wird oft abgefragt).</summary>
+    public Kompaktmodus Kompaktmodus => Datenbearbeitung.KompaktmodusVon(stand);
 
     /// <summary>Ordner für Optionen und gemerkte Pläne (gleicher Aufbau wie beim Original, Basis siehe <see cref="EigeneBasis"/>).</summary>
     public string Staffelordner { get; }
@@ -201,7 +206,7 @@ public sealed class Plansitzung
     /// <summary>Erzeugt eine Arbeitskopie der Spielplandaten für den Dialog „Spielplandaten bearbeiten“.</summary>
     /// <returns>Die Arbeitskopie; der Standard ist bei click-TT-Dateien der unveränderte Import.</returns>
     public Datenbearbeitung DatenBearbeiten() =>
-        new(stand, IstClickTtDatei ? ClickTtNachPlanDaten.Laden(Pfad) : null) { FreitagZaehltZumWochenende = Optionen.FreitagZaehltZumWochenende };
+        new(stand, IstClickTtDatei ? () => Import().Kopie() : null) { FreitagZaehltZumWochenende = Optionen.FreitagZaehltZumWochenende };
 
     /// <summary>
     /// Übernimmt eine bearbeitete Arbeitskopie wie das Original (<c>DoOnAfterPlanChanged</c> mit <c>SavePlan</c>): Bei
@@ -216,7 +221,7 @@ public sealed class Plansitzung
         Staffel neu = StaffelAbbildung.AusPlanDaten(bearbeitung.Arbeitsstand);
         if (IstClickTtDatei)
         {
-            DatenKnoten differenz = DatenKnoten.Differenz(bearbeitung.Arbeitsstand, ClickTtNachPlanDaten.Laden(Pfad));
+            DatenKnoten differenz = DatenKnoten.Differenz(bearbeitung.Arbeitsstand, Import().Kopie());
             PlanDatenDatei.Speichern(ModifikationenPfad(Pfad), differenz);
         }
         else
@@ -370,11 +375,19 @@ public sealed class Plansitzung
     /// <returns>Je Mannschaft die Nachbartermine nach Tagen.</returns>
     public IReadOnlyList<MannschaftsNachbartermine> Nachbartermine() => Nachbarterminauswertung.Ermitteln(Staffel, Optionen);
 
-    /// <summary>Daten der Diagramme (Tab „Diagramme“ des Originals) für einen Plan.</summary>
+    /// <summary>
+    /// Daten der Diagramme (Tab „Diagramme“ des Originals) für einen Plan; im Kompaktmodus mit den Spieltagen und ihren
+    /// Ausrichtern.
+    /// </summary>
     /// <param name="spiele">Spiele des Plans.</param>
     /// <returns>Die Diagrammdaten.</returns>
-    public Diagrammdaten Diagramme(IReadOnlyList<Spiel> spiele) =>
-        Diagrammauswertung.Ermitteln(Staffel with { BestehenderSpielplan = spiele }, Optionen);
+    public Diagrammdaten Diagramme(IReadOnlyList<Spiel> spiele)
+    {
+        Diagrammdaten daten = Diagrammauswertung.Ermitteln(Staffel with { BestehenderSpielplan = spiele }, Optionen);
+        return Kompaktmodus is Kompaktmodus.Ein or Kompaktmodus.Bestaetigt
+            ? daten with { Kompakttage = Kompaktplanung.Ausrichtertage(spiele) }
+            : daten;
+    }
 
     /// <summary>Terminplan mit den Hinweisen und Nachbarterminen des Originals (Tab „Terminplan“).</summary>
     /// <param name="spiele">Spiele des Plans.</param>
@@ -433,6 +446,20 @@ public sealed class Plansitzung
         ArgumentNullException.ThrowIfNull(ziel);
         OptionenSpeichern(ziel.Setzen(Optionen, wert));
     }
+
+    /// <summary>Verstöße gegen „vereinsinterne Spiele am Anfang“ je Mannschaft (für die Qualitätsansicht).</summary>
+    /// <param name="spiele">Spiele des Plans.</param>
+    /// <returns>Je betroffene Mannschaft ihre Spiele gegen fremde Vereine vor einem vereinsinternen Spiel.</returns>
+    public IReadOnlyList<Mannschaftsmeldungen> VereinsinterneMeldungen(IReadOnlyList<Spiel> spiele) =>
+        Referenzbewertung.VereinsinterneMeldungen(Staffel with { BestehenderSpielplan = spiele }, Optionen);
+
+    /// <summary>
+    /// Verstöße der Kriterien, die im Original nur Kosten haben: bei der Spielverteilung je Mannschaft die zu langen Pausen, bei
+    /// den Spieltagen die zu langen bzw. überlappenden (für die Qualitätsansicht).
+    /// </summary>
+    /// <param name="spiele">Spiele des Plans.</param>
+    /// <returns>Die Bewertung mit den Meldungen.</returns>
+    public Zusatzverstoesse? Zusatzverstoesse(IReadOnlyList<Spiel> spiele) => Bewerten(spiele).Zusatz;
 
     /// <summary>Meldungen zu harten Fehlern vor dem Export (Original <c>getHardErrorMessages</c>).</summary>
     /// <param name="spiele">Spiele des Plans.</param>
@@ -548,5 +575,23 @@ public sealed class Plansitzung
             spiele.Select(s => new CsvSpiel(s.Zeitpunkt, s.Heim, s.Gast, lokal(s))),
             Staffel.Mannschaften.Select(m => new CsvMannschaft(m.Name, m.VereinsId, m.Id)),
             optionen);
+    }
+
+    /// <summary>
+    /// Der unveränderte click-TT-Import, einmal gelesen und gemerkt, solange sich die Datei nicht ändert: Vorher las jede Arbeitskopie
+    /// (auch jede Eingabe im Raster der Kompaktspieltage) die ganze XML-Datei neu. Nur lesen; Arbeitskopien bekommen eine Kopie.
+    /// </summary>
+    private DatenKnoten Import()
+    {
+        DateTime geaendert = File.GetLastWriteTimeUtc(Pfad);
+        lock (importSperre)
+        {
+            if (import is not { } i || i.Geaendert != geaendert)
+            {
+                import = (geaendert, ClickTtNachPlanDaten.Laden(Pfad));
+            }
+
+            return import.Value.Knoten;
+        }
     }
 }

@@ -131,7 +131,8 @@ public static class Kompaktdruck
     /// <summary>
     /// Ein Mannschaftsname für den senkrechten Rasterkopf: bis 15 Zeichen eine Zeile, sonst zwei – geteilt nach „/“, „-“ oder
     /// an einem Leerzeichen, und zwar dort, wo die längere Hälfte am kürzesten ist (Peter, 14.10.2026), z. B.
-    /// „TTG Mündersbach/“ und „Höchstenbach“. Ohne solche Stelle bleibt es bei einer Zeile.
+    /// „TTG Mündersbach/“ und „Höchstenbach“. Ohne solche Stelle bleibt es bei einer Zeile. Jede Zeile hat höchstens 22 Zeichen
+    /// (sonst mit „…“ gekürzt), damit sehr lange Namen den Kopf nicht beliebig hoch machen.
     /// </summary>
     /// <param name="name">Der Mannschaftsname.</param>
     /// <returns>Eine oder zwei Zeilen.</returns>
@@ -139,6 +140,8 @@ public static class Kompaktdruck
     {
         ArgumentNullException.ThrowIfNull(name);
         const int Einzeilig = 15;
+        const int Zeichen = 22;
+        static string Kurz(string zeile) => zeile.Length <= Zeichen ? zeile : zeile[..(Zeichen - 1)].TrimEnd() + "…";
         if (name.Length <= Einzeilig)
         {
             return [name];
@@ -152,11 +155,11 @@ public static class Kompaktdruck
             .ToList();
         if (stellen.Count == 0)
         {
-            return [name];
+            return [Kurz(name)];
         }
 
         (string erste, string zweite) = stellen.MinBy(t => Math.Max(t.Erste.Length, t.Zweite.Length));
-        return [erste.TrimEnd(), zweite.TrimStart()];
+        return [Kurz(erste.TrimEnd()), Kurz(zweite.TrimStart())];
     }
 
     /// <summary>„km je Mannschaft“ wie in der Ansicht: je Mannschaft Ausrichtungen, ein Balken und die km, die weiteste zuerst.</summary>
@@ -181,8 +184,9 @@ public static class Kompaktdruck
                     ? string.Create(Deutsch, $"{m.Ausgerichtet}× Ausrichter, {m.EinzelHeim}× Einzel zuhause")
                     : string.Create(Deutsch, $"{m.Ausgerichtet}× Ausrichter");
 
-                // Spalten nach den gemessenen Namen (volle Mannschaftsnamen sind unterschiedlich lang), Balken bis vor die km.
-                double xAusrichter = Math.Max(140, liste.Select(m => f.TextBreite(m.Name, 11, false)).DefaultIfEmpty(0).Max() + 12);
+                // Spalten nach den gemessenen Namen (volle Mannschaftsnamen sind unterschiedlich lang, sehr lange gekürzt), Balken bis vor die km.
+                double namensbreite = Math.Min(Textkuerzung.Namensbreite, liste.Select(m => f.TextBreite(m.Name, 11, false)).DefaultIfEmpty(0).Max());
+                double xAusrichter = Math.Max(140, namensbreite + 12);
                 double xBalken = Math.Max(350, xAusrichter + liste.Select(m => f.TextBreite(Ausrichter(m), 10, false)).DefaultIfEmpty(0).Max() + 12);
                 double balken = Math.Max(30, Math.Min(120, Kartenbreite - 50 - xBalken));
                 for (int i = 0; i < liste.Count; i++)
@@ -190,7 +194,7 @@ public static class Kompaktdruck
                     Kompaktmannschaft m = liste[i];
                     double y = Kopf + (i * Zeile);
                     string km = m.Km.ToString("N0", Deutsch);
-                    f.Text(m.Name, 0, y, 11, Farbe.Tinte, false);
+                    f.Text(Textkuerzung.Kuerzen(f, m.Name, namensbreite, 11, false), 0, y, 11, Farbe.Tinte, false);
                     f.Text(Ausrichter(m), xAusrichter, y + 1, 10, Farbe.Tinte2, false);
                     f.Rechteck(xBalken, y + 4, balken * m.Km / weiteste, 7, Farbe.Akzent);
                     f.Text(km, Kartenbreite - f.TextBreite(km, 11, false), y, 11, Farbe.Tinte, false);
@@ -285,7 +289,9 @@ public static class Kompaktdruck
             }
         }
 
-        Legende(f, oben + kopf + (zeilen.Count * Zeilenhoehe) + 12);
+        // Die Legende nennt nur die Farben, die im Plan vorkommen.
+        List<Kompaktzelle> alle = [.. zeilen.SelectMany(z => z.Zellen)];
+        Legende(f, oben + kopf + (zeilen.Count * Zeilenhoehe) + 12, (alle.Exists(z => z.ZweiterSpieltag), alle.Exists(z => z.DritterSpieltag), alle.Exists(z => z.Einzel)));
     }
 
     /// <summary>Ein Feld des Rasters: Meldung als Farbe, Ring für Spitzen- und Abstiegsspieltag, ★ bzw. ● bzw. ?.</summary>
@@ -359,8 +365,8 @@ public static class Kompaktdruck
         f.Vieleck(punkte, farbe, null, 0, geschlossen: true);
     }
 
-    /// <summary>Legende unter dem Raster, wie in der Ansicht.</summary>
-    private static void Legende(IZeichenflaeche f, double y)
+    /// <summary>Legende unter dem Raster, wie in der Ansicht – mit den Farben, die im Plan vorkommen.</summary>
+    private static void Legende(IZeichenflaeche f, double y, (bool Zweiter, bool Dritter, bool Einzel) farben)
     {
         const double G = 10;
         double x = 0;
@@ -388,22 +394,22 @@ public static class Kompaktdruck
         y += 20;
         Eintrag((ex, ey) => Stern(f, ex + 8, ey + 6, 5.5, Farbe.Tinte), "richtet aus", 14);
         Eintrag((ex, ey) => f.Kreis(ex + 8, ey + 6, 4, Farbe.Tinte, null, 0), "Gast", 14);
-        Eintrag(
-            (ex, ey) =>
-            {
-                Stern(f, ex + 4, ey + 6, 5, Zweiter);
-                f.Kreis(ex + 14, ey + 6, 4, Zweiter, null, 0);
-            },
-            "zweiter Spieltag am selben Tag",
-            14);
-        Eintrag(
-            (ex, ey) =>
-            {
-                Stern(f, ex + 4, ey + 6, 5, EinzelGelb);
-                f.Kreis(ex + 14, ey + 6, 4, EinzelGelb, null, 0);
-            },
-            "Einzelbegegnung",
-            14);
+        foreach ((_, Farbe farbe, string text) in new[]
+        {
+            (farben.Zweiter, Zweiter, "zweiter Spieltag am selben Tag"),
+            (farben.Dritter, Dritter, "dritter Spieltag am selben Tag"),
+            (farben.Einzel, EinzelGelb, "Einzelbegegnung"),
+        }.Where(e => e.Item1))
+        {
+            Eintrag(
+                (ex, ey) =>
+                {
+                    Stern(f, ex + 4, ey + 6, 5, farbe);
+                    f.Kreis(ex + 14, ey + 6, 4, farbe, null, 0);
+                },
+                text,
+                14);
+        }
 
         x = 0;
         y += 20;

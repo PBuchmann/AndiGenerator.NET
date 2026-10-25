@@ -27,11 +27,20 @@ public static class HighsLoeser
     /// <summary>Status „beweisbar beste Lösung“ (kHighsModelStatusOptimal).</summary>
     private const int Optimal = 7;
 
+    /// <summary>Status „keine Lösung“ (kHighsModelStatusInfeasible).</summary>
+    private const int Unzulaessig = 8;
+
+    /// <summary>Lösung vorhanden (kHighsSolutionStatusFeasible).</summary>
+    private const int ZulaessigeLoesung = 2;
+
     /// <summary>Mehr Aufwand für Heuristiken, damit früh gute Lösungen da sind (Standard 0,05).</summary>
     private const double Heuristik = 0.2;
 
     /// <summary>Rückruf während der ganzzahligen Suche mit der Frage nach Abbruch (kCallbackMipInterrupt).</summary>
     private const int MipUnterbrechung = 6;
+
+    /// <summary>Rückruf von HiGHS bei jeder besseren Lösung (<c>kCallbackMipImprovingSolution</c>).</summary>
+    private const int MipBessereLoesung = 4;
 
     /// <summary>Ab so vielen Spalten ohne Vorverarbeitung (die üblichen Modelle haben 2.000 bis 4.000).</summary>
     private const int GrossesModell = 10_000;
@@ -163,7 +172,15 @@ public static class HighsLoeser
 
             SetzeRueckruf(h, Marshal.GetFunctionPointerForDelegate(rueckruf), IntPtr.Zero);
             StarteRueckruf(h, MipUnterbrechung);
+            using IDisposable messung = Rechenfaeden.HighsRechnet();
             if (Ausfuehren(h) < 0)
+            {
+                return (null, false);
+            }
+
+            // Abgebrochen, bevor es eine Lösung gab: keine Werte (sonst lauter Nullen).
+            _ = LeseGanzzahlInfo(h, "primal_solution_status", out int loesungsstatus);
+            if (loesungsstatus != ZulaessigeLoesung)
             {
                 return (null, false);
             }
@@ -171,6 +188,156 @@ public static class HighsLoeser
             var werte = new double[n];
             LeseLoesung(h, werte, new double[n], new double[m], new double[m]);
             return (werte, Modellstatus(h) == Optimal);
+        }
+        finally
+        {
+            Zerstoeren(h);
+            GC.KeepAlive(rueckruf);
+        }
+    }
+
+    /// <summary>
+    /// Löst das Problem bis zur Zeitgrenze und liefert neben der besten Lösung die beweisbare untere Schranke (für die untere
+    /// Schranke der Ligaplanung, MIGRATIONSPLAN O7).
+    /// </summary>
+    /// <param name="problem">Das Problem.</param>
+    /// <param name="zeitgrenze">Zeitgrenze.</param>
+    /// <param name="start">Eine bekannte Lösung als Startpunkt, oder <c>null</c>.</param>
+    /// <param name="aufhoeren">
+    /// Wird während der Suche gefragt; <c>true</c> beendet sie mit der bis dahin besten Lösung (Abbruch, Pause), oder <c>null</c>.
+    /// </param>
+    /// <param name="fortschritt">
+    /// Zeitgrenze nach Fortschritt (<paramref name="zeitgrenze"/> ist dann die Obergrenze), oder <c>null</c>.
+    /// </param>
+    /// <param name="vorgabe">Startwert, Aufwand der Heuristiken und Zwischenstände (für Vergleiche), oder <c>null</c>.</param>
+    /// <returns>
+    /// Die Werte der besten Lösung (oder <c>null</c>), ihre Kosten, die untere Schranke, ob die Lösung beweisbar die beste ist
+    /// und ob das Problem keine Lösung hat.
+    /// </returns>
+    public static (double[]? Werte, double Wert, double Schranke, bool Optimal, bool Unloesbar) LoesenMitSchranke(Ganzzahlproblem problem, TimeSpan zeitgrenze, double[]? start = null, Func<bool>? aufhoeren = null, Fortschrittsgrenze? fortschritt = null, Highsvorgabe? vorgabe = null)
+    {
+        ArgumentNullException.ThrowIfNull(problem);
+        IntPtr h = Erzeugen();
+        if (h == IntPtr.Zero)
+        {
+            return (null, double.PositiveInfinity, double.NegativeInfinity, false, false);
+        }
+
+        var stand = new Fortschrittsstand(fortschritt);
+        int spalten = problem.Kosten.Length;
+        Rueckruf rueckruf = (art, _, datenAus, datenEin, _) =>
+        {
+            if (art == MipBessereLoesung)
+            {
+                // Eine bessere Lösung (im ursprünglichen Modell): sofort weitergeben.
+                IntPtr zeiger = Fortschrittsstand.Rueckrufzeiger(datenAus, "mip_solution");
+                if (zeiger != IntPtr.Zero && vorgabe?.Loesung is { } loesung)
+                {
+                    var x = new double[spalten];
+                    Marshal.Copy(zeiger, x, 0, spalten);
+                    loesung(x);
+                }
+
+                return;
+            }
+
+            if (vorgabe?.Zwischenstand is { } melden && Fortschrittsstand.Ausgabewert(datenAus, "running_time") is double zeit)
+            {
+                melden(zeit, Fortschrittsstand.Ausgabewert(datenAus, "mip_primal_bound") ?? double.PositiveInfinity, Fortschrittsstand.Ausgabewert(datenAus, "mip_dual_bound") ?? double.NegativeInfinity);
+            }
+
+            if (datenEin != IntPtr.Zero && (aufhoeren?.Invoke() == true || stand.Steht(datenAus)))
+            {
+                Marshal.WriteInt32(datenEin, 1);
+            }
+        };
+
+        try
+        {
+            SetzeSchalter(h, "output_flag", 0);
+            SetzeZahl(h, "time_limit", zeitgrenze.TotalSeconds);
+            if (vorgabe is not null)
+            {
+                SetzeGanzzahl(h, "random_seed", Math.Abs(vorgabe.Startwert % 2_000_000_000));
+                if (vorgabe.Heuristik is double heuristik)
+                {
+                    SetzeZahl(h, "mip_heuristic_effort", heuristik);
+                }
+
+                if (vorgabe.OhneNeustart)
+                {
+                    SetzeSchalter(h, "mip_allow_restart", 0);
+                }
+            }
+
+            // Hier bleibt die Vorverarbeitung an (anders als bei den Kompaktspieltagen): Ohne sie fand die Teilneuplanung in der
+            // Zeitgrenze nichts mehr (Kreisklasse (7): 0 von 10 Ausschnitten), und abbrechen lässt sich jetzt über den Rückruf.
+            double unendlich = Unendlich(h);
+            int n = problem.Kosten.Length;
+            int m = problem.ZeileUnten.Length;
+            double[] zeileOben = problem.ZeileOben.Select(x => double.IsPositiveInfinity(x) ? unendlich : x).ToArray();
+            double[] zeileUnten = problem.ZeileUnten.Select(x => double.IsNegativeInfinity(x) ? -unendlich : x).ToArray();
+            int status = UebergebeMip(
+                h,
+                n,
+                m,
+                problem.Spalten.Length,
+                Zeilenweise,
+                Minimieren,
+                0,
+                problem.Kosten,
+                new double[n],
+                problem.SpalteOben,
+                zeileUnten,
+                zeileOben,
+                problem.ZeilenAnfang,
+                problem.Spalten,
+                problem.Werte,
+                Enumerable.Repeat(Ganzzahlig, n).ToArray());
+            if (status < 0)
+            {
+                return (null, double.PositiveInfinity, double.NegativeInfinity, false, false);
+            }
+
+            if (start is not null && start.Length == n)
+            {
+                SetzeLoesung(h, start, IntPtr.Zero, IntPtr.Zero, IntPtr.Zero);
+            }
+
+            if (aufhoeren is not null || fortschritt is not null || vorgabe?.Zwischenstand is not null || vorgabe?.Loesung is not null)
+            {
+                SetzeRueckruf(h, Marshal.GetFunctionPointerForDelegate(rueckruf), IntPtr.Zero);
+                StarteRueckruf(h, MipUnterbrechung);
+                if (vorgabe?.Loesung is not null)
+                {
+                    StarteRueckruf(h, MipBessereLoesung);
+                }
+            }
+
+            using IDisposable messung = Rechenfaeden.HighsRechnet();
+            if (Ausfuehren(h) < 0)
+            {
+                return (null, double.PositiveInfinity, double.NegativeInfinity, false, false);
+            }
+
+            int modellstatus = Modellstatus(h);
+            if (modellstatus == Unzulaessig)
+            {
+                return (null, double.PositiveInfinity, double.PositiveInfinity, false, true);
+            }
+
+            _ = LeseGanzzahlInfo(h, "primal_solution_status", out int loesungsstatus);
+            _ = LeseZahlInfo(h, "mip_dual_bound", out double schranke);
+            if (loesungsstatus != ZulaessigeLoesung)
+            {
+                return (null, double.PositiveInfinity, schranke, false, false);
+            }
+
+            var werte = new double[n];
+            LeseLoesung(h, werte, new double[n], new double[m], new double[m]);
+            _ = LeseZahlInfo(h, "objective_function_value", out double wert);
+            bool optimal = modellstatus == Optimal;
+            return (werte, wert, optimal ? wert : schranke, optimal, false);
         }
         finally
         {
@@ -228,6 +395,12 @@ public static class HighsLoeser
     [DllImport(Bibliothek, EntryPoint = "Highs_setSolution", CallingConvention = CallingConvention.Cdecl)]
     private static extern int SetzeLoesung(IntPtr highs, double[] spalten, IntPtr zeilen, IntPtr spaltenDual, IntPtr zeilenDual);
 
+    [DllImport(Bibliothek, EntryPoint = "Highs_getDoubleInfoValue", CallingConvention = CallingConvention.Cdecl)]
+    private static extern int LeseZahlInfo(IntPtr highs, [MarshalAs(UnmanagedType.LPUTF8Str)] string info, out double wert);
+
+    [DllImport(Bibliothek, EntryPoint = "Highs_getIntInfoValue", CallingConvention = CallingConvention.Cdecl)]
+    private static extern int LeseGanzzahlInfo(IntPtr highs, [MarshalAs(UnmanagedType.LPUTF8Str)] string info, out int wert);
+
     [DllImport(Bibliothek, EntryPoint = "Highs_getInfinity", CallingConvention = CallingConvention.Cdecl)]
     private static extern double Unendlich(IntPtr highs);
 
@@ -236,4 +409,57 @@ public static class HighsLoeser
 
     [DllImport(Bibliothek, EntryPoint = "Highs_startCallback", CallingConvention = CallingConvention.Cdecl)]
     private static extern int StarteRueckruf(IntPtr highs, int art);
+
+    /// <summary>
+    /// Verfolgt im Rückruf, ob HiGHS noch vorankommt: bester gefundener Wert (primal) und Untergrenze (dual) mit der Laufzeit
+    /// ihrer letzten Verbesserung.
+    /// </summary>
+    private sealed class Fortschrittsstand(Fortschrittsgrenze? grenze)
+    {
+        private double bester = double.PositiveInfinity;
+        private double untergrenze = double.NegativeInfinity;
+        private double zuletzt;
+
+        /// <summary>Gibt an, ob HiGHS aufhören soll: nach der Mindestzeit und so lange ohne Fortschritt.</summary>
+        public bool Steht(IntPtr datenAus)
+        {
+            if (grenze is null || Ausgabewert(datenAus, "running_time") is not double zeit)
+            {
+                return false;
+            }
+
+            const double Schritt = 1e-6;
+            if (Ausgabewert(datenAus, "mip_primal_bound") is double primal && double.IsFinite(primal) && primal < bester - Schritt)
+            {
+                bester = primal;
+                zuletzt = zeit;
+            }
+
+            if (Ausgabewert(datenAus, "mip_dual_bound") is double dual && double.IsFinite(dual) && dual > untergrenze + Schritt)
+            {
+                untergrenze = dual;
+                zuletzt = zeit;
+            }
+
+            // Ohne gefundenen Plan sucht HiGHS weiter (bis zur Obergrenze): Der erste Plan ist selbst der Fortschritt.
+            return double.IsFinite(bester) && zeit >= grenze.Mindestens && zeit - zuletzt >= grenze.Stillstand;
+        }
+
+        /// <summary>Ein Wert (double) aus den Daten des Rückrufs; <c>null</c>, wenn es ihn nicht gibt.</summary>
+        internal static double? Ausgabewert(IntPtr datenAus, string name)
+        {
+            IntPtr zeiger = datenAus == IntPtr.Zero ? IntPtr.Zero : LeseRueckrufwert(datenAus, name);
+            return zeiger == IntPtr.Zero ? null : BitConverter.Int64BitsToDouble(Marshal.ReadInt64(zeiger));
+        }
+
+        /// <summary>Ein Zeiger aus den Daten des Rückrufs (bei „mip_solution“ die Werte der Spalten).</summary>
+        internal static IntPtr Rueckrufzeiger(IntPtr datenAus, string name)
+        {
+            ArgumentException.ThrowIfNullOrEmpty(name);
+            return datenAus == IntPtr.Zero ? IntPtr.Zero : LeseRueckrufwert(datenAus, name);
+        }
+
+        [DllImport(Bibliothek, EntryPoint = "Highs_getCallbackDataOutItem", CallingConvention = CallingConvention.Cdecl)]
+        private static extern IntPtr LeseRueckrufwert(IntPtr datenAus, [MarshalAs(UnmanagedType.LPUTF8Str)] string name);
+    }
 }

@@ -51,7 +51,7 @@ public sealed class Kompaktkarte : Control
             return;
         }
 
-        context.DrawRectangle(Farbe("Schwebe"), null, new Rect(Bounds.Size), 10, 10);
+        context.DrawRectangle(Pinsel.Farbe("Schwebe"), null, new Rect(Bounds.Size), 10, 10);
         using (context.PushClip(new RoundedRect(new Rect(Bounds.Size), 10)))
         {
             FontFamily? schrift = global::Avalonia.Application.Current?.TryFindResource("Grundschrift", out object? f) == true && f is FontFamily ff ? ff : null;
@@ -91,7 +91,4 @@ public sealed class Kompaktkarte : Control
             .MinBy(h => Math.Abs((h.Punkt.X * s) - p.X) + Math.Abs((h.Punkt.Y * s) - p.Y));
         ToolTip.SetTip(this, naechste?.Ort.Hinweis);
     }
-
-    private static IBrush Farbe(string name) =>
-        global::Avalonia.Application.Current?.TryFindResource(name, out object? wert) == true && wert is IBrush b ? b : Brushes.Gray;
 }

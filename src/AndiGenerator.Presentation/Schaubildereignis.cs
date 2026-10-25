@@ -4,7 +4,7 @@
 
 namespace AndiGenerator.Presentation;
 
-/// <summary>Was im Schaubild des Maschinenraums kurz aufleuchtet.</summary>
+/// <summary>Was im Schaubild des Leitstands kurz aufleuchtet.</summary>
 public enum Schaubildereignis
 {
     /// <summary>Der beste Plan ist besser geworden (der Plan kommt von einer Insel über den Koordinator).</summary>
@@ -18,4 +18,10 @@ public enum Schaubildereignis
 
     /// <summary>Der Automodus hat Gewichte angehoben.</summary>
     Anhebung,
+
+    /// <summary>Ein Plan aus HiGHS (Teilneuplanung oder untere Schranke) ist bester Plan geworden.</summary>
+    Teilneuplanung,
+
+    /// <summary>Die Teilneuplanung übernimmt den besseren Plan der Inseln als neuen Ausgangsplan.</summary>
+    Ausgangsplan,
 }

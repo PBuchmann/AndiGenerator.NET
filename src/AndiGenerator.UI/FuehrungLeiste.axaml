@@ -1,0 +1,93 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:p="using:AndiGenerator.Presentation"
+             xmlns:ui="using:AndiGenerator.UI"
+             x:Class="AndiGenerator.UI.FuehrungLeiste"
+             x:DataType="p:FuehrungViewModel">
+  <UserControl.Styles>
+    <Style Selector="Button.fschritt">
+      <Setter Property="HorizontalAlignment" Value="Stretch" />
+      <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+      <Setter Property="Padding" Value="10,8" />
+      <Setter Property="Margin" Value="0,1" />
+      <Setter Property="CornerRadius" Value="12" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="BorderBrush" Value="Transparent" />
+    </Style>
+    <Style Selector="Button.fschritt:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="{StaticResource Schwebe}" />
+      <Setter Property="BorderBrush" Value="Transparent" />
+    </Style>
+    <Style Selector="Button.fschritt.aktiv">
+      <Setter Property="Background" Value="#F3F7FC" />
+      <Setter Property="BorderBrush" Value="#C9DAF0" />
+    </Style>
+    <Style Selector="Button.fschritt.aktiv:pointerover /template/ ContentPresenter#PART_ContentPresenter">
+      <Setter Property="Background" Value="#F3F7FC" />
+      <Setter Property="BorderBrush" Value="#C9DAF0" />
+    </Style>
+    <Style Selector="Border.fmarke">
+      <Setter Property="Width" Value="26" />
+      <Setter Property="Height" Value="26" />
+      <Setter Property="CornerRadius" Value="13" />
+      <Setter Property="Background" Value="{StaticResource Schwebe}" />
+    </Style>
+    <Style Selector="Border.fmarke TextBlock">
+      <Setter Property="Foreground" Value="{StaticResource Tinte2}" />
+    </Style>
+    <Style Selector="Border.fmarke.aktiv">
+      <Setter Property="Background" Value="{StaticResource Akzent}" />
+    </Style>
+    <Style Selector="Border.fmarke.aktiv TextBlock">
+      <Setter Property="Foreground" Value="White" />
+    </Style>
+    <Style Selector="Border.fmarke.erledigt">
+      <Setter Property="Background" Value="#E4F1E8" />
+    </Style>
+    <Style Selector="Border.fmarke.erledigt TextBlock">
+      <Setter Property="Foreground" Value="{StaticResource Gut}" />
+    </Style>
+  </UserControl.Styles>
+  <Border Background="{StaticResource Flaeche}" BorderBrush="{StaticResource Linie}" BorderThickness="1,0,0,0" Width="340">
+    <DockPanel Margin="14,14,14,12">
+      <Grid DockPanel.Dock="Top" ColumnDefinitions="*,Auto" Margin="4,0,0,10">
+        <StackPanel Spacing="2">
+          <TextBlock Text="{Binding Titel}" FontSize="15" FontWeight="Bold" TextWrapping="Wrap" />
+          <TextBlock Text="{Binding FortschrittText}" Classes="klein" />
+        </StackPanel>
+        <Button Grid.Column="1" Classes="entfernen" Command="{Binding SchliessenCommand}" VerticalAlignment="Top" ToolTip.Tip="Schritt für Schritt schließen (F1)">
+          <ui:Symbol Daten="{StaticResource SymbolSchliessen}" Groesse="16" />
+        </Button>
+      </Grid>
+      <Grid DockPanel.Dock="Bottom" ColumnDefinitions="Auto,*,Auto" Margin="0,10,0,0">
+        <Button Classes="gross" Content="‹ Zurück" Command="{Binding ZurueckCommand}" />
+        <Button Grid.Column="1" Classes="gross" Content="Zeigen" Command="{Binding ZeigenCommand}" HorizontalAlignment="Center"
+                ToolTip.Tip="Öffnet bei Bedarf die Ansicht und hebt die Stelle in der Oberfläche hervor" />
+        <Button Grid.Column="2" Classes="gross primaer" Content="{Binding WeiterText}" Command="{Binding WeiterCommand}" />
+      </Grid>
+      <ScrollViewer VerticalScrollBarVisibility="Auto">
+        <ItemsControl ItemsSource="{Binding Schritte}">
+          <ItemsControl.ItemTemplate>
+            <DataTemplate x:DataType="p:Fuehrungszeile">
+              <Button Classes="fschritt" Classes.aktiv="{Binding IstAktuell}" Command="{Binding WaehlenCommand}">
+                <Grid ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto">
+                  <Border Classes="fmarke" Classes.aktiv="{Binding IstAktuell}" Classes.erledigt="{Binding IstErledigt}" VerticalAlignment="Top" Margin="0,0,10,0">
+                    <TextBlock Text="{Binding Marke}" FontSize="12" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                  </Border>
+                  <TextBlock Grid.Column="1" Text="{Binding Titel}" FontSize="14" FontWeight="SemiBold" TextWrapping="Wrap" VerticalAlignment="Center" />
+                  <StackPanel Grid.Row="1" Grid.Column="1" Spacing="6" Margin="0,6,0,2" IsVisible="{Binding IstAktuell}">
+                    <TextBlock Text="{Binding Text}" FontSize="13" TextWrapping="Wrap" Foreground="{StaticResource Tinte}" />
+                    <Button Classes="link" Command="{Binding $parent[UserControl].((p:FuehrungViewModel)DataContext).AnleitungCommand}" ToolTip.Tip="Anleitung als PDF öffnen">
+                      <TextBlock Text="{Binding Verweis}" FontSize="12" TextWrapping="Wrap" />
+                    </Button>
+                  </StackPanel>
+                </Grid>
+              </Button>
+            </DataTemplate>
+          </ItemsControl.ItemTemplate>
+        </ItemsControl>
+      </ScrollViewer>
+    </DockPanel>
+  </Border>
+</UserControl>

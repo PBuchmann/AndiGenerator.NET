@@ -224,7 +224,7 @@ public sealed class BedienungTests : IDisposable
             modell.KostenoptimierungCommand.Execute(null);
             await modell.GenerierungCommand.ExecuteAsync(null);
             await WartenAsync(o, fenster, TimeSpan.FromSeconds(4), () => false);
-            Zeigen<MaschinenraumAnsicht>(fenster, o, modell.MaschinenraumCommand);
+            Zeigen<LeitstandAnsicht>(fenster, o, modell.LeitstandCommand);
             await WartenAsync(o, fenster, TimeSpan.FromSeconds(2), () => false);
             Zeigen<VerlaufAnsicht>(fenster, o, modell.VerlaufCommand);
             Ueberfahren<Verlaufsdiagramm>(fenster);
@@ -233,7 +233,7 @@ public sealed class BedienungTests : IDisposable
             modell.AutomodusCommand.Execute(null);
             await WartenAsync(o, fenster, TimeSpan.FromSeconds(20), () => modell.Anzeige.Phase.Length > 0);
             await WartenAsync(o, fenster, TimeSpan.FromSeconds(2), () => false);
-            Zeigen<MaschinenraumAnsicht>(fenster, o, modell.MaschinenraumCommand);
+            Zeigen<LeitstandAnsicht>(fenster, o, modell.LeitstandCommand);
             Ueberfahren<Maschinenschaubild>(fenster);
             Zeigen<VerlaufAnsicht>(fenster, o, modell.VerlaufCommand);
             Ueberfahren<Verlaufsdiagramm>(fenster);

@@ -4,9 +4,10 @@
 
 namespace AndiGenerator.Engine.Referenz;
 
-/// <summary>Linie zwischen zwei Spielen gegen denselben Gegner (Original <c>PaintSpielAbstandMannschaft</c>).</summary>
+/// <summary>Abstand zwischen zwei Spielen gegen denselben Gegner (Original <c>PaintSpielAbstandMannschaft</c>).</summary>
+/// <param name="Gegner">Name des Gegners.</param>
 /// <param name="Von">Termin des ersten Spiels.</param>
 /// <param name="Bis">Termin des nächsten Spiels gegen denselben Gegner.</param>
-/// <param name="Rot">Rotanteil der Linienfarbe (grün = idealer Abstand, rot = schlecht).</param>
-/// <param name="Gruen">Grünanteil der Linienfarbe.</param>
-public sealed record Abstandslinie(DateTime Von, DateTime Bis, int Rot, int Gruen);
+/// <param name="Abstand">Abstand in Spielen der Mannschaft (1 = gleich das nächste Spiel).</param>
+/// <param name="Ideal">Idealer Abstand: Spiele der Mannschaft je Runde.</param>
+public sealed record Abstandslinie(string Gegner, DateTime Von, DateTime Bis, int Abstand, double Ideal);

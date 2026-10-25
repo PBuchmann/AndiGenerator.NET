@@ -24,7 +24,12 @@ internal sealed partial class KernPlan
         MannschaftsKostenart.GleicheHeimtermine, MannschaftsKostenart.Spielverteilung,
     ];
 
-    /// <summary>Original <c>CalculateKosten(-1)</c>.</summary>
+    /// <summary>
+    /// Die Zielfunktion beim Glätten im Automodus (Verstöße zählen statt Kosten), oder <c>null</c> = Kosten des Originals.
+    /// </summary>
+    public Zaehlziel? Zaehlziel { get; set; }
+
+    /// <summary>Original <c>CalculateKosten(-1)</c>; mit <see cref="Zaehlziel"/> dessen Wert.</summary>
     public double Kosten()
     {
         Berechnungsoptionen optionen = D.Optionen;
@@ -58,7 +63,14 @@ internal sealed partial class KernPlan
             }
         }
 
-        return ergebnis + NichtErlaubteKosten();
+        ergebnis += NichtErlaubteKosten();
+        if (Zaehlziel is { } ziel)
+        {
+            double hart = FehlterminKosten() + SpielfreieTageKosten() + NichtErlaubteKosten();
+            return ziel.Wert(this, ergebnis, (int)Math.Round(hart / (10.0 * RefPlan.MaxKostenOhneHartenFehler)));
+        }
+
+        return ergebnis;
     }
 
     /// <summary>Original <c>CalculateMannschaftsKosten</c>.</summary>
@@ -217,8 +229,12 @@ internal sealed partial class KernPlan
         return new RefPlan.Spieltagskosten(breite, ueberlappung, letzteBreite, letzteUeberlappung);
     }
 
-    /// <summary>Original <c>getTeamsNotAtBegin</c>.</summary>
-    private int TeamsNichtAmAnfang()
+    /// <summary>
+    /// Original <c>getTeamsNotAtBegin</c>: Spiele gegen fremde Vereine vor einem vereinsinternen Spiel derselben Runde (je
+    /// Mannschaft gezählt).
+    /// </summary>
+    /// <returns>Die Anzahl.</returns>
+    public int TeamsNichtAmAnfang()
     {
         int ergebnis = 0;
         for (int t = 0; t < D.N; t++)

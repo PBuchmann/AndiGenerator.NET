@@ -4,7 +4,7 @@
              xmlns:ui="using:AndiGenerator.UI"
              x:Class="AndiGenerator.UI.Seiten.MannschaftenSeite"
              x:DataType="p:MannschaftenSeiteViewModel">
-  <DockPanel Margin="12" HorizontalAlignment="Left">
+  <DockPanel Margin="12" HorizontalAlignment="Stretch" MaxWidth="780">
     <StackPanel DockPanel.Dock="Right" Classes="seitenknoepfe">
       <Button Classes="seitenknopf" Command="{Binding NeuCommand}">
         <StackPanel Orientation="Horizontal" Spacing="8">
@@ -25,6 +25,6 @@
         </StackPanel>
       </Button>
     </StackPanel>
-    <ListBox x:Name="Liste" ItemsSource="{Binding Namen}" SelectedItem="{Binding Auswahl}" MinHeight="300" Width="520" />
+    <ListBox x:Name="Liste" ItemsSource="{Binding Namen}" SelectedItem="{Binding Auswahl}" MinHeight="300" MinWidth="200" />
   </DockPanel>
 </UserControl>

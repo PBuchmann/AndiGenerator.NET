@@ -38,7 +38,7 @@ public sealed partial class Datenbearbeitung
     /// <param name="mannschaft">Mannschaftsname.</param>
     /// <returns>Die Wochen oder <c>null</c> ohne Standard.</returns>
     public IReadOnlyList<Wunschterminwoche>? WunschtermineStandard(string mannschaft) =>
-        standard is null ? null : WunschtermineAus(HeimtageAus(standard, mannschaft));
+        Standard is null ? null : WunschtermineAus(HeimtageAus(Standard, mannschaft));
 
     /// <summary>
     /// Schreibt die Terminübersicht (Original <c>FormToData</c> mit <c>SetHomeDays</c>). Abweichend vom Original bleiben
@@ -58,7 +58,7 @@ public sealed partial class Datenbearbeitung
     /// <returns><c>true</c>, wenn gleich oder ohne Standard.</returns>
     public bool WunschtermineSindStandard(string mannschaft, IReadOnlyList<Wunschterminwoche> wochen)
     {
-        List<Heimtag> vorlage = standard is null ? [] : HeimtageAus(standard, mannschaft);
+        List<Heimtag> vorlage = Standard is null ? [] : HeimtageAus(Standard, mannschaft);
         List<Heimtag> jetzt = MitTerminenAusserhalb(Heimtage(mannschaft), wochen).Select(NachSpeichern).ToList();
         return vorlage.Count == jetzt.Count && vorlage.TrueForAll(jetzt.Contains);
     }

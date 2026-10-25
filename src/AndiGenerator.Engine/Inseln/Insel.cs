@@ -89,7 +89,14 @@ internal sealed class Insel
         Erfolge++;
 
         verbesserungBei = durchlaeufe;
-        Verteilen(new Auftrag(Loesung.Kopie(), Kosten));
+
+        // Mit später Annahme geht jeder Platz seinen eigenen Weg weiter (ein Auftrag setzte ihn auf den besten zurück); die Insel
+        // merkt sich nur den besten Plan.
+        if (!Plaetze[0].Spaet)
+        {
+            Verteilen(new Auftrag(Loesung.Kopie(), Kosten));
+        }
+
         DynamischeAnpassen(besteStrategie);
     }
 

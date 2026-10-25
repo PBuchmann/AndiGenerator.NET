@@ -25,6 +25,12 @@ public sealed class Kartenzeichner(IZeichenflaeche f)
     /// <summary>Gelb der Einzelbegegnungen, wie in der Planmatrix.</summary>
     private static readonly Farbe EinzelGelb = new(0xEA, 0xB3, 0x08);
 
+    /// <summary>Zweiter Spieltag am selben Sonntag (wie ★/● im Raster).</summary>
+    private static readonly Farbe ZweiterSpieltag = new(0xC2, 0x41, 0x0C);
+
+    /// <summary>Dritter (oder weiterer) Spieltag am selben Sonntag.</summary>
+    private static readonly Farbe DritterSpieltag = new(0x7E, 0x22, 0xCE);
+
     /// <summary>Holt den Hintergrund der Karte (Ton „Schwebe“ der Oberfläche).</summary>
     public static Farbe Hintergrund { get; } = new(0xF0, 0xEF, 0xEA);
 
@@ -67,6 +73,12 @@ public sealed class Kartenzeichner(IZeichenflaeche f)
             if (Geteilt(bild, fahrt))
             {
                 HalbeFahrt(fahrt, s);
+                if (fahrt.Versatz > 0 && Gleichfarbig(bild, fahrt))
+                {
+                    // Zwei Fahrten in derselben Farbe (z. B. zweimal zum selben Ausrichter): eine helle Mittellinie trennt die
+                    // Hälften, sonst sähe es aus wie eine Fahrt.
+                    Trennlinie(fahrt, s);
+                }
             }
             else
             {
@@ -107,6 +119,10 @@ public sealed class Kartenzeichner(IZeichenflaeche f)
             {
                 // Mehrere Fahrten zum selben Ziel: ein gemeinsamer Pfeil, jede Fahrt ihre Hälfte in ihrer Farbe.
                 HalberPfeil(Linie(fahrt with { Versatz = 0 }, s), Math.Sign(fahrt.Versatz), Linienfarbe(fahrt));
+                if (fahrt.Versatz > 0 && Gleichfarbig(bild, fahrt))
+                {
+                    PfeilTrennen(Linie(fahrt with { Versatz = 0 }, s));
+                }
             }
             else
             {
@@ -148,7 +164,22 @@ public sealed class Kartenzeichner(IZeichenflaeche f)
     private static bool Geteilt(Kartenbild bild, Kartenfahrt fahrt) =>
         fahrt.Kraeftig && bild.Fahrten.Count(x => x.Kraeftig && x.Von == fahrt.Von && x.Nach == fahrt.Nach) == 2;
 
-    private static Farbe Linienfarbe(Kartenfahrt fahrt) => fahrt.Einzel ? EinzelGelb : Farbe.Akzent;
+    /// <summary>Ob die zweite Fahrt derselben Strecke dieselbe Farbe hat (dann trennt eine helle Linie die Hälften).</summary>
+    private static bool Gleichfarbig(Kartenbild bild, Kartenfahrt fahrt) =>
+        bild.Fahrten.Any(x => x != fahrt && x.Kraeftig && x.Von == fahrt.Von && x.Nach == fahrt.Nach && Linienfarbe(x) == Linienfarbe(fahrt));
+
+    /// <summary>
+    /// Die Farbe einer Fahrt wie ihre Punkte im Raster der Kompaktspieltage: Einzelbegegnung gelb, sonst nach dem Spieltag am
+    /// Sonntag schwarz, orangerot, violett; ohne Spieltag blau.
+    /// </summary>
+    private static Farbe Linienfarbe(Kartenfahrt fahrt) => (fahrt.Einzel, fahrt.Spieltag) switch
+    {
+        (true, _) => EinzelGelb,
+        (_, 0) => Farbe.Tinte,
+        (_, 1) => ZweiterSpieltag,
+        (_, >= 2) => DritterSpieltag,
+        _ => Farbe.Akzent,
+    };
 
     private static (double X, double Y) P(V v) => (v.X, v.Y);
 
@@ -218,7 +249,7 @@ public sealed class Kartenzeichner(IZeichenflaeche f)
         {
             double x = halle.Punkt.X * s;
             double y = halle.Punkt.Y * s;
-            string text = halle.Ort.Beschriftung;
+            string text = Textkuerzung.Kuerzen(f, halle.Ort.Beschriftung, Textkuerzung.Namensbreite, 12, true);
             double w = f.TextBreite(text, 12, true) + 6;
             (double X, double Y)? lage = Erste(NaheLagen(x, y, w, H), w);
             bool leitlinie = false;
@@ -232,7 +263,7 @@ public sealed class Kartenzeichner(IZeichenflaeche f)
             {
                 // Kein Platz für den Namen: eine Nummer am Punkt, der Name steht in der Legende.
                 text = (nummeriert.Count + 1).ToString(Deutsch);
-                nummeriert.Add((text, halle.Ort.Beschriftung));
+                nummeriert.Add((text, Textkuerzung.Kuerzen(f, halle.Ort.Beschriftung, Textkuerzung.Namensbreite, 11, false)));
                 w = f.TextBreite(text, 12, true) + 6;
                 lage = Erste(NaheLagen(x, y, w, H), w)
                     ?? (Math.Clamp(x + 9, 2, Math.Max(2, breite - 2 - w)), Math.Clamp(y - 10, 2, Math.Max(2, hoehe - 2 - H)));
@@ -318,9 +349,13 @@ public sealed class Kartenzeichner(IZeichenflaeche f)
         }
 
         const double Radius = 8;
-        if (ankommend.Select(x => x.Einzel).Distinct().Count() == 1)
+
+        // Geteilt wird bei verschieden gefärbten Linien und bei mehreren Fahrten vom selben Ausgangspunkt (zweimal zum selben
+        // Ausrichter) – sonst sähe man nur eine.
+        bool mehrereVonEinem = ankommend.GroupBy(x => x.Von).Any(g => g.Count() > 1);
+        if (ankommend.Select(Linienfarbe).Distinct().Count() == 1 && !mehrereVonEinem)
         {
-            f.Kreis(mitte.X, mitte.Y, Radius, ankommend[0].Einzel ? EinzelGelb : Farbe.Akzent, Hell, 2);
+            f.Kreis(mitte.X, mitte.Y, Radius, Linienfarbe(ankommend[0]), Hell, 2);
             return;
         }
 
@@ -425,6 +460,37 @@ public sealed class Kartenzeichner(IZeichenflaeche f)
         V spitze = achse.Nach - (t * 9.5);
         V basis = spitze - (t * 7);
         f.Vieleck([P(spitze - (quer * 0.3)), P(basis + (quer * 3.8)), P(basis - (quer * 0.3))], farbe, null, 0, geschlossen: true);
+    }
+
+    /// <summary>Helle Linie auf der Mittelachse einer geteilten Fahrt (vom Start bis zum Fuß der Spitze).</summary>
+    private void Trennlinie(Kartenfahrt fahrt, double s)
+    {
+        (V von, V nach) = Linie(fahrt with { Versatz = 0 }, s);
+        V r = nach - von;
+        double l = r.Laenge;
+        if (l < 1)
+        {
+            return;
+        }
+
+        V ende = l > 30 ? nach - (r / l * 15.5) : nach;
+        f.Linie(von.X, von.Y, ende.X, ende.Y, Hell, 0.8);
+    }
+
+    /// <summary>Helle Linie auf der Achse einer geteilten Pfeilspitze.</summary>
+    private void PfeilTrennen((V Von, V Nach) achse)
+    {
+        V r = achse.Nach - achse.Von;
+        double laenge = r.Laenge;
+        if (laenge < 1)
+        {
+            return;
+        }
+
+        V t = r / laenge;
+        V spitze = achse.Nach - (t * 9.5);
+        V basis = spitze - (t * 7);
+        f.Linie(basis.X, basis.Y, spitze.X, spitze.Y, Hell, 0.8);
     }
 
     /// <summary>

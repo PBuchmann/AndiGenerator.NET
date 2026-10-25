@@ -84,6 +84,20 @@ public sealed class Zoom : ObservableObject
     /// <summary>Wechselt zur nächstkleineren Stufe.</summary>
     public void Kleiner() => Prozent = Stufen.LastOrDefault(s => s < Prozent, Minimum);
 
+    /// <summary>
+    /// Stellt die Vergrößerung für eine Geste mit zwei Fingern ein (Bildschirm oder Touchpad): <paramref name="start"/> zu
+    /// Beginn der Geste mal <paramref name="skala"/> (Abstand der Finger jetzt durch Abstand zu Beginn), gerundet auf 5 %.
+    /// </summary>
+    /// <param name="start">Die Vergrößerung zu Beginn der Geste in Prozent.</param>
+    /// <param name="skala">Das Verhältnis der Fingerabstände.</param>
+    public void Skalieren(int start, double skala)
+    {
+        if (skala > 0 && double.IsFinite(skala))
+        {
+            Schieber = start * skala;
+        }
+    }
+
     /// <summary>Setzt die Vergrößerung auf 100 % zurück.</summary>
     public void Zuruecksetzen() => Prozent = 100;
 }

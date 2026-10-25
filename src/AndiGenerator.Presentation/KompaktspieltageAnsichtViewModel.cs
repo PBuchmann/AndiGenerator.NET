@@ -2,6 +2,7 @@
 // SPDX-FileCopyrightText: 2026 Peter Buchmann
 // SPDX-License-Identifier: GPL-3.0-only
 
+using System.Collections.ObjectModel;
 using System.Globalization;
 using AndiGenerator.Application;
 using AndiGenerator.Domain.Turniere;
@@ -21,7 +22,14 @@ public sealed partial class KompaktspieltageAnsichtViewModel : Document
     private static readonly CultureInfo Deutsch = CultureInfo.GetCultureInfo("de-DE");
 
     private readonly HauptfensterViewModel hauptfenster;
+    private readonly ObservableCollection<Kompaktspalte> spalten = [];
+    private readonly ObservableCollection<Kompaktrasterzeile> zeilen = [];
+    private readonly ObservableCollection<Kompaktkmzeile> kmZeilen = [];
+    private readonly ObservableCollection<Kompaktspieltagkarte> spieltage = [];
+    private readonly ObservableCollection<string> hinweise = [];
     private Kompaktauswertung? auswertung;
+    private (Kartenbild Bild, object Eingaben)? kartenstand;
+    private (bool Zweiter, bool Dritter, bool Einzel) legendeFarben;
     private (char Art, string Schluessel) auswahl = ('-', string.Empty);
     private bool eingeschaltet;
     private string kopfzeile = string.Empty;
@@ -36,11 +44,6 @@ public sealed partial class KompaktspieltageAnsichtViewModel : Document
     private string fortschrittText = string.Empty;
     private string erlaeuterungstitel = string.Empty;
     private IReadOnlyList<string> erlaeuterung = [];
-    private IReadOnlyList<Kompaktspalte> spalten = [];
-    private IReadOnlyList<Kompaktrasterzeile> zeilen = [];
-    private IReadOnlyList<Kompaktkmzeile> kmZeilen = [];
-    private IReadOnlyList<Kompaktspieltagkarte> spieltage = [];
-    private IReadOnlyList<string> hinweise = [];
     private (IReadOnlyList<string> Spitze, IReadOnlyList<string> Keller) gruppen = ([], []);
 
     /// <summary>Initialisiert die Ansicht.</summary>
@@ -65,6 +68,7 @@ public sealed partial class KompaktspieltageAnsichtViewModel : Document
         TagAnlegenCommand = new AsyncRelayCommand(TagAnlegenAsync);
         LokalFuerAlleCommand = new AsyncRelayCommand(LokalFuerAlleAsync);
         ZeitLoeschenCommand = new AsyncRelayCommand(ZeitLoeschenAsync);
+        HalleFuerAlleCommand = new AsyncRelayCommand(HalleFuerAlleAsync);
         Laden();
     }
 
@@ -151,14 +155,27 @@ public sealed partial class KompaktspieltageAnsichtViewModel : Document
     public IReadOnlyList<string> Erlaeuterung
     {
         get => erlaeuterung;
-        private set => SetProperty(ref erlaeuterung, value);
+        private set
+        {
+            // Unverändert bleibt die Liste stehen: Die Oberfläche baut sie sonst bei jeder Eingabe neu auf.
+            if (!value.SequenceEqual(erlaeuterung))
+            {
+                SetProperty(ref erlaeuterung, value);
+            }
+        }
     }
 
     /// <summary>Holt die Pläne zur Wahl: Plan aus click-TT und die Varianten der letzten Berechnung.</summary>
     public IReadOnlyList<Kompaktplanwahl> Plaene
     {
         get => plaene;
-        private set => SetProperty(ref plaene, value);
+        private set
+        {
+            if (!value.SequenceEqual(plaene))
+            {
+                SetProperty(ref plaene, value);
+            }
+        }
     }
 
     /// <summary>Holt die Hinweise der letzten Berechnung.</summary>
@@ -181,7 +198,13 @@ public sealed partial class KompaktspieltageAnsichtViewModel : Document
     public IReadOnlyList<string> Mannschaftsnamen
     {
         get => mannschaftsnamen;
-        private set => SetProperty(ref mannschaftsnamen, value);
+        private set
+        {
+            if (!value.SequenceEqual(mannschaftsnamen))
+            {
+                SetProperty(ref mannschaftsnamen, value);
+            }
+        }
     }
 
     /// <summary>Holt die Spaltenköpfe des Rasters.</summary>
@@ -190,7 +213,7 @@ public sealed partial class KompaktspieltageAnsichtViewModel : Document
         get => spalten;
         private set
         {
-            if (SetProperty(ref spalten, value))
+            if (Listenabgleich.Abgleichen(spalten, value))
             {
                 OnPropertyChanged(nameof(Kopfhoehe));
             }
@@ -204,7 +227,7 @@ public sealed partial class KompaktspieltageAnsichtViewModel : Document
     public IReadOnlyList<Kompaktrasterzeile> Zeilen
     {
         get => zeilen;
-        private set => SetProperty(ref zeilen, value);
+        private set => Listenabgleich.Abgleichen(zeilen, value, ZeileGleich, ZellenAbgleichen);
     }
 
     /// <summary>Holt die Karte.</summary>
@@ -225,7 +248,7 @@ public sealed partial class KompaktspieltageAnsichtViewModel : Document
     public IReadOnlyList<Kompaktkmzeile> KmZeilen
     {
         get => kmZeilen;
-        private set => SetProperty(ref kmZeilen, value);
+        private set => Listenabgleich.Abgleichen(kmZeilen, value);
     }
 
     /// <summary>Holt die Karten der Spieltage.</summary>
@@ -234,7 +257,7 @@ public sealed partial class KompaktspieltageAnsichtViewModel : Document
         get => spieltage;
         private set
         {
-            if (SetProperty(ref spieltage, value))
+            if (Listenabgleich.Abgleichen(spieltage, value, KarteGleich))
             {
                 OnPropertyChanged(nameof(Spieltagbreite));
             }
@@ -253,8 +276,17 @@ public sealed partial class KompaktspieltageAnsichtViewModel : Document
     public IReadOnlyList<string> Hinweise
     {
         get => hinweise;
-        private set => SetProperty(ref hinweise, value);
+        private set => Listenabgleich.Abgleichen(hinweise, value);
     }
+
+    /// <summary>Holt einen Wert, der angibt, ob die Legende den zweiten Spieltag eines Sonntags (orangerot) zeigt – nur, wenn es einen gibt.</summary>
+    public bool LegendeZweiter => legendeFarben.Zweiter;
+
+    /// <summary>Holt einen Wert, der angibt, ob die Legende den dritten Spieltag eines Sonntags (violett) zeigt.</summary>
+    public bool LegendeDritter => legendeFarben.Dritter;
+
+    /// <summary>Holt einen Wert, der angibt, ob die Legende Einzelbegegnungen (gelb) zeigt.</summary>
+    public bool LegendeEinzel => legendeFarben.Einzel;
 
     /// <summary>Holt einen Wert, der angibt, ob ein Plan gezeigt wird (aus click-TT oder berechnet); sonst entfallen die km je Mannschaft.</summary>
     public bool HatPlan => auswertung?.Spieltage.Count > 0;
@@ -324,6 +356,31 @@ public sealed partial class KompaktspieltageAnsichtViewModel : Document
         OnPropertyChanged(nameof(HatPlan));
         AuswahlZeigen();
     }
+
+    /// <summary>
+    /// Ob eine Zeile des Rasters stehen bleiben kann: gleicher Sonntag, gleiche Auswahl, gleich viele Felder. Ihre Felder gleicht
+    /// <see cref="ZellenAbgleichen"/> dann einzeln ab – eine Eingabe baut so nur ein Feld neu.
+    /// </summary>
+    private static bool ZeileGleich(Kompaktrasterzeile alt, Kompaktrasterzeile neu) =>
+        alt.Tag == neu.Tag && alt.Datum == neu.Datum && alt.Gewaehlt == neu.Gewaehlt && alt.Zellen.Count == neu.Zellen.Count
+        && alt.Zellen is ObservableCollection<Kompaktzelle>;
+
+    private static bool ZelleGleich(Kompaktzelle a, Kompaktzelle b) =>
+        a.Meldung == b.Meldung && a.Zeichen == b.Zeichen && a.Verstoss == b.Verstoss && a.Gedimmt == b.Gedimmt && a.Hinweis == b.Hinweis
+        && a.Spieltag == b.Spieltag && a.Spitzenspieltag == b.Spitzenspieltag && a.Abstiegsspieltag == b.Abstiegsspieltag
+        && a.Mannschaft == b.Mannschaft && a.Tag == b.Tag && a.Einzel == b.Einzel;
+
+    /// <summary>
+    /// Eine stehen bleibende Zeile: geänderte Felder werden ersetzt, gleiche bekommen nur den Rahmen der neuen (er ändert sich
+    /// ohne Neuaufbau).
+    /// </summary>
+    private static void ZellenAbgleichen(Kompaktrasterzeile alt, Kompaktrasterzeile neu) =>
+        Listenabgleich.Abgleichen((ObservableCollection<Kompaktzelle>)alt.Zellen, neu.Zellen, ZelleGleich, (a, n) => a.IstCursor = n.IstCursor);
+
+    private static bool KarteGleich(Kompaktspieltagkarte a, Kompaktspieltagkarte b) =>
+        a.Nummer == b.Nummer && a.Datum == b.Datum && a.Form == b.Form && a.Ausrichter == b.Ausrichter && a.Km == b.Km
+        && a.Spiele.SequenceEqual(b.Spiele) && a.Verlegen == b.Verlegen && a.Gaeste == b.Gaeste && a.Hinweise.SequenceEqual(b.Hinweise)
+        && a.Gewaehlt == b.Gewaehlt && a.Adresse == b.Adresse;
 
     private static List<string> HinweiseBilden(Kompaktauswertung a)
     {
@@ -440,6 +497,7 @@ public sealed partial class KompaktspieltageAnsichtViewModel : Document
         }
 
         string? team = auswahl.Art == 'M' ? auswahl.Schluessel : null;
+        HalleLaden(team);
         DateOnly? tag = auswahl.Art == 'T' ? DateOnly.ParseExact(auswahl.Schluessel, "O", CultureInfo.InvariantCulture) : null;
         int? nummer = auswahl.Art == 'S' ? int.Parse(auswahl.Schluessel, CultureInfo.InvariantCulture) : null;
         List<(int Nummer, Kompaktspieltag Spieltag)> alle = a.Spieltage.Select((s, i) => (i, s)).ToList();
@@ -453,6 +511,8 @@ public sealed partial class KompaktspieltageAnsichtViewModel : Document
         Kompaktspieltag? spitzentag = gruppen.Spitze.Count >= 3 ? Kompaktpunkte.Gruppentag(a, gruppen.Spitze) : null;
         Kompaktspieltag? kellertag = gruppen.Keller.Count >= 3 ? Kompaktpunkte.Gruppentag(a, gruppen.Keller) : null;
         Zeilen = a.Tage.Select(t => Rasterzeile(a, t, tag == t, team, tag is not null && tag != t, rahmen, (spitzentag, kellertag))).ToList();
+        List<Kompaktzelle> zellen = [.. zeilen.SelectMany(z => z.Zellen)];
+        LegendeSetzen((zellen.Exists(z => z.ZweiterSpieltag), zellen.Exists(z => z.DritterSpieltag), zellen.Exists(z => z.Einzel)));
         double weiteste = Math.Max(1, a.Mannschaften.Select(m => m.Km).DefaultIfEmpty(0).Max());
         KmZeilen = a.Mannschaften.OrderByDescending(m => m.Km)
             .Select(m => new Kompaktkmzeile(m.Name, Ausrichtertext(m), m.Km.ToString("N0", Deutsch), m.Km / weiteste, m.Name == team))
@@ -474,6 +534,21 @@ public sealed partial class KompaktspieltageAnsichtViewModel : Document
             _ => "Alle Fahrten der Halbrunde",
         };
         bool alleZeigen = auswahl.Art == '-';
-        Karte = Kompaktfahrtenkarte.Bauen(a, alleZeigen ? a.Spieltage : gewaehlt, team, alleZeigen);
+
+        // Gleiche Spielorte und Fahrten (etwa nach einer Meldung im Raster): Die Karte bleibt, statt neu gebaut und gezeichnet zu werden.
+        kartenstand = Kompaktfahrtenkarte.Bauen(a, alleZeigen ? a.Spieltage : gewaehlt, team, alleZeigen, kartenstand);
+        Karte = kartenstand.Value.Bild;
+    }
+
+    /// <summary>Merkt sich, welche Farben der Spieltage im Plan vorkommen (nur sie stehen in der Legende).</summary>
+    private void LegendeSetzen((bool Zweiter, bool Dritter, bool Einzel) farben)
+    {
+        if (legendeFarben != farben)
+        {
+            legendeFarben = farben;
+            OnPropertyChanged(nameof(LegendeZweiter));
+            OnPropertyChanged(nameof(LegendeDritter));
+            OnPropertyChanged(nameof(LegendeEinzel));
+        }
     }
 }

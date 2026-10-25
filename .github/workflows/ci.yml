@@ -26,7 +26,11 @@ jobs:
       - name: Bauen
         run: dotnet build AndiGenerator.slnx -c Release -nologo
 
+      # Die vier Testprojekte laufen parallel, jedes mit eigenem Datensammler für die Abdeckung. Unter Last (Persistence.Tests
+      # rechnet minutenlang) verbindet sich ein Sammler manchmal nicht innerhalb der üblichen 90 s – dann bricht der Lauf ab.
       - name: Testen (mit Messung der Testabdeckung)
+        env:
+          VSTEST_CONNECTION_TIMEOUT: '600'
         run: dotnet test AndiGenerator.slnx -c Release --no-build -nologo --logger "trx" --results-directory TestResults --filter "Kategorie!=Messung" --settings .runsettings --collect "Code Coverage;Format=cobertura"
 
       - name: Testabdeckung zusammenfassen

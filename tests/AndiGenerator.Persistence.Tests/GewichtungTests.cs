@@ -69,6 +69,28 @@ public class GewichtungTests
         Assert.Equal(markierung, Gewichtungsanzeige.Markierung(Gewichtungsanzeige.Wert(stufen)));
     }
 
+    /// <summary>
+    /// Kriterien, die im Original nur Kosten haben, bekommen eine Anzahl (Pausen, zu lange bzw. überlappende Spieltage) – nur,
+    /// wenn sie Kosten haben – und zählen bei den C-Verstößen mit.
+    /// </summary>
+    [Fact]
+    public void Spielverteilung_und_Spieltage_bekommen_eine_Anzahl()
+    {
+        var zellen = Enumerable.Repeat(new Kostenzelle(-1, -1, 0), Berechnungsoptionen.AnzahlKostenarten).ToArray();
+        zellen[(int)MannschaftsKostenart.Spielverteilung] = new Kostenzelle(-1, -1, 50);
+        var zusatz = new Zusatzverstoesse([2, 1], 3, 4, 1, 0, [], [[], []], []);
+        var bewertung = new Planbewertung(0, 0, 0, 0, 10, 20, 0, 30, 0, [MannschaftsKostenart.Spielverteilung], [new("A", zellen, 50, []), new("B", zellen, 50, [])], 0, zusatz);
+
+        IReadOnlyList<Qualitaetskriterium> kriterien = Planqualitaet.Kriterien(bewertung);
+
+        Assert.Equal(3, kriterien.Single(k => k.Kriterium == Kostenkriterium.Spielverteilung).Anzahl);
+        Assert.Equal(3, kriterien.Single(k => k.Kriterium == Kostenkriterium.Spieltaglaenge).Anzahl);
+        Assert.Equal(4, kriterien.Single(k => k.Kriterium == Kostenkriterium.Spieltagueberlappung).Anzahl);
+        Assert.Equal(1, kriterien.Single(k => k.Kriterium == Kostenkriterium.LetzterSpieltagLaenge).Anzahl);
+        Assert.Equal(0, kriterien.Single(k => k.Kriterium == Kostenkriterium.LetzterSpieltagUeberlappung).Anzahl);
+        Assert.Equal(3 + 3 + 4 + 1, Stufeneinteilung.Standard.Zaehlen(bewertung).CAnzahl);
+    }
+
     [Fact]
     public void Qualitaet_zaehlt_Verstoesse_je_Kriterium()
     {
@@ -112,7 +134,9 @@ public class GewichtungTests
         Assert.Equal(15, sperr.Gesamtzahl);
         Assert.Equal(300.0, sperr.Kosten);
 
-        Qualitaetskriterium halle = kriterien.Single(k => k.Stufe == "A2");
+        // Standard: vereinsinterne Spiele am Anfang zuerst (A2), dann Hallenbelegung.
+        Assert.Equal(Kostenkriterium.VereinsinterneSpieleAmAnfang, kriterien.Single(k => k.Stufe == "A2").Kriterium);
+        Qualitaetskriterium halle = kriterien.Single(k => k.Stufe == "A3");
         Assert.Equal(Kostenkriterium.Hallenbelegung, halle.Kriterium);
         Assert.True(halle.Erfuellt);
         Assert.Null(kriterien.Single(k => k.Stufe == "B4").Anzahl);
@@ -127,7 +151,7 @@ public class GewichtungTests
 
         IReadOnlyList<Qualitaetskriterium> umgestuft = Planqualitaet.Kriterien(bewertung, eigene);
         Assert.Equal("A2", umgestuft.Single(k => k.Kriterium == Kostenkriterium.Sperrtermine).Stufe);
-        Assert.Equal("A3", umgestuft.Single(k => k.Kriterium == Kostenkriterium.Hallenbelegung).Stufe);
+        Assert.Equal("A4", umgestuft.Single(k => k.Kriterium == Kostenkriterium.Hallenbelegung).Stufe);
         Assert.Equal(eigene.Text(), Stufeneinteilung.AusText(eigene.Text()).Text());
 
         // Nach unten umgestuft kommt ein Kriterium an die erste Stelle der neuen Stufe, nach oben ans Ende.

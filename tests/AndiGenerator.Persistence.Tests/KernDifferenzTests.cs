@@ -5,6 +5,7 @@
 using System.Globalization;
 using AndiGenerator.Domain.Optionen;
 using AndiGenerator.Domain.Stammdaten;
+using AndiGenerator.Engine.Inseln;
 using AndiGenerator.Engine.Kern;
 using AndiGenerator.Engine.Referenz;
 using AndiGenerator.Persistence.Plandaten;
@@ -86,6 +87,33 @@ public class KernDifferenzTests
         staffel = staffel with { BestehenderSpielplan = Veraendern(staffel, zufall) };
         Berechnungsoptionen optionen = startwert == 1 ? Berechnungsoptionen.Standard : ZufaelligeOptionen(staffel, zufall);
         VergleicheBewertung(staffel, optionen, $"{datei} / {startwert}");
+    }
+
+    /// <summary>
+    /// Das Zählziel der Suche zählt wie der Automodus (KernPlan.StufenBewerten): harte Fehler, A, B und C mit den Pausen der
+    /// Spielverteilung und den Spieltagen – auch für zufällig veränderte Pläne; die schnellen Anzahlen gleichen denen mit
+    /// Meldungen.
+    /// </summary>
+    /// <param name="datei">Die Staffel.</param>
+    /// <param name="startwert">Startwert der Veränderung des Plans.</param>
+    [Theory]
+    [MemberData(nameof(ZufallsplaeneDaten))]
+    public void Zaehlziel_zaehlt_wie_der_Automodus(string datei, int startwert)
+    {
+        var zufall = new Random(startwert * 104_729);
+        Staffel staffel = Laden(datei);
+        staffel = staffel with { BestehenderSpielplan = Veraendern(staffel, zufall) };
+        Stufeneinteilung einteilung = Stufeneinteilung.AusText("A:Hallenbelegung,ParalleleSpiele;B:Sperrtermine,Spielverteilung,Spieltagueberlappung").Vervollstaendigt();
+        Stufe[] stufen = einteilung.AlsFeld();
+        var plan = new KernPlan(RefPlan.Laden(staffel, Berechnungsoptionen.Standard)) { Zaehlziel = new Zaehlziel(stufen) };
+        plan.Sortieren();
+
+        double wert = plan.Kosten();
+        Stufenwert stufenwert = plan.StufenBewerten(stufen, new double[Stufeneinteilung.AnzahlKriterien], new double[Stufeneinteilung.AnzahlKriterien]);
+        Zusatzverstoesse zusatz = plan.ZusatzZaehlen(meldungen: false);
+
+        Assert.Equal((zusatz.Spielverteilung.Sum(), zusatz.SpieltageLaenge, zusatz.SpieltageUeberlappung, zusatz.LetzterLaenge == 1, zusatz.LetzterUeberlappung == 1), plan.ZusatzAnzahlen());
+        Assert.Equal((stufenwert.Harte * 1e12) + (stufenwert.A * 1e9) + (stufenwert.B * 1e6) + stufenwert.CAnzahl, Math.Floor(wert));
     }
 
     [Theory]

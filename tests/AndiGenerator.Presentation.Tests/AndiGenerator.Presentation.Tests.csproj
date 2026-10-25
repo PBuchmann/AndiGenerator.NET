@@ -7,6 +7,11 @@
     <Using Include="Xunit" />
   </ItemGroup>
   <ItemGroup>
+    <!-- HiGHS-Tests auf win-arm64 überspringen (Highs.Native liefert dort keine Bibliothek), wie in Persistence.Tests. -->
+    <Compile Include="..\AndiGenerator.Persistence.Tests\HighsPlattform.cs" Link="Gemeinsam\HighsPlattform.cs" />
+    <Compile Include="..\AndiGenerator.Persistence.Tests\HighsFactAttribute.cs" Link="Gemeinsam\HighsFactAttribute.cs" />
+  </ItemGroup>
+  <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" />
     <PackageReference Include="xunit" />
     <PackageReference Include="xunit.runner.visualstudio" />
@@ -14,6 +19,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\AndiGenerator.Presentation\AndiGenerator.Presentation.csproj" />
     <ProjectReference Include="..\..\src\AndiGenerator.Persistence\AndiGenerator.Persistence.csproj" />
+    <ProjectReference Include="..\..\tools\AndiGenerator.Mcp\AndiGenerator.Mcp.csproj" />
   </ItemGroup>
   <ItemGroup>
     <!-- Anonymisierte Testdaten im Repository (tools/anonymisieren), siehe Doku/TESTDATEN.md. -->

@@ -49,6 +49,11 @@ public interface IOberflaeche
     /// <returns>Die Antwort.</returns>
     Task<Sicherungswahl> SicherungAbfragenAsync(Planvergleich vergleich);
 
+    /// <summary>Zeigt den Dialog „B-Varianten“ bildschirmfüllend und modal.</summary>
+    /// <param name="dialog">Der Dialog.</param>
+    /// <returns><c>true</c> bei „Übernehmen“ (dann ist <see cref="AlternativendialogViewModel.Gewaehlt"/> gesetzt).</returns>
+    Task<bool> AlternativenZeigenAsync(AlternativendialogViewModel dialog);
+
     /// <summary>Stellt eine Entscheidungsfrage mit Detailtext und eigenen Schaltflächen.</summary>
     /// <param name="titel">Titel des Dialogs.</param>
     /// <param name="text">Einleitender Text.</param>
@@ -145,4 +150,14 @@ public interface IOberflaeche
     /// <param name="text">Meldungstext.</param>
     /// <returns>Erledigt, sobald die Meldung geschlossen ist.</returns>
     Task MeldenAsync(string titel, string text);
+
+    /// <summary>
+    /// Hält den Rechner wach (kein Energiesparmodus, der Bildschirm darf ausgehen), solange eine Generierung rechnet; ändert
+    /// keine Einstellung des Systems. Aufruf auf dem UI-Thread.
+    /// </summary>
+    /// <param name="an"><c>true</c>, solange gerechnet wird; <c>false</c> gibt den Energiesparmodus wieder frei.</param>
+    void WachHalten(bool an)
+    {
+        // Standard: nichts (Systeme ohne diese Möglichkeit).
+    }
 }

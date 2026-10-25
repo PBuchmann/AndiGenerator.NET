@@ -101,7 +101,7 @@ public sealed partial class HauptfensterViewModel
     }
 
     /// <summary>Holt, ob die geöffnete Staffel mit Kompaktspieltagen geplant wird.</summary>
-    internal Kompaktmodus Kompaktmodus => sitzung?.DatenBearbeiten().Kompaktspieltage ?? Kompaktmodus.Offen;
+    internal Kompaktmodus Kompaktmodus => sitzung?.Kompaktmodus ?? Kompaktmodus.Offen;
 
     /// <summary>Holt einen Wert, der angibt, ob die Kompaktspieltage eingeschaltet sind (die Ansicht zeigt dann Plan und Karte).</summary>
     internal bool KompaktEingeschaltet => Kompaktmodus is Kompaktmodus.Ein or Kompaktmodus.Bestaetigt;
@@ -547,6 +547,12 @@ public sealed partial class HauptfensterViewModel
     private void KompaktFortschritt(Kompaktfortschritt stand) =>
         oberflaeche.AufOberflaeche(() =>
         {
+            // Eine verspätete Meldung überschreibt nicht das Ergebnis der beendeten Berechnung.
+            if (!KompaktRechnet)
+            {
+                return;
+            }
+
             Statuszeile = "Kompaktspieltage werden geplant – " + stand.Text;
             kompaktAnsicht?.FortschrittZeigen(stand.Anteil * 100, stand.Text);
         });

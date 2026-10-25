@@ -15,17 +15,18 @@ internal sealed class OptimierenArgumente
           --sekunden N      Laufzeit in Sekunden (Standard 120)
           --durchlaeufe N   stattdessen bis N Durchläufe insgesamt; mit --kerne 1 und --startwert reproduzierbar
           --kerne N         Rechen-Threads (Standard: Prozessorkerne - 1)
-          --inseln N        Zahl der Inseln (Standard 4)
           --startwert N     Startwert der Zufallsfolgen
           --optionen DATEI  Optionsdatei (.options); "auto" = Staffelordner des Originals; Standard: Standardoptionen
           --rundenplanung R beide | halbrunde | vorrunde | rueckrunde (überschreibt die Optionsdatei)
           --leer            mit leerem Plan beginnen (sonst mit dem bestehenden Spielplan der Datei)
-          --ohne-spezial    ohne Spezial-Insel
-          --original        Suche und Kosten wie im Original (ohne die Korrekturen der Klasse-3-Befunde
-                            und ohne die Regel für den Pflichtspieltag; zum Vergleich)
-          --hallen-wie-original  nur die Korrektur „Hallen nach Namen“ abschalten
           --intervall N     Statuszeile alle N Sekunden (Standard 10)
           --protokoll DATEI Verlauf als CSV (Sekunden;Durchläufe;Pläne/s;Kosten;Verbesserungen;Neustarts;Spezial)
+          --start PLAN      Startplan (gemerkter Plan .xml oder CSV, z. B. von "schranke --plan") für die erste Insel
+          --auto            Automodus (Gewichte nach der Rangfolge A/B/C lenken)
+          --highs           Automodus mit HiGHS: Schranke beendet das Drängen, Plan aus HiGHS nach dem Grundlauf (schaltet --auto ein)
+          --nebenher        mit --highs: HiGHS rechnet wie in der Oberfläche nebenher (Zwischenpläne sofort angeboten,
+                            Teilneuplanung erst danach) statt vor dem Start
+          --neuplanen       Automodus mit Teilneuplanung (HiGHS) nebenher (schaltet --auto ein)
           --plan DATEI      besten Plan als gemerkten Plan (Format des Originals) speichern
           --ausgabe DATEI   Bildschirmausgabe zusätzlich in diese Datei schreiben
         Eine .modifications-Datei neben der XML-Datei wird automatisch berücksichtigt. Abbrechen mit Strg+C.
@@ -39,8 +40,6 @@ internal sealed class OptimierenArgumente
 
     public int? Kerne { get; private set; }
 
-    public int? Inseln { get; private set; }
-
     public int? Startwert { get; private set; }
 
     public string? Optionen { get; private set; }
@@ -49,19 +48,22 @@ internal sealed class OptimierenArgumente
 
     public bool Leer { get; private set; }
 
-    public bool OhneSpezial { get; private set; }
-
-    /// <summary>Holt einen Wert, der angibt, ob ohne Korrekturen gerechnet wird (wie das Original).</summary>
-    public bool Original { get; private set; }
-
-    /// <summary>Holt einen Wert, der angibt, ob die Hallenbelegung wie im Original nur nach Spiellokal-Nummer zählt.</summary>
-    public bool HallenWieOriginal { get; private set; }
-
     public int Intervall { get; private set; } = 10;
 
     public string? Protokoll { get; private set; }
 
     public string? Plan { get; private set; }
+
+    public string? Start { get; private set; }
+
+    public bool Auto { get; private set; }
+
+    public bool Highs { get; private set; }
+
+    /// <summary>Holt einen Wert, der angibt, ob HiGHS nebenher rechnet (wie in der Oberfläche).</summary>
+    public bool Nebenher { get; private set; }
+
+    public bool Neuplanen { get; private set; }
 
     public string? Ausgabe { get; private set; }
 
@@ -127,14 +129,21 @@ internal sealed class OptimierenArgumente
             case "--leer":
                 Leer = true;
                 return true;
-            case "--ohne-spezial":
-                OhneSpezial = true;
+            case "--auto":
+                Auto = true;
                 return true;
-            case "--original":
-                Original = true;
+            case "--highs":
+                Highs = true;
+                Auto = true;
                 return true;
-            case "--hallen-wie-original":
-                HallenWieOriginal = true;
+            case "--nebenher":
+                Nebenher = true;
+                Highs = true;
+                Auto = true;
+                return true;
+            case "--neuplanen":
+                Neuplanen = true;
+                Auto = true;
                 return true;
             case "--sekunden" when Zahl(werte, arg, out zahl, out fehler):
                 Sekunden = (int)Math.Min(zahl, int.MaxValue);
@@ -144,9 +153,6 @@ internal sealed class OptimierenArgumente
                 return true;
             case "--kerne" when Zahl(werte, arg, out zahl, out fehler):
                 Kerne = (int)Math.Clamp(zahl, 1, 1024);
-                return true;
-            case "--inseln" when Zahl(werte, arg, out zahl, out fehler):
-                Inseln = (int)Math.Clamp(zahl, 1, 256);
                 return true;
             case "--startwert" when Zahl(werte, arg, out zahl, out fehler):
                 Startwert = (int)Math.Min(zahl, int.MaxValue);
@@ -163,6 +169,9 @@ internal sealed class OptimierenArgumente
                 return Rundenplanung is not null;
             case "--protokoll" when Text(werte, arg, out text, out fehler):
                 Protokoll = text;
+                return true;
+            case "--start" when Text(werte, arg, out text, out fehler):
+                Start = text;
                 return true;
             case "--plan" when Text(werte, arg, out text, out fehler):
                 Plan = text;

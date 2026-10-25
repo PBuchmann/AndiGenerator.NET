@@ -20,6 +20,7 @@ public sealed record Diagrammwahl(Diagrammteil Teil, string Titel, string Beschr
     {
         Diagrammteil.Spieltage => "Spieltage",
         Diagrammteil.WechselHeimAuswaerts => "Wechsel Heim/Auswärts",
+        Diagrammteil.Ausrichter => "Ausrichter und Spielorte",
         Diagrammteil.Spielverteilung => "Spielverteilung",
         Diagrammteil.AbstandHeimAuswaerts => "Abstand Hin-/Rückspiel",
         Diagrammteil.SpieleProWoche => "Spiele pro Woche",
@@ -31,10 +32,11 @@ public sealed record Diagrammwahl(Diagrammteil Teil, string Titel, string Beschr
     /// <returns>Ein Satz.</returns>
     public static string BeschreibungVon(Diagrammteil teil) => teil switch
     {
-        Diagrammteil.Spieltage => "Wann jede Mannschaft spielt; Überlappungen der Spieltage sind grau hinterlegt.",
-        Diagrammteil.WechselHeimAuswaerts => "Folge der Heim- und Auswärtsspiele je Mannschaft; lange Serien fallen sofort auf.",
-        Diagrammteil.Spielverteilung => "Die Termine jeder Mannschaft über die Saison und ihre Abstände zueinander.",
-        Diagrammteil.AbstandHeimAuswaerts => "Wie weit Heim- und Auswärtsspiel gegen denselben Gegner auseinanderliegen.",
+        Diagrammteil.Spieltage => "Wann jeder Spieltag gespielt wird: Termine, Spanne und Überschneidungen mit anderen Spieltagen.",
+        Diagrammteil.Ausrichter => "Wer wie oft ausrichtet und wo jede Mannschaft spielt; bei Kompaktspieltagen zählt nicht der Wechsel.",
+        Diagrammteil.WechselHeimAuswaerts => "Heim- und Auswärtsspiele je Mannschaft als Kacheln; ideal ist ein gleichmäßiges Schachbrett, Serien ab drei sind rot unterstrichen.",
+        Diagrammteil.Spielverteilung => "Jedes Spiel am genauen Tag: Doppelspieltage, Spiele kurz nacheinander und lange Pausen je Mannschaft.",
+        Diagrammteil.AbstandHeimAuswaerts => "Wie viele Spiele zwischen Hin- und Rückspiel gegen jeden Gegner liegen; grün ist das Soll (eine Runde ± 2 Spiele).",
         Diagrammteil.SpieleProWoche => "Wie viele Spiele jede Mannschaft je Woche hat.",
         _ => "Abgleich des Plans mit der Setzliste: wann die gesetzten Mannschaften aufeinandertreffen.",
     };

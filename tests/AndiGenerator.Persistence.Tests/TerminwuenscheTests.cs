@@ -13,9 +13,10 @@ namespace AndiGenerator.Persistence.Tests;
 /// <summary>Bericht „Terminwünsche“ aus click-TT: Textzeilen auswerten, mit den Spielplandaten abgleichen und übernehmen.</summary>
 public sealed class TerminwuenscheTests : IDisposable
 {
-    private static readonly string Privat = Path.Combine(
-        typeof(TerminwuenscheTests).Assembly.GetCustomAttributes<AssemblyMetadataAttribute>().First(a => a.Key == "Loesungsordner").Value!,
-        "Referenz");
+    private static readonly string Loesungsordner =
+        typeof(TerminwuenscheTests).Assembly.GetCustomAttributes<AssemblyMetadataAttribute>().First(a => a.Key == "Loesungsordner").Value!;
+
+    private static readonly string Privat = Path.Combine(Loesungsordner, "Referenz");
 
     private readonly string ordner = Path.Combine(Path.GetTempPath(), "andigen-tw-" + Guid.NewGuid().ToString("N"));
 
@@ -26,49 +27,7 @@ public sealed class TerminwuenscheTests : IDisposable
     [Fact]
     public void Bericht_wird_aus_Textzeilen_gelesen()
     {
-        // Aufbau wie nu.Dokument 019 (erfundene Vereine); Kopf und Fuß jeder Seite werden übergangen.
-        double oben = 30;
-        var zeilen = new List<Textzeile>();
-        void Zeile(params (double Links, string Text)[] woerter)
-        {
-            zeilen.Add(new Textzeile(0, oben, woerter.Select(w => new Textwort(w.Links, w.Text)).ToList()));
-            oben += 12;
-        }
-
-        void Text(string text) => Zeile((28, text));
-        Text("Tischtennisverband Rheinland Rheinhessen e.V.");
-        Text("Bezirksliga Test");
-        Text("Terminwünsche");
-        oben = 100;
-        Text("Verein Nord (000123) - Erwachsene II");
-        Text("Kontaktperson");
-        Text("Max Muster, Weg 1, 11111 Irgendwo,");
-        Text("Spiellokal 1");
-        Text("Sporthalle Nord, Hauptstraße 5, 12345 Nordstadt,");
-        Text("Tel.: 01234 5678");
-        Text("Spiellokal 2");
-        Text("Alte Halle, 12345 Nordstadt-Süd,");
-        Text("Spiellokal 3");
-        Text("Zusatzinformationen");
-        Text("Ball: Plastik weiß");
-        Text("Bemerkung: Bitte nicht vor");
-        Text("18 Uhr ansetzen.");
-        Text("Terminwünsche Vorrunde");
-        Zeile((28, "Spieltag"), (150, "Datum"), (280, "Spiellokal"), (400, "max."), (430, "Heimspiele"), (500, "Heimkoppelspiel"));
-        Zeile((28, "1."), (40, "Spieltag"), (150, "Sa"), (165, "05.09.2026"), (215, "18:00"), (245, "Uhr"), (280, "Sporthalle"), (330, "Nord"), (400, "2"), (500, "wenn"));
-        Zeile((500, "möglich"));
-        Zeile((28, "2."), (40, "Spieltag"), (150, "Fr"), (165, "11.09.2026"), (215, "20:00"), (245, "Uhr"), (280, "Alte"), (400, "unendlich"), (500, "-"));
-        Zeile((280, "Halle"));
-        Text("Sperrtermine");
-        Text("12.09.2026, 13.09.2026,");
-        Text("27.09.2026");
-        Text("nu.Dokument 019, erstellt am 12.10.2026 10:48 | Seite 1 von 2");
-        Text("Terminwünsche Rückrunde");
-        Text("Keine Terminwünsche vorhanden.");
-        Text("Sperrtermine");
-        Text("Verein Süd (77) - Jugend 19");
-        Text("Spiellokal 1");
-        Text("Halle Süd, 54321 Südstadt");
+        List<Textzeile> zeilen = Beispielbericht();
 
         IReadOnlyList<Vereinsmeldung> meldungen = TerminwunschBericht.Lesen(zeilen);
 
@@ -88,6 +47,45 @@ public sealed class TerminwuenscheTests : IDisposable
         Assert.Equal([new DateOnly(2026, 9, 12), new DateOnly(2026, 9, 13), new DateOnly(2026, 9, 27)], nord.Sperrtermine);
         Assert.Equal(("Verein Süd", 77, 1), (meldungen[1].Verein, meldungen[1].VereinsNummer, meldungen[1].MannschaftsNummer));
         Assert.Equal("Halle Süd", meldungen[1].Spiellokale[1].Name);
+    }
+
+    /// <summary>Der Bericht als PDF (mit PdfPig geschrieben): Die Zeilen und Wörter kommen in derselben Lage zurück.</summary>
+    [Fact]
+    public void Bericht_wird_aus_einem_PDF_gelesen()
+    {
+        List<Textzeile> zeilen = Beispielbericht();
+        var pdf = new UglyToad.PdfPig.Writer.PdfDocumentBuilder();
+
+        // Die Schrift der Oberfläche: Die Standardschriften von PdfPig kennen keine Umlaute.
+        string ttf = Path.Combine(Loesungsordner, "src", "AndiGenerator.UI", "Assets", "Fonts", "IBMPlexSans-Regular.ttf");
+        UglyToad.PdfPig.Writer.PdfDocumentBuilder.AddedFont schrift = pdf.AddTrueTypeFont(File.ReadAllBytes(ttf));
+        UglyToad.PdfPig.Writer.PdfPageBuilder seite = pdf.AddPage(UglyToad.PdfPig.Content.PageSize.A4);
+        double hoehe = seite.PageSize.Height;
+        foreach (Textzeile zeile in zeilen)
+        {
+            foreach (Textwort wort in zeile.Woerter)
+            {
+                seite.AddText(wort.Text, 9, new UglyToad.PdfPig.Core.PdfPoint(wort.Links, hoehe - zeile.Oben), schrift);
+            }
+        }
+
+        string pfad = Path.Combine(ordner, "Terminmeldungen.pdf");
+        File.WriteAllBytes(pfad, pdf.Build());
+
+        IReadOnlyList<Textzeile> gelesen = TerminwunschPdf.Textzeilen(pfad);
+        Assert.Equal(zeilen.Count, gelesen.Count);
+        Assert.Equal(zeilen.Select(z => string.Join(" ", z.Woerter.Select(w => w.Text))), gelesen.Select(z => string.Join(" ", z.Woerter.Select(w => w.Text))));
+        IReadOnlyList<Vereinsmeldung> meldungen = TerminwunschPdf.Laden(pfad);
+        Assert.Equal(TerminwunschBericht.Lesen(zeilen), meldungen, (a, b) => a.Verein == b.Verein && a.Bemerkung == b.Bemerkung && a.Heimtermine.SequenceEqual(b.Heimtermine));
+    }
+
+    [Fact]
+    public void Kein_PDF_und_fehlende_Datei_werden_gemeldet()
+    {
+        string pfad = Path.Combine(ordner, "kaputt.pdf");
+        File.WriteAllText(pfad, "kein PDF");
+        Assert.Throws<FormatException>(() => TerminwunschPdf.Laden(pfad));
+        Assert.Throws<FileNotFoundException>(() => TerminwunschPdf.Laden(Path.Combine(ordner, "fehlt.pdf")));
     }
 
     [Fact]
@@ -191,5 +189,54 @@ public sealed class TerminwuenscheTests : IDisposable
             Assert.All(abgleich.Mannschaften, m => Assert.True(m.Abweichungen.Count == 0, pdf + ": " + m.Mannschaft + ": " + string.Join("; ", m.Abweichungen)));
             Assert.True(abgleich.NummernGesetzt > 0, pdf);
         }
+    }
+
+    /// <summary>Ein Bericht wie nu.Dokument 019 (erfundene Vereine); Kopf und Fuß jeder Seite werden übergangen.</summary>
+    private static List<Textzeile> Beispielbericht()
+    {
+        double oben = 30;
+        var zeilen = new List<Textzeile>();
+        void Zeile(params (double Links, string Text)[] woerter)
+        {
+            zeilen.Add(new Textzeile(0, oben, woerter.Select(w => new Textwort(w.Links, w.Text)).ToList()));
+            oben += 12;
+        }
+
+        void Text(string text) => Zeile((28, text));
+        Text("Tischtennisverband Rheinland Rheinhessen e.V.");
+        Text("Bezirksliga Test");
+        Text("Terminwünsche");
+        oben = 100;
+        Text("Verein Nord (000123) - Erwachsene II");
+        Text("Kontaktperson");
+        Text("Max Muster, Weg 1, 11111 Irgendwo,");
+        Text("Spiellokal 1");
+        Text("Sporthalle Nord, Hauptstraße 5, 12345 Nordstadt,");
+        Text("Tel.: 01234 5678");
+        Text("Spiellokal 2");
+        Text("Alte Halle, 12345 Nordstadt-Süd,");
+        Text("Spiellokal 3");
+        Text("Zusatzinformationen");
+        Text("Ball: Plastik weiß");
+        Text("Bemerkung: Bitte nicht vor");
+        Text("18 Uhr ansetzen.");
+        Text("Terminwünsche Vorrunde");
+        Zeile((28, "Spieltag"), (150, "Datum"), (280, "Spiellokal"), (400, "max."), (430, "Heimspiele"), (500, "Heimkoppelspiel"));
+        Zeile((28, "1."), (40, "Spieltag"), (150, "Sa"), (165, "05.09.2026"), (215, "18:00"), (245, "Uhr"), (280, "Sporthalle"), (330, "Nord"), (400, "2"), (500, "wenn"));
+        Zeile((500, "möglich"));
+        Zeile((28, "2."), (40, "Spieltag"), (150, "Fr"), (165, "11.09.2026"), (215, "20:00"), (245, "Uhr"), (280, "Alte"), (400, "unendlich"), (500, "-"));
+        Zeile((280, "Halle"));
+        Text("Sperrtermine");
+        Text("12.09.2026, 13.09.2026,");
+        Text("27.09.2026");
+        Text("nu.Dokument 019, erstellt am 12.10.2026 10:48 | Seite 1 von 2");
+        Text("Terminwünsche Rückrunde");
+        Text("Keine Terminwünsche vorhanden.");
+        Text("Sperrtermine");
+        Text("Verein Süd (77) - Jugend 19");
+        Text("Spiellokal 1");
+        Text("Halle Süd, 54321 Südstadt");
+
+        return zeilen;
     }
 }

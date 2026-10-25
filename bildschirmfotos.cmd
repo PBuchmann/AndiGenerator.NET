@@ -1,6 +1,6 @@
 @echo off
 rem Erzeugt die Bildschirmfotos der Anleitung neu (Doku\Anleitung\Bilder) - ohne Bildschirm, mit anonymisierten Testdaten.
-rem Laeuft etwa eine Minute (Kostenoptimierung und Automodus rechnen kurz). Protokoll: bildschirmfotos-log.txt.
+rem Laeuft etwa anderthalb Minuten (Kostenoptimierung, Automodus und Kompaktplaner rechnen kurz). Protokoll: bildschirmfotos-log.txt.
 chcp 65001 >nul
 cd /d "%~dp0"
 set "LOG=%~dp0bildschirmfotos-log.txt"

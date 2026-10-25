@@ -5,54 +5,14 @@
 using AndiGenerator.Domain.Stammdaten;
 using AndiGenerator.Domain.Turniere;
 using AndiGenerator.Engine.Turniere;
-using AndiGenerator.Persistence.Turniere;
 
 namespace AndiGenerator.Persistence.Tests;
 
-/// <summary>Turnierrunden (Jugend): Meldungen aus der Umfrage lesen, Turniertage erkennen und gegen die Meldungen prüfen.</summary>
+/// <summary>Turnierrunden (Jugend): Turniertage erkennen und gegen die Meldungen prüfen.</summary>
 public class TurniereTests
 {
-    // Kopf über zwei Zeilen und Umlaute, wie sie entstehen, wenn UTF-8 als Latin-1 gelesen wurde.
-    private const string Umfrage = """
-        Zeitstempel,E-Mail-Adresse,Mannschaft,"15.11.2026
-        (Volkstrauertag)",22.11.2026,Halle,Zwei Spiele parallel in der Halle mÃ¶glich?,Bemerkungen
-        01.09.2026 10:00:00,a@example.org,Verein A,"mÃ¶glicher Heimspieltag, mÃ¶glicher AuswÃ¤rtsspieltag",kÃ¶nnen nicht,Halle Nord,Ja,"erst ab 12 Uhr, bitte"
-        01.09.2026 11:00:00,b@example.org,Verein B,mÃ¶glicher AuswÃ¤rtsspieltag,mÃ¶glicher Heimspieltag,Halle SÃ¼d,Nein,
-        02.09.2026 09:00:00,a@example.org,Verein A,mÃ¶glicher Heimspieltag,mÃ¶glicher AuswÃ¤rtsspieltag,Halle Nord,Ja,
-        """;
-
     private static readonly DateOnly Tag1 = new(2026, 11, 15);
     private static readonly DateOnly Tag2 = new(2026, 11, 22);
-
-    [Fact]
-    public void Umfrage_wird_gelesen_und_letzte_Meldung_gilt()
-    {
-        IReadOnlyList<Turniermeldung> meldungen = TurniermeldungenCsv.Lesen(Umfrage);
-
-        Assert.Equal(new[] { "Verein A", "Verein B" }, meldungen.Select(m => m.Mannschaft));
-        Turniermeldung a = meldungen[0];
-        Assert.Equal(Turnierbereitschaft.Heim, a.An(Tag1));
-        Assert.Equal(Turnierbereitschaft.Auswaerts, a.An(Tag2));
-        Assert.True(a.ZweiTische);
-        Assert.Equal(string.Empty, a.Bemerkung);
-        Turniermeldung b = meldungen[1];
-        Assert.Equal("Halle Süd", b.Halle);
-        Assert.False(b.ZweiTische);
-        Assert.Equal(Turnierbereitschaft.Auswaerts, b.An(Tag1));
-        Assert.Equal(Turnierbereitschaft.None, b.An(new DateOnly(2026, 12, 6)));
-    }
-
-    [Theory]
-    [InlineData("möglicher Heimspieltag, möglicher Auswärtsspieltag", Turnierbereitschaft.Heim | Turnierbereitschaft.Auswaerts)]
-    [InlineData("möglicher Auswärtsspieltag", Turnierbereitschaft.Auswaerts)]
-    [InlineData("können nicht", Turnierbereitschaft.None)]
-    [InlineData("", Turnierbereitschaft.None)]
-    public void Antwort_wird_erkannt(string zelle, Turnierbereitschaft erwartet) =>
-        Assert.Equal(erwartet, TurniermeldungenCsv.Bereitschaft(zelle));
-
-    [Fact]
-    public void Umfrage_ohne_Termine_wird_abgelehnt() =>
-        Assert.Throws<FormatException>(() => TurniermeldungenCsv.Lesen("Mannschaft,Halle\nVerein A,Halle Nord\n"));
 
     [Fact]
     public void Dreier_und_Vierer_werden_erkannt()

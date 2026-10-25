@@ -74,9 +74,12 @@ public sealed class Bildschirmfotos : IDisposable
             Plansitzung.Oeffnen(StaffelKopieren("bericht", mitAenderungen: false), Path.Combine(ordner, "basis-bericht")).Staffel.Mannschaften);
         await EinrichtungAsync(ziel, StaffelKopieren("erststart", mitAenderungen: false), bericht);
         string datei = StaffelKopieren("daten", mitAenderungen: true);
+        SetzlisteEinschalten(datei);
         await HauptfensterAsync(ziel, datei);
         Dialoge(ziel, datei);
-        await KompaktAsync(ziel, KompaktklasseVorbereiten());
+        await DatenseitenAsync(ziel);
+        await KompaktEinrichtungAsync(ziel, KompaktklasseRoh());
+        await KompaktAsync(ziel, Kompaktklasse.Vorbereiten(ordner));
     });
 
     /// <summary>
@@ -223,7 +226,7 @@ public sealed class Bildschirmfotos : IDisposable
             await WartenAsync(o, TimeSpan.FromSeconds(8), () => false);
 
             // Leitstand der Kostenoptimierung (mit Spezial-Insel), solange gerechnet wird; danach wieder die Kosten vorn.
-            Zeigen(modell.MaschinenraumCommand, o);
+            Zeigen(modell.LeitstandCommand, o);
             await WartenAsync(o, TimeSpan.FromSeconds(2), () => false);
             Foto(ziel, "20-leitstand-kosten", Ansichten(fenster), o);
             Zeigen(modell.KostenansichtCommand, o);
@@ -249,6 +252,13 @@ public sealed class Bildschirmfotos : IDisposable
                 Foto(ziel, "17-diagramm-spielverteilung", Ansichten(fenster), o);
             }
 
+            DiagrammeFotografieren(ziel, fenster, diagramm, o, [
+                (Diagrammteil.WechselHeimAuswaerts, "35-diagramm-wechsel"),
+                (Diagrammteil.AbstandHeimAuswaerts, "36-diagramm-abstand"),
+                (Diagrammteil.SpieleProWoche, "37-diagramm-woche"),
+                (Diagrammteil.Setzliste, "38-diagramm-setzliste"),
+            ]);
+
             Zeigen(modell.TerminwunschansichtCommand, o);
             var wuensche = (TerminwunschAnsichtViewModel)Einzige<TerminwunschAnsicht>(fenster).DataContext!;
             wuensche.IstUebersicht = true;
@@ -266,8 +276,8 @@ public sealed class Bildschirmfotos : IDisposable
             await WartenAsync(o, TimeSpan.FromSeconds(45), () => modell.Anzeige.Phase.Length > 0);
             await WartenAsync(o, TimeSpan.FromSeconds(3), () => false);
 
-            // Maschinenraum, solange gerechnet wird (die Kerne zeigen ihre Last).
-            Zeigen(modell.MaschinenraumCommand, o);
+            // Leitstand, solange gerechnet wird (die Kerne zeigen ihre Last).
+            Zeigen(modell.LeitstandCommand, o);
             await WartenAsync(o, TimeSpan.FromSeconds(2), () => false);
             Foto(ziel, "19-leitstand", Ansichten(fenster), o);
 
@@ -292,12 +302,41 @@ public sealed class Bildschirmfotos : IDisposable
             // Qualität im Automodus (mit Einstufung), gewählt die erste Zeile mit Verstößen je Mannschaft.
             Zeigen(modell.QualitaetsansichtCommand, o);
             var qualitaet = (QualitaetAnsichtViewModel)Einzige<QualitaetAnsicht>(fenster).DataContext!;
+            await WartenAsync(o, TimeSpan.FromSeconds(60), () => !qualitaet.Zeilen.Any(z => z.BestmoeglichRechnet));
             if (qualitaet.Zeilen.FirstOrDefault(z => z.Zustand != Qualitaetszustand.Erfuellt && z.Kriterium is not null) is { } zeile)
             {
                 qualitaet.Waehlen(zeile);
             }
 
             Foto(ziel, "05-qualitaet", Ansichten(fenster), o);
+
+            // Schritt für Schritt im Automodus: Begleitleiste rechts, der Scheinwerfer auf dem aktuellen Schritt.
+            modell.FuehrungStarten(Fuehrungsart.Automodus);
+            Foto(ziel, "59-schritt-fuer-schritt", fenster, o);
+            modell.FuehrungCommand.Execute(null);
+
+            // B-Varianten aus HiGHS im bildschirmfüllenden Dialog, verglichen mit dem Plan aus click-TT (der laufende Plan ist
+            // in B meist schon so gut, dass keine Variante ihn verbessert): Knopf in der Kopfzeile der Stufe B.
+            qualitaet.Quelle = PlanQuelle.ClickTt;
+            await WartenAsync(o, TimeSpan.FromSeconds(60), () => KnopfB(qualitaet) is not null);
+            if (KnopfB(qualitaet) is IAsyncRelayCommand knopf)
+            {
+                await knopf.ExecuteAsync(null);
+                o.Abarbeiten();
+            }
+
+            if (o.Alternativendialoge.LastOrDefault() is { } varianten)
+            {
+                var alternativen = new Alternativendialog(varianten) { Width = 1400, Height = 860 };
+                alternativen.Show();
+                Foto(ziel, "39-b-varianten", alternativen, o);
+                alternativen.Close();
+            }
+
+            var ueber = new Ueberdialog(new UeberViewModel(o, UeberViewModel.VersionVon(typeof(HauptfensterViewModel).Assembly)));
+            ueber.Show();
+            Foto(ziel, "40-ueber", ueber, o);
+            ueber.Close();
 
             // Spielplandaten über den Befehl, der den Dialog zeigt.
             o.Datendialog = dialog =>
@@ -344,6 +383,20 @@ public sealed class Bildschirmfotos : IDisposable
             await modell.GenerierungCommand.ExecuteAsync(null);
             await WartenAsync(o, TimeSpan.FromMinutes(3), () => !modell.KompaktRechnet);
             Foto(ziel, "30-kompakt-plaene", Ansichten(fenster), o);
+
+            modell.FuehrungStarten(Fuehrungsart.Kompaktspieltage);
+            Foto(ziel, "60-kompakt-schritt-fuer-schritt", fenster, o);
+            modell.FuehrungCommand.Execute(null);
+
+            // Diagramme im Kompaktmodus: Ausrichter statt Wechsel, Spielorte in Spielverteilung und Woche.
+            Zeigen(modell.DiagrammansichtCommand, o);
+            var diagramm = (DiagrammAnsichtViewModel)Einzige<DiagrammAnsicht>(fenster).DataContext!;
+            DiagrammeFotografieren(ziel, fenster, diagramm, o, [
+                (Diagrammteil.Ausrichter, "56-kompakt-diagramm-ausrichter"),
+                (Diagrammteil.Spielverteilung, "57-kompakt-diagramm-spielverteilung"),
+                (Diagrammteil.SpieleProWoche, "58-kompakt-diagramm-woche"),
+            ]);
+            Zeigen(modell.KompaktspieltageCommand, o);
 
             // Für Raster, Karte und Spieltage ein hohes Fenster, damit alles ohne Rollen im Bild ist.
             fenster.Height = 2600;
@@ -393,43 +446,6 @@ public sealed class Bildschirmfotos : IDisposable
         druck.Show();
         Foto(ziel, "34-kompakt-druckauswahl", druck, o);
         druck.Close();
-    }
-
-    /// <summary>
-    /// Bericht „Terminwünsche“ zur erfundenen Kompaktklasse: je Verein eine Halle an einem echten Ort (für Karte und
-    /// Entfernungen), die gemeldeten Heimtermine und Sperren, bei einer Mannschaft „Nur Heim“ an ihrem ersten Heimtermin.
-    /// </summary>
-    private static List<Vereinsmeldung> Kompaktmeldungen(IReadOnlyList<Mannschaft> mannschaften)
-    {
-        (string Plz, string Ort)[] orte =
-        [
-            ("55116", "Mainz"), ("56068", "Koblenz"), ("54290", "Trier"), ("67655", "Kaiserslautern"), ("55543", "Bad Kreuznach"),
-            ("56564", "Neuwied"), ("67547", "Worms"), ("56410", "Montabaur"), ("55411", "Bingen am Rhein"),
-        ];
-        var meldungen = new List<Vereinsmeldung>();
-        for (int i = 0; i < mannschaften.Count; i++)
-        {
-            Mannschaft m = mannschaften[i];
-            (string plz, string ort) = orte[i % orte.Length];
-            string halle = m.Heimspieltermine.Select(t => t.Halle).FirstOrDefault(h => h.Length > 0) ?? ("Sporthalle " + ort);
-            List<GemeldeterHeimtermin> termine = m.Heimspieltermine.Select(t => new GemeldeterHeimtermin(t.Zeitpunkt, halle, "2", "-")).ToList();
-            string bemerkung = i == 2 && termine.Count > 0
-                ? "Nur Heim: " + termine[0].Zeitpunkt.ToString("dd.MM.", System.Globalization.CultureInfo.InvariantCulture)
-                : string.Empty;
-            meldungen.Add(new Vereinsmeldung(
-                m.Name,
-                int.Parse(m.VereinsId, System.Globalization.CultureInfo.InvariantCulture),
-                "Jugend 19",
-                new Dictionary<int, Spiellokaladresse>
-                {
-                    [1] = new(halle, "Schulstraße " + (i + 3).ToString(System.Globalization.CultureInfo.InvariantCulture), plz, ort),
-                },
-                bemerkung,
-                termine,
-                m.Sperrtermine));
-        }
-
-        return meldungen;
     }
 
     /// <summary>Gewichtung einer Kostenart, Druckauswahl und Wunschtermin.</summary>
@@ -504,6 +520,137 @@ public sealed class Bildschirmfotos : IDisposable
         finally
         {
             daten.Close();
+        }
+    }
+
+    /// <summary>
+    /// Die übrigen Seiten der Spielplandaten mit der Staffel der Anleitung (mit Änderungen) und die Bearbeitungsdialoge,
+    /// die sie öffnen: Mannschaft, Auswärtskoppel, Nachbarmannschaft mit Spiel, Pflichtspielzeit, Vorgabespiel.
+    /// </summary>
+    private static async Task DatenseitenAsync(string ziel)
+    {
+        var o = new TestOberflaeche();
+        using var a = new Arbeitsplatz("eingabe/" + Staffel + ".xml");
+        a.Oberflaeche.Mannschaft = d => DialogFoto(ziel, "49-dialog-mannschaft", new Mannschaftsdialog(d), o);
+        a.Oberflaeche.Auswaertskoppel = d => DialogFoto(ziel, "50-dialog-auswaertskoppel", new Auswaertskoppeldialog(d), o);
+        a.Oberflaeche.Nachbarspiel = d => DialogFoto(ziel, "51-dialog-nachbarspiel", new Nachbarspieldialog(d), o);
+        a.Oberflaeche.Nachbarmannschaft = async d =>
+        {
+            d.Name = "TTC Nachbarort";
+            d.Nummer = 2;
+            d.Art = NachbarmannschaftsdialogViewModel.Arten.FirstOrDefault() ?? "Herren";
+            var fenster = new Nachbarmannschaftsdialog(d);
+            fenster.Show();
+            Foto(ziel, "52-dialog-nachbarmannschaft", fenster, o);
+            await d.NeuCommand.ExecuteAsync(null);
+            fenster.Close();
+            return false;
+        };
+        a.Oberflaeche.Pflichtspielzeit = d => DialogFoto(ziel, "53-dialog-pflichtspielzeit", new Pflichtspielzeitdialog(d), o);
+        a.Oberflaeche.Vorgabespiel = d => DialogFoto(ziel, "54-dialog-vorgabespiel", new Vorgabespieldialog(d), o);
+
+        var daten = new Datendialog(a.Dialog);
+        daten.Show();
+        try
+        {
+            MannschaftenSeiteViewModel mannschaften = SeiteWaehlen<MannschaftenSeiteViewModel>(daten, a.Dialog);
+            Foto(ziel, "41-daten-mannschaften", daten, o);
+            mannschaften.Auswahl = mannschaften.Namen.FirstOrDefault();
+            await (mannschaften.Auswahl is null ? mannschaften.NeuCommand : mannschaften.BearbeitenCommand).ExecuteAsync(null);
+
+            Mehr<SpiellokaleSeiteViewModel>(daten, a.Dialog);
+            Foto(ziel, "42-daten-spiellokale", daten, o);
+            Mehr<HeimkoppelnSeiteViewModel>(daten, a.Dialog);
+            Foto(ziel, "43-daten-heimkoppeln", daten, o);
+
+            AuswaertskoppelnSeiteViewModel koppeln = Mehr<AuswaertskoppelnSeiteViewModel>(daten, a.Dialog);
+            Foto(ziel, "44-daten-auswaertskoppeln", daten, o);
+            if (koppeln.Detail is AuswaertskoppelDetailViewModel koppel)
+            {
+                await koppel.NeuCommand.ExecuteAsync(null);
+            }
+
+            NachbarmannschaftenSeiteViewModel nachbarn = Mehr<NachbarmannschaftenSeiteViewModel>(daten, a.Dialog);
+            Foto(ziel, "45-daten-nachbarmannschaften", daten, o);
+            if (nachbarn.Detail is NachbarmannschaftDetailViewModel nachbar)
+            {
+                await nachbar.NeuCommand.ExecuteAsync(null);
+            }
+
+            PflichtspieltageSeiteViewModel pflicht = SeiteWaehlen<PflichtspieltageSeiteViewModel>(daten, a.Dialog);
+            Foto(ziel, "46-daten-pflichtspieltage", daten, o);
+            await pflicht.NeuCommand.ExecuteAsync(null);
+
+            VorgabespieleSeiteViewModel vorgaben = SeiteWaehlen<VorgabespieleSeiteViewModel>(daten, a.Dialog);
+            Foto(ziel, "47-daten-vorgabespiele", daten, o);
+            await vorgaben.NeuCommand.ExecuteAsync(null);
+
+            Mehr<HeimrechtSeiteViewModel>(daten, a.Dialog);
+            Foto(ziel, "48-daten-heimrecht", daten, o);
+        }
+        finally
+        {
+            daten.Close();
+        }
+    }
+
+    /// <summary>Eine Seite mit Mannschaftsliste: gewählt ist die erste Mannschaft mit Einträgen (sonst die erste).</summary>
+    private static T Mehr<T>(Datendialog daten, DatenDialogViewModel dialog)
+        where T : MehrMannschaftenSeiteViewModel
+    {
+        T seite = SeiteWaehlen<T>(daten, dialog);
+        string? mitEintraegen = seite.Namen.FirstOrDefault(n =>
+        {
+            seite.Mannschaft = n;
+            return seite.Detail is { IstStandard: false };
+        });
+        seite.Mannschaft = mitEintraegen ?? seite.Namen.FirstOrDefault();
+
+        Oberflaeche.Zeichnen(daten);
+        return seite;
+    }
+
+    private static bool DialogFoto(string ziel, string name, Window dialog, TestOberflaeche o)
+    {
+        dialog.Show();
+        Foto(ziel, name, dialog, o);
+        dialog.Close();
+        return false;
+    }
+
+    /// <summary>Zeigt die Diagramme nacheinander (nur die, die es für die Staffel gibt) und fotografiert sie.</summary>
+    private static void DiagrammeFotografieren(string ziel, Window fenster, DiagrammAnsichtViewModel diagramm, TestOberflaeche o, IReadOnlyList<(Diagrammteil Teil, string Name)> liste)
+    {
+        foreach ((Diagrammteil teil, string name) in liste)
+        {
+            if (diagramm.Auswahl.FirstOrDefault(w => w.Teil == teil) is { } wahl)
+            {
+                diagramm.WaehlenCommand.Execute(wahl);
+                Foto(ziel, name, Ansichten(fenster), o);
+            }
+        }
+    }
+
+    /// <summary>Erstes Öffnen der Kompaktklasse: Die Einrichtung schlägt Kompaktspieltage vor.</summary>
+    private static async Task KompaktEinrichtungAsync(string ziel, string datei)
+    {
+        var o = new TestOberflaeche { DateiZumOeffnen = datei, Sammeln = true };
+        using var modell = new HauptfensterViewModel(o, () => new HostWindow(), Path.Combine(Path.GetDirectoryName(datei)!, "..", "basis-roh"), null);
+        var fenster = new HauptfensterView { DataContext = modell, Width = 1400, Height = 860 };
+        fenster.Show();
+        try
+        {
+            await modell.OeffnenCommand.ExecuteAsync(null);
+            o.Abarbeiten();
+            if (modell.Einrichtung is { } einrichtung && einrichtung.Schritte.FirstOrDefault(s => s.Titel == "Klasse mit Kompaktspieltagen") is { } schritt)
+            {
+                einrichtung.Aktiv = schritt;
+                Foto(ziel, "55-kompakt-einrichtung", fenster, o);
+            }
+        }
+        finally
+        {
+            fenster.Close();
         }
     }
 
@@ -606,22 +753,26 @@ public sealed class Bildschirmfotos : IDisposable
     private static Control Kacheln(Window fenster) =>
         fenster.GetVisualDescendants().OfType<Grid>().First(g => g.Classes.Contains("kacheln"));
 
-    /// <summary>
-    /// Kopiert die erfundene Kompaktklasse in einen eigenen Ordner und bereitet sie vor wie nach der Einrichtung:
-    /// Kompaktspieltage bestätigt, Bericht „Terminwünsche“ übernommen, QTTR-Schnitte (für Spitzen- und Abstiegsspieltag).
-    /// </summary>
-    private string KompaktklasseVorbereiten()
+    /// <summary>Der Knopf „B-Varianten wählen“ in der Kopfzeile der Stufe B, falls es Varianten gibt.</summary>
+    private static IAsyncRelayCommand? KnopfB(QualitaetAnsichtViewModel qualitaet) =>
+        qualitaet.Zeilen.Select(z => z.Kopf).OfType<Stufenkopf>().FirstOrDefault(k => k.Knopf.StartsWith("B-Varianten", StringComparison.Ordinal))?.KnopfBefehl as IAsyncRelayCommand;
+
+    /// <summary>Schaltet die Setzliste ein (Reihenfolge wie in den Daten), damit es auch ihr Diagramm gibt.</summary>
+    private void SetzlisteEinschalten(string datei)
     {
-        string daten = Path.Combine(ordner, "kompakt");
+        Plansitzung sitzung = Plansitzung.Oeffnen(datei, Path.Combine(ordner, "basis-setzliste"));
+        Datenbearbeitung b = sitzung.DatenBearbeiten();
+        b.SetzlisteSpeichern(new Setzlistendaten(true, b.Setzliste().Reihenfolge));
+        sitzung.DatenUebernehmen(b);
+    }
+
+    /// <summary>Kopiert die erfundene Kompaktklasse unverändert (wie frisch aus click-TT) in einen eigenen Ordner.</summary>
+    private string KompaktklasseRoh()
+    {
+        string daten = Path.Combine(ordner, "kompakt-roh");
         Directory.CreateDirectory(daten);
         string datei = Path.Combine(daten, "Jugend 19 Testliga (HR).xml");
         File.Copy(Path.Combine(Testdaten.Referenz, "..", "kompakt", "Jugend_19_Testliga_(HR).xml"), datei);
-        Plansitzung sitzung = Plansitzung.Oeffnen(datei, Path.Combine(ordner, "basis-kompakt"));
-        Datenbearbeitung b = sitzung.DatenBearbeiten();
-        b.KompaktspieltageSetzen(Kompaktmodus.Bestaetigt);
-        b.TerminwuenscheUebernehmen(b.TerminwuenscheAbgleichen(Kompaktmeldungen(sitzung.Staffel.Mannschaften)), "Terminmeldungen.pdf");
-        b.MannschaftsstaerkenSpeichern(sitzung.Staffel.Mannschaften.Select((m, i) => new Mannschaftsstaerke(m.Name, 1450 + ((i * 173) % 500), 4)));
-        sitzung.DatenUebernehmen(b);
         return datei;
     }
 

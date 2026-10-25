@@ -18,6 +18,10 @@ namespace AndiGenerator.Engine.Referenz;
 /// <param name="VereinsinterneSpieleAmAnfang">Vereinsinterne Spiele am Anfang.</param>
 /// <param name="SichtbareKostenarten">Spalten der Kostentabelle (Original <c>HasValuesForType</c>).</param>
 /// <param name="Mannschaften">Zeilen der Kostentabelle in der Reihenfolge des Originals.</param>
+/// <param name="VereinsinterneAnzahl">
+/// Spiele gegen fremde Vereine vor einem vereinsinternen Spiel derselben Runde (Original <c>getTeamsNotAtBegin</c>).
+/// </param>
+/// <param name="Zusatz">Anzahlen der Kriterien, die im Original nur Kosten haben (Spielverteilung, Spieltage).</param>
 public sealed record Planbewertung(
     double Gesamtkosten,
     double NichtTerminiert,
@@ -29,4 +33,6 @@ public sealed record Planbewertung(
     double LaengeLetzterSpieltag,
     double VereinsinterneSpieleAmAnfang,
     IReadOnlyList<MannschaftsKostenart> SichtbareKostenarten,
-    IReadOnlyList<Mannschaftsbewertung> Mannschaften);
+    IReadOnlyList<Mannschaftsbewertung> Mannschaften,
+    int VereinsinterneAnzahl = 0,
+    Zusatzverstoesse? Zusatz = null);

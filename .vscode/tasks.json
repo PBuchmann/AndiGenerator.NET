@@ -1,0 +1,36 @@
+{
+  // Aufgaben: Strg+Umschalt+B (Standard: Bauen) bzw. "Terminal → Aufgabe ausführen…".
+  "version": "2.0.0",
+  "tasks": [
+    {
+      "label": "Bauen (Release)",
+      "type": "process",
+      "command": "dotnet",
+      "args": ["build", "AndiGenerator.slnx", "-c", "Release", "-nologo", "-v:minimal"],
+      "group": { "kind": "build", "isDefault": true },
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "Bauen (Debug)",
+      "type": "process",
+      "command": "dotnet",
+      "args": ["build", "src/AndiGenerator.Desktop", "-c", "Debug", "-nologo", "-v:minimal"],
+      "group": "build",
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "Bauen und testen (bauen.cmd)",
+      "type": "shell",
+      "command": "${workspaceFolder}\\bauen.cmd",
+      "group": "test",
+      "problemMatcher": "$msCompile"
+    },
+    {
+      "label": "AndiGenerator.NET starten",
+      "type": "shell",
+      "command": "${workspaceFolder}\\starten.cmd",
+      "dependsOn": "Bauen (Release)",
+      "problemMatcher": []
+    }
+  ]
+}

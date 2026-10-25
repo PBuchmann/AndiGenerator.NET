@@ -69,11 +69,15 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
     private OptionenAnsichtViewModel? optionenAnsicht;
     private TerminwunschAnsichtViewModel? terminwunschAnsicht;
     private NachbarterminAnsichtViewModel? nachbarterminAnsicht;
-    private MaschinenraumAnsichtViewModel? maschinenraumAnsicht;
+    private LeitstandAnsichtViewModel? leitstandAnsicht;
     private VerlaufAnsichtViewModel? verlaufAnsicht;
     private string titel = UeberViewModel.Programm;
     private string statuszeile = "Bitte eine click-TT-Datei oder Plandatei öffnen.";
     private bool laeuft;
+
+    /// <summary>Ob die Oberfläche den Rechner gerade wach hält (siehe <see cref="IOberflaeche.WachHalten"/>).</summary>
+    private bool wachGehalten;
+
     private bool pausiert;
     private int naechsteAnsicht = 1;
     private string staffelname = string.Empty;
@@ -142,9 +146,9 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
                 kompaktAnsicht = null;
             }
 
-            if (ReferenceEquals(e.Dockable, maschinenraumAnsicht))
+            if (ReferenceEquals(e.Dockable, leitstandAnsicht))
             {
-                maschinenraumAnsicht = null;
+                leitstandAnsicht = null;
             }
 
             if (ReferenceEquals(e.Dockable, verlaufAnsicht))
@@ -194,8 +198,12 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
         DatenCommand = new AsyncRelayCommand(DatenBearbeitenAsync, () => ZeigtArbeitsbereich);
         TerminwunschansichtCommand = new RelayCommand(TerminwuenscheOeffnen, () => ZeigtArbeitsbereich);
         NachbarterminansichtCommand = new RelayCommand(NachbartermineOeffnen, () => ZeigtArbeitsbereich);
-        MaschinenraumCommand = new RelayCommand(MaschinenraumOeffnen, () => ZeigtArbeitsbereich);
+        LeitstandCommand = new RelayCommand(LeitstandOeffnen, () => ZeigtArbeitsbereich);
+        BVariantenCommand = new AsyncRelayCommand(BVariantenZeigenAsync);
         VerlaufCommand = new RelayCommand(VerlaufOeffnen, () => ZeigtArbeitsbereich);
+        FuehrungCommand = new RelayCommand(FuehrungUmschalten, () => ZeigtArbeitsbereich);
+        PropertyChanged += (_, e) => FuehrungAktualisieren(e.PropertyName);
+        Anzeige.PropertyChanged += (_, e) => FuehrungAktualisieren(e.PropertyName);
 
         Zuletzt = Zeilen(Zuletztlesen());
         statusTakt = new Timer(_ => StatusAbfragen(), null, TimeSpan.FromMilliseconds(500), TimeSpan.FromMilliseconds(500));
@@ -228,7 +236,7 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
     /// <summary>Holt die Kacheln mit dem Stand der Generierung.</summary>
     public Generierungsanzeige Anzeige { get; } = new();
 
-    /// <summary>Holt den Verlauf der laufenden Suche (Maschinenraum).</summary>
+    /// <summary>Holt den Verlauf der laufenden Suche (Leitstand).</summary>
     public Suchverlauf Verlauf { get; } = new();
 
     /// <summary>Holt die zuletzt geöffneten Staffeln für die Startseite.</summary>
@@ -282,6 +290,7 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
                 OeffnenCommand.NotifyCanExecuteChanged();
                 NeuCommand.NotifyCanExecuteChanged();
                 ZuletztOeffnenCommand.NotifyCanExecuteChanged();
+                beispielOeffnen?.NotifyCanExecuteChanged();
                 AnsichtsbefehleAktualisieren();
             }
         }
@@ -459,8 +468,11 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
     /// <summary>Holt den Befehl „Nachbarmannschaften“ (gemeldete Spiele der Nachbarmannschaften, als andockbares Dokument).</summary>
     public IRelayCommand NachbarterminansichtCommand { get; }
 
-    /// <summary>Holt den Befehl „Maschinenraum“ (Rechenkerne und Inseln der laufenden Generierung, als andockbares Dokument).</summary>
-    public IRelayCommand MaschinenraumCommand { get; }
+    /// <summary>Holt den Befehl „Leitstand“ (Rechenkerne und Inseln der laufenden Generierung, als andockbares Dokument).</summary>
+    public IRelayCommand LeitstandCommand { get; }
+
+    /// <summary>Holt den Befehl „B-Varianten wählen“ der Kachel HiGHS (Dialog der B-Varianten).</summary>
+    public IAsyncRelayCommand BVariantenCommand { get; }
 
     /// <summary>Holt den Befehl „Verlauf“ (Verlauf der Suche seit dem Start, als andockbares Dokument).</summary>
     public IRelayCommand VerlaufCommand { get; }
@@ -535,7 +547,7 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
     /// <summary>Holt den Hinweis zur Wahl des Verfahrens: was das gewählte tut und wie gewechselt wird.</summary>
     public string VerfahrenErklaerung => (Automodus, Laeuft) switch
     {
-        (true, false) => "Lenkt sich selbst: erst Verstöße der Stufen A und B herausdrängen, dann die übrigen Kriterien glätten.",
+        (true, false) => "Lenkt sich selbst: erst Verstöße der Stufen A und B herausdrängen, dann die übrigen Kriterien glätten. HiGHS rechnet nebenher den für A und B bestmöglichen Plan und sagt, wann bei A und B nichts mehr zu holen ist.",
         (false, false) => "Wie im Original: senkt die Gesamtkosten mit Ihren Gewichtungen.",
         _ => "Wechsel jederzeit möglich – die Suche macht mit dem bisher besten Plan weiter.",
     };
@@ -677,7 +689,9 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
 
         try
         {
-            s.KriterienstufenSpeichern(neu.Text());
+            // Im Hintergrund: Bei click-TT-Dateien wird dabei die Datei neu gelesen (sonst hängt die Oberfläche kurz).
+            string text = neu.Text();
+            await Task.Run(() => s.KriterienstufenSpeichern(text), CancellationToken.None);
         }
         catch (Exception fehler) when (fehler is IOException or UnauthorizedAccessException)
         {
@@ -688,6 +702,7 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
         // Die Kosten ändern sich nicht: Der laufende Automodus übernimmt die Einteilung ohne Neustart und macht beim
         // wichtigsten geänderten Kriterium weiter.
         dienst.EinteilungAendern(neu);
+        HighsEinspielen();
         AlleAnsichtenAktualisieren();
         if (laufenderStand is Planstand stand)
         {
@@ -782,7 +797,36 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
             return [new Meldungsgruppe("Ganzer Plan", string.Create(Deutsch, $"{fehler.Count} Fehler"), fehler)];
         }
 
-        if (kriterium is not Kostenkriterium k || k >= Kostenkriterium.VereinsinterneSpieleAmAnfang)
+        if (kriterium == Kostenkriterium.VereinsinterneSpieleAmAnfang)
+        {
+            return s.VereinsinterneMeldungen(angezeigt.Spiele)
+                .OrderByDescending(m => m.Meldungen.Count)
+                .Select(m => new Meldungsgruppe(m.Mannschaft, Anzahltext(m.Meldungen.Count, m.Meldungen.Count), m.Meldungen))
+                .ToList();
+        }
+
+        if (kriterium is Kostenkriterium.Spielverteilung && s.Zusatzverstoesse(angezeigt.Spiele) is { } verteilung)
+        {
+            return angezeigt.Bewertung.Mannschaften
+                .Select((m, t) => (m.Name, Texte: t < verteilung.Verteilungsmeldungen.Count ? verteilung.Verteilungsmeldungen[t] : []))
+                .Where(x => x.Texte.Count > 0)
+                .OrderByDescending(x => x.Texte.Count)
+                .Select(x => new Meldungsgruppe(x.Name, Anzahltext(x.Texte.Count, x.Texte.Count), x.Texte))
+                .ToList();
+        }
+
+        if (kriterium is Kostenkriterium.Spieltaglaenge or Kostenkriterium.Spieltagueberlappung or Kostenkriterium.LetzterSpieltagLaenge or Kostenkriterium.LetzterSpieltagUeberlappung
+            && s.Zusatzverstoesse(angezeigt.Spiele) is { } spieltage)
+        {
+            bool laenge = kriterium is Kostenkriterium.Spieltaglaenge or Kostenkriterium.LetzterSpieltagLaenge;
+            bool letzter = kriterium is Kostenkriterium.LetzterSpieltagLaenge or Kostenkriterium.LetzterSpieltagUeberlappung;
+            List<string> spieltagtexte = (letzter ? spieltage.LetzterMeldungen : spieltage.Spieltagmeldungen)
+                .Where(m => laenge ? m.Contains(" dauert ", StringComparison.Ordinal) : m.Contains(" beginnt ", StringComparison.Ordinal))
+                .ToList();
+            return spieltagtexte.Count == 0 ? [] : [new Meldungsgruppe("Ganzer Plan", Anzahltext(spieltagtexte.Count, spieltagtexte.Count), spieltagtexte)];
+        }
+
+        if (kriterium is not Kostenkriterium k || k > Kostenkriterium.VereinsinterneSpieleAmAnfang)
         {
             return [];
         }
@@ -1232,7 +1276,7 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
         gemerkteStaende.Clear();
         Einrichtung = null;
         var offen = new List<IDockable>(ansichten);
-        offen.AddRange(new IDockable?[] { optionenAnsicht, terminwunschAnsicht, nachbarterminAnsicht, kompaktAnsicht, maschinenraumAnsicht, verlaufAnsicht }.OfType<IDockable>());
+        offen.AddRange(new IDockable?[] { optionenAnsicht, terminwunschAnsicht, nachbarterminAnsicht, kompaktAnsicht, leitstandAnsicht, verlaufAnsicht }.OfType<IDockable>());
         foreach (IDockable ansicht in offen)
         {
             fabrik.CloseDockable(ansicht);
@@ -1243,7 +1287,7 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
         terminwunschAnsicht = null;
         nachbarterminAnsicht = null;
         kompaktAnsicht = null;
-        maschinenraumAnsicht = null;
+        leitstandAnsicht = null;
         verlaufAnsicht = null;
         AnsichtOeffnen(new KostenAnsichtViewModel(this, NaechsteId()));
 
@@ -1266,7 +1310,7 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
         DruckenCommand.NotifyCanExecuteChanged();
         TerminwunschansichtCommand.NotifyCanExecuteChanged();
         NachbarterminansichtCommand.NotifyCanExecuteChanged();
-        MaschinenraumCommand.NotifyCanExecuteChanged();
+        LeitstandCommand.NotifyCanExecuteChanged();
         VerlaufCommand.NotifyCanExecuteChanged();
         SchliessenCommand.NotifyCanExecuteChanged();
         BefehleAktualisieren();
@@ -1602,7 +1646,9 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
         dienst.Automodus = Automodus;
         Anzeige.Zuruecksetzen("erster Plan wird gesucht …");
         Verlauf.Zuruecksetzen();
+        festlegung = null;
         dienst.Starten(s.Staffel, s.Optionen, ausgangsplan);
+        HighsEinspielen();
         StartplaeneAufbauen();
         Laeuft = true;
         Pausiert = false;
@@ -1636,10 +1682,12 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
     /// <summary>Startet eine neue Generierung; ein noch nicht gesicherter Plan wird vorher gesichert (oder es wird gefragt).</summary>
     private async Task StartenAsync()
     {
-        if (await PlanSichernAsync("Eine neue Generierung startet."))
+        if (!await PlanSichernAsync("Eine neue Generierung startet."))
         {
-            Starten();
+            return;
         }
+
+        Starten();
     }
 
     /// <summary>Umschalter: Wählen eines Verfahrens; das Abwählen des gewählten stellt nur die Anzeige wieder her.</summary>
@@ -1672,6 +1720,7 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
         {
             dienst.Automodus = auto;
             dienst.DatenAendern(s.Staffel, s.Optionen);
+            HighsEinspielen();
             Anzeige.KostenAngepasst();
             dienst.Pausiert = false;
             Pausiert = false;
@@ -1713,6 +1762,14 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
 
     private void GenerierungGeaendert()
     {
+        // Solange gerechnet wird (nicht in der Pause), geht der Rechner nicht in den Energiesparmodus.
+        bool rechnet = (Laeuft && !Pausiert) || (KompaktRechnet && !KompaktPausiert);
+        if (rechnet != wachGehalten)
+        {
+            wachGehalten = rechnet;
+            oberflaeche.WachHalten(rechnet);
+        }
+
         VerfahrenGeaendert();
         OnPropertyChanged(nameof(GenerierungText));
         OnPropertyChanged(nameof(ZeigtPause));
@@ -1874,8 +1931,8 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
         }
 
         dienst.Stoppen();
-        Anzeige.KerneAnhalten();
-        maschinenraumAnsicht?.Uebernehmen(Optimierungsstand.Leer);
+        Anzeige.Anhalten();
+        leitstandAnsicht?.Uebernehmen(Optimierungsstand.Leer);
         Laeuft = false;
         Pausiert = false;
         StartplaeneAufbauen();
@@ -2017,17 +2074,18 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
         }
     }
 
-    private void MaschinenraumOeffnen()
+    private void LeitstandOeffnen()
     {
-        if (maschinenraumAnsicht is null)
+        if (leitstandAnsicht is null)
         {
-            maschinenraumAnsicht = new MaschinenraumAnsichtViewModel(this);
-            maschinenraumAnsicht.Uebernehmen(Laeuft ? dienst.Stand() : Optimierungsstand.Leer);
-            fabrik.AnsichtHinzufuegen(maschinenraumAnsicht);
+            leitstandAnsicht = new LeitstandAnsichtViewModel(this);
+            leitstandAnsicht.Uebernehmen(Laeuft ? dienst.Stand() : Optimierungsstand.Leer);
+            leitstandAnsicht.HighsZeigen(highsFortschritt);
+            fabrik.AnsichtHinzufuegen(leitstandAnsicht);
         }
         else
         {
-            fabrik.SetActiveDockable(maschinenraumAnsicht);
+            fabrik.SetActiveDockable(leitstandAnsicht);
         }
     }
 
@@ -2091,6 +2149,7 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
         if (dienst.Laeuft)
         {
             dienst.DatenAendern(s.Staffel, s.Optionen);
+            HighsEinspielen();
             Anzeige.KostenAngepasst();
         }
 
@@ -2281,7 +2340,7 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
         TerminwunschansichtCommand.NotifyCanExecuteChanged();
         NachbarterminansichtCommand.NotifyCanExecuteChanged();
         KompaktspieltageCommand.NotifyCanExecuteChanged();
-        MaschinenraumCommand.NotifyCanExecuteChanged();
+        LeitstandCommand.NotifyCanExecuteChanged();
         VerlaufCommand.NotifyCanExecuteChanged();
     }
 
@@ -2350,8 +2409,9 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
             {
                 Statuszeile = text;
                 Anzeige.Uebernehmen(stand);
+                Anzeige.HighsZeigen(HighsanzeigeBilden(stand));
                 Verlauf.Hinzufuegen(stand);
-                maschinenraumAnsicht?.Uebernehmen(stand);
+                leitstandAnsicht?.Uebernehmen(stand);
             }
         });
         if (fehler is not null && !ReferenceEquals(fehler, Interlocked.Exchange(ref gemeldeterFehler, fehler)))

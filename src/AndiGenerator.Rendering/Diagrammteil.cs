@@ -13,6 +13,9 @@ public enum Diagrammteil
     /// <summary>Wechsel Heim/Auswärts (<c>PaintSpielWechselHeimAuswaerts</c>).</summary>
     WechselHeimAuswaerts,
 
+    /// <summary>Ausrichter und Spielorte je Kompaktspieltag (statt Wechsel Heim/Auswärts im Kompaktmodus, nicht im Original).</summary>
+    Ausrichter,
+
     /// <summary>Spielverteilung (<c>PaintSpielAbstaende</c>).</summary>
     Spielverteilung,
 

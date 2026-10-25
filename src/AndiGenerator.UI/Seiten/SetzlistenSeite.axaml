@@ -56,7 +56,7 @@
             <TextBlock Text="⋮⋮" FontSize="16" FontWeight="Bold" Foreground="{StaticResource Tinte2}" HorizontalAlignment="Center" VerticalAlignment="Center" />
           </Border>
           <TextBlock Grid.Column="1" Text="{Binding PlatzText}" Classes="ziffer" FontWeight="SemiBold" Foreground="{StaticResource Tinte2}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,12,0" />
-          <TextBlock Grid.Column="2" Text="{Binding Name}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+          <TextBlock ToolTip.Tip="{Binding Name}" Classes="mannschaft" Grid.Column="2" Text="{Binding Name}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
           <TextBlock Grid.Column="3" Text="{Binding Staerke}" Classes="ziffer" Foreground="{StaticResource Tinte2}" VerticalAlignment="Center" Margin="12,0,10,0" ToolTip.Tip="Schnitt der TTR-Werte der Stammspieler aus der Mannschaftsmeldung" />
         </Grid>
       </Border>
@@ -68,7 +68,7 @@
     <TextBlock DockPanel.Dock="Top" Classes="abschnitt" Text="Erwartete Reihenfolge" />
     <TextBlock DockPanel.Dock="Top" Classes="leer" Text="Mannschaft am Griff ⋮⋮ an ihren erwarteten Platz ziehen (Escape bricht ab) oder wählen und die Knöpfe nutzen" TextWrapping="Wrap" MaxWidth="700" HorizontalAlignment="Left" Margin="0,0,0,8" />
     <TextBlock DockPanel.Dock="Top" Classes="leer" Text="{Binding StaerkenHinweis}" IsVisible="{Binding HatStaerken}" TextWrapping="Wrap" MaxWidth="700" HorizontalAlignment="Left" Margin="0,0,0,8" />
-    <DockPanel HorizontalAlignment="Left" VerticalAlignment="Top">
+    <DockPanel HorizontalAlignment="Stretch" MaxWidth="796" VerticalAlignment="Top">
       <StackPanel DockPanel.Dock="Right" Classes="seitenknoepfe" IsEnabled="{Binding Aktiv}">
         <Button Classes="seitenknopf" Command="{Binding HochCommand}">
           <StackPanel Orientation="Horizontal" Spacing="8">
@@ -90,7 +90,7 @@
         </Button>
       </StackPanel>
       <!-- Solange die Setzliste aus ist, bleibt die Reihenfolge ausgegraut (sie wird aber aufbewahrt) -->
-      <Panel Width="560" VerticalAlignment="Top">
+      <Panel MinWidth="260" VerticalAlignment="Top">
         <Border Classes="karte" Padding="6" IsEnabled="{Binding Aktiv}" Classes.ruht="{Binding !Aktiv}">
           <ItemsControl x:Name="Liste" ItemsSource="{Binding Zeilen}" Background="Transparent" ItemTemplate="{StaticResource Setzvorlage}"
                         PointerPressed="ListeGedrueckt" PointerMoved="ListeBewegt" PointerReleased="ListeLosgelassen" PointerCaptureLost="ListeVerloren" />

@@ -101,6 +101,43 @@ public class InseloptimiererTests
         Assert.Equal([Kostenkriterium.Auswaertskoppel], geaendert.Kriterien);
         Assert.EndsWith("ab Auswaertskoppel", geaendert.Aenderungen[^1], StringComparison.Ordinal);
 
+        // Festlegung (gewählte Alternative): Jeder Verstoß über einer Obergrenze zählt wie ein harter Fehler; aufgehoben wieder nicht.
+        using var fest = new Inseloptimierer(staffel, Berechnungsoptionen.Standard, einstellungen);
+        fest.Rechnen(80_000);
+        Stufenwert vorher = Assert.IsType<Lenkungsstand>(fest.Lenkung).Bester;
+        Stufeneinteilung voll = Stufeneinteilung.Standard.Vervollstaendigt();
+        fest.Festlegen(voll.A.Concat(voll.B).ToDictionary(k => k, _ => 0), "Test");
+        Lenkungsstand festgelegt = Assert.IsType<Lenkungsstand>(fest.Lenkung);
+        Assert.Equal("Test", festgelegt.Festgelegt);
+        Assert.Equal(vorher.Harte + vorher.A + vorher.B, festgelegt.Bester.Harte);
+        fest.Festlegen(null, null);
+        Lenkungsstand aufgehoben = Assert.IsType<Lenkungsstand>(fest.Lenkung);
+        Assert.Null(aufgehoben.Festgelegt);
+        Assert.Equal(vorher.Harte, aufgehoben.Bester.Harte);
+
+        // Zählt die Suche beim Glätten schon und rückt ein Kriterium von C nach B, zählt sie gleich nach der neuen Einteilung
+        // weiter – kein Drängen mit den Kosten des Originals, bei dem die Inseln Verstöße in A gegen B tauschten.
+        fest.Festlegen(voll.A.Concat(voll.B).ToDictionary(k => k, _ => 9999), "Test");
+        fest.Rechnen(20_000);
+        Assert.Equal("Optimierung Stufe C", fest.Lenkung?.Bezeichnung);
+        Kostenkriterium nachB = voll.C.First(Stufeneinteilung.HatAnzahl);
+        fest.EinteilungAendern(voll.Einstufen(nachB, Stufe.B));
+        Lenkungsstand gezaehltNeu = Assert.IsType<Lenkungsstand>(fest.Lenkung);
+        Assert.Equal("Optimierung Stufe C", gezaehltNeu.Bezeichnung);
+        Assert.Contains("Einteilung geändert", gezaehltNeu.Aenderungen[^1], StringComparison.Ordinal);
+        fest.Rechnen(2_000);
+        Assert.Equal("Optimierung Stufe C", fest.Lenkung?.Bezeichnung);
+
+        // Feststeckende Inseln beginnen reihum mit einem anderen Startverfahren neu (ohne Teilneuplanung statt ihres Plans
+        // „Mannschaften“).
+        fest.Rechnen(40_000);
+        IReadOnlyList<Startstatistik> starts = fest.Maschinenraum.Starts ?? [];
+        Assert.True(starts.Count >= 2, string.Join(", ", starts));
+        Assert.Contains(starts, x => x.Verfahren == Startverfahren.Spiele);
+        Assert.Contains(starts, x => x.Verfahren == Startverfahren.Zeitfenster);
+        Assert.All(starts, x => Assert.True(x.Starts > 0));
+        Assert.Contains(fest.Maschinenraum.Inseln, i => i.Start is not null);
+
         // Wechsel von der Kostenoptimierung: Der Plan ist schon optimiert, also keine Basisoptimierung, gleich Stufe A.
         using var direkt = new Inseloptimierer(staffel, Berechnungsoptionen.Standard, einstellungen with { AutoOhneGrundlauf = true });
         direkt.Rechnen(20_000);
@@ -155,15 +192,31 @@ public class InseloptimiererTests
     }
 
     [Fact]
-    public void Stufenwert_ordnet_nach_harten_Fehlern_A_B_Ausreissern_C_und_erst_dann_nach_Kosten()
+    public void Stufenwert_ordnet_nach_harten_Fehlern_A_B_C_dann_Ausreissern_und_erst_dann_nach_Kosten()
     {
         Assert.True(new Stufenwert(0, 9, 9, 9, 9, 9e9).IstBesserAls(new Stufenwert(1, 0, 0, 0, 0, 0)));
         Assert.True(new Stufenwert(0, 1, 9, 9, 9, 9e9).IstBesserAls(new Stufenwert(0, 2, 0, 0, 0, 0)));
         Assert.True(new Stufenwert(0, 1, 1, 9, 9, 9e9).IstBesserAls(new Stufenwert(0, 1, 2, 0, 0, 0)));
-        Assert.True(new Stufenwert(0, 1, 1, 1, 9, 9e9).IstBesserAls(new Stufenwert(0, 1, 1, 2, 0, 0)));
-        Assert.True(new Stufenwert(0, 1, 1, 1, 1, 9e9).IstBesserAls(new Stufenwert(0, 1, 1, 1, 2, 0)));
+
+        // Weniger C-Verstöße schlagen weniger Ausreißer: Ein besserer Plan hat bei gleichem A und B nie mehr C-Verstöße.
+        Assert.True(new Stufenwert(0, 1, 1, 9, 1, 9e9).IstBesserAls(new Stufenwert(0, 1, 1, 0, 2, 0)));
+        Assert.True(new Stufenwert(0, 1, 1, 1, 1, 9e9).IstBesserAls(new Stufenwert(0, 1, 1, 2, 1, 0)));
         Assert.True(new Stufenwert(0, 1, 1, 1, 1, 5).IstBesserAls(new Stufenwert(0, 1, 1, 1, 1, 6)));
         Assert.False(new Stufenwert(0, 1, 1, 1, 1, 6).IstBesserAls(new Stufenwert(0, 1, 1, 1, 1, 6)));
+    }
+
+    [Fact]
+    public void Stufenvergleich_gibt_B_nie_fuer_C_her()
+    {
+        // Ein B-Verstoß mehr ist schlechter, egal wie viel besser C wird; A geht vor B.
+        Assert.False(Stufenvergleich.Besser(new Stufenwert(0, 1, 2, 0, 0, 0), new Stufenwert(0, 1, 1, 0, 99, 0)));
+        Assert.False(Stufenvergleich.Besser(new Stufenwert(0, 2, 0, 0, 0, 0), new Stufenwert(0, 1, 9, 0, 99, 0)));
+
+        // Zurückziehen beim Glätten: mit einem B-Verstoß Spielraum, A nie.
+        var bezug = new Stufenwert(0, 1, 1, 0, 20, 0);
+        Assert.False(Stufenvergleich.AOderBSchlechter(new Stufenwert(0, 1, 2, 0, 30, 0), bezug));
+        Assert.True(Stufenvergleich.AOderBSchlechter(new Stufenwert(0, 1, 3, 0, 0, 0), bezug));
+        Assert.True(Stufenvergleich.AOderBSchlechter(new Stufenwert(0, 2, 0, 0, 0, 0), bezug));
     }
 
     [Fact]
@@ -245,6 +298,53 @@ public class InseloptimiererTests
         PlanPruefen(staffel, optimierer.BesterStand());
     }
 
+    /// <summary>Vorrang für HiGHS: Ruhen mehr Threads als es gibt, rechnet einer trotzdem weiter.</summary>
+    /// <returns>Der Testlauf.</returns>
+    [Fact]
+    public async Task Ruhende_Threads_lassen_einen_rechnen()
+    {
+        using var optimierer = new Inseloptimierer(LeereStaffel(R2), Berechnungsoptionen.Standard, Optimierungseinstellungen.Standard with { Kerne = 2 });
+        optimierer.Ruhend = 8;
+        Assert.Equal(1, optimierer.Ruhend);
+        optimierer.Starten();
+        long anfang = optimierer.Durchlaeufe;
+        for (int i = 0; i < 50 && optimierer.Durchlaeufe == anfang; i++)
+        {
+            await Task.Delay(100);
+        }
+
+        Assert.True(optimierer.Durchlaeufe > anfang);
+        optimierer.Ruhend = 0;
+        Assert.Equal(0, optimierer.Ruhend);
+
+        // Mit acht Kernen ruhen höchstens vier (die Hälfte).
+        using var achtKerne = new Inseloptimierer(LeereStaffel(R2), Berechnungsoptionen.Standard, Optimierungseinstellungen.Standard with { Kerne = 8 });
+        achtKerne.Ruhend = 8;
+        Assert.Equal(4, achtKerne.Ruhend);
+    }
+
+    /// <summary>
+    /// Ein Platz, der ruhte, bekommt den neuen Plan (andere Gewichte, Zählziel) auch dann, wenn vor seiner Übernahme ein
+    /// Neustart ohne neuen Plan kam – sonst rechnete er mit den alten Gewichten weiter.
+    /// </summary>
+    [Fact]
+    public void Neustart_ersetzt_den_neuen_Plan_eines_Auftrags_nicht()
+    {
+        RefPlan referenz = RefPlan.Laden(LeereStaffel(R2), Berechnungsoptionen.Standard);
+        var definition = new KernDefinition(referenz);
+        var alt = new KernPlan(referenz, definition);
+        alt.Merken();
+        var platz = new Suchplatz(alt, new Zufall(1), Tauschstrategie.Lesen("2"), false, -1);
+        var neu = new KernPlan(referenz, definition) { Zaehlziel = new Zaehlziel([.. Enumerable.Repeat(Stufe.C, 64)], 1000) };
+        neu.Merken();
+        var start = new Loesung(alt.AnzahlErlaubt);
+        alt.LoesungSchreiben(start);
+        platz.Auftragen(new Auftrag(start, -1, neu));
+        platz.Auftragen(new Auftrag(start.Kopie(), -1));
+        platz.Rechnen();
+        Assert.True(platz.Spaet);
+    }
+
     [Fact]
     public async Task Pause_haelt_die_Rechnung_an()
     {
@@ -252,10 +352,16 @@ public class InseloptimiererTests
         optimierer.Starten();
         await Task.Delay(300);
 
-        // Unter Last (andere Tests rechnen parallel) braucht das Anhalten bzw. Weiterlaufen etwas länger: warten, bis sich
-        // der Zähler nicht mehr bzw. wieder bewegt, höchstens fünf Sekunden.
+        // Unter Last (andere Tests rechnen parallel) kann ein Suchfaden noch lange an seinem Schritt rechnen: erst wenn beide
+        // in der Pause warten, steht der Zähler wirklich (höchstens zehn Sekunden; ein ruhiger Zähler allein reicht nicht).
         optimierer.Pausiert = true;
-        long angehalten = await StehtAsync(() => optimierer.Durchlaeufe);
+        for (int i = 0; i < 100 && optimierer.WartendeSuchfaeden < 2; i++)
+        {
+            await Task.Delay(100);
+        }
+
+        Assert.Equal(2, optimierer.WartendeSuchfaeden);
+        long angehalten = optimierer.Durchlaeufe;
         await Task.Delay(300);
         Assert.Equal(angehalten, optimierer.Durchlaeufe);
 
@@ -268,23 +374,117 @@ public class InseloptimiererTests
         Assert.True(optimierer.Durchlaeufe > angehalten);
     }
 
-    /// <summary>Wartet, bis sich ein Zähler 300 ms lang nicht mehr ändert (höchstens fünf Sekunden), und liefert seinen Stand.</summary>
-    private static async Task<long> StehtAsync(Func<long> zaehler)
+    /// <summary>Ein Startplan (O7 Schritt 2, z. B. aus HiGHS) ist sofort der beste Stand, wenn er besser ist als der leere Plan.</summary>
+    [Fact]
+    public void Startplan_ist_der_Ausgangspunkt()
     {
-        long stand = zaehler();
-        for (int i = 0; i < 16; i++)
+        const string R3 = "R3_Damen_Bezirksoberliga_Rheinhessen (1).xml";
+        string pfad = Path.Combine(Testdaten.Referenz, "eingabe", R3);
+        IReadOnlyList<Spiel> startplan = StaffelAbbildung.AusPlanDaten(ClickTtNachPlanDaten.Laden(pfad)).BestehenderSpielplan;
+        Staffel staffel = LeereStaffel(R3);
+        Assert.NotEmpty(startplan);
+
+        using var ohne = new Inseloptimierer(staffel, Berechnungsoptionen.Standard, Optimierungseinstellungen.Standard with { Kerne = 1, Startwert = 1 });
+        using var mit = new Inseloptimierer(staffel, Berechnungsoptionen.Standard, Optimierungseinstellungen.Standard with { Kerne = 1, Startwert = 1, Startplan = startplan });
+
+        Optimierungsergebnis start = mit.BesterStand();
+        Planbewertung bewertung = Referenzbewertung.Bewerten(staffel with { BestehenderSpielplan = startplan }, Berechnungsoptionen.Standard);
+        Assert.Equal(Kostenanzeige.Kurz(bewertung.Gesamtkosten), Kostenanzeige.Kurz(start.Kosten));
+        Assert.True(start.Kosten < ohne.BesterStand().Kosten);
+        Assert.Equal(startplan.Count, start.Spiele.Count(s => s.Zeitpunkt is not null));
+
+        mit.Rechnen(20_000);
+        Assert.True(mit.BesterStand().Kosten <= start.Kosten);
+        PlanPruefen(staffel, mit.BesterStand());
+    }
+
+    /// <summary>
+    /// Automodus mit HiGHS: Der Plan aus HiGHS beendet den Grundlauf und wird gleich bester Plan, und die Schranke beendet das Drängen sofort, wenn der beste
+    /// Plan sie erreicht (hier eine Schranke, die jeder Plan ohne harte Fehler erreicht).
+    /// </summary>
+    [Fact]
+    public void Schranke_aus_HiGHS_beendet_das_Draengen_und_der_Plan_wird_eingespielt()
+    {
+        const string R3 = "R3_Damen_Bezirksoberliga_Rheinhessen (1).xml";
+        string pfad = Path.Combine(Testdaten.Referenz, "eingabe", R3);
+        IReadOnlyList<Spiel> plan = StaffelAbbildung.AusPlanDaten(ClickTtNachPlanDaten.Laden(pfad)).BestehenderSpielplan;
+        Optimierungseinstellungen einstellungen = Optimierungseinstellungen.Standard with
         {
-            await Task.Delay(300);
-            long neu = zaehler();
-            if (neu == stand)
-            {
-                break;
-            }
+            Kerne = 1,
+            Startwert = 3,
+            Automodus = true,
+            AutoOhneGrundlauf = true,
+            AutoStillstandPlaene = 2_000,
+            Zeitbudget = 2_000,
+        };
+        using var optimierer = new Inseloptimierer(LeereStaffel(R3), Berechnungsoptionen.Standard, einstellungen);
+        optimierer.HighsEinspielen(plan, 1000, 1000);
+        optimierer.Rechnen(20_000);
 
-            stand = neu;
-        }
+        Lenkungsstand lenkung = Assert.IsType<Lenkungsstand>(optimierer.Lenkung);
+        Assert.Contains(lenkung.Aenderungen, z => z.EndsWith("Basisoptimierung beendet", StringComparison.Ordinal));
+        Assert.Contains(lenkung.Aenderungen, z => z.Contains("Plan aus HiGHS (", StringComparison.Ordinal) && z.EndsWith("bester Plan", StringComparison.Ordinal));
+        Assert.Contains(lenkung.Aenderungen, z => z.Contains("Stufe A bei der Schranke", StringComparison.Ordinal));
+        Assert.Contains(lenkung.Aenderungen, z => z.Contains("Stufe B bei der Schranke", StringComparison.Ordinal));
+        Assert.Equal((1000, 1000), (lenkung.SchrankeA, lenkung.SchrankeB));
+        Assert.Equal(0, lenkung.Bester.Harte);
+    }
 
-        return stand;
+    /// <summary>
+    /// Ohne Schranke aus HiGHS: Geht bei A nichts mehr, drängt der Automodus B nicht mit angehobenen Gewichten (damit liefen die
+    /// Inseln vom besten Plan weg, bis zu Spielen ohne Termin), sondern schützt A und sucht zählend weiter.
+    /// </summary>
+    [Fact]
+    public void Ohne_Schranke_sucht_der_Automodus_nach_Stufe_A_zaehlend()
+    {
+        const string R3 = "R3_Damen_Bezirksoberliga_Rheinhessen (1).xml";
+        Optimierungseinstellungen einstellungen = Optimierungseinstellungen.Standard with
+        {
+            Kerne = 1,
+            Startwert = 3,
+            Automodus = true,
+            AutoOhneGrundlauf = true,
+            AutoStillstandPlaene = 2_000,
+            Zeitbudget = 2_000,
+        };
+        using var optimierer = new Inseloptimierer(LeereStaffel(R3), Berechnungsoptionen.Standard, einstellungen);
+        optimierer.Rechnen(300_000);
+
+        Lenkungsstand lenkung = Assert.IsType<Lenkungsstand>(optimierer.Lenkung);
+        Assert.Contains(lenkung.Aenderungen, z => z.Contains("bei A geht nichts mehr", StringComparison.Ordinal) && z.EndsWith("A geschützt, Suche zählt B und C", StringComparison.Ordinal));
+        Assert.DoesNotContain(lenkung.Aenderungen, z => z.EndsWith("): Stufe B", StringComparison.Ordinal));
+        Assert.Equal(0, lenkung.Bester.Harte);
+    }
+
+    /// <summary>
+    /// Teilneuplanung im Automodus: Pläne werden wie der beste Plan bewertet (vor dem Ende der Basisoptimierung gar nicht) und
+    /// nur übernommen, wenn sie danach besser sind.
+    /// </summary>
+    [Fact]
+    public void Plan_der_Teilneuplanung_wird_wie_der_beste_Plan_bewertet()
+    {
+        const string R3 = "R3_Damen_Bezirksoberliga_Rheinhessen (1).xml";
+        string pfad = Path.Combine(Testdaten.Referenz, "eingabe", R3);
+        IReadOnlyList<Spiel> plan = StaffelAbbildung.AusPlanDaten(ClickTtNachPlanDaten.Laden(pfad)).BestehenderSpielplan;
+        Optimierungseinstellungen einstellungen = Optimierungseinstellungen.Standard with
+        {
+            Kerne = 1,
+            Startwert = 3,
+            Automodus = true,
+            AutoOhneGrundlauf = true,
+            AutoStillstandPlaene = 2_000,
+            Zeitbudget = 2_000,
+        };
+        using var optimierer = new Inseloptimierer(LeereStaffel(R3), Berechnungsoptionen.Standard, einstellungen);
+        Assert.Null(optimierer.NachStufen(plan));
+        Assert.False(optimierer.PlanEinspielen(plan, "Test"));
+
+        optimierer.Rechnen(5_000);
+        Stufenwert wert = Assert.IsType<Stufenwert>(optimierer.NachStufen(plan));
+        Stufenwert bester = optimierer.Lenkung!.Bester;
+        bool besser = optimierer.IstBesser(wert, bester);
+        Assert.Equal(besser, optimierer.PlanEinspielen(plan, "Test"));
+        Assert.Contains(optimierer.Lenkung.Aenderungen, z => z.Contains("Test (", StringComparison.Ordinal));
     }
 
     private static Optimierungsergebnis Rechnen(Staffel staffel, Optimierungseinstellungen einstellungen, long durchlaeufe)

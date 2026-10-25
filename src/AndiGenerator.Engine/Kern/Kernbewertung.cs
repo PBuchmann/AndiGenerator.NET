@@ -53,6 +53,8 @@ public static class Kernbewertung
             spieltag.LetzteBreite,
             kern.VereinsinterneSpieleAmAnfangKosten(),
             Enum.GetValues<MannschaftsKostenart>().Where(plan.HatWerteFuer).ToList(),
-            mannschaften);
+            mannschaften,
+            kern.TeamsNichtAmAnfang(),
+            kern.ZusatzZaehlen(meldungen: false));
     }
 }

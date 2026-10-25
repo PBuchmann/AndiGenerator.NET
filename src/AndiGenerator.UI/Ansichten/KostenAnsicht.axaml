@@ -82,7 +82,7 @@
           <StackPanel Spacing="12" HorizontalAlignment="Left">
             <!-- Matrix links, Verteilung rechts daneben; reicht die Breite nicht, rückt die Verteilung darunter (im Code) -->
             <Grid x:Name="Karten" ColumnDefinitions="Auto,Auto" RowDefinitions="Auto,Auto" HorizontalAlignment="Left">
-              <Border x:Name="MatrixKarte" Classes="karte" Padding="14,10" HorizontalAlignment="Left" VerticalAlignment="Top" IsVisible="{Binding HatMatrix}">
+              <Border x:Name="MatrixKarte" ui:Fuehrungsmarke.Ziel="KostenMatrix" Classes="karte" Padding="14,10" HorizontalAlignment="Left" VerticalAlignment="Top" IsVisible="{Binding HatMatrix}">
                 <Panel>
                   <Grid x:Name="Tabelle" HorizontalAlignment="Left" />
                   <!-- Umschalter der Zellen im freien Feld links oben über den Mannschaftsnamen -->

@@ -31,6 +31,25 @@ public static class Kartenbau
         IReadOnlyList<Landesumriss> laender,
         IReadOnlyList<Stadt> staedte)
     {
+        ArgumentNullException.ThrowIfNull(fahrten);
+        return MitSpieltagen(orte, [.. fahrten.Select(f => (f.Von, f.Nach, f.Kraeftig, f.Einzel, -1))], laender, staedte);
+    }
+
+    /// <summary>Baut das Kartenbild; jede Fahrt mit dem Spieltag ihres Sonntags (für die Farbe wie im Raster).</summary>
+    /// <param name="orte">Spielorte (nur solche mit bekannter Lage).</param>
+    /// <param name="fahrten">
+    /// Fahrten von Gast zu Ausrichter (Mannschaftsnamen), mit Kennzeichen für Einzelbegegnungen und dem Spieltag am Sonntag
+    /// (0 = erster, 1 = zweiter …; −1 = ohne, dann blau).
+    /// </param>
+    /// <param name="laender">Umrisse der Bundesländer.</param>
+    /// <param name="staedte">Städte, die wichtigsten zuerst.</param>
+    /// <returns>Das Bild; ohne Spielorte ein leeres.</returns>
+    public static Kartenbild MitSpieltagen(
+        IReadOnlyList<Kartenort> orte,
+        IReadOnlyList<(string Von, string Nach, bool Kraeftig, bool Einzel, int Spieltag)> fahrten,
+        IReadOnlyList<Landesumriss> laender,
+        IReadOnlyList<Stadt> staedte)
+    {
         ArgumentNullException.ThrowIfNull(orte);
         ArgumentNullException.ThrowIfNull(fahrten);
         ArgumentNullException.ThrowIfNull(laender);
@@ -106,16 +125,16 @@ public static class Kartenbau
     /// Fahrten zwischen denselben beiden Hallen (in beide Richtungen) bekommen einen seitlichen Versatz, damit ihre Linien
     /// nebeneinander liegen statt übereinander.
     /// </summary>
-    private static List<Kartenfahrt> Nebeneinander(List<(string Von, string Nach, bool Kraeftig, bool Einzel)> fahrten, Dictionary<string, Kartenpunkt> punkte)
+    private static List<Kartenfahrt> Nebeneinander(List<(string Von, string Nach, bool Kraeftig, bool Einzel, int Spieltag)> fahrten, Dictionary<string, Kartenpunkt> punkte)
     {
         var ergebnis = new List<Kartenfahrt>();
-        foreach (IGrouping<(string, string), (string Von, string Nach, bool Kraeftig, bool Einzel)> gruppe in fahrten
+        foreach (IGrouping<(string, string), (string Von, string Nach, bool Kraeftig, bool Einzel, int Spieltag)> gruppe in fahrten
             .GroupBy(f => string.CompareOrdinal(f.Von, f.Nach) <= 0 ? (f.Von, f.Nach) : (f.Nach, f.Von)))
         {
-            List<(string Von, string Nach, bool Kraeftig, bool Einzel)> liste = gruppe.ToList();
+            List<(string Von, string Nach, bool Kraeftig, bool Einzel, int Spieltag)> liste = gruppe.ToList();
             for (int i = 0; i < liste.Count; i++)
             {
-                (string von, string nach, bool kraeftig, bool einzel) = liste[i];
+                (string von, string nach, bool kraeftig, bool einzel, int spieltag) = liste[i];
 
                 // Versatz gilt in Richtung der Gruppe (erster Name zum zweiten); in Gegenrichtung mit umgekehrtem Vorzeichen.
                 double versatz = i - ((liste.Count - 1) / 2.0);
@@ -124,7 +143,7 @@ public static class Kartenbau
                     versatz = -versatz;
                 }
 
-                ergebnis.Add(new Kartenfahrt(punkte[von], punkte[nach], kraeftig, einzel) { Versatz = versatz, Mehrfach = liste.Count > 1 });
+                ergebnis.Add(new Kartenfahrt(punkte[von], punkte[nach], kraeftig, einzel) { Versatz = versatz, Mehrfach = liste.Count > 1, Spieltag = spieltag });
             }
         }
 

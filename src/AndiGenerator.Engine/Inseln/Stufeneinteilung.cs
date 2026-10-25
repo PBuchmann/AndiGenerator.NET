@@ -21,12 +21,13 @@ public sealed record Stufeneinteilung(IReadOnlyList<Kostenkriterium> A, IReadOnl
     public static readonly int AnzahlKriterien = Enum.GetValues<Kostenkriterium>().Length;
 
     /// <summary>
-    /// Gets die Einteilung nach E14: A Hallenbelegung, parallele Spiele, Pflichtspieltage, vereinsinterne Spiele am Anfang;
+    /// Gets die Einteilung nach E14 (vereinsinterne Spiele am Anfang zuerst – die Wettspielordnung setzt sie voraus): A
+    /// vereinsinterne Spiele am Anfang, Hallenbelegung, parallele Spiele, Pflichtspieltage;
     /// B Auswärts- und Heimkoppel, Sperr- und Ausweichtermine; C nach Wichtigkeit: Heim/Auswärts ausgeglichen, Wechsel,
     /// Abstände, Spielverteilung, übrige, zuletzt die Spieltage.
     /// </summary>
     public static Stufeneinteilung Standard { get; } = new(
-        [Kostenkriterium.Hallenbelegung, Kostenkriterium.ParalleleSpiele, Kostenkriterium.Pflichtspieltage, Kostenkriterium.VereinsinterneSpieleAmAnfang],
+        [Kostenkriterium.VereinsinterneSpieleAmAnfang, Kostenkriterium.Hallenbelegung, Kostenkriterium.ParalleleSpiele, Kostenkriterium.Pflichtspieltage],
         [Kostenkriterium.Auswaertskoppel, Kostenkriterium.Heimkoppel, Kostenkriterium.Sperrtermine, Kostenkriterium.Ausweichtermine],
         [
             Kostenkriterium.UngleichHeimAuswaerts, Kostenkriterium.WechselHeimAuswaerts, Kostenkriterium.DreiTageAbstand,
@@ -174,7 +175,7 @@ public sealed record Stufeneinteilung(IReadOnlyList<Kostenkriterium> A, IReadOnl
         return new Stufeneinteilung(listen[0], listen[1], listen[2]);
     }
 
-    /// <summary>Kriterien mit einer Anzahl von Verstößen (alle außer Spieltagslänge und -überlappung).</summary>
+    /// <summary>Die Stufe jedes Kriteriums als Feld.</summary>
     /// <returns>Stufe je Kriterium, Index = Enumwert.</returns>
     public Stufe[] AlsFeld()
     {
@@ -195,7 +196,8 @@ public sealed record Stufeneinteilung(IReadOnlyList<Kostenkriterium> A, IReadOnl
 
     /// <summary>
     /// Zählt die Verstöße einer Bewertung nach dieser Einteilung (wie der Automodus): Anzahlen je Mannschafts-Kostenart über
-    /// alle Mannschaften, vereinsinterne Spiele am Anfang als 1; Spieltagslänge und -überlappung zählen nur bei den C-Kosten.
+    /// alle Mannschaften, vereinsinterne Spiele am Anfang je Spiel davor; Spielverteilung und Spieltage nach
+    /// <see cref="Planbewertung.Zusatz"/> (zu lange Pausen, zu lange bzw. überlappende Spieltage).
     /// </summary>
     /// <param name="bewertung">Die Bewertung eines Plans.</param>
     /// <returns>Harte Fehler, Verstöße A, B und C, Kosten der Stufe C (ohne Ausreißer).</returns>
@@ -211,12 +213,21 @@ public sealed record Stufeneinteilung(IReadOnlyList<Kostenkriterium> A, IReadOnl
             kosten[k] = bewertung.Mannschaften.Sum(m => m.JeKostenart[k].Kosten);
         }
 
-        anzahl[(int)Kostenkriterium.VereinsinterneSpieleAmAnfang] = bewertung.VereinsinterneSpieleAmAnfang > 0 ? 1 : 0;
+        anzahl[(int)Kostenkriterium.VereinsinterneSpieleAmAnfang] = bewertung.VereinsinterneSpieleAmAnfang > 0 ? bewertung.VereinsinterneAnzahl : 0;
         kosten[(int)Kostenkriterium.VereinsinterneSpieleAmAnfang] = bewertung.VereinsinterneSpieleAmAnfang;
         kosten[(int)Kostenkriterium.Spieltaglaenge] = bewertung.LaengeSpieltage;
         kosten[(int)Kostenkriterium.Spieltagueberlappung] = bewertung.UeberlappungSpieltage;
         kosten[(int)Kostenkriterium.LetzterSpieltagLaenge] = bewertung.LaengeLetzterSpieltag;
         kosten[(int)Kostenkriterium.LetzterSpieltagUeberlappung] = bewertung.UeberlappungLetzterSpieltag;
+        if (bewertung.Zusatz is { } z)
+        {
+            int verteilung = (int)Kostenkriterium.Spielverteilung;
+            anzahl[verteilung] = kosten[verteilung] > 0 ? z.Spielverteilung.Sum() : 0;
+            anzahl[(int)Kostenkriterium.Spieltaglaenge] = bewertung.LaengeSpieltage > 0 ? z.SpieltageLaenge : 0;
+            anzahl[(int)Kostenkriterium.Spieltagueberlappung] = bewertung.UeberlappungSpieltage > 0 ? z.SpieltageUeberlappung : 0;
+            anzahl[(int)Kostenkriterium.LetzterSpieltagLaenge] = bewertung.LaengeLetzterSpieltag > 0 ? z.LetzterLaenge : 0;
+            anzahl[(int)Kostenkriterium.LetzterSpieltagUeberlappung] = bewertung.UeberlappungLetzterSpieltag > 0 ? z.LetzterUeberlappung : 0;
+        }
 
         double[] jeStufe = new double[3];
         double c = 0;

@@ -196,6 +196,7 @@ internal sealed partial class KernPlan
         artBerechnet = new bool[KernDefinition.AnzahlArten];
 
         KostenAnzahl = new int[D.N * KernDefinition.AnzahlArten];
+        StufenAnzahl = new int[D.N * KernDefinition.AnzahlArten];
         KostenAlle = new int[D.N * KernDefinition.AnzahlArten];
         KostenWert = new double[D.N * KernDefinition.AnzahlArten];
     }
@@ -203,9 +204,6 @@ internal sealed partial class KernPlan
     public KernDefinition D { get; }
 
     public int AnzahlErlaubt => anzahlErlaubt;
-
-    /// <summary>Erlaubte und (noch vorhandene) nicht erlaubte Spiele; Letztere liegen hinter den erlaubten.</summary>
-    public int AnzahlAktiv => anzahlAktiv;
 
     public int[] Heim { get; }
 
@@ -242,6 +240,12 @@ internal sealed partial class KernPlan
     public int[] SpieleAnzahl { get; }
 
     public bool AlleTermineGueltig { get; set; }
+
+    /// <summary>
+    /// Gets die Verstöße je Mannschaft und Kostenart für die Stufen (nach <see cref="StufenBewerten"/>): wie
+    /// <see cref="KostenAnzahl"/>, bei der Spielverteilung die zu langen Pausen (das Original zählt dort nichts).
+    /// </summary>
+    public int[] StufenAnzahl { get; }
 
     /// <summary>Anzahl je Mannschaft und Kostenart (Index t·16 + Art).</summary>
     public int[] KostenAnzahl { get; }
@@ -364,9 +368,6 @@ internal sealed partial class KernPlan
 
         return -1;
     }
-
-    /// <summary>Original <c>getKoppeledGameBefore</c>.</summary>
-    public int GekoppeltDavor(int t, int index) => index > 0 && GekoppeltDanach(t, index - 1) >= 0 ? Spiele[t][index - 1] : -1;
 
     /// <summary>Original <c>getKoppeledGame(Index)</c>.</summary>
     public int Gekoppelt(int t, int index)

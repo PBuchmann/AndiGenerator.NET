@@ -15,13 +15,13 @@ public sealed partial class Datenbearbeitung
     {
         get
         {
-            if (standard is null)
+            if (Standard is null)
             {
                 return true;
             }
 
             DatenKnoten? jetzt = Arbeitsstand.ErstesKind("predefinedgames");
-            DatenKnoten? vorlage = standard.ErstesKind("predefinedgames");
+            DatenKnoten? vorlage = Standard.ErstesKind("predefinedgames");
             return jetzt is null || vorlage is null ? ReferenceEquals(jetzt, vorlage) : jetzt.IstGleich(vorlage);
         }
     }
@@ -102,13 +102,13 @@ public sealed partial class Datenbearbeitung
     /// <summary>Original <c>toDefault</c>: festgelegte Begegnungen aus der click-TT-Datei übernehmen.</summary>
     public void VorgegebeneSpieleZuruecksetzen()
     {
-        if (standard is null)
+        if (Standard is null)
         {
             return;
         }
 
         DatenKnoten? jetzt = Arbeitsstand.ErstesKind("predefinedgames");
-        DatenKnoten? vorlage = standard.ErstesKind("predefinedgames");
+        DatenKnoten? vorlage = Standard.ErstesKind("predefinedgames");
         if (vorlage is null)
         {
             if (jetzt is not null)

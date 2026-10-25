@@ -33,7 +33,7 @@ public partial class QualitaetAnsicht : UserControl
         // Den Fokus (für Escape) holen, ohne dass die umgebende Bildlaufleiste dorthin springt: Sonst rutscht die Liste unter
         // dem ruhenden Mauszeiger weg, und ein Klick auf den Griff verschiebt die Zeile.
         AddHandler(RequestBringIntoViewEvent, (_, e) => e.Handled |= ReferenceEquals(e.TargetObject, this));
-        Mausradzoom.Anmelden(this);
+        Ansichtszoom.Anmelden(this);
         Focusable = true;
         KeyDown += (_, e) =>
         {
@@ -78,6 +78,7 @@ public partial class QualitaetAnsicht : UserControl
         if (zeilenrahmen is { DataContext: Qualitaetszeile gewaehlt } && Modell is { } m)
         {
             m.Waehlen(gewaehlt);
+            DetailBildlauf.ScrollToHome();
             e.Handled = true;
         }
     }

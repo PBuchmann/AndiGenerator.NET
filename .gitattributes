@@ -9,6 +9,9 @@
 # (click-TT-Kodierung Windows-1252 bzw. iso-8859-15, CRLF).
 testdaten/** -text
 
+# Beispielstaffeln für das Paket: click-TT-Dateien byte-genau wie im Original
+src/AndiGenerator.Desktop/Beispiele/** -text
+
 # Binärdateien
 *.png binary
 *.ico binary

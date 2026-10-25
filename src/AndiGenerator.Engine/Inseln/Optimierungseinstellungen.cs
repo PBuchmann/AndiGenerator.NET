@@ -2,6 +2,8 @@
 // SPDX-FileCopyrightText: 2026 Peter Buchmann
 // SPDX-License-Identifier: GPL-3.0-only
 
+using AndiGenerator.Domain.Stammdaten;
+
 namespace AndiGenerator.Engine.Inseln;
 
 /// <summary>Einstellungen des Inselmodells (MIGRATIONSPLAN E6).</summary>
@@ -44,6 +46,22 @@ namespace AndiGenerator.Engine.Inseln;
 /// damit langsame Rechner ebenso viel suchen wie schnelle, bevor der Automodus entscheidet.
 /// </param>
 /// <param name="AutoMaxGrundlauf">Höchstdauer der Basisoptimierung in Sekunden reiner Rechenzeit; danach beginnt in jedem Fall Stufe A.</param>
+/// <param name="Startplan">
+/// Startplan für die ersten <paramref name="StartplanInseln"/> Inseln (z. B. aus HiGHS, MIGRATIONSPLAN O7 Schritt 2), oder
+/// <c>null</c>; die übrigen Inseln beginnen wie bisher.
+/// </param>
+/// <param name="StartplanInseln">Zahl der Inseln, die mit dem Startplan beginnen.</param>
+/// <param name="AutoZaehlen">
+/// Beim Glätten von C sucht die Suche nach der Zahl der Verstöße (wie der Automodus vergleicht), nicht nach den Kosten des
+/// Originals; der Automodus hebt dann keine C-Gewichte mehr an. <c>false</c> = wie früher (zum Vergleich).
+/// </param>
+/// <param name="AutoSpaetannahme">
+/// Beim Glätten von C (mit <paramref name="AutoZaehlen"/>): Länge des Gedächtnisses der späten Annahme je Suchplatz – ein
+/// Platz nimmt auch Pläne an, die in C nicht schlechter sind als sein Plan vor so vielen Schritten; A und B dürfen nie
+/// schlechter werden als im besten Plan. 0 = nur Verbesserungen (wie im Original). Standard 1000 (Bezirksliga Süd, 600 s:
+/// C 210/207 statt 211/221 mit 0 und 212/216 mit 5000).
+/// </param>
+/// <param name="Fadenstart">Wird zu Beginn jedes Rechen-Threads auf ihm aufgerufen (z. B. für die Messung der Rechenzeit), oder <c>null</c>.</param>
 public sealed record Optimierungseinstellungen(
     int Kerne,
     int Inseln,
@@ -63,7 +81,12 @@ public sealed record Optimierungseinstellungen(
     bool AutoOhneGrundlauf = false,
     double AutoDeutlich = 0.01,
     long AutoStillstandPlaene = 500_000,
-    double AutoMaxGrundlauf = 180)
+    double AutoMaxGrundlauf = 180,
+    IReadOnlyList<Spiel>? Startplan = null,
+    int StartplanInseln = 1,
+    Action? Fadenstart = null,
+    bool AutoZaehlen = true,
+    int AutoSpaetannahme = 1000)
 {
     /// <summary>Standard: Topologie des Originals (4 Inseln × 14 feste + 10 dynamische Suchplätze, Spezial-Insel), alle Kerne bis auf einen.</summary>
     public static Optimierungseinstellungen Standard { get; } = new(

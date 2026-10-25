@@ -29,8 +29,14 @@ public static class TerminwunschPdf
     /// <param name="pfad">Pfad der PDF-Datei.</param>
     /// <returns>Die Zeilen.</returns>
     /// <exception cref="FormatException">Die Datei ist kein lesbares PDF.</exception>
+    /// <exception cref="FileNotFoundException">Die Datei gibt es nicht (PdfPig meldet sonst einen ungeprüften Fehler).</exception>
     public static IReadOnlyList<Textzeile> Textzeilen(string pfad)
     {
+        if (!File.Exists(pfad))
+        {
+            throw new FileNotFoundException("Die Datei „" + pfad + "“ gibt es nicht.", pfad);
+        }
+
         try
         {
             using PdfDocument dokument = PdfDocument.Open(pfad);

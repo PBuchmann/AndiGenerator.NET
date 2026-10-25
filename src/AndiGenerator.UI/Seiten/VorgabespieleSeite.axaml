@@ -38,8 +38,8 @@
           <Grid ColumnDefinitions="120,70,200,200,*">
             <TextBlock Text="{Binding Datum}" />
             <TextBlock Grid.Column="1" Text="{Binding Uhrzeit}" />
-            <TextBlock Grid.Column="2" Text="{Binding Heim}" TextTrimming="CharacterEllipsis" />
-            <TextBlock Grid.Column="3" Text="{Binding Gast}" TextTrimming="CharacterEllipsis" />
+            <TextBlock ToolTip.Tip="{Binding Heim}" Classes="mannschaft" Grid.Column="2" Text="{Binding Heim}" TextTrimming="CharacterEllipsis" />
+            <TextBlock ToolTip.Tip="{Binding Gast}" Classes="mannschaft" Grid.Column="3" Text="{Binding Gast}" TextTrimming="CharacterEllipsis" />
             <TextBlock Grid.Column="4" Text="{Binding Spiellokal}" />
           </Grid>
         </DataTemplate>

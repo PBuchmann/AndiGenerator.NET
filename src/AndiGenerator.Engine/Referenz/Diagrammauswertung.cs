@@ -35,37 +35,48 @@ public static class Diagrammauswertung
             DelphiDatum.ZuDateTime(erster),
             DelphiDatum.ZuDateTime(letzter),
             plan.Mannschaften.Select(m => Mannschaft(plan, m)).ToList(),
-            Ueberlappungen(plan),
-            plan.HatKoppeltermine() || plan.HatAuswaertsKoppeltermine(),
             mitRueckrunde,
             Wochen(plan, optionen, mitRueckrunde),
             plan.HatSetzliste(),
-            plan.Runden.Count,
-            plan.Mannschaften.Count == 0 ? 0 : plan.Mannschaften.Max(m => m.Spiele.Count));
+            plan.Mannschaften.Count == 0 ? 0 : plan.Mannschaften.Max(m => m.Spiele.Count),
+            Verstoesse: Verstoesse(Referenzbewertung.Bewerten(staffel, optionen), optionen));
+    }
+
+    /// <summary>Die Verstöße je Mannschaft und Spieltag aus der Bewertung, nur für berücksichtigte Kriterien.</summary>
+    /// <param name="bewertung">Die Bewertung des Plans.</param>
+    /// <param name="optionen">Berechnungsoptionen (Gewichtung je Kriterium).</param>
+    /// <returns>Die Verstöße.</returns>
+    internal static Diagrammverstoesse Verstoesse(Planbewertung bewertung, Berechnungsoptionen optionen)
+    {
+        int? Anzahl(Mannschaftsbewertung m, MannschaftsKostenart art) =>
+            optionen.Fuer(art) == Gewichtung.NichtBeruecksichtigen ? null : Math.Max(0, m.JeKostenart[(int)art].Anzahl);
+
+        Zusatzverstoesse? zusatz = bewertung.Zusatz;
+        bool pausen = optionen.Fuer(MannschaftsKostenart.Spielverteilung) != Gewichtung.NichtBeruecksichtigen && zusatz is not null;
+        var je = new Dictionary<string, Mannschaftsverstoesse>(StringComparer.Ordinal);
+        for (int t = 0; t < bewertung.Mannschaften.Count; t++)
+        {
+            Mannschaftsbewertung m = bewertung.Mannschaften[t];
+            IReadOnlyList<(double Start, double Ende)> zeiten = pausen && zusatz!.Pausen is { } p && t < p.Count ? p[t] : [];
+            je[m.Name] = new Mannschaftsverstoesse(
+                Anzahl(m, MannschaftsKostenart.WechselHeimAuswaerts),
+                Anzahl(m, MannschaftsKostenart.DreiTageAbstand),
+                Anzahl(m, MannschaftsKostenart.ZweiSpieleProWoche),
+                pausen && t < zusatz!.Spielverteilung.Count ? zusatz.Spielverteilung[t] : null,
+                Anzahl(m, MannschaftsKostenart.AbstandHeimAuswaerts),
+                Anzahl(m, MannschaftsKostenart.Setzliste),
+                zeiten.Select(z => (DelphiDatum.ZuDateTime(z.Start), DelphiDatum.ZuDateTime(z.Ende))).ToList());
+        }
+
+        HashSet<int> zuLang = optionen.Spieltag == Gewichtung.NichtBeruecksichtigen ? [] : [.. zusatz?.ZuLangeSpieltage ?? []];
+        HashSet<int> ueberlappend = optionen.SpieltagUeberlappung == Gewichtung.NichtBeruecksichtigen ? [] : [.. zusatz?.UeberlappendeSpieltage ?? []];
+        return new Diagrammverstoesse(je, zuLang, ueberlappend);
     }
 
     /// <summary>Original <c>MondayBefore</c>.</summary>
     /// <param name="datum">Delphi-Datum.</param>
     /// <returns>Montag der Woche als Delphi-Datum.</returns>
     internal static double MontagDavor(double datum) => (((DelphiDatum.Trunc(datum) - 2) / 7) * 7) + 2;
-
-    /// <summary>Original <c>PaintSpielAbstandMannschaft</c>: Farbe der Linie zwischen zwei Spielen gegen denselben Gegner.</summary>
-    /// <param name="abstand">Anzahl Spiele vom ersten bis zum nächsten Spiel gegen den Gegner.</param>
-    /// <param name="ideal">Idealer Abstand (Spiele der Mannschaft je Runde).</param>
-    /// <returns>Rot- und Grünanteil.</returns>
-    internal static (int Rot, int Gruen) Abstandsfarbe(int abstand, double ideal)
-    {
-        double wert = Math.Abs((abstand - ideal) / ideal);
-        if (abstand > ideal)
-        {
-            // Spiele weiter auseinander als gefordert ist nicht so schlimm.
-            wert /= 1.25;
-        }
-
-        int gruen = Math.Max(0, 255 - (int)Math.Truncate(wert * 255));
-        int rot = 255 - gruen;
-        return rot < gruen ? (rot, 255) : (255, gruen);
-    }
 
     private static Diagrammmannschaft Mannschaft(RefPlan plan, RefMannschaft m)
     {
@@ -80,7 +91,8 @@ public static class Diagrammauswertung
                 ReferenceEquals(spiel.Heim, m),
                 m.GekoppeltesSpiel(i) is not null,
                 spiel.DatumGueltig ? plan.RundeZuDatum(spiel.Datum) : -1,
-                gegnerRang < 0 || eigenerRang < 0 ? 0 : Math.Abs(eigenerRang - gegnerRang)));
+                gegnerRang < 0 || eigenerRang < 0 ? 0 : Math.Abs(eigenerRang - gegnerRang),
+                Gegner(m, spiel).TeamName));
         }
 
         return new Diagrammmannschaft(m.TeamName, spiele, Abstaende(plan, m));
@@ -109,8 +121,7 @@ public static class Diagrammauswertung
             int j = spiele.FindIndex(k + 1, s => Gegner(m, s).TeamId == gegner);
             while (j >= 0)
             {
-                (int rot, int gruen) = Abstandsfarbe(j - k, ideal);
-                linien.Add(new Abstandslinie(DelphiDatum.ZuDateTime(spiele[k].Datum), DelphiDatum.ZuDateTime(spiele[j].Datum), rot, gruen));
+                linien.Add(new Abstandslinie(Gegner(m, spiele[k]).TeamName, DelphiDatum.ZuDateTime(spiele[k].Datum), DelphiDatum.ZuDateTime(spiele[j].Datum), j - k, ideal));
                 k = j;
                 j = spiele.FindIndex(k + 1, s => Gegner(m, s).TeamId == gegner);
             }
@@ -119,42 +130,6 @@ public static class Diagrammauswertung
         }
 
         return zeilen;
-    }
-
-    /// <summary>Original <c>PaintSpielPlanOverlap</c>.</summary>
-    private static List<Spieltagsueberlappung> Ueberlappungen(RefPlan plan)
-    {
-        int spieltage = plan.Mannschaften.Count == 0 ? 0 : plan.Mannschaften.Max(m => m.Spiele.Count);
-        var maxWerte = new List<double>();
-        var minWerte = new List<double>();
-        for (int i = 0; i < spieltage; i++)
-        {
-            List<double> termine = plan.Mannschaften
-                .Where(m => m.Spiele.Count > i && m.Spiele[i].Datum != 0.0)
-                .Select(m => m.Spiele[i].Datum)
-                .ToList();
-            if (termine.Count > 0)
-            {
-                maxWerte.Add(termine.Max());
-                minWerte.Add(termine.Min());
-            }
-        }
-
-        var ergebnis = new List<Spieltagsueberlappung>();
-        for (int abstand = 1; abstand < maxWerte.Count; abstand++)
-        {
-            for (int i = 0; i + abstand < minWerte.Count; i++)
-            {
-                int j = i + abstand;
-                if (DelphiDatum.Trunc(maxWerte[i]) >= DelphiDatum.Trunc(minWerte[j]))
-                {
-                    int helligkeit = 255 - Math.Min(128, abstand * (128 / 5));
-                    ergebnis.Add(new Spieltagsueberlappung(DelphiDatum.ZuDateTime(minWerte[j]), DelphiDatum.ZuDateTime(maxWerte[i]), helligkeit));
-                }
-            }
-        }
-
-        return ergebnis;
     }
 
     /// <summary>Original <c>PaintGamesPerWeek</c>.</summary>

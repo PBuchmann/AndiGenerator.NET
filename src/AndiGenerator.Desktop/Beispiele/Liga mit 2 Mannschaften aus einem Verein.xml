@@ -1,0 +1,1907 @@
+<?xml version="1.0" encoding="iso-8859-15"?>
+<TT name="Liga mit 2 Mannschaften aus einem Verein" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.tt-liga.de/TTGenerator http://www.tt-liga.de/includes/TTGenerator.xsd" xmlns="http://www.tt-liga.de/TTGenerator" mid="21.12.2015" from="01.09.2015" until="15.05.2016" gender="Herren" id="10022">
+  <noGameDays />
+  <mandatoryGameDays>
+	  
+  </mandatoryGameDays>
+  <predefinedGames>
+  	
+  </predefinedGames>
+  <existingSchedule>
+     <game day="18.09.2015" time="20:15" homeTeam="VfR Heilbronn II" guestTeam="FC Hanau 93 II" /> <game day="18.09.2015" time="20:15" homeTeam="FC G&#252;tersloh IV" guestTeam="Hannover 96 II" /> <game day="25.09.2015" time="20:00" homeTeam="FC Hanau 93 II" guestTeam="FC G&#252;tersloh III" /> <game day="28.09.2015" time="20:00" homeTeam="SC Tasmania 1900 Berlin" guestTeam="FC G&#252;tersloh IV" /> <game day="30.09.2015" time="20:00" homeTeam="Hamburger SV II" guestTeam="Hallescher FC" /> <game day="30.09.2015" time="20:15" homeTeam="FC G&#252;tersloh III" guestTeam="VfR Heilbronn II" /> <game day="02.10.2015" time="20:00" homeTeam="DSC Arminia Bielefeld II" guestTeam="SC Tasmania 1900 Berlin" /> <game day="02.10.2015" time="20:00" homeTeam="Hallescher FC" guestTeam="FC Hanau 93 II" /> <game day="02.10.2015" time="20:15" homeTeam="FC G&#252;tersloh IV" guestTeam="FC G&#252;tersloh III" /> <game day="07.10.2015" time="20:15" homeTeam="FC G&#252;tersloh IV" guestTeam="DSC Arminia Bielefeld II" /> <game day="08.10.2015" time="19:30" homeTeam="Hannover 96 II" guestTeam="Hamburger SV II" /> <game day="09.10.2015" time="20:00" homeTeam="Hallescher FC" guestTeam="FC G&#252;tersloh IV" /> <game day="12.10.2015" time="20:00" homeTeam="SC Tasmania 1900 Berlin" guestTeam="FC G&#252;tersloh III" /> <game day="14.10.2015" time="20:00" homeTeam="Hamburger SV II" guestTeam="TSV Havelse" /> <game day="14.10.2015" time="20:15" homeTeam="FC G&#252;tersloh III" guestTeam="Hannover 96 II" /> <game day="16.10.2015" time="20:00" homeTeam="DSC Arminia Bielefeld II" guestTeam="Hallescher FC" /> <game day="23.10.2015" time="20:00" homeTeam="FC Hanau 93 II" guestTeam="Hamburger SV II" /> <game day="26.10.2015" time="20:00" homeTeam="TSV Havelse" guestTeam="SC Tasmania 1900 Berlin" /> <game day="28.10.2015" time="20:00" homeTeam="Hamburger SV II" guestTeam="DSC Arminia Bielefeld II" /> <game day="28.10.2015" time="20:15" homeTeam="FC G&#252;tersloh IV" guestTeam="VfR Heilbronn II" /> <game day="29.10.2015" time="19:30" homeTeam="Hannover 96 II" guestTeam="Hallescher FC" /> <game day="30.10.2015" time="20:00" homeTeam="Hallescher FC" guestTeam="TSV Havelse" /> <game day="06.11.2015" time="20:15" homeTeam="VfR Heilbronn II" guestTeam="Hannover 96 II" /> <game day="09.11.2015" time="20:00" homeTeam="TSV Havelse" guestTeam="FC G&#252;tersloh IV" /> <game day="09.11.2015" time="20:00" homeTeam="SC Tasmania 1900 Berlin" guestTeam="VfR Heilbronn II" /> <game day="13.11.2015" time="20:00" homeTeam="Hallescher FC" guestTeam="FC G&#252;tersloh III" /> <game day="13.11.2015" time="20:00" homeTeam="DSC Arminia Bielefeld II" guestTeam="TSV Havelse" /> <game day="13.11.2015" time="20:00" homeTeam="FC Hanau 93 II" guestTeam="SC Tasmania 1900 Berlin" /> <game day="19.11.2015" time="19:30" homeTeam="Hannover 96 II" guestTeam="TSV Havelse" /> <game day="20.11.2015" time="20:00" homeTeam="FC G&#252;tersloh III" guestTeam="Hamburger SV II" /> <game day="20.11.2015" time="20:00" homeTeam="Hallescher FC" guestTeam="SC Tasmania 1900 Berlin" /> <game day="20.11.2015" time="20:15" homeTeam="VfR Heilbronn II" guestTeam="DSC Arminia Bielefeld II" /> <game day="23.11.2015" time="20:00" homeTeam="TSV Havelse" guestTeam="FC Hanau 93 II" /> <game day="25.11.2015" time="20:00" homeTeam="Hamburger SV II" guestTeam="FC G&#252;tersloh IV" /> <game day="30.11.2015" time="20:00" homeTeam="SC Tasmania 1900 Berlin" guestTeam="Hamburger SV II" /> <game day="04.12.2015" time="20:00" homeTeam="FC Hanau 93 II" guestTeam="DSC Arminia Bielefeld II" /> <game day="07.12.2015" time="20:00" homeTeam="TSV Havelse" guestTeam="VfR Heilbronn II" /> <game day="10.12.2015" time="19:30" homeTeam="Hannover 96 II" guestTeam="FC Hanau 93 II" /> <game day="11.12.2015" time="20:00" homeTeam="DSC Arminia Bielefeld II" guestTeam="FC G&#252;tersloh III" /> <game day="14.12.2015" time="20:00" homeTeam="SC Tasmania 1900 Berlin" guestTeam="Hannover 96 II" /> <game day="16.12.2015" time="20:00" homeTeam="Hamburger SV II" guestTeam="VfR Heilbronn II" /> <game day="16.12.2015" time="20:15" homeTeam="FC G&#252;tersloh IV" guestTeam="FC Hanau 93 II" /> <game day="17.12.2015" time="19:30" homeTeam="Hannover 96 II" guestTeam="DSC Arminia Bielefeld II" /> <game day="18.12.2015" time="20:00" homeTeam="FC G&#252;tersloh III" guestTeam="TSV Havelse" /> <game day="18.12.2015" time="20:15" homeTeam="VfR Heilbronn II" guestTeam="Hallescher FC" /> <game day="08.01.2016" time="20:15" homeTeam="FC G&#252;tersloh III" guestTeam="FC G&#252;tersloh IV" /> <game day="15.01.2016" time="20:00" homeTeam="Hallescher FC" guestTeam="VfR Heilbronn II" /> <game day="15.01.2016" time="20:00" homeTeam="FC Hanau 93 II" guestTeam="FC G&#252;tersloh IV" /> <game day="22.01.2016" time="20:00" homeTeam="DSC Arminia Bielefeld II" guestTeam="Hannover 96 II" /> <game day="22.01.2016" time="20:00" homeTeam="FC Hanau 93 II" guestTeam="Hallescher FC" /> <game day="22.01.2016" time="20:15" homeTeam="VfR Heilbronn II" guestTeam="FC G&#252;tersloh III" /> <game day="28.01.2016" time="19:30" homeTeam="Hannover 96 II" guestTeam="FC G&#252;tersloh III" /> <game day="29.01.2016" time="20:00" homeTeam="FC G&#252;tersloh IV" guestTeam="SC Tasmania 1900 Berlin" /> <game day="29.01.2016" time="20:00" homeTeam="Hallescher FC" guestTeam="Hamburger SV II" /> <game day="01.02.2016" time="20:00" homeTeam="TSV Havelse" guestTeam="Hallescher FC" /> <game day="01.02.2016" time="20:00" homeTeam="SC Tasmania 1900 Berlin" guestTeam="DSC Arminia Bielefeld II" /> <game day="03.02.2016" time="20:00" homeTeam="Hamburger SV II" guestTeam="Hannover 96 II" /> <game day="03.02.2016" time="20:15" homeTeam="FC G&#252;tersloh III" guestTeam="SC Tasmania 1900 Berlin" /> <game day="05.02.2016" time="20:00" homeTeam="DSC Arminia Bielefeld II" guestTeam="FC Hanau 93 II" /> <game day="05.02.2016" time="20:15" homeTeam="VfR Heilbronn II" guestTeam="FC G&#252;tersloh IV" /> <game day="12.02.2016" time="20:00" homeTeam="FC Hanau 93 II" guestTeam="VfR Heilbronn II" /> <game day="15.02.2016" time="20:00" homeTeam="SC Tasmania 1900 Berlin" guestTeam="TSV Havelse" /> <game day="17.02.2016" time="20:15" homeTeam="FC G&#252;tersloh III" guestTeam="Hallescher FC" /> <game day="18.02.2016" time="19:30" homeTeam="Hannover 96 II" guestTeam="FC G&#252;tersloh IV" /> <game day="19.02.2016" time="20:00" homeTeam="DSC Arminia Bielefeld II" guestTeam="Hamburger SV II" /> <game day="22.02.2016" time="20:00" homeTeam="TSV Havelse" guestTeam="DSC Arminia Bielefeld II" /> <game day="26.02.2016" time="20:15" homeTeam="VfR Heilbronn II" guestTeam="TSV Havelse" /> <game day="29.02.2016" time="20:00" homeTeam="TSV Havelse" guestTeam="FC G&#252;tersloh III" /> <game day="29.02.2016" time="20:00" homeTeam="SC Tasmania 1900 Berlin" guestTeam="FC Hanau 93 II" /> <game day="02.03.2016" time="20:15" homeTeam="FC G&#252;tersloh IV" guestTeam="Hamburger SV II" /> <game day="03.03.2016" time="19:30" homeTeam="Hannover 96 II" guestTeam="VfR Heilbronn II" /> <game day="04.03.2016" time="20:00" homeTeam="DSC Arminia Bielefeld II" guestTeam="FC G&#252;tersloh IV" /> <game day="04.03.2016" time="20:00" homeTeam="FC Hanau 93 II" guestTeam="TSV Havelse" /> <game day="09.03.2016" time="20:00" homeTeam="Hamburger SV II" guestTeam="FC Hanau 93 II" /> <game day="09.03.2016" time="20:15" homeTeam="FC G&#252;tersloh III" guestTeam="DSC Arminia Bielefeld II" /> <game day="11.03.2016" time="20:00" homeTeam="Hallescher FC" guestTeam="Hannover 96 II" /> <game day="11.03.2016" time="20:15" homeTeam="VfR Heilbronn II" guestTeam="SC Tasmania 1900 Berlin" /> <game day="14.03.2016" time="20:00" homeTeam="TSV Havelse" guestTeam="Hamburger SV II" /> <game day="16.03.2016" time="20:00" homeTeam="Hamburger SV II" guestTeam="FC G&#252;tersloh III" /> <game day="17.03.2016" time="19:30" homeTeam="Hannover 96 II" guestTeam="SC Tasmania 1900 Berlin" /> <game day="18.03.2016" time="20:00" homeTeam="FC G&#252;tersloh IV" guestTeam="Hallescher FC" /> <game day="18.03.2016" time="20:00" homeTeam="DSC Arminia Bielefeld II" guestTeam="VfR Heilbronn II" /> <game day="18.03.2016" time="20:00" homeTeam="FC Hanau 93 II" guestTeam="Hannover 96 II" /> <game day="04.04.2016" time="20:00" homeTeam="TSV Havelse" guestTeam="Hannover 96 II" /> <game day="04.04.2016" time="20:00" homeTeam="SC Tasmania 1900 Berlin" guestTeam="Hallescher FC" /> <game day="06.04.2016" time="20:00" homeTeam="Hamburger SV II" guestTeam="SC Tasmania 1900 Berlin" /> <game day="06.04.2016" time="20:15" homeTeam="FC G&#252;tersloh III" guestTeam="FC Hanau 93 II" /> <game day="06.04.2016" time="20:15" homeTeam="FC G&#252;tersloh IV" guestTeam="TSV Havelse" /> <game day="08.04.2016" time="20:00" homeTeam="Hallescher FC" guestTeam="DSC Arminia Bielefeld II" /> <game day="08.04.2016" time="20:15" homeTeam="VfR Heilbronn II" guestTeam="Hamburger SV II" />
+  </existingSchedule>
+  <teams>
+    
+      <team clubId="10023" number="1" id="10024">
+        <name>SC Tasmania 1900 Berlin</name>
+        <gameDays>
+           <homeGame day="15.02.2016" time="20:00" maxParallelGames="2" /> <homeGame day="22.02.2016" time="20:00" maxParallelGames="2" /> <homeGame day="01.02.2016" time="20:00" maxParallelGames="2" /> <homeGame day="25.01.2016" time="20:00" maxParallelGames="2" /> <homeGame day="18.01.2016" time="20:00" maxParallelGames="2" /> <homeGame day="14.12.2015" time="20:00" maxParallelGames="2" /> <homeGame day="21.09.2015" time="20:00" maxParallelGames="2" /> <homeGame day="07.12.2015" time="20:00" maxParallelGames="2" /> <homeGame day="14.09.2015" time="20:00" maxParallelGames="2" /> <homeGame day="30.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="23.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="16.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="09.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="02.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="26.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="19.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="12.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="05.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="28.09.2015" time="20:00" maxParallelGames="2" /> <homeGame day="11.04.2016" time="20:00" maxParallelGames="2" /> <homeGame day="04.04.2016" time="20:00" maxParallelGames="2" /> <homeGame day="14.03.2016" time="20:00" maxParallelGames="2" /> <homeGame day="07.03.2016" time="20:00" maxParallelGames="2" /> <homeGame day="29.02.2016" time="20:00" maxParallelGames="2" />
+          
+          
+          
+        </gameDays>
+        <sisterTeams>
+        	
+        		<team gender="Herren" number="2">
+        			<name>SC Tasmania 1900 Berlin II</name>
+        			
+        				<game day="18.09.2015" time="20:00" homeTeam="SC Tasmania 1900 Berlin II" guestTeam="Tennis Borussia Berlin" />
+        			
+        				<game day="25.09.2015" time="20:00" homeTeam="SC Tasmania 1900 Berlin II" guestTeam="Viktoria Aschaffenburg IV" />
+        			
+        				<game day="19.10.2015" time="20:15" homeTeam="KSV Baunatal V" guestTeam="SC Tasmania 1900 Berlin II" />
+        			
+        				<game day="30.10.2015" time="20:00" homeTeam="Alemannia Aachen IV" guestTeam="SC Tasmania 1900 Berlin II" />
+        			
+        				<game day="06.11.2015" time="20:00" homeTeam="SC Tasmania 1900 Berlin II" guestTeam="Blau-Weiß 90 Berlin II" />
+        			
+        				<game day="20.11.2015" time="20:00" homeTeam="SC Tasmania 1900 Berlin II" guestTeam="Hertha BSC Berlin II" />
+        			
+        				<game day="24.11.2015" time="20:15" homeTeam="Berliner Fußballclub Dynamo e. V." guestTeam="SC Tasmania 1900 Berlin II" />
+        			
+        				<game day="27.11.2015" time="20:00" homeTeam="SC Tasmania 1900 Berlin II" guestTeam="Blau-Weiß 90 Berlin III" />
+        			
+        				<game day="11.12.2015" time="20:00" homeTeam="LR Ahlen III" guestTeam="SC Tasmania 1900 Berlin II" />
+        			
+        				<game day="15.01.2016" time="20:00" homeTeam="Hertha BSC Berlin II" guestTeam="SC Tasmania 1900 Berlin II" />
+        			
+        				<game day="21.01.2016" time="20:00" homeTeam="Blau-Weiß 90 Berlin II" guestTeam="SC Tasmania 1900 Berlin II" />
+        			
+        				<game day="29.01.2016" time="20:00" homeTeam="SC Tasmania 1900 Berlin II" guestTeam="Berliner Fußballclub Dynamo e. V." />
+        			
+        				<game day="05.02.2016" time="20:00" homeTeam="Viktoria Aschaffenburg IV" guestTeam="SC Tasmania 1900 Berlin II" />
+        			
+        				<game day="12.02.2016" time="20:00" homeTeam="Tennis Borussia Berlin" guestTeam="SC Tasmania 1900 Berlin II" />
+        			
+        				<game day="19.02.2016" time="20:00" homeTeam="SC Tasmania 1900 Berlin II" guestTeam="KSV Baunatal V" />
+        			
+        				<game day="26.02.2016" time="20:00" homeTeam="SC Tasmania 1900 Berlin II" guestTeam="Alemannia Aachen IV" />
+        			
+        				<game day="04.03.2016" time="20:00" homeTeam="SC Tasmania 1900 Berlin II" guestTeam="LR Ahlen III" />
+        			
+        				<game day="08.04.2016" time="20:00" homeTeam="Blau-Weiß 90 Berlin III" guestTeam="SC Tasmania 1900 Berlin II" />
+        			
+						</team>
+        	
+        		<team gender="Herren" number="3">
+        			<name>SC Tasmania 1900 Berlin III</name>
+        			
+        				<game day="14.09.2015" time="20:00" homeTeam="SC Tasmania 1900 Berlin III" guestTeam="KSV Baunatal VIII" />
+        			
+        				<game day="06.10.2015" time="20:15" homeTeam="Berliner Fußballclub Dynamo e. V. II" guestTeam="SC Tasmania 1900 Berlin III" />
+        			
+        				<game day="14.10.2015" time="20:15" homeTeam="FC G&#252;tersloh VI" guestTeam="SC Tasmania 1900 Berlin III" />
+        			
+        				<game day="19.10.2015" time="20:00" homeTeam="SC Tasmania 1900 Berlin III" guestTeam="Viktoria Aschaffenburg V" />
+        			
+        				<game day="02.11.2015" time="20:00" homeTeam="SC Tasmania 1900 Berlin III" guestTeam="Wacker 04 Berlin IV" />
+        			
+        				<game day="11.11.2015" time="20:00" homeTeam="Alemannia Aachen V" guestTeam="SC Tasmania 1900 Berlin III" />
+        			
+        				<game day="16.11.2015" time="20:00" homeTeam="SC Tasmania 1900 Berlin III" guestTeam="Westfalia Herne IV" />
+        			
+        				<game day="18.01.2016" time="19:30" homeTeam="Viktoria Aschaffenburg V" guestTeam="SC Tasmania 1900 Berlin III" />
+        			
+        				<game day="25.01.2016" time="20:00" homeTeam="SC Tasmania 1900 Berlin III" guestTeam="Berliner Fußballclub Dynamo e. V. II" />
+        			
+        				<game day="12.02.2016" time="20:00" homeTeam="Westfalia Herne IV" guestTeam="SC Tasmania 1900 Berlin III" />
+        			
+        				<game day="23.02.2016" time="20:00" homeTeam="Wacker 04 Berlin IV" guestTeam="SC Tasmania 1900 Berlin III" />
+        			
+        				<game day="04.03.2016" time="20:00" homeTeam="KSV Baunatal VIII" guestTeam="SC Tasmania 1900 Berlin III" />
+        			
+        				<game day="14.03.2016" time="20:00" homeTeam="SC Tasmania 1900 Berlin III" guestTeam="FC G&#252;tersloh VI" />
+        			
+        				<game day="04.04.2016" time="20:00" homeTeam="SC Tasmania 1900 Berlin III" guestTeam="Alemannia Aachen V" />
+        			
+						</team>
+        	
+        		<team gender="Damen" number="1">
+        			<name>SC Tasmania 1900 Berlin</name>
+        			
+        				<game day="05.10.2015" time="20:00" homeTeam="SC Tasmania 1900 Berlin" guestTeam="VfB L&#252;beck" />
+        			
+        				<game day="20.10.2015" time="20:00" homeTeam="Wacker 04 Berlin III" guestTeam="SC Tasmania 1900 Berlin" />
+        			
+        				<game day="26.10.2015" time="20:00" homeTeam="SC Tasmania 1900 Berlin" guestTeam="SC Herford" />
+        			
+        				<game day="16.11.2015" time="20:00" homeTeam="SC Tasmania 1900 Berlin" guestTeam="KSV Baunatal II" />
+        			
+        				<game day="19.11.2015" time="20:00" homeTeam="Bonner SC" guestTeam="SC Tasmania 1900 Berlin" />
+        			
+        				<game day="23.11.2015" time="20:00" homeTeam="SC Tasmania 1900 Berlin" guestTeam="SV Darmstadt 98 III" />
+        			
+        				<game day="27.11.2015" time="20:00" homeTeam="Arminia Hannover" guestTeam="SC Tasmania 1900 Berlin" />
+        			
+        				<game day="07.12.2015" time="20:00" homeTeam="SC Tasmania 1900 Berlin" guestTeam="LR Ahlen" />
+        			
+        				<game day="11.12.2015" time="20:00" homeTeam="Dresdner SC" guestTeam="SC Tasmania 1900 Berlin" />
+        			
+        				<game day="18.01.2016" time="20:00" homeTeam="SC Tasmania 1900 Berlin" guestTeam="Dresdner SC" />
+        			
+        				<game day="28.01.2016" time="20:15" homeTeam="VfB L&#252;beck" guestTeam="SC Tasmania 1900 Berlin" />
+        			
+        				<game day="01.02.2016" time="20:00" homeTeam="SC Tasmania 1900 Berlin" guestTeam="Bonner SC" />
+        			
+        				<game day="05.02.2016" time="20:30" homeTeam="LR Ahlen" guestTeam="SC Tasmania 1900 Berlin" />
+        			
+        				<game day="24.02.2016" time="20:00" homeTeam="SC Herford" guestTeam="SC Tasmania 1900 Berlin" />
+        			
+        				<game day="29.02.2016" time="20:15" homeTeam="KSV Baunatal II" guestTeam="SC Tasmania 1900 Berlin" />
+        			
+        				<game day="14.03.2016" time="20:00" homeTeam="SC Tasmania 1900 Berlin" guestTeam="Wacker 04 Berlin III" />
+        			
+        				<game day="20.03.2016" time="14:00" homeTeam="SV Darmstadt 98 III" guestTeam="SC Tasmania 1900 Berlin" />
+        			
+        				<game day="04.04.2016" time="20:00" homeTeam="SC Tasmania 1900 Berlin" guestTeam="Arminia Hannover" />
+        			
+						</team>
+        	
+        </sisterTeams>
+        
+      </team>
+    
+      <team clubId="10025" number="2" id="10026">
+        <name>DSC Arminia Bielefeld II</name>
+        <gameDays>
+           <homeGame day="02.10.2015" time="20:00" maxParallelGames="1" /> <homeGame day="16.10.2015" time="20:00" maxParallelGames="1" /> <homeGame day="30.10.2015" time="20:00" maxParallelGames="1" /> <homeGame day="13.11.2015" time="20:00" maxParallelGames="1" /> <homeGame day="27.11.2015" time="20:00" maxParallelGames="1" /> <homeGame day="11.12.2015" time="20:00" maxParallelGames="1" /> <homeGame day="18.09.2015" time="20:00" maxParallelGames="1" /> <homeGame day="22.01.2016" time="20:00" maxParallelGames="1" /> <homeGame day="15.04.2016" time="20:00" maxParallelGames="1" /> <homeGame day="05.02.2016" time="20:00" maxParallelGames="1" /> <homeGame day="19.02.2016" time="20:00" maxParallelGames="1" /> <homeGame day="04.03.2016" time="20:00" maxParallelGames="1" /> <homeGame day="18.03.2016" time="20:00" maxParallelGames="1" />
+          
+          
+          
+        </gameDays>
+        <sisterTeams>
+        	
+        		<team gender="Herren" number="1">
+        			<name>DSC Arminia Bielefeld</name>
+        			
+        				<game day="30.09.2015" time="20:30" homeTeam="Alemannia Aachen" guestTeam="DSC Arminia Bielefeld" />
+        			
+        				<game day="09.10.2015" time="20:00" homeTeam="DSC Arminia Bielefeld" guestTeam="Wacker 04 Berlin II" />
+        			
+        				<game day="10.10.2015" time="19:00" homeTeam="FC Hanau 93" guestTeam="DSC Arminia Bielefeld" />
+        			
+        				<game day="23.10.2015" time="20:00" homeTeam="DSC Arminia Bielefeld" guestTeam="Blau-Weiß 90 Berlin" />
+        			
+        				<game day="30.10.2015" time="20:00" homeTeam="Westfalia Herne" guestTeam="DSC Arminia Bielefeld" />
+        			
+        				<game day="06.11.2015" time="20:00" homeTeam="DSC Arminia Bielefeld" guestTeam="Hannover 96" />
+        			
+        				<game day="13.11.2015" time="20:00" homeTeam="Viktoria Aschaffenburg" guestTeam="DSC Arminia Bielefeld" />
+        			
+        				<game day="20.11.2015" time="20:00" homeTeam="DSC Arminia Bielefeld" guestTeam="Arminia Hannover" />
+        			
+        				<game day="28.11.2015" time="14:00" homeTeam="SpVgg Bayreuth III" guestTeam="DSC Arminia Bielefeld" />
+        			
+        				<game day="15.01.2016" time="20:00" homeTeam="DSC Arminia Bielefeld" guestTeam="Westfalia Herne" />
+        			
+        				<game day="23.01.2016" time="19:00" homeTeam="Wacker 04 Berlin II" guestTeam="DSC Arminia Bielefeld" />
+        			
+        				<game day="29.01.2016" time="20:00" homeTeam="DSC Arminia Bielefeld" guestTeam="Alemannia Aachen" />
+        			
+        				<game day="12.02.2016" time="20:00" homeTeam="DSC Arminia Bielefeld" guestTeam="FC Hanau 93" />
+        			
+        				<game day="26.02.2016" time="20:00" homeTeam="DSC Arminia Bielefeld" guestTeam="Viktoria Aschaffenburg" />
+        			
+        				<game day="01.03.2016" time="19:30" homeTeam="Hannover 96" guestTeam="DSC Arminia Bielefeld" />
+        			
+        				<game day="11.03.2016" time="20:00" homeTeam="DSC Arminia Bielefeld" guestTeam="SpVgg Bayreuth III" />
+        			
+        				<game day="16.03.2016" time="20:00" homeTeam="Arminia Hannover" guestTeam="DSC Arminia Bielefeld" />
+        			
+        				<game day="08.04.2016" time="20:00" homeTeam="Blau-Weiß 90 Berlin" guestTeam="DSC Arminia Bielefeld" />
+        			
+						</team>
+        	
+        		<team gender="Herren" number="3">
+        			<name>DSC Arminia Bielefeld III</name>
+        			
+        				<game day="21.09.2015" time="20:15" homeTeam="VfR Heilbronn III" guestTeam="DSC Arminia Bielefeld III" />
+        			
+        				<game day="28.09.2015" time="20:00" homeTeam="DSC Arminia Bielefeld III" guestTeam="Arminia Hannover III" />
+        			
+        				<game day="30.09.2015" time="20:15" homeTeam="FC G&#252;tersloh V" guestTeam="DSC Arminia Bielefeld III" />
+        			
+        				<game day="12.10.2015" time="20:00" homeTeam="DSC Arminia Bielefeld III" guestTeam="Hamburger SV III" />
+        			
+        				<game day="23.10.2015" time="20:00" homeTeam="Real Madrid" guestTeam="DSC Arminia Bielefeld III" />
+        			
+        				<game day="26.10.2015" time="20:00" homeTeam="DSC Arminia Bielefeld III" guestTeam="FC Hanau 93 III" />
+        			
+        				<game day="23.11.2015" time="20:00" homeTeam="DSC Arminia Bielefeld III" guestTeam="Wacker 04 Berlin III" />
+        			
+        				<game day="07.12.2015" time="20:00" homeTeam="DSC Arminia Bielefeld III" guestTeam="Arminia Hannover II" />
+        			
+        				<game day="18.12.2015" time="20:00" homeTeam="SC Herford" guestTeam="DSC Arminia Bielefeld III" />
+        			
+        				<game day="13.01.2016" time="20:00" homeTeam="FC Hanau 93 III" guestTeam="DSC Arminia Bielefeld III" />
+        			
+        				<game day="18.01.2016" time="20:00" homeTeam="DSC Arminia Bielefeld III" guestTeam="FC G&#252;tersloh V" />
+        			
+        				<game day="29.01.2016" time="20:00" homeTeam="Arminia Hannover III" guestTeam="DSC Arminia Bielefeld III" />
+        			
+        				<game day="01.02.2016" time="20:00" homeTeam="DSC Arminia Bielefeld III" guestTeam="Real Madrid" />
+        			
+        				<game day="05.02.2016" time="20:00" homeTeam="Hamburger SV III" guestTeam="DSC Arminia Bielefeld III" />
+        			
+        				<game day="15.02.2016" time="20:00" homeTeam="DSC Arminia Bielefeld III" guestTeam="SC Herford" />
+        			
+        				<game day="25.02.2016" time="20:00" homeTeam="Arminia Hannover II" guestTeam="DSC Arminia Bielefeld III" />
+        			
+        				<game day="29.02.2016" time="20:00" homeTeam="DSC Arminia Bielefeld III" guestTeam="VfR Heilbronn III" />
+        			
+        				<game day="11.03.2016" time="20:00" homeTeam="Wacker 04 Berlin III" guestTeam="DSC Arminia Bielefeld III" />
+        			
+						</team>
+        	
+        		<team gender="Herren" number="4">
+        			<name>DSC Arminia Bielefeld IV</name>
+        			
+        				<game day="23.09.2015" time="20:15" homeTeam="FC Hanau 93 IV" guestTeam="DSC Arminia Bielefeld IV" />
+        			
+        				<game day="05.10.2015" time="20:00" homeTeam="DSC Arminia Bielefeld IV" guestTeam="Westfalia Herne III" />
+        			
+        				<game day="19.10.2015" time="20:00" homeTeam="DSC Arminia Bielefeld IV" guestTeam="VfR Heilbronn IV" />
+        			
+        				<game day="26.10.2015" time="20:00" homeTeam="TSV Havelse III" guestTeam="DSC Arminia Bielefeld IV" />
+        			
+        				<game day="02.11.2015" time="20:00" homeTeam="DSC Arminia Bielefeld IV" guestTeam="TSV Havelse IV" />
+        			
+        				<game day="12.11.2015" time="19:30" homeTeam="Hannover 96 III" guestTeam="DSC Arminia Bielefeld IV" />
+        			
+        				<game day="15.12.2015" time="20:00" homeTeam="FC Augsburg III" guestTeam="DSC Arminia Bielefeld IV" />
+        			
+        				<game day="11.01.2016" time="20:00" homeTeam="DSC Arminia Bielefeld IV" guestTeam="FC Hanau 93 IV" />
+        			
+        				<game day="25.01.2016" time="20:00" homeTeam="DSC Arminia Bielefeld IV" guestTeam="FC Augsburg III" />
+        			
+        				<game day="03.02.2016" time="20:00" homeTeam="Westfalia Herne III" guestTeam="DSC Arminia Bielefeld IV" />
+        			
+        				<game day="12.02.2016" time="00:00" homeTeam="DSC Arminia Bielefeld IV" guestTeam="Hannover 96 III" />
+        			
+        				<game day="19.02.2016" time="20:00" homeTeam="VfR Heilbronn IV" guestTeam="DSC Arminia Bielefeld IV" />
+        			
+        				<game day="22.02.2016" time="20:00" homeTeam="DSC Arminia Bielefeld IV" guestTeam="TSV Havelse III" />
+        			
+        				<game day="02.03.2016" time="20:00" homeTeam="TSV Havelse IV" guestTeam="DSC Arminia Bielefeld IV" />
+        			
+						</team>
+        	
+        		<team gender="Bambini" number="1">
+        			<name>DSC Arminia Bielefeld</name>
+        			
+        				<game day="23.10.2015" time="18:00" homeTeam="DSC Arminia Bielefeld" guestTeam="Alemannia Aachen" />
+        			
+        				<game day="06.11.2015" time="18:00" homeTeam="DSC Arminia Bielefeld" guestTeam="VfL Bochum" />
+        			
+        				<game day="20.11.2015" time="17:30" homeTeam="SpVgg Bayreuth II" guestTeam="DSC Arminia Bielefeld" />
+        			
+        				<game day="27.11.2015" time="18:00" homeTeam="Wacker 04 Berlin" guestTeam="DSC Arminia Bielefeld" />
+        			
+        				<game day="04.12.2015" time="18:00" homeTeam="DSC Arminia Bielefeld" guestTeam="1. FC Bocholt" />
+        			
+        				<game day="17.12.2015" time="17:30" homeTeam="Bonner SC" guestTeam="DSC Arminia Bielefeld" />
+        			
+        				<game day="29.01.2016" time="18:00" homeTeam="DSC Arminia Bielefeld" guestTeam="SpVgg Bayreuth II" />
+        			
+        				<game day="06.02.2016" time="10:30" homeTeam="1. FC Bocholt" guestTeam="DSC Arminia Bielefeld" />
+        			
+        				<game day="26.02.2016" time="18:00" homeTeam="DSC Arminia Bielefeld" guestTeam="Bonner SC" />
+        			
+        				<game day="09.03.2016" time="17:30" homeTeam="VfL Bochum" guestTeam="DSC Arminia Bielefeld" />
+        			
+        				<game day="16.03.2016" time="18:00" homeTeam="Alemannia Aachen" guestTeam="DSC Arminia Bielefeld" />
+        			
+        				<game day="08.04.2016" time="18:00" homeTeam="DSC Arminia Bielefeld" guestTeam="Wacker 04 Berlin" />
+        			
+						</team>
+        	
+        		<team gender="Bambini" number="2">
+        			<name>DSC Arminia Bielefeld II</name>
+        			
+        				<game day="25.09.2015" time="18:00" homeTeam="DSC Arminia Bielefeld II" guestTeam="Arminia Hannover" />
+        			
+        				<game day="02.10.2015" time="18:30" homeTeam="FC Hanau 93" guestTeam="DSC Arminia Bielefeld II" />
+        			
+        				<game day="09.10.2015" time="18:00" homeTeam="DSC Arminia Bielefeld II" guestTeam="Westfalia Herne" />
+        			
+        				<game day="13.10.2015" time="18:00" homeTeam="KSV Baunatal" guestTeam="DSC Arminia Bielefeld II" />
+        			
+        				<game day="23.10.2015" time="17:30" homeTeam="Viktoria Aschaffenburg" guestTeam="DSC Arminia Bielefeld II" />
+        			
+        				<game day="30.10.2015" time="18:00" homeTeam="DSC Arminia Bielefeld II" guestTeam="VfR Heilbronn" />
+        			
+        				<game day="13.11.2015" time="17:30" homeTeam="SpVgg Bayreuth III" guestTeam="DSC Arminia Bielefeld II" />
+        			
+        				<game day="27.11.2015" time="18:00" homeTeam="DSC Arminia Bielefeld II" guestTeam="FC G&#252;tersloh" />
+        			
+        				<game day="09.12.2015" time="17:30" homeTeam="FC Homburg" guestTeam="DSC Arminia Bielefeld II" />
+        			
+        				<game day="08.01.2016" time="18:00" homeTeam="DSC Arminia Bielefeld II" guestTeam="FC Homburg" />
+        			
+        				<game day="15.01.2016" time="18:00" homeTeam="DSC Arminia Bielefeld II" guestTeam="FC Hanau 93" />
+        			
+        				<game day="22.01.2016" time="17:30" homeTeam="Arminia Hannover" guestTeam="DSC Arminia Bielefeld II" />
+        			
+        				<game day="05.02.2016" time="18:00" homeTeam="DSC Arminia Bielefeld II" guestTeam="KSV Baunatal" />
+        			
+        				<game day="19.02.2016" time="18:00" homeTeam="DSC Arminia Bielefeld II" guestTeam="Viktoria Aschaffenburg" />
+        			
+        				<game day="07.03.2016" time="18:20" homeTeam="VfR Heilbronn" guestTeam="DSC Arminia Bielefeld II" />
+        			
+        				<game day="18.03.2016" time="17:30" homeTeam="FC G&#252;tersloh" guestTeam="DSC Arminia Bielefeld II" />
+        			
+        				<game day="08.04.2016" time="18:00" homeTeam="DSC Arminia Bielefeld II" guestTeam="SpVgg Bayreuth III" />
+        			
+        				<game day="16.04.2016" time="11:00" homeTeam="Westfalia Herne" guestTeam="DSC Arminia Bielefeld II" />
+        			
+						</team>
+        	
+        		<team gender="Bambini" number="3">
+        			<name>DSC Arminia Bielefeld III</name>
+        			
+        				<game day="26.09.2015" time="11:00" homeTeam="Westfalia Herne II" guestTeam="DSC Arminia Bielefeld III" />
+        			
+        				<game day="29.09.2015" time="18:00" homeTeam="DSC Arminia Bielefeld III" guestTeam="Westfalia Herne II" />
+        			
+        				<game day="07.10.2015" time="18:15" homeTeam="Hamburger SV" guestTeam="DSC Arminia Bielefeld III" />
+        			
+        				<game day="20.10.2015" time="18:00" homeTeam="DSC Arminia Bielefeld III" guestTeam="Hamburger SV" />
+        			
+        				<game day="27.10.2015" time="18:00" homeTeam="DSC Arminia Bielefeld III" guestTeam="Alemannia Aachen II" />
+        			
+        				<game day="11.11.2015" time="18:00" homeTeam="Alemannia Aachen II" guestTeam="DSC Arminia Bielefeld III" />
+        			
+        				<game day="25.11.2015" time="18:00" homeTeam="Blau-Weiß 90 Berlin" guestTeam="DSC Arminia Bielefeld III" />
+        			
+        				<game day="01.12.2015" time="18:00" homeTeam="DSC Arminia Bielefeld III" guestTeam="Blau-Weiß 90 Berlin" />
+        			
+        				<game day="08.12.2015" time="18:00" homeTeam="DSC Arminia Bielefeld III" guestTeam="Blau-Weiß 90 Berlin II" />
+        			
+        				<game day="16.12.2015" time="18:00" homeTeam="Blau-Weiß 90 Berlin II" guestTeam="DSC Arminia Bielefeld III" />
+        			
+        				<game day="13.01.2016" time="18:15" homeTeam="Hamburger SV" guestTeam="DSC Arminia Bielefeld III" />
+        			
+        				<game day="19.01.2016" time="18:00" homeTeam="DSC Arminia Bielefeld III" guestTeam="Blau-Weiß 90 Berlin" />
+        			
+        				<game day="27.01.2016" time="18:00" homeTeam="Blau-Weiß 90 Berlin II" guestTeam="DSC Arminia Bielefeld III" />
+        			
+        				<game day="03.02.2016" time="18:00" homeTeam="Alemannia Aachen II" guestTeam="DSC Arminia Bielefeld III" />
+        			
+        				<game day="16.02.2016" time="18:00" homeTeam="DSC Arminia Bielefeld III" guestTeam="Westfalia Herne II" />
+        			
+        				<game day="27.02.2016" time="11:00" homeTeam="Westfalia Herne II" guestTeam="DSC Arminia Bielefeld III" />
+        			
+        				<game day="01.03.2016" time="18:00" homeTeam="DSC Arminia Bielefeld III" guestTeam="Alemannia Aachen II" />
+        			
+        				<game day="16.03.2016" time="18:00" homeTeam="Blau-Weiß 90 Berlin" guestTeam="DSC Arminia Bielefeld III" />
+        			
+        				<game day="05.04.2016" time="18:00" homeTeam="DSC Arminia Bielefeld III" guestTeam="Blau-Weiß 90 Berlin II" />
+        			
+        				<game day="12.04.2016" time="18:00" homeTeam="DSC Arminia Bielefeld III" guestTeam="Hamburger SV" />
+        			
+						</team>
+        	
+        		<team gender="Bambini" number="1">
+        			<name>DSC Arminia Bielefeld</name>
+        			
+        				<game day="27.09.2015" time="14:00" homeTeam="Wacker 04 Berlin" guestTeam="DSC Arminia Bielefeld" />
+        			
+        				<game day="05.10.2015" time="00:00" homeTeam="DSC Arminia Bielefeld" guestTeam="spielfrei" />
+        			
+        				<game day="09.10.2015" time="18:00" homeTeam="DSC Arminia Bielefeld" guestTeam="Tennis Borussia Berlin II" />
+        			
+        				<game day="16.10.2015" time="18:00" homeTeam="DSC Arminia Bielefeld" guestTeam="FC Homburg" />
+        			
+        				<game day="30.10.2015" time="17:30" homeTeam="SpVgg Bayreuth" guestTeam="DSC Arminia Bielefeld" />
+        			
+        				<game day="13.11.2015" time="18:00" homeTeam="DSC Arminia Bielefeld" guestTeam="Blau-Weiß 90 Berlin" />
+        			
+        				<game day="20.11.2015" time="17:00" homeTeam="Tennis Borussia Berlin" guestTeam="DSC Arminia Bielefeld" />
+        			
+        				<game day="20.01.2016" time="18:00" homeTeam="Blau-Weiß 90 Berlin" guestTeam="DSC Arminia Bielefeld" />
+        			
+        				<game day="25.01.2016" time="00:00" homeTeam="spielfrei" guestTeam="DSC Arminia Bielefeld" />
+        			
+        				<game day="29.01.2016" time="17:00" homeTeam="Tennis Borussia Berlin II" guestTeam="DSC Arminia Bielefeld" />
+        			
+        				<game day="15.02.2016" time="18:00" homeTeam="DSC Arminia Bielefeld" guestTeam="SpVgg Bayreuth" />
+        			
+        				<game day="04.03.2016" time="17:30" homeTeam="FC Homburg" guestTeam="DSC Arminia Bielefeld" />
+        			
+        				<game day="14.03.2016" time="18:00" homeTeam="DSC Arminia Bielefeld" guestTeam="Wacker 04 Berlin" />
+        			
+        				<game day="11.04.2016" time="18:00" homeTeam="DSC Arminia Bielefeld" guestTeam="Tennis Borussia Berlin" />
+        			
+						</team>
+        	
+        </sisterTeams>
+        
+      </team>
+    
+      <team clubId="10027" number="3" id="10028">
+        <name>FC G&#252;tersloh III</name>
+        <gameDays>
+           <homeGame day="16.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="15.04.2016" time="20:00" maxParallelGames="2" /> <homeGame day="13.04.2016" time="20:15" maxParallelGames="2" /> <homeGame day="08.04.2016" time="20:00" maxParallelGames="2" /> <homeGame day="06.04.2016" time="20:15" maxParallelGames="2" /> <homeGame day="16.03.2016" time="20:15" maxParallelGames="2" /> <homeGame day="11.03.2016" time="20:00" maxParallelGames="2" /> <homeGame day="09.03.2016" time="20:15" maxParallelGames="2" /> <homeGame day="04.03.2016" time="20:00" maxParallelGames="2" /> <homeGame day="02.03.2016" time="20:15" maxParallelGames="2" /> <homeGame day="26.02.2016" time="20:00" maxParallelGames="2" /> <homeGame day="24.02.2016" time="20:15" maxParallelGames="2" /> <homeGame day="19.02.2016" time="20:00" maxParallelGames="2" /> <homeGame day="17.02.2016" time="20:15" maxParallelGames="2" /> <homeGame day="05.02.2016" time="20:00" maxParallelGames="2" /> <homeGame day="03.02.2016" time="20:15" maxParallelGames="2" /> <homeGame day="29.01.2016" time="20:00" maxParallelGames="2" /> <homeGame day="27.01.2016" time="20:15" maxParallelGames="2" /> <homeGame day="22.01.2016" time="20:00" maxParallelGames="2" /> <homeGame day="20.01.2016" time="20:15" maxParallelGames="2" /> <homeGame day="13.01.2016" time="20:15" maxParallelGames="2" /> <homeGame day="18.12.2015" time="20:00" maxParallelGames="2" /> <homeGame day="16.12.2015" time="20:15" maxParallelGames="2" /> <homeGame day="14.10.2015" time="20:15" maxParallelGames="2" /> <homeGame day="09.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="11.12.2015" time="20:00" maxParallelGames="2" /> <homeGame day="09.12.2015" time="20:15" maxParallelGames="2" /> <homeGame day="04.12.2015" time="20:00" maxParallelGames="2" /> <homeGame day="02.12.2015" time="20:15" maxParallelGames="2" /> <homeGame day="30.09.2015" time="20:15" maxParallelGames="2" /> <homeGame day="02.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="25.11.2015" time="20:15" maxParallelGames="2" /> <homeGame day="20.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="13.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="11.11.2015" time="20:15" maxParallelGames="2" /> <homeGame day="30.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="28.10.2015" time="20:15" maxParallelGames="2" /> <homeGame day="23.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="07.10.2015" time="20:15" maxParallelGames="2" />
+          
+          
+          
+        </gameDays>
+        <sisterTeams>
+        	
+        		<team gender="Herren" number="1">
+        			<name>FC G&#252;tersloh</name>
+        			
+        				<game day="09.10.2015" time="20:00" homeTeam="FC Carl Zeiss Jena II" guestTeam="FC G&#252;tersloh" />
+        			
+        				<game day="10.10.2015" time="18:30" homeTeam="Karlsruher SC" guestTeam="FC G&#252;tersloh" />
+        			
+        				<game day="17.10.2015" time="15:00" homeTeam="FC G&#252;tersloh" guestTeam="Hessen Kassel III" />
+        			
+        				<game day="18.10.2015" time="17:00" homeTeam="FC G&#252;tersloh" guestTeam="ESV Ingolstadt II" />
+        			
+        				<game day="31.10.2015" time="18:00" homeTeam="Wacker 04 Berlin" guestTeam="FC G&#252;tersloh" />
+        			
+        				<game day="14.11.2015" time="15:00" homeTeam="FC G&#252;tersloh" guestTeam="1. FC Kaiserslautern" />
+        			
+        				<game day="15.11.2015" time="11:00" homeTeam="Dresdner SC" guestTeam="FC G&#252;tersloh" />
+        			
+        				<game day="21.11.2015" time="15:00" homeTeam="FC G&#252;tersloh" guestTeam="1. FC Dynamo Dresden" />
+        			
+        				<game day="05.12.2015" time="15:00" homeTeam="FC G&#252;tersloh" guestTeam="MTV Ingolstadt" />
+        			
+        				<game day="22.01.2016" time="20:00" homeTeam="1. FC Kaiserslautern" guestTeam="FC G&#252;tersloh" />
+        			
+        				<game day="29.01.2016" time="20:15" homeTeam="ESV Ingolstadt II" guestTeam="FC G&#252;tersloh" />
+        			
+        				<game day="06.02.2016" time="19:00" homeTeam="1. FC Dynamo Dresden" guestTeam="FC G&#252;tersloh" />
+        			
+        				<game day="28.02.2016" time="14:00" homeTeam="FC G&#252;tersloh" guestTeam="FC Carl Zeiss Jena II" />
+        			
+        				<game day="05.03.2016" time="15:00" homeTeam="FC G&#252;tersloh" guestTeam="Wacker 04 Berlin" />
+        			
+        				<game day="13.03.2016" time="14:00" homeTeam="FC G&#252;tersloh" guestTeam="Karlsruher SC" />
+        			
+        				<game day="18.03.2016" time="20:15" homeTeam="Hessen Kassel III" guestTeam="FC G&#252;tersloh" />
+        			
+        				<game day="09.04.2016" time="15:00" homeTeam="FC G&#252;tersloh" guestTeam="Dresdner SC" />
+        			
+        				<game day="16.04.2016" time="16:30" homeTeam="MTV Ingolstadt" guestTeam="FC G&#252;tersloh" />
+        			
+						</team>
+        	
+        		<team gender="Herren" number="2">
+        			<name>FC G&#252;tersloh II</name>
+        			
+        				<game day="09.10.2015" time="20:15" homeTeam="1. FC Bocholt" guestTeam="FC G&#252;tersloh II" />
+        			
+        				<game day="16.10.2015" time="20:00" homeTeam="FC G&#252;tersloh II" guestTeam="Bonner SC" />
+        			
+        				<game day="23.10.2015" time="20:15" homeTeam="VfR Heilbronn" guestTeam="FC G&#252;tersloh II" />
+        			
+        				<game day="30.10.2015" time="20:00" homeTeam="FC G&#252;tersloh II" guestTeam="MSV Duisburg II" />
+        			
+        				<game day="07.11.2015" time="19:30" homeTeam="Rot-Weiß L&#252;denscheid" guestTeam="FC G&#252;tersloh II" />
+        			
+        				<game day="13.11.2015" time="20:00" homeTeam="FC G&#252;tersloh II" guestTeam="SV Darmstadt 98 II" />
+        			
+        				<game day="20.11.2015" time="20:00" homeTeam="Hamburger SV" guestTeam="FC G&#252;tersloh II" />
+        			
+        				<game day="26.11.2015" time="20:00" homeTeam="1. FSV Mainz 05" guestTeam="FC G&#252;tersloh II" />
+        			
+        				<game day="11.12.2015" time="20:00" homeTeam="FC G&#252;tersloh II" guestTeam="KSV Baunatal II" />
+        			
+        				<game day="05.02.2016" time="20:00" homeTeam="FC G&#252;tersloh II" guestTeam="VfR Heilbronn" />
+        			
+        				<game day="12.02.2016" time="20:00" homeTeam="Bonner SC" guestTeam="FC G&#252;tersloh II" />
+        			
+        				<game day="19.02.2016" time="20:00" homeTeam="FC G&#252;tersloh II" guestTeam="Rot-Weiß L&#252;denscheid" />
+        			
+        				<game day="23.02.2016" time="20:00" homeTeam="SV Darmstadt 98 II" guestTeam="FC G&#252;tersloh II" />
+        			
+        				<game day="26.02.2016" time="20:00" homeTeam="FC G&#252;tersloh II" guestTeam="1. FC Bocholt" />
+        			
+        				<game day="04.03.2016" time="20:00" homeTeam="KSV Baunatal II" guestTeam="FC G&#252;tersloh II" />
+        			
+        				<game day="11.03.2016" time="20:00" homeTeam="FC G&#252;tersloh II" guestTeam="1. FSV Mainz 05" />
+        			
+        				<game day="15.03.2016" time="20:00" homeTeam="MSV Duisburg II" guestTeam="FC G&#252;tersloh II" />
+        			
+        				<game day="08.04.2016" time="20:00" homeTeam="FC G&#252;tersloh II" guestTeam="Hamburger SV" />
+        			
+						</team>
+        	
+        		<team gender="Herren" number="4">
+        			<name>FC G&#252;tersloh IV</name>
+        			
+        				<game day="18.09.2015" time="20:15" homeTeam="FC G&#252;tersloh IV" guestTeam="Hannover 96 II" />
+        			
+        				<game day="28.09.2015" time="20:00" homeTeam="SC Tasmania 1900 Berlin" guestTeam="FC G&#252;tersloh IV" />
+        			
+        				<game day="02.10.2015" time="20:15" homeTeam="FC G&#252;tersloh IV" guestTeam="FC G&#252;tersloh III" />
+        			
+        				<game day="07.10.2015" time="20:15" homeTeam="FC G&#252;tersloh IV" guestTeam="DSC Arminia Bielefeld II" />
+        			
+        				<game day="09.10.2015" time="20:00" homeTeam="Hallescher FC" guestTeam="FC G&#252;tersloh IV" />
+        			
+        				<game day="28.10.2015" time="20:15" homeTeam="FC G&#252;tersloh IV" guestTeam="VfR Heilbronn II" />
+        			
+        				<game day="09.11.2015" time="20:00" homeTeam="TSV Havelse" guestTeam="FC G&#252;tersloh IV" />
+        			
+        				<game day="25.11.2015" time="20:00" homeTeam="Hamburger SV II" guestTeam="FC G&#252;tersloh IV" />
+        			
+        				<game day="16.12.2015" time="20:15" homeTeam="FC G&#252;tersloh IV" guestTeam="FC Hanau 93 II" />
+        			
+        				<game day="08.01.2016" time="20:15" homeTeam="FC G&#252;tersloh III" guestTeam="FC G&#252;tersloh IV" />
+        			
+        				<game day="15.01.2016" time="20:00" homeTeam="FC Hanau 93 II" guestTeam="FC G&#252;tersloh IV" />
+        			
+        				<game day="29.01.2016" time="20:00" homeTeam="FC G&#252;tersloh IV" guestTeam="SC Tasmania 1900 Berlin" />
+        			
+        				<game day="05.02.2016" time="20:15" homeTeam="VfR Heilbronn II" guestTeam="FC G&#252;tersloh IV" />
+        			
+        				<game day="18.02.2016" time="19:30" homeTeam="Hannover 96 II" guestTeam="FC G&#252;tersloh IV" />
+        			
+        				<game day="02.03.2016" time="20:15" homeTeam="FC G&#252;tersloh IV" guestTeam="Hamburger SV II" />
+        			
+        				<game day="04.03.2016" time="20:00" homeTeam="DSC Arminia Bielefeld II" guestTeam="FC G&#252;tersloh IV" />
+        			
+        				<game day="18.03.2016" time="20:00" homeTeam="FC G&#252;tersloh IV" guestTeam="Hallescher FC" />
+        			
+        				<game day="06.04.2016" time="20:15" homeTeam="FC G&#252;tersloh IV" guestTeam="TSV Havelse" />
+        			
+						</team>
+        	
+        		<team gender="Herren" number="5">
+        			<name>FC G&#252;tersloh V</name>
+        			
+        				<game day="23.09.2015" time="20:15" homeTeam="FC G&#252;tersloh V" guestTeam="Arminia Hannover II" />
+        			
+        				<game day="30.09.2015" time="20:15" homeTeam="FC G&#252;tersloh V" guestTeam="DSC Arminia Bielefeld III" />
+        			
+        				<game day="07.10.2015" time="20:15" homeTeam="FC G&#252;tersloh V" guestTeam="Arminia Hannover III" />
+        			
+        				<game day="21.10.2015" time="20:00" homeTeam="FC Hanau 93 III" guestTeam="FC G&#252;tersloh V" />
+        			
+        				<game day="06.11.2015" time="20:00" homeTeam="SC Herford" guestTeam="FC G&#252;tersloh V" />
+        			
+        				<game day="11.11.2015" time="20:15" homeTeam="FC G&#252;tersloh V" guestTeam="Hamburger SV III" />
+        			
+        				<game day="13.11.2015" time="20:00" homeTeam="Real Madrid" guestTeam="FC G&#252;tersloh V" />
+        			
+        				<game day="20.11.2015" time="20:00" homeTeam="Wacker 04 Berlin III" guestTeam="FC G&#252;tersloh V" />
+        			
+        				<game day="30.11.2015" time="20:15" homeTeam="VfR Heilbronn III" guestTeam="FC G&#252;tersloh V" />
+        			
+        				<game day="13.01.2016" time="20:15" homeTeam="FC G&#252;tersloh V" guestTeam="VfR Heilbronn III" />
+        			
+        				<game day="18.01.2016" time="20:00" homeTeam="DSC Arminia Bielefeld III" guestTeam="FC G&#252;tersloh V" />
+        			
+        				<game day="27.01.2016" time="20:15" homeTeam="FC G&#252;tersloh V" guestTeam="FC Hanau 93 III" />
+        			
+        				<game day="03.02.2016" time="20:15" homeTeam="FC G&#252;tersloh V" guestTeam="Wacker 04 Berlin III" />
+        			
+        				<game day="12.02.2016" time="20:00" homeTeam="Arminia Hannover III" guestTeam="FC G&#252;tersloh V" />
+        			
+        				<game day="17.02.2016" time="20:15" homeTeam="FC G&#252;tersloh V" guestTeam="Real Madrid" />
+        			
+        				<game day="26.02.2016" time="20:00" homeTeam="Hamburger SV III" guestTeam="FC G&#252;tersloh V" />
+        			
+        				<game day="02.03.2016" time="20:15" homeTeam="FC G&#252;tersloh V" guestTeam="SC Herford" />
+        			
+        				<game day="10.03.2016" time="20:00" homeTeam="Arminia Hannover II" guestTeam="FC G&#252;tersloh V" />
+        			
+						</team>
+        	
+        		<team gender="Herren" number="6">
+        			<name>FC G&#252;tersloh VI</name>
+        			
+        				<game day="26.09.2015" time="15:00" homeTeam="FC G&#252;tersloh VI" guestTeam="Wacker 04 Berlin IV" />
+        			
+        				<game day="28.09.2015" time="19:30" homeTeam="Viktoria Aschaffenburg V" guestTeam="FC G&#252;tersloh VI" />
+        			
+        				<game day="07.10.2015" time="20:00" homeTeam="Alemannia Aachen V" guestTeam="FC G&#252;tersloh VI" />
+        			
+        				<game day="14.10.2015" time="20:15" homeTeam="FC G&#252;tersloh VI" guestTeam="SC Tasmania 1900 Berlin III" />
+        			
+        				<game day="30.10.2015" time="20:00" homeTeam="Westfalia Herne IV" guestTeam="FC G&#252;tersloh VI" />
+        			
+        				<game day="25.11.2015" time="20:30" homeTeam="Berliner Fußballclub Dynamo e. V. II" guestTeam="FC G&#252;tersloh VI" />
+        			
+        				<game day="02.12.2015" time="20:15" homeTeam="FC G&#252;tersloh VI" guestTeam="KSV Baunatal VIII" />
+        			
+        				<game day="13.01.2016" time="20:15" homeTeam="FC G&#252;tersloh VI" guestTeam="Berliner Fußballclub Dynamo e. V. II" />
+        			
+        				<game day="23.01.2016" time="15:00" homeTeam="FC G&#252;tersloh VI" guestTeam="Alemannia Aachen V" />
+        			
+        				<game day="02.03.2016" time="20:15" homeTeam="FC G&#252;tersloh VI" guestTeam="Westfalia Herne IV" />
+        			
+        				<game day="08.03.2016" time="20:00" homeTeam="Wacker 04 Berlin IV" guestTeam="FC G&#252;tersloh VI" />
+        			
+        				<game day="09.03.2016" time="20:15" homeTeam="FC G&#252;tersloh VI" guestTeam="Viktoria Aschaffenburg V" />
+        			
+        				<game day="14.03.2016" time="20:00" homeTeam="SC Tasmania 1900 Berlin III" guestTeam="FC G&#252;tersloh VI" />
+        			
+        				<game day="15.04.2016" time="20:00" homeTeam="KSV Baunatal VIII" guestTeam="FC G&#252;tersloh VI" />
+        			
+						</team>
+        	
+        		<team gender="Damen" number="1">
+        			<name>FC G&#252;tersloh</name>
+        			
+        				<game day="03.10.2015" time="18:00" homeTeam="Wacker 04 Berlin" guestTeam="FC G&#252;tersloh" />
+        			
+        				<game day="10.10.2015" time="18:00" homeTeam="FC G&#252;tersloh" guestTeam="Holstein Kiel" />
+        			
+        				<game day="11.10.2015" time="11:00" homeTeam="FC G&#252;tersloh" guestTeam="SC Fortuna K&#246;ln" />
+        			
+        				<game day="31.10.2015" time="14:00" homeTeam="Langenhagener SC II" guestTeam="FC G&#252;tersloh" />
+        			
+        				<game day="31.10.2015" time="19:00" homeTeam="VfB Leipzig" guestTeam="FC G&#252;tersloh" />
+        			
+        				<game day="14.11.2015" time="15:15" homeTeam="RV Viktoria Wombach II" guestTeam="FC G&#252;tersloh" />
+        			
+        				<game day="05.12.2015" time="19:00" homeTeam="FC G&#252;tersloh" guestTeam="SC Charlottenburg" />
+        			
+        				<game day="12.12.2015" time="18:00" homeTeam="SB Versbach" guestTeam="FC G&#252;tersloh" />
+        			
+        				<game day="19.12.2015" time="17:00" homeTeam="FC G&#252;tersloh" guestTeam="Viktoria K&#246;ln III" />
+        			
+        				<game day="23.01.2016" time="15:00" homeTeam="Viktoria K&#246;ln III" guestTeam="FC G&#252;tersloh" />
+        			
+        				<game day="30.01.2016" time="14:30" homeTeam="FC G&#252;tersloh" guestTeam="VfB Leipzig" />
+        			
+        				<game day="06.02.2016" time="17:00" homeTeam="FC G&#252;tersloh" guestTeam="Wacker 04 Berlin" />
+        			
+        				<game day="13.02.2016" time="18:00" homeTeam="Holstein Kiel" guestTeam="FC G&#252;tersloh" />
+        			
+        				<game day="20.02.2016" time="14:00" homeTeam="FC G&#252;tersloh" guestTeam="SB Versbach" />
+        			
+        				<game day="27.02.2016" time="17:00" homeTeam="FC G&#252;tersloh" guestTeam="Langenhagener SC II" />
+        			
+        				<game day="12.03.2016" time="18:00" homeTeam="FC G&#252;tersloh" guestTeam="RV Viktoria Wombach II" />
+        			
+        				<game day="19.03.2016" time="15:00" homeTeam="SC Fortuna K&#246;ln" guestTeam="FC G&#252;tersloh" />
+        			
+        				<game day="03.04.2016" time="13:00" homeTeam="SC Charlottenburg" guestTeam="FC G&#252;tersloh" />
+        			
+						</team>
+        	
+        		<team gender="Damen" number="2">
+        			<name>FC G&#252;tersloh II</name>
+        			
+        				<game day="30.09.2015" time="20:00" homeTeam="FC Carl Zeiss Jena II" guestTeam="FC G&#252;tersloh II" />
+        			
+        				<game day="09.10.2015" time="20:15" homeTeam="FC G&#252;tersloh II" guestTeam="SV Waldhof Mannheim" />
+        			
+        				<game day="16.10.2015" time="20:15" homeTeam="FC G&#252;tersloh II" guestTeam="VfR Mannheim" />
+        			
+        				<game day="21.10.2015" time="20:00" homeTeam="FC Carl Zeiss Jena" guestTeam="FC G&#252;tersloh II" />
+        			
+        				<game day="30.10.2015" time="20:15" homeTeam="FC G&#252;tersloh II" guestTeam="SV Darmstadt 98" />
+        			
+        				<game day="06.11.2015" time="20:00" homeTeam="Rot-Weiß L&#252;denscheid" guestTeam="FC G&#252;tersloh II" />
+        			
+        				<game day="20.11.2015" time="20:15" homeTeam="FC G&#252;tersloh II" guestTeam="Arminia Marten" />
+        			
+        				<game day="26.11.2015" time="19:30" homeTeam="1. FC Bocholt" guestTeam="FC G&#252;tersloh II" />
+        			
+        				<game day="02.12.2015" time="20:00" homeTeam="SC Fortuna K&#246;ln III" guestTeam="FC G&#252;tersloh II" />
+        			
+        				<game day="11.12.2015" time="20:15" homeTeam="FC G&#252;tersloh II" guestTeam="SV Meppen" />
+        			
+        				<game day="29.01.2016" time="20:15" homeTeam="FC G&#252;tersloh II" guestTeam="Rot-Weiß L&#252;denscheid" />
+        			
+        				<game day="30.01.2016" time="16:00" homeTeam="VfR Mannheim" guestTeam="FC G&#252;tersloh II" />
+        			
+        				<game day="14.02.2016" time="14:00" homeTeam="SV Darmstadt 98" guestTeam="FC G&#252;tersloh II" />
+        			
+        				<game day="19.02.2016" time="20:15" homeTeam="FC G&#252;tersloh II" guestTeam="SC Fortuna K&#246;ln III" />
+        			
+        				<game day="26.02.2016" time="20:15" homeTeam="SV Waldhof Mannheim" guestTeam="FC G&#252;tersloh II" />
+        			
+        				<game day="04.03.2016" time="20:15" homeTeam="FC G&#252;tersloh II" guestTeam="1. FC Bocholt" />
+        			
+        				<game day="11.03.2016" time="20:15" homeTeam="SV Meppen" guestTeam="FC G&#252;tersloh II" />
+        			
+        				<game day="18.03.2016" time="20:15" homeTeam="FC G&#252;tersloh II" guestTeam="FC Carl Zeiss Jena" />
+        			
+        				<game day="08.04.2016" time="20:15" homeTeam="FC G&#252;tersloh II" guestTeam="FC Carl Zeiss Jena II" />
+        			
+        				<game day="09.04.2016" time="18:30" homeTeam="Arminia Marten" guestTeam="FC G&#252;tersloh II" />
+        			
+						</team>
+        	
+        		<team gender="Damen" number="3">
+        			<name>FC G&#252;tersloh III</name>
+        			
+        				<game day="19.09.2015" time="14:30" homeTeam="FC G&#252;tersloh IV" guestTeam="FC G&#252;tersloh III" />
+        			
+        				<game day="21.10.2015" time="20:00" homeTeam="FC G&#252;tersloh III" guestTeam="Wacker 04 Berlin IV" />
+        			
+        				<game day="10.11.2015" time="20:00" homeTeam="Hannover 96" guestTeam="FC G&#252;tersloh III" />
+        			
+        				<game day="09.12.2015" time="20:00" homeTeam="FC G&#252;tersloh III" guestTeam="SpVgg Bayreuth II" />
+        			
+        				<game day="20.01.2016" time="20:00" homeTeam="FC G&#252;tersloh III" guestTeam="FC G&#252;tersloh IV" />
+        			
+        				<game day="06.02.2016" time="14:00" homeTeam="Wacker 04 Berlin IV" guestTeam="FC G&#252;tersloh III" />
+        			
+        				<game day="12.02.2016" time="20:00" homeTeam="SpVgg Bayreuth II" guestTeam="FC G&#252;tersloh III" />
+        			
+        				<game day="24.02.2016" time="20:00" homeTeam="FC G&#252;tersloh III" guestTeam="Hannover 96" />
+        			
+						</team>
+        	
+        		<team gender="Damen" number="4">
+        			<name>FC G&#252;tersloh IV</name>
+        			
+        				<game day="19.09.2015" time="14:30" homeTeam="FC G&#252;tersloh IV" guestTeam="FC G&#252;tersloh III" />
+        			
+        				<game day="10.10.2015" time="14:30" homeTeam="FC G&#252;tersloh IV" guestTeam="SpVgg Bayreuth II" />
+        			
+        				<game day="15.11.2015" time="14:00" homeTeam="Wacker 04 Berlin IV" guestTeam="FC G&#252;tersloh IV" />
+        			
+        				<game day="08.12.2015" time="20:00" homeTeam="Hannover 96" guestTeam="FC G&#252;tersloh IV" />
+        			
+        				<game day="16.01.2016" time="14:30" homeTeam="FC G&#252;tersloh IV" guestTeam="Hannover 96" />
+        			
+        				<game day="20.01.2016" time="20:00" homeTeam="FC G&#252;tersloh III" guestTeam="FC G&#252;tersloh IV" />
+        			
+        				<game day="29.01.2016" time="20:00" homeTeam="SpVgg Bayreuth II" guestTeam="FC G&#252;tersloh IV" />
+        			
+        				<game day="12.03.2016" time="14:30" homeTeam="FC G&#252;tersloh IV" guestTeam="Wacker 04 Berlin IV" />
+        			
+						</team>
+        	
+        		<team gender="Bambini" number="1">
+        			<name>FC G&#252;tersloh</name>
+        			
+        				<game day="23.09.2015" time="18:00" homeTeam="FC G&#252;tersloh" guestTeam="KSV Baunatal" />
+        			
+        				<game day="09.10.2015" time="17:30" homeTeam="FC G&#252;tersloh" guestTeam="FC Hanau 93" />
+        			
+        				<game day="23.10.2015" time="17:30" homeTeam="Arminia Hannover" guestTeam="FC G&#252;tersloh" />
+        			
+        				<game day="30.10.2015" time="17:30" homeTeam="FC G&#252;tersloh" guestTeam="SpVgg Bayreuth III" />
+        			
+        				<game day="13.11.2015" time="17:30" homeTeam="Viktoria Aschaffenburg" guestTeam="FC G&#252;tersloh" />
+        			
+        				<game day="20.11.2015" time="17:30" homeTeam="FC G&#252;tersloh" guestTeam="FC Homburg" />
+        			
+        				<game day="27.11.2015" time="18:00" homeTeam="DSC Arminia Bielefeld II" guestTeam="FC G&#252;tersloh" />
+        			
+        				<game day="02.12.2015" time="18:00" homeTeam="FC G&#252;tersloh" guestTeam="Westfalia Herne" />
+        			
+        				<game day="07.12.2015" time="18:20" homeTeam="VfR Heilbronn" guestTeam="FC G&#252;tersloh" />
+        			
+        				<game day="13.01.2016" time="18:00" homeTeam="FC G&#252;tersloh" guestTeam="Arminia Hannover" />
+        			
+        				<game day="29.01.2016" time="18:30" homeTeam="FC Hanau 93" guestTeam="FC G&#252;tersloh" />
+        			
+        				<game day="05.02.2016" time="17:30" homeTeam="SpVgg Bayreuth III" guestTeam="FC G&#252;tersloh" />
+        			
+        				<game day="17.02.2016" time="18:00" homeTeam="FC G&#252;tersloh" guestTeam="VfR Heilbronn" />
+        			
+        				<game day="24.02.2016" time="17:30" homeTeam="FC Homburg" guestTeam="FC G&#252;tersloh" />
+        			
+        				<game day="01.03.2016" time="18:00" homeTeam="KSV Baunatal" guestTeam="FC G&#252;tersloh" />
+        			
+        				<game day="18.03.2016" time="17:30" homeTeam="FC G&#252;tersloh" guestTeam="DSC Arminia Bielefeld II" />
+        			
+        				<game day="09.04.2016" time="11:00" homeTeam="Westfalia Herne" guestTeam="FC G&#252;tersloh" />
+        			
+        				<game day="13.04.2016" time="18:00" homeTeam="FC G&#252;tersloh" guestTeam="Viktoria Aschaffenburg" />
+        			
+						</team>
+        	
+        </sisterTeams>
+        
+      </team>
+    
+      <team clubId="10029" number="2" id="10030">
+        <name>VfR Heilbronn II</name>
+        <gameDays>
+           <homeGame day="20.11.2015" time="20:15" maxParallelGames="2" /> <homeGame day="04.12.2015" time="20:15" maxParallelGames="2" /> <homeGame day="02.10.2015" time="20:15" maxParallelGames="2" /> <homeGame day="18.12.2015" time="20:15" maxParallelGames="2" /> <homeGame day="18.09.2015" time="20:15" maxParallelGames="2" /> <homeGame day="22.01.2016" time="20:15" maxParallelGames="2" /> <homeGame day="08.04.2016" time="20:15" maxParallelGames="2" /> <homeGame day="16.10.2015" time="20:15" maxParallelGames="2" /> <homeGame day="05.02.2016" time="20:15" maxParallelGames="2" /> <homeGame day="26.02.2016" time="20:15" maxParallelGames="2" /> <homeGame day="11.03.2016" time="20:15" maxParallelGames="2" />
+           <noGame from="30.10.2015" until="30.10.2015" /> <noGame from="29.01.2016" until="29.01.2016" />
+          
+          
+        </gameDays>
+        <sisterTeams>
+        	
+        		<team gender="Herren" number="1">
+        			<name>VfR Heilbronn</name>
+        			
+        				<game day="09.10.2015" time="20:15" homeTeam="VfR Heilbronn" guestTeam="SV Darmstadt 98 II" />
+        			
+        				<game day="15.10.2015" time="20:00" homeTeam="1. FSV Mainz 05" guestTeam="VfR Heilbronn" />
+        			
+        				<game day="23.10.2015" time="20:15" homeTeam="VfR Heilbronn" guestTeam="FC G&#252;tersloh II" />
+        			
+        				<game day="30.10.2015" time="20:15" homeTeam="1. FC Bocholt" guestTeam="VfR Heilbronn" />
+        			
+        				<game day="13.11.2015" time="20:15" homeTeam="VfR Heilbronn" guestTeam="Rot-Weiß L&#252;denscheid" />
+        			
+        				<game day="20.11.2015" time="20:00" homeTeam="Bonner SC" guestTeam="VfR Heilbronn" />
+        			
+        				<game day="27.11.2015" time="20:15" homeTeam="VfR Heilbronn" guestTeam="MSV Duisburg II" />
+        			
+        				<game day="04.12.2015" time="20:00" homeTeam="KSV Baunatal II" guestTeam="VfR Heilbronn" />
+        			
+        				<game day="11.12.2015" time="20:15" homeTeam="VfR Heilbronn" guestTeam="Hamburger SV" />
+        			
+        				<game day="15.01.2016" time="20:00" homeTeam="Hamburger SV" guestTeam="VfR Heilbronn" />
+        			
+        				<game day="29.01.2016" time="20:15" homeTeam="VfR Heilbronn" guestTeam="KSV Baunatal II" />
+        			
+        				<game day="05.02.2016" time="20:00" homeTeam="FC G&#252;tersloh II" guestTeam="VfR Heilbronn" />
+        			
+        				<game day="19.02.2016" time="20:15" homeTeam="VfR Heilbronn" guestTeam="1. FC Bocholt" />
+        			
+        				<game day="23.02.2016" time="20:00" homeTeam="MSV Duisburg II" guestTeam="VfR Heilbronn" />
+        			
+        				<game day="04.03.2016" time="20:15" homeTeam="VfR Heilbronn" guestTeam="1. FSV Mainz 05" />
+        			
+        				<game day="12.03.2016" time="19:30" homeTeam="Rot-Weiß L&#252;denscheid" guestTeam="VfR Heilbronn" />
+        			
+        				<game day="18.03.2016" time="20:15" homeTeam="VfR Heilbronn" guestTeam="Bonner SC" />
+        			
+        				<game day="05.04.2016" time="20:00" homeTeam="SV Darmstadt 98 II" guestTeam="VfR Heilbronn" />
+        			
+						</team>
+        	
+        		<team gender="Herren" number="3">
+        			<name>VfR Heilbronn III</name>
+        			
+        				<game day="21.09.2015" time="20:15" homeTeam="VfR Heilbronn III" guestTeam="DSC Arminia Bielefeld III" />
+        			
+        				<game day="28.09.2015" time="20:15" homeTeam="VfR Heilbronn III" guestTeam="SC Herford" />
+        			
+        				<game day="01.10.2015" time="20:00" homeTeam="Arminia Hannover II" guestTeam="VfR Heilbronn III" />
+        			
+        				<game day="16.10.2015" time="20:00" homeTeam="Arminia Hannover III" guestTeam="VfR Heilbronn III" />
+        			
+        				<game day="26.10.2015" time="20:15" homeTeam="VfR Heilbronn III" guestTeam="Wacker 04 Berlin III" />
+        			
+        				<game day="11.11.2015" time="20:00" homeTeam="FC Hanau 93 III" guestTeam="VfR Heilbronn III" />
+        			
+        				<game day="16.11.2015" time="20:15" homeTeam="VfR Heilbronn III" guestTeam="Real Madrid" />
+        			
+        				<game day="30.11.2015" time="20:15" homeTeam="VfR Heilbronn III" guestTeam="FC G&#252;tersloh V" />
+        			
+        				<game day="18.12.2015" time="20:00" homeTeam="Hamburger SV III" guestTeam="VfR Heilbronn III" />
+        			
+        				<game day="11.01.2016" time="20:15" homeTeam="VfR Heilbronn III" guestTeam="Hamburger SV III" />
+        			
+        				<game day="13.01.2016" time="20:15" homeTeam="FC G&#252;tersloh V" guestTeam="VfR Heilbronn III" />
+        			
+        				<game day="25.01.2016" time="20:15" homeTeam="VfR Heilbronn III" guestTeam="Arminia Hannover III" />
+        			
+        				<game day="29.01.2016" time="20:00" homeTeam="Real Madrid" guestTeam="VfR Heilbronn III" />
+        			
+        				<game day="12.02.2016" time="20:00" homeTeam="SC Herford" guestTeam="VfR Heilbronn III" />
+        			
+        				<game day="15.02.2016" time="20:15" homeTeam="VfR Heilbronn III" guestTeam="Arminia Hannover II" />
+        			
+        				<game day="26.02.2016" time="20:00" homeTeam="Wacker 04 Berlin III" guestTeam="VfR Heilbronn III" />
+        			
+        				<game day="29.02.2016" time="20:00" homeTeam="DSC Arminia Bielefeld III" guestTeam="VfR Heilbronn III" />
+        			
+        				<game day="14.03.2016" time="20:15" homeTeam="VfR Heilbronn III" guestTeam="FC Hanau 93 III" />
+        			
+						</team>
+        	
+        		<team gender="Herren" number="4">
+        			<name>VfR Heilbronn IV</name>
+        			
+        				<game day="25.09.2015" time="20:00" homeTeam="VfR Heilbronn IV" guestTeam="Hannover 96 III" />
+        			
+        				<game day="09.10.2015" time="20:00" homeTeam="VfR Heilbronn IV" guestTeam="TSV Havelse IV" />
+        			
+        				<game day="14.10.2015" time="20:00" homeTeam="Westfalia Herne III" guestTeam="VfR Heilbronn IV" />
+        			
+        				<game day="19.10.2015" time="20:00" homeTeam="DSC Arminia Bielefeld IV" guestTeam="VfR Heilbronn IV" />
+        			
+        				<game day="23.10.2015" time="20:00" homeTeam="VfR Heilbronn IV" guestTeam="FC Hanau 93 IV" />
+        			
+        				<game day="03.11.2015" time="20:00" homeTeam="FC Augsburg III" guestTeam="VfR Heilbronn IV" />
+        			
+        				<game day="09.11.2015" time="20:00" homeTeam="TSV Havelse III" guestTeam="VfR Heilbronn IV" />
+        			
+        				<game day="15.01.2016" time="20:00" homeTeam="VfR Heilbronn IV" guestTeam="FC Augsburg III" />
+        			
+        				<game day="21.01.2016" time="19:30" homeTeam="Hannover 96 III" guestTeam="VfR Heilbronn IV" />
+        			
+        				<game day="29.01.2016" time="20:00" homeTeam="VfR Heilbronn IV" guestTeam="TSV Havelse III" />
+        			
+        				<game day="03.02.2016" time="20:00" homeTeam="TSV Havelse IV" guestTeam="VfR Heilbronn IV" />
+        			
+        				<game day="12.02.2016" time="00:00" homeTeam="VfR Heilbronn IV" guestTeam="Westfalia Herne III" />
+        			
+        				<game day="19.02.2016" time="20:00" homeTeam="VfR Heilbronn IV" guestTeam="DSC Arminia Bielefeld IV" />
+        			
+        				<game day="24.02.2016" time="20:15" homeTeam="FC Hanau 93 IV" guestTeam="VfR Heilbronn IV" />
+        			
+						</team>
+        	
+        		<team gender="Bambini" number="1">
+        			<name>VfR Heilbronn</name>
+        			
+        				<game day="25.09.2015" time="17:30" homeTeam="FC Homburg" guestTeam="VfR Heilbronn" />
+        			
+        				<game day="05.10.2015" time="18:20" homeTeam="VfR Heilbronn" guestTeam="KSV Baunatal" />
+        			
+        				<game day="17.10.2015" time="11:00" homeTeam="Westfalia Herne" guestTeam="VfR Heilbronn" />
+        			
+        				<game day="19.10.2015" time="18:20" homeTeam="VfR Heilbronn" guestTeam="FC Hanau 93" />
+        			
+        				<game day="30.10.2015" time="18:00" homeTeam="DSC Arminia Bielefeld II" guestTeam="VfR Heilbronn" />
+        			
+        				<game day="09.11.2015" time="18:20" homeTeam="VfR Heilbronn" guestTeam="Arminia Hannover" />
+        			
+        				<game day="27.11.2015" time="17:30" homeTeam="Viktoria Aschaffenburg" guestTeam="VfR Heilbronn" />
+        			
+        				<game day="04.12.2015" time="17:30" homeTeam="SpVgg Bayreuth III" guestTeam="VfR Heilbronn" />
+        			
+        				<game day="07.12.2015" time="18:20" homeTeam="VfR Heilbronn" guestTeam="FC G&#252;tersloh" />
+        			
+        				<game day="18.01.2016" time="18:20" homeTeam="VfR Heilbronn" guestTeam="SpVgg Bayreuth III" />
+        			
+        				<game day="29.01.2016" time="17:30" homeTeam="Arminia Hannover" guestTeam="VfR Heilbronn" />
+        			
+        				<game day="01.02.2016" time="18:20" homeTeam="VfR Heilbronn" guestTeam="FC Homburg" />
+        			
+        				<game day="17.02.2016" time="18:00" homeTeam="FC G&#252;tersloh" guestTeam="VfR Heilbronn" />
+        			
+        				<game day="22.02.2016" time="18:20" homeTeam="VfR Heilbronn" guestTeam="Westfalia Herne" />
+        			
+        				<game day="07.03.2016" time="18:20" homeTeam="VfR Heilbronn" guestTeam="DSC Arminia Bielefeld II" />
+        			
+        				<game day="15.03.2016" time="18:00" homeTeam="KSV Baunatal" guestTeam="VfR Heilbronn" />
+        			
+        				<game day="04.04.2016" time="18:20" homeTeam="VfR Heilbronn" guestTeam="Viktoria Aschaffenburg" />
+        			
+        				<game day="15.04.2016" time="18:30" homeTeam="FC Hanau 93" guestTeam="VfR Heilbronn" />
+        			
+						</team>
+        	
+        </sisterTeams>
+        
+      </team>
+    
+      <team clubId="10031" number="1" id="10032">
+        <name>Hallescher FC</name>
+        <gameDays>
+           <homeGame day="02.10.2015" time="20:00" /> <homeGame day="09.10.2015" time="20:00" /> <homeGame day="16.10.2015" time="20:00" /> <homeGame day="06.11.2015" time="20:00" /> <homeGame day="13.11.2015" time="20:00" /> <homeGame day="20.11.2015" time="20:00" /> <homeGame day="27.11.2015" time="20:00" /> <homeGame day="04.12.2015" time="20:00" /> <homeGame day="15.04.2016" time="20:00" /> <homeGame day="11.12.2015" time="20:00" /> <homeGame day="15.01.2016" time="20:00" /> <homeGame day="22.01.2016" time="20:00" /> <homeGame day="04.03.2016" time="20:00" /> <homeGame day="26.02.2016" time="20:00" /> <homeGame day="08.04.2016" time="20:00" /> <homeGame day="12.02.2016" time="20:00" /> <homeGame day="11.03.2016" time="20:00" /> <homeGame day="29.01.2016" time="20:00" />
+          
+          
+          
+        </gameDays>
+        <sisterTeams>
+        	
+        </sisterTeams>
+        
+      </team>
+    
+      <team clubId="10033" number="2" id="10034">
+        <name>Hannover 96 II</name>
+        <gameDays>
+           <homeGame day="29.10.2015" time="19:30" maxParallelGames="1" /> <homeGame day="14.04.2016" time="19:30" maxParallelGames="1" /> <homeGame day="17.03.2016" time="19:30" maxParallelGames="1" /> <homeGame day="03.03.2016" time="19:30" maxParallelGames="1" /> <homeGame day="18.02.2016" time="19:30" maxParallelGames="1" /> <homeGame day="28.01.2016" time="19:30" maxParallelGames="1" /> <homeGame day="14.01.2016" time="19:30" maxParallelGames="1" /> <homeGame day="17.12.2015" time="19:30" maxParallelGames="1" /> <homeGame day="19.11.2015" time="19:30" maxParallelGames="1" /> <homeGame day="10.12.2015" time="19:30" maxParallelGames="1" /> <homeGame day="08.10.2015" time="19:30" maxParallelGames="1" /> <homeGame day="15.10.2015" time="19:30" maxParallelGames="1" />
+           <noGame from="01.10.2015" until="01.10.2015" /> <noGame from="22.10.2015" until="22.10.2015" /> <noGame from="12.11.2015" until="12.11.2015" /> <noGame from="26.11.2015" until="26.11.2015" /> <noGame from="03.12.2015" until="03.12.2015" />
+          
+          
+        </gameDays>
+        <sisterTeams>
+        	
+        		<team gender="Herren" number="1">
+        			<name>Hannover 96</name>
+        			
+        				<game day="09.10.2015" time="20:00" homeTeam="Westfalia Herne" guestTeam="Hannover 96" />
+        			
+        				<game day="13.10.2015" time="19:30" homeTeam="Hannover 96" guestTeam="Alemannia Aachen" />
+        			
+        				<game day="21.10.2015" time="20:00" homeTeam="Arminia Hannover" guestTeam="Hannover 96" />
+        			
+        				<game day="27.10.2015" time="19:30" homeTeam="Hannover 96" guestTeam="Viktoria Aschaffenburg" />
+        			
+        				<game day="06.11.2015" time="20:00" homeTeam="DSC Arminia Bielefeld" guestTeam="Hannover 96" />
+        			
+        				<game day="17.11.2015" time="19:30" homeTeam="Hannover 96" guestTeam="Wacker 04 Berlin II" />
+        			
+        				<game day="27.11.2015" time="20:00" homeTeam="Blau-Weiß 90 Berlin" guestTeam="Hannover 96" />
+        			
+        				<game day="01.12.2015" time="19:30" homeTeam="Hannover 96" guestTeam="FC Hanau 93" />
+        			
+        				<game day="15.12.2015" time="19:30" homeTeam="Hannover 96" guestTeam="SpVgg Bayreuth III" />
+        			
+        				<game day="26.01.2016" time="19:30" homeTeam="Hannover 96" guestTeam="Arminia Hannover" />
+        			
+        				<game day="30.01.2016" time="19:00" homeTeam="Wacker 04 Berlin II" guestTeam="Hannover 96" />
+        			
+        				<game day="16.02.2016" time="19:30" homeTeam="Hannover 96" guestTeam="Blau-Weiß 90 Berlin" />
+        			
+        				<game day="19.02.2016" time="20:00" homeTeam="SpVgg Bayreuth III" guestTeam="Hannover 96" />
+        			
+        				<game day="01.03.2016" time="19:30" homeTeam="Hannover 96" guestTeam="DSC Arminia Bielefeld" />
+        			
+        				<game day="09.03.2016" time="20:30" homeTeam="Alemannia Aachen" guestTeam="Hannover 96" />
+        			
+        				<game day="15.03.2016" time="19:30" homeTeam="Hannover 96" guestTeam="Westfalia Herne" />
+        			
+        				<game day="08.04.2016" time="20:00" homeTeam="Viktoria Aschaffenburg" guestTeam="Hannover 96" />
+        			
+        				<game day="09.04.2016" time="15:00" homeTeam="FC Hanau 93" guestTeam="Hannover 96" />
+        			
+						</team>
+        	
+        		<team gender="Herren" number="3">
+        			<name>Hannover 96 III</name>
+        			
+        				<game day="25.09.2015" time="20:00" homeTeam="VfR Heilbronn IV" guestTeam="Hannover 96 III" />
+        			
+        				<game day="01.10.2015" time="19:30" homeTeam="Hannover 96 III" guestTeam="FC Hanau 93 IV" />
+        			
+        				<game day="06.10.2015" time="20:00" homeTeam="FC Augsburg III" guestTeam="Hannover 96 III" />
+        			
+        				<game day="22.10.2015" time="19:30" homeTeam="Hannover 96 III" guestTeam="TSV Havelse III" />
+        			
+        				<game day="28.10.2015" time="20:00" homeTeam="TSV Havelse IV" guestTeam="Hannover 96 III" />
+        			
+        				<game day="12.11.2015" time="19:30" homeTeam="Hannover 96 III" guestTeam="DSC Arminia Bielefeld IV" />
+        			
+        				<game day="03.12.2015" time="19:30" homeTeam="Hannover 96 III" guestTeam="Westfalia Herne III" />
+        			
+        				<game day="13.01.2016" time="20:00" homeTeam="Westfalia Herne III" guestTeam="Hannover 96 III" />
+        			
+        				<game day="21.01.2016" time="19:30" homeTeam="Hannover 96 III" guestTeam="VfR Heilbronn IV" />
+        			
+        				<game day="27.01.2016" time="20:15" homeTeam="FC Hanau 93 IV" guestTeam="Hannover 96 III" />
+        			
+        				<game day="04.02.2016" time="19:30" homeTeam="Hannover 96 III" guestTeam="FC Augsburg III" />
+        			
+        				<game day="12.02.2016" time="00:00" homeTeam="DSC Arminia Bielefeld IV" guestTeam="Hannover 96 III" />
+        			
+        				<game day="15.02.2016" time="20:00" homeTeam="TSV Havelse III" guestTeam="Hannover 96 III" />
+        			
+        				<game day="25.02.2016" time="19:30" homeTeam="Hannover 96 III" guestTeam="TSV Havelse IV" />
+        			
+						</team>
+        	
+        		<team gender="Damen" number="1">
+        			<name>Hannover 96</name>
+        			
+        				<game day="06.11.2015" time="20:00" homeTeam="SpVgg Bayreuth II" guestTeam="Hannover 96" />
+        			
+        				<game day="10.11.2015" time="20:00" homeTeam="Hannover 96" guestTeam="FC G&#252;tersloh III" />
+        			
+        				<game day="28.11.2015" time="14:00" homeTeam="Wacker 04 Berlin IV" guestTeam="Hannover 96" />
+        			
+        				<game day="08.12.2015" time="20:00" homeTeam="Hannover 96" guestTeam="FC G&#252;tersloh IV" />
+        			
+        				<game day="16.01.2016" time="14:30" homeTeam="FC G&#252;tersloh IV" guestTeam="Hannover 96" />
+        			
+        				<game day="19.01.2016" time="20:00" homeTeam="Hannover 96" guestTeam="Wacker 04 Berlin IV" />
+        			
+        				<game day="24.02.2016" time="20:00" homeTeam="FC G&#252;tersloh III" guestTeam="Hannover 96" />
+        			
+        				<game day="08.03.2016" time="20:00" homeTeam="Hannover 96" guestTeam="SpVgg Bayreuth II" />
+        			
+						</team>
+        	
+        </sisterTeams>
+        
+      </team>
+    
+      <team clubId="10035" number="2" id="10036">
+        <name>Hamburger SV II</name>
+        <gameDays>
+           <homeGame day="13.04.2016" time="20:00" maxParallelGames="1" /> <homeGame day="06.04.2016" time="20:00" maxParallelGames="1" /> <homeGame day="16.03.2016" time="20:00" maxParallelGames="1" /> <homeGame day="09.03.2016" time="20:00" maxParallelGames="1" /> <homeGame day="02.03.2016" time="20:00" maxParallelGames="1" /> <homeGame day="24.02.2016" time="20:00" maxParallelGames="1" /> <homeGame day="17.02.2016" time="20:00" maxParallelGames="1" /> <homeGame day="03.02.2016" time="20:00" maxParallelGames="1" /> <homeGame day="16.09.2015" time="20:00" maxParallelGames="1" /> <homeGame day="27.01.2016" time="20:00" maxParallelGames="1" /> <homeGame day="14.10.2015" time="20:00" maxParallelGames="1" /> <homeGame day="20.01.2016" time="20:00" maxParallelGames="1" /> <homeGame day="13.01.2016" time="20:00" maxParallelGames="1" /> <homeGame day="16.12.2015" time="20:00" maxParallelGames="1" /> <homeGame day="09.12.2015" time="20:00" maxParallelGames="1" /> <homeGame day="02.12.2015" time="20:00" maxParallelGames="1" /> <homeGame day="25.11.2015" time="20:00" maxParallelGames="1" /> <homeGame day="23.09.2015" time="20:00" maxParallelGames="1" /> <homeGame day="28.10.2015" time="20:00" maxParallelGames="1" /> <homeGame day="21.10.2015" time="20:00" maxParallelGames="1" /> <homeGame day="04.11.2015" time="20:00" /> <homeGame day="11.11.2015" time="20:00" />
+          
+          
+          
+        </gameDays>
+        <sisterTeams>
+        	
+        		<team gender="Herren" number="1">
+        			<name>Hamburger SV</name>
+        			
+        				<game day="26.09.2015" time="19:30" homeTeam="Rot-Weiß L&#252;denscheid" guestTeam="Hamburger SV" />
+        			
+        				<game day="29.09.2015" time="20:00" homeTeam="SV Darmstadt 98 II" guestTeam="Hamburger SV" />
+        			
+        				<game day="09.10.2015" time="20:00" homeTeam="Hamburger SV" guestTeam="KSV Baunatal II" />
+        			
+        				<game day="16.10.2015" time="20:00" homeTeam="Hamburger SV" guestTeam="1. FC Bocholt" />
+        			
+        				<game day="13.11.2015" time="20:00" homeTeam="Hamburger SV" guestTeam="1. FSV Mainz 05" />
+        			
+        				<game day="17.11.2015" time="20:00" homeTeam="MSV Duisburg II" guestTeam="Hamburger SV" />
+        			
+        				<game day="20.11.2015" time="20:00" homeTeam="Hamburger SV" guestTeam="FC G&#252;tersloh II" />
+        			
+        				<game day="27.11.2015" time="20:00" homeTeam="Hamburger SV" guestTeam="Bonner SC" />
+        			
+        				<game day="11.12.2015" time="20:15" homeTeam="VfR Heilbronn" guestTeam="Hamburger SV" />
+        			
+        				<game day="15.01.2016" time="20:00" homeTeam="Hamburger SV" guestTeam="VfR Heilbronn" />
+        			
+        				<game day="22.01.2016" time="20:00" homeTeam="Bonner SC" guestTeam="Hamburger SV" />
+        			
+        				<game day="05.02.2016" time="20:00" homeTeam="Hamburger SV" guestTeam="SV Darmstadt 98 II" />
+        			
+        				<game day="12.02.2016" time="20:00" homeTeam="KSV Baunatal II" guestTeam="Hamburger SV" />
+        			
+        				<game day="25.02.2016" time="20:00" homeTeam="1. FSV Mainz 05" guestTeam="Hamburger SV" />
+        			
+        				<game day="04.03.2016" time="20:00" homeTeam="Hamburger SV" guestTeam="MSV Duisburg II" />
+        			
+        				<game day="11.03.2016" time="20:15" homeTeam="1. FC Bocholt" guestTeam="Hamburger SV" />
+        			
+        				<game day="18.03.2016" time="20:00" homeTeam="Hamburger SV" guestTeam="Rot-Weiß L&#252;denscheid" />
+        			
+        				<game day="08.04.2016" time="20:00" homeTeam="FC G&#252;tersloh II" guestTeam="Hamburger SV" />
+        			
+						</team>
+        	
+        		<team gender="Herren" number="3">
+        			<name>Hamburger SV III</name>
+        			
+        				<game day="02.10.2015" time="20:00" homeTeam="Hamburger SV III" guestTeam="FC Hanau 93 III" />
+        			
+        				<game day="12.10.2015" time="20:00" homeTeam="DSC Arminia Bielefeld III" guestTeam="Hamburger SV III" />
+        			
+        				<game day="29.10.2015" time="20:00" homeTeam="Arminia Hannover II" guestTeam="Hamburger SV III" />
+        			
+        				<game day="06.11.2015" time="20:00" homeTeam="Hamburger SV III" guestTeam="Arminia Hannover III" />
+        			
+        				<game day="11.11.2015" time="20:15" homeTeam="FC G&#252;tersloh V" guestTeam="Hamburger SV III" />
+        			
+        				<game day="13.11.2015" time="20:00" homeTeam="Wacker 04 Berlin III" guestTeam="Hamburger SV III" />
+        			
+        				<game day="04.12.2015" time="20:00" homeTeam="Real Madrid" guestTeam="Hamburger SV III" />
+        			
+        				<game day="11.12.2015" time="20:00" homeTeam="Hamburger SV III" guestTeam="SC Herford" />
+        			
+        				<game day="18.12.2015" time="20:00" homeTeam="Hamburger SV III" guestTeam="VfR Heilbronn III" />
+        			
+        				<game day="11.01.2016" time="20:15" homeTeam="VfR Heilbronn III" guestTeam="Hamburger SV III" />
+        			
+        				<game day="15.01.2016" time="20:00" homeTeam="Hamburger SV III" guestTeam="Wacker 04 Berlin III" />
+        			
+        				<game day="22.01.2016" time="20:00" homeTeam="SC Herford" guestTeam="Hamburger SV III" />
+        			
+        				<game day="29.01.2016" time="20:00" homeTeam="Hamburger SV III" guestTeam="Arminia Hannover II" />
+        			
+        				<game day="05.02.2016" time="20:00" homeTeam="Hamburger SV III" guestTeam="DSC Arminia Bielefeld III" />
+        			
+        				<game day="17.02.2016" time="20:00" homeTeam="FC Hanau 93 III" guestTeam="Hamburger SV III" />
+        			
+        				<game day="26.02.2016" time="20:00" homeTeam="Hamburger SV III" guestTeam="FC G&#252;tersloh V" />
+        			
+        				<game day="04.03.2016" time="20:00" homeTeam="Arminia Hannover III" guestTeam="Hamburger SV III" />
+        			
+        				<game day="11.03.2016" time="20:00" homeTeam="Hamburger SV III" guestTeam="Real Madrid" />
+        			
+						</team>
+        	
+        		<team gender="Bambini" number="1">
+        			<name>Hamburger SV</name>
+        			
+        				<game day="23.09.2015" time="18:00" homeTeam="Alemannia Aachen II" guestTeam="Hamburger SV" />
+        			
+        				<game day="07.10.2015" time="18:15" homeTeam="Hamburger SV" guestTeam="DSC Arminia Bielefeld III" />
+        			
+        				<game day="14.10.2015" time="18:15" homeTeam="Hamburger SV" guestTeam="Blau-Weiß 90 Berlin II" />
+        			
+        				<game day="20.10.2015" time="18:00" homeTeam="DSC Arminia Bielefeld III" guestTeam="Hamburger SV" />
+        			
+        				<game day="28.10.2015" time="18:00" homeTeam="Blau-Weiß 90 Berlin" guestTeam="Hamburger SV" />
+        			
+        				<game day="11.11.2015" time="18:15" homeTeam="Hamburger SV" guestTeam="Blau-Weiß 90 Berlin" />
+        			
+        				<game day="21.11.2015" time="11:00" homeTeam="Westfalia Herne II" guestTeam="Hamburger SV" />
+        			
+        				<game day="25.11.2015" time="18:15" homeTeam="Hamburger SV" guestTeam="Westfalia Herne II" />
+        			
+        				<game day="02.12.2015" time="18:00" homeTeam="Blau-Weiß 90 Berlin II" guestTeam="Hamburger SV" />
+        			
+        				<game day="16.12.2015" time="18:15" homeTeam="Hamburger SV" guestTeam="Alemannia Aachen II" />
+        			
+        				<game day="13.01.2016" time="18:15" homeTeam="Hamburger SV" guestTeam="DSC Arminia Bielefeld III" />
+        			
+        				<game day="30.01.2016" time="11:00" homeTeam="Westfalia Herne II" guestTeam="Hamburger SV" />
+        			
+        				<game day="03.02.2016" time="18:15" homeTeam="Hamburger SV" guestTeam="Blau-Weiß 90 Berlin II" />
+        			
+        				<game day="17.02.2016" time="18:00" homeTeam="Blau-Weiß 90 Berlin" guestTeam="Hamburger SV" />
+        			
+        				<game day="24.02.2016" time="18:15" homeTeam="Hamburger SV" guestTeam="Blau-Weiß 90 Berlin" />
+        			
+        				<game day="02.03.2016" time="18:00" homeTeam="Blau-Weiß 90 Berlin II" guestTeam="Hamburger SV" />
+        			
+        				<game day="09.03.2016" time="18:00" homeTeam="Alemannia Aachen II" guestTeam="Hamburger SV" />
+        			
+        				<game day="16.03.2016" time="18:15" homeTeam="Hamburger SV" guestTeam="Alemannia Aachen II" />
+        			
+        				<game day="06.04.2016" time="18:15" homeTeam="Hamburger SV" guestTeam="Westfalia Herne II" />
+        			
+        				<game day="12.04.2016" time="18:00" homeTeam="DSC Arminia Bielefeld III" guestTeam="Hamburger SV" />
+        			
+						</team>
+        	
+        </sisterTeams>
+        
+      </team>
+    
+      <team clubId="10027" number="4" id="10037">
+        <name>FC G&#252;tersloh IV</name>
+        <gameDays>
+           <homeGame day="24.02.2016" time="20:15" maxParallelGames="2" /> <homeGame day="14.10.2015" time="20:15" maxParallelGames="2" /> <homeGame day="15.04.2016" time="20:00" maxParallelGames="2" /> <homeGame day="13.04.2016" time="20:15" maxParallelGames="2" /> <homeGame day="08.04.2016" time="20:00" maxParallelGames="2" /> <homeGame day="06.04.2016" time="20:15" maxParallelGames="2" /> <homeGame day="18.03.2016" time="20:00" maxParallelGames="2" /> <homeGame day="16.03.2016" time="20:15" maxParallelGames="2" /> <homeGame day="11.03.2016" time="20:00" maxParallelGames="2" /> <homeGame day="09.03.2016" time="20:15" maxParallelGames="2" /> <homeGame day="04.03.2016" time="20:00" maxParallelGames="2" /> <homeGame day="02.03.2016" time="20:15" maxParallelGames="2" /> <homeGame day="26.02.2016" time="20:00" maxParallelGames="2" /> <homeGame day="19.02.2016" time="20:00" maxParallelGames="2" /> <homeGame day="17.02.2016" time="20:15" maxParallelGames="2" /> <homeGame day="05.02.2016" time="20:00" maxParallelGames="2" /> <homeGame day="03.02.2016" time="20:15" maxParallelGames="2" /> <homeGame day="29.01.2016" time="20:00" maxParallelGames="2" /> <homeGame day="27.01.2016" time="20:15" maxParallelGames="2" /> <homeGame day="22.01.2016" time="20:00" maxParallelGames="2" /> <homeGame day="20.01.2016" time="20:15" maxParallelGames="2" /> <homeGame day="15.01.2016" time="20:00" maxParallelGames="2" /> <homeGame day="13.01.2016" time="20:15" maxParallelGames="2" /> <homeGame day="18.12.2015" time="20:00" maxParallelGames="2" /> <homeGame day="09.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="16.12.2015" time="20:15" maxParallelGames="2" /> <homeGame day="23.09.2015" time="20:15" maxParallelGames="2" /> <homeGame day="25.09.2015" time="20:00" maxParallelGames="2" /> <homeGame day="11.12.2015" time="20:00" maxParallelGames="2" /> <homeGame day="09.12.2015" time="20:15" maxParallelGames="2" /> <homeGame day="04.12.2015" time="20:00" maxParallelGames="2" /> <homeGame day="02.12.2015" time="20:15" maxParallelGames="2" /> <homeGame day="30.09.2015" time="20:15" maxParallelGames="2" /> <homeGame day="02.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="07.10.2015" time="20:15" maxParallelGames="2" /> <homeGame day="25.11.2015" time="20:15" maxParallelGames="2" /> <homeGame day="20.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="13.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="11.11.2015" time="20:15" maxParallelGames="2" /> <homeGame day="30.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="28.10.2015" time="20:15" maxParallelGames="2" /> <homeGame day="23.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="21.10.2015" time="20:15" maxParallelGames="2" /> <homeGame day="16.10.2015" time="20:00" maxParallelGames="2" />
+           <noGame from="04.10.2015" until="04.10.2015" /> <noGame from="27.11.2015" until="27.11.2015" /> <noGame from="28.11.2015" until="28.11.2015" /> <noGame from="29.11.2015" until="29.11.2015" /> <noGame from="12.12.2015" until="12.12.2015" />
+          
+          
+        </gameDays>
+        <sisterTeams>
+        	
+        		<team gender="Herren" number="1">
+        			<name>FC G&#252;tersloh</name>
+        			
+        				<game day="09.10.2015" time="20:00" homeTeam="FC Carl Zeiss Jena II" guestTeam="FC G&#252;tersloh" />
+        			
+        				<game day="10.10.2015" time="18:30" homeTeam="Karlsruher SC" guestTeam="FC G&#252;tersloh" />
+        			
+        				<game day="17.10.2015" time="15:00" homeTeam="FC G&#252;tersloh" guestTeam="Hessen Kassel III" />
+        			
+        				<game day="18.10.2015" time="17:00" homeTeam="FC G&#252;tersloh" guestTeam="ESV Ingolstadt II" />
+        			
+        				<game day="31.10.2015" time="18:00" homeTeam="Wacker 04 Berlin" guestTeam="FC G&#252;tersloh" />
+        			
+        				<game day="14.11.2015" time="15:00" homeTeam="FC G&#252;tersloh" guestTeam="1. FC Kaiserslautern" />
+        			
+        				<game day="15.11.2015" time="11:00" homeTeam="Dresdner SC" guestTeam="FC G&#252;tersloh" />
+        			
+        				<game day="21.11.2015" time="15:00" homeTeam="FC G&#252;tersloh" guestTeam="1. FC Dynamo Dresden" />
+        			
+        				<game day="05.12.2015" time="15:00" homeTeam="FC G&#252;tersloh" guestTeam="MTV Ingolstadt" />
+        			
+        				<game day="22.01.2016" time="20:00" homeTeam="1. FC Kaiserslautern" guestTeam="FC G&#252;tersloh" />
+        			
+        				<game day="29.01.2016" time="20:15" homeTeam="ESV Ingolstadt II" guestTeam="FC G&#252;tersloh" />
+        			
+        				<game day="06.02.2016" time="19:00" homeTeam="1. FC Dynamo Dresden" guestTeam="FC G&#252;tersloh" />
+        			
+        				<game day="28.02.2016" time="14:00" homeTeam="FC G&#252;tersloh" guestTeam="FC Carl Zeiss Jena II" />
+        			
+        				<game day="05.03.2016" time="15:00" homeTeam="FC G&#252;tersloh" guestTeam="Wacker 04 Berlin" />
+        			
+        				<game day="13.03.2016" time="14:00" homeTeam="FC G&#252;tersloh" guestTeam="Karlsruher SC" />
+        			
+        				<game day="18.03.2016" time="20:15" homeTeam="Hessen Kassel III" guestTeam="FC G&#252;tersloh" />
+        			
+        				<game day="09.04.2016" time="15:00" homeTeam="FC G&#252;tersloh" guestTeam="Dresdner SC" />
+        			
+        				<game day="16.04.2016" time="16:30" homeTeam="MTV Ingolstadt" guestTeam="FC G&#252;tersloh" />
+        			
+						</team>
+        	
+        		<team gender="Herren" number="2">
+        			<name>FC G&#252;tersloh II</name>
+        			
+        				<game day="09.10.2015" time="20:15" homeTeam="1. FC Bocholt" guestTeam="FC G&#252;tersloh II" />
+        			
+        				<game day="16.10.2015" time="20:00" homeTeam="FC G&#252;tersloh II" guestTeam="Bonner SC" />
+        			
+        				<game day="23.10.2015" time="20:15" homeTeam="VfR Heilbronn" guestTeam="FC G&#252;tersloh II" />
+        			
+        				<game day="30.10.2015" time="20:00" homeTeam="FC G&#252;tersloh II" guestTeam="MSV Duisburg II" />
+        			
+        				<game day="07.11.2015" time="19:30" homeTeam="Rot-Weiß L&#252;denscheid" guestTeam="FC G&#252;tersloh II" />
+        			
+        				<game day="13.11.2015" time="20:00" homeTeam="FC G&#252;tersloh II" guestTeam="SV Darmstadt 98 II" />
+        			
+        				<game day="20.11.2015" time="20:00" homeTeam="Hamburger SV" guestTeam="FC G&#252;tersloh II" />
+        			
+        				<game day="26.11.2015" time="20:00" homeTeam="1. FSV Mainz 05" guestTeam="FC G&#252;tersloh II" />
+        			
+        				<game day="11.12.2015" time="20:00" homeTeam="FC G&#252;tersloh II" guestTeam="KSV Baunatal II" />
+        			
+        				<game day="05.02.2016" time="20:00" homeTeam="FC G&#252;tersloh II" guestTeam="VfR Heilbronn" />
+        			
+        				<game day="12.02.2016" time="20:00" homeTeam="Bonner SC" guestTeam="FC G&#252;tersloh II" />
+        			
+        				<game day="19.02.2016" time="20:00" homeTeam="FC G&#252;tersloh II" guestTeam="Rot-Weiß L&#252;denscheid" />
+        			
+        				<game day="23.02.2016" time="20:00" homeTeam="SV Darmstadt 98 II" guestTeam="FC G&#252;tersloh II" />
+        			
+        				<game day="26.02.2016" time="20:00" homeTeam="FC G&#252;tersloh II" guestTeam="1. FC Bocholt" />
+        			
+        				<game day="04.03.2016" time="20:00" homeTeam="KSV Baunatal II" guestTeam="FC G&#252;tersloh II" />
+        			
+        				<game day="11.03.2016" time="20:00" homeTeam="FC G&#252;tersloh II" guestTeam="1. FSV Mainz 05" />
+        			
+        				<game day="15.03.2016" time="20:00" homeTeam="MSV Duisburg II" guestTeam="FC G&#252;tersloh II" />
+        			
+        				<game day="08.04.2016" time="20:00" homeTeam="FC G&#252;tersloh II" guestTeam="Hamburger SV" />
+        			
+						</team>
+        	
+        		<team gender="Herren" number="3">
+        			<name>FC G&#252;tersloh III</name>
+        			
+        				<game day="25.09.2015" time="20:00" homeTeam="FC Hanau 93 II" guestTeam="FC G&#252;tersloh III" />
+        			
+        				<game day="30.09.2015" time="20:15" homeTeam="FC G&#252;tersloh III" guestTeam="VfR Heilbronn II" />
+        			
+        				<game day="02.10.2015" time="20:15" homeTeam="FC G&#252;tersloh IV" guestTeam="FC G&#252;tersloh III" />
+        			
+        				<game day="12.10.2015" time="20:00" homeTeam="SC Tasmania 1900 Berlin" guestTeam="FC G&#252;tersloh III" />
+        			
+        				<game day="14.10.2015" time="20:15" homeTeam="FC G&#252;tersloh III" guestTeam="Hannover 96 II" />
+        			
+        				<game day="13.11.2015" time="20:00" homeTeam="Hallescher FC" guestTeam="FC G&#252;tersloh III" />
+        			
+        				<game day="20.11.2015" time="20:00" homeTeam="FC G&#252;tersloh III" guestTeam="Hamburger SV II" />
+        			
+        				<game day="11.12.2015" time="20:00" homeTeam="DSC Arminia Bielefeld II" guestTeam="FC G&#252;tersloh III" />
+        			
+        				<game day="18.12.2015" time="20:00" homeTeam="FC G&#252;tersloh III" guestTeam="TSV Havelse" />
+        			
+        				<game day="08.01.2016" time="20:15" homeTeam="FC G&#252;tersloh III" guestTeam="FC G&#252;tersloh IV" />
+        			
+        				<game day="22.01.2016" time="20:15" homeTeam="VfR Heilbronn II" guestTeam="FC G&#252;tersloh III" />
+        			
+        				<game day="28.01.2016" time="19:30" homeTeam="Hannover 96 II" guestTeam="FC G&#252;tersloh III" />
+        			
+        				<game day="03.02.2016" time="20:15" homeTeam="FC G&#252;tersloh III" guestTeam="SC Tasmania 1900 Berlin" />
+        			
+        				<game day="17.02.2016" time="20:15" homeTeam="FC G&#252;tersloh III" guestTeam="Hallescher FC" />
+        			
+        				<game day="29.02.2016" time="20:00" homeTeam="TSV Havelse" guestTeam="FC G&#252;tersloh III" />
+        			
+        				<game day="09.03.2016" time="20:15" homeTeam="FC G&#252;tersloh III" guestTeam="DSC Arminia Bielefeld II" />
+        			
+        				<game day="16.03.2016" time="20:00" homeTeam="Hamburger SV II" guestTeam="FC G&#252;tersloh III" />
+        			
+        				<game day="06.04.2016" time="20:15" homeTeam="FC G&#252;tersloh III" guestTeam="FC Hanau 93 II" />
+        			
+						</team>
+        	
+        		<team gender="Herren" number="5">
+        			<name>FC G&#252;tersloh V</name>
+        			
+        				<game day="23.09.2015" time="20:15" homeTeam="FC G&#252;tersloh V" guestTeam="Arminia Hannover II" />
+        			
+        				<game day="30.09.2015" time="20:15" homeTeam="FC G&#252;tersloh V" guestTeam="DSC Arminia Bielefeld III" />
+        			
+        				<game day="07.10.2015" time="20:15" homeTeam="FC G&#252;tersloh V" guestTeam="Arminia Hannover III" />
+        			
+        				<game day="21.10.2015" time="20:00" homeTeam="FC Hanau 93 III" guestTeam="FC G&#252;tersloh V" />
+        			
+        				<game day="06.11.2015" time="20:00" homeTeam="SC Herford" guestTeam="FC G&#252;tersloh V" />
+        			
+        				<game day="11.11.2015" time="20:15" homeTeam="FC G&#252;tersloh V" guestTeam="Hamburger SV III" />
+        			
+        				<game day="13.11.2015" time="20:00" homeTeam="Real Madrid" guestTeam="FC G&#252;tersloh V" />
+        			
+        				<game day="20.11.2015" time="20:00" homeTeam="Wacker 04 Berlin III" guestTeam="FC G&#252;tersloh V" />
+        			
+        				<game day="30.11.2015" time="20:15" homeTeam="VfR Heilbronn III" guestTeam="FC G&#252;tersloh V" />
+        			
+        				<game day="13.01.2016" time="20:15" homeTeam="FC G&#252;tersloh V" guestTeam="VfR Heilbronn III" />
+        			
+        				<game day="18.01.2016" time="20:00" homeTeam="DSC Arminia Bielefeld III" guestTeam="FC G&#252;tersloh V" />
+        			
+        				<game day="27.01.2016" time="20:15" homeTeam="FC G&#252;tersloh V" guestTeam="FC Hanau 93 III" />
+        			
+        				<game day="03.02.2016" time="20:15" homeTeam="FC G&#252;tersloh V" guestTeam="Wacker 04 Berlin III" />
+        			
+        				<game day="12.02.2016" time="20:00" homeTeam="Arminia Hannover III" guestTeam="FC G&#252;tersloh V" />
+        			
+        				<game day="17.02.2016" time="20:15" homeTeam="FC G&#252;tersloh V" guestTeam="Real Madrid" />
+        			
+        				<game day="26.02.2016" time="20:00" homeTeam="Hamburger SV III" guestTeam="FC G&#252;tersloh V" />
+        			
+        				<game day="02.03.2016" time="20:15" homeTeam="FC G&#252;tersloh V" guestTeam="SC Herford" />
+        			
+        				<game day="10.03.2016" time="20:00" homeTeam="Arminia Hannover II" guestTeam="FC G&#252;tersloh V" />
+        			
+						</team>
+        	
+        		<team gender="Herren" number="6">
+        			<name>FC G&#252;tersloh VI</name>
+        			
+        				<game day="26.09.2015" time="15:00" homeTeam="FC G&#252;tersloh VI" guestTeam="Wacker 04 Berlin IV" />
+        			
+        				<game day="28.09.2015" time="19:30" homeTeam="Viktoria Aschaffenburg V" guestTeam="FC G&#252;tersloh VI" />
+        			
+        				<game day="07.10.2015" time="20:00" homeTeam="Alemannia Aachen V" guestTeam="FC G&#252;tersloh VI" />
+        			
+        				<game day="14.10.2015" time="20:15" homeTeam="FC G&#252;tersloh VI" guestTeam="SC Tasmania 1900 Berlin III" />
+        			
+        				<game day="30.10.2015" time="20:00" homeTeam="Westfalia Herne IV" guestTeam="FC G&#252;tersloh VI" />
+        			
+        				<game day="25.11.2015" time="20:30" homeTeam="Berliner Fußballclub Dynamo e. V. II" guestTeam="FC G&#252;tersloh VI" />
+        			
+        				<game day="02.12.2015" time="20:15" homeTeam="FC G&#252;tersloh VI" guestTeam="KSV Baunatal VIII" />
+        			
+        				<game day="13.01.2016" time="20:15" homeTeam="FC G&#252;tersloh VI" guestTeam="Berliner Fußballclub Dynamo e. V. II" />
+        			
+        				<game day="23.01.2016" time="15:00" homeTeam="FC G&#252;tersloh VI" guestTeam="Alemannia Aachen V" />
+        			
+        				<game day="02.03.2016" time="20:15" homeTeam="FC G&#252;tersloh VI" guestTeam="Westfalia Herne IV" />
+        			
+        				<game day="08.03.2016" time="20:00" homeTeam="Wacker 04 Berlin IV" guestTeam="FC G&#252;tersloh VI" />
+        			
+        				<game day="09.03.2016" time="20:15" homeTeam="FC G&#252;tersloh VI" guestTeam="Viktoria Aschaffenburg V" />
+        			
+        				<game day="14.03.2016" time="20:00" homeTeam="SC Tasmania 1900 Berlin III" guestTeam="FC G&#252;tersloh VI" />
+        			
+        				<game day="15.04.2016" time="20:00" homeTeam="KSV Baunatal VIII" guestTeam="FC G&#252;tersloh VI" />
+        			
+						</team>
+        	
+        		<team gender="Damen" number="1">
+        			<name>FC G&#252;tersloh</name>
+        			
+        				<game day="03.10.2015" time="18:00" homeTeam="Wacker 04 Berlin" guestTeam="FC G&#252;tersloh" />
+        			
+        				<game day="10.10.2015" time="18:00" homeTeam="FC G&#252;tersloh" guestTeam="Holstein Kiel" />
+        			
+        				<game day="11.10.2015" time="11:00" homeTeam="FC G&#252;tersloh" guestTeam="SC Fortuna K&#246;ln" />
+        			
+        				<game day="31.10.2015" time="14:00" homeTeam="Langenhagener SC II" guestTeam="FC G&#252;tersloh" />
+        			
+        				<game day="31.10.2015" time="19:00" homeTeam="VfB Leipzig" guestTeam="FC G&#252;tersloh" />
+        			
+        				<game day="14.11.2015" time="15:15" homeTeam="RV Viktoria Wombach II" guestTeam="FC G&#252;tersloh" />
+        			
+        				<game day="05.12.2015" time="19:00" homeTeam="FC G&#252;tersloh" guestTeam="SC Charlottenburg" />
+        			
+        				<game day="12.12.2015" time="18:00" homeTeam="SB Versbach" guestTeam="FC G&#252;tersloh" />
+        			
+        				<game day="19.12.2015" time="17:00" homeTeam="FC G&#252;tersloh" guestTeam="Viktoria K&#246;ln III" />
+        			
+        				<game day="23.01.2016" time="15:00" homeTeam="Viktoria K&#246;ln III" guestTeam="FC G&#252;tersloh" />
+        			
+        				<game day="30.01.2016" time="14:30" homeTeam="FC G&#252;tersloh" guestTeam="VfB Leipzig" />
+        			
+        				<game day="06.02.2016" time="17:00" homeTeam="FC G&#252;tersloh" guestTeam="Wacker 04 Berlin" />
+        			
+        				<game day="13.02.2016" time="18:00" homeTeam="Holstein Kiel" guestTeam="FC G&#252;tersloh" />
+        			
+        				<game day="20.02.2016" time="14:00" homeTeam="FC G&#252;tersloh" guestTeam="SB Versbach" />
+        			
+        				<game day="27.02.2016" time="17:00" homeTeam="FC G&#252;tersloh" guestTeam="Langenhagener SC II" />
+        			
+        				<game day="12.03.2016" time="18:00" homeTeam="FC G&#252;tersloh" guestTeam="RV Viktoria Wombach II" />
+        			
+        				<game day="19.03.2016" time="15:00" homeTeam="SC Fortuna K&#246;ln" guestTeam="FC G&#252;tersloh" />
+        			
+        				<game day="03.04.2016" time="13:00" homeTeam="SC Charlottenburg" guestTeam="FC G&#252;tersloh" />
+        			
+						</team>
+        	
+        		<team gender="Damen" number="2">
+        			<name>FC G&#252;tersloh II</name>
+        			
+        				<game day="30.09.2015" time="20:00" homeTeam="FC Carl Zeiss Jena II" guestTeam="FC G&#252;tersloh II" />
+        			
+        				<game day="09.10.2015" time="20:15" homeTeam="FC G&#252;tersloh II" guestTeam="SV Waldhof Mannheim" />
+        			
+        				<game day="16.10.2015" time="20:15" homeTeam="FC G&#252;tersloh II" guestTeam="VfR Mannheim" />
+        			
+        				<game day="21.10.2015" time="20:00" homeTeam="FC Carl Zeiss Jena" guestTeam="FC G&#252;tersloh II" />
+        			
+        				<game day="30.10.2015" time="20:15" homeTeam="FC G&#252;tersloh II" guestTeam="SV Darmstadt 98" />
+        			
+        				<game day="06.11.2015" time="20:00" homeTeam="Rot-Weiß L&#252;denscheid" guestTeam="FC G&#252;tersloh II" />
+        			
+        				<game day="20.11.2015" time="20:15" homeTeam="FC G&#252;tersloh II" guestTeam="Arminia Marten" />
+        			
+        				<game day="26.11.2015" time="19:30" homeTeam="1. FC Bocholt" guestTeam="FC G&#252;tersloh II" />
+        			
+        				<game day="02.12.2015" time="20:00" homeTeam="SC Fortuna K&#246;ln III" guestTeam="FC G&#252;tersloh II" />
+        			
+        				<game day="11.12.2015" time="20:15" homeTeam="FC G&#252;tersloh II" guestTeam="SV Meppen" />
+        			
+        				<game day="29.01.2016" time="20:15" homeTeam="FC G&#252;tersloh II" guestTeam="Rot-Weiß L&#252;denscheid" />
+        			
+        				<game day="30.01.2016" time="16:00" homeTeam="VfR Mannheim" guestTeam="FC G&#252;tersloh II" />
+        			
+        				<game day="14.02.2016" time="14:00" homeTeam="SV Darmstadt 98" guestTeam="FC G&#252;tersloh II" />
+        			
+        				<game day="19.02.2016" time="20:15" homeTeam="FC G&#252;tersloh II" guestTeam="SC Fortuna K&#246;ln III" />
+        			
+        				<game day="26.02.2016" time="20:15" homeTeam="SV Waldhof Mannheim" guestTeam="FC G&#252;tersloh II" />
+        			
+        				<game day="04.03.2016" time="20:15" homeTeam="FC G&#252;tersloh II" guestTeam="1. FC Bocholt" />
+        			
+        				<game day="11.03.2016" time="20:15" homeTeam="SV Meppen" guestTeam="FC G&#252;tersloh II" />
+        			
+        				<game day="18.03.2016" time="20:15" homeTeam="FC G&#252;tersloh II" guestTeam="FC Carl Zeiss Jena" />
+        			
+        				<game day="08.04.2016" time="20:15" homeTeam="FC G&#252;tersloh II" guestTeam="FC Carl Zeiss Jena II" />
+        			
+        				<game day="09.04.2016" time="18:30" homeTeam="Arminia Marten" guestTeam="FC G&#252;tersloh II" />
+        			
+						</team>
+        	
+        		<team gender="Damen" number="3">
+        			<name>FC G&#252;tersloh III</name>
+        			
+        				<game day="19.09.2015" time="14:30" homeTeam="FC G&#252;tersloh IV" guestTeam="FC G&#252;tersloh III" />
+        			
+        				<game day="21.10.2015" time="20:00" homeTeam="FC G&#252;tersloh III" guestTeam="Wacker 04 Berlin IV" />
+        			
+        				<game day="10.11.2015" time="20:00" homeTeam="Hannover 96" guestTeam="FC G&#252;tersloh III" />
+        			
+        				<game day="09.12.2015" time="20:00" homeTeam="FC G&#252;tersloh III" guestTeam="SpVgg Bayreuth II" />
+        			
+        				<game day="20.01.2016" time="20:00" homeTeam="FC G&#252;tersloh III" guestTeam="FC G&#252;tersloh IV" />
+        			
+        				<game day="06.02.2016" time="14:00" homeTeam="Wacker 04 Berlin IV" guestTeam="FC G&#252;tersloh III" />
+        			
+        				<game day="12.02.2016" time="20:00" homeTeam="SpVgg Bayreuth II" guestTeam="FC G&#252;tersloh III" />
+        			
+        				<game day="24.02.2016" time="20:00" homeTeam="FC G&#252;tersloh III" guestTeam="Hannover 96" />
+        			
+						</team>
+        	
+        		<team gender="Damen" number="4">
+        			<name>FC G&#252;tersloh IV</name>
+        			
+        				<game day="19.09.2015" time="14:30" homeTeam="FC G&#252;tersloh IV" guestTeam="FC G&#252;tersloh III" />
+        			
+        				<game day="10.10.2015" time="14:30" homeTeam="FC G&#252;tersloh IV" guestTeam="SpVgg Bayreuth II" />
+        			
+        				<game day="15.11.2015" time="14:00" homeTeam="Wacker 04 Berlin IV" guestTeam="FC G&#252;tersloh IV" />
+        			
+        				<game day="08.12.2015" time="20:00" homeTeam="Hannover 96" guestTeam="FC G&#252;tersloh IV" />
+        			
+        				<game day="16.01.2016" time="14:30" homeTeam="FC G&#252;tersloh IV" guestTeam="Hannover 96" />
+        			
+        				<game day="20.01.2016" time="20:00" homeTeam="FC G&#252;tersloh III" guestTeam="FC G&#252;tersloh IV" />
+        			
+        				<game day="29.01.2016" time="20:00" homeTeam="SpVgg Bayreuth II" guestTeam="FC G&#252;tersloh IV" />
+        			
+        				<game day="12.03.2016" time="14:30" homeTeam="FC G&#252;tersloh IV" guestTeam="Wacker 04 Berlin IV" />
+        			
+						</team>
+        	
+        		<team gender="Bambini" number="1">
+        			<name>FC G&#252;tersloh</name>
+        			
+        				<game day="23.09.2015" time="18:00" homeTeam="FC G&#252;tersloh" guestTeam="KSV Baunatal" />
+        			
+        				<game day="09.10.2015" time="17:30" homeTeam="FC G&#252;tersloh" guestTeam="FC Hanau 93" />
+        			
+        				<game day="23.10.2015" time="17:30" homeTeam="Arminia Hannover" guestTeam="FC G&#252;tersloh" />
+        			
+        				<game day="30.10.2015" time="17:30" homeTeam="FC G&#252;tersloh" guestTeam="SpVgg Bayreuth III" />
+        			
+        				<game day="13.11.2015" time="17:30" homeTeam="Viktoria Aschaffenburg" guestTeam="FC G&#252;tersloh" />
+        			
+        				<game day="20.11.2015" time="17:30" homeTeam="FC G&#252;tersloh" guestTeam="FC Homburg" />
+        			
+        				<game day="27.11.2015" time="18:00" homeTeam="DSC Arminia Bielefeld II" guestTeam="FC G&#252;tersloh" />
+        			
+        				<game day="02.12.2015" time="18:00" homeTeam="FC G&#252;tersloh" guestTeam="Westfalia Herne" />
+        			
+        				<game day="07.12.2015" time="18:20" homeTeam="VfR Heilbronn" guestTeam="FC G&#252;tersloh" />
+        			
+        				<game day="13.01.2016" time="18:00" homeTeam="FC G&#252;tersloh" guestTeam="Arminia Hannover" />
+        			
+        				<game day="29.01.2016" time="18:30" homeTeam="FC Hanau 93" guestTeam="FC G&#252;tersloh" />
+        			
+        				<game day="05.02.2016" time="17:30" homeTeam="SpVgg Bayreuth III" guestTeam="FC G&#252;tersloh" />
+        			
+        				<game day="17.02.2016" time="18:00" homeTeam="FC G&#252;tersloh" guestTeam="VfR Heilbronn" />
+        			
+        				<game day="24.02.2016" time="17:30" homeTeam="FC Homburg" guestTeam="FC G&#252;tersloh" />
+        			
+        				<game day="01.03.2016" time="18:00" homeTeam="KSV Baunatal" guestTeam="FC G&#252;tersloh" />
+        			
+        				<game day="18.03.2016" time="17:30" homeTeam="FC G&#252;tersloh" guestTeam="DSC Arminia Bielefeld II" />
+        			
+        				<game day="09.04.2016" time="11:00" homeTeam="Westfalia Herne" guestTeam="FC G&#252;tersloh" />
+        			
+        				<game day="13.04.2016" time="18:00" homeTeam="FC G&#252;tersloh" guestTeam="Viktoria Aschaffenburg" />
+        			
+						</team>
+        	
+        </sisterTeams>
+        
+      </team>
+    
+      <team clubId="10038" number="1" id="10039">
+        <name>TSV Havelse</name>
+        <gameDays>
+           <homeGame day="28.09.2015" time="20:00" maxParallelGames="1" /> <homeGame day="05.10.2015" time="20:00" maxParallelGames="1" /> <homeGame day="12.10.2015" time="20:00" maxParallelGames="1" /> <homeGame day="19.10.2015" time="20:00" maxParallelGames="1" /> <homeGame day="26.10.2015" time="20:00" maxParallelGames="1" /> <homeGame day="09.11.2015" time="20:00" maxParallelGames="1" /> <homeGame day="23.11.2015" time="20:00" maxParallelGames="1" /> <homeGame day="11.04.2016" time="20:00" maxParallelGames="1" /> <homeGame day="30.11.2015" time="20:00" maxParallelGames="1" /> <homeGame day="14.03.2016" time="20:00" maxParallelGames="1" /> <homeGame day="04.04.2016" time="20:00" maxParallelGames="1" /> <homeGame day="25.01.2016" time="20:00" maxParallelGames="1" /> <homeGame day="18.01.2016" time="20:00" maxParallelGames="1" /> <homeGame day="01.02.2016" time="20:00" maxParallelGames="1" /> <homeGame day="07.12.2015" time="20:00" maxParallelGames="1" /> <homeGame day="15.02.2016" time="20:00" maxParallelGames="1" /> <homeGame day="22.02.2016" time="20:00" maxParallelGames="1" /> <homeGame day="29.02.2016" time="20:00" maxParallelGames="1" /> <homeGame day="07.03.2016" time="20:00" maxParallelGames="1" />
+          
+          
+          
+        </gameDays>
+        <sisterTeams>
+        	
+        		<team gender="Herren" number="2">
+        			<name>TSV Havelse II</name>
+        			
+        				<game day="25.09.2015" time="20:00" homeTeam="Viktoria Aschaffenburg III" guestTeam="TSV Havelse II" />
+        			
+        				<game day="30.09.2015" time="20:00" homeTeam="TSV Havelse II" guestTeam="SV Babelsberg 03 II" />
+        			
+        				<game day="09.10.2015" time="20:00" homeTeam="Hertha BSC Berlin" guestTeam="TSV Havelse II" />
+        			
+        				<game day="14.10.2015" time="20:00" homeTeam="TSV Havelse II" guestTeam="Bayern Hof" />
+        			
+        				<game day="21.10.2015" time="20:00" homeTeam="TSV Havelse II" guestTeam="KSV Baunatal VI" />
+        			
+        				<game day="30.10.2015" time="20:00" homeTeam="Blau-Weiß 90 Berlin IV" guestTeam="TSV Havelse II" />
+        			
+        				<game day="11.11.2015" time="20:00" homeTeam="Westfalia Herne II" guestTeam="TSV Havelse II" />
+        			
+        				<game day="25.11.2015" time="20:00" homeTeam="TSV Havelse II" guestTeam="FC Homburg" />
+        			
+        				<game day="02.12.2015" time="20:00" homeTeam="TSV Havelse II" guestTeam="FC Augsburg II" />
+        			
+        				<game day="12.01.2016" time="20:00" homeTeam="FC Augsburg II" guestTeam="TSV Havelse II" />
+        			
+        				<game day="18.01.2016" time="20:00" homeTeam="SV Babelsberg 03 II" guestTeam="TSV Havelse II" />
+        			
+        				<game day="27.01.2016" time="20:00" homeTeam="TSV Havelse II" guestTeam="Westfalia Herne II" />
+        			
+        				<game day="12.02.2016" time="20:00" homeTeam="Bayern Hof" guestTeam="TSV Havelse II" />
+        			
+        				<game day="02.03.2016" time="20:00" homeTeam="TSV Havelse II" guestTeam="Hertha BSC Berlin" />
+        			
+        				<game day="08.03.2016" time="20:15" homeTeam="FC Homburg" guestTeam="TSV Havelse II" />
+        			
+        				<game day="09.03.2016" time="20:00" homeTeam="TSV Havelse II" guestTeam="Viktoria Aschaffenburg III" />
+        			
+        				<game day="18.03.2016" time="20:00" homeTeam="KSV Baunatal VI" guestTeam="TSV Havelse II" />
+        			
+        				<game day="06.04.2016" time="20:00" homeTeam="TSV Havelse II" guestTeam="Blau-Weiß 90 Berlin IV" />
+        			
+						</team>
+        	
+        		<team gender="Herren" number="3">
+        			<name>TSV Havelse III</name>
+        			
+        				<game day="28.09.2015" time="20:00" homeTeam="TSV Havelse III" guestTeam="TSV Havelse IV" />
+        			
+        				<game day="07.10.2015" time="20:15" homeTeam="FC Hanau 93 IV" guestTeam="TSV Havelse III" />
+        			
+        				<game day="12.10.2015" time="20:00" homeTeam="TSV Havelse III" guestTeam="FC Augsburg III" />
+        			
+        				<game day="22.10.2015" time="19:30" homeTeam="Hannover 96 III" guestTeam="TSV Havelse III" />
+        			
+        				<game day="26.10.2015" time="20:00" homeTeam="TSV Havelse III" guestTeam="DSC Arminia Bielefeld IV" />
+        			
+        				<game day="09.11.2015" time="20:00" homeTeam="TSV Havelse III" guestTeam="VfR Heilbronn IV" />
+        			
+        				<game day="11.11.2015" time="20:00" homeTeam="Westfalia Herne III" guestTeam="TSV Havelse III" />
+        			
+        				<game day="20.01.2016" time="20:00" homeTeam="TSV Havelse IV" guestTeam="TSV Havelse III" />
+        			
+        				<game day="29.01.2016" time="20:00" homeTeam="VfR Heilbronn IV" guestTeam="TSV Havelse III" />
+        			
+        				<game day="01.02.2016" time="20:00" homeTeam="TSV Havelse III" guestTeam="FC Hanau 93 IV" />
+        			
+        				<game day="12.02.2016" time="00:00" homeTeam="FC Augsburg III" guestTeam="TSV Havelse III" />
+        			
+        				<game day="15.02.2016" time="20:00" homeTeam="TSV Havelse III" guestTeam="Hannover 96 III" />
+        			
+        				<game day="22.02.2016" time="20:00" homeTeam="DSC Arminia Bielefeld IV" guestTeam="TSV Havelse III" />
+        			
+        				<game day="29.02.2016" time="20:00" homeTeam="TSV Havelse III" guestTeam="Westfalia Herne III" />
+        			
+						</team>
+        	
+        		<team gender="Herren" number="4">
+        			<name>TSV Havelse IV</name>
+        			
+        				<game day="28.09.2015" time="20:00" homeTeam="TSV Havelse III" guestTeam="TSV Havelse IV" />
+        			
+        				<game day="30.09.2015" time="20:00" homeTeam="TSV Havelse IV" guestTeam="Westfalia Herne III" />
+        			
+        				<game day="09.10.2015" time="20:00" homeTeam="VfR Heilbronn IV" guestTeam="TSV Havelse IV" />
+        			
+        				<game day="14.10.2015" time="20:00" homeTeam="TSV Havelse IV" guestTeam="FC Hanau 93 IV" />
+        			
+        				<game day="20.10.2015" time="20:00" homeTeam="FC Augsburg III" guestTeam="TSV Havelse IV" />
+        			
+        				<game day="28.10.2015" time="20:00" homeTeam="TSV Havelse IV" guestTeam="Hannover 96 III" />
+        			
+        				<game day="02.11.2015" time="20:00" homeTeam="DSC Arminia Bielefeld IV" guestTeam="TSV Havelse IV" />
+        			
+        				<game day="20.01.2016" time="20:00" homeTeam="TSV Havelse IV" guestTeam="TSV Havelse III" />
+        			
+        				<game day="27.01.2016" time="20:00" homeTeam="Westfalia Herne III" guestTeam="TSV Havelse IV" />
+        			
+        				<game day="03.02.2016" time="20:00" homeTeam="TSV Havelse IV" guestTeam="VfR Heilbronn IV" />
+        			
+        				<game day="12.02.2016" time="00:00" homeTeam="FC Hanau 93 IV" guestTeam="TSV Havelse IV" />
+        			
+        				<game day="17.02.2016" time="20:00" homeTeam="TSV Havelse IV" guestTeam="FC Augsburg III" />
+        			
+        				<game day="25.02.2016" time="19:30" homeTeam="Hannover 96 III" guestTeam="TSV Havelse IV" />
+        			
+        				<game day="02.03.2016" time="20:00" homeTeam="TSV Havelse IV" guestTeam="DSC Arminia Bielefeld IV" />
+        			
+						</team>
+        	
+        </sisterTeams>
+        
+      </team>
+    
+      <team clubId="10040" number="2" id="10041">
+        <name>FC Hanau 93 II</name>
+        <gameDays>
+           <homeGame day="04.12.2015" time="20:00" maxParallelGames="2" /> <homeGame day="15.04.2016" time="20:00" maxParallelGames="2" /> <homeGame day="15.01.2016" time="20:00" maxParallelGames="2" /> <homeGame day="22.01.2016" time="20:00" maxParallelGames="2" /> <homeGame day="18.03.2016" time="20:00" maxParallelGames="2" /> <homeGame day="29.01.2016" time="20:00" maxParallelGames="2" /> <homeGame day="18.09.2015" time="20:00" maxParallelGames="2" /> <homeGame day="12.02.2016" time="20:00" maxParallelGames="2" /> <homeGame day="02.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="04.03.2016" time="20:00" maxParallelGames="2" /> <homeGame day="25.09.2015" time="20:00" maxParallelGames="2" /> <homeGame day="27.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="13.11.2015" time="20:00" maxParallelGames="2" /> <homeGame day="30.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="23.10.2015" time="20:00" maxParallelGames="2" /> <homeGame day="16.10.2015" time="20:00" maxParallelGames="2" />
+          
+          
+          
+        </gameDays>
+        <sisterTeams>
+        	
+        		<team gender="Herren" number="1">
+        			<name>FC Hanau 93</name>
+        			
+        				<game day="10.10.2015" time="15:00" homeTeam="FC Hanau 93" guestTeam="Viktoria Aschaffenburg" />
+        			
+        				<game day="10.10.2015" time="19:00" homeTeam="FC Hanau 93" guestTeam="DSC Arminia Bielefeld" />
+        			
+        				<game day="30.10.2015" time="20:00" homeTeam="SpVgg Bayreuth III" guestTeam="FC Hanau 93" />
+        			
+        				<game day="07.11.2015" time="19:00" homeTeam="Wacker 04 Berlin II" guestTeam="FC Hanau 93" />
+        			
+        				<game day="11.11.2015" time="20:00" homeTeam="Arminia Hannover" guestTeam="FC Hanau 93" />
+        			
+        				<game day="01.12.2015" time="19:30" homeTeam="Hannover 96" guestTeam="FC Hanau 93" />
+        			
+        				<game day="11.12.2015" time="20:00" homeTeam="Westfalia Herne" guestTeam="FC Hanau 93" />
+        			
+        				<game day="12.12.2015" time="15:00" homeTeam="FC Hanau 93" guestTeam="Alemannia Aachen" />
+        			
+        				<game day="12.12.2015" time="19:00" homeTeam="FC Hanau 93" guestTeam="Blau-Weiß 90 Berlin" />
+        			
+        				<game day="27.01.2016" time="20:30" homeTeam="Alemannia Aachen" guestTeam="FC Hanau 93" />
+        			
+        				<game day="06.02.2016" time="15:00" homeTeam="FC Hanau 93" guestTeam="SpVgg Bayreuth III" />
+        			
+        				<game day="06.02.2016" time="19:00" homeTeam="FC Hanau 93" guestTeam="Wacker 04 Berlin II" />
+        			
+        				<game day="12.02.2016" time="20:00" homeTeam="DSC Arminia Bielefeld" guestTeam="FC Hanau 93" />
+        			
+        				<game day="20.02.2016" time="15:00" homeTeam="FC Hanau 93" guestTeam="Westfalia Herne" />
+        			
+        				<game day="20.02.2016" time="19:00" homeTeam="FC Hanau 93" guestTeam="Arminia Hannover" />
+        			
+        				<game day="26.02.2016" time="20:00" homeTeam="Blau-Weiß 90 Berlin" guestTeam="FC Hanau 93" />
+        			
+        				<game day="11.03.2016" time="20:00" homeTeam="Viktoria Aschaffenburg" guestTeam="FC Hanau 93" />
+        			
+        				<game day="09.04.2016" time="15:00" homeTeam="FC Hanau 93" guestTeam="Hannover 96" />
+        			
+						</team>
+        	
+        		<team gender="Herren" number="3">
+        			<name>FC Hanau 93 III</name>
+        			
+        				<game day="25.09.2015" time="20:00" homeTeam="Arminia Hannover III" guestTeam="FC Hanau 93 III" />
+        			
+        				<game day="30.09.2015" time="20:00" homeTeam="FC Hanau 93 III" guestTeam="SC Herford" />
+        			
+        				<game day="02.10.2015" time="20:00" homeTeam="Hamburger SV III" guestTeam="FC Hanau 93 III" />
+        			
+        				<game day="21.10.2015" time="20:00" homeTeam="FC Hanau 93 III" guestTeam="FC G&#252;tersloh V" />
+        			
+        				<game day="26.10.2015" time="20:00" homeTeam="DSC Arminia Bielefeld III" guestTeam="FC Hanau 93 III" />
+        			
+        				<game day="11.11.2015" time="20:00" homeTeam="FC Hanau 93 III" guestTeam="VfR Heilbronn III" />
+        			
+        				<game day="27.11.2015" time="20:00" homeTeam="Wacker 04 Berlin III" guestTeam="FC Hanau 93 III" />
+        			
+        				<game day="02.12.2015" time="20:00" homeTeam="FC Hanau 93 III" guestTeam="Real Madrid" />
+        			
+        				<game day="03.12.2015" time="20:00" homeTeam="Arminia Hannover II" guestTeam="FC Hanau 93 III" />
+        			
+        				<game day="13.01.2016" time="20:00" homeTeam="FC Hanau 93 III" guestTeam="DSC Arminia Bielefeld III" />
+        			
+        				<game day="20.01.2016" time="20:00" homeTeam="FC Hanau 93 III" guestTeam="Wacker 04 Berlin III" />
+        			
+        				<game day="21.01.2016" time="20:00" homeTeam="FC Hanau 93 III" guestTeam="Arminia Hannover III" />
+        			
+        				<game day="27.01.2016" time="20:15" homeTeam="FC G&#252;tersloh V" guestTeam="FC Hanau 93 III" />
+        			
+        				<game day="17.02.2016" time="20:00" homeTeam="FC Hanau 93 III" guestTeam="Hamburger SV III" />
+        			
+        				<game day="26.02.2016" time="20:00" homeTeam="SC Herford" guestTeam="FC Hanau 93 III" />
+        			
+        				<game day="02.03.2016" time="20:00" homeTeam="FC Hanau 93 III" guestTeam="Arminia Hannover II" />
+        			
+        				<game day="14.03.2016" time="20:15" homeTeam="VfR Heilbronn III" guestTeam="FC Hanau 93 III" />
+        			
+        				<game day="18.03.2016" time="20:00" homeTeam="Real Madrid" guestTeam="FC Hanau 93 III" />
+        			
+						</team>
+        	
+        		<team gender="Herren" number="4">
+        			<name>FC Hanau 93 IV</name>
+        			
+        				<game day="23.09.2015" time="20:15" homeTeam="FC Hanau 93 IV" guestTeam="DSC Arminia Bielefeld IV" />
+        			
+        				<game day="01.10.2015" time="19:30" homeTeam="Hannover 96 III" guestTeam="FC Hanau 93 IV" />
+        			
+        				<game day="07.10.2015" time="20:15" homeTeam="FC Hanau 93 IV" guestTeam="TSV Havelse III" />
+        			
+        				<game day="14.10.2015" time="20:00" homeTeam="TSV Havelse IV" guestTeam="FC Hanau 93 IV" />
+        			
+        				<game day="23.10.2015" time="20:00" homeTeam="VfR Heilbronn IV" guestTeam="FC Hanau 93 IV" />
+        			
+        				<game day="04.11.2015" time="20:15" homeTeam="FC Hanau 93 IV" guestTeam="FC Augsburg III" />
+        			
+        				<game day="09.12.2015" time="20:15" homeTeam="FC Hanau 93 IV" guestTeam="Westfalia Herne III" />
+        			
+        				<game day="11.01.2016" time="20:00" homeTeam="DSC Arminia Bielefeld IV" guestTeam="FC Hanau 93 IV" />
+        			
+        				<game day="19.01.2016" time="20:00" homeTeam="FC Augsburg III" guestTeam="FC Hanau 93 IV" />
+        			
+        				<game day="27.01.2016" time="20:15" homeTeam="FC Hanau 93 IV" guestTeam="Hannover 96 III" />
+        			
+        				<game day="01.02.2016" time="20:00" homeTeam="TSV Havelse III" guestTeam="FC Hanau 93 IV" />
+        			
+        				<game day="12.02.2016" time="00:00" homeTeam="FC Hanau 93 IV" guestTeam="TSV Havelse IV" />
+        			
+        				<game day="17.02.2016" time="20:00" homeTeam="Westfalia Herne III" guestTeam="FC Hanau 93 IV" />
+        			
+        				<game day="24.02.2016" time="20:15" homeTeam="FC Hanau 93 IV" guestTeam="VfR Heilbronn IV" />
+        			
+						</team>
+        	
+        		<team gender="Bambini" number="1">
+        			<name>FC Hanau 93</name>
+        			
+        				<game day="25.09.2015" time="17:30" homeTeam="Viktoria Aschaffenburg" guestTeam="FC Hanau 93" />
+        			
+        				<game day="02.10.2015" time="18:30" homeTeam="FC Hanau 93" guestTeam="DSC Arminia Bielefeld II" />
+        			
+        				<game day="09.10.2015" time="17:30" homeTeam="FC G&#252;tersloh" guestTeam="FC Hanau 93" />
+        			
+        				<game day="16.10.2015" time="18:30" homeTeam="FC Hanau 93" guestTeam="Arminia Hannover" />
+        			
+        				<game day="19.10.2015" time="18:20" homeTeam="VfR Heilbronn" guestTeam="FC Hanau 93" />
+        			
+        				<game day="30.10.2015" time="17:30" homeTeam="FC Homburg" guestTeam="FC Hanau 93" />
+        			
+        				<game day="13.11.2015" time="18:30" homeTeam="FC Hanau 93" guestTeam="KSV Baunatal" />
+        			
+        				<game day="28.11.2015" time="11:00" homeTeam="Westfalia Herne" guestTeam="FC Hanau 93" />
+        			
+        				<game day="11.12.2015" time="18:30" homeTeam="FC Hanau 93" guestTeam="SpVgg Bayreuth III" />
+        			
+        				<game day="15.01.2016" time="18:00" homeTeam="DSC Arminia Bielefeld II" guestTeam="FC Hanau 93" />
+        			
+        				<game day="19.01.2016" time="18:00" homeTeam="KSV Baunatal" guestTeam="FC Hanau 93" />
+        			
+        				<game day="29.01.2016" time="18:30" homeTeam="FC Hanau 93" guestTeam="FC G&#252;tersloh" />
+        			
+        				<game day="05.02.2016" time="18:30" homeTeam="FC Hanau 93" guestTeam="Westfalia Herne" />
+        			
+        				<game day="19.02.2016" time="17:30" homeTeam="Arminia Hannover" guestTeam="FC Hanau 93" />
+        			
+        				<game day="04.03.2016" time="18:30" homeTeam="FC Hanau 93" guestTeam="FC Homburg" />
+        			
+        				<game day="11.03.2016" time="17:30" homeTeam="SpVgg Bayreuth III" guestTeam="FC Hanau 93" />
+        			
+        				<game day="18.03.2016" time="18:30" homeTeam="FC Hanau 93" guestTeam="Viktoria Aschaffenburg" />
+        			
+        				<game day="15.04.2016" time="18:30" homeTeam="FC Hanau 93" guestTeam="VfR Heilbronn" />
+        			
+						</team>
+        	
+        </sisterTeams>
+        
+      </team>
+    
+  </teams>
+</TT>

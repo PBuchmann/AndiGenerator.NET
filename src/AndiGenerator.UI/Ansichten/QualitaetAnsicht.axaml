@@ -37,6 +37,27 @@
       <Setter Property="BorderBrush" Value="{StaticResource Akzent}" />
       <Setter Property="Foreground" Value="White" />
     </Style>
+    <!-- Kleiner Knopf für eine Alternative aus HiGHS -->
+    <Style Selector="TextBlock.folge">
+      <Setter Property="Foreground" Value="{StaticResource Tinte2}" />
+    </Style>
+    <Style Selector="TextBlock.folge.neu">
+      <Setter Property="Foreground" Value="{StaticResource Schlecht}" />
+    </Style>
+    <Style Selector="TextBlock.folge.entfaellt">
+      <Setter Property="Foreground" Value="{StaticResource Gut}" />
+    </Style>
+        <Style Selector="Button.alternative">
+      <Setter Property="Padding" Value="16,6" />
+      <Setter Property="MinHeight" Value="34" />
+      <Setter Property="FontSize" Value="13" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+      <Setter Property="CornerRadius" Value="6" />
+      <Setter Property="Background" Value="{StaticResource AkzentHell}" />
+      <Setter Property="Foreground" Value="{StaticResource AkzentDunkel}" />
+      <Setter Property="BorderBrush" Value="{StaticResource Rand}" />
+      <Setter Property="BorderThickness" Value="1" />
+    </Style>
     <!-- Spalte Einstufung: links durch eine dünne Linie abgesetzt, mit Luft für Schaltergruppe und Pfeile -->
     <Style Selector="Border.einstufung">
       <Setter Property="Width" Value="268" />
@@ -91,8 +112,33 @@
   <UserControl.Resources>
     <!-- Eine Zeile der Tabelle; auch für die Zeile, die beim Ziehen am Mauszeiger hängt -->
     <DataTemplate x:Key="Zeilenvorlage" x:DataType="p:Qualitaetszeile">
+      <StackPanel>
+      <!-- Kopfzeile der Stufe (Automodus): Verstöße zusammen, Grenze aus HiGHS und ob das Optimum erreicht ist -->
+      <Border IsVisible="{Binding HatKopf}" Background="{StaticResource Schwebe}" CornerRadius="8" Padding="12,8" Margin="0,12,0,2">
+        <Grid ColumnDefinitions="190,90,120,130,*" RowDefinitions="Auto,Auto">
+          <TextBlock Text="{Binding Kopf.Titel}" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center" />
+          <TextBlock Grid.Column="1" Text="{Binding Kopf.Plan}" Classes="ziffer" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center" />
+          <TextBlock Grid.Column="2" Text="{Binding Kopf.Grenze}" Classes="ziffer" FontSize="12" Foreground="{StaticResource Tinte2}" VerticalAlignment="Center"
+                     ToolTip.Tip="So wenige Verstöße hat jeder Plan in dieser Stufe mindestens (berechnet mit HiGHS; in B bei bestmöglichem A)." />
+          <!-- Leiste: grau die Verstöße, die jeder Plan hat; orange, wie viele sich höchstens noch vermeiden lassen -->
+          <Border Grid.Column="3" IsVisible="{Binding Kopf.HatLeiste}" Width="110" Height="8" CornerRadius="4" Background="#F3D9AE"
+                  HorizontalAlignment="Left" VerticalAlignment="Center" ClipToBounds="True"
+                  ToolTip.Tip="Grau: Verstöße, die jeder Plan hat. Orange: so viele lassen sich höchstens noch vermeiden.">
+            <Border Background="{StaticResource Grau}" CornerRadius="4" HorizontalAlignment="Left"
+                    Width="{Binding Kopf.Unvermeidbar, Converter={x:Static ui:Konverter.Anteilsbreite}, ConverterParameter=110}" />
+          </Border>
+          <!-- Zweite Zeile: was die Grenze heißt (Optimum erreicht, wie viel noch möglich ist) -->
+          <StackPanel Grid.Row="1" Grid.Column="1" Grid.ColumnSpan="4" Orientation="Horizontal" Spacing="6" VerticalAlignment="Center" Margin="0,4,0,0">
+            <ui:Symbol Daten="{StaticResource SymbolHaken}" Farbe="{StaticResource Gut}" Groesse="16" VerticalAlignment="Center" IsVisible="{Binding Kopf.IstBestmoeglich}" />
+            <TextBlock Text="{Binding Kopf.Spielraum}" FontSize="13" FontWeight="SemiBold" VerticalAlignment="Center" TextWrapping="Wrap"
+                       Foreground="{Binding Kopf.Zustand, Converter={x:Static ui:Konverter.SpielraumFarbe}}" />
+          </StackPanel>
+          <Button Classes="alternative" Content="{Binding Kopf.Knopf}" Command="{Binding Kopf.KnopfBefehl}" IsVisible="{Binding Kopf.HatKnopf}" Grid.Column="4" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="12,0,0,0"
+                  ToolTip.Tip="B-Varianten aus HiGHS (A bestmöglich): je B-Kriterium ein Plan mit Vorrang für dieses Kriterium, und der beste Plan für die Summe in B („Plan B optimal“, wenn HiGHS das bewiesen hat). Ein Klick öffnet den Vergleich mit dem aktuellen Plan; dort wählen Sie eine Variante. Ist eine Variante übernommen: Festlegung aufheben." />
+        </Grid>
+      </Border>
       <Border Classes="zeile" Classes.gezogen="{Binding IstGezogen}" Classes.gewaehlt="{Binding IstGewaehlt}" BorderBrush="{StaticResource Linie}" BorderThickness="0,0,0,1" MinHeight="48">
-        <Grid ColumnDefinitions="Auto,56,40,210,90,Auto,Auto">
+        <Grid ColumnDefinitions="Auto,56,40,210,90,Auto,Auto,Auto,Auto">
           <!-- Griff zum Ziehen (nur im Automodus, nicht bei den harten Fehlern) -->
           <Border Grid.Column="0" Width="30" IsVisible="{Binding $parent[UserControl].((p:QualitaetAnsichtViewModel)DataContext).Bearbeitbar}">
             <Border Classes="griff" IsVisible="{Binding IstEinstufbar}"
@@ -108,16 +154,35 @@
             <TextBlock Text="{Binding Zustand, Converter={x:Static ui:Konverter.ZustandSymbol}}" Foreground="White" FontSize="12" FontWeight="Bold"
                        HorizontalAlignment="Center" VerticalAlignment="Center" />
           </Border>
-          <TextBlock Grid.Column="3" Text="{Binding Name}" FontSize="13" VerticalAlignment="Center" TextWrapping="Wrap" Margin="0,0,12,0" />
+          <StackPanel Grid.Column="3" VerticalAlignment="Center" Margin="0,0,12,0" Spacing="2">
+            <TextBlock Text="{Binding Name}" FontSize="13" TextWrapping="Wrap" />
+            <!-- Beim Ziehen über A oder B: warum die Zeile dort nicht hin darf (HiGHS kennt das Kriterium nicht) -->
+            <TextBlock Text="{Binding Ablehnung}" IsVisible="{Binding HatAblehnung}" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource Schlecht}" TextWrapping="Wrap" />
+          </StackPanel>
           <TextBlock Grid.Column="4" Text="{Binding Verstoesse}" Classes="ziffer" FontSize="13" HorizontalAlignment="Right" VerticalAlignment="Center" />
-          <TextBlock Grid.Column="5" Text="{Binding Kosten}" Width="90" Classes="ziffer" FontSize="13" TextAlignment="Right" VerticalAlignment="Center"
+          <!-- Untere Schranke (Automodus): grüner Haken, wenn der Plan sie erreicht – besser geht es nicht -->
+          <Border Grid.Column="5" Width="170" Margin="16,0,0,0" Background="Transparent" VerticalAlignment="Center"
+                  IsVisible="{Binding $parent[UserControl].((p:QualitaetAnsichtViewModel)DataContext).ZeigtSchranke}"
+                  ToolTip.Tip="Untergrenze: Weniger Verstöße hat kein Plan bei diesem Kriterium – selbst wenn nur es zählte (in B bei bestmöglichem A; berechnet mit HiGHS). Ob es einen Plan mit genau diesem Wert gibt, ist offen; zusammen mit den anderen Kriterien der Stufe ist er meist nicht erreichbar. Ob der Plan besser werden kann, steht in der Kopfzeile der Stufe. „kein Verstoß zwingend“: Die Untergrenze ist 0. Haken: Der Plan erreicht die Untergrenze. Sanduhr: wird berechnet.">
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Spacing="6">
+              <ui:Symbol Daten="{StaticResource SymbolSanduhr}" Farbe="{StaticResource Tinte2}" Groesse="14" VerticalAlignment="Center" IsVisible="{Binding BestmoeglichRechnet}"
+                         ToolTip.Tip="Wird berechnet …" />
+              <ui:Symbol Daten="{StaticResource SymbolHaken}" Farbe="{StaticResource Gut}" Groesse="14" VerticalAlignment="Center" IsVisible="{Binding BestmoeglichErreicht}" />
+              <TextBlock Text="{Binding Bestmoeglich}" FontSize="12" VerticalAlignment="Center" Foreground="{StaticResource Grau}" />
+            </StackPanel>
+          </Border>
+          <!-- Festgelegt (Automodus): Obergrenze aus der übernommenen B-Variante -->
+          <TextBlock Grid.Column="6" Width="100" Margin="12,0,0,0" Text="{Binding Festgelegt}" Classes="ziffer" FontSize="12" Foreground="{StaticResource Grau}" VerticalAlignment="Center"
+                     IsVisible="{Binding $parent[UserControl].((p:QualitaetAnsichtViewModel)DataContext).ZeigtFestlegung}"
+                     ToolTip.Tip="Obergrenze aus der übernommenen B-Variante: Mehr Verstöße darf das Kriterium nicht haben. Weniger sind möglich – der Automodus kann beim Glätten von C noch besser werden." />
+          <TextBlock Grid.Column="7" Text="{Binding Kosten}" Width="90" Classes="ziffer" FontSize="13" TextAlignment="Right" VerticalAlignment="Center"
                      IsVisible="{Binding $parent[UserControl].((p:QualitaetAnsichtViewModel)DataContext).ZeigtKosten}" />
           <!-- Einstufen (nach unten an den Anfang, nach oben ans Ende der neuen Stufe) und Reihenfolge; am Stufenrand führen die Pfeile in die Nachbarstufe -->
-          <Border Grid.Column="6" Classes="einstufung" IsVisible="{Binding $parent[UserControl].((p:QualitaetAnsichtViewModel)DataContext).Bearbeitbar}">
+          <Border Grid.Column="8" Classes="einstufung" IsVisible="{Binding $parent[UserControl].((p:QualitaetAnsichtViewModel)DataContext).Bearbeitbar}">
           <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
             <StackPanel Orientation="Horizontal" IsVisible="{Binding IstEinstufbar}">
-              <Button Classes="stufe" Classes.gewaehlt="{Binding IstA}" CornerRadius="8,0,0,8" Content="A" Command="{Binding EinstufenACommand}" ToolTip.Tip="Stufe A: muss eingehalten werden" />
-              <Button Classes="stufe" Classes.gewaehlt="{Binding IstB}" CornerRadius="0" Content="B" Command="{Binding EinstufenBCommand}" ToolTip.Tip="Stufe B: soll eingehalten werden" />
+              <Button Classes="stufe" Classes.gewaehlt="{Binding IstA}" CornerRadius="8,0,0,8" Content="A" Command="{Binding EinstufenACommand}" ToolTip.Tip="{Binding ErklaerungA}" />
+              <Button Classes="stufe" Classes.gewaehlt="{Binding IstB}" CornerRadius="0" Content="B" Command="{Binding EinstufenBCommand}" ToolTip.Tip="{Binding ErklaerungB}" />
               <Button Classes="stufe" Classes.gewaehlt="{Binding IstC}" CornerRadius="0,8,8,0" Content="C" Command="{Binding EinstufenCCommand}" ToolTip.Tip="Stufe C: wird geglättet" />
             </StackPanel>
             <StackPanel Orientation="Horizontal" Spacing="4" IsVisible="{Binding IstEinstufbar}">
@@ -132,6 +197,7 @@
           </Border>
         </Grid>
       </Border>
+      </StackPanel>
     </DataTemplate>
   </UserControl.Resources>
   <DockPanel Margin="18,14">
@@ -155,29 +221,33 @@
                    Foreground="{Binding PflichtErfuellt, Converter={x:Static ui:Konverter.PflichtFarbe}}" />
       </StackPanel>
     </Border>
-    <!-- Ein gemeinsamer Bildlauf für die ganze Tabelle wie in den übrigen Ansichten; die Leiste liegt rechts neben der Karte. -->
-    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto"
-                  IsVisible="{Binding Zusammenfassung, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+    <!-- Automodus: warum es keine Spalte „Bestmöglich“ gibt (z. B. nur Rückrunde geplant) -->
+    <TextBlock DockPanel.Dock="Top" Text="{Binding SchrankeHinweis}" IsVisible="{Binding HatSchrankeHinweis}" Classes="klein" FontSize="12"
+               Foreground="{StaticResource Tinte2}" TextWrapping="Wrap" Margin="2,0,0,10" />
+    <!-- Links die Kriterien mit eigenem Bildlauf, rechts die Verstöße der gewählten Zeile je Mannschaft mit eigenem Bildlauf:
+         So stehen die Verstöße immer oben im Blick, auch wenn die Tabelle weit heruntergescrollt ist. -->
+    <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding Zusammenfassung, Converter={x:Static StringConverters.IsNotNullOrEmpty}}">
+    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
     <LayoutTransformControl LayoutTransform="{Binding Zoom.Faktor, Converter={x:Static ui:Konverter.Skalierung}}" HorizontalAlignment="Left" VerticalAlignment="Top">
-    <!-- Links die Kriterien, rechts die Verstöße der gewählten Zeile je Mannschaft -->
-    <StackPanel Orientation="Horizontal" Spacing="16" VerticalAlignment="Top">
       <Border Classes="karte" Padding="18,10,18,6" VerticalAlignment="Top">
         <Grid>
         <DockPanel>
           <Border DockPanel.Dock="Top" BorderBrush="{StaticResource Linie}" BorderThickness="0,0,0,1" Padding="0,6,0,8">
-            <Grid ColumnDefinitions="Auto,56,40,210,90,Auto,Auto">
+            <Grid ColumnDefinitions="Auto,56,40,210,90,Auto,Auto,Auto,Auto">
               <Border Grid.Column="0" Width="30" IsVisible="{Binding Bearbeitbar}" />
               <TextBlock Grid.Column="1" Text="STUFE" Classes="klein" FontSize="11" FontWeight="SemiBold" />
               <TextBlock Grid.Column="3" Text="KRITERIUM" Classes="klein" FontSize="11" FontWeight="SemiBold" />
               <TextBlock Grid.Column="4" Text="VERSTÖSSE" Classes="klein" FontSize="11" FontWeight="SemiBold" HorizontalAlignment="Right" />
-              <TextBlock Grid.Column="5" Text="KOSTEN" Width="90" Classes="klein" FontSize="11" FontWeight="SemiBold" TextAlignment="Right" IsVisible="{Binding ZeigtKosten}" />
-              <Border Grid.Column="6" Classes="einstufung" IsVisible="{Binding Bearbeitbar}">
+              <TextBlock Grid.Column="5" Text="UNTERGRENZE" Width="170" Margin="16,0,0,0" Classes="klein" FontSize="11" FontWeight="SemiBold" TextAlignment="Right" IsVisible="{Binding ZeigtSchranke}" />
+              <TextBlock Grid.Column="6" Text="FESTGELEGT" Width="100" Margin="12,0,0,0" Classes="klein" FontSize="11" FontWeight="SemiBold" IsVisible="{Binding ZeigtFestlegung}" />
+              <TextBlock Grid.Column="7" Text="KOSTEN" Width="90" Classes="klein" FontSize="11" FontWeight="SemiBold" TextAlignment="Right" IsVisible="{Binding ZeigtKosten}" />
+              <Border Grid.Column="8" Classes="einstufung" IsVisible="{Binding Bearbeitbar}">
                 <TextBlock Text="EINSTUFUNG" Classes="klein" FontSize="11" FontWeight="SemiBold" VerticalAlignment="Center" />
               </Border>
             </Grid>
           </Border>
           <!-- Im Automodus: Zeilen am Griff links ziehen; die Zeile hängt am Mauszeiger, die Tabelle macht an der Ablagestelle Platz und nummeriert schon um. -->
-          <ItemsControl x:Name="Liste" ItemsSource="{Binding Zeilen}" Background="Transparent"
+          <ItemsControl x:Name="Liste" ui:Fuehrungsmarke.Ziel="QualitaetTabelle" ItemsSource="{Binding Zeilen}" Background="Transparent"
                         ItemTemplate="{StaticResource Zeilenvorlage}"
                         PointerPressed="ListeGedrueckt" PointerMoved="ListeBewegt" PointerReleased="ListeLosgelassen" PointerCaptureLost="ListeVerloren" />
         </DockPanel>
@@ -189,7 +259,11 @@
         </Canvas>
         </Grid>
       </Border>
-      <Border Classes="karte" Padding="18,12" Width="440" VerticalAlignment="Top" IsVisible="{Binding ZeigtDetails}">
+    </LayoutTransformControl>
+    </ScrollViewer>
+    <ScrollViewer x:Name="DetailBildlauf" Grid.Column="1" Margin="16,0,0,0" HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto" IsVisible="{Binding ZeigtDetails}">
+    <LayoutTransformControl LayoutTransform="{Binding Zoom.Faktor, Converter={x:Static ui:Konverter.Skalierung}}" VerticalAlignment="Top">
+      <Border Classes="karte" Padding="18,12" Width="440" VerticalAlignment="Top">
         <StackPanel Spacing="12">
           <Grid ColumnDefinitions="*,Auto">
             <StackPanel Spacing="2" VerticalAlignment="Center">
@@ -205,7 +279,7 @@
               <DataTemplate x:DataType="p:Meldungsgruppe">
                 <StackPanel Spacing="4" Margin="0,0,0,12">
                   <Grid ColumnDefinitions="*,Auto">
-                    <TextBlock Text="{Binding Name}" FontSize="13" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                    <TextBlock ToolTip.Tip="{Binding Name}" Classes="mannschaft" Text="{Binding Name}" FontSize="13" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
                     <Border Grid.Column="1" Background="#FBEDEB" CornerRadius="8" Padding="8,2" Margin="8,0,0,0" VerticalAlignment="Center">
                       <TextBlock Text="{Binding Anzahl}" FontSize="11" FontWeight="SemiBold" Foreground="#7A1A12" />
                     </Border>
@@ -223,10 +297,25 @@
               </DataTemplate>
             </ItemsControl.ItemTemplate>
           </ItemsControl>
+          <!-- Was es kostet, das Kriterium so gut wie möglich zu machen (aus den B-Varianten) -->
+          <StackPanel Spacing="4" IsVisible="{Binding ZeigtFolge}">
+            <TextBlock Text="WENN DAS KRITERIUM VORRANG HAT" Classes="klein" FontSize="11" FontWeight="SemiBold" />
+            <TextBlock Text="{Binding FolgeTitel}" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap" />
+            <ItemsControl ItemsSource="{Binding Folge}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="p:Unterschied">
+                  <Border BorderBrush="{StaticResource Linie}" BorderThickness="0,1,0,0" Padding="0,5">
+                    <TextBlock Classes="folge" Classes.neu="{Binding IstNeu}" Classes.entfaellt="{Binding Entfaellt}" Text="{Binding Text}" FontSize="12" TextWrapping="Wrap" />
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            <TextBlock Text="Vergleichen und wählen: „B-Varianten wählen“ in der Kopfzeile der Stufe B." Classes="klein" TextWrapping="Wrap" Margin="0,4,0,0" />
+          </StackPanel>
         </StackPanel>
       </Border>
-    </StackPanel>
     </LayoutTransformControl>
     </ScrollViewer>
+    </Grid>
   </DockPanel>
 </UserControl>

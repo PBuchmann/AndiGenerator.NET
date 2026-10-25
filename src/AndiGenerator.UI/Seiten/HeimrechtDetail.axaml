@@ -18,7 +18,7 @@
         <DataTemplate x:DataType="p:HeimrechtZeile">
           <Border Classes="zeile">
             <Grid ColumnDefinitions="260,*" Margin="0,2">
-              <TextBlock Text="{Binding Gegner}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+              <TextBlock ToolTip.Tip="{Binding Gegner}" Classes="mannschaft" Text="{Binding Gegner}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
               <!-- Heimrecht der gegnerischen Mannschaft als Umschalter: Vorrunde, egal, Rückrunde -->
             <Border Grid.Column="1" Background="#ECEAE4" CornerRadius="10" Padding="3" HorizontalAlignment="Left">
               <StackPanel Orientation="Horizontal" Spacing="3">

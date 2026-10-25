@@ -137,6 +137,11 @@ public sealed class KompaktdruckTests
         Assert.True(raster.Breite >= 470 && raster.Hoehe > 104);
         Assert.Contains("TTC B", f.Texte);
         Assert.Contains("Spitzenspieltag", f.Texte);
+
+        // Nur Farben, die im Plan vorkommen: ein einziger 4er-Spieltag – kein zweiter Spieltag, keine Einzelbegegnung.
+        Assert.DoesNotContain("zweiter Spieltag am selben Tag", f.Texte);
+        Assert.DoesNotContain("dritter Spieltag am selben Tag", f.Texte);
+        Assert.DoesNotContain("Einzelbegegnung", f.Texte);
         Assert.Contains(f.Punkte, p => p.Art == "Kreis" && Math.Abs(p.Groesse - 8.25) < 1e-9);
         Assert.True(f.Vielecke > 4);
     }
@@ -153,6 +158,17 @@ public sealed class KompaktdruckTests
         Assert.InRange(f.Rechtecke, 1, 1 + bild.Staedte.Count);
         Assert.Contains("TTC C", f.Texte);
         Assert.Contains(f.Punkte, p => p.Art == "Kreis");
+    }
+
+    /// <summary>Farben der Spieltage nur in Karten je Spieltag bzw. Sonntag; je Mannschaft blau (Einzelbegegnung gelb).</summary>
+    [Fact]
+    public void Spieltagsfarben_nur_in_Karten_je_Spieltag()
+    {
+        Kompaktauswertung a = Auswertung();
+
+        Assert.All(Kompaktfahrtenkarte.Bauen(a, a.Spieltage, null, alleZeigen: false).Fahrten, f => Assert.Equal(0, f.Spieltag));
+        Assert.All(Kompaktfahrtenkarte.Mannschaft(a, "TTC C").Fahrten, f => Assert.Equal(-1, f.Spieltag));
+        Assert.All(Kompaktfahrtenkarte.Bauen(a, a.Spieltage, null, alleZeigen: true).Fahrten, f => Assert.Equal(-1, f.Spieltag));
     }
 
     private static IReadOnlyList<Abschnitt> Abschnitte(Kompaktauswertung a, Func<string, string, string> halle) =>

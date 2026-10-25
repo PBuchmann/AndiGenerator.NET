@@ -7,7 +7,7 @@ using AndiGenerator.Domain.Optionen;
 namespace AndiGenerator.Engine.Inseln;
 
 /// <summary>
-/// Blick in den Maschinenraum der Optimierung: was die Rechenkerne und Inseln gerade tun (Anzeige „Maschinenraum“).
+/// Leitstand der Optimierung: was die Rechenkerne und Inseln gerade tun (Anzeige „Leitstand“).
 /// </summary>
 /// <param name="Kerne">Berechnete Pläne je Rechen-Thread seit dem Start (ohne Rechen-Threads leer).</param>
 /// <param name="Inseln">Die Inseln, zuletzt die Spezial-Insel, wenn es sie gibt.</param>
@@ -16,6 +16,11 @@ namespace AndiGenerator.Engine.Inseln;
 /// <param name="SpezialVerwendet">Wie oft die Lösung der Spezial-Insel eine Insel neu gestartet hat.</param>
 /// <param name="BesterPlan">Die Kriterien des besten Plans (Kosten bzw. im Automodus Verstöße je Kriterium).</param>
 /// <param name="BesterPlanNummer">Zählt weiter, sobald sich der geltende beste Plan ändert (zusammen mit <paramref name="BesterPlan"/> ermittelt).</param>
+/// <param name="Starts">Im Automodus je Startverfahren die Neustarts der Inseln und ihre Erfolge; leer, solange keine.</param>
+/// <param name="BesterHarte">
+/// Im Automodus die harten Fehler des besten Plans (Spiele ohne gültigen Termin) – zu Beginn der Basisoptimierung hat er oft
+/// noch welche, und seine Verstöße in A sind dann nicht vergleichbar (weniger Spiele mit Termin, weniger Verstöße).
+/// </param>
 public sealed record Maschinenraum(
     IReadOnlyList<long> Kerne,
     IReadOnlyList<Inselstand> Inseln,
@@ -23,4 +28,6 @@ public sealed record Maschinenraum(
     MannschaftsKostenart? SpezialKostenart,
     int SpezialVerwendet,
     IReadOnlyList<Kriterienwert>? BesterPlan = null,
-    int BesterPlanNummer = 0);
+    int BesterPlanNummer = 0,
+    IReadOnlyList<Startstatistik>? Starts = null,
+    int BesterHarte = 0);

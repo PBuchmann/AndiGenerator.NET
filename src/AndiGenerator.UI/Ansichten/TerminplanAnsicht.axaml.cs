@@ -13,6 +13,6 @@ public partial class TerminplanAnsicht : UserControl
     public TerminplanAnsicht()
     {
         InitializeComponent();
-        Mausradzoom.Anmelden(this);
+        Ansichtszoom.Anmelden(this);
     }
 }

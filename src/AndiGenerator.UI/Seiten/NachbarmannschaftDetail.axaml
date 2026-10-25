@@ -5,7 +5,7 @@
              xmlns:a="using:AndiGenerator.Application"
              x:Class="AndiGenerator.UI.Seiten.NachbarmannschaftDetail"
              x:DataType="p:NachbarmannschaftDetailViewModel">
-  <DockPanel HorizontalAlignment="Left">
+  <DockPanel HorizontalAlignment="Stretch" MaxWidth="756">
     <TextBlock DockPanel.Dock="Top" Classes="abschnitt" Text="Nachbarmannschaften" />
     <StackPanel DockPanel.Dock="Right" Classes="seitenknoepfe">
       <Button Classes="seitenknopf" Command="{Binding NeuCommand}">
@@ -27,10 +27,10 @@
         </StackPanel>
       </Button>
     </StackPanel>
-    <ListBox x:Name="Liste" ItemsSource="{Binding Eintraege}" SelectedItem="{Binding Auswahl}" MinHeight="260" Width="520">
+    <ListBox x:Name="Liste" ItemsSource="{Binding Eintraege}" SelectedItem="{Binding Auswahl}" MinHeight="260" MinWidth="200">
       <ListBox.ItemTemplate>
         <DataTemplate x:DataType="a:Nachbarmannschaftseintrag">
-          <TextBlock Text="{Binding Bezeichnung}" />
+          <TextBlock Text="{Binding Bezeichnung}" TextWrapping="Wrap" />
         </DataTemplate>
       </ListBox.ItemTemplate>
     </ListBox>

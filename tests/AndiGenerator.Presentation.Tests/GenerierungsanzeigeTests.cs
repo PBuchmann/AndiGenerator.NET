@@ -56,7 +56,7 @@ public sealed class GenerierungsanzeigeTests
         anzeige.Uebernehmen(Stand(1000) with { Lenkung = lenkung });
 
         Assert.True(anzeige.ZeigtVerstoesse);
-        Assert.Equal("Automodus · Optimierung Stufe C", anzeige.Titel);
+        Assert.Equal("Optimierung Stufe C", anzeige.Titel);
         Assert.Equal(Planqualitaet.Name(Kostenkriterium.Spielverteilung), anzeige.Phase);
 
         // Alle Kriterien werden genannt, auch viele (unten in der Kachel ist Platz).
@@ -74,40 +74,6 @@ public sealed class GenerierungsanzeigeTests
         Assert.Equal("–", anzeige.VerstossA);
         Assert.Equal(string.Empty, anzeige.Phase);
         Assert.Equal(string.Empty, anzeige.BasisA);
-    }
-
-    [Fact]
-    public void Kerne_zeigen_ihre_Last_im_Verhaeltnis_zum_schnellsten()
-    {
-        var anzeige = new Generierungsanzeige();
-        anzeige.Uebernehmen(MitKernen(0, 0));
-        anzeige.Uebernehmen(MitKernen(1000, 500));
-
-        Assert.Equal(2, anzeige.Kerne.Count);
-        Assert.True(anzeige.Rechnet);
-        Assert.Equal(22, anzeige.Kerne[0].Hoehe);
-        Assert.True(anzeige.Kerne[1].Hoehe < anzeige.Kerne[0].Hoehe);
-
-        // Angehalten ruhen alle Kerne.
-        anzeige.Uebernehmen(MitKernen(1000, 500) with { Pausiert = true });
-        Assert.False(anzeige.Rechnet);
-        Assert.All(anzeige.Kerne, k => Assert.Equal(3, k.Hoehe));
-    }
-
-    [Fact]
-    public void Viele_Kerne_stehen_in_der_Kachel_in_Gruppen_und_im_Maschinenraum_als_Raster()
-    {
-        var anzeige = new Generierungsanzeige();
-        anzeige.Uebernehmen(MitKernen(new long[192]));
-        Assert.Equal(192, anzeige.Kerne.Count);
-        Assert.Equal(16, anzeige.KachelKerne.Count);
-        Assert.True(anzeige.VieleKerne);
-        Assert.Equal("Kerne 1–12", anzeige.KachelKerne[0].Name);
-
-        anzeige.Uebernehmen(MitKernen(new long[8]));
-        Assert.Equal(8, anzeige.KachelKerne.Count);
-        Assert.False(anzeige.VieleKerne);
-        Assert.Same(anzeige.Kerne[0], anzeige.KachelKerne[0]);
     }
 
     [Fact]
@@ -129,8 +95,44 @@ public sealed class GenerierungsanzeigeTests
         Assert.True(verlauf.Punkte.Zip(verlauf.Punkte.Skip(1)).All(p => p.First.Sekunden <= p.Second.Sekunden));
     }
 
-    private static Optimierungsstand MitKernen(params long[] kerne) =>
-        Stand(1000) with { Maschinenraum = new Maschinenraum(kerne, [], 100_000, null, 0) };
+    [Fact]
+    public void Verlauf_merkt_Verbesserungen_mit_Herkunft_und_Meilensteine()
+    {
+        Suchverlauf verlauf = Beispielverlauf.Erzeugen();
+
+        // Jede Verbesserung mit Herkunft und Werten danach; die erste aus HiGHS bringt A von 35 auf 10.
+        Assert.Equal(18, verlauf.Verbesserungen.Count);
+        Assert.Equal(["Inseln", "HiGHS", "Teilneuplanung"], verlauf.Verbesserungen.Select(v => v.Herkunft).Distinct());
+        Verlaufsverbesserung highs = verlauf.Verbesserungen.First(v => v.Herkunft == "HiGHS");
+        Assert.Equal((78, 10, 29), (highs.Sekunden, highs.A, highs.B));
+        Assert.Contains(highs.Aenderungen, a => a.Besser && a.Text.Contains("35 → 10", StringComparison.Ordinal));
+
+        // Meilensteine in zeitlicher Reihenfolge.
+        Assert.Equal(["Basisoptimierung fertig", "A bestmöglich", "Festgelegt: Plan B optimal"], verlauf.Meilensteine.Select(m => m.Text));
+        Assert.Equal(10, verlauf.Punkte[^1].SchrankeA);
+        Assert.True(verlauf.Punkte[^1].Suche > 0.8);
+    }
+
+    /// <summary>
+    /// Ein Plan mit Spielen ohne gültigen Termin (zu Beginn der Basisoptimierung) erscheint im Verlauf nicht: Er hat weniger
+    /// Verstöße, und die Treppe sähe aus, als wäre ein besserer Plan verloren gegangen.
+    /// </summary>
+    [Fact]
+    public void Plan_mit_Spielen_ohne_Termin_erscheint_im_Verlauf_ohne_Verstoesse()
+    {
+        var verlauf = new Suchverlauf();
+        Optimierungsstand Basis(int a, int harte)
+        {
+            var lenkung = new Lenkungsstand(null, new Stufenwert(harte, a, 30, 0, 300, 0), null, string.Empty, "Basisoptimierung", 0, 0, Berechnungsoptionen.Standard, []);
+            var raum = new Maschinenraum([], [], 0, null, 0, [new(Kostenkriterium.ParalleleSpiele, a, Stufe.A)], 1, BesterHarte: harte);
+            return new Optimierungsstand(true, false, 100, 10, 1000, 1, TimeSpan.Zero, null, [], lenkung, raum);
+        }
+
+        verlauf.Hinzufuegen(Basis(12, 40), 1);
+        verlauf.Hinzufuegen(Basis(40, 0), 2);
+
+        Assert.Equal([null, 40], verlauf.Punkte.Select(p => p.A));
+    }
 
     private static Optimierungsstand Stand(double kosten) =>
         new(true, false, 100, 10, kosten, 1, TimeSpan.Zero, null, []);

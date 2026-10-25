@@ -94,6 +94,25 @@ public sealed class KompaktspieltageTests : IDisposable
         Assert.Equal(Kompaktmodus.Ein, Plansitzung.Oeffnen(sitzung.Pfad, Path.Combine(ordner, "basis")).DatenBearbeiten().Kompaktspieltage);
     }
 
+    /// <summary>Die Halle für alle Heimspiele gilt für alle Heimtermine der Mannschaft und für neue, die danach eingetragen werden.</summary>
+    [Fact]
+    public void Halle_fuer_alle_Heimspiele_gilt_auch_fuer_neue_Heimtermine()
+    {
+        Plansitzung sitzung = Oeffnen(Testdaten.Datei("4__Kreisklasse_Gruppe_A (2).xml"));
+        string team = sitzung.Staffel.Mannschaften[0].Name;
+        Datenbearbeitung daten = sitzung.DatenBearbeiten();
+        daten.KompaktLokalFuerAlle(team, "2");
+        sitzung.DatenUebernehmen(daten);
+
+        Datenbearbeitung danach = sitzung.DatenBearbeiten();
+        Assert.Equal("2", danach.KompaktStandardlokal(team));
+        var neuerTag = new DateOnly(2027, 6, 6);
+        danach.KompaktfeldSetzen(team, neuerTag, Kompaktfeld.Heim);
+        Assert.Equal("2", danach.KompaktterminLesen(team, neuerTag)?.Spiellokal);
+        Assert.All(sitzung.Staffel.Mannschaften[0].Heimspieltermine, t => Assert.Equal("2", t.Spiellokal));
+        Assert.Equal(Kompaktmodus.Offen, sitzung.Kompaktmodus);
+    }
+
     [Fact]
     public void Spitze_und_Keller_nach_QTTR_Schnitt()
     {

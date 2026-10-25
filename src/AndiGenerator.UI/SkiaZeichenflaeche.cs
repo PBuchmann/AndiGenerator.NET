@@ -3,7 +3,6 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 using AndiGenerator.Rendering;
-using Avalonia.Platform;
 using SkiaSharp;
 
 namespace AndiGenerator.UI;
@@ -13,10 +12,9 @@ namespace AndiGenerator.UI;
 /// Schrift wie in der Oberfläche: die mitgelieferte IBM Plex Sans (fett = SemiBold), ersatzweise Segoe UI. Die Schriften
 /// werden einmal geladen und von allen Seiten geteilt, damit das PDF sie nur einmal einbettet.
 /// </summary>
-internal sealed class SkiaZeichenflaeche : IZeichenflaeche, IDisposable
+internal sealed partial class SkiaZeichenflaeche : IZeichenflaeche, IDisposable
 {
     private const string Ersatzschrift = "Segoe UI";
-    private const string Schriftordner = "avares://AndiGenerator.UI/Assets/Fonts/";
 
     private static readonly Lazy<SKTypeface> SchriftNormal = new(() => Laden("IBMPlexSans-Regular.ttf", SKFontStyle.Normal));
     private static readonly Lazy<SKTypeface> SchriftFett = new(() => Laden("IBMPlexSans-SemiBold.ttf", SKFontStyle.Bold));
@@ -217,11 +215,16 @@ internal sealed class SkiaZeichenflaeche : IZeichenflaeche, IDisposable
 
     private static SKColor Skia(Farbe farbe) => new(farbe.R, farbe.G, farbe.B);
 
+    /// <summary>Öffnet eine Schriftdatei aus <c>Assets/Fonts</c> (Oberfläche: Avalonia-Ressource; MCP-Server: eingebettet).</summary>
+    /// <param name="datei">Dateiname, z. B. <c>IBMPlexSans-Regular.ttf</c>.</param>
+    /// <returns>Der Inhalt.</returns>
+    private static partial Stream SchriftOeffnen(string datei);
+
     private static SKTypeface Laden(string datei, SKFontStyle ersatz)
     {
         try
         {
-            using Stream strom = AssetLoader.Open(new Uri(Schriftordner + datei));
+            using Stream strom = SchriftOeffnen(datei);
             using SKData daten = SKData.Create(strom);
             if (SKTypeface.FromData(daten) is SKTypeface schrift)
             {

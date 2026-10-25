@@ -29,6 +29,14 @@
   <ItemGroup>
     <PackageVersion Include="Velopack" Version="0.0.1298" />
   </ItemGroup>
+  <!-- Steuerung durch eine KI über das Model Context Protocol (nur tools/AndiGenerator.Mcp): ModelContextProtocol Apache-2.0, Microsoft.Extensions.Hosting MIT. -->
+  <ItemGroup>
+    <PackageVersion Include="ModelContextProtocol" Version="2.2.0" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.10" />
+    <!-- PDF-Ausdruck des MCP-Servers ohne Avalonia: dieselbe SkiaSharp-Version, die Avalonia.Skia mitbringt (MIT). -->
+    <PackageVersion Include="SkiaSharp" Version="3.119.4" />
+    <PackageVersion Include="SkiaSharp.NativeAssets.Linux" Version="3.119.4" />
+  </ItemGroup>
   <!-- Analyzer nur zur Entwicklungszeit: nicht Teil der ausgelieferten Programme und daher von der Lizenzregel ausgenommen (E11, präzisiert 01.10.2026); Lizenzen siehe THIRD-PARTY-NOTICES.md. -->
   <ItemGroup>
     <GlobalPackageReference Include="StyleCop.Analyzers" Version="1.2.0-beta.556" />

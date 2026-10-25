@@ -56,7 +56,7 @@ public partial class KostenAnsicht : UserControl
     public KostenAnsicht()
     {
         InitializeComponent();
-        Mausradzoom.Anmelden(this);
+        Ansichtszoom.Anmelden(this);
         LayoutUpdated += (_, _) => KartenAnordnen();
     }
 

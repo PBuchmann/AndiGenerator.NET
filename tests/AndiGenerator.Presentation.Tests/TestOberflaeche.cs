@@ -24,11 +24,20 @@ internal sealed class TestOberflaeche : IOberflaeche
     /// </summary>
     public bool Sammeln { get; set; }
 
+    /// <summary>Holt, wie die Oberfläche wach gehalten bzw. freigegeben wurde (in der Reihenfolge der Aufrufe).</summary>
+    public List<bool> Wach { get; } = [];
+
     /// <summary>Holt die Titel aller angezeigten Dialoge in der Reihenfolge der Aufrufe.</summary>
     public List<string> Aufrufe { get; } = [];
 
     /// <summary>Holt oder setzt die Antwort auf Ja/Nein-Fragen.</summary>
     public bool Antwort { get; set; }
+
+    /// <summary>Holt die gezeigten Dialoge „B-Varianten“.</summary>
+    public List<AlternativendialogViewModel> Alternativendialoge { get; } = [];
+
+    /// <summary>Holt oder setzt, ob im Dialog der Alternativen „Übernehmen“ gewählt wird.</summary>
+    public bool AlternativeUebernehmen { get; set; }
 
     /// <summary>Holt oder setzt die Datei, die „Öffnen“ liefert.</summary>
     public string? DateiZumOeffnen { get; set; }
@@ -121,6 +130,13 @@ internal sealed class TestOberflaeche : IOberflaeche
 
     public Task<bool> FragenAsync(string titel, string frage) => Merken(titel, Antwort);
 
+    public Task<bool> AlternativenZeigenAsync(AlternativendialogViewModel dialog)
+    {
+        Alternativendialoge.Add(dialog);
+        return Task.FromResult(AlternativeUebernehmen);
+    }
+
+    /// <inheritdoc/>
     public Task<Sicherungswahl> SicherungAbfragenAsync(Planvergleich vergleich)
     {
         Vergleich = vergleich;
@@ -200,6 +216,9 @@ internal sealed class TestOberflaeche : IOberflaeche
         Meldungen.Add(titel + ": " + text);
         return Task.CompletedTask;
     }
+
+    /// <inheritdoc/>
+    public void WachHalten(bool an) => Wach.Add(an);
 
     private Task<T> Merken<T>(string titel, T ergebnis)
     {

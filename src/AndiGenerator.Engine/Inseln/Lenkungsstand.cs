@@ -21,6 +21,12 @@ namespace AndiGenerator.Engine.Inseln;
 /// angehobenen, in Stufe C das, das geglättet wird; leer in der Basisoptimierung.
 /// </param>
 /// <param name="Gewichte">Die Gewichte, die der Automodus gegenüber den Gewichtungen des Anwenders geändert hat.</param>
+/// <param name="SchrankeA">Die untere Schranke aus HiGHS für die Summe der Stufe A; <c>null</c>, solange keine bekannt ist.</param>
+/// <param name="SchrankeB">Die untere Schranke für die Summe der Stufe B bei bestmöglichem A; <c>null</c>, solange keine bekannt ist.</param>
+/// <param name="VonInseln">So oft ist der Plan einer Insel bester Plan geworden (nach der Basisoptimierung).</param>
+/// <param name="VonHighs">So oft ist ein Plan aus HiGHS bester Plan geworden.</param>
+/// <param name="ZuletztVon">Woher der beste Plan zuletzt kam: „Insel 3“, „HiGHS“ oder „Teilneuplanung“; <c>null</c>, solange keiner.</param>
+/// <param name="Festgelegt">Was der Staffelleiter festgelegt hat (A und B bleiben so), oder <c>null</c>.</param>
 public sealed record Lenkungsstand(
     Stufenwert? Basis,
     Stufenwert Bester,
@@ -32,4 +38,10 @@ public sealed record Lenkungsstand(
     Berechnungsoptionen Gewichtungen,
     IReadOnlyList<string> Aenderungen,
     IReadOnlyList<Kostenkriterium>? Kriterien = null,
-    IReadOnlyList<Gewichtsanhebung>? Gewichte = null);
+    IReadOnlyList<Gewichtsanhebung>? Gewichte = null,
+    int? SchrankeA = null,
+    int? SchrankeB = null,
+    int VonInseln = 0,
+    int VonHighs = 0,
+    string? ZuletztVon = null,
+    string? Festgelegt = null);

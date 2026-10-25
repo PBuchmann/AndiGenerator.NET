@@ -7,7 +7,7 @@ using AndiGenerator.Engine.Inseln;
 
 namespace AndiGenerator.Presentation.Tests;
 
-/// <summary>Schaubild im Maschinenraum: grober Zustand der Inseln und Ereignisse aus dem Vergleich zweier Stände.</summary>
+/// <summary>Schaubild im Leitstand: grober Zustand der Inseln und Ereignisse aus dem Vergleich zweier Stände.</summary>
 public sealed class SchaubildTests
 {
     [Fact]

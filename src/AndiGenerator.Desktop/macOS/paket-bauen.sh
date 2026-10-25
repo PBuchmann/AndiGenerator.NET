@@ -25,6 +25,7 @@ mkdir -p "$app/Contents/MacOS" "$app/Contents/Resources"
 cp -R "$publish/." "$app/Contents/MacOS/"
 cp "$hier/AndiGenerator.NET.icns" "$app/Contents/Resources/"
 chmod 755 "$app/Contents/MacOS/AndiGenerator.NET"
+if [ -f "$app/Contents/MacOS/andigen-mcp" ]; then chmod 755 "$app/Contents/MacOS/andigen-mcp"; fi
 
 # Die Kurzversion muss rein numerisch sein (1.0.0-beta.1 → 1.0.0); die volle Version steht in CFBundleVersion.
 sed -e "s/@VERSION@/$version/g" -e "s/@KURZVERSION@/${version%%-*}/g" "$hier/Info.plist" > "$app/Contents/Info.plist"

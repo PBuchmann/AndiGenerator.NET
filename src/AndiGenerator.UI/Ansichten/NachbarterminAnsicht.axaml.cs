@@ -13,6 +13,6 @@ public partial class NachbarterminAnsicht : UserControl
     public NachbarterminAnsicht()
     {
         InitializeComponent();
-        Mausradzoom.Anmelden(this);
+        Ansichtszoom.Anmelden(this);
     }
 }

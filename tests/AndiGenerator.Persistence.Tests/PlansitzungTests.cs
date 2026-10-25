@@ -310,21 +310,24 @@ public sealed class PlansitzungTests : IDisposable
         {
             Assert.Equal(spiele.Count(s => s.Heim == m.Name || s.Gast == m.Name), m.Spiele.Count(s => s.Zeitpunkt is not null));
             Assert.Equal(m.Spiele.Select(s => s.Zeitpunkt), m.Spiele.OrderBy(s => s.Zeitpunkt).Select(s => s.Zeitpunkt));
-            Assert.All(m.Abstaende.SelectMany(z => z), l => Assert.True(l.Von <= l.Bis));
+            Assert.All(m.Abstaende.SelectMany(z => z), l => Assert.True(l.Von <= l.Bis && l.Abstand > 0 && l.Gegner.Length > 0));
         });
         Assert.Equal(daten.MitRueckrunde ? 2 : 1, daten.Wochen.Count);
+
+        // Die Diagramme zeigen rechts dieselben Zahlen wie die Qualitätsansicht.
+        Planbewertung bewertung = sitzung.Bewerten(spiele);
+        Assert.NotNull(daten.Verstoesse);
+        Assert.Equal(daten.Mannschaften.Select(m => m.Name).Order(), daten.Verstoesse.JeMannschaft.Keys.Order());
+        Assert.All(bewertung.Mannschaften, m =>
+        {
+            Mannschaftsverstoesse v = daten.Verstoesse.Von(m.Name)!;
+            Assert.Equal(m.JeKostenart[(int)MannschaftsKostenart.WechselHeimAuswaerts].Anzahl, v.Wechsel);
+            Assert.Equal(m.JeKostenart[(int)MannschaftsKostenart.DreiTageAbstand].Anzahl, v.EngeTermine);
+        });
+        Assert.Equal(bewertung.Zusatz!.Spielverteilung.Sum(), daten.Verstoesse.JeMannschaft.Values.Sum(v => v.Pausen ?? 0));
+        Assert.Equal(bewertung.Zusatz.Spielverteilung.Sum(), daten.Verstoesse.JeMannschaft.Values.Sum(v => v.Pausenzeiten.Count));
         Assert.All(daten.Wochen.SelectMany(w => w.Montage), t => Assert.Equal(DayOfWeek.Monday, t.DayOfWeek));
         Assert.All(daten.Wochen, w => Assert.Equal(w.Montage.Count, w.MaxDifferenz.Count));
-    }
-
-    [Theory]
-    [InlineData(4, 4.0, 0, 255)]
-    [InlineData(12, 4.0, 255, 0)]
-    [InlineData(2, 4.0, 127, 255)]
-    [InlineData(3, 4.0, 63, 255)]
-    public void Abstandsfarbe_wie_im_Original(int abstand, double ideal, int rot, int gruen)
-    {
-        Assert.Equal((rot, gruen), Diagrammauswertung.Abstandsfarbe(abstand, ideal));
     }
 
     [Fact]
