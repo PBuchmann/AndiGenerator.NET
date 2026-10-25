@@ -28,8 +28,10 @@ public sealed partial class HauptfensterViewModel
         }
 
         string kopie;
+        bool erstesMal;
         try
         {
+            erstesMal = !File.Exists(Path.Combine(eigeneBasis, "Beispiele", Path.GetFileName(quelle)));
             kopie = Beispielsammlung.Kopieren(quelle, eigeneBasis);
         }
         catch (Exception fehler) when (fehler is IOException or UnauthorizedAccessException)
@@ -39,5 +41,12 @@ public sealed partial class HauptfensterViewModel
         }
 
         await StaffelOeffnenAsync(kopie);
+
+        // Die Doppelrunde ist eine Einstellung, keine Angabe der click-TT-Datei: beim ersten Öffnen einschalten, damit das
+        // Beispiel zeigt, wofür es gedacht ist (später bleibt, was in den Einstellungen gewählt wurde).
+        if (erstesMal && Beispielsammlung.IstDoppelrunde(quelle) && Optionen is { Doppelrunde: false } bisher)
+        {
+            OptionenAnwenden(bisher with { Doppelrunde = true });
+        }
     }
 }

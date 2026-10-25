@@ -179,7 +179,10 @@ public sealed partial class Diagrammzeichner
         f?.Text(stand.ToString(CultureInfo.InvariantCulture), rechts + 8, mitte - 8, Normal, Tinte, true);
 
         // Wie in der Qualitätsansicht: je Spiel, das in derselben Woche wie das vorige liegt (außer am Koppeltermin), ein Verstoß.
-        string verstoesse = d.Verstoesse is null ? eigene.ToString(CultureInfo.InvariantCulture) : v?.ZweiSpieleProWoche?.ToString(CultureInfo.InvariantCulture) ?? "–";
+        // Bei mehreren Runden zählt jedes Raster nur seine Wochen; die Zahl der Bewertung gilt für die ganze Saison.
+        string verstoesse = d.Verstoesse is null || (d.Wochen.Count > 1 && zaehlt)
+            ? eigene.ToString(CultureInfo.InvariantCulture)
+            : v?.ZweiSpieleProWoche?.ToString(CultureInfo.InvariantCulture) ?? "–";
         bool rot = verstoesse is not ("0" or "–");
         f?.Text(verstoesse, rechts + 58, mitte - 8, Normal, rot ? Schlecht : Tinte, rot);
     }

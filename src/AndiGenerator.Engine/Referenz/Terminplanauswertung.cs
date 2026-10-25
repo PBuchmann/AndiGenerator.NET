@@ -64,15 +64,17 @@ public static class Terminplanauswertung
     private static Terminplanzeile Zeile(RefPlan plan, RefSpiel spiel)
     {
         DateTime? zeitpunkt = spiel.DatumGueltig ? DelphiDatum.ZuDateTime(spiel.Datum) : null;
+        int runde = spiel.DatumGueltig ? plan.RundeZuDatum(spiel.Datum) : -1;
         return new Terminplanzeile(
             zeitpunkt,
             spiel.Heim.TeamName,
             spiel.Gast.TeamName,
-            spiel.DatumGueltig ? plan.RundeZuDatum(spiel.Datum) : -1,
+            runde,
             zeitpunkt is DateTime z ? ISOWeek.GetWeekOfYear(z) : 0,
             string.Join(", ", Hinweise(plan, spiel)),
             Nachbartermine(plan, spiel, spiel.Heim),
-            Nachbartermine(plan, spiel, spiel.Gast));
+            Nachbartermine(plan, spiel, spiel.Gast),
+            Rundennamen.Name(Rundennamen.Fuer(plan.Optionen), runde));
     }
 
     /// <summary>Hinweise wie im Original <c>PaintOneTermin</c>.</summary>

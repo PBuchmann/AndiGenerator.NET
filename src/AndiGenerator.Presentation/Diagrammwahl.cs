@@ -36,7 +36,7 @@ public sealed record Diagrammwahl(Diagrammteil Teil, string Titel, string Beschr
         Diagrammteil.Ausrichter => "Wer wie oft ausrichtet und wo jede Mannschaft spielt; bei Kompaktspieltagen zählt nicht der Wechsel.",
         Diagrammteil.WechselHeimAuswaerts => "Heim- und Auswärtsspiele je Mannschaft als Kacheln; ideal ist ein gleichmäßiges Schachbrett, Serien ab drei sind rot unterstrichen.",
         Diagrammteil.Spielverteilung => "Jedes Spiel am genauen Tag: Doppelspieltage, Spiele kurz nacheinander und lange Pausen je Mannschaft.",
-        Diagrammteil.AbstandHeimAuswaerts => "Wie viele Spiele zwischen Hin- und Rückspiel gegen jeden Gegner liegen; grün ist das Soll (eine Runde ± 2 Spiele).",
+        Diagrammteil.AbstandHeimAuswaerts => "Wie viele Spiele zwischen Hin- und Rückspiel gegen jeden Gegner liegen (bei einer Doppelrunde zwischen den vier Spielen); grün ist das Soll (eine Runde ± 2 Spiele).",
         Diagrammteil.SpieleProWoche => "Wie viele Spiele jede Mannschaft je Woche hat.",
         _ => "Abgleich des Plans mit der Setzliste: wann die gesetzten Mannschaften aufeinandertreffen.",
     };

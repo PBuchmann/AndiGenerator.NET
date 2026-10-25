@@ -2,6 +2,17 @@
 
 Was sich von Version zu Version für Anwender ändert. Die Einzelheiten stehen in der [Anleitung](Doku/ANLEITUNG.md), die technische Geschichte im [Migrationsplan](Doku/MIGRATIONSPLAN.md).
 
+## Unveröffentlicht
+
+### Behoben
+
+- **Doppelrunde in Terminplan und Diagrammen:** Die vier Viertelrunden heißen jetzt „1. Vorrunde“ bis „2. Rückrunde“ – vorher hieß die zweite Viertelrunde im Terminplan „Rückrunde“ und die übrigen „3. Runde“ und „4. Runde“. Im Diagramm *Wechsel Heim/Auswärts* trennt eine Lücke jede Viertelrunde (vorher nur die erste, beschriftet als „Beginn der Rückrunde“), *Spiele pro Woche* zeigt je Viertelrunde ein Raster (vorher Hin- und Rückrunde mit je zwei Viertelrunden), die *Setzliste* nennt die Viertelrunden, und *Abstand Hin-/Rückspiel* gibt es auch bei einer Doppelrunde als Halbrunde.
+- **Spiele pro Woche, Spalte „2 je Woche“:** Bei mehreren Rastern (Hin- und Rückrunde) stand in jedem Raster die Zahl der ganzen Saison; jetzt zählt jedes Raster seine Wochen.
+
+### Geändert
+
+- **Beispiel „Liga für Doppelrunde“** öffnet sich beim ersten Mal mit eingeschalteter Doppelrunde (vorher plante es eine normale Vor- und Rückrunde, bis man die Doppelrunde in den Einstellungen einschaltete).
+
 ## 0.9.10 (25.10.2026)
 
 Die letzte Vorabversion vor 1.0: Alle Diagramme und die Übersicht der Terminwünsche sind neu gestaltet und zählen wie die Qualitätsansicht, der Automodus rechnet mit HiGHS (Schranke, B-Varianten, Teilneuplanung), und die Kompaktspieltage sind an vielen Stellen verbessert. Neu sind außerdem die Führung „Schritt für Schritt“ (F1), Beispiele zum Ausprobieren auf der Startseite und – für Fortgeschrittene – die Steuerung durch eine KI über den beiliegenden MCP-Server `andigen-mcp`.

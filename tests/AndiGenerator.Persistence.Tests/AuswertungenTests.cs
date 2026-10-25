@@ -5,6 +5,7 @@
 using System.Text;
 using AndiGenerator.Domain.Optionen;
 using AndiGenerator.Domain.Stammdaten;
+using AndiGenerator.Engine.Kern;
 using AndiGenerator.Engine.Referenz;
 using AndiGenerator.Persistence.Plandaten;
 
@@ -141,6 +142,39 @@ public class AuswertungenTests
         Assert.Contains(zeilen, z => z.Hinweis.Contains("Spiellokal: 2", StringComparison.Ordinal));
         Terminplanzeile heim = Assert.Single(zeilen, z => z.Zeitpunkt == tag && z.Heim == verein[0].Name);
         Assert.Contains(heim.NachbartermineHeim, n => n.Gast == verein[1].Name && n.EchteNachbarmannschaft == (Math.Abs(verein[0].Nummer - verein[1].Nummer) == 1));
+    }
+
+    /// <summary>
+    /// Doppelrunde (Peter, 25.10.2026): Terminplan und Diagramme kennen die vier Viertelrunden – Namen im Terminplan, je
+    /// Viertelrunde ein Raster „Spiele pro Woche“, jedes Spiel in genau einem Raster, Diagramm „Abstand“ dabei.
+    /// </summary>
+    [Fact]
+    public void Doppelrunde_zeigt_vier_Viertelrunden()
+    {
+        Staffel staffel = Laden("R23_Liga für Doppelrunde.xml") with { BestehenderSpielplan = [] };
+        Berechnungsoptionen optionen = Berechnungsoptionen.Standard with { Doppelrunde = true };
+        IReadOnlyList<Spiel> plan = Kernoptimierung.Optimieren(staffel, optionen, "15", 200, startwert: 1).Spiele;
+        Staffel mitPlan = staffel with { BestehenderSpielplan = plan };
+
+        IReadOnlyList<Terminplanzeile> zeilen = Terminplanauswertung.Zeilen(mitPlan, optionen);
+        Diagrammdaten daten = Diagrammauswertung.Ermitteln(mitPlan, optionen);
+
+        string[] namen = ["1. Vorrunde", "2. Vorrunde", "1. Rückrunde", "2. Rückrunde"];
+        Assert.Equal(staffel.Mannschaften.Count * (staffel.Mannschaften.Count - 1) * 2, zeilen.Count);
+        Assert.Equal(namen, zeilen.Where(z => z.Zeitpunkt is not null).Select(z => z.Rundenname).Distinct());
+        Assert.All(zeilen.Where(z => z.Zeitpunkt is not null), z => Assert.Equal(namen[z.Runde], z.Rundenname));
+        Assert.Equal(namen, daten.Rundennamen);
+        Assert.Equal(namen, daten.Wochen.Select(w => w.Titel));
+        Assert.True(daten.MitRueckrunde);
+        for (int i = 0; i < daten.Mannschaften.Count; i++)
+        {
+            Assert.Equal(daten.Mannschaften[i].Spiele.Count(s => s.Zeitpunkt is not null), daten.Wochen.Sum(w => w.Spiele[i].Sum()));
+        }
+
+        // Ohne Doppelrunde bleibt es bei Vor- und Rückrunde.
+        Diagrammdaten einfach = Diagrammauswertung.Ermitteln(staffel, Berechnungsoptionen.Standard);
+        Assert.Equal(["Hinrunde", "Rückrunde"], einfach.Wochen.Select(w => w.Titel));
+        Assert.Equal(["Vorrunde", "Rückrunde"], einfach.Rundennamen);
     }
 
     [Fact]

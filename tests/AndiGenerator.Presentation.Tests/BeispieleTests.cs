@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 using AndiGenerator.Application;
+using AndiGenerator.Persistence.Optionen;
 
 namespace AndiGenerator.Presentation.Tests;
 
@@ -65,6 +66,23 @@ public sealed class BeispieleTests : IDisposable
         }
 
         Assert.DoesNotContain(o.Meldungen, m => m.Contains("Fehler", StringComparison.OrdinalIgnoreCase));
+    }
+
+    [Fact]
+    public async Task Die_Doppelrunde_wird_nur_beim_ersten_Oeffnen_eingeschaltet()
+    {
+        // Die Doppelrunde ist eine Einstellung der Staffel, keine Angabe der click-TT-Datei.
+        Beispielzeile doppel = hf.Beispiele.Single(b => b.Name == "Liga für Doppelrunde");
+        await hf.BeispielOeffnenCommand.ExecuteAsync(doppel.Pfad);
+        await hf.SchliessenCommand.ExecuteAsync(null);
+        string datei = Assert.Single(Directory.GetFiles(Path.Combine(ordner, "basis"), OptionenDatei.Dateiname, SearchOption.AllDirectories), d => d.Contains("Doppelrunde", StringComparison.Ordinal));
+        Assert.True(OptionenDatei.Laden(datei).Doppelrunde);
+
+        // Wer sie in den Einstellungen ausschaltet, behält das auch beim nächsten Öffnen.
+        OptionenDatei.Speichern(datei, OptionenDatei.Laden(datei) with { Doppelrunde = false });
+        await hf.BeispielOeffnenCommand.ExecuteAsync(doppel.Pfad);
+        await hf.SchliessenCommand.ExecuteAsync(null);
+        Assert.False(OptionenDatei.Laden(datei).Doppelrunde);
     }
 
     [Fact]

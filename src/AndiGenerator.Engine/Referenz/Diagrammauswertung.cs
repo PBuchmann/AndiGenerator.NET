@@ -30,16 +30,18 @@ public static class Diagrammauswertung
         double erster = wuensche.Count == 0 ? 0.0 : wuensche.Min();
         double letzter = wuensche.Count == 0 ? 0.0 : wuensche.Max();
         bool mitRueckrunde = optionen.Rundenplanung is not (Rundenplanung.Halbrunde or Rundenplanung.NurVorrunde or Rundenplanung.Corona);
+        IReadOnlyList<string> rundennamen = Rundennamen.Fuer(optionen);
         return new Diagrammdaten(
             plan.SpieleErlaubt.Exists(s => s.Datum != 0.0),
             DelphiDatum.ZuDateTime(erster),
             DelphiDatum.ZuDateTime(letzter),
             plan.Mannschaften.Select(m => Mannschaft(plan, m)).ToList(),
-            mitRueckrunde,
-            Wochen(plan, optionen, mitRueckrunde),
+            mitRueckrunde || optionen.Doppelrunde,
+            optionen.Doppelrunde ? Viertelrunden(plan, optionen, mitRueckrunde, rundennamen) : Wochen(plan, optionen, mitRueckrunde),
             plan.HatSetzliste(),
             plan.Mannschaften.Count == 0 ? 0 : plan.Mannschaften.Max(m => m.Spiele.Count),
-            Verstoesse: Verstoesse(Referenzbewertung.Bewerten(staffel, optionen), optionen));
+            Verstoesse: Verstoesse(Referenzbewertung.Bewerten(staffel, optionen), optionen),
+            Rundennamen: rundennamen);
     }
 
     /// <summary>Die Verstöße je Mannschaft und Spieltag aus der Bewertung, nur für berücksichtigte Kriterien.</summary>
@@ -141,6 +143,31 @@ public static class Diagrammauswertung
         {
             double ende = DelphiDatum.Wert(new DateOnly(2500, 1, 1));
             ergebnis.Add(Woche(plan, "Rückrunde", Montage(plan, plan.RueckrundenbeginnXml, ende, ende)));
+        }
+
+        return ergebnis;
+    }
+
+    /// <summary>
+    /// Spiele pro Woche bei einer Doppelrunde (nicht im Original, das auch dann nur Hin- und Rückrunde zeigte): je Runde ein
+    /// Raster, damit der Abstand zwischen erster und letzter Mannschaft am Ende jeder Viertelrunde zu sehen ist.
+    /// </summary>
+    private static List<Wochenstatistik> Viertelrunden(RefPlan plan, Berechnungsoptionen optionen, bool mitRueckrunde, IReadOnlyList<string> namen)
+    {
+        double ende = DelphiDatum.Wert(new DateOnly(2500, 1, 1));
+        bool halbrunde = optionen.Rundenplanung == Rundenplanung.Halbrunde;
+        var ergebnis = new List<Wochenstatistik>();
+        for (int i = 0; i < plan.Runden.Count; i++)
+        {
+            if (!halbrunde && !mitRueckrunde && plan.Runden[i].Von >= plan.RueckrundenbeginnXml)
+            {
+                continue;
+            }
+
+            double von = i == 0 ? 0.0 : plan.Runden[i].Von;
+            bool letzte = i == plan.Runden.Count - 1;
+            double bis = letzte && !halbrunde ? ende : plan.Runden[i].Bis - Sekunde;
+            ergebnis.Add(Woche(plan, Rundennamen.Name(namen, i), Montage(plan, von, bis, bis)));
         }
 
         return ergebnis;

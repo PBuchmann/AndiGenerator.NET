@@ -47,6 +47,23 @@ public sealed class WechselTests
     }
 
     [Fact]
+    public void DoppelrundeHatEineLueckeJeViertelrunde()
+    {
+        // Vier Viertelrunden mit je zwei Spielen: vor dem 3., 5. und 7. Spiel eine Lücke, die Legende nennt die Viertelrunde.
+        List<Diagrammspiel> spiele = Enumerable.Range(0, 8).Select(i => new Diagrammspiel(Start.AddDays(7 * i), i % 2 == 0, false, i / 2, 0)).ToList();
+        var daten = new Diagrammdaten(true, Start, Start.AddDays(70), [new Diagrammmannschaft("A", spiele, [])], true, [], false, 8, Rundennamen: ["1. Vorrunde", "2. Vorrunde", "1. Rückrunde", "2. Rückrunde"]);
+        var flaeche = new Messflaeche();
+        var zeichner = new Diagrammzeichner(daten, flaeche);
+
+        zeichner.Zeichnen(Diagrammteil.WechselHeimAuswaerts, 0);
+
+        double schritt = zeichner.Hinweise[1].X - zeichner.Hinweise[0].X;
+        List<int> luecken = Enumerable.Range(1, 7).Where(k => zeichner.Hinweise[k].X - zeichner.Hinweise[k - 1].X > schritt + 0.01).ToList();
+        Assert.Equal([2, 4, 6], luecken);
+        Assert.Contains(flaeche.Texte, x => x.StartsWith("Lücke = Beginn einer Viertelrunde", StringComparison.Ordinal));
+    }
+
+    [Fact]
     public void KompaktspieltageZeigenAusrichterUndSpielorte()
     {
         // Ein Dreier in der Halle von A (B hat gegen C Heimrecht laut Plan, das zählt hier nicht).

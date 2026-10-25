@@ -22,6 +22,9 @@ public static class Beispielsammlung
         ["Liga für Doppelrunde"] = (7, "6 Mannschaften, jeder spielt viermal gegen jeden (Doppelrunde)."),
     };
 
+    /// <summary>Beispiele, die als Doppelrunde gedacht sind; beim ersten Öffnen wird die Doppelrunde eingeschaltet.</summary>
+    private static readonly HashSet<string> Doppelrunden = new(StringComparer.OrdinalIgnoreCase) { "Liga für Doppelrunde" };
+
     /// <summary>Holt den Ordner der beiliegenden Beispiele.</summary>
     public static string Programmordner { get; } = Path.Combine(AppContext.BaseDirectory, "Beispiele");
 
@@ -43,6 +46,11 @@ public static class Beispielsammlung
             .Select(e => new Beispielzeile(e.Name, e.Angabe.Text, e.Pfad))
             .ToList();
     }
+
+    /// <summary>Gibt an, ob ein Beispiel als Doppelrunde gedacht ist (jeder spielt viermal gegen jeden).</summary>
+    /// <param name="pfad">Pfad des Beispiels (beiliegend oder Kopie).</param>
+    /// <returns><c>true</c> für eine Doppelrunde.</returns>
+    public static bool IstDoppelrunde(string pfad) => Doppelrunden.Contains(Path.GetFileNameWithoutExtension(pfad));
 
     /// <summary>
     /// Legt die Kopie eines Beispiels im Datenordner an (Unterordner „Beispiele“), falls es sie noch nicht gibt; eine

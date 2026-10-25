@@ -5,7 +5,7 @@
 namespace AndiGenerator.Engine.Referenz;
 
 /// <summary>Anzahl Spiele pro Woche einer Runde (Original <c>PaintGamesPerWeekOneRound</c>).</summary>
-/// <param name="Titel"><c>Hinrunde</c> oder <c>Rückrunde</c>.</param>
+/// <param name="Titel"><c>Hinrunde</c> oder <c>Rückrunde</c>, bei einer Doppelrunde der Name der Runde (z. B. „2. Vorrunde“).</param>
 /// <param name="Montage">Montag jeder Spielwoche.</param>
 /// <param name="Spiele">Je Mannschaft (Reihenfolge der Staffel) die Spiele je Woche.</param>
 /// <param name="MaxDifferenz">Je Woche die größte Differenz der bis dahin absolvierten Spiele.</param>

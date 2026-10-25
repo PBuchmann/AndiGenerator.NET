@@ -48,7 +48,7 @@ internal static class Terminplanbau
                 aktuelle = [];
                 woche = plan[i].Kalenderwoche;
                 montag = zeit.Date.AddDays(-(((int)zeit.DayOfWeek + 6) % 7));
-                rundenwechsel = plan[i].Runde != runde ? Rundenname(plan[i].Runde) : string.Empty;
+                rundenwechsel = plan[i].Runde != runde ? Rundenname(plan[i]) : string.Empty;
             }
 
             runde = plan[i].Runde;
@@ -100,16 +100,11 @@ internal static class Terminplanbau
         return ergebnis;
     }
 
-    /// <summary>Name einer Runde für Zwischenüberschriften.</summary>
-    /// <param name="runde">Index der Runde ab 0 (<c>RundeZuDatum</c>); negativ = keiner Runde zugeordnet.</param>
-    /// <returns>Z. B. „Vorrunde“; leer ohne Runde.</returns>
-    internal static string Rundenname(int runde) => runde switch
-    {
-        < 0 => string.Empty,
-        0 => "Vorrunde",
-        1 => "Rückrunde",
-        _ => string.Create(Deutsch, $"{runde + 1}. Runde"),
-    };
+    /// <summary>Name der Runde eines Spiels für Zwischenüberschriften.</summary>
+    /// <param name="zeile">Das Spiel.</param>
+    /// <returns>Z. B. „Vorrunde“ oder bei einer Doppelrunde „2. Vorrunde“; leer ohne Runde.</returns>
+    internal static string Rundenname(Terminplanzeile zeile) =>
+        zeile.Rundenname.Length > 0 || zeile.Runde < 0 ? zeile.Rundenname : Rundennamen.Name(Rundennamen.Fuer(Domain.Optionen.Berechnungsoptionen.Standard), zeile.Runde);
 
     private static void Abschliessen(List<Terminwoche> wochen, List<Terminspiel>? spiele, int woche, DateTime montag, string rundenwechsel)
     {
@@ -127,8 +122,8 @@ internal static class Terminplanbau
     {
         List<Nachbarspiel> nachbarn = z.NachbartermineHeim.Concat(z.NachbartermineGast).Select(Nachbar).ToList();
         return z.Zeitpunkt is DateTime t
-            ? new Terminspiel(nummer, t.ToString("ddd dd.MM.", Deutsch), t.ToString("dddd, dd.MM.yyyy", Deutsch), t.ToString("HH:mm", Deutsch), z.Heim, z.Gast, Rundenname(z.Runde), Hinweischip.Aus(z.Hinweis), nachbarn)
-            : new Terminspiel(nummer, "ohne Termin", "noch ohne Termin", string.Empty, z.Heim, z.Gast, Rundenname(z.Runde), Hinweischip.Aus(z.Hinweis), nachbarn);
+            ? new Terminspiel(nummer, t.ToString("ddd dd.MM.", Deutsch), t.ToString("dddd, dd.MM.yyyy", Deutsch), t.ToString("HH:mm", Deutsch), z.Heim, z.Gast, Rundenname(z), Hinweischip.Aus(z.Hinweis), nachbarn)
+            : new Terminspiel(nummer, "ohne Termin", "noch ohne Termin", string.Empty, z.Heim, z.Gast, Rundenname(z), Hinweischip.Aus(z.Hinweis), nachbarn);
     }
 
     private static Nachbarspiel Nachbar(Nachbartermin n) =>

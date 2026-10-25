@@ -34,14 +34,26 @@ public sealed partial class Diagrammzeichner
         return ueberschuss <= 2 ? Pausenorange : Schlecht;
     }
 
-    private static string Rundenname(int runde, int runden)
+    /// <summary>Name einer Runde über ihrer Treppe.</summary>
+    /// <param name="runde">Index der Runde (ab 0).</param>
+    /// <param name="stelle">Stelle der Treppe (ab 0).</param>
+    /// <param name="runden">Anzahl der Runden mit Spielen.</param>
+    /// <param name="namen">Die Namen der Runden aus den Diagrammdaten oder <c>null</c>.</param>
+    /// <returns>Der Name.</returns>
+    private static string Rundenname(int runde, int stelle, int runden, IReadOnlyList<string>? namen)
     {
-        if (runden != 2)
+        // Eigene Namen nur bei einer Doppelrunde (sonst heißen die Runden hier wie bisher Hin- und Rückrunde).
+        if (namen is { Count: > 0 } && runde < namen.Count && namen[^1] != "Rückrunde")
         {
-            return string.Create(CultureInfo.InvariantCulture, $"{runde}. Runde");
+            return namen[runde];
         }
 
-        return runde == 1 ? "Hinrunde" : "Rückrunde";
+        if (runden != 2)
+        {
+            return string.Create(CultureInfo.InvariantCulture, $"{stelle + 1}. Runde");
+        }
+
+        return stelle == 0 ? "Hinrunde" : "Rückrunde";
     }
 
     private static string Setzlistenhinweis(int k, Diagrammspiel s, int ziel, bool verstoss)
@@ -83,7 +95,7 @@ public sealed partial class Diagrammzeichner
 
         for (int r = 0; r < runden.Count; r++)
         {
-            Text(Rundenname(r + 1, runden.Count), Links + (r * rundenbreite), y, Normal, Beschriftung);
+            Text(Rundenname(runden[r], r, runden.Count, d.Rundennamen), Links + (r * rundenbreite), y, Normal, Beschriftung);
         }
 
         double rechts = Links + (runden.Count * rundenbreite);
