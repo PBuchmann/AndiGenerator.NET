@@ -347,7 +347,7 @@
           </Border>
 
           <!-- Karte und km je Mannschaft -->
-          <Border ui:Fuehrungsmarke.Ziel="KompaktKarte" Grid.Column="2" Classes="karte" VerticalAlignment="Top" MinWidth="360" MaxWidth="560" HorizontalAlignment="Left">
+          <Border ui:Fuehrungsmarke.Ziel="KompaktKarte" Grid.Column="2" Classes="karte" VerticalAlignment="Top" MinWidth="360" MaxWidth="760" HorizontalAlignment="Left">
             <StackPanel Spacing="10">
               <Grid ColumnDefinitions="*,Auto">
                 <TextBlock Text="{Binding Kartentitel}" FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap" />
@@ -360,20 +360,22 @@
                 <TextBlock Text="km je Mannschaft" FontSize="15" FontWeight="SemiBold" />
                 <TextBlock Grid.Column="1" Text="Luftlinie, hin und zurück" Classes="klein" VerticalAlignment="Center" />
               </Grid>
-              <!-- Spalten über alle Zeilen gleich breit: Name, Ausrichter, Balken, km -->
+              <!-- Spalten über alle Zeilen gleich breit: Name, Ausrichter, Balken, km; die Angabe „Ausrichter“ nimmt, was übrig
+                   ist, und wird bei Platzmangel gekürzt – so bleiben Balken und km immer in der Karte -->
               <ItemsControl ItemsSource="{Binding KmZeilen}" Grid.IsSharedSizeScope="True" IsVisible="{Binding HatPlan}">
                 <ItemsControl.ItemTemplate>
                   <DataTemplate x:DataType="p:Kompaktkmzeile">
-                    <Button Classes="flach" Command="{Binding $parent[UserControl].((p:KompaktspieltageAnsichtViewModel)DataContext).MannschaftWaehlenCommand}" CommandParameter="{Binding Name}">
+                    <Button Classes="flach" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                            Command="{Binding $parent[UserControl].((p:KompaktspieltageAnsichtViewModel)DataContext).MannschaftWaehlenCommand}" CommandParameter="{Binding Name}">
                       <Grid Margin="0,2">
                         <Grid.ColumnDefinitions>
                           <ColumnDefinition Width="Auto" SharedSizeGroup="KmName" />
-                          <ColumnDefinition Width="Auto" SharedSizeGroup="KmZusatz" />
-                          <ColumnDefinition Width="132" />
+                          <ColumnDefinition Width="*" />
+                          <ColumnDefinition Width="100" />
                           <ColumnDefinition Width="Auto" SharedSizeGroup="KmWert" />
                         </Grid.ColumnDefinitions>
                         <TextBlock ToolTip.Tip="{Binding Name}" Classes="mannschaft" Text="{Binding Name}" Classes.gewaehlt="{Binding Gewaehlt}" Margin="0,0,12,0" VerticalAlignment="Center" />
-                        <TextBlock Grid.Column="1" Text="{Binding Zusatz}" Classes="klein" Margin="0,0,12,0" VerticalAlignment="Center" />
+                        <TextBlock Grid.Column="1" Text="{Binding Zusatz}" ToolTip.Tip="{Binding Zusatz}" Classes="klein" Margin="0,0,12,0" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
                         <Border Grid.Column="2" Height="8" CornerRadius="4" Background="{StaticResource Akzent}" Width="{Binding Balken}" HorizontalAlignment="Left" VerticalAlignment="Center" />
                         <TextBlock Grid.Column="3" Text="{Binding Km}" Classes="ziffer" MinWidth="44" TextAlignment="Right" Margin="10,0,0,0" VerticalAlignment="Center" />
                       </Grid>

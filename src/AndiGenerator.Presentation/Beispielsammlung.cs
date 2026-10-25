@@ -11,6 +11,9 @@ namespace AndiGenerator.Presentation;
 /// </summary>
 public static class Beispielsammlung
 {
+    /// <summary>Name, unter dem ein mitgelieferter Plan (Datei <c>.plan</c> neben dem Beispiel) gemerkt wird.</summary>
+    public const string Beispielplan = "Beispielplan (mit HiGHS optimiert)";
+
     private static readonly Dictionary<string, (int Rang, string Text)> Beschreibungen = new(StringComparer.OrdinalIgnoreCase)
     {
         ["Liga mit idealen Meldungen"] = (1, "10 Mannschaften mit idealen Terminwünschen – der einfachste Einstieg."),
@@ -73,6 +76,13 @@ public static class Beispielsammlung
             if (File.Exists(aenderungen))
             {
                 Kopie(aenderungen, Path.ChangeExtension(ziel, ".modifications"));
+            }
+
+            // Ein gut optimierter Plan (Kompaktspieltage: mit HiGHS bis zum Ende gerechnet) liegt als .plan daneben.
+            string plan = Path.ChangeExtension(quelle, ".plan");
+            if (File.Exists(plan))
+            {
+                Kopie(plan, Path.ChangeExtension(ziel, ".plan"));
             }
         }
 

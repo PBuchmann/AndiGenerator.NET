@@ -7,10 +7,12 @@ Was sich von Version zu Version für Anwender ändert. Die Einzelheiten stehen i
 ### Behoben
 
 - **Doppelrunde in Terminplan und Diagrammen:** Die vier Viertelrunden heißen jetzt „1. Vorrunde“ bis „2. Rückrunde“ – vorher hieß die zweite Viertelrunde im Terminplan „Rückrunde“ und die übrigen „3. Runde“ und „4. Runde“. Im Diagramm *Wechsel Heim/Auswärts* trennt eine Lücke jede Viertelrunde (vorher nur die erste, beschriftet als „Beginn der Rückrunde“), *Spiele pro Woche* zeigt je Viertelrunde ein Raster (vorher Hin- und Rückrunde mit je zwei Viertelrunden), die *Setzliste* nennt die Viertelrunden, und *Abstand Hin-/Rückspiel* gibt es auch bei einer Doppelrunde als Halbrunde.
+- **Kompaktspieltage, km je Mannschaft:** Bei langen Namen stand die Kilometerzahl außerhalb der Karte und war nicht zu lesen. Jetzt wird die Angabe „Ausrichter“ gekürzt (ganz im Hinweis), die Karte darf breiter werden, und Balken und km bleiben immer sichtbar.
 - **Spiele pro Woche, Spalte „2 je Woche“:** Bei mehreren Rastern (Hin- und Rückrunde) stand in jedem Raster die Zahl der ganzen Saison; jetzt zählt jedes Raster seine Wochen.
 
 ### Geändert
 
+- **Beispiele mit Kompaktspieltagen bringen einen optimierten Plan mit:** Jugend 19 Hessenliga und NRW-Liga 1 öffnen sich beim ersten Mal mit dem gemerkten Plan „Beispielplan (mit HiGHS optimiert)“ – mit HiGHS bis zum Ende gerechnet, so sieht man ohne lange Rechnung, was herauskommt.
 - **Beispiel „Liga für Doppelrunde“** öffnet sich beim ersten Mal mit eingeschalteter Doppelrunde (vorher plante es eine normale Vor- und Rückrunde, bis man die Doppelrunde in den Einstellungen einschaltete).
 
 ## 0.9.10 (25.10.2026)

@@ -6,6 +6,7 @@ using System.Text;
 using AndiGenerator.Presentation;
 using AndiGenerator.Presentation.Tests;
 using AndiGenerator.UI.Ansichten;
+using Avalonia;
 using Avalonia.Controls;
 using Avalonia.Headless;
 using Avalonia.Media.Imaging;
@@ -124,6 +125,16 @@ public sealed class LangeNamenTests : IDisposable
 
             await lauf;
             Pruefen(fenster, o, "kompakt-plan");
+
+            // Die km je Mannschaft stehen ganz in ihrer Karte (bei langen Namen wird die Angabe „Ausrichter“ gekürzt).
+            List<TextBlock> km = fenster.GetVisualDescendants().OfType<TextBlock>().Where(t => t.DataContext is Kompaktkmzeile && t.Classes.Contains("ziffer")).ToList();
+            Assert.NotEmpty(km);
+            Assert.All(km, t =>
+            {
+                Border karte = t.GetVisualAncestors().OfType<Border>().First(b => b.Classes.Contains("karte"));
+                Point? rechts = t.TranslatePoint(new Point(t.Bounds.Width, 0), karte);
+                Assert.True(rechts is { } r && r.X <= karte.Bounds.Width, $"{t.Text} ragt aus der Karte");
+            });
             Ansicht(fenster, o, modell.DiagrammansichtCommand, "kompakt-diagramme", klickTt: false);
         }
         finally

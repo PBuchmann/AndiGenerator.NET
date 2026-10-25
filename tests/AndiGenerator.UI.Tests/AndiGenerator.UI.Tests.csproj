@@ -22,7 +22,7 @@
     <Compile Include="..\AndiGenerator.Presentation.Tests\Arbeitsplatz.cs" Link="Gemeinsam\Arbeitsplatz.cs" />
     <Compile Include="..\AndiGenerator.Presentation.Tests\Namen.cs" Link="Gemeinsam\Namen.cs" />
     <Compile Include="..\AndiGenerator.Presentation.Tests\Beispielverlauf.cs" Link="Gemeinsam\Beispielverlauf.cs" />
-    <None Include="..\..\src\AndiGenerator.Desktop\Beispiele\*.xml;..\..\src\AndiGenerator.Desktop\Beispiele\*.modifications" Link="Beispiele\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
+    <None Include="..\..\src\AndiGenerator.Desktop\Beispiele\*.xml;..\..\src\AndiGenerator.Desktop\Beispiele\*.modifications;..\..\src\AndiGenerator.Desktop\Beispiele\*.plan" Link="Beispiele\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" />
     <Compile Include="..\AndiGenerator.Presentation.Tests\Kompaktklasse.cs" Link="Gemeinsam\Kompaktklasse.cs" />
     <AssemblyAttribute Include="System.Reflection.AssemblyMetadataAttribute">
       <_Parameter1>Referenz</_Parameter1>

@@ -3,7 +3,9 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 using AndiGenerator.Application;
+using AndiGenerator.Persistence.Gemeinsam;
 using AndiGenerator.Persistence.Optionen;
+using AndiGenerator.Persistence.Plandaten;
 
 namespace AndiGenerator.Presentation.Tests;
 
@@ -83,6 +85,29 @@ public sealed class BeispieleTests : IDisposable
         await hf.BeispielOeffnenCommand.ExecuteAsync(doppel.Pfad);
         await hf.SchliessenCommand.ExecuteAsync(null);
         Assert.False(OptionenDatei.Laden(datei).Doppelrunde);
+    }
+
+    [Fact]
+    public async Task Die_Kompaktklassen_bringen_einen_optimierten_Plan_mit()
+    {
+        // Mit HiGHS bis zum Ende gerechnet (Peter, 25.10.2026): Beim ersten Öffnen steht er als gemerkter Plan zur Wahl.
+        foreach (Beispielzeile beispiel in hf.Beispiele.Where(b => b.Name.StartsWith("Jugend 19", StringComparison.Ordinal)))
+        {
+            Assert.True(File.Exists(Path.ChangeExtension(beispiel.Pfad, ".plan")), beispiel.Name);
+            await hf.BeispielOeffnenCommand.ExecuteAsync(beispiel.Pfad);
+            string staffelordner = Assert.Single(Directory.GetDirectories(Path.Combine(ordner, "basis"), beispiel.Name + "*", SearchOption.AllDirectories), d => !d.EndsWith("Beispiele", StringComparison.Ordinal));
+            GemerkterPlanEintrag plan = Assert.Single(Staffelordner.GemerktePlaene(staffelordner));
+            Assert.Equal(Beispielsammlung.Beispielplan, plan.Name);
+            IReadOnlyList<GespeichertesSpiel> spiele = GespeicherterPlanDatei.Laden(plan.Pfad);
+            int n = spiele.Select(s => s.Heim).Distinct().Count();
+            Assert.Equal(n * (n - 1) / 2, spiele.Count(s => s.Zeitpunkt is not null));
+            if (hf.Einrichtung is { } einrichtung)
+            {
+                await einrichtung.AbschliessenCommand.ExecuteAsync(null);
+            }
+
+            await hf.SchliessenCommand.ExecuteAsync(null);
+        }
     }
 
     [Fact]

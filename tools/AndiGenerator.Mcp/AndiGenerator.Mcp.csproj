@@ -17,7 +17,7 @@
     <EmbeddedResource Include="..\..\src\AndiGenerator.UI\Assets\Fonts\IBMPlexSans-Regular.ttf" Link="Ausdruck\IBMPlexSans-Regular.ttf" LogicalName="Schrift.IBMPlexSans-Regular.ttf" />
     <EmbeddedResource Include="..\..\src\AndiGenerator.UI\Assets\Fonts\IBMPlexSans-SemiBold.ttf" Link="Ausdruck\IBMPlexSans-SemiBold.ttf" LogicalName="Schrift.IBMPlexSans-SemiBold.ttf" />
     <!-- Beispielstaffeln wie beim Programm (im Paket dieselben Dateien im selben Ordner). -->
-    <None Include="..\..\src\AndiGenerator.Desktop\Beispiele\*.xml;..\..\src\AndiGenerator.Desktop\Beispiele\*.modifications" Link="Beispiele\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
+    <None Include="..\..\src\AndiGenerator.Desktop\Beispiele\*.xml;..\..\src\AndiGenerator.Desktop\Beispiele\*.modifications;..\..\src\AndiGenerator.Desktop\Beispiele\*.plan" Link="Beispiele\%(Filename)%(Extension)" CopyToOutputDirectory="PreserveNewest" CopyToPublishDirectory="PreserveNewest" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\..\src\AndiGenerator.Presentation\AndiGenerator.Presentation.csproj" />
