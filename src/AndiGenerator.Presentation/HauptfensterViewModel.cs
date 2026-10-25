@@ -1374,6 +1374,11 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
         bool zusatz = mannschaftsmeldung is not null || terminwuensche is not null;
         List<string> hinweise = zusatz ? await ZusatzdateienUebernehmenAsync(neu, mannschaftsmeldung, terminwuensche) : [];
         Einrichtung = EinrichtungErstellen(neu);
+        if (Einrichtung is null)
+        {
+            ArbeitsbereichEinrichten();
+        }
+
         if (hinweise.Count > 0)
         {
             string text = string.Join(Environment.NewLine, hinweise) + " Bitte die passende Datei unter „Daten aus click-TT ergänzen“ laden.";
@@ -1602,7 +1607,33 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
     private Task EinrichtungAbschliessen()
     {
         Einrichtung = null;
+        ArbeitsbereichEinrichten();
         return Task.CompletedTask;
+    }
+
+    /// <summary>
+    /// Nach dem Öffnen einer normalen Runde (Peter, 25.10.2026): Ist schon ein Plan gespeichert (gesichert oder gemerkt),
+    /// steht der zuletzt gespeicherte unter „Start mit“ – alle Ansichten und Kacheln zeigen ihn, ▶ optimiert mit ihm
+    /// weiter. Vorne liegt die Ansicht „Terminwünsche“, damit man die Meldungen der Vereine gleich sieht. Im Kompaktmodus
+    /// bleibt es bei der Ansicht „Kompaktspieltage“.
+    /// </summary>
+    private void ArbeitsbereichEinrichten()
+    {
+        if (sitzung is null || KompaktAktiv || Laeuft)
+        {
+            return;
+        }
+
+        PlanQuelle? juengster = Planquellen
+            .Where(q => q.Art is PlanQuellenArt.GesicherterPlan or PlanQuellenArt.GemerkterPlan && q.Eintrag is not null)
+            .MaxBy(q => q.Eintrag!.Geaendert);
+        if (juengster is not null && Startplaene.FirstOrDefault(p => p.Quelle == juengster) is Startplan gespeichert)
+        {
+            Startplan = gespeichert;
+            Statuszeile += $" Start mit dem zuletzt gespeicherten Plan „{juengster.Eintrag!.Name}“.";
+        }
+
+        TerminwuenscheOeffnen();
     }
 
     /// <summary>Schreibt die bearbeiteten Daten (<c>.modifications</c> bzw. Plandatei) und übernimmt sie in die Sitzung.</summary>

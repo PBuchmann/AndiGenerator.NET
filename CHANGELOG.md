@@ -2,6 +2,15 @@
 
 Was sich von Version zu Version für Anwender ändert. Die Einzelheiten stehen in der [Anleitung](Doku/ANLEITUNG.md), die technische Geschichte im [Migrationsplan](Doku/MIGRATIONSPLAN.md).
 
+## Unveröffentlicht
+
+### Geändert
+
+- **Anleitung „Was ist anders als im Original?“** (Abschnitt 1.1): was gleich bleibt, was neu ist und was bewusst korrigiert wurde – für Umsteiger vom AndiGenerator.
+- **Hinweise für Windows-Laptops mit ARM-Prozessor** (Installation, Automodus, Grenzen der Kompaktspieltage): Die ARM-Fassung rechnet schneller, aber ohne HiGHS – ohne Schranke, B-Varianten und Teilneuplanung im Automodus, und Kompaktspieltage liegen ohne Löser oft erst am Ende der Berechnung vor.
+- **Nach dem Öffnen** einer normalen Runde liegt die Ansicht **Terminwünsche** vorn statt einer leeren Kostenansicht. Gibt es schon einen gespeicherten Plan (gesichert oder gemerkt), steht der jüngste unter **Start mit**: Ansichten und Kacheln zeigen ihn sofort, **▶ Start** optimiert mit ihm weiter.
+- **Anleitung:** neues Kapitel 10 „Steuerung durch eine KI (MCP)“ – was die KI kann, Einrichten in Claude Desktop mit den Pfaden je System, Beispiele für Aufträge, Datenschutz und Grenzen (bisher nur in `tools/AndiGenerator.Mcp/README.md`). Die Bildschirmfotos zu Kompaktspieltagen und „Schritt für Schritt“ sind nicht mehr abgedunkelt.
+
 ## 0.9.9 (25.10.2026)
 
 Die letzte Vorabversion vor 1.0: Alle Diagramme und die Übersicht der Terminwünsche sind neu gestaltet und zählen wie die Qualitätsansicht, der Automodus rechnet mit HiGHS (Schranke, B-Varianten, Teilneuplanung), und die Kompaktspieltage sind an vielen Stellen verbessert. Neu sind außerdem die Führung „Schritt für Schritt“ (F1), Beispiele zum Ausprobieren auf der Startseite und – für Fortgeschrittene – die Steuerung durch eine KI über den beiliegenden MCP-Server `andigen-mcp`.

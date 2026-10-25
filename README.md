@@ -21,6 +21,9 @@ AndiGenerator.NET ist die C#/.NET-Portierung des **AndiGenerators** von **Andrea
 - Ansichten: Kostenmatrix, Qualität (Pflichtregeln), Meldungen, Terminplan, Diagramme, Terminwünsche, Nachbarmannschaften
 - Ausgabe: CSV für click-TT, Ausdruck als PDF
 - Vor- und Rückrunde, Halbrunde, Doppelrunde, einzelne Runden
+- Automodus mit HiGHS (Stufen A/B/C, Schranke, B-Varianten); Kompaktspieltage (3er- und 4er-Spieltage, Karte, Fahrten)
+- Schritt für Schritt (F1): Begleitleiste durch die Optimierung; Beispiele zum Ausprobieren auf der Startseite
+- Steuerung durch eine KI-Anwendung über den beiliegenden MCP-Server `andigen-mcp` (Anleitung, Kapitel 10; [tools/AndiGenerator.Mcp](tools/AndiGenerator.Mcp/README.md))
 
 ## Anleitung
 

@@ -673,6 +673,16 @@ public sealed class Bildschirmfotos : IDisposable
         o.Abarbeiten();
         Zeichnen(steuerelement);
         o.Abarbeiten();
+
+        // Der Scheinwerfer der Führung „Schritt für Schritt“ dunkelt alles außer dem gezeigten Element ab; im Programm
+        // erlischt er nach wenigen Sekunden, im Test vergeht diese Zeit nicht. Für saubere Bilder vor dem Foto ausschalten
+        // (erst nach dem Abarbeiten, das ihn neu richten kann).
+        if (TopLevel.GetTopLevel(steuerelement) is HauptfensterView hauptfenster)
+        {
+            Dispatcher.UIThread.RunJobs();
+            hauptfenster.Licht.Ausschalten();
+        }
+
         Zeichnen(steuerelement);
         Visual fenster = TopLevel.GetTopLevel(steuerelement) ?? steuerelement;
         var aufloesung = new Vector(96 * Skala, 96 * Skala);
