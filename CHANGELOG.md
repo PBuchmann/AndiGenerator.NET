@@ -2,9 +2,9 @@
 
 Was sich von Version zu Version für Anwender ändert. Die Einzelheiten stehen in der [Anleitung](Doku/ANLEITUNG.md), die technische Geschichte im [Migrationsplan](Doku/MIGRATIONSPLAN.md).
 
-## 0.9.9 (24.10.2026)
+## 0.9.9 (25.10.2026)
 
-Die letzte Vorabversion vor 1.0: Alle Diagramme und die Übersicht der Terminwünsche sind neu gestaltet und zählen wie die Qualitätsansicht, der Automodus rechnet mit HiGHS (Schranke, B-Varianten, Teilneuplanung), und die Kompaktspieltage sind an vielen Stellen verbessert.
+Die letzte Vorabversion vor 1.0: Alle Diagramme und die Übersicht der Terminwünsche sind neu gestaltet und zählen wie die Qualitätsansicht, der Automodus rechnet mit HiGHS (Schranke, B-Varianten, Teilneuplanung), und die Kompaktspieltage sind an vielen Stellen verbessert. Neu sind außerdem die Führung „Schritt für Schritt“ (F1), Beispiele zum Ausprobieren auf der Startseite und – für Fortgeschrittene – die Steuerung durch eine KI über den beiliegenden MCP-Server `andigen-mcp`.
 
 ### Neu
 
