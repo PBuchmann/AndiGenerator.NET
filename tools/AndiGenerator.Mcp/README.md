@@ -14,7 +14,7 @@ Server erzeugt dafür das Hauptfenster-Modell ohne Fenster; Optimiert wird vom P
 
 ## Einrichten (Claude Desktop)
 
-1. `andigen-mcp` liegt dem installierten Programm bei (ab 0.9.9), im Programmordner neben `AndiGenerator.NET`:
+1. `andigen-mcp` liegt dem installierten Programm bei (ab 0.9.10), im Programmordner neben `AndiGenerator.NET`:
 
    | System | Pfad |
    |---|---|
