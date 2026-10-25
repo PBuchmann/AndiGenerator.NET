@@ -1,7 +1,7 @@
 # Projektwissen für die Arbeit mit Claude
 
 Ergänzt `CLAUDE.md` (Regeln) um das, was sich in der Zusammenarbeit zwischen Peter und Claude angesammelt hat: wie wir
-arbeiten, was Peter wichtig ist, wie die Kompaktspieltage gebaut sind und was offen ist. Stand: 25.10.2026 (Version 0.9.9).
+arbeiten, was Peter wichtig ist, wie die Kompaktspieltage gebaut sind und was offen ist. Stand: 25.10.2026 (Version 0.9.10).
 Entscheidungen mit Begründung stehen ausführlich im [MIGRATIONSPLAN](MIGRATIONSPLAN.md); Änderungen für Anwender im
 [CHANGELOG](../CHANGELOG.md).
 

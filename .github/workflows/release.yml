@@ -37,6 +37,9 @@ jobs:
         run: echo "version=$('${{ github.ref_name }}'.TrimStart('v'))" >> $env:GITHUB_OUTPUT
 
       - name: Bauen und testen
+        # Auf dem Runner starten vier Testprojekte gleichzeitig; 90 s reichen dem Testhost dann nicht immer zum Verbinden.
+        env:
+          VSTEST_CONNECTION_TIMEOUT: '600'
         run: |
           dotnet build AndiGenerator.slnx -c Release -nologo -p:Version=${{ steps.version.outputs.version }}
           dotnet test AndiGenerator.slnx -c Release --no-build -nologo --filter "Kategorie!=Messung"

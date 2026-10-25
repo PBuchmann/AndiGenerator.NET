@@ -51,7 +51,7 @@ Zu Beginn jeder Sitzung auch `Doku/PROJEKTWISSEN.md` lesen (Arbeitsweise, Vorlie
 - Nicht pushen und keine Zugangsdaten eingeben – Peter pusht selbst (Visual Studio).
 
 ## Doku und Versionen
-- Jede sichtbare Änderung in `CHANGELOG.md` unter „Unveröffentlicht“ (aktuell Arbeit an 0.9.9; 0.9.8 ist veröffentlicht –
+- Jede sichtbare Änderung in `CHANGELOG.md` unter „Unveröffentlicht“ (aktuell Arbeit an 1.0.0; 0.9.10 ist veröffentlicht –
   den Abschnitt „Unveröffentlicht“ bei der ersten Änderung wieder anlegen). Release: Abschnitt zu `## x.y.z (Datum)`,
   PDF der Anleitung neu, Pull Request; nach dem Merge setzt Peter den Tag `vx.y.z` auf `main` (startet den Release-Workflow).
 - Anleitung: `Doku/ANLEITUNG.md`; Bilder mit `bildschirmfotos.cmd` (Test `Bildschirmfotos`), PDF siehe `tools/anleitung/README.md`.
