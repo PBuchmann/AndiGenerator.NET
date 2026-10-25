@@ -6,6 +6,7 @@ using AndiGenerator.Application;
 using AndiGenerator.Domain.Optionen;
 using AndiGenerator.Engine.Inseln;
 using AndiGenerator.Engine.Schranke;
+using AndiGenerator.Persistence.Tests;
 using AndiGenerator.Rendering;
 using Dock.Model.Core;
 
@@ -672,7 +673,7 @@ public sealed class HauptfensterTests : IDisposable
         Assert.True(optionen.AutomatischeMitte);
     }
 
-    [Fact]
+    [HighsFact]
     public async Task Automodus_uebernimmt_die_Schranke_aus_HiGHS_in_die_laufende_Generierung()
     {
         // HiGHS rechnet nebenher; seine Schranke landet im laufenden Automodus und steht im Leitstand.
@@ -697,7 +698,7 @@ public sealed class HauptfensterTests : IDisposable
         }
     }
 
-    [Fact]
+    [HighsFact]
     public async Task Automodus_zeigt_die_Schranke_der_Stufe_A()
     {
         // Im Automodus zeigt die Qualitätsansicht die untere Schranke der Stufe A (HiGHS rechnet im Hintergrund).
@@ -739,7 +740,7 @@ public sealed class HauptfensterTests : IDisposable
         Assert.DoesNotContain(qualitaet.Zeilen, z => z.HatKopf);
     }
 
-    [Fact]
+    [HighsFact]
     public async Task Kriterien_ohne_Modell_bleiben_in_C()
     {
         // Bei der Doppelrunde kennt HiGHS den Abstand H/A nicht: Die Zeile lässt sich weder mit den Knöpfen noch durch Ziehen

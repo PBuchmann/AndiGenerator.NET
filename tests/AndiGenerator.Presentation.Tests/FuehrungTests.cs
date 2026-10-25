@@ -46,7 +46,8 @@ public sealed class FuehrungTests : IDisposable
     [MemberData(nameof(Arten))]
     public void Jeder_Schritt_zeigt_auf_ein_bekanntes_Ziel_und_einen_Abschnitt_der_Anleitung(Fuehrungsart art)
     {
-        string anleitung = File.ReadAllText(Path.Combine(Testdaten.Referenz, "..", "..", "Doku", "ANLEITUNG.md"));
+        // Unter Windows kann Git die Anleitung mit CRLF auschecken (core.autocrlf, z. B. auf GitHub Actions).
+        string anleitung = File.ReadAllText(Path.Combine(Testdaten.Referenz, "..", "..", "Doku", "ANLEITUNG.md")).ReplaceLineEndings("\n");
         IReadOnlyList<Fuehrungsschritt> schritte = Fuehrungen.Schritte(art);
 
         Assert.InRange(schritte.Count, 8, 12);
