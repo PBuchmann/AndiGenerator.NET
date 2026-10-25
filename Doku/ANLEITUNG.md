@@ -1,6 +1,6 @@
 # AndiGenerator.NET – Anleitung
 
-AndiGenerator.NET erstellt Spielpläne für Tischtennis-Staffeln. Grundlage sind die Terminwünsche, die die Vereine in click-TT gemeldet haben. Das Programm plant auf zwei Arten: **normale Runden** optimiert es so lange, bis Sie zufrieden sind (Kapitel [5](#5-normale-runden-optimieren)); für Klassen, die eine Halbrunde in **Kompaktspieltagen** spielen, baut es Pläne aus 3er- und 4er-Spieltagen in einer Halle (Kapitel [6](#6-kompaktspieltage-planen)). In beiden Fällen exportiert es das Ergebnis als CSV-Datei für den Import in click-TT.
+AndiGenerator.NET erstellt Spielpläne für Tischtennis-Staffeln. Grundlage sind die Terminwünsche, die die Vereine in click-TT gemeldet haben. Das Programm plant auf zwei Arten: **normale Runden** optimiert es so lange, bis Sie zufrieden sind (Kapitel [5](#5-normale-runden-optimieren)); für Klassen, die eine Halbrunde in **Kompaktspieltagen** spielen, baut es Pläne aus 3er- und 4er-Spieltagen in einer Halle (Kapitel [6](#6-kompaktspieltage-planen)). In beiden Fällen exportiert es das Ergebnis als CSV-Datei für den Import in click-TT. Wer mag, lässt eine KI-Anwendung das Programm bedienen (Kapitel [10](#10-steuerung-durch-eine-ki-mcp)).
 
 AndiGenerator.NET ist die Weiterentwicklung des **AndiGenerators** von Andreas Hofmann. Die Optimierung normaler Runden, die Bewertung der Pläne und die Dateiformate stammen aus seinem Programm und rechnen genauso. Neu sind die Oberfläche, die Bedienung und die Planung von Kompaktspieltagen. Diese Anleitung beschreibt die neue Oberfläche; die fachlichen Abschnitte zu normalen Runden folgen inhaltlich der Anleitung des Originals.
 
@@ -21,7 +21,8 @@ AndiGenerator.NET ist die Weiterentwicklung des **AndiGenerators** von Andreas H
 7. [Ansichten für beide Arten der Planung](#7-ansichten-für-beide-arten-der-planung) – Terminplan, Diagramme, Terminwünsche, Nachbarmannschaften
 8. [Export und Druck](#8-export-und-druck)
 9. [Spielplandaten bearbeiten](#9-spielplandaten-bearbeiten)
-10. [Tipps und häufige Fragen](#10-tipps-und-häufige-fragen)
+10. [Steuerung durch eine KI (MCP)](#10-steuerung-durch-eine-ki-mcp) – für Fortgeschrittene
+11. [Tipps und häufige Fragen](#11-tipps-und-häufige-fragen)
 
 ---
 
@@ -918,7 +919,63 @@ Zu beachten:
 
 ![Heimrecht](Anleitung/Bilder/48-daten-heimrecht.png)
 
-## 10. Tipps und häufige Fragen
+## 10. Steuerung durch eine KI (MCP)
+
+*Für Fortgeschrittene – zum Planen wird das nicht gebraucht.* Dem Programm liegt das Zusatzprogramm **andigen-mcp** bei, ein Server für das *Model Context Protocol* (MCP). Eine KI-Anwendung wie **Claude Desktop** startet ihn im Hintergrund und kann damit eine Staffel planen – mit denselben Schritten wie in der Oberfläche: öffnen, einrichten, Verfahren wählen, rechnen lassen, Qualität lesen, Pläne vergleichen, merken, exportieren und drucken. Gerechnet wird wie immer vom Programm (Suche und HiGHS); die KI bedient es, erklärt die Ergebnisse in Worten und fragt Sie, bevor sie etwas ändert. So lässt sich zum Beispiel sagen: „Plane die Staffel im Automodus, bis Stufe B optimal ist, und erkläre mir die verbleibenden Sperrtermin-Verstöße.“
+
+### 10.1 Was die KI kann
+
+- **Staffel:** öffnen (auch die [Beispiele](#32-staffel-öffnen)), Punkte der Einrichtung lesen und entscheiden, schließen.
+- **Rechnen:** Kostenoptimierung oder Automodus wählen, Ausgangsplan wählen, starten, pausieren, stoppen und den Fortschritt verfolgen (Kacheln, Phasen, HiGHS).
+- **Bewerten:** Qualität mit Stufen und Verstößen je Mannschaft, Kriterien einstufen, B-Varianten aus HiGHS vergleichen und festlegen; Kosten und Gewichtungen lesen und ändern.
+- **Spielplandaten:** Termine, Sperren, spielfreie Tage, Setzliste, 60-km-Regel, festgelegte Begegnungen, Pflichtspieltage, Mannschaften, Spiellokale, Heim- und Auswärtskoppeln, Nachbarmannschaften mit ihren Spielen und das Heimrecht – Änderungen gelten sofort, auch für eine laufende Generierung.
+- **Ansehen:** den Terminplan Woche für Woche (auch nur einer Mannschaft) und jedes Diagramm als Bild mit den Verstößen je Mannschaft.
+- **Kompaktspieltage:** Meldungen setzen, Pläne berechnen, vergleichen und wählen.
+- **Ergebnis:** Plan merken, für click-TT exportieren (CSV), als PDF drucken.
+- **Schritt für Schritt:** den nächsten sinnvollen Schritt nennen, wie die [Begleitleiste](#51-der-weg-zum-plan).
+
+### 10.2 Einrichten (Claude Desktop)
+
+1. Den Pfad von andigen-mcp heraussuchen – er liegt im Programmordner neben AndiGenerator.NET:
+
+   | System | Pfad |
+   |---|---|
+   | Windows (Setup) | `%LOCALAPPDATA%\AndiGeneratorNET\current\andigen-mcp.exe` |
+   | Windows (Portable) | `andigen-mcp.exe` im entpackten Ordner |
+   | macOS | `/Applications/AndiGenerator.NET.app/Contents/MacOS/andigen-mcp` |
+   | Linux (.deb) | `/opt/andigenerator-net/andigen-mcp` |
+
+2. In Claude Desktop **Einstellungen → Entwickler → Konfiguration bearbeiten** wählen. Es öffnet sich die Datei `claude_desktop_config.json`; dort den Server eintragen (unter Windows den Benutzernamen anpassen, jeder `\` doppelt):
+
+   ```
+   {
+     "mcpServers": {
+       "andigenerator": {
+         "command": "C:\\Users\\IhrName\\AppData\\Local\\AndiGeneratorNET\\current\\andigen-mcp.exe"
+       }
+     }
+   }
+   ```
+
+3. Claude Desktop neu starten. Unter den Werkzeugen erscheint **andigenerator**.
+
+Andere KI-Anwendungen, die MCP-Server über die Standardein- und -ausgabe (stdio) starten, werden genauso eingerichtet. Weitere Einzelheiten, auch die Liste aller Werkzeuge: `tools/AndiGenerator.Mcp/README.md` im Quellcode.
+
+### 10.3 Beispiele für Aufträge
+
+- „Öffne das Beispiel ‚Liga mit Koppelterminen‘, schließ die Einrichtung ab und plane im Automodus. Sag mir, wenn Stufe B optimal ist.“
+- „Welche Mannschaften haben die meisten Sperrtermin-Verstöße? Zeig mir den Terminplan von TV Musterstadt.“
+- „Trag für TV Musterstadt am 14.11.2026 einen Sperrtermin ein und rechne weiter.“
+- „Plane die Kompaktspieltage, vergleiche die Varianten und drucke die Übersicht für die Vereine nach C:\Spielplaene\Kompakt.pdf.“
+
+### 10.4 Datenschutz und Grenzen
+
+- **Datenschutz:** andigen-mcp arbeitet nur auf Ihrem Rechner, ohne Netzwerk und ohne Zugangsdaten. Was die KI-Anwendung aus den Antworten (Mannschaften, Termine, Hallen) an ihren Dienst im Internet schickt, entscheiden Sie mit Ihrer KI-Anwendung. Zum Ausprobieren eignen sich die Beispiele.
+- **Kontrolle:** Die KI soll vor Änderungen an Daten, Einstufungen und vor dem Export nachfragen. Prüfen Sie den Plan trotzdem, bevor Sie ihn in click-TT übernehmen.
+- **Getrennt von der Oberfläche:** Die KI arbeitet mit einer eigenen, unsichtbaren Programmsitzung, nicht mit dem geöffneten Fenster. Gemerkte Pläne und geänderte Spielplandaten liegen im selben Datenordner und erscheinen in der Oberfläche beim nächsten Öffnen der Staffel. Dieselbe Staffel nicht gleichzeitig in der Oberfläche und über die KI bearbeiten.
+- **Updates:** Vor einem Update des Programms die KI-Anwendung beenden – solange sie andigen-mcp gestartet hat, kann das Update die Datei nicht ersetzen.
+
+## 11. Tipps und häufige Fragen
 
 **Wie erkenne ich Spiele ohne Termin?**
 In der Qualitätsansicht unter A1, an sehr hohen Gesamtkosten und im Terminplan: Spiele ohne Termin stehen dort immer ganz oben.
