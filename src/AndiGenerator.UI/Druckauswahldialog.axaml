@@ -6,7 +6,7 @@
         Title="Drucken"
         SizeToContent="WidthAndHeight" CanResize="False" ShowInTaskbar="False"
         WindowStartupLocation="CenterOwner" Classes="dialog">
-  <StackPanel Margin="24" Spacing="8" MinWidth="360">
+  <StackPanel Margin="16" Spacing="8" MinWidth="360">
     <!-- Kompaktmodus: nur die Übersicht für die Vereine, im Hochformat, mit dem in der Ansicht gewählten Plan. -->
     <StackPanel Spacing="8" IsVisible="{Binding IstKompakt}">
       <TextBlock Text="Kompaktspieltage (Übersicht für die Vereine)" FontWeight="SemiBold" />

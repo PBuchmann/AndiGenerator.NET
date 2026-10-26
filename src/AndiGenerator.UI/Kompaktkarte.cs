@@ -54,8 +54,14 @@ public sealed class Kompaktkarte : Control
         context.DrawRectangle(Pinsel.Farbe("Schwebe"), null, new Rect(Bounds.Size), 10, 10);
         using (context.PushClip(new RoundedRect(new Rect(Bounds.Size), 10)))
         {
+            // Die ganze Karte zeigen: Ist der Platz breiter als die Karte bei ihrer Höhe, steht sie in der Mitte (vorher wurde sie
+            // auf die volle Breite vergrößert und unten abgeschnitten).
+            (double s, double links) = Massstab(bild);
             FontFamily? schrift = global::Avalonia.Application.Current?.TryFindResource("Grundschrift", out object? f) == true && f is FontFamily ff ? ff : null;
-            new Kartenzeichner(new AvaloniaZeichenflaeche(context, schrift)).Zeichnen(bild, Bounds.Width, Bounds.Height);
+            using (context.PushTransform(Matrix.CreateTranslation(links, 0)))
+            {
+                new Kartenzeichner(new AvaloniaZeichenflaeche(context, schrift)).Zeichnen(bild, bild.Breite * s, bild.Hoehe * s);
+            }
         }
     }
 
@@ -84,11 +90,18 @@ public sealed class Kompaktkarte : Control
             return;
         }
 
-        double s = Bounds.Width / bild.Breite;
-        Point p = e.GetPosition(this);
+        (double s, double links) = Massstab(bild);
+        Point p = e.GetPosition(this) - new Point(links, 0);
         Kartenhalle? naechste = bild.Hallen
             .Where(h => Math.Abs((h.Punkt.X * s) - p.X) < 10 && Math.Abs((h.Punkt.Y * s) - p.Y) < 10)
             .MinBy(h => Math.Abs((h.Punkt.X * s) - p.X) + Math.Abs((h.Punkt.Y * s) - p.Y));
         ToolTip.SetTip(this, naechste?.Ort.Hinweis);
+    }
+
+    /// <summary>Vergrößerung und linker Rand, mit denen die ganze Karte in den Platz passt (waagerecht in der Mitte).</summary>
+    private (double Massstab, double Links) Massstab(Kartenbild bild)
+    {
+        double s = Math.Min(Bounds.Width / bild.Breite, bild.Hoehe > 0 ? Bounds.Height / bild.Hoehe : double.PositiveInfinity);
+        return (s, Math.Max(0, (Bounds.Width - (bild.Breite * s)) / 2));
     }
 }

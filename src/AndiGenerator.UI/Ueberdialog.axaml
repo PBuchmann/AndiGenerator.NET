@@ -6,9 +6,9 @@
         Title="Über AndiGenerator.NET"
         SizeToContent="Height" Width="560" CanResize="False" ShowInTaskbar="False"
         WindowStartupLocation="CenterOwner" Classes="dialog">
-  <StackPanel Margin="24" Spacing="10">
+  <StackPanel Margin="16" Spacing="10">
     <StackPanel Orientation="Horizontal" Spacing="12">
-      <TextBlock Text="{x:Static p:UeberViewModel.Programm}" FontSize="20" FontWeight="SemiBold" />
+      <TextBlock Text="{x:Static p:UeberViewModel.Programm}" FontSize="17" FontWeight="SemiBold" />
       <TextBlock Text="{Binding Version}" VerticalAlignment="Bottom" Margin="0,0,0,3" Foreground="{StaticResource Grau}" />
     </StackPanel>
     <TextBlock Text="{x:Static p:UeberViewModel.Beschreibung}" TextWrapping="Wrap" />

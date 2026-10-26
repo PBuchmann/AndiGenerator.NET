@@ -73,8 +73,16 @@ internal sealed class Kompaktoptimierung
     /// <param name="parallel">Zahl paralleler Läufe.</param>
     /// <param name="aufhoeren">Wird während der Suche gefragt (darf für die Pause blockieren).</param>
     /// <param name="zeitgrenze">Harte Zeitgrenze für den Löser (auch ohne Rückfrage), oder <c>null</c>.</param>
-    /// <returns>Der Plan, oder <c>null</c>, wenn keiner gefunden wurde; und ob er beweisbar der beste ist.</returns>
-    public (Kompaktloesung? Loesung, bool Optimal) Suchen(Kompaktauftrag auftrag, Kompaktloesung? start, int parallel, Func<bool> aufhoeren, TimeSpan? zeitgrenze = null)
+    /// <param name="stand">
+    /// Bekommt während der Suche den Stand aller Läufe zusammen (bester Wert, höchste untere Schranke; in Punkten des Modells,
+    /// siehe <see cref="KmJePunkt"/>), oder <c>null</c>.
+    /// </param>
+    /// <param name="zwischenplan">Bekommt jeden besseren gültigen Plan schon während der Suche (mit seinem Wert im Modell), oder <c>null</c>.</param>
+    /// <returns>
+    /// Der Plan, oder <c>null</c>, wenn keiner gefunden wurde; ob er beweisbar der beste ist; und um wie viele Punkte es
+    /// höchstens noch besser ginge (0, wenn bewiesen; <see cref="double.PositiveInfinity"/> ohne Schranke).
+    /// </returns>
+    public (Kompaktloesung? Loesung, bool Optimal, double Luecke) Suchen(Kompaktauftrag auftrag, Kompaktloesung? start, int parallel, Func<bool> aufhoeren, TimeSpan? zeitgrenze = null, Action<Loeserstand>? stand = null, Action<Kompaktloesung, double>? zwischenplan = null)
     {
         ArgumentNullException.ThrowIfNull(auftrag);
         ArgumentNullException.ThrowIfNull(aufhoeren);
@@ -82,28 +90,59 @@ internal sealed class Kompaktoptimierung
         TimeSpan? Rest() => zeitgrenze is TimeSpan g ? TimeSpan.FromTicks(Math.Max(TimeSpan.TicksPerSecond, (g - uhr.Elapsed).Ticks)) : null;
 
         // Erst nur Spieltage ohne Verstoß (kleineres Modell, meist reicht das), sonst auch mit Verstößen (10 Punkte je Verstoß).
-        (Kompaktloesung? loesung, bool optimal) = SuchenBis(auftrag, 0, start, parallel, aufhoeren, Rest());
+        // Die Schranke des ersten Modells gilt nur für Pläne ohne Verstoß – Pläne mit Verstoß kosten aber je 10 Punkte mehr.
+        (Kompaktloesung? loesung, bool optimal, double luecke) = SuchenBis(auftrag, 0, start, parallel, aufhoeren, Rest(), stand, zwischenplan);
         if (loesung is null && !aufhoeren())
         {
-            (loesung, optimal) = SuchenBis(auftrag, Kompaktmodell.MaxVerstoesseJeSpieltag, start, parallel, aufhoeren, Rest());
+            (loesung, optimal, luecke) = SuchenBis(auftrag, Kompaktmodell.MaxVerstoesseJeSpieltag, start, parallel, aufhoeren, Rest(), stand, zwischenplan);
         }
 
-        return (loesung, optimal);
+        return (loesung, optimal, luecke);
+    }
+
+    /// <summary>Kilometer je Punkt des Modells: 10 Punkte stehen für so viele Kilometer wie der Bezug (Einzelfahrten doppelt).</summary>
+    /// <param name="auftrag">Der Auftrag.</param>
+    /// <returns>Kilometer je Punkt.</returns>
+    public double KmJePunkt(Kompaktauftrag auftrag)
+    {
+        ArgumentNullException.ThrowIfNull(auftrag);
+        return (auftrag.KmBezug ?? KmSchaetzung) / 10;
     }
 
     private static string Block(Kompaktkandidat k) => string.Create(CultureInfo.InvariantCulture, $"{(int)k.Form}:{string.Join(',', k.Mannschaften)}");
 
     /// <summary>Sucht nur mit Spieltagen bis zu so vielen Verstößen, in mehreren Läufen parallel.</summary>
-    private (Kompaktloesung? Loesung, bool Optimal) SuchenBis(Kompaktauftrag auftrag, int verstoesse, Kompaktloesung? start, int parallel, Func<bool> aufhoeren, TimeSpan? zeitgrenze)
+    private (Kompaktloesung? Loesung, bool Optimal, double Luecke) SuchenBis(Kompaktauftrag auftrag, int verstoesse, Kompaktloesung? start, int parallel, Func<bool> aufhoeren, TimeSpan? zeitgrenze, Action<Loeserstand>? stand, Action<Kompaktloesung, double>? zwischenplan)
     {
         (Ganzzahlmodell m, int[] spalteZuKandidat) = Aufbauen(auftrag, verstoesse);
         double[]? startwerte = start is null ? null : Startwerte(m, spalteZuKandidat, start, auftrag);
         int bewiesen = 0;
         bool Aufhoeren() => Volatile.Read(ref bewiesen) != 0 || aufhoeren();
+
+        // Alle Läufe lösen dasselbe Modell: Es gilt der beste Wert aller Läufe und die höchste ihrer Schranken.
+        var zusammen = new Laufstand();
+        Action<Loeserstand>? melden = stand is null ? null : s =>
+        {
+            // Unter der Sperre weitergeben, damit die Meldungen in der Reihenfolge der Stände ankommen.
+            lock (zusammen)
+            {
+                if (zusammen.Aufnehmen(s) is Loeserstand neu)
+                {
+                    stand(neu);
+                }
+            }
+        };
+        Action<double[]>? gefunden = zwischenplan is null ? null : werte =>
+        {
+            if (Entschluesseln(m, spalteZuKandidat, werte) is (List<Kompaktkandidat> wahl, double wert))
+            {
+                zwischenplan(new Kompaktloesung(modell, wahl), wert);
+            }
+        };
         var laeufe = new (double[]? Werte, bool Optimal)[Math.Max(1, parallel)];
         Parallel.For(0, laeufe.Length, new ParallelOptions { MaxDegreeOfParallelism = laeufe.Length }, i =>
         {
-            laeufe[i] = loeser.Loesen(m, startwerte, i + 1, Aufhoeren, zeitgrenze);
+            laeufe[i] = loeser.Loesen(m, startwerte, i + 1, Aufhoeren, zeitgrenze, melden ?? zusammen.Merken, gefunden);
             if (laeufe[i].Optimal)
             {
                 Interlocked.Exchange(ref bewiesen, 1);
@@ -115,21 +154,7 @@ internal sealed class Kompaktoptimierung
         bool optimal = false;
         foreach ((double[]? werte, bool bewiesenerLauf) in laeufe.Append<(double[]? Werte, bool Optimal)>((startwerte, false)).Where(l => l.Werte is not null))
         {
-            List<Kompaktkandidat> wahl = [];
-            double kosten = 0;
-            for (int s = 0; s < werte!.Length; s++)
-            {
-                if (werte[s] > 0.5)
-                {
-                    kosten += m.Kosten[s];
-                    if (s < spalteZuKandidat.Length)
-                    {
-                        wahl.Add(alle[spalteZuKandidat[s]]);
-                    }
-                }
-            }
-
-            if (!Gueltig(wahl))
+            if (Entschluesseln(m, spalteZuKandidat, werte!) is not (List<Kompaktkandidat> wahl, double kosten))
             {
                 continue;
             }
@@ -146,7 +171,28 @@ internal sealed class Kompaktoptimierung
             }
         }
 
-        return (beste, optimal);
+        double luecke = optimal ? 0 : Math.Max(0, besteKosten - zusammen.Schranke);
+        return (beste, optimal, luecke);
+    }
+
+    /// <summary>Die Spieltage einer Lösung des Lösers und ihr Wert; <c>null</c>, wenn sie kein gültiger Plan ist.</summary>
+    private (List<Kompaktkandidat> Wahl, double Kosten)? Entschluesseln(Ganzzahlmodell m, int[] spalteZuKandidat, double[] werte)
+    {
+        List<Kompaktkandidat> wahl = [];
+        double kosten = 0;
+        for (int s = 0; s < werte.Length && s < m.Spalten; s++)
+        {
+            if (werte[s] > 0.5)
+            {
+                kosten += m.Kosten[s];
+                if (s < spalteZuKandidat.Length)
+                {
+                    wahl.Add(alle[spalteZuKandidat[s]]);
+                }
+            }
+        }
+
+        return Gueltig(wahl) ? (wahl, kosten) : null;
     }
 
     /// <summary>Prüft selbst, ob ein Plan vollständig ist: jede Paarung genau einmal, niemand zweimal am Tag.</summary>

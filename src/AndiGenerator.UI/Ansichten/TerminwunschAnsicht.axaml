@@ -4,7 +4,7 @@
              xmlns:ui="using:AndiGenerator.UI"
              x:Class="AndiGenerator.UI.Ansichten.TerminwunschAnsicht"
              x:DataType="p:TerminwunschAnsichtViewModel">
-  <DockPanel Margin="18,14">
+  <DockPanel Margin="12,8">
   <StackPanel DockPanel.Dock="Top" Classes="leiste" Orientation="Horizontal" Spacing="18" Margin="0,0,0,12">
     <Border Background="#ECEAE4" CornerRadius="12" Padding="4" VerticalAlignment="Center">
       <StackPanel Orientation="Horizontal" Spacing="4">
@@ -12,22 +12,21 @@
         <ToggleButton Classes="segment" Content="Je Mannschaft" IsChecked="{Binding IstKarten}" ToolTip.Tip="Die Wünsche und ihre Auswertung je Mannschaft als Karten" />
       </StackPanel>
     </Border>
-    <ui:Zoomauswahl DataContext="{Binding Zoom}" />
     <Border Classes="karte" Padding="16,8" VerticalAlignment="Center">
-      <StackPanel Orientation="Horizontal" Spacing="20">
+      <StackPanel Orientation="Horizontal" Spacing="14">
         <StackPanel Orientation="Horizontal" Spacing="8">
           <Rectangle Width="18" Height="5" RadiusX="1" RadiusY="1" Fill="#2E3A46" VerticalAlignment="Center" />
-          <TextBlock Text="Heimspielwunsch" FontSize="13" VerticalAlignment="Center" />
+          <TextBlock Text="Heimspielwunsch" FontSize="12" VerticalAlignment="Center" />
         </StackPanel>
         <StackPanel Orientation="Horizontal" Spacing="8" IsVisible="{Binding Uebersicht.HatKoppeltermine, FallbackValue=False}">
           <Rectangle Width="18" Height="5" RadiusX="1" RadiusY="1" Fill="#3B82C4" VerticalAlignment="Center" />
-          <TextBlock Text="Koppeltermin" FontSize="13" VerticalAlignment="Center" />
+          <TextBlock Text="Koppeltermin" FontSize="12" VerticalAlignment="Center" />
         </StackPanel>
         <StackPanel Orientation="Horizontal" Spacing="8">
           <Rectangle Width="18" Height="5" RadiusX="1" RadiusY="1" Fill="{StaticResource Schlecht}" VerticalAlignment="Center" />
-          <TextBlock Text="frei (Sperrtermin)" FontSize="13" VerticalAlignment="Center" />
+          <TextBlock Text="frei (Sperrtermin)" FontSize="12" VerticalAlignment="Center" />
         </StackPanel>
-        <TextBlock Text="je Mannschaft Zeilen Mo bis So, eine Spalte je Woche" FontSize="12" Foreground="{StaticResource Grau}" VerticalAlignment="Center" />
+        <TextBlock Text="je Mannschaft Zeilen Mo bis So, eine Spalte je Woche" FontSize="11" Foreground="{StaticResource Grau}" VerticalAlignment="Center" />
       </StackPanel>
     </Border>
   </StackPanel>
@@ -42,12 +41,12 @@
             <StackPanel Spacing="6">
               <StackPanel Orientation="Horizontal" Spacing="8">
                 <ui:Symbol Daten="{StaticResource SymbolWarnung}" Farbe="#8A5A00" Groesse="18" VerticalAlignment="Center" />
-                <TextBlock Text="Hinweise" FontSize="14" FontWeight="SemiBold" Foreground="#6E4400" VerticalAlignment="Center" />
+                <TextBlock Text="Hinweise" FontSize="13" FontWeight="SemiBold" Foreground="#6E4400" VerticalAlignment="Center" />
               </StackPanel>
               <ItemsControl ItemsSource="{Binding Hinweise}">
                 <ItemsControl.ItemTemplate>
                   <DataTemplate x:DataType="x:String">
-                    <SelectableTextBlock Text="{Binding}" FontSize="12" TextWrapping="Wrap" Foreground="#4A3A1A" Margin="0,2" />
+                    <SelectableTextBlock Text="{Binding}" FontSize="11" TextWrapping="Wrap" Foreground="#4A3A1A" Margin="0,2" />
                   </DataTemplate>
                 </ItemsControl.ItemTemplate>
               </ItemsControl>
@@ -70,7 +69,7 @@
               <Border Classes="karte" Padding="16,12" Margin="0,0,12,12" VerticalAlignment="Top">
                 <StackPanel Spacing="8">
                   <Grid ColumnDefinitions="*,Auto">
-                    <TextBlock ToolTip.Tip="{Binding Name}" Classes="mannschaft" Text="{Binding Name}" FontSize="14" FontWeight="Bold" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
+                    <TextBlock ToolTip.Tip="{Binding Name}" Classes="mannschaft" Text="{Binding Name}" FontSize="13" FontWeight="Bold" TextTrimming="CharacterEllipsis" VerticalAlignment="Center" />
                     <Border Grid.Column="1" CornerRadius="8" Padding="8,2" Margin="8,0,0,0" VerticalAlignment="Center" IsVisible="{Binding HatStatus}"
                             Background="{Binding StatusFarbe, Converter={x:Static ui:Konverter.WunschHintergrund}}">
                       <TextBlock Text="{Binding Status}" FontSize="11" FontWeight="SemiBold" Foreground="{Binding StatusFarbe, Converter={x:Static ui:Konverter.WunschSchrift}}" />
@@ -86,7 +85,7 @@
                               <DataTemplate x:DataType="p:Wunscheintrag">
                                 <Border CornerRadius="6" Padding="{Binding Hervorgehoben, Converter={x:Static ui:Konverter.EintragAbstand}}" Margin="0,1"
                                         Background="{Binding Farbe, Converter={x:Static ui:Konverter.WunschHintergrund}}">
-                                  <SelectableTextBlock Text="{Binding Text}" FontSize="12" TextWrapping="Wrap"
+                                  <SelectableTextBlock Text="{Binding Text}" FontSize="11" TextWrapping="Wrap"
                                                        Foreground="{Binding Farbe, Converter={x:Static ui:Konverter.WunschSchrift}}" />
                                 </Border>
                               </DataTemplate>

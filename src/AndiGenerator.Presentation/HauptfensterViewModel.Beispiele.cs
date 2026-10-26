@@ -59,7 +59,7 @@ public sealed partial class HauptfensterViewModel
     }
 
     /// <summary>
-    /// Merkt den mitgelieferten Plan eines Beispiels (beim ersten Öffnen): Er steht dann unter „Start mit“ bzw. bei
+    /// Merkt den mitgelieferten Plan eines Beispiels (beim ersten Öffnen): Er steht dann als gemerkter Plan bzw. bei
     /// Kompaktspieltagen neben den Varianten zur Wahl, ohne dass man selbst lange rechnen muss.
     /// </summary>
     /// <param name="datei">Die Datei <c>.plan</c> neben der Kopie des Beispiels.</param>

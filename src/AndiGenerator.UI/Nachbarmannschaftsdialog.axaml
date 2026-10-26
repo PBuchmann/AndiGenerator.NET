@@ -12,7 +12,7 @@
       <Setter Property="VerticalAlignment" Value="Center" />
     </Style>
   </Window.Styles>
-  <DockPanel Margin="24">
+  <DockPanel Margin="16">
     <Grid DockPanel.Dock="Top" Classes="formular" ColumnDefinitions="160,300,Auto" RowDefinitions="Auto,Auto,Auto,Auto,Auto,Auto">
       <TextBlock Grid.Row="0" Text="Mannschaftsname" />
       <TextBox Grid.Row="0" Grid.Column="1" Text="{Binding Name}" />

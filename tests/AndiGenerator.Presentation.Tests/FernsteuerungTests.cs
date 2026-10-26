@@ -121,8 +121,6 @@ public sealed class FernsteuerungTests : IDisposable
         Assert.True((await w.EinrichtungAbschliessen()).Erfolg);
         Assert.True((await w.EinrichtungAbschliessen()).Erfolg);
 
-        Assert.False((await w.StartplanWaehlen("gibt es nicht")).Erfolg);
-        Assert.True((await w.StartplanWaehlen("in click-TT vorhandenem Plan")).Erfolg);
         Aktionsergebnis verfahren = await w.VerfahrenWaehlen("kostenoptimierung");
         Assert.Equal("Kostenoptimierung", verfahren.Stand.Verfahren);
         Assert.StartsWith("Schritt für Schritt: Kostenoptimierung", verfahren.Stand.NaechsterSchritt, StringComparison.Ordinal);
@@ -162,7 +160,6 @@ public sealed class FernsteuerungTests : IDisposable
         Assert.True((await w.Stoppen()).Erfolg);
         Assert.False((await w.PlanMerken(" ")).Erfolg);
         Assert.True((await w.PlanMerken("Von der KI")).Erfolg);
-        Assert.Contains((await w.Status()).Startplaene, p => p.Contains("Von der KI", StringComparison.Ordinal));
 
         Aktionsergebnis export = await w.CsvExportieren(Path.Combine(ordner, "plan.csv"), trotzHinweisen: true);
         Assert.True(export.Erfolg, export.Text);

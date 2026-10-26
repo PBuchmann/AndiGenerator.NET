@@ -82,13 +82,13 @@
           <TextBlock Text="{Binding Titel}" Classes="titel" FontWeight="Bold" TextTrimming="CharacterEllipsis" />
         </StackPanel>
         <StackPanel Grid.Column="1" VerticalAlignment="Center" HorizontalAlignment="Right" Spacing="6">
-          <TextBlock Text="{Binding FortschrittText}" FontSize="13" Foreground="{StaticResource Tinte2}" HorizontalAlignment="Right" />
+          <TextBlock Text="{Binding FortschrittText}" FontSize="12" Foreground="{StaticResource Tinte2}" HorizontalAlignment="Right" />
           <ProgressBar Value="{Binding Fortschritt}" Minimum="0" Maximum="100" Width="220" Height="8" MinHeight="8" CornerRadius="4" Foreground="{StaticResource Gut}" Background="#ECEAE4" />
         </StackPanel>
       </Grid>
     </Border>
     <Grid DockPanel.Dock="Bottom" ColumnDefinitions="*,Auto" Margin="28,0,28,20">
-      <TextBlock Text="Beim Abschließen gilt bei Entscheidungen die angeklickte Wahl; Punkte ohne Wahl bleiben unverändert. Alles lässt sich später unter „Spielplandaten“, „Einstellungen“ und in der Qualitätsansicht ändern." Classes="klein" FontSize="13" TextWrapping="Wrap" VerticalAlignment="Center" Margin="0,0,16,0" />
+      <TextBlock Text="Beim Abschließen gilt bei Entscheidungen die angeklickte Wahl; Punkte ohne Wahl bleiben unverändert. Alles lässt sich später unter „Spielplandaten“, „Einstellungen“ und in der Qualitätsansicht ändern." Classes="klein" FontSize="12" TextWrapping="Wrap" VerticalAlignment="Center" Margin="0,0,16,0" />
       <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="10">
         <Button Classes="gross" Content="Abbrechen" Command="{Binding AbbrechenCommand}" ToolTip.Tip="Staffel schließen – schon übernommene Punkte bleiben gespeichert" />
         <Button Classes="gross primaer" Content="Abschließen" Command="{Binding AbschliessenCommand}" />
@@ -103,10 +103,10 @@
                 <Button Classes="schritt" Classes.aktiv="{Binding IstAktiv}" Command="{Binding WaehlenCommand}">
                   <Grid ColumnDefinitions="Auto,*">
                     <Border Classes="marke" Classes.aktiv="{Binding IstAktiv}" Classes.erledigt="{Binding IstErledigt}" VerticalAlignment="Center" Margin="0,0,14,0">
-                      <TextBlock Text="{Binding Marke}" FontSize="13" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                      <TextBlock Text="{Binding Marke}" FontSize="12" FontWeight="Bold" HorizontalAlignment="Center" VerticalAlignment="Center" />
                     </Border>
                     <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
-                      <TextBlock Text="{Binding Titel}" FontSize="14" FontWeight="SemiBold" Foreground="{StaticResource Tinte}" />
+                      <TextBlock Text="{Binding Titel}" FontSize="13" FontWeight="SemiBold" Foreground="{StaticResource Tinte}" />
                       <TextBlock Text="{Binding Status}" Classes="klein" />
                     </StackPanel>
                   </Grid>
@@ -129,7 +129,7 @@
               <ListBox.ItemTemplate>
                 <DataTemplate x:DataType="p:Einrichtungsoption">
                   <StackPanel Spacing="4">
-                    <TextBlock Text="{Binding Titel}" FontSize="14" FontWeight="SemiBold" TextWrapping="Wrap" />
+                    <TextBlock Text="{Binding Titel}" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap" />
                     <TextBlock Text="{Binding Beschreibung}" Classes="klein" TextWrapping="Wrap" />
                   </StackPanel>
                 </DataTemplate>
@@ -141,7 +141,7 @@
                 <Button Classes="gross" Content="Überspringen" Command="{Binding UeberspringenCommand}" />
                 <Button Grid.Column="2" Classes="gross primaer" Command="{Binding UebernehmenCommand}">
                   <StackPanel Orientation="Horizontal" Spacing="10">
-                    <ui:Symbol Daten="{StaticResource SymbolHaken}" Groesse="20" />
+                    <ui:Symbol Daten="{StaticResource SymbolHaken}" Groesse="16" />
                     <TextBlock Text="{Binding UebernehmenText}" VerticalAlignment="Center" />
                   </StackPanel>
                 </Button>
@@ -150,15 +150,15 @@
           </StackPanel>
           <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
             <StackPanel Spacing="12" Margin="0,0,12,0">
-              <TextBlock Text="{Binding Aktiv.Titel}" FontSize="20" FontWeight="Bold" />
-              <TextBlock Text="{Binding Aktiv.Text}" FontSize="13" LineHeight="23" Foreground="{StaticResource Tinte2}" TextWrapping="Wrap" MaxWidth="900" HorizontalAlignment="Left" />
+              <TextBlock Text="{Binding Aktiv.Titel}" FontSize="17" FontWeight="Bold" />
+              <TextBlock Text="{Binding Aktiv.Text}" FontSize="12" LineHeight="23" Foreground="{StaticResource Tinte2}" TextWrapping="Wrap" MaxWidth="900" HorizontalAlignment="Left" />
               <Border IsVisible="{Binding Aktiv.HatDetails}" Background="#F7F6F2" CornerRadius="12" Padding="16,10">
                 <ItemsControl ItemsSource="{Binding Aktiv.Details}">
                   <ItemsControl.ItemTemplate>
                     <DataTemplate x:DataType="p:Detailzeile">
                       <Grid ColumnDefinitions="Auto,*" Margin="0,3" Classes.unter="{Binding IstUnterpunkt}">
-                        <TextBlock Text="•" FontSize="13" Width="18" IsVisible="{Binding IstPunkt}" />
-                        <TextBlock Grid.Column="1" Text="{Binding Text}" FontSize="13" TextWrapping="Wrap" FontWeight="{Binding IstUeberschrift, Converter={x:Static ui:Konverter.MeldungGewicht}}" />
+                        <TextBlock Text="•" FontSize="12" Width="18" IsVisible="{Binding IstPunkt}" />
+                        <TextBlock Grid.Column="1" Text="{Binding Text}" FontSize="12" TextWrapping="Wrap" FontWeight="{Binding IstUeberschrift, Converter={x:Static ui:Konverter.MeldungGewicht}}" />
                       </Grid>
                     </DataTemplate>
                   </ItemsControl.ItemTemplate>

@@ -1,0 +1,475 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:p="using:AndiGenerator.Presentation"
+             xmlns:ui="using:AndiGenerator.UI"
+             x:Class="AndiGenerator.UI.NormalAnsicht"
+             x:DataType="p:HauptfensterViewModel">
+  <!-- Der normale Modus (Peter, 29.10.2026; Entwurf „Einfacher Modus“, Seiten 1, 2D und 3): Dateien → Planung → Ergebnis. -->
+  <UserControl.Styles>
+    <Style Selector="Border.normalkarte">
+      <Setter Property="Background" Value="{StaticResource Flaeche}" />
+      <Setter Property="BorderBrush" Value="{StaticResource Linie}" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="CornerRadius" Value="10" />
+      <Setter Property="Padding" Value="16,14" />
+    </Style>
+    <Style Selector="Border.marke">
+      <Setter Property="CornerRadius" Value="4" />
+      <Setter Property="Padding" Value="7,2" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Border.marke TextBlock">
+      <Setter Property="FontSize" Value="10" />
+      <Setter Property="FontWeight" Value="Bold" />
+    </Style>
+    <Style Selector="TextBlock.ueberschrift">
+      <Setter Property="FontSize" Value="15" />
+      <Setter Property="FontWeight" Value="SemiBold" />
+    </Style>
+    <Style Selector="Border.blauhinweis">
+      <Setter Property="Background" Value="{StaticResource AkzentHell}" />
+      <Setter Property="CornerRadius" Value="8" />
+      <Setter Property="Padding" Value="12,10" />
+    </Style>
+    <Style Selector="Border.blauhinweis TextBlock">
+      <Setter Property="Foreground" Value="{StaticResource AkzentDunkel}" />
+      <Setter Property="TextWrapping" Value="Wrap" />
+    </Style>
+    <Style Selector="Button.wicht">
+      <Setter Property="Width" Value="26" />
+      <Setter Property="Height" Value="26" />
+      <Setter Property="Padding" Value="0" />
+      <Setter Property="CornerRadius" Value="6" />
+      <Setter Property="Background" Value="Transparent" />
+      <Setter Property="BorderThickness" Value="1" />
+      <Setter Property="BorderBrush" Value="Transparent" />
+      <Setter Property="HorizontalContentAlignment" Value="Center" />
+      <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Button.wicht.aktiv">
+      <Setter Property="Background" Value="{StaticResource AkzentHell}" />
+      <Setter Property="BorderBrush" Value="{StaticResource Akzent}" />
+    </Style>
+    <Style Selector="Border.ablage">
+      <Setter Property="BorderBrush" Value="#9DB5D3" />
+      <Setter Property="BorderThickness" Value="2" />
+      <Setter Property="CornerRadius" Value="12" />
+      <Setter Property="Background" Value="{StaticResource Flaeche}" />
+      <Setter Property="Padding" Value="28" />
+    </Style>
+    <Style Selector="Border.ablage.ziehen">
+      <Setter Property="Background" Value="{StaticResource AkzentHell}" />
+      <Setter Property="BorderBrush" Value="{StaticResource Akzent}" />
+    </Style>
+  </UserControl.Styles>
+
+  <DockPanel Background="{StaticResource Grund}">
+    <!-- Kopf: Staffel, Knöpfe der Seite, Menü (Umschalter und Vergrößerung stehen in der Leiste unten) -->
+    <Border DockPanel.Dock="Top" Height="56" Background="{StaticResource Flaeche}" BorderBrush="{StaticResource Linie}" BorderThickness="0,0,0,1" Padding="20,0">
+      <Grid ColumnDefinitions="Auto,*,Auto">
+        <StackPanel Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+          <Border Width="30" Height="30" CornerRadius="8" Background="{StaticResource Akzent}">
+            <ui:Symbol Daten="{StaticResource SymbolLogo}" Farbe="White" Groesse="18" HorizontalAlignment="Center" VerticalAlignment="Center" />
+          </Border>
+          <TextBlock Text="AndiGenerator.NET" FontWeight="Bold" FontSize="14" VerticalAlignment="Center" IsVisible="{Binding !IstGeoeffnet}" />
+          <StackPanel VerticalAlignment="Center" IsVisible="{Binding IstGeoeffnet}">
+            <TextBlock Text="{Binding Staffelinfo}" Classes="klein" FontSize="11" TextTrimming="CharacterEllipsis" />
+            <TextBlock Text="{Binding Staffelname}" FontWeight="Bold" FontSize="15" TextTrimming="CharacterEllipsis" />
+          </StackPanel>
+        </StackPanel>
+        <StackPanel Grid.Column="2" Orientation="Horizontal" Spacing="8" VerticalAlignment="Center">
+          <Button Classes="gross" Command="{Binding Normal.PauseCommand}" IsVisible="{Binding Normal.ZeigtPlanung}"
+                  ToolTip.Tip="Pause hält die Suche an. Weiter startet eine neue Suche; der beste Plan bleibt erhalten und zählt weiter.">
+            <StackPanel Orientation="Horizontal" Spacing="7">
+              <ui:Symbol Daten="{StaticResource SymbolPause}" Groesse="14" IsVisible="{Binding Normal.Rechnet}" />
+              <ui:Symbol Daten="{StaticResource SymbolStart}" Groesse="14" IsVisible="{Binding Normal.Pausiert}" />
+              <TextBlock Text="{Binding Normal.PauseText}" VerticalAlignment="Center" />
+            </StackPanel>
+          </Button>
+          <Button Classes="gross" Command="{Binding Normal.NeuStartenCommand}" IsVisible="{Binding Normal.ZeigtPlanung}"
+                  ToolTip.Tip="Die Planung beginnt von vorn. Der beste Plan bleibt erhalten und wird nur durch einen besseren ersetzt.">
+            <StackPanel Orientation="Horizontal" Spacing="7">
+              <ui:Symbol Daten="{StaticResource SymbolNeustart}" Groesse="14" />
+              <TextBlock Text="Neu starten" VerticalAlignment="Center" />
+            </StackPanel>
+          </Button>
+          <Button Classes="gross primaer" Command="{Binding Normal.FertigCommand}" IsVisible="{Binding Normal.ZeigtPlanung}"
+                  ToolTip.Tip="Die Planung beenden und das Ergebnis ansehen. Der beste Plan bleibt erhalten; ein bisher besserer wird nicht ersetzt.">
+            <StackPanel Orientation="Horizontal" Spacing="7">
+              <ui:Symbol Daten="{StaticResource SymbolStopp}" Groesse="14" Farbe="White" />
+              <TextBlock Text="Beenden" VerticalAlignment="Center" />
+            </StackPanel>
+          </Button>
+          <Button Classes="gross" Width="40" Padding="0" HorizontalContentAlignment="Center" ToolTip.Tip="Weitere Funktionen">
+            <ui:Symbol Daten="{StaticResource SymbolMenue}" />
+            <Button.Flyout>
+              <MenuFlyout Placement="BottomEdgeAlignedRight">
+                <MenuItem Header="Andere Staffel öffnen …" Command="{Binding Normal.OeffnenCommand}" />
+                <MenuItem Header="Wünsche der Vereine ändern (Spielplandaten) …" Command="{Binding Normal.DatenCommand}" />
+                <MenuItem Header="Staffel schließen" Command="{Binding SchliessenCommand}" />
+                <Separator />
+                <MenuItem Header="Anleitung" Command="{Binding AnleitungCommand}" />
+                <MenuItem Header="Über AndiGenerator.NET" Command="{Binding UeberCommand}" />
+              </MenuFlyout>
+            </Button.Flyout>
+          </Button>
+        </StackPanel>
+      </Grid>
+    </Border>
+
+    <ui:Statusleiste DockPanel.Dock="Bottom" />
+
+    <Panel>
+      <!-- Seite 1: Dateien ablegen -->
+      <ScrollViewer IsVisible="{Binding Normal.ZeigtStart}" VerticalScrollBarVisibility="Auto">
+        <StackPanel MaxWidth="760" Margin="20,40,20,32" Spacing="20">
+          <StackPanel Spacing="6">
+            <TextBlock Text="Neuen Spielplan erstellen" FontSize="24" FontWeight="Bold" />
+            <TextBlock Text="Legen Sie die Dateien aus click-TT hier ab. Alles Weitere stellt das Programm selbst ein." FontSize="14" Foreground="{StaticResource Tinte2}" TextWrapping="Wrap" />
+          </StackPanel>
+
+          <Border x:Name="Ablage" Classes="ablage" DragDrop.AllowDrop="True">
+            <StackPanel HorizontalAlignment="Center" Spacing="10">
+              <ui:Symbol Daten="{StaticResource SymbolOeffnen}" Farbe="{StaticResource Akzent}" Groesse="36" HorizontalAlignment="Center" />
+              <TextBlock Text="Dateien hierher ziehen" FontSize="15" FontWeight="SemiBold" HorizontalAlignment="Center" />
+              <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" Spacing="4">
+                <TextBlock Text="oder" Foreground="{StaticResource Grau}" VerticalAlignment="Center" />
+                <Button Classes="link" Command="{Binding Normal.OeffnenCommand}" Content="Dateien auswählen …" VerticalAlignment="Center" Padding="0" />
+                <TextBlock Text="· XML, dazu gern die PDF und CSV aus click-TT" Foreground="{StaticResource Grau}" VerticalAlignment="Center" />
+              </StackPanel>
+            </StackPanel>
+          </Border>
+
+          <Border Classes="normalkarte" Padding="0" IsVisible="{Binding IstGeoeffnet}">
+            <ItemsControl ItemsSource="{Binding Normal.Dateien}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="p:Normaldatei">
+                  <Border BorderBrush="{StaticResource Linie}" BorderThickness="0,0,0,1" Padding="16,12">
+                    <Grid ColumnDefinitions="28,*,Auto" >
+                      <Panel VerticalAlignment="Center">
+                        <ui:Symbol Daten="{StaticResource SymbolHaken}" Farbe="{StaticResource Gut}" Groesse="20" IsVisible="{Binding Geladen}" />
+                        <Ellipse Width="18" Height="18" Stroke="#C9C6BE" StrokeThickness="2" IsVisible="{Binding !Geladen}" HorizontalAlignment="Left" />
+                      </Panel>
+                      <StackPanel Grid.Column="1" Spacing="2" Margin="12,0">
+                        <TextBlock>
+                          <Run Text="{Binding Titel}" FontWeight="SemiBold" />
+                          <Run Text=" · " Foreground="{StaticResource Grau}" />
+                          <Run Text="{Binding Rolle}" Foreground="{StaticResource Grau}" />
+                        </TextBlock>
+                        <TextBlock Text="{Binding Beschreibung}" Foreground="{StaticResource Tinte2}" TextWrapping="Wrap" />
+                      </StackPanel>
+                      <TextBlock Grid.Column="2" Text="{Binding Zustand}" FontSize="12" FontWeight="SemiBold" VerticalAlignment="Center"
+                                 Foreground="{Binding Geladen, Converter={x:Static ui:Konverter.PflichtFarbe}}" />
+                    </Grid>
+                  </Border>
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
+          </Border>
+
+          <Border Classes="blauhinweis" IsVisible="{Binding IstGeoeffnet}">
+            <Grid ColumnDefinitions="Auto,*">
+              <ui:Symbol Daten="{StaticResource SymbolInfo}" Farbe="{StaticResource Akzent}" Groesse="18" VerticalAlignment="Top" Margin="0,0,12,0" />
+              <TextBlock Grid.Column="1" Text="{Binding Normal.Pruefung}" />
+            </Grid>
+          </Border>
+
+          <Border Background="#FBEDEB" CornerRadius="8" Padding="12,10" IsVisible="{Binding Normal.HatHinderung}">
+            <StackPanel Spacing="8">
+              <TextBlock Text="{Binding Normal.Hinderung}" Foreground="#7A1A12" TextWrapping="Wrap" />
+              <Button Classes="link" Command="{Binding ExperteCommand}" Content="Zum Expertenmodus wechseln" />
+            </StackPanel>
+          </Border>
+
+          <Border Classes="normalkarte" IsVisible="{Binding Normal.HatVorhanden}">
+            <Grid ColumnDefinitions="*,Auto">
+              <TextBlock Text="{Binding Normal.Vorhanden}" TextWrapping="Wrap" VerticalAlignment="Center" />
+              <Button Grid.Column="1" Classes="gross" Margin="12,0,0,0" Command="{Binding Normal.ErgebnisZeigenCommand}" Content="Ansehen" />
+            </Grid>
+          </Border>
+
+          <Grid ColumnDefinitions="Auto,*,Auto" IsVisible="{Binding IstGeoeffnet}">
+            <Button Classes="link" Command="{Binding Normal.EinrichtungPruefenCommand}" IsVisible="{Binding ZeigtEinrichtung}" Content="Einrichtung prüfen (für Fortgeschrittene)" VerticalAlignment="Center" />
+            <Button Grid.Column="2" Classes="gross primaer" Command="{Binding Normal.PlanErstellenCommand}" Padding="22,0" Height="40">
+              <StackPanel Orientation="Horizontal" Spacing="8">
+                <ui:Symbol Daten="{StaticResource SymbolStart}" Gefuellt="True" Farbe="White" Groesse="14" />
+                <TextBlock Text="Plan erstellen" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" />
+              </StackPanel>
+            </Button>
+          </Grid>
+
+          <Border Classes="karte" Padding="14" CornerRadius="18" IsVisible="{Binding !IstGeoeffnet}">
+            <StackPanel IsVisible="{Binding HatZuletzt}">
+              <TextBlock Text="Zuletzt geöffnet" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource Tinte2}" Margin="18,6,18,8" />
+              <ItemsControl ItemsSource="{Binding Zuletzt}">
+                <ItemsControl.ItemTemplate>
+                  <DataTemplate x:DataType="p:Zuletztzeile">
+                    <Button Classes="zuletzt" Command="{Binding $parent[UserControl].((p:HauptfensterViewModel)DataContext).ZuletztOeffnenCommand}" CommandParameter="{Binding Pfad}" ToolTip.Tip="{Binding Pfad}">
+                      <Grid ColumnDefinitions="Auto,*,Auto">
+                        <ui:Symbol Daten="{StaticResource SymbolKalender}" Farbe="{StaticResource Tinte2}" Groesse="20" VerticalAlignment="Center" Margin="0,0,16,0" />
+                        <StackPanel Grid.Column="1" VerticalAlignment="Center">
+                          <TextBlock Text="{Binding Name}" FontSize="13" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                          <TextBlock Text="{Binding Ordner}" Classes="klein" TextTrimming="CharacterEllipsis" />
+                        </StackPanel>
+                        <TextBlock Grid.Column="2" Text="{Binding Zeit}" Classes="klein" VerticalAlignment="Center" Margin="16,0,0,0" />
+                      </Grid>
+                    </Button>
+                  </DataTemplate>
+                </ItemsControl.ItemTemplate>
+              </ItemsControl>
+            </StackPanel>
+          </Border>
+        </StackPanel>
+      </ScrollViewer>
+
+      <!-- Seite 2: die Planung läuft (Entwurf 2D: Balken mit bewiesenen Grenzen, Probleme, Vergleich) -->
+      <Grid IsVisible="{Binding Normal.ZeigtPlanung}" RowDefinitions="Auto,*" Margin="24,16,24,16">
+        <StackPanel Orientation="Horizontal" Spacing="12" Margin="0,0,0,12">
+          <TextBlock Text="Der Plan wird besser" FontSize="20" FontWeight="Bold" VerticalAlignment="Bottom" />
+          <TextBlock Text="{Binding Normal.Laufzeit}" Foreground="{StaticResource Tinte2}" VerticalAlignment="Bottom" Margin="0,0,0,2" />
+        </StackPanel>
+        <Grid Grid.Row="1" RowDefinitions="Auto,*">
+        <Border Background="#ECEAE4" CornerRadius="8" Padding="3" HorizontalAlignment="Left" Margin="0,0,0,12">
+          <StackPanel Orientation="Horizontal" Spacing="4">
+            <RadioButton Classes="segment" GroupName="PlanungReiter" Content="Übersicht" IsChecked="{Binding Normal.ZeigtUebersicht, Mode=OneWay}" Command="{Binding Normal.ReiterCommand}" CommandParameter="0" />
+            <RadioButton Classes="segment" GroupName="PlanungReiter" Content="Terminplan" IsChecked="{Binding Normal.ZeigtTerminplan, Mode=OneWay}" Command="{Binding Normal.ReiterCommand}" CommandParameter="1" ToolTip.Tip="Der beste Plan bis jetzt; er aktualisiert sich bei jeder Verbesserung." />
+            <RadioButton Classes="segment" GroupName="PlanungReiter" Content="Diagramme" IsChecked="{Binding Normal.ZeigtDiagramme, Mode=OneWay}" Command="{Binding Normal.ReiterCommand}" CommandParameter="2" ToolTip.Tip="Diagramme des besten Plans bis jetzt; sie aktualisieren sich bei jeder Verbesserung." />
+          </StackPanel>
+        </Border>
+        <Panel Grid.Row="1">
+        <ContentControl Content="{Binding Normal.Terminplan}" IsVisible="{Binding Normal.ZeigtTerminplan}" />
+        <ContentControl Content="{Binding Normal.Diagramme}" IsVisible="{Binding Normal.ZeigtDiagramme}" />
+        <TextBlock Text="Sobald es den ersten Plan gibt, erscheint er hier." Foreground="{StaticResource Tinte2}" IsVisible="{Binding Normal.PlanungOhneAnsicht}" />
+        <Grid IsVisible="{Binding Normal.ZeigtUebersicht}" ColumnDefinitions="1.7*,14,*">
+          <Border Classes="normalkarte">
+            <DockPanel>
+              <WrapPanel DockPanel.Dock="Top" Margin="0,0,0,4">
+                <TextBlock Classes="ueberschrift" Text="Wo der Plan steht" Margin="0,0,24,0" />
+                <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,2,16,0">
+                  <ui:Grenzbalken Width="20" Height="16" Anzahl="1" Grenze="1" Maximum="1" />
+                  <TextBlock Text="unvermeidbar (bewiesen)" Classes="klein" VerticalAlignment="Center" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,2,16,0">
+                  <Border Width="9" Height="10" CornerRadius="2,0,0,2" Background="{StaticResource Highs}" VerticalAlignment="Center" />
+                  <Border Width="9" Height="10" CornerRadius="0,2,2,0" Background="{StaticResource Akzent}" VerticalAlignment="Center" Margin="-6,0,0,0" />
+                  <TextBlock Text="noch zu holen" Classes="klein" VerticalAlignment="Center" />
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,2,0,0">
+                  <Border Width="2" Height="14" Background="{StaticResource Tinte}" VerticalAlignment="Center" />
+                  <TextBlock Text="gespeicherter Plan" Classes="klein" VerticalAlignment="Center" />
+                </StackPanel>
+              </WrapPanel>
+              <TextBlock DockPanel.Dock="Bottom" Classes="klein" TextWrapping="Wrap" Margin="0,8,0,0"
+                         Text="Schraffiert: so viele Verstöße hat jeder mögliche Plan – das hat HiGHS bewiesen. Nur der farbige Teil lässt sich noch verbessern. Im Feinschliff sind Grenzen meist unbekannt." />
+              <ScrollViewer VerticalScrollBarVisibility="Auto">
+                <ItemsControl ItemsSource="{Binding Normal.Gruppen}">
+                  <ItemsControl.ItemTemplate>
+                    <DataTemplate x:DataType="p:Normalgruppe">
+                      <StackPanel Spacing="2" Margin="0,8,0,0">
+                        <Border BorderBrush="#ECEAE4" BorderThickness="0,0,0,1" Padding="0,0,0,4">
+                          <StackPanel Orientation="Horizontal" Spacing="10">
+                            <Border Classes="marke" Background="{Binding Stufe, Converter={x:Static ui:Konverter.StufeHell}}">
+                              <TextBlock Text="{Binding Marke}" Foreground="{Binding Stufe, Converter={x:Static ui:Konverter.StufeDunkel}}" />
+                            </Border>
+                            <TextBlock Text="{Binding Summe}" FontWeight="SemiBold" VerticalAlignment="Center" />
+                            <TextBlock Text="{Binding Grenze}" Classes="klein" VerticalAlignment="Center" TextWrapping="Wrap" />
+                          </StackPanel>
+                        </Border>
+                        <TextBlock Text="{Binding Leer}" Classes="klein" IsVisible="{Binding !HatZeilen}" Margin="0,4,0,0" />
+                        <ItemsControl ItemsSource="{Binding Zeilen}">
+                          <ItemsControl.ItemTemplate>
+                            <DataTemplate x:DataType="p:Normalbalken">
+                              <Grid ColumnDefinitions="88,160,*,190" Margin="0,3">
+                                <StackPanel Orientation="Horizontal" Spacing="2" VerticalAlignment="Center" IsVisible="{Binding Einstellbar}">
+                                  <Button Classes="wicht" Classes.aktiv="{Binding NiedrigAktiv}" Command="{Binding WichtigkeitCommand}" CommandParameter="{Binding NiedrigParameter}" ToolTip.Tip="{Binding NiedrigHinweis}">
+                                    <ui:Symbol Daten="{StaticResource SymbolRunter}" Farbe="{StaticResource Tinte2}" Groesse="16" />
+                                  </Button>
+                                  <Button Classes="wicht" Classes.aktiv="{Binding HochAktiv}" Command="{Binding WichtigkeitCommand}" CommandParameter="{Binding HochParameter}" ToolTip.Tip="{Binding HochHinweis}">
+                                    <ui:Symbol Daten="{StaticResource SymbolZiel}" Farbe="{StaticResource Tinte2}" Groesse="16" />
+                                  </Button>
+                                  <Button Classes="wicht" Classes.aktiv="{Binding NormalAktiv}" Command="{Binding WichtigkeitCommand}" CommandParameter="{Binding NormalParameter}" ToolTip.Tip="{Binding NormalHinweis}">
+                                    <ui:Symbol Daten="{StaticResource SymbolGleich}" Farbe="{StaticResource Tinte2}" Groesse="16" />
+                                  </Button>
+                                </StackPanel>
+                                <TextBlock Grid.Column="1" Text="{Binding Name}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                                <ui:Grenzbalken Grid.Column="2" Height="22" Margin="12,0" Anzahl="{Binding Anzahl}" Grenze="{Binding Grenze}" Vorher="{Binding Vorher}" Maximum="{Binding Maximum}" Stufe="{Binding Stufe}" />
+                                <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="8" HorizontalAlignment="Right" VerticalAlignment="Center">
+                                  <TextBlock Text="{Binding AnzahlText}" Classes="ziffer" FontWeight="SemiBold" FontSize="14" VerticalAlignment="Center" />
+                                  <Border Classes="marke" Background="#E3F1E8" IsVisible="{Binding Bestmoeglich}">
+                                    <TextBlock Text="{Binding Urteil}" Foreground="#1D4D2F" FontWeight="SemiBold" />
+                                  </Border>
+                                  <TextBlock Text="{Binding Urteil}" Classes="klein" IsVisible="{Binding !Bestmoeglich}" VerticalAlignment="Center" />
+                                </StackPanel>
+                              </Grid>
+                            </DataTemplate>
+                          </ItemsControl.ItemTemplate>
+                        </ItemsControl>
+                      </StackPanel>
+                    </DataTemplate>
+                  </ItemsControl.ItemTemplate>
+                </ItemsControl>
+              </ScrollViewer>
+            </DockPanel>
+          </Border>
+
+          <Grid Grid.Column="2" RowDefinitions="Auto,14,Auto,14,*">
+            <Border Classes="normalkarte">
+              <Grid ColumnDefinitions="Auto,*">
+                <Border Width="44" Height="44" CornerRadius="22" Background="#E3F1E8" IsVisible="{Binding Normal.UrteilGut}" VerticalAlignment="Top">
+                  <ui:Symbol Daten="{StaticResource SymbolHaken}" Farbe="{StaticResource Gut}" Groesse="24" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <Border Width="44" Height="44" CornerRadius="22" Background="#FBF1DC" IsVisible="{Binding !Normal.UrteilGut}" VerticalAlignment="Top">
+                  <ui:Symbol Daten="{StaticResource SymbolInfo}" Farbe="#6E4400" Groesse="24" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                </Border>
+                <StackPanel Grid.Column="1" Spacing="2" Margin="14,0,0,0">
+                  <TextBlock Text="{Binding Normal.Urteil}" FontSize="16" FontWeight="Bold" TextWrapping="Wrap" />
+                  <TextBlock Text="{Binding Normal.UrteilText}" Foreground="{StaticResource Tinte2}" TextWrapping="Wrap" />
+                </StackPanel>
+              </Grid>
+            </Border>
+            <Border Grid.Row="2" Classes="normalkarte" IsVisible="{Binding Normal.ZeigtVerlauf}">
+              <StackPanel Spacing="8">
+                <Grid ColumnDefinitions="1.1*,1.5*,1.2*,1.1*">
+                  <StackPanel>
+                    <TextBlock Text="Beste Lösung" Classes="klein" />
+                    <TextBlock Text="{Binding Normal.BesterWert}" Classes="ziffer" FontSize="30" FontWeight="SemiBold" Foreground="{StaticResource Gut}" />
+                  </StackPanel>
+                  <StackPanel Grid.Column="1" ToolTip.Tip="So wenig Schönheitsfehler hat jeder mögliche Plan mindestens – von HiGHS bewiesen. Im Feinschliff ist das oft noch unbekannt.">
+                    <TextBlock Text="Bewiesene Grenze" Classes="klein" />
+                    <TextBlock Text="{Binding Normal.GrenzeText}" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
+                  </StackPanel>
+                  <StackPanel Grid.Column="2">
+                    <TextBlock Text="Noch zu holen" Classes="klein" />
+                    <TextBlock Text="{Binding Normal.NochText}" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
+                  </StackPanel>
+                  <StackPanel Grid.Column="3">
+                    <TextBlock Text="Verbesserungen" Classes="klein" />
+                    <TextBlock Text="{Binding Normal.Verbesserungen}" Classes="ziffer" FontSize="14" FontWeight="SemiBold" Margin="0,8,0,0" />
+                  </StackPanel>
+                </Grid>
+                <ui:Suchraumbild Height="230" Verlauf="{Binding Normal.Verlauf}" Sekunden="{Binding Normal.VerlaufSekunden}" Laeuft="{Binding Normal.Rechnet}" />
+                <TextBlock Classes="klein" TextWrapping="Wrap"
+                           Text="Links der Suchraum: Er zieht sich mit jeder Verbesserung zusammen; der schraffierte Kern ist unvermeidbar (Sinnbild). Rechts echte Werte: blau der beste Plan, gestrichelt die bewiesene Grenze, der Streifen dazwischen ist noch zu holen." />
+              </StackPanel>
+            </Border>
+            <Border Grid.Row="4" Classes="normalkarte">
+              <DockPanel>
+                <TextBlock DockPanel.Dock="Top" Classes="ueberschrift" Text="Größte Probleme jetzt" Margin="0,0,0,10" />
+                <Border DockPanel.Dock="Bottom" Classes="blauhinweis" Margin="0,10,0,0">
+                  <TextBlock Text="{Binding Normal.Hinweis}" FontSize="12" />
+                </Border>
+                <ScrollViewer VerticalScrollBarVisibility="Auto">
+                  <ItemsControl ItemsSource="{Binding Normal.Probleme}">
+                    <ItemsControl.ItemTemplate>
+                      <DataTemplate x:DataType="p:Normalproblem">
+                        <Grid ColumnDefinitions="54,*" Margin="0,0,0,10">
+                          <Border Classes="marke" VerticalAlignment="Top" HorizontalAlignment="Left" Background="{Binding Stufe, Converter={x:Static ui:Konverter.StufeHell}}">
+                            <TextBlock Text="{Binding Marke}" Foreground="{Binding Stufe, Converter={x:Static ui:Konverter.StufeDunkel}}" />
+                          </Border>
+                          <TextBlock Grid.Column="1" TextWrapping="Wrap">
+                            <Run Text="{Binding WerVorneweg}" FontWeight="SemiBold" /><Run Text="{Binding Was}" />
+                          </TextBlock>
+                        </Grid>
+                      </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                  </ItemsControl>
+                </ScrollViewer>
+              </DockPanel>
+            </Border>
+          </Grid>
+        </Grid>
+        </Panel>
+        </Grid>
+      </Grid>
+
+      <!-- Seite 3: das Ergebnis -->
+      <Grid IsVisible="{Binding Normal.ZeigtErgebnis}" ColumnDefinitions="*,16,300" Margin="24,16,24,16">
+        <DockPanel>
+          <Border DockPanel.Dock="Top" Background="#ECEAE4" CornerRadius="8" Padding="3" HorizontalAlignment="Left" Margin="0,0,0,12">
+            <StackPanel Orientation="Horizontal" Spacing="4">
+              <RadioButton Classes="segment" GroupName="NormalReiter" Content="Übersicht" IsChecked="{Binding Normal.ZeigtUebersicht, Mode=OneWay}" Command="{Binding Normal.ReiterCommand}" CommandParameter="0" />
+              <RadioButton Classes="segment" GroupName="NormalReiter" Content="Terminplan" IsChecked="{Binding Normal.ZeigtTerminplan, Mode=OneWay}" Command="{Binding Normal.ReiterCommand}" CommandParameter="1" />
+              <RadioButton Classes="segment" GroupName="NormalReiter" Content="Diagramme" IsChecked="{Binding Normal.ZeigtDiagramme, Mode=OneWay}" Command="{Binding Normal.ReiterCommand}" CommandParameter="2" />
+            </StackPanel>
+          </Border>
+          <Panel>
+            <ScrollViewer IsVisible="{Binding Normal.ZeigtUebersicht}" VerticalScrollBarVisibility="Auto">
+              <StackPanel Spacing="14">
+                <Border Classes="normalkarte" Padding="18,16">
+                  <Grid ColumnDefinitions="Auto,*">
+                    <Border Width="52" Height="52" CornerRadius="26" Background="#E3F1E8" IsVisible="{Binding Normal.FazitGut}" VerticalAlignment="Top">
+                      <ui:Symbol Daten="{StaticResource SymbolHaken}" Farbe="{StaticResource Gut}" Groesse="28" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <Border Width="52" Height="52" CornerRadius="26" Background="#FBEDEB" IsVisible="{Binding !Normal.FazitGut}" VerticalAlignment="Top">
+                      <ui:Symbol Daten="{StaticResource SymbolWarnung}" Farbe="{StaticResource Schlecht}" Groesse="28" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                    </Border>
+                    <StackPanel Grid.Column="1" Spacing="4" Margin="16,0,0,0">
+                      <TextBlock Text="{Binding Normal.FazitTitel}" FontSize="20" FontWeight="Bold" TextWrapping="Wrap" />
+                      <TextBlock Text="{Binding Normal.FazitText}" Foreground="{StaticResource Tinte2}" TextWrapping="Wrap" />
+                      <TextBlock Text="{Binding Normal.FazitVergleich}" IsVisible="{Binding Normal.HatFazitVergleich}" Foreground="#6E4400" TextWrapping="Wrap" />
+                    </StackPanel>
+                  </Grid>
+                </Border>
+                <Border Classes="normalkarte">
+                  <StackPanel Spacing="10">
+                    <TextBlock Classes="ueberschrift" Text="Was Sie den Vereinen sagen sollten" />
+                    <TextBlock Text="Nichts – alle Pflichtregeln und Wünsche der Vereine sind erfüllt." Foreground="{StaticResource Tinte2}" IsVisible="{Binding !Normal.HatVereinshinweise}" />
+                    <ItemsControl ItemsSource="{Binding Normal.Vereinshinweise}">
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="p:Normalproblem">
+                          <Grid ColumnDefinitions="54,*" Margin="0,0,0,8">
+                            <Border Classes="marke" VerticalAlignment="Top" HorizontalAlignment="Left" Background="{Binding Stufe, Converter={x:Static ui:Konverter.StufeHell}}">
+                              <TextBlock Text="{Binding Marke}" Foreground="{Binding Stufe, Converter={x:Static ui:Konverter.StufeDunkel}}" />
+                            </Border>
+                            <TextBlock Grid.Column="1" TextWrapping="Wrap">
+                              <Run Text="{Binding WerVorneweg}" FontWeight="SemiBold" /><Run Text="{Binding Was}" />
+                            </TextBlock>
+                          </Grid>
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                  </StackPanel>
+                </Border>
+                <Border Classes="normalkarte">
+                  <StackPanel Spacing="10">
+                    <TextBlock Classes="ueberschrift" Text="Die größten Schönheitsfehler" />
+                    <ItemsControl ItemsSource="{Binding Normal.Feinschliffhinweise}">
+                      <ItemsControl.ItemTemplate>
+                        <DataTemplate x:DataType="p:Normalproblem">
+                          <TextBlock TextWrapping="Wrap" Margin="0,0,0,8">
+                            <Run Text="{Binding WerVorneweg}" FontWeight="SemiBold" /><Run Text="{Binding Was}" />
+                          </TextBlock>
+                        </DataTemplate>
+                      </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                    <TextBlock Classes="klein" TextWrapping="Wrap" Text="Einzelheiten zeigen die Diagramme, z. B. der Wechsel von Heim- und Auswärtsspielen je Mannschaft." />
+                  </StackPanel>
+                </Border>
+              </StackPanel>
+            </ScrollViewer>
+            <ContentControl Content="{Binding Normal.Terminplan}" IsVisible="{Binding Normal.ZeigtTerminplan}" />
+            <ContentControl Content="{Binding Normal.Diagramme}" IsVisible="{Binding Normal.ZeigtDiagramme}" />
+          </Panel>
+        </DockPanel>
+
+        <StackPanel Grid.Column="2" Spacing="10">
+          <Button Classes="gross primaer" Height="44" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Command="{Binding Normal.ExportierenCommand}" Content="Für click-TT exportieren" />
+          <Button Classes="gross" Height="40" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Command="{Binding Normal.DruckenCommand}" Content="Für die Vereine drucken (PDF)" />
+          <Button Classes="gross" Height="40" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Command="{Binding Normal.ReiterCommand}" CommandParameter="1" Content="Terminplan ansehen" />
+          <Button Classes="gross" Height="40" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Command="{Binding Normal.ReiterCommand}" CommandParameter="2" Content="Diagramme ansehen" />
+          <Border Height="1" Background="{StaticResource Linie}" Margin="0,6" />
+          <Button Classes="gross" Height="40" HorizontalAlignment="Stretch" HorizontalContentAlignment="Center" Command="{Binding Normal.PlanErstellenCommand}" Content="Nochmal planen" />
+          <TextBlock Classes="klein" TextWrapping="Wrap" Text="Der beste Plan bleibt immer erhalten: Ein neuer Lauf ersetzt ihn nur, wenn er besser ist." />
+          <Button Classes="link" Command="{Binding Normal.DatenCommand}" Content="Wünsche der Vereine ändern (Spielplandaten) …" HorizontalAlignment="Left" />
+          <Border Classes="normalkarte" Margin="0,16,0,0" Padding="14,12">
+            <StackPanel Spacing="6">
+              <TextBlock Text="Mehr Einfluss nehmen?" FontWeight="SemiBold" />
+              <TextBlock Classes="klein" TextWrapping="Wrap" Text="Im Expertenmodus sehen Sie alle Kriterien, Kosten, B-Varianten und den Leitstand – mit demselben Plan (gemerkt als „Bester Plan (normaler Modus)“)." />
+              <Button Classes="link" Command="{Binding ExperteCommand}" Content="Zum Expertenmodus wechseln" HorizontalAlignment="Left" />
+            </StackPanel>
+          </Border>
+        </StackPanel>
+      </Grid>
+    </Panel>
+  </DockPanel>
+</UserControl>

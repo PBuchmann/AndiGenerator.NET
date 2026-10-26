@@ -67,7 +67,7 @@ public static class Fehlerprotokoll
         if (gesichert is not null)
         {
             text.Append("Der aktuelle Plan wurde als gemerkter Plan „").Append(gesichert)
-                .Append("“ gesichert. Sie finden ihn unter „Start mit“ und in der Planauswahl der Ansichten.").AppendLine().AppendLine();
+                .Append("“ gesichert. Er wird in den Ansichten angezeigt, solange keine neue Generierung läuft.").AppendLine().AppendLine();
         }
 
         if (protokoll is not null)

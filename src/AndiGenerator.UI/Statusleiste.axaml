@@ -1,0 +1,40 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:p="using:AndiGenerator.Presentation"
+             xmlns:ui="using:AndiGenerator.UI"
+             x:Class="AndiGenerator.UI.Statusleiste"
+             x:DataType="p:HauptfensterViewModel">
+  <!-- Die Leiste unten in beiden Modi, an derselben Stelle: links Hinweise, rechts die geplante Runde, die Vergrößerung und
+       der Umschalter Normal | Experte. -->
+  <Border BorderThickness="0,1,0,0" BorderBrush="{StaticResource Linie}" Background="{StaticResource Flaeche}" Padding="12,3">
+    <Grid ColumnDefinitions="*,Auto">
+      <Border ClipToBounds="True" VerticalAlignment="Center">
+      <StackPanel Orientation="Horizontal" Spacing="16" VerticalAlignment="Center">
+        <!-- Die Statuszeile mit dem Stand des Laufs steht schon im Kopf und entfällt hier. Führung „Schritt für Schritt“: der nächste Schritt, der zur Lage passt; ein Klick öffnet die Begleitleiste -->
+        <Button Classes="link" Command="{Binding FuehrungCommand}" IsVisible="{Binding HatFuehrungsHinweis}" Padding="4,0"
+                ToolTip.Tip="Schritt für Schritt öffnen (F1)">
+          <StackPanel Orientation="Horizontal" Spacing="6">
+            <ui:Symbol Daten="{StaticResource SymbolHilfe}" Groesse="14" />
+            <TextBlock Text="{Binding FuehrungsHinweis}" FontSize="11" VerticalAlignment="Center" />
+          </StackPanel>
+        </Button>
+      </StackPanel>
+      </Border>
+      <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="12" VerticalAlignment="Center">
+        <Border Background="{StaticResource AkzentHell}" CornerRadius="6" Padding="8,1" IsVisible="{Binding IstGeoeffnet}"
+                ToolTip.Tip="Diese Runde plant das Programm; die übrigen Spiele bleiben, wie sie in click-TT stehen (Einstellungen › Optionen).">
+          <StackPanel Orientation="Horizontal" Spacing="6">
+            <TextBlock Text="Geplant wird" Classes="klein" FontSize="11" VerticalAlignment="Center" />
+            <TextBlock Text="{Binding Rundentext}" FontWeight="SemiBold" TextWrapping="NoWrap" Foreground="{StaticResource AkzentDunkel}" VerticalAlignment="Center" />
+          </StackPanel>
+        </Border>
+        <StackPanel Orientation="Horizontal" Spacing="2" ToolTip.Tip="Vergrößerung der Ansicht (Strg + Mausrad, Strg + Plus/Minus/0)">
+          <Button Content="−" Command="{Binding ZoomKleinerCommand}" Width="28" Height="26" Padding="0" HorizontalContentAlignment="Center" ToolTip.Tip="Ansicht verkleinern (Strg + Minus)" />
+          <Button Content="{Binding AktiverZoom.Text}" Command="{Binding ZoomZuruecksetzenCommand}" MinWidth="58" Height="26" Padding="6,0" HorizontalContentAlignment="Center" ToolTip.Tip="Originalgröße 100 % (Strg + 0)" />
+          <Button Content="+" Command="{Binding ZoomGroesserCommand}" Width="28" Height="26" Padding="0" HorizontalContentAlignment="Center" ToolTip.Tip="Ansicht vergrößern (Strg + Plus)" />
+        </StackPanel>
+        <ui:Modusumschalter VerticalAlignment="Center" />
+      </StackPanel>
+    </Grid>
+  </Border>
+</UserControl>

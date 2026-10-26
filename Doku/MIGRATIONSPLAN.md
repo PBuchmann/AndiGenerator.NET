@@ -608,7 +608,7 @@ Die **TT-Spielplan Engine** (Stephan Rüb, v1.1.2) ist ein neues, unabhängiges 
 
 **Merkposten:**
 1. **Oberflächenkonzepte** (Kandidaten für Phase 4/5): Top-5-Pläne mit „ab hier optimieren“; Planqualität als Zahl der Verstöße je Kriterium (live, Ziel 0; passt zu E14); Diagramme (Heim-/Auswärts-Rhythmus je Mannschaft, Spiel- und Pausenrhythmus, Auslastung je Kalenderwoche); Gewichtungs-Voreinstellungen; Konfliktliste; Terminwünsche mit Erfüllungsstatus; Kalender mit Verschieben per Klick; Verlauf früherer Läufe; Batch-Modus für mehrere Staffeln; Importe (Rahmenterminplan-PDF, Vereinsbemerkungen-PDF, Setzliste aus TTR-CSV); Plausibilitätsprüfung der Daten vor dem Start; geführte Einführung (Tour).
-2. **Andere Optimierungsverfahren prüfen**, insbesondere **Google OR-Tools CP-SAT** (Apache-2.0, GPL-v3-kompatibel; .NET-Paket `Google.OrTools`, nativ ca. 35 MB): z. B. als Startlösung oder für Teilprobleme (Paarungen/Heimrecht, Pflichtspielwoche) in Kombination mit der bestehenden lokalen Suche. Maßstab bleibt das Kostenmodell des Originals (`andigen bewerten`). Ausgearbeitet in **Abschnitt 11** (O7).
+2. ~~**Andere Optimierungsverfahren prüfen**~~ (CP-SAT geprüft 28.10.2026 im einfachen Modus: gleichauf mit HiGHS, wieder entfernt – Abschnitt 14), insbesondere **Google OR-Tools CP-SAT** (Apache-2.0, GPL-v3-kompatibel; .NET-Paket `Google.OrTools`, nativ ca. 35 MB): z. B. als Startlösung oder für Teilprobleme (Paarungen/Heimrecht, Pflichtspielwoche) in Kombination mit der bestehenden lokalen Suche. Maßstab bleibt das Kostenmodell des Originals (`andigen bewerten`). Ausgearbeitet in **Abschnitt 11** (O7).
 
 **Zweiter Blick (15.10.2026)** – die TT-Spielplan Engine (v1.1.2) erneut untersucht (nur entpackt, Texte und Programmteile
 gelesen, nicht ausgeführt). Ihr „KI Konfliktberater“ ist eine **regelbasierte Analyse** (zu wenige Wunschtermine für die
@@ -913,6 +913,16 @@ nach Abstand O9 (CPU-Prototyp), dann O7 Schritt 3 bzw. O10.
 - **Ergebnis:** der beste Plan nach Stufen, die angepassten Gewichtungen und die Liste der Änderungen (`Inseloptimierer.Lenkung`). Spezial-Insel im Automodus aus.
 - *Beispiel (Verbandsoberliga, 3 min):* A 18 → 3, B 13 → 4 bei etwa gleich vielen C-Verstößen; Peter: „arbeitet sehr gut“.
 
+### Nächster Schritt: Kriterien dynamisch einstufen (Peter, 27.10.2026)
+
+Kriterien sind im Automodus nicht fest. Ein Kriterium kommt nach B (bzw. von B nach A), wenn es sich dort auf 0 oder fast 0
+bringen lässt, ohne andere Kriterien zu kannibalisieren (B-Kriterien und C deutlich schlechter); sonst bleibt es in C bzw.
+wandert zurück. Erster Fall: die Heim/Auswärts-Bilanz (Standard B5). Messung je 5 min Automodus mit HiGHS aus leerem Plan:
+R3 Damen-BOL A·B·C 2·13·76 → 2·0·86 (Bilanz 13 → 0, Wechsel H/A 22 → 16, Ungleich H/A 4 → 0, Sperrtermine 0 → 0);
+R21 Verbandsoberliga 1·127·261 → 1·63·321 (Bilanz ≈ 122 → ≈ 37, aber Sperrtermine 1 → 18, Ausweichtermine 4 → 8,
+3-Tage-Abstand 11 → 35) – dort gehört sie wegen der vielen Koppelwünsche nach C. Offen: Maß für „kannibalisiert“, wann
+geprüft wird (nach der Schranke von B?), Anzeige für den Anwender (einfacher Modus: „Offene Punkte im Verlauf“ neu denken).
+
 ## 12. Kompaktspieltage (Turnierrunden der Jugend, Stand 12.10.2026)
 
 **Name:** In Oberfläche und Anleitung heißt der Modus **Kompaktspieltage** (Peter, 12.10.2026: „Blockspieltage“ oder „Kompaktspieltage“ sind beide geläufig). Die Bezeichner im Code (`Turnier…`) und der Befehl `andigen turnier` bleiben vorerst.
@@ -956,6 +966,312 @@ nach Abstand O9 (CPU-Prototyp), dann O7 Schritt 3 bzw. O10.
 - [x] **Vollständige Suche nur aus 4er-Spieltagen** (Peter, 13.10.2026: gültig sind in der Jugend-VOL nur reine 4er-Pläne; 3er nur zeigen, wenn kürzer): `Viererbaum` – Branch and Bound bei 9 bzw. 10 Mannschaften (jede richtet genau einen 4er aus), nur Spieltage ohne Verstoß mit möglichem Sonntag, Verzweigung über die engste Paarung, kürzeste zuerst, Schranke max(je Gast die nächsten freien Gastgeber, je Gastgeber die nächsten Gäste), Sonntage erst am vollständigen Plan; erste Ebene parallel. Abschätzung (Knuth-Stichproben, Python, Daten 2026): ohne Schranke ca. 8·10⁸ Knoten, mit Schranke ab einem Plan von 3.108 km ca. 10⁶. Danach zufällige Suche für Varianten und kürzere 3er-Pläne.
 - [ ] **Offen:** Zeitwünsche aus den Bemerkungen, Routenplaner statt Luftlinie. *(Erledigt: Einzelbegegnungen unter der Woche bis 60 km; Druck als Übersicht für die Vereine, 14.10.2026.)*
 - [ ] **Später, erst auf Nachfrage – einstellbare Gewichte der Kompaktplanung** (Peter, 14.10.2026): Die Punkte stehen fest im Code (10 je Verstoß gegen die Meldungen, 15 je Mannschaft ohne 3er-/4er-Heimspieltag, 2 ganz ohne Heimspiel, 3 je Dreier, wenn ein reiner 4er-Plan möglich ist, 3 je fehlendem Spitzen- bzw. Abstiegsspieltag (+0,5 früh), km-Punkte 10 · km/Bezug, Einzel-km doppelt; `Kompaktgesamt`, `Kompaktpunkte`). Solange Peter der einzige Nutzer ist, reicht das. Für andere Staffelleiter wären einstellbare Gewichte wie im normalen Modus konsequent – umsetzen erst, wenn jemand danach fragt.
+
+## 13. Ideen aus dem Meinl-Generator (Stand 26.10.2026)
+
+Der **clickTT-Spielplangenerator** („Meinl-Generator“, Thorsten Meinl, Java, Version 1.10.1) ist in vielen Landesverbänden
+verlinkt (u. a. BTTV, HTTV, BaTTV, TTVWH, DTTB). Untersucht wurde nur die Dokumentation (Foliensatz, Stand 12.06.2024) und
+das Verhalten beim Ausführen; der Code nicht (keine Lizenz angegeben, Dekompilieren nur mit Erlaubnis des Autors). Ideen
+werden übernommen, Code nicht.
+
+**Qualitätsvergleich** (Peter, 26.10.2026; Meinl-Pläne mit `andigen bewerten` nach A · B · C eingestuft):
+
+| Klasse | Meinl | AndiGenerator.NET |
+|---|---|---|
+| Verbandsoberliga (12 Mannschaften) | 4–6 harte Fehler, A 89–91, B 59, C ≈ 345 | – |
+| Verbandsliga Rheinland Süd-West (lange gerechnet, Konfiguration HTTV) | 6 harte Fehler, A 32–41, B 37–39, C 183–189 | A 0, B 27, C 49 |
+| Kreisoberliga (Einteilung Peters, B mit Abständen und Spielverteilung) | A 17–19, B 10–13, C 138–150 | A 0, B 0, C 126 (läuft) |
+
+Meinl erkennt zwei Spiele einer Mannschaft zur selben Uhrzeit (gewünschte Auswärtskoppel) nicht als Fehler und kennt
+parallele Spiele mit Nachbarmannschaften anderer Klassen nicht („Termine aus anderen Ligen ignorieren“).
+
+**ToDos, nach Nutzen geordnet:**
+
+- [ ] **M1 – Mindestspiele je Monat schnell eingeben:** In den Pflichtspieltagen ein Knopf „Für jeden Monat (bzw. jeden
+  Zwei-Monats-Block) mindestens N Spiele“, der die Pflichtzeiträume anlegt. Bei Meinl „Minimalspiele“; in HTTV, DTTB und
+  BaTTV eine schwere Verletzung („fehlende Pflichtspiele“). Unsere Pflichtspieltage können das schon, nur einzeln.
+- [ ] **M2 – Prüfung der Meldungen gegen Mindestspiele:** Vor dem Start warnen, wenn eine Mannschaft in einem
+  Pflichtzeitraum weniger nutzbare Heim- und Auswärtstermine gemeldet hat, als Spiele verlangt sind (Meinl warnt beim
+  Laden). Passt zum Datencheck aus Abschnitt 10, Punkt 3.
+- [ ] **M3 – Verbandsprofile:** Beim Einrichten der Staffel den Landesverband wählen; das setzt Voreinstellungen
+  (Mindestspiele je Monat, Wochenende für die 60-km-Regel, Regeln für Koppeltermine, Hallenkapazität, Stufeneinteilung).
+  Werte der Verbände bei Thorsten Meinl bzw. den Verbänden erfragen. Wichtig für Tests in anderen Verbänden.
+- [ ] **M4 – Mindestabstand Hin-/Rückspiel in Tagen:** Kriterium „Hin- und Rückspiel zu eng beisammen“ (Meinl: weniger als
+  90 Tage). Unser „Abstand H/A“ misst die Reihenfolge der Gegner, keine feste Tageszahl.
+- [ ] **M5 – Einstellbarer Mindestabstand zwischen zwei Spielen:** Meinl: „dicht gedrängte Spiele“ unter N Tagen
+  (Standard 5) oder kein Wochenende dazwischen. Unser 3-Tage-Abstand ist fest.
+- [ ] **M6 – Höchstlänge einer Spielpause in Tagen** (Meinl: Standard 14 Tage) als Ergänzung zur Spielverteilung, die
+  relativ zu den gemeldeten Terminen misst (Ferien zählen dort zu Recht nicht als Pause).
+- [ ] **M7 – Grenze für Heim-/Auswärtsserien einstellbar:** z. B. „HAAH“ noch erlaubt, „HAAAH“ ein Verstoß (Meinl
+  unterscheidet leicht und schwer). Bei uns nur Kosten bzw. Serien ab drei im Diagramm.
+- [ ] **M8 – Samstag + Sonntag als eigenes Kriterium** („unerwünschte Doppelspieltage“, TTVWH); heute nur über den
+  3-Tage-Abstand.
+- [ ] **M9 – Koppeltermine ganz verbieten**, auch wenn sie gewünscht sind (statt nur Gewicht „aus“).
+- [ ] **M10 – Mindestpause zwischen zwei Spielen am selben Tag** einstellbar (Heim- und Auswärtsspiel bzw. Auswärtskoppel);
+  unterschreitet sie, ist es ein harter Fehler.
+- [ ] **M11 – Rundenbeginn und -ende vorübergehend verschieben**, um kleine Ligen kompakter zu planen (bei Meinl nur für
+  den Lauf, die Daten aus click-TT bleiben unverändert). Bei uns bisher nur für die Viertelrunden der Doppelrunde.
+
+**Nicht übernommen:** Online-Version, „hohe Optimierung“ (bei uns Automodus mit HiGHS), automatischer Neustart für
+Nachtläufe (Inseln beginnen ohnehin neu), Gerechtigkeitsstrafe (bei uns quadratische Kosten je Mannschaft).
+
+## 14. Einfacher Modus: Schnellplaner (Stand 28.10.2026)
+
+Vorgabe Peter: Der Expertenmodus bleibt (Kompaktspieltage, Kostenoptimierung, Automodus). Neu kommt der einfache Modus für
+normale Klassenleiter: sofort mit HiGHS an A, dann an optimalem B, keine Ausflüge zu B-Varianten. Danach sucht er an der
+**Grenze des Machbaren** und lässt den Klassenleiter sie ausloten. Erst der Algorithmus (Engine `Einfach/`, Kommandozeile
+`andigen einfach`), dann die Oberfläche.
+
+**Leitgedanken (Peter, 28.10.2026)**
+- Nicht „der beste Plan“, sondern der beste für die gewählten Kriterien. An der Grenze führt jede Verbesserung eines
+  Kriteriums zur Verschlechterung eines anderen; dort muss der Klassenleiter einschätzen, was ihm wichtiger ist.
+- Bild der **Wippe**: Drücke ich ein Kriterium und keines geht hoch, war ich noch nicht an der Grenze. Der Algorithmus soll
+  immer an der Grenze suchen und es dem Planer ermöglichen, sie verständlich auszuloten.
+- Bewertet wird nach **Gruppen**, nicht nach A, B, C. Mehr feste Stufen (A–E) wären hinderlich (unten bleibt keine Freiheit,
+  jede Stufe kostet einen HiGHS-Schritt, zu starr für Abwägungen) – stattdessen zwei feste Stufen, ein wählbarer Fokus und
+  eine gewichtete Güte.
+- Auffälligkeit zählt: Mehrfach hintereinander zu Hause fällt mehr auf als eine etwas schlechtere Verteilung.
+- Präzisiert (Peter, 28.10.2026): Es geht primär um das **schnelle Finden eines sehr guten Plans**. Der Anwender sieht, welche
+  Kriterien optimal und bewiesen sind; zwischen den übrigen liegt irgendwo das Optimum. Er kann den einfachen Modus **allein
+  durchlaufen lassen** (Ergebnis: ein ausgewogenes Optimum) oder **mitbestimmen**: Dann bekommt er in mehreren **Stufen**
+  Vorschläge angezeigt (wie im Kompaktmodus, aber unterschiedliche Zwischenstände), wählt einen Plan und einen **Hebel**
+  („Heim/Auswärts-Wechsel verbessern“, „Spieltage nicht so weit auseinanderfächern“) oder beendet die Planung. Je Stufe
+  werden die Pläne ähnlicher. Die Vorschläge müssen sich wesentlich unterscheiden, und man muss schnell sehen, wodurch.
+  Die Grenze als Fläche/3D-Objekt ist verworfen (schwer verständlich, zu wenige Punkte).
+
+**Maßstab (`Massstab`, `Planguete`)** – der Reihe nach: Pflicht (harte Fehler, Summe A), **Wünsche der Vereine**
+(Heim-/Auswärtskoppel, Sperr-, Ausweichtermine – nie geopfert), dann der **Fokus** (eine Gruppe, die der Klassenleiter
+verbessern will, strikt), dann die **Güte**: Σ Gewicht × Gruppe. Eine Gruppe ist der Mittelwert ihrer Kriterien, jedes bezogen
+auf seinen Wert im Grundplan (mindestens die Zahl der Mannschaften) – so beherrscht kein Kriterium seine Gruppe mit großen
+Zahlen. Gruppen und Startgewichte nach Auffälligkeit: Heim/Auswärts (Ungleich, Wechsel, Abstand H/A) 3, Abstände
+(3 Tage, 2 je Woche) 2, Spielverteilung 1, Spieltage 1, 60-km-Regel 1, Setzliste 1, gleiche Heimtermine 1. Der Wechsel H/A
+zählt steigend (zwei in Folge 1, drei 3, vier 6; seit 29.10.2026 – vorher gab es dafür die inzwischen entfernte H/A-Bilanz).
+
+**Steuerung (`Schnellsteuerung`)** – auch während der Rechnung: `Fokus(gruppe)` („Verbessern“ stark) und `Gewicht(gruppe, w)`
+(„Verbessern“ leicht). Der Schnellplaner liest den Maßstab vor jeder Runde; die C-Reihenfolge der Kandidaten folgt den
+Gewichten, die Teilneuplanung rechnet mit Gewichten je C-Kriterium (`Neuplanungseinstellungen.CGewicht`) wie die Güte.
+
+**Beweisstand (`Kriteriumsstatus`, `Beweisstand`)** – je Kriterium des besten Plans: *optimal* (kein Verstoß), *bewiesen*
+(Pflicht bzw. Wünsche: HiGHS hat die Summe der Stufe bewiesen und der Plan erreicht sie), *allein bewiesen* (das Kriterium
+allein kann nicht tiefer, aus der Schranke je Kriterium bzw. den Proben), sonst *offen* – nur dort gibt es Hebel.
+
+**Vorschläge (`Vorschlagsauswahl`, `Vorschlag`, `Unterschied`)** – höchstens vier: die **Empfehlung** (der beste nach dem
+Maßstab; mit Hebel der beste für den Hebel), mit Hebel auch der **ausgewogene**, je offener Gruppe der Plan, der sie am besten
+erfüllt, und die **bisherige Wahl** zum Vergleich – aber nur gute Pläne (ausgewogen höchstens doppelt so schlecht wie der
+beste) und nur, wenn er von allen schon gewählten mindestens die Schwelle entfernt ist (Σ Gewicht × |Gruppenunterschied|, Einheit der Güte; Stufe 1: 0,4, jede Stufe halb so viel). Jeder Vorschlag nennt bis zu
+vier Kriterien, in denen er sich deutlich (≥ 1 und ≥ 10 %) von der Empfehlung unterscheidet – erst was besser wird, dann was
+es kostet, je die wirksamsten zuerst („Wechsel Heim/Auswärts 14 → 9“); benannt ist er nach den Gruppen, in denen er am meisten
+gewinnt („Besser bei Abstände“). Bleibt nur die Empfehlung: Die Alternativen unterscheiden sich kaum.
+
+**Stufen und Hebel (`Schnellsteuerung.Waehlen(plan, hebel)`)** – ohne Wahl rechnet der einfache Modus allein weiter
+(Stufe 1, ausgewogen). Eine Wahl beginnt die nächste Stufe: Alle Kandidaten beginnen beim gewählten Plan; jedes Kriterium der
+Gruppen darf höchstens um die **Toleranz** schlechter werden (Stufe 2: 30 %, jede weitere halb so viel, mindestens ein
+Verstoß; was im gewählten Plan besser ist als in der bisherigen Empfehlung, gar nicht – sonst führte das Verfeinern in R3 zur
+alten Empfehlung zurück – als Obergrenzen im Automodus, `Inseloptimierer.Festlegen`, also echt bewertet); die Grenze der Stufe beginnt mit
+dem gewählten Plan und den bekannten Plänen in dieser Nähe. Mit Hebel ist dessen Gruppe der Fokus (strikt), ohne Hebel wird
+ausgewogen verfeinert. Jede Gruppe hat einen Hebel, auch die Spieltage.
+
+**Grenze (`Paretofront`)** – alle Pläne mit bester Pflicht und besten Wünschen, die in keiner Gruppe von einem anderen
+übertroffen werden, ohne in einer anderen schlechter zu sein (höchstens 60). `Senken(aktuell, gruppe)` liefert die Wippe: der
+Plan an der Grenze mit dieser Gruppe niedriger und dem kleinsten gewichteten Anstieg der übrigen, mit der Änderung je Gruppe;
+`null` = an der Grenze ist dafür nichts bekannt.
+
+**Ablauf (`Schnellplaner`)**
+1. *Pflicht und Wünsche:* Inseln sofort (Automodus, Grundeinteilung: B nur die Wünsche), gleichzeitig `Ligaschranke.Schnell`:
+   Kette A1 → Summe A → Summe B (Kriterien einzeln und B-Varianten intern als Startpläne – ohne sie fand HiGHS in R21 B 10–18
+   statt 8), ohne „A und B zusammen“ und ohne Stufe C.
+2. *Glätten:* Die Grundeinteilung glättet 45 s mit allen Kernen; ihr Plan ist der Bezug der Gruppen. Danach sind Pflicht und
+   Wünsche je Kriterium festgelegt (`Inseloptimierer.Festlegen`, Obergrenzen der Teilneuplanung).
+3. *Rennen an der Grenze:* Kandidaten sind die Grundeinteilung und je Gruppe mit Verstößen eine **Richtung** (die Gruppe mit
+   dreifachem Gewicht in der Güte – sie neigt nur, damit ihre Pläne als Vorschläge taugen; strikt, die Kriterien in B, rechnete
+   sie Pläne mit sechsfacher Güte). Wählt der Klassenleiter einen Hebel, kommt ein **strikter** Kandidat dazu (die Gruppe im
+   Fokus, ihre Kriterien in B, sonst – Spieltage – dreifaches Gewicht vorn in C). Je Kandidat Inseln (1 Kern) und Teilneuplanung (1 Kern). Jeder
+   beginnt eine Runde beim besten Plan der Grenze **für seine Richtung** (so nutzt jeder, was die anderen fanden – vorher ging
+   in R21 ein besserer Plan eines ausgeschiedenen Kandidaten verloren). Je Kandidat 30 s in seiner ersten Runde der Stufe, dann doppelt, höchstens 4 min; in jeder Stufe rechnet erst jeder einmal. Reichen
+   die Kerne nicht für alle, bekommen die mit den meisten Erfolgen je Sekunde die Zeit (Pläne an der Grenze, ein neuer bester
+   doppelt, ältere zählen je Runde 0,7-mal; jeder fünfte Platz zufällig; der Fokus immer) – keiner scheidet für immer aus
+   (vorher Successive Halving). Der „beste Plan“ ist der beste der Grenze für den Maßstab.
+
+**Verworfen:** Proben mit HiGHS über die ganze Saison („wie weit lässt sich ein C-Kriterium bei festem A und B allein
+senken?“, `Kriteriumsprobe`, noch abrufbar mit `andigen einfach --probe N`) – in 15 s je Kriterium fand HiGHS in R3 nirgends
+eine Verbesserung. Einzelne C-Kriterien als Kandidaten (statt Gruppen) – zu viele, und sie entsprechen nicht dem, was der
+Klassenleiter steuert.
+
+**Messung (Container mit 2 logischen Prozessoren, also 1 Kern für den Schnellplaner, 10 min; Vergleich: Automodus mit HiGHS
+5 min, 2 Threads; Maßstab vor der Umstellung auf Gewichte und Bezug):**
+
+| Staffel | Automodus | Einfacher Modus | A und B fertig |
+|---|---|---|---|
+| R3 Damen-BOL | 0·2 · 0 · Güte 3,06 | 0·2 · 0 · **Güte 2,35** | nach 3 s |
+| R21 Verbandsoberliga | 0·1 · 8 · Güte 7,92 | 0·1 · 8 · Güte 8,09 | nach 108 s (Wünsche 8 = Optimum) |
+
+**Messung mit Maßstab (Gewichte 3/2/1, Bezug Grundplan, steigende Bilanz; gleicher Container, 10 min):**
+
+| Lauf | Güte nach A/B | Güte bester Plan | Pläne an der Grenze | Wippe (Beispiel) |
+|---|---|---|---|---|
+| R3, ohne Fokus | 21,81 | **3,00** (Bilanz 151 → 3, Wechsel 56 → 14) | 4 (Güte 3,0 … 19,4) | Abstände senken (−0,13) hebt Heim/Auswärts um +5,38 |
+| R21, ohne Fokus | 8,40 | **5,83** | 5 (Güte 5,83 … 6,37) | Heim/Auswärts −0,03 kostet Abstände +0,08 |
+| R21, Fokus Heim/Auswärts ab 300 s | 7,19 | 5,84 (Heim/Auswärts 0,89 = kleinster Wert der Grenze) | 5 | – |
+
+Befunde: In R3 ist die Grenze weit (echte Zielkonflikte), in R21 eng – die Koppelwünsche legen fast alles fest. Ein
+Fokus-Kandidat fand in R21 einen Plan mit besserer Güte (5,42) als die Grundeinteilung; das Halbieren nach wenigen Runden
+ist also verrauscht. Die Grenze entsteht nur nebenbei (4–5 Punkte) – für eine Darstellung als Fläche muss sie gezielt
+abgetastet werden (siehe Offen).
+
+**Messung mitbestimmen (gleicher Container, 1 Kern, 10 min):**
+
+| Lauf | Güte nach A/B | Güte am Ende | Beobachtung |
+|---|---|---|---|
+| R3 allein | 16,0 | **2,91** | Vorschläge: Empfehlung und „Besser bei Abstände“ (3,43: Drei Tage 5 → 4, dafür Wechsel H/A 12 → 19) |
+| R3 mitbestimmt: 250 s Empfehlung ohne Hebel, 420 s Hebel Heim/Auswärts | 16,9 | 3,65 | Hebel: Heim/Auswärts 0,42 → 0,37 (Bilanz 3 → 2, Wechsel 12 → 10), Abstände 0,58 → 0,60; Güte 3,74 → 3,65 |
+| R21 allein | 9,25 | 6,10 | Pflicht und Wünsche bewiesen (Wünsche 8); Grenze eng – ein Vorschlag „Besser bei Heim/Auswärts“ (6,50) |
+
+Auf einem Kern teilen sich fünf Kandidaten die Zeit; vorher (Successive Halving) rechnete fast nur die Grundeinteilung (R21
+5,83). Mit vielen Kernen rechnen alle gleichzeitig – dort ist die Verteilung nach Erfolg gleichgültig. Noch auf Peters Rechner
+zu messen.
+
+**Reihenmessung (`andigen einfachreihe`, `einfachreihe.cmd`)** – Vorgabe Peter (28.10.2026): Ein Klassenleiter lässt eine
+Planung höchstens etwa 5 Minuten laufen, oft auf einem Rechner mit 4 Kernen (im Original hat Peter an der Verbandsoberliga
+zwei Stunden gearbeitet). Je Klasse ein eigener Prozess `andigen einfach` mit Zwischenständen, auf Wunsch (`--vergleich`) der
+Automodus mit HiGHS wie in der Oberfläche gleich lang; alle Pläne werden danach gleich bewertet (Pflicht, Wünsche, Güte nach
+dem Standard-Maßstab je Mannschaft) und landen in `einfachreihe.csv` im Zielordner (Standard: Unterordner `einfachreihe`
+neben den Eingaben – bei `Referenz/eingabe` also privat). Standard seit der ersten Reihe: **120 s mit allen Kernen**,
+Zwischenstand nach 60 s (Peter: „Eine bis zwei Minuten müssen ausreichen“).
+
+**Erste Reihe (Peters Rechner, 28 Klassen aus `Referenz/eingabe`, je 300 s auf 4 Kernen):** einfacher Modus gegen Automodus
+23 besser, 4 schlechter, 1 gleich; Pflicht und Wünsche nie schlechter, die Wünsche in 4 Klassen besser – Verbandsoberliga
+8 (nach 39 s) gegen 46, R14 2 gegen 3, R26 5 gegen 6, Bezirksliga Süd 0 gegen 1. Güte bei gleichen Wünschen im Median 11 %
+besser (R20 15,3 gegen 23,9; R05 4,9 gegen 8,4; R3 5,3 gegen 8,2). Nach 120 s schon in 18 Klassen besser als der Automodus
+nach 300 s; nach 60 s noch grob. Pflicht und Wünsche meist nach 1–11 s fertig, die 4. Kreisklassen nach 69 s. Schwächer in
+R15, R06 (R13, R17 knapp) – jeweils in der Gruppe Heim/Auswärts (R15 2,77 gegen 1,75). Peters Deutung: Viele Wünsche sind nur
+auf Kosten des Heim/Auswärts-Wechsels erfüllbar; steht er nicht in B, hat er keinen Vorrang. Versuch: Beim Glätten die
+Bilanz ans Ende von B (`Schnellplaner.Glaetteinteilung`, `--bilanz-in-b`; die Wünsche sind dann schon je Kriterium
+festgelegt). **Ergebnis (Container, 1 Kern, 120 s, R06, R13, R14, R15, R17, R21, R3): in allen 7 Klassen schlechter**
+(R15 15,0 gegen 11,8; R06 17,2 gegen 13,0; R13 5,4 gegen 3,3) – und auch die Gruppe Heim/Auswärts wurde nicht besser
+(R15 3,09 gegen 2,75): Die Bilanz ist für Wechsel und Abstand H/A ein schwacher Stellvertreter, mit Vorrang verdrängt sie
+Abstände und Spielverteilung. (Die Bilanz ist inzwischen ganz entfernt, siehe unten.) In 6 Klassen änderte sich zwischen 180 und 300 s nichts mehr
+(lokales Optimum).
+
+**Versuch Fenster mit 2 Spielen (`--bilanz-spiele 2`, Peters Rechner, 120 s, alle Kerne):** Wechsel H/A kaum anders (R15
+30 → 29, R17 34 → 38, R21 77 → 83), Abstand H/A und Spielverteilung besser, Güte etwas schlechter; R06 nicht vergleichbar
+(erster Lauf langsam angelaufen). Standard bleibt das Fenster mit 3 Spielen. Befund dazu: Die Bilanz ist ein schwacher
+Stellvertreter für den Wechsel – H H A A H H ist ohne Verstoß; der Automodus bringt die Bilanz in 2 min auf 0, ohne dass der
+Wechsel verlässlich besser wird.
+
+**Versuch CP-SAT (28.10.2026, wieder entfernt):** CP-SAT aus Google OR-Tools (Apache-2.0, NuGet `Google.OrTools`) über
+dieselbe Schnittstelle `ISchrankenloeser` wie HiGHS, nur in der Kommandozeile: dasselbe Modell 1:1 (gebrochene Faktoren ×1000),
+Startplan als Hinweis, 4 Arbeiter je Lauf. Stolperstein: OR-Tools bringt unter Windows ein eigenes, älteres `highs.dll` mit,
+das unseres im selben Ordner überschrieb („Prozedureinsprungpunkt nicht gefunden“) – eigener Ordner nötig. Ergebnis auf
+Peters Rechner (5 Klassen, 120 s, alle Kerne, je zwei Läufe), Güte nach 120 s:
+
+| Klasse | HiGHS | CP-SAT | CP-SAT, ganzer Plan je Schritt (20 s) |
+|---|---|---|---|
+| R11 | 19,5 / 19,4 | 20,9 / 21,4 | 21,2 |
+| R15 | 12,1 / 9,4 | 10,1 / 9,7 | 15,8 |
+| R17 | 10,6 / 11,6 | 11,9 / 9,3 | 12,1 |
+| R21 Verbandsoberliga | 26,1 / 27,4 | 26,6 / 24,8 | 25,3 |
+| R3 | 7,4 / 6,4 | 7,9 / 6,4 | 8,3 |
+
+Im Mittel gleichauf (Summe 74,9 gegen 74,4; zwei Läufe desselben Lösers streuen um bis zu 2,6), der ganze Plan je Schritt
+schlechter. CP-SAT hatte Pflicht und Wünsche in R15, R17 und R21 schneller (R21 70 s gegen 80–96 s), in R3 langsamer. Den
+Wechsel H/A kennt die Teilneuplanung bei beiden Lösern genau (`Ligaschranke.WechselHeimAuswaerts`, Zustandskette je
+Spieltag). **Entscheidung Peter:** CP-SAT raus (90 MB native Bibliotheken je Plattform, zweiter Löser, kein Gewinn). Wert des
+Vergleichs: Zwei grundverschiedene Löser landen im selben Bereich – der einfache Modus ist in 2 Minuten nahe an dem, was mit
+diesem Modell erreichbar ist.
+
+**Bilanz raus, Wechsel steigend? (29.10.2026)** – Befund: Die Heim/Auswärts-Bilanz bringt keinen eigenen Nutzen (kein
+Stellvertreter für den Wechsel, in B schädlich, ihr Zweck – etwas für HiGHS Leichtes – entfällt, weil die Teilneuplanung den
+Wechsel genau kennt; lange Serien zählt schon der Wechsel, den Ausgleich Ungleich H/A). Vorschlag (Peter: „ja, perfekt“):
+Wechsel H/A zählt steigend – Heim–Heim 1, drei in Folge 3, vier 6 –, nur in der Anzahl (Automodus, einfacher Modus), die
+Kosten des Originals bleiben (dort zählt die Folge schon mit Länge hoch 4). Nebenbefund: Bei gerader Mannschaftszahl hat ein
+Plan „jeder gegen jeden“ mindestens N − 2 Brüche (Heim–Heim bzw. Auswärts–Auswärts) je Runde – einzelne Doppel sind
+unvermeidbar, Serien ab 3 nicht. Versuch zuerst als Schalter (`Versuchsschalter.WechselSteigend`, `OhneBilanz`;
+`--wechsel-steigend --ohne-bilanz`; HiGHS zählt den Wechsel weiter einfach, die echte Bewertung steigend), gemessen mit
+`serientest.cmd` (6 Klassen, 120 s; die Reihe zählt je Plan Doppel, Serien ab 3 und die längste Serie). Hält es, wird die
+Bilanz ganz entfernt (auch aus dem Automodus).
+
+**Ergebnis (Peters Rechner, 120 s, alle Kerne):** steigend ohne Bilanz in allen 6 Klassen besser, Pflicht und Wünsche gleich –
+Güte ohne Bilanz R06 13,4 → 11,4; R11 18,9 → 13,6; R15 13,7 → 8,1; R17 12,8 → 10,0; R21 20,8 → 20,0; R3 7,6 → 4,9 (Summe
+87,2 → 68,0, −22 %); Wechsel H/A (einfach gezählt) 292 → 237, Serien ab 3 42 → 34, Abstand H/A 336 → 271. Nicht getrennt
+gemessen, wie viel davon das Weglassen der Bilanz bringt. **Umgesetzt (29.10.2026):** Bilanz entfernt (Kriterium, Zählung,
+HiGHS-Modell, Fenster; gespeicherte Einteilungen, die sie nennen, werden überlesen – `Stufeneinteilung.Entfernt`); der
+Wechsel H/A zählt steigend über den Zuschlag `Zusatzverstoesse.Wechselzuschlag` (Automodus, einfacher Modus,
+Qualitätsansicht; Kostentabelle und Kosten wie im Original; HiGHS zählt in der Teilneuplanung weiter jedes Doppel einmal).
+
+**Für später vorgemerkt – Oberfläche (Peter):** Leiste „bewiesen“ (Häkchen), darunter die Vorschläge als Karten mit ihren
+Unterschieden in Worten und kleinen Balken je offener Gruppe; je Karte die Hebel der offenen Gruppen. Wahl „allein rechnen“
+oder „mitbestimmen“. Die Wippe ist der Hebel: Herunterdrücken einer Gruppe hebt andere (Rückmeldung als neue Karte, auch aus
+`Paretofront.Senken`). Dazu die Diagramme schnell einblendbar (Heim/Auswärts → Wechsel,
+Abstände und Spielverteilung → Spielverteilung, Spieltage → Spieltage). Ergebnisseite nach dem Mockup mit allen Diagrammen;
+die Verlaufsgrafik zeigt Pflicht, Wünsche und Güte statt fester Stufen.
+
+**Umgesetzt (29.10.2026) – normaler Modus in der Oberfläche (Entwurf „Einfacher Modus“, Seiten 1, 2D und 3):** Der
+einfache Modus heißt in der Oberfläche **normaler Modus**; `Programmeinstellungen.Expertenmodus` („modus=experte|normal“)
+hält die Wahl über den Neustart. `Normalplanung` (Application) startet den `Schnellplaner` mit HiGHS im Hintergrund und hält
+den besten Plan als gemerkten Plan „Bester Plan (normaler Modus)“ – ersetzt nur durch einen besseren (`Planguete.IstBesserAls`).
+`Planprobleme` macht aus einer Bewertung Sätze je Kriterium mit den am stärksten betroffenen Mannschaften (Muss, Soll,
+Feinschliff). `NormalmodusViewModel` (Presentation) fragt den neuesten `Schnellstand` jede Sekunde ab; `Schnellstand` und
+`Schnellergebnis` tragen dafür die bewiesenen Schranken A und B. Die Balken (`Grenzbalken`, UI) zeigen den bewiesenen Teil
+schraffiert, den offenen farbig und den gespeicherten Plan eines früheren Laufs als Strich – keine Verlaufskurven. Planung
+endet mit „Fertig“ oder nach 180 s ohne Verbesserung. Die Einrichtung übernimmt der normale Modus mit den Vorschlägen; „Einrichtung
+prüfen“ zeigt die Seite des Expertenmodus. Noch offen: Kompaktspieltage im normalen Modus, Mitbestimmen (Vorschläge und Hebel)
+in der Oberfläche. Die N−2-Grenze für Wechsel H/A wird nicht als bewiesen gezeigt (gilt mit freien Terminen nicht sicher).
+
+**Umgesetzt (30.10.2026) – Wichtigkeit je Kriterium und Reiter während der Planung:** `Massstab.Faktoren` (je
+Kostenkriterium, 1 = normal) multiplizieren das Kriteriumsgewicht und den Gruppenwert; `Schnellsteuerung.Wichtigkeit`
+setzt sie während der Suche (CLI: `--faktor K=F,…`). Der normale Modus bildet ↓ / ◎ / = auf 0,15 / 6 / 1 ab; der Faktor
+gilt auch beim Vergleich des besten Plans (`Massstab.IstBesser`, `Normalplanung.Uebernehmen`) und blendet Kriterien
+unter 0,5 aus den Problemlisten aus. Eine Messung (R15 Bezirksliga Süd, 80 s, 2 Kerne, Wechsel H/A 0,1 / 1 / 8: 42 / 58 / 41
+Verstöße) zeigte keinen eindeutigen Effekt – die kurze Rechenzeit und die Zufallsschwankung überdecken ihn; Wirkung mit
+mehr Rechenzeit prüfen, ggf. die Faktoren stärker wählen. Reiter Übersicht | Terminplan | Diagramme auch auf der Planungsseite
+(speichert den besten Plan bei Verbesserung und lädt die Ansichten neu).
+
+**Offen:** Obergrenzen der Stufe auch im Modell der Teilneuplanung (heute nur im Automodus; das Modell zählt manche
+Kriterien genähert, eine zu enge Zeile machte es unlösbar); Messung auf einem Rechner mit vielen Kernen; Feinabstimmung der Gewichte; steigende Zählung auch für lange Pausen
+und lange Spieltage.
+
+## Plan für die Woche ab 02.11.2026 (Peter, 31.10.2026)
+
+Reihenfolge nach Abhängigkeit; Punkt 5 ändert die Richtung des normalen Modus und kommt vor 6.
+
+1. **Geplante Runde oben zentral anzeigen** (normaler und Expertenmodus): „Gesamte Runde“, „Hinrunde“ oder „Rückrunde“
+   (`Optionen.Rundenplanung`) in der Kopfzeile, damit man sieht, was geplant wird und was feststeht.
+2. **Einheitlicher Umschalter Normal | Experte:** Heute sieht er in beiden Oberflächen völlig anders aus. Ein gemeinsames
+   Steuerelement, an derselben Stelle, mit gleichem Aussehen.
+3. **Feste Begegnungen (aus click-TT geladen) – gelten als gesetzt:**
+   - Im Dialog, in dem die festen Begegnungen bearbeitet werden, eine Funktion „alle löschen“ für die **gesamte Runde**,
+     die **Hinrunde** oder die **Rückrunde** (ein Klick statt einzeln).
+   - In den **Diagrammen** (Spieltage, Wechsel H/A, Spielverteilung, …) sichtbar machen, welche Begegnungen fest sind und
+     welche geplant werden (wenn möglich; z. B. abgetönt/Rahmen und Legende).
+   - Dazu: das Diagramm Wechsel H/A erklärt, dass nur die geplante Runde zählt (siehe Punkt 4).
+4. **Zählung Wechsel Heim/Auswärts korrigieren.** Befund (30.10.): Gezählt wird nur die geplante Runde; dazu die
+   Eigenheit des Originals: Beginnt die geplante Runde mit einem Auswärtsspiel, zählt schon das erste Spiel als Bruch
+   (Vorbelegung „Auswärts“), und der Übergang vom letzten festen zum ersten geplanten Spiel wird nicht verglichen.
+   Ziele: (a) Vorbelegung und Rundenübergang richtig behandeln; (b) **nur zählen, was wirklich besser gehen kann** – in
+   einer perfekten Runde kann nicht jede Mannschaft ein perfektes Schachbrett haben (bei ungerader Spielzahl je Runde
+   oder gemeinsamen Hallen usw.); die Zählung soll den unvermeidbaren Anteil abziehen (z. B. Mindestbrüche je
+   Mannschaft/Runde aus der Spielzahl und den festen Spielen); (c) das **HiGHS-Modell muss realistisch rechenbar
+   bleiben** (heute ist der Wechsel dort genähert; die Änderung darf die Ausschnitte nicht schwerer machen). Vorher
+   klären, ob die Abweichung vom Original gewollt ist (Automodus, Qualitätsansicht, Probleme im normalen Modus und die
+   Kostenoptimierung sind betroffen; die Kostentabelle bleibt wie im Original).
+5. **Normaler Modus neu ausrichten.** Der bisherige normale Modus (Dateien → Planung mit Balken/Suchraum → Ergebnis,
+   `Schnellplaner`, Wichtigkeits-Symbole) war eine Fehlentwicklung. Der **einfache Modus** (Schnellplaner mit
+   Gruppen, Fokus, Vorschlägen und Hebeln) wird **zurückgebaut**; der **normale Modus wird nur ein anderes Frontend für den
+   Automodus** (`Optimierungsdienst`/Stufen A, B, C). Zu klären/umzusetzen: was von `Normalplanung`, `Planprobleme`,
+   Kopf-/Seitenstruktur, Pause/Weiter/Neu starten, Reitern (Terminplan/Diagramme während der Planung) und dem Export
+   erhalten bleibt (Frontend ja, Schnellplaner/Massstab-Faktoren/`andigen einfach` zurück); die **Animation „Suchraum“
+   sagt nichts aus** und wird ersetzt durch eine Anzeige, die den Automodus wirklich abbildet (z. B. Stufen A/B/C mit
+   Schranken, Verbesserungen je Stufe).
+6. **Kriterien-Experimente im Automodus (Kernstück des normalen Modus).** Start mit der Standardaufteilung der Kriterien
+   auf A, B, C. Hat die Optimierung einen guten Stand, probiert der Modus selbst: Lässt sich z. B. „2 Spiele pro Woche“
+   nach B oder A verschieben und dann auf 0 oder deutlich senken? Beobachten, was mit den anderen Kriterien geschieht –
+   **immer etwas warten, bis sich der Zustand eingependelt hat** – und daraus die **Abhängigkeiten zwischen den
+   Kriterien** ableiten. Die Experimente laufen **parallel auf allen CPUs** (mehrere Zuordnungen gleichzeitig), damit
+   die Aussagen schnell kommen. Der Anwender sieht Sätze wie „Spieltage lassen sich um 4 verbessern, dafür kommen 3
+   Wechsel H/A dazu“ und **entscheidet**, ob er dafür Verletzungen anderer Kriterien in Kauf nimmt; die Wahl ändert die
+   Einteilung und die Planung läuft von dort weiter. Offene Fragen vorab: Wartekriterium „eingependelt“ (z. B. keine
+   Verbesserung in N Sekunden), wie viele Experimente gleichzeitig (Kerne), Umgang mit dem Plan beim Umbau der
+   Einteilung (bester Plan bleibt erhalten und zählt nach der alten Einteilung weiter), Darstellung der Abhängigkeiten.
 
 ## Änderungsprotokoll
 | Datum | Änderung |
@@ -1150,3 +1466,12 @@ nach Abstand O9 (CPU-Prototyp), dann O7 Schritt 3 bzw. O10.
 | 25.10.2026 | Beispiele (Peter): Die fünf Testpläne des Originals (`AndiGenerator\Exe\Testplaene`, mit den echten Vereinsnamen von 2015/16 – Peter hat sich ausdrücklich für die Originale entschieden) und zwei Kompaktklassen (Jugend 19 Hessenliga, Jugend 19 NRW-Liga 1; Mannschaften aus den Tabellen auf myTischtennis, Termine/Hallen erfunden, `tools/kompaktklasse/mytischtennis.py`, Hallenorte als `.modifications` über `mytischtennis-adressen.cs`) liegen in `src/AndiGenerator.Desktop/Beispiele` und damit in jedem Paket. Die Startseite bietet sie an; `Beispielsammlung.Kopieren` legt eine Kopie (mit `.modifications`) unter `<Datenordner>\Beispiele` an, weil der Programmordner schreibgeschützt sein kann und bei Updates ersetzt wird; eine vorhandene Kopie bleibt. MCP: `beispiel_oeffnen` (50 Werkzeuge). |
 | 25.10.2026 | Lange Mannschaftsnamen (Peter): zentral `Textkuerzung.Kuerzen` (Rendering, gemessen mit der Zeichenfläche, „…“) und `Textkuerzung.Namensbreite` (230 pt). PDF-Tabellen begrenzen jede Spalte auf eine Namensspalte (bei 11 pt) und kürzen nur in solchen Spalten, statt die Tabelle zu verkleinern; Überschriften, Abschnittstitel und Fußzeile auf die Seitenbreite. Diagramme (linke Namensspalte), Terminwunschkalender, Karte, km je Mannschaft, Rasterkopf der Kompaktspieltage (höchstens 22 Zeichen je Zeile). Oberfläche: Stil `TextBlock.mannschaft` (höchstens 260 px, „…“, Hinweis mit vollem Namen). Test `LangeNamenTests` prüft alle Ansichten mit einem 110 Zeichen langen Namen. Beispielklassen für Kompaktspieltage nur noch mit Sonntagsmeldungen (samstags entstanden Spiele um 21 Uhr). |
 | 25.10.2026 | Analyzer (Peter): Microsoft.VisualStudio.Threading.Analyzers (MIT) und die eingebauten .NET-Analyzer in `AnalysisMode Recommended`. Geprüft und verworfen: SecurityCodeScan (eingestellt, auf Web-Lücken ausgerichtet, hier nur Fehlalarme zu `Random`), Meziantou (überschneidet sich mit Sonar/StyleCop, meist Stil; `ConfigureAwait(false)` überall passt nicht zu einer Oberfläche), IDisposableAnalyzers (laut, eher einmalige Durchsicht), Roslynator (ohne Funde im Build); xunit.analyzers kommt schon mit xunit, Dependabot und CodeQL laufen bereits. Abgeschaltet mit Begründung in `.editorconfig`: CA1859 (Schnittstellen als Rückgabetypen), VSTHRD200 (Async-Endung), in Tests CA1707/CA1861/CA1826. Behoben: Rückgaben der HiGHS-Aufrufe bewusst verworfen und dokumentiert, CancellationToken zuletzt (Kompaktplaner, Viererbaum), statische Hilfsmethoden, Fehlerbehandlung der Oberfläche fängt Fehler beim Melden selbst ab; bewusstes synchrones Warten (Engine-Threads, MCP-Bedienfaden) mit Begründung markiert. |
+| 26.10.2026 | Abschnitt 13: Ideen aus dem Meinl-Generator (Dokumentation und Vergleich in drei Klassen) als ToDos M1–M11 (Mindestspiele je Monat, Prüfung der Meldungen, Verbandsprofile, Mindestabstände, Pausen, Serien, Sa+So, Koppeln verbieten, Rundendaten verschieben); `andigen bewerten` zählt dafür harte Fehler und A · B · C. |
+| 27.10.2026 | Kompaktere Oberfläche (Rückmeldung Andreas): Grundschrift 12 statt 13, Bedienflächen 30–36 statt 44–48 px, schmalere Navigation, weniger Rand; Zoomleiste aus allen Ansichten entfernt, stattdessen Menü ☰ im Kopf mit Vergrößerung der aktiven Ansicht (`HauptfensterViewModel.ZoomStand`). Schritt 2: Experten- und einfacher Modus. |
+| 27.10.2026 | Neues Kriterium Heim/Auswärts-Bilanz (`Kostenkriterium.HeimAuswaertsBilanz`, nur Automodus, Standard B5) als Fenster-Bilanz: je Mannschaft, Runde und gleitendem Fenster aus L Wochen (L = 3 · Wochen mit Terminen je Runde / (N − 1), 2 bis 8) |Heim − Auswärts| ≤ 1, jeder Überschuss ein Verstoß; zwei Spiele derselben Art an einem Tag zählen einmal. Vorgabe Peter: keine Kostenart, keine Gewichtung – gezählt über `KernPlan.ZusatzZaehlen` (Qualität, Zählziel, `Stufeneinteilung.Zaehlen`). HiGHS (`Ligaschranke.HeimAuswaertsBilanzZiel`): je Fenster eine Hilfszahl und zwei Zeilen über die Terminspalten (an Koppeltagen eine Tagesspalte), Zeilen erst nach Stufe A im Modell. Verworfen: Bilanz je Kalenderwoche (Ferien zählten mit) und Bilanz Spiel für Spiel (braucht „spielt heute“ mit Big-M – HiGHS fand bei R11 195 bei Untergrenze 0). Gespeicherte Einteilungen ohne das Kriterium bekommen es am Ende von B (`Stufeneinteilung.AusText`). |
+| 28.10.2026 | H/A-Bilanz: Fenster gleiten über den Übergang Hin-/Rückrunde (Frage Peter; bei „nur Rückrunde“ mit der festen Vorrunde). Abschnitt 14: einfacher Modus – `Planguete` (Maßstab Pflicht · Wünsche · Güte mit H/A als eine Gruppe), `Ligaschranke.Schnell`, `Schnellplaner` (Phase 1 A und B, Glätten, Rennen der Einteilungen mit Successive Halving), `andigen einfach`; `andigen bewerten` zeigt den Maßstab. |
+| 29.10.2026 | Normaler Modus in der Oberfläche: drei Seiten (Dateien, Planung mit bewiesenen Grenzen und Problemen je Mannschaft, Ergebnis mit Kurz-Fazit), Wahl Normal/Experte bleibt erhalten, bester Plan als gemerkter Plan nur durch einen besseren ersetzt. |
+| 29.10.2026 | Heim/Auswärts-Bilanz entfernt, Wechsel H/A zählt steigend (Zuschlag zur Anzahl, Kosten wie im Original); gemessen −22 % Güte in 6 Klassen. |
+| 28.10.2026 | Versuche im einfachen Modus: Bilanz in B, Bilanz-Fenster mit 2 Spielen, CP-SAT als zweiter Löser (auch mit ganzem Plan je Schritt) – keiner besser; CP-SAT wieder entfernt, die Bilanz-Versuche bleiben als Schalter der Kommandozeile. Reihenmessung `andigen einfachreihe`. |
+| 28.10.2026 | Einfacher Modus mitbestimmen: Beweisstand je Kriterium, Vorschläge mit Schwelle und Unterschieden, Stufen mit Wahl und Hebel (Toleranz je Stufe halbiert), Rennen mit gemeinsamer Grenze und Zeit nach Erfolg statt Successive Halving; Grenze als Fläche verworfen. |
+| 28.10.2026 | Einfacher Modus steuerbar: `Massstab` (Gruppen mit Gewichten nach Auffälligkeit, Fokus, Bezug Grundplan), `Schnellsteuerung`, `Paretofront` (Grenze des Machbaren, Wippe `Senken`), Kandidaten je Gruppe (Fokus), gewichtetes C-Ziel der Teilneuplanung (`CGewicht`); H/A-Bilanz zählt steigend. Oberfläche als Wippe vorgemerkt. |

@@ -11,8 +11,6 @@ namespace AndiGenerator.Mcp;
 /// <param name="Verfahren">Kostenoptimierung, Automodus oder Kompaktspieltage.</param>
 /// <param name="Laeuft">Die Generierung bzw. Berechnung läuft (auch angehalten).</param>
 /// <param name="Angehalten">Sie ist angehalten.</param>
-/// <param name="Startplan">Ausgangsplan des nächsten Starts.</param>
-/// <param name="Startplaene">Mögliche Ausgangspläne.</param>
 /// <param name="Ergebnis">Stand der Generierung (normale Runden) oder <c>null</c>.</param>
 /// <param name="Statuszeile">Die Statuszeile der Oberfläche.</param>
 /// <param name="NaechsterSchritt">Nächster Schritt der Führung „Schritt für Schritt“.</param>
@@ -24,8 +22,6 @@ public sealed record Stand(
     string Verfahren,
     bool Laeuft,
     bool Angehalten,
-    string Startplan,
-    IReadOnlyList<string> Startplaene,
     Generierungsstand? Ergebnis,
     string Statuszeile,
     string NaechsterSchritt,

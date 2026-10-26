@@ -124,12 +124,13 @@ internal sealed class Zaehlziel
         }
 
         // Wie der Automodus (KernPlan.StufenBewerten): Pausen der Spielverteilung und die Spieltage zählen mit.
-        (int pausen, int laenge, int ueberlappung, bool letzteLaenge, bool letzteUeberlappung) = plan.ZusatzAnzahlen();
+        (int pausen, int laenge, int ueberlappung, bool letzteLaenge, bool letzteUeberlappung, int zuschlag) = plan.ZusatzAnzahlen();
         Zuordnen(Kostenkriterium.Spielverteilung, optionen.Fuer(MannschaftsKostenart.Spielverteilung) != Gewichtung.NichtBeruecksichtigen ? pausen : 0, ref a, ref b, ref c);
         Zuordnen(Kostenkriterium.Spieltaglaenge, optionen.Spieltag != Gewichtung.NichtBeruecksichtigen ? laenge : 0, ref a, ref b, ref c);
         Zuordnen(Kostenkriterium.Spieltagueberlappung, optionen.SpieltagUeberlappung != Gewichtung.NichtBeruecksichtigen ? ueberlappung : 0, ref a, ref b, ref c);
         Zuordnen(Kostenkriterium.LetzterSpieltagLaenge, optionen.LetzterSpieltag != Gewichtung.NichtBeruecksichtigen && letzteLaenge ? 1 : 0, ref a, ref b, ref c);
         Zuordnen(Kostenkriterium.LetzterSpieltagUeberlappung, optionen.LetzterSpieltagUeberlappung != Gewichtung.NichtBeruecksichtigen && letzteUeberlappung ? 1 : 0, ref a, ref b, ref c);
+        Zuordnen(Kostenkriterium.WechselHeimAuswaerts, optionen.Fuer(MannschaftsKostenart.WechselHeimAuswaerts) != Gewichtung.NichtBeruecksichtigen ? zuschlag : 0, ref a, ref b, ref c);
 
         double wert = (Hart * harte) + (JeA * a) + (JeB * b) + c + Math.Min(0.49, kosten * Gleichstand);
         return Grenze is { } g && (harte, a, b).CompareTo(g) > 0 ? Strafe + wert : wert;

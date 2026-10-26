@@ -18,21 +18,21 @@
   </Window.Styles>
   <!-- Aktueller und gesicherter Plan im Vergleich: Verstöße je Stufe, Kosten, dann die einzelnen Kriterien mit Unterschieden
        (im Kompaktmodus die Kennzahlen der Kompaktspieltage); der jeweils bessere Wert ist grün. -->
-  <StackPanel Margin="24" Spacing="12" Width="560">
+  <StackPanel Margin="16" Spacing="12" Width="600">
     <TextBlock Text="{Binding Frage}" TextWrapping="Wrap" />
     <Border Classes="karte" Padding="14,10">
       <StackPanel Spacing="4">
-        <Grid ColumnDefinitions="*,130,130">
+        <Grid ColumnDefinitions="*,140,140">
           <TextBlock Grid.Column="1" Text="Aktueller Plan" FontWeight="SemiBold" HorizontalAlignment="Right" />
           <TextBlock Grid.Column="2" Text="Gesicherter Plan" FontWeight="SemiBold" HorizontalAlignment="Right" />
         </Grid>
         <ItemsControl ItemsSource="{Binding Zeilen}">
           <ItemsControl.ItemTemplate>
             <DataTemplate x:DataType="p:Vergleichszeile">
-              <Grid ColumnDefinitions="*,130,130" Margin="0,2">
-                <TextBlock Text="{Binding Bezeichnung}" VerticalAlignment="Center" />
-                <TextBlock Grid.Column="1" Text="{Binding Aktuell}" Classes="wert ziffer" Classes.besser="{Binding AktuellBesser}" />
-                <TextBlock Grid.Column="2" Text="{Binding Gesichert}" Classes="wert ziffer" Classes.besser="{Binding GesichertBesser}" />
+              <Grid ColumnDefinitions="*,140,140" Margin="0,2">
+                <TextBlock Text="{Binding Bezeichnung}" VerticalAlignment="Top" TextWrapping="Wrap" Margin="0,0,8,0" />
+                <TextBlock Grid.Column="1" Text="{Binding Aktuell}" Classes="wert ziffer" Classes.besser="{Binding AktuellBesser}" TextAlignment="Right" VerticalAlignment="Top" />
+                <TextBlock Grid.Column="2" Text="{Binding Gesichert}" Classes="wert ziffer" Classes.besser="{Binding GesichertBesser}" TextAlignment="Right" VerticalAlignment="Top" />
               </Grid>
             </DataTemplate>
           </ItemsControl.ItemTemplate>
@@ -41,7 +41,7 @@
         <ItemsControl ItemsSource="{Binding Unterschiede}" IsVisible="{Binding HatUnterschiede}">
           <ItemsControl.ItemTemplate>
             <DataTemplate x:DataType="p:Vergleichszeile">
-              <Grid ColumnDefinitions="*,130,130" Margin="0,1">
+              <Grid ColumnDefinitions="*,140,140" Margin="0,1">
                 <TextBlock Text="{Binding Bezeichnung}" Classes="klein" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
                 <TextBlock Grid.Column="1" Text="{Binding Aktuell}" Classes="wert ziffer klein" Classes.besser="{Binding AktuellBesser}" />
                 <TextBlock Grid.Column="2" Text="{Binding Gesichert}" Classes="wert ziffer klein" Classes.besser="{Binding GesichertBesser}" />

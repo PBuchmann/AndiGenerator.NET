@@ -13,8 +13,8 @@ public static class Fuehrungen
     private static IReadOnlyList<Fuehrungsschritt> Kosten { get; } =
     [
         new(
-            "Verfahren und Ausgangsplan wählen",
-            "Wählen Sie oben rechts unter „Verfahren“ die Kostenoptimierung. Unter „Start mit“ legen Sie fest, wovon die Suche ausgeht: von einem leeren Plan, dem Plan aus click-TT oder einem gemerkten Plan.",
+            "Verfahren wählen",
+            "Wählen Sie oben rechts unter „Verfahren“ die Kostenoptimierung. Gestartet wird immer mit einem leeren Plan, wie im Original.",
             Fuehrungsziel.Verfahren,
             "5.1")
         {
@@ -66,7 +66,7 @@ public static class Fuehrungen
             "5.8"),
         new(
             "Anhalten und Plan merken",
-            "Passt der Plan, halten Sie mit ⏸ an und merken ihn unter einem Namen. Gemerkte Pläne lassen sich später vergleichen oder als Ausgangsplan wählen.",
+            "Passt der Plan, halten Sie mit ⏸ an und merken ihn unter einem Namen. Gemerkte Pläne lassen sich später vergleichen und wieder anzeigen.",
             Fuehrungsziel.PlanMerken,
             "5.11"),
         new(

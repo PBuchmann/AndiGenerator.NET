@@ -53,6 +53,22 @@ public static class Konverter
         _ => Grau,
     });
 
+    /// <summary>Holt den hellen Hintergrund der Marke einer Stufe im normalen Modus (Muss rot, Soll orange, Güte blau).</summary>
+    public static IValueConverter StufeHell { get; } = new FuncValueConverter<Engine.Inseln.Stufe, IBrush>(s => s switch
+    {
+        Engine.Inseln.Stufe.A => ProblemHell,
+        Engine.Inseln.Stufe.B => WarnungHell,
+        _ => AkzentHell,
+    });
+
+    /// <summary>Holt die Schrift der Marke einer Stufe im normalen Modus.</summary>
+    public static IValueConverter StufeDunkel { get; } = new FuncValueConverter<Engine.Inseln.Stufe, IBrush>(s => s switch
+    {
+        Engine.Inseln.Stufe.A => ProblemDunkel,
+        Engine.Inseln.Stufe.B => WarnungDunkel,
+        _ => AkzentDunkel,
+    });
+
     /// <summary>Holt, ob eine Zahl negativ ist (z. B. Differenz: besser).</summary>
     public static IValueConverter IstNegativ { get; } = new FuncValueConverter<int, bool>(r => r < 0);
 

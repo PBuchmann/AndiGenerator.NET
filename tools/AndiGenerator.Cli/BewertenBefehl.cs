@@ -5,6 +5,8 @@
 using System.Globalization;
 using AndiGenerator.Domain.Optionen;
 using AndiGenerator.Domain.Stammdaten;
+using AndiGenerator.Engine.Einfach;
+using AndiGenerator.Engine.Inseln;
 using AndiGenerator.Engine.Referenz;
 using AndiGenerator.Persistence.Plandaten;
 
@@ -102,7 +104,7 @@ internal static class BewertenBefehl
             return 2;
         }
 
-        Tabelle(ergebnisse);
+        Tabelle(ergebnisse, Stufeneinteilung.AusText(staffel.Kriterienstufen));
         if (a.Details)
         {
             Details(ergebnisse);
@@ -139,11 +141,29 @@ internal static class BewertenBefehl
 
     private static string Vergleichsform(string name) => string.Concat(name.Where(char.IsLetterOrDigit)).ToUpperInvariant();
 
-    private static void Tabelle(List<(string Name, IReadOnlyList<Spiel> Spiele, Planbewertung Bewertung)> ergebnisse)
+    private static void Tabelle(List<(string Name, IReadOnlyList<Spiel> Spiele, Planbewertung Bewertung)> ergebnisse, Stufeneinteilung einteilung)
     {
         Zeile("Plan", ergebnisse.Select(e => Kuerzen(e.Name)));
         Zeile("Spiele (terminiert)", ergebnisse.Select(e => $"{e.Spiele.Count} ({e.Spiele.Count(s => s.Zeitpunkt is not null)})"));
         Zeile("Gesamtkosten", ergebnisse.Select(e => Kostenanzeige.Kurz(e.Bewertung.Gesamtkosten)));
+
+        // Verstöße wie im Automodus (Einteilung der Staffel): harte Fehler, dann die Stufen A, B und C.
+        List<Stufenwert> stufen = ergebnisse.Select(e => einteilung.Zaehlen(e.Bewertung)).ToList();
+        Zeile("Harte Fehler", stufen.Select(w => w.Harte.ToString(CultureInfo.InvariantCulture)));
+        Zeile("Verstöße A · B · C", stufen.Select(w => string.Create(CultureInfo.InvariantCulture, $"{w.A} · {w.B} · {w.CAnzahl}")));
+        Console.WriteLine($"  A: {Namen(einteilung.A)}");
+        Console.WriteLine($"  B: {Namen(einteilung.B)}");
+
+        // Maßstab des einfachen Modus: Pflicht, Wünsche der Vereine, Güte (Gruppen je Mannschaft).
+        List<Planguete> guete = ergebnisse.Select(e => Planguete.Bewerten(e.Bewertung)).ToList();
+        Zeile("Einfach: Pflicht · Wünsche", guete.Select(g => string.Create(CultureInfo.InvariantCulture, $"{g.Harte}·{g.A} · {g.Wuensche}")));
+        Zeile("Einfach: Güte", guete.Select(g => g.Guete.ToString("0.00", CultureInfo.InvariantCulture)));
+        for (int i = 0; i < Massstab.Gruppen.Count; i++)
+        {
+            int gruppe = i;
+            Zeile("  " + Massstab.Gruppen[i].Name, guete.Select(g => g.Gruppe(gruppe).ToString("0.00", CultureInfo.InvariantCulture)));
+        }
+
         Console.WriteLine();
         Console.WriteLine("Plan-Kostenarten:");
         Zeile("  nicht terminiert", ergebnisse.Select(e => Kostenanzeige.Kurz(e.Bewertung.NichtTerminiert)));
@@ -167,6 +187,8 @@ internal static class BewertenBefehl
             Zeile("  " + Referenzbewertung.Kostenartnamen[(int)art], ergebnisse.Select(e => Kostenart(e.Bewertung, art)));
         }
     }
+
+    private static string Namen(IReadOnlyList<Kostenkriterium> kriterien) => string.Join(", ", kriterien);
 
     private static string Kostenart(Planbewertung bewertung, MannschaftsKostenart art)
     {

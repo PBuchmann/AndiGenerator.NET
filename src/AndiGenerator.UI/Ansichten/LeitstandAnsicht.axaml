@@ -53,8 +53,8 @@
     </Style>
   </UserControl.Styles>
   <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-    <StackPanel Margin="18,14" Spacing="16" MaxWidth="1200" HorizontalAlignment="Left">
-      <TextBlock Text="{Binding Ueberschrift}" FontSize="18" FontWeight="SemiBold" />
+    <StackPanel Margin="12,8" Spacing="12" MaxWidth="1200" HorizontalAlignment="Left">
+      <TextBlock Text="{Binding Ueberschrift}" FontSize="15" FontWeight="SemiBold" />
 
       <!-- Prozessor (links) und Schaubild der Maschine (rechts) -->
       <Grid ColumnDefinitions="360,12,*">
@@ -69,7 +69,7 @@
                 <TextBlock Grid.Column="1" Text="{Binding Anzeige.Tempo}" Classes="klein" VerticalAlignment="Bottom" />
               </Grid>
               <StackPanel Orientation="Horizontal" Spacing="6">
-                <TextBlock Text="{Binding Anzeige.Auslastung}" FontSize="22" FontWeight="SemiBold" />
+                <TextBlock Text="{Binding Anzeige.Auslastung}" FontSize="18" FontWeight="SemiBold" />
                 <TextBlock Text="ausgelastet" Classes="klein" VerticalAlignment="Bottom" Margin="0,0,0,4" />
               </StackPanel>
               <ui:Anteilsleiste Height="20" Kerne="{Binding Anzeige.Last.Prozessoren, FallbackValue=0}" Suche="{Binding Anzeige.Last.Suche, FallbackValue=0}" Highs="{Binding Anzeige.Last.Highs, FallbackValue=0}" Rest="{Binding Anzeige.Last.Sonstiges, FallbackValue=0}" ToolTip.Tip="Der ganze Prozessor – je Kern eine dünne Linie" />
@@ -135,7 +135,7 @@
                 <StackPanel Spacing="4" Margin="0,4">
                   <StackPanel Orientation="Horizontal" Spacing="8">
                     <Border Classes="stufenmarke">
-                      <TextBlock Text="{Binding Stufe}" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource AkzentDunkel}" />
+                      <TextBlock Text="{Binding Stufe}" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource AkzentDunkel}" />
                     </Border>
                     <TextBlock Text="{Binding Kriterium}" FontWeight="SemiBold" VerticalAlignment="Center" />
                   </StackPanel>
@@ -143,7 +143,7 @@
                     <ItemsControl.ItemTemplate>
                       <DataTemplate x:DataType="p:Gewichtszeile">
                         <Grid ColumnDefinitions="220,Auto,*" Margin="0,2">
-                          <TextBlock Text="{Binding Wer}" FontSize="13" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                          <TextBlock Text="{Binding Wer}" FontSize="12" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
                           <ItemsControl Grid.Column="1" ItemsSource="{Binding Segmente}" VerticalAlignment="Center">
                             <ItemsControl.ItemsPanel>
                               <ItemsPanelTemplate>

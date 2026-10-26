@@ -36,4 +36,16 @@ public sealed partial class HauptfensterViewModel
                 [],
                 [new Einrichtungsoption("Nur die Rückrunde", "Vorschlag – die Vorrunde bleibt, wie sie ist"), ganzeRunde]);
     }
+
+    /// <summary>Der Text zur geplanten Runde für die Kopfzeile.</summary>
+    /// <param name="runde">Die Rundenplanung.</param>
+    /// <returns>Z. B. „Rückrunde“.</returns>
+    private static string RundentextVon(Domain.Optionen.Rundenplanung runde) => runde switch
+    {
+        Domain.Optionen.Rundenplanung.Beide => "gesamte Runde",
+        Domain.Optionen.Rundenplanung.NurVorrunde => "Hinrunde",
+        Domain.Optionen.Rundenplanung.NurRueckrunde => "Rückrunde",
+        Domain.Optionen.Rundenplanung.Halbrunde => "Halbrunde",
+        _ => "Rückrunde (Corona)",
+    };
 }

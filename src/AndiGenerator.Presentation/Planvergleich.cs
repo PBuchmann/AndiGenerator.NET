@@ -137,7 +137,7 @@ public sealed class Planvergleich
         [
             Zahlzeile("Verstöße gegen die Meldungen", aktuell.Verstoesse, gesichert.Verstoesse),
             Zahlzeile("Mannschaften ohne Heimspieltag", aktuell.OhneHeimspieltag, gesichert.OhneHeimspieltag),
-            new Vergleichszeile("Spieltage", aktuell.Formen, gesichert.Formen, false, false),
+            new Vergleichszeile("Spieltage", Untereinander(aktuell.Formen), Untereinander(gesichert.Formen), false, false),
             Kmzeile("Fahrten gesamt (Luftlinie)", aktuell.KmGesamt, gesichert.KmGesamt),
             Kmzeile("Unterschied weiteste – kürzeste Mannschaft", Kompaktpunkte.Spanne(aktuell), Kompaktpunkte.Spanne(gesichert)),
             Zahlzeile("Stand: größter Abstand (Spiele)", aktuell.GroessterAbstand, gesichert.GroessterAbstand),
@@ -184,6 +184,9 @@ public sealed class Planvergleich
         int Summe(char stufe) => kriterien.Where(k => k.Stufe.StartsWith(stufe)).Sum(k => k.Anzahl ?? 0);
         return (Summe('A'), Summe('B'), Summe('C'));
     }
+
+    /// <summary>Je Form eine Zeile („10× 4er“, „5× Einzel“): In einer Zeile passte das nicht in die Spalte (Peter, 26.10.2026).</summary>
+    private static string Untereinander(string formen) => formen.Replace(" · ", Environment.NewLine, StringComparison.Ordinal);
 
     private static Vergleichszeile Zahlzeile(string bezeichnung, int aktuell, int gesichert) =>
         new(bezeichnung, aktuell.ToString(Deutsch), gesichert.ToString(Deutsch), aktuell < gesichert, aktuell > gesichert);

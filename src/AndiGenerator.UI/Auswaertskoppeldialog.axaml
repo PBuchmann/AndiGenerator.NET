@@ -6,7 +6,7 @@
         Title="Auswärtskoppelwunsch"
         SizeToContent="WidthAndHeight" CanResize="False" ShowInTaskbar="False"
         WindowStartupLocation="CenterOwner" Classes="dialog">
-  <StackPanel Margin="24" Spacing="12">
+  <StackPanel Margin="16" Spacing="12">
     <Grid Classes="formular" ColumnDefinitions="120,300" RowDefinitions="Auto,Auto,Auto">
       <Grid.Styles>
         <Style Selector="Grid.formular > :is(Control)">

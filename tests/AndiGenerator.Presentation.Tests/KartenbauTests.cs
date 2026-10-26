@@ -25,7 +25,7 @@ public sealed class KartenbauTests
         Kartenbild bild = Kartenbau.Bauen(orte, [("ESV Engers", "TTC Zugbrücke Grenzau", true, false), ("SV Trier-Olewig", "Unbekannt", true, true)], Kartendaten.Laender, Kartendaten.Staedte);
 
         Assert.Equal(600, bild.Breite);
-        Assert.InRange(bild.Hoehe / bild.Breite, 0.55, 1.0);
+        Assert.InRange(bild.Hoehe / bild.Breite, 0.55, 0.75 + 1e-9);
         Assert.All(bild.Hallen, h => Assert.True(h.Punkt.X is > 0 and < 600 && h.Punkt.Y > 0 && h.Punkt.Y < bild.Hoehe));
         Assert.Single(bild.Fahrten);
         Assert.InRange(bild.Staedte.Count, 1, 10);
@@ -59,9 +59,11 @@ public sealed class KartenbauTests
 
         new Kartenzeichner(f).Zeichnen(bild, bild.Breite, bild.Hoehe);
 
-        // Der Ausschnitt ist auf die Stadt gezoomt: die Hallen nutzen einen großen Teil der Breite.
-        double spanne = bild.Hallen.Max(h => h.Punkt.X) - bild.Hallen.Min(h => h.Punkt.X);
-        Assert.True(spanne > 0.4 * bild.Breite, $"Hallen nur über {spanne:N0} von {bild.Breite:N0} Bildpunkten.");
+        // Der Ausschnitt ist auf die Stadt gezoomt: die Hallen nutzen einen großen Teil der Breite oder – bei einer Klasse, die
+        // sich von Nord nach Süd erstreckt (die Karte ist höchstens drei Viertel so hoch wie breit) – der Höhe.
+        double breit = (bild.Hallen.Max(h => h.Punkt.X) - bild.Hallen.Min(h => h.Punkt.X)) / bild.Breite;
+        double hoch = (bild.Hallen.Max(h => h.Punkt.Y) - bild.Hallen.Min(h => h.Punkt.Y)) / bild.Hoehe;
+        Assert.True(Math.Max(breit, hoch) > 0.4, $"Hallen nur über {breit:P0} der Breite und {hoch:P0} der Höhe.");
 
         // Jeder volle Name steht an der Karte oder in der Legende (dann eine Nummer am Punkt).
         Assert.All(hallen, h => Assert.Contains(h.Name, f.Texte));

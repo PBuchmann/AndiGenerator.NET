@@ -102,11 +102,15 @@ public static class HighsLoeser
     /// Darf blockieren (Pause).
     /// </param>
     /// <param name="zeitgrenze">Harte Zeitgrenze für HiGHS (auch für Phasen ohne Rückruf), oder <c>null</c>.</param>
+    /// <param name="zwischenstand">
+    /// Bekommt im Rückruf den Wert der besten Lösung und die untere Schranke (im Thread des Lösers, sehr oft), oder <c>null</c>.
+    /// </param>
+    /// <param name="loesung">Bekommt jede bessere Lösung schon während der Suche (Werte der Spalten), oder <c>null</c>.</param>
     /// <returns>
     /// Die Werte der Spalten (0 oder 1) der besten gefundenen Lösung, oder <c>null</c>, wenn keine gefunden wurde; und ob sie
     /// beweisbar die beste ist.
     /// </returns>
-    public static (double[]? Werte, bool Optimal) Loesen(Ganzzahlproblem problem, double[]? start, int startwert, Func<bool> aufhoeren, TimeSpan? zeitgrenze = null)
+    public static (double[]? Werte, bool Optimal) Loesen(Ganzzahlproblem problem, double[]? start, int startwert, Func<bool> aufhoeren, TimeSpan? zeitgrenze = null, Action<double, double>? zwischenstand = null, Action<double[]>? loesung = null)
     {
         ArgumentNullException.ThrowIfNull(problem);
         ArgumentNullException.ThrowIfNull(aufhoeren);
@@ -116,8 +120,29 @@ public static class HighsLoeser
             return (null, false);
         }
 
-        Rueckruf rueckruf = (_, _, _, datenEin, _) =>
+        int spalten = problem.Kosten.Length;
+        Rueckruf rueckruf = (art, _, datenAus, datenEin, _) =>
         {
+            if (art == MipBessereLoesung)
+            {
+                IntPtr zeiger = Fortschrittsstand.Rueckrufzeiger(datenAus, "mip_solution");
+                if (zeiger != IntPtr.Zero && loesung is not null)
+                {
+                    var x = new double[spalten];
+                    Marshal.Copy(zeiger, x, 0, spalten);
+                    loesung(x);
+                }
+
+                return;
+            }
+
+            if (zwischenstand is not null)
+            {
+                zwischenstand(
+                    Fortschrittsstand.Ausgabewert(datenAus, "mip_primal_bound") ?? double.PositiveInfinity,
+                    Fortschrittsstand.Ausgabewert(datenAus, "mip_dual_bound") ?? double.NegativeInfinity);
+            }
+
             // Das erste Feld der Eingabedaten ist „user_interrupt“.
             if (datenEin != IntPtr.Zero && aufhoeren())
             {
@@ -178,6 +203,11 @@ public static class HighsLoeser
 
             _ = SetzeRueckruf(h, Marshal.GetFunctionPointerForDelegate(rueckruf), IntPtr.Zero);
             _ = StarteRueckruf(h, MipUnterbrechung);
+            if (loesung is not null)
+            {
+                _ = StarteRueckruf(h, MipBessereLoesung);
+            }
+
             using IDisposable messung = Rechenfaeden.HighsRechnet();
             if (Ausfuehren(h) < 0)
             {

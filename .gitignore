@@ -64,6 +64,10 @@ nunit-*.xml
 build-log.txt
 build-messung.txt
 optimierung-log.txt
+einfach-log.txt
+einfachreihe-log.txt
+bilanztest-*-log.txt
+serientest-*-log.txt
 turnier-log.txt
 abdeckung-log.txt
 messen-log.txt

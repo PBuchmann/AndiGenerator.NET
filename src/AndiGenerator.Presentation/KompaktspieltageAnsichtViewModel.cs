@@ -42,6 +42,8 @@ public sealed partial class KompaktspieltageAnsichtViewModel : Document
     private bool angehalten;
     private double fortschritt;
     private string fortschrittText = string.Empty;
+    private IReadOnlyList<string> optimierungsstand = [];
+    private IReadOnlyList<string> qualitaet = [];
     private string erlaeuterungstitel = string.Empty;
     private IReadOnlyList<string> erlaeuterung = [];
     private (IReadOnlyList<string> Spitze, IReadOnlyList<string> Keller) gruppen = ([], []);
@@ -143,6 +145,44 @@ public sealed partial class KompaktspieltageAnsichtViewModel : Document
         get => fortschrittText;
         private set => SetProperty(ref fortschrittText, value);
     }
+
+    /// <summary>
+    /// Holt je laufendem Schritt mit HiGHS eine Zeile zum Stand der Optimierung (wie viel besser es höchstens noch ginge,
+    /// wann zuletzt etwas vorankam).
+    /// </summary>
+    public IReadOnlyList<string> Optimierungsstand
+    {
+        get => optimierungsstand;
+        private set
+        {
+            if (SetProperty(ref optimierungsstand, value))
+            {
+                OnPropertyChanged(nameof(HatOptimierungsstand));
+            }
+        }
+    }
+
+    /// <summary>Holt einen Wert, der angibt, ob es Zeilen zum Stand der Optimierung gibt.</summary>
+    public bool HatOptimierungsstand => optimierungsstand.Count > 0;
+
+    /// <summary>
+    /// Holt nach der Berechnung je Schritt, welche Qualität gefunden wurde und was nach dem Beweis von HiGHS mindestens nötig
+    /// ist (z. B. „Kürzester Plan: 2.403 km … – bestmöglich (bewiesen)“).
+    /// </summary>
+    public IReadOnlyList<string> Qualitaet
+    {
+        get => qualitaet;
+        private set
+        {
+            if (SetProperty(ref qualitaet, value))
+            {
+                OnPropertyChanged(nameof(HatQualitaet));
+            }
+        }
+    }
+
+    /// <summary>Holt einen Wert, der angibt, ob die Qualität der gefundenen Pläne gezeigt wird (nach der Berechnung).</summary>
+    public bool HatQualitaet => qualitaet.Count > 0 && !Rechnet;
 
     /// <summary>Holt die Überschrift der Erläuterung, z. B. „Bestes Gesamtpaket“.</summary>
     public string Erlaeuterungstitel
@@ -297,10 +337,12 @@ public sealed partial class KompaktspieltageAnsichtViewModel : Document
     /// <summary>Zeigt den Fortschritt der Berechnung.</summary>
     /// <param name="prozent">Erledigt in Prozent.</param>
     /// <param name="text">Was gerade geschieht.</param>
-    internal void FortschrittZeigen(double prozent, string text)
+    /// <param name="optimierung">Je laufendem Schritt mit HiGHS eine Zeile zum Stand der Optimierung.</param>
+    internal void FortschrittZeigen(double prozent, string text, IReadOnlyList<string> optimierung)
     {
         Fortschritt = prozent;
         FortschrittText = string.Create(Deutsch, $"{prozent:N0} % – {text}");
+        Optimierungsstand = optimierung;
     }
 
     /// <summary>Zeigt unter dem Balken, dass die Berechnung angehalten ist (der Balken bleibt stehen).</summary>
@@ -314,6 +356,8 @@ public sealed partial class KompaktspieltageAnsichtViewModel : Document
         Rechnet = hauptfenster.KompaktRechnet;
         Angehalten = hauptfenster.KompaktPausiert;
         Planerhinweise = hauptfenster.KompaktPlanerhinweise;
+        Qualitaet = hauptfenster.KompaktQualitaet;
+        OnPropertyChanged(nameof(HatQualitaet));
         auswertung = Eingeschaltet ? hauptfenster.Kompaktauswertung() : null;
         Plaene = PlaeneBilden();
         Mannschaftsnamen = hauptfenster.KompaktMannschaften();

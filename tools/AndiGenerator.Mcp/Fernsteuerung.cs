@@ -165,20 +165,6 @@ internal sealed partial class Fernsteuerung : IDisposable
         return Ergebnis(true, automodus ? "Automodus gewählt." : "Kostenoptimierung gewählt.");
     });
 
-    /// <summary>Wählt den Ausgangsplan für den nächsten Start.</summary>
-    /// <param name="name">Name aus „Startplaene“ im Stand.</param>
-    /// <returns>Das Ergebnis.</returns>
-    public Task<Aktionsergebnis> StartplanAsync(string name) => faden.Ausfuehren(() =>
-    {
-        if (hf.Startplaene.FirstOrDefault(p => Gleich(p.Name, name)) is not { } plan)
-        {
-            return Ergebnis(false, $"Keinen Ausgangsplan „{name}“. Möglich: {string.Join(", ", hf.Startplaene.Select(p => p.Name))}.");
-        }
-
-        hf.Startplan = plan;
-        return Ergebnis(Equals(hf.Startplan, plan), Equals(hf.Startplan, plan) ? $"Ausgangsplan: {plan.Name}." : "Während einer Generierung lässt sich der Ausgangsplan nicht wechseln (erst „stoppen“).");
-    });
-
     /// <summary>Startet die Generierung bzw. im Kompaktmodus die Berechnung der Pläne; läuft im Hintergrund weiter.</summary>
     /// <returns>Das Ergebnis.</returns>
     public Task<Aktionsergebnis> StartenAsync() => faden.Ausfuehren(() =>
@@ -463,11 +449,11 @@ internal sealed partial class Fernsteuerung : IDisposable
         return new Kompaktstand(
             k.Kopfzeile,
             k.Rechnet,
-            k.FortschrittText,
+            k.Optimierungsstand.Count == 0 ? k.FortschrittText : k.FortschrittText + " | " + string.Join(" | ", k.Optimierungsstand),
             k.Plaene.Select(p => (p.Gewaehlt ? "▶ " : string.Empty) + p.Titel + " – " + p.Zeile).ToList(),
             k.Erlaeuterungstitel.Length == 0 ? [] : [k.Erlaeuterungstitel, .. k.Erlaeuterung.Select(z => z.Replace("**", string.Empty, StringComparison.Ordinal))],
             k.Spieltage.Select(s => $"{s.Datum} {s.Form} {s.Ausrichter}: {string.Join("; ", s.Spiele)}").ToList(),
-            [.. k.Hinweise]);
+            [.. k.Qualitaet, .. k.Hinweise]);
     });
 
     /// <summary>Zeigt einen Plan der Kompaktspieltage (er gilt dann für Terminplan, Druck und Export).</summary>
@@ -638,8 +624,6 @@ internal sealed partial class Fernsteuerung : IDisposable
             verfahren,
             hf.Laeuft || hf.KompaktRechnet,
             hf.KompaktRechnet ? hf.KompaktPausiert : hf.Pausiert,
-            hf.Startplan?.Name ?? string.Empty,
-            hf.Startplaene.Select(p => p.Name).ToList(),
             ergebnis,
             hf.Statuszeile,
             hf.FuehrungsHinweis,

@@ -79,8 +79,18 @@ public static class Planqualitaet
             Kriterium = k,
             Anzahl = bewertung.Zusatz is { } z && Kostenart(bewertung, stufe, MannschaftsKostenart.Spielverteilung).Kosten > 0 ? z.Spielverteilung.Sum() : 0,
         },
+        Kostenkriterium.WechselHeimAuswaerts => Wechsel(bewertung, stufe, k),
         _ => Kostenart(bewertung, stufe, (MannschaftsKostenart)(int)k) with { Kriterium = k },
     };
+
+    /// <summary>Wechsel H/A: steigend gezählt wie im Automodus (drei Heimspiele in Folge 3, vier 6), die Kosten wie im Original.</summary>
+    private static Qualitaetskriterium Wechsel(Planbewertung bewertung, string stufe, Kostenkriterium k)
+    {
+        Qualitaetskriterium q = Kostenart(bewertung, stufe, MannschaftsKostenart.WechselHeimAuswaerts) with { Kriterium = k };
+        return q.Anzahl is int a && a > 0
+            ? q with { Anzahl = Enumerable.Range(0, bewertung.Mannschaften.Count).Sum(bewertung.WechselAnzahl) }
+            : q;
+    }
 
     /// <summary>Kriterium der Spieltage: Anzahl aus der Zusatzzählung (nur, wenn es Kosten gibt).</summary>
     private static Qualitaetskriterium Spieltag(string stufe, Kostenkriterium k, double kosten, int? anzahl)

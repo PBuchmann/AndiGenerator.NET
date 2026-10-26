@@ -113,6 +113,11 @@ internal static class Kostenmatrixbau
         Planbewertung b, Berechnungsoptionen optionen, Mannschaftsbewertung m, string id, MannschaftsKostenart art, Func<string, MannschaftsKostenart, IReadOnlyList<string>> meldungen)
     {
         Kostenzelle zelle = m.JeKostenart[(int)art];
+        if (art == MannschaftsKostenart.WechselHeimAuswaerts && zelle.Anzahl >= 0)
+        {
+            zelle = zelle with { Anzahl = b.WechselAnzahl(b.Mannschaften.ToList().IndexOf(m)) };
+        }
+
         var ziel = new MannschaftsKostenartGewichtungsziel(id, m.Name, art);
         return new Kostendetail(
             "ZELLE",
@@ -129,10 +134,16 @@ internal static class Kostenmatrixbau
             IstZelle: true);
     }
 
+    /// <summary>Verstöße einer Mannschaft je Kostenart; der Wechsel H/A mit dem steigend gezählten Zuschlag.</summary>
+    private static int Anzahl(Planbewertung b, int t, MannschaftsKostenart art) =>
+        art == MannschaftsKostenart.WechselHeimAuswaerts
+            ? b.WechselAnzahl(t)
+            : Math.Max(0, b.Mannschaften[t].JeKostenart[(int)art].Anzahl);
+
     private static Kostendetail Kostenartdetail(Planbewertung b, Berechnungsoptionen optionen, MannschaftsKostenart art)
     {
         double summe = b.Mannschaften.Sum(x => x.JeKostenart[(int)art].Kosten);
-        int anzahl = b.Mannschaften.Sum(x => Math.Max(0, x.JeKostenart[(int)art].Anzahl));
+        int anzahl = Enumerable.Range(0, b.Mannschaften.Count).Sum(t => Anzahl(b, t, art));
         bool gezaehlt = b.Mannschaften.Any(x => x.JeKostenart[(int)art].Anzahl >= 0);
         var ziel = new KostenartGewichtungsziel(art);
         List<string> aufteilung = b.Mannschaften
@@ -158,7 +169,8 @@ internal static class Kostenmatrixbau
     private static Kostendetail Mannschaftsdetail(Planbewertung b, Berechnungsoptionen optionen, Mannschaftsbewertung m, string id)
     {
         var ziel = new MannschaftsGewichtungsziel(id, m.Name);
-        int anzahl = b.SichtbareKostenarten.Sum(art => Math.Max(0, m.JeKostenart[(int)art].Anzahl));
+        int t = b.Mannschaften.ToList().IndexOf(m);
+        int anzahl = b.SichtbareKostenarten.Sum(art => Anzahl(b, t, art));
         List<string> aufteilung = b.SichtbareKostenarten
             .Where(art => m.JeKostenart[(int)art].Kosten > 0)
             .OrderByDescending(art => m.JeKostenart[(int)art].Kosten)

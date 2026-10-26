@@ -7,7 +7,7 @@
     <!-- Ein Tag als Kärtchen: leer (weiß), Heimspiel (blau), Ausweichtermin (hellblau, kursiv), Sperrtermin (rot) -->
     <Style Selector="Border.kaertchen">
       <Setter Property="Width" Value="88" />
-      <Setter Property="Height" Value="44" />
+      <Setter Property="Height" Value="32" />
       <Setter Property="Margin" Value="1" />
       <Setter Property="Padding" Value="5,3" />
       <Setter Property="CornerRadius" Value="6" />
@@ -48,7 +48,7 @@
       <Setter Property="Opacity" Value="0.95" />
     </Style>
     <Style Selector="TextBlock.haupt">
-      <Setter Property="FontSize" Value="12" />
+      <Setter Property="FontSize" Value="11" />
       <Setter Property="FontWeight" Value="SemiBold" />
       <Setter Property="Foreground" Value="{StaticResource AkzentDunkel}" />
     </Style>
@@ -127,7 +127,7 @@
         <ItemsControl.ItemTemplate>
           <DataTemplate x:DataType="p:WunschterminZeile">
             <StackPanel Orientation="Horizontal">
-              <TextBlock Text="{Binding Beschriftung}" Width="104" FontSize="12" LineHeight="16" VerticalAlignment="Center" TextWrapping="Wrap" />
+              <TextBlock Text="{Binding Beschriftung}" Width="104" FontSize="11" LineHeight="16" VerticalAlignment="Center" TextWrapping="Wrap" />
               <ItemsControl ItemsSource="{Binding Tage}" ItemTemplate="{StaticResource Kaertchenvorlage}">
                 <ItemsControl.ItemsPanel>
                   <ItemsPanelTemplate>

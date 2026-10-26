@@ -109,6 +109,41 @@ public sealed class BedienungTests : IDisposable
     });
 
     [Fact]
+    public Task Die_Rueckfrage_bei_Kompaktspieltagen_passt_in_ihre_Spalten() => oberflaeche.Ausfuehren(() =>
+    {
+        // Die Hessenliga mit ihrem mitgelieferten Plan: „10× 4er · 5× Einzel“ passte nicht in eine Spalte (Peter, 26.10.2026).
+        string beispiel = Path.Combine(Beispielsammlung.Programmordner, "Jugend 19 Hessenliga (HR)");
+        string basis = Path.Combine(Path.GetTempPath(), "andigen-sicherung-" + Guid.NewGuid().ToString("N"));
+        try
+        {
+            AndiGenerator.Application.Plansitzung s = AndiGenerator.Application.Plansitzung.Oeffnen(beispiel + ".xml", basis);
+            List<AndiGenerator.Domain.Stammdaten.Spiel> spiele = AndiGenerator.Persistence.Plandaten.GespeicherterPlanDatei.Laden(beispiel + ".plan")
+                .Select(g => new AndiGenerator.Domain.Stammdaten.Spiel(g.Zeitpunkt, g.Heim, g.Gast, g.Spiellokal))
+                .ToList();
+            AndiGenerator.Application.Kompaktauswertung auswertung = AndiGenerator.Application.Kompaktplanung.SpieleAuswerten(s.Staffel, s.DatenBearbeiten(), s.Optionen.Rundenplanung, new DateOnly(2026, 8, 1), spiele);
+            Planvergleich vergleich = Planvergleich.Kompakt("Die Staffel wird geschlossen.", auswertung, auswertung, [], null, new DateTime(2026, 10, 25, 15, 2, 0, DateTimeKind.Local));
+            var fenster = new Sicherungsdialog(vergleich);
+            fenster.Show();
+            Oberflaeche.Zeichnen(fenster);
+            List<TextBlock> werte = fenster.GetVisualDescendants().OfType<TextBlock>().Where(b => b.Classes.Contains("wert")).ToList();
+            Assert.NotEmpty(werte);
+            Assert.All(werte, b => Assert.True(b.DesiredSize.Width <= 140.5, $"„{b.Text}“ ist {b.DesiredSize.Width:F0} breit"));
+            Assert.Contains(werte, b => b.Text!.Contains("4er", StringComparison.Ordinal) && b.Text.Contains(Environment.NewLine, StringComparison.Ordinal));
+            fenster.Close();
+        }
+        finally
+        {
+            if (Directory.Exists(basis))
+            {
+                Directory.Delete(basis, recursive: true);
+            }
+        }
+
+        oberflaeche.KeineFehler(ausgabe);
+        return Task.CompletedTask;
+    });
+
+    [Fact]
     public Task Die_Setzliste_laesst_sich_am_Griff_umordnen() => oberflaeche.Ausfuehren(() =>
     {
         using var a = new Arbeitsplatz("datendialoge/D01_Allgemein.xml");
@@ -243,6 +278,52 @@ public sealed class BedienungTests : IDisposable
             Oberflaeche.Zeichnen(fenster);
             modell.StoppenCommand.Execute(null);
             o.Abarbeiten();
+        }
+        finally
+        {
+            fenster.Close();
+        }
+
+        oberflaeche.KeineFehler(ausgabe);
+    });
+
+    [Fact]
+    public Task Die_Leiste_unten_vergroessert_die_aktive_Ansicht() => oberflaeche.Ausfuehren(async () =>
+    {
+        // Die Vergrößerung steht nicht mehr in jeder Ansicht, sondern im Menü im Kopf (Andreas/Peter, 27.10.2026).
+        Directory.CreateDirectory(Path.Combine(ordner, "daten"));
+        string datei = Path.Combine(ordner, "daten", "staffel.xml");
+        File.Copy(Path.Combine(Testdaten.Referenz, "datendialoge", "D01_Allgemein.xml"), datei);
+        var o = new TestOberflaeche { DateiZumOeffnen = datei, Sammeln = true };
+        using var modell = new HauptfensterViewModel(o, () => new HostWindow(), Path.Combine(ordner, "basis"), null);
+        var fenster = new HauptfensterView { DataContext = modell, Width = 1400, Height = 900 };
+        fenster.Show();
+        try
+        {
+            await modell.OeffnenCommand.ExecuteAsync(null);
+            o.Abarbeiten();
+            if (modell.Einrichtung is { } einrichtung)
+            {
+                await einrichtung.AbschliessenCommand.ExecuteAsync(null);
+                o.Abarbeiten();
+            }
+
+            modell.ExperteCommand.Execute(null);
+            o.Abarbeiten();
+            Zeigen<TerminplanAnsicht>(fenster, o, modell.TerminplanansichtCommand);
+            var ansicht = (IZoombar)fenster.GetVisualDescendants().OfType<TerminplanAnsicht>().Single().DataContext!;
+            int vorher = ansicht.Zoom.Prozent;
+
+            // Die Vergrößerung steht in der Leiste unten (in beiden Modi dieselbe Stelle).
+            Oberflaeche.Zeichnen(fenster);
+            Statusleiste leiste = fenster.GetVisualDescendants().OfType<Statusleiste>().First(l => l.IsEffectivelyVisible);
+            Button anzeige = leiste.GetVisualDescendants().OfType<Button>().Single(b => Equals(b.Command, modell.ZoomZuruecksetzenCommand));
+            Assert.Equal(modell.AktiverZoom.Text, anzeige.Content);
+            Assert.Equal(ansicht.Zoom.Text, anzeige.Content);
+            Button groesser = leiste.GetVisualDescendants().OfType<Button>().Single(b => Equals(b.Command, modell.ZoomGroesserCommand));
+            groesser.Command!.Execute(null);
+            Assert.True(ansicht.Zoom.Prozent > vorher);
+            Assert.Empty(fenster.GetVisualDescendants().OfType<Slider>());
         }
         finally
         {

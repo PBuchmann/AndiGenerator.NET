@@ -35,4 +35,17 @@ public sealed record Planbewertung(
     IReadOnlyList<MannschaftsKostenart> SichtbareKostenarten,
     IReadOnlyList<Mannschaftsbewertung> Mannschaften,
     int VereinsinterneAnzahl = 0,
-    Zusatzverstoesse? Zusatz = null);
+    Zusatzverstoesse? Zusatz = null)
+{
+    /// <summary>
+    /// Verstöße Wechsel H/A einer Mannschaft mit dem steigend gezählten Zuschlag (Automodus, Qualität, Kostenansicht).
+    /// Der Zuschlag entsteht nur, wo schon Verstöße sind; die Kosten bleiben unverändert.
+    /// </summary>
+    /// <param name="t">Index der Mannschaft in <see cref="Mannschaften"/>.</param>
+    /// <returns>Anzahl; 0, wenn die Mannschaft keine Verstöße hat.</returns>
+    public int WechselAnzahl(int t)
+    {
+        int anzahl = Math.Max(0, Mannschaften[t].JeKostenart[(int)MannschaftsKostenart.WechselHeimAuswaerts].Anzahl);
+        return anzahl + (anzahl > 0 && Zusatz?.Wechselzuschlag is { } z && t < z.Count ? z[t] : 0);
+    }
+}

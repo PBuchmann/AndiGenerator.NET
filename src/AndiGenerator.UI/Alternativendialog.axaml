@@ -47,8 +47,8 @@
       <Setter Property="Background" Value="{StaticResource AkzentHell}" />
     </Style>
   </Window.Styles>
-  <DockPanel Margin="24,18">
-    <TextBlock DockPanel.Dock="Top" Text="B-Varianten" FontSize="20" FontWeight="SemiBold" Margin="0,0,0,6" />
+  <DockPanel Margin="16,12">
+    <TextBlock DockPanel.Dock="Top" Text="B-Varianten" FontSize="17" FontWeight="SemiBold" Margin="0,0,0,6" />
     <TextBlock DockPanel.Dock="Top" Text="{Binding Erklaerung}" TextWrapping="Wrap" MaxWidth="1100" HorizontalAlignment="Left" Foreground="{StaticResource Tinte2}" Margin="0,0,0,12" />
     <TextBlock DockPanel.Dock="Top" Text="{Binding Hinweis}" IsVisible="{Binding HatHinweis}" TextWrapping="Wrap" MaxWidth="1100" HorizontalAlignment="Left" Foreground="{StaticResource HighsDunkel}" FontWeight="SemiBold" Margin="0,0,0,12" />
     <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" Spacing="12" HorizontalAlignment="Right" Margin="0,12,0,0">
@@ -73,8 +73,8 @@
                     <Button Classes="spaltenkopf" Classes.gewaehlt="{Binding IstGewaehlt}" Command="{Binding AuswaehlenCommand}"
                             ToolTip.Tip="Auswählen: Unten stehen ihre betroffenen Mannschaften, „Übernehmen“ gilt ihr.">
                       <StackPanel Spacing="2">
-                        <TextBlock Text="{Binding Titel}" FontSize="13" FontWeight="SemiBold" TextWrapping="Wrap" />
-                        <TextBlock Text="{Binding Summen}" Classes="ziffer" FontSize="12" Foreground="{StaticResource Tinte2}" />
+                        <TextBlock Text="{Binding Titel}" FontSize="12" FontWeight="SemiBold" TextWrapping="Wrap" />
+                        <TextBlock Text="{Binding Summen}" Classes="ziffer" FontSize="11" Foreground="{StaticResource Tinte2}" />
                       </StackPanel>
                     </Button>
                   </DataTemplate>
@@ -87,8 +87,8 @@
                   <Border BorderBrush="{StaticResource Linie}" BorderThickness="0,1,0,0">
                     <StackPanel Orientation="Horizontal">
                       <StackPanel Orientation="Horizontal" Width="300" Spacing="8" VerticalAlignment="Center">
-                        <TextBlock Text="{Binding Stufe}" Width="32" FontSize="12" Foreground="{StaticResource Tinte2}" VerticalAlignment="Center" />
-                        <TextBlock Text="{Binding Name}" FontSize="13" TextWrapping="Wrap" Width="260" VerticalAlignment="Center"
+                        <TextBlock Text="{Binding Stufe}" Width="32" FontSize="11" Foreground="{StaticResource Tinte2}" VerticalAlignment="Center" />
+                        <TextBlock Text="{Binding Name}" FontSize="12" TextWrapping="Wrap" Width="260" VerticalAlignment="Center"
                                    FontWeight="{Binding IstSumme, Converter={x:Static ui:Konverter.Fett}}" />
                       </StackPanel>
                       <ItemsControl ItemsSource="{Binding Zellen}">
@@ -100,7 +100,7 @@
                         <ItemsControl.ItemTemplate>
                           <DataTemplate x:DataType="p:Alternativzelle">
                             <Border Classes="zelle" Classes.gewaehlt="{Binding Spalte.IstGewaehlt}">
-                              <TextBlock Text="{Binding Text}" Classes="ziffer" FontSize="13"
+                              <TextBlock Text="{Binding Text}" Classes="ziffer" FontSize="12"
                                          Classes.besser="{Binding Richtung, Converter={x:Static ui:Konverter.IstNegativ}}"
                                          Classes.schlechter="{Binding Richtung, Converter={x:Static ui:Konverter.IstPositiv}}" />
                             </Border>
@@ -115,7 +115,7 @@
           </StackPanel>
         </Border>
         <!-- Betroffene Mannschaften der ausgewählten Spalte, je Kriterium eine Karte -->
-        <TextBlock Text="{Binding DetailTitel}" FontSize="15" FontWeight="SemiBold" />
+        <TextBlock Text="{Binding DetailTitel}" FontSize="14" FontWeight="SemiBold" />
         <!-- So breit wie das Fenster (nicht wie die Tabelle): Die Karten brechen um, kein waagerechter Bildlauf -->
         <ItemsControl ItemsSource="{Binding AuswahlDetails}" HorizontalAlignment="Left" MaxWidth="{Binding $parent[ScrollViewer].Viewport.Width}">
           <ItemsControl.ItemsPanel>
@@ -127,19 +127,19 @@
             <DataTemplate x:DataType="p:Vergleichsabschnitt">
               <Border Classes="karte" Padding="14,10" Width="420" Margin="0,0,12,12" VerticalAlignment="Top">
                 <StackPanel Spacing="6">
-                  <TextBlock Text="{Binding Titel}" FontSize="13" FontWeight="SemiBold" />
+                  <TextBlock Text="{Binding Titel}" FontSize="12" FontWeight="SemiBold" />
                   <ItemsControl ItemsSource="{Binding Gruppen}">
                     <ItemsControl.ItemTemplate>
                       <DataTemplate x:DataType="p:Unterschiedsgruppe">
                         <StackPanel Spacing="2" Margin="0,4,0,4">
                           <Grid ColumnDefinitions="*,Auto">
-                            <TextBlock ToolTip.Tip="{Binding Name}" Classes="mannschaft" Text="{Binding Name}" FontSize="12" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                            <TextBlock ToolTip.Tip="{Binding Name}" Classes="mannschaft" Text="{Binding Name}" FontSize="11" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
                             <TextBlock Grid.Column="1" Text="{Binding Anzahl}" FontSize="11" Foreground="{StaticResource Tinte2}" Margin="8,0,0,0" />
                           </Grid>
                           <ItemsControl ItemsSource="{Binding Zeilen}">
                             <ItemsControl.ItemTemplate>
                               <DataTemplate x:DataType="p:Unterschied">
-                                <SelectableTextBlock Classes="meldung" Classes.neu="{Binding IstNeu}" Classes.entfaellt="{Binding Entfaellt}" Text="{Binding Text}" FontSize="12" TextWrapping="Wrap" />
+                                <SelectableTextBlock Classes="meldung" Classes.neu="{Binding IstNeu}" Classes.entfaellt="{Binding Entfaellt}" Text="{Binding Text}" FontSize="11" TextWrapping="Wrap" />
                               </DataTemplate>
                             </ItemsControl.ItemTemplate>
                           </ItemsControl>

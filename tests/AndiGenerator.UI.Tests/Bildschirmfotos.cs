@@ -5,6 +5,8 @@
 using AndiGenerator.Application;
 using AndiGenerator.Domain.Optionen;
 using AndiGenerator.Domain.Stammdaten;
+using AndiGenerator.Engine.Einfach;
+using AndiGenerator.Engine.Turniere;
 using AndiGenerator.Persistence.Terminwuensche;
 using AndiGenerator.Presentation;
 using AndiGenerator.Presentation.Tests;
@@ -72,6 +74,7 @@ public sealed class Bildschirmfotos : IDisposable
         Directory.CreateDirectory(ziel);
         IReadOnlyList<Vereinsmeldung> bericht = Terminmeldungen(
             Plansitzung.Oeffnen(StaffelKopieren("bericht", mitAenderungen: false), Path.Combine(ordner, "basis-bericht")).Staffel.Mannschaften);
+        await NormalAsync(ziel, StaffelKopieren("normal", mitAenderungen: false));
         await EinrichtungAsync(ziel, StaffelKopieren("erststart", mitAenderungen: false), bericht);
         string datei = StaffelKopieren("daten", mitAenderungen: true);
         SetzlisteEinschalten(datei);
@@ -83,6 +86,59 @@ public sealed class Bildschirmfotos : IDisposable
     });
 
     /// <summary>
+    /// Der normale Modus: leere Startseite, Dateien geladen, Planung mit Balken und Grenzen, Ergebnis mit Kurz-Fazit und
+    /// Terminplan. Die Planung rechnet kurz (wenige Sekunden je Schritt), damit die Bilder schnell entstehen.
+    /// </summary>
+    private static async Task NormalAsync(string ziel, string datei)
+    {
+        string basis = Path.Combine(Path.GetDirectoryName(datei)!, "..", "basis-normal");
+        var o = new TestOberflaeche { DateiZumOeffnen = datei, Sammeln = true };
+        using var modell = new HauptfensterViewModel(o, () => new HostWindow(), basis, null);
+        modell.Normal.Planeinstellungen = Schnellplanereinstellungen.Standard with
+        {
+            Kerne = 2,
+            PhaseEinsHoechstens = TimeSpan.FromSeconds(15),
+            Vorglaetten = TimeSpan.FromSeconds(3),
+            ErsteRunde = TimeSpan.FromSeconds(3),
+            LaengsteRunde = TimeSpan.FromSeconds(6),
+            Laufzeit = new Laufzeitregel(TimeSpan.FromSeconds(2), TimeSpan.FromSeconds(10), TimeSpan.FromSeconds(2)),
+        };
+        var fenster = new HauptfensterView { DataContext = modell, Width = 1400, Height = 860 };
+        fenster.Show();
+        try
+        {
+            Foto(ziel, "60-normal-start", fenster, o);
+            await modell.Normal.OeffnenCommand.ExecuteAsync(null);
+            o.Abarbeiten();
+            Foto(ziel, "61-normal-dateien", fenster, o);
+            await modell.Normal.PlanErstellenCommand.ExecuteAsync(null);
+            await WartenAsync(o, TimeSpan.FromSeconds(25), () => false);
+            Normalbalken[] fein = [.. modell.Normal.Gruppen.SelectMany(g => g.Zeilen).Where(z => z.Einstellbar)];
+            if (fein.Length >= 2)
+            {
+                modell.Normal.WichtigkeitCommand.Execute(fein[0].HochParameter);
+                modell.Normal.WichtigkeitCommand.Execute(fein[^1].NiedrigParameter);
+                await WartenAsync(o, TimeSpan.FromSeconds(3), () => false);
+            }
+
+            Foto(ziel, "62-normal-planung", fenster, o);
+            modell.Normal.ReiterCommand.Execute("1");
+            await WartenAsync(o, TimeSpan.FromSeconds(4), () => false);
+            Foto(ziel, "65-normal-planung-terminplan", fenster, o);
+            modell.Normal.ReiterCommand.Execute("0");
+            await modell.Normal.FertigCommand.ExecuteAsync(null);
+            o.Abarbeiten();
+            Foto(ziel, "63-normal-ergebnis", fenster, o);
+            modell.Normal.ReiterCommand.Execute("1");
+            Foto(ziel, "64-normal-terminplan", fenster, o);
+        }
+        finally
+        {
+            fenster.Close();
+        }
+    }
+
+    /// <summary>
     /// Startseite und Einrichtung: Die Einrichtung erscheint nur, wenn es etwas zu klären gibt – sicher beim ersten Öffnen
     /// einer click-TT-Datei (ohne <c>.modifications</c>).
     /// </summary>
@@ -91,6 +147,7 @@ public sealed class Bildschirmfotos : IDisposable
         string basis = Path.Combine(Path.GetDirectoryName(datei)!, "..", "basis");
         var o = new TestOberflaeche { DateiZumOeffnen = datei, Sammeln = true };
         using var modell = new HauptfensterViewModel(o, () => new HostWindow(), basis, null);
+        modell.ExperteCommand.Execute(null);
         var fenster = new HauptfensterView { DataContext = modell, Width = 1400, Height = 860 };
         fenster.Show();
         try
@@ -207,6 +264,7 @@ public sealed class Bildschirmfotos : IDisposable
         string basis = Path.Combine(Path.GetDirectoryName(datei)!, "..", "basis");
         var o = new TestOberflaeche { DateiZumOeffnen = datei, Sammeln = true };
         using var modell = new HauptfensterViewModel(o, () => new HostWindow(), basis, null);
+        modell.ExperteCommand.Execute(null);
         var fenster = new HauptfensterView { DataContext = modell, Width = 1400, Height = 860 };
         fenster.Show();
         try
@@ -219,8 +277,7 @@ public sealed class Bildschirmfotos : IDisposable
                 o.Abarbeiten();
             }
 
-            // Kostenoptimierung ab dem Plan aus click-TT, kurz rechnen lassen und anhalten.
-            modell.Startplan = modell.Startplaene.Single(p => p.Quelle == PlanQuelle.ClickTt);
+            // Kostenoptimierung ab leerem Plan, kurz rechnen lassen und anhalten.
             modell.KostenoptimierungCommand.Execute(null);
             await modell.GenerierungCommand.ExecuteAsync(null);
             await WartenAsync(o, TimeSpan.FromSeconds(8), () => false);
@@ -366,6 +423,7 @@ public sealed class Bildschirmfotos : IDisposable
         string basis = Path.Combine(Path.GetDirectoryName(datei)!, "..", "basis-kompakt");
         var o = new TestOberflaeche { DateiZumOeffnen = datei, Sammeln = true };
         using var modell = new HauptfensterViewModel(o, () => new HostWindow(), basis, null);
+        modell.ExperteCommand.Execute(null);
         var fenster = new HauptfensterView { DataContext = modell, Width = 1400, Height = 860 };
         DruckauswahlViewModel? druckauswahl = null;
         fenster.Show();
@@ -404,7 +462,7 @@ public sealed class Bildschirmfotos : IDisposable
             Border raster = fenster.GetVisualDescendants().OfType<Border>().First(b => b.Name == "Raster");
             Foto(ziel, "31-kompakt-raster-karte", raster.GetVisualAncestors().OfType<Grid>().First(), o);
             Border spieltage = fenster.GetVisualDescendants().OfType<TextBlock>()
-                .First(b => b.Text == "Spieltage" && b.FontSize > 14)
+                .First(b => b.Text == "Spieltage" && b.FontSize > 13)
                 .GetVisualAncestors().OfType<Border>().First(b => b.Classes.Contains("karte"));
             Foto(ziel, "32-kompakt-spieltage", spieltage, o);
 
@@ -636,6 +694,7 @@ public sealed class Bildschirmfotos : IDisposable
     {
         var o = new TestOberflaeche { DateiZumOeffnen = datei, Sammeln = true };
         using var modell = new HauptfensterViewModel(o, () => new HostWindow(), Path.Combine(Path.GetDirectoryName(datei)!, "..", "basis-roh"), null);
+        modell.ExperteCommand.Execute(null);
         var fenster = new HauptfensterView { DataContext = modell, Width = 1400, Height = 860 };
         fenster.Show();
         try

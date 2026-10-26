@@ -111,17 +111,19 @@ public sealed class ZoomTests
     }
 
     [Fact]
-    public void Tastenbefehle_wirken_auf_die_aktive_Ansicht()
+    public void Tastenbefehle_und_Menue_wirken_auf_die_aktive_Ansicht()
     {
         var o = new TestOberflaeche();
         string basis = Path.Combine(Path.GetTempPath(), "andigen-zoom-" + Guid.NewGuid().ToString("N"));
         using var hf = new HauptfensterViewModel(o, () => throw new InvalidOperationException("Keine Fenster im Test"), basis, null);
+        hf.ExperteCommand.Execute(null);
         var dokumente = (Dock.Model.Core.IDock)hf.Layout.ActiveDockable!;
         IZoombar aktiv = Assert.IsAssignableFrom<IZoombar>(dokumente.ActiveDockable);
 
         hf.ZoomGroesserCommand.Execute(null);
         hf.ZoomGroesserCommand.Execute(null);
         Assert.Equal(125, aktiv.Zoom.Prozent);
+        Assert.Equal("Vergrößerung der Ansicht: 125 %", hf.ZoomStand);
         hf.ZoomKleinerCommand.Execute(null);
         Assert.Equal(110, aktiv.Zoom.Prozent);
         hf.ZoomZuruecksetzenCommand.Execute(null);

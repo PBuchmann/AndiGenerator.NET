@@ -1,0 +1,14 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:p="using:AndiGenerator.Presentation"
+             x:Class="AndiGenerator.UI.Modusumschalter"
+             x:DataType="p:HauptfensterViewModel">
+  <!-- Der Umschalter Normal | Experte: in beiden Oberflächen derselbe, an derselben Stelle (rechts im Kopf, vor dem Menü). -->
+  <Border Background="#ECEAE4" CornerRadius="8" Padding="3" VerticalAlignment="Bottom"
+          ToolTip.Tip="Normal: in drei Schritten zum Plan. Experte: alle Kriterien, Kosten, Varianten und der Leitstand.">
+    <StackPanel Orientation="Horizontal" Spacing="4">
+      <RadioButton Classes="segment" Content="Normal" IsChecked="{Binding IstNormal, Mode=OneWay}" Command="{Binding NormalCommand}" />
+      <RadioButton Classes="segment" Content="Experte" IsChecked="{Binding IstExperte, Mode=OneWay}" Command="{Binding ExperteCommand}" />
+    </StackPanel>
+  </Border>
+</UserControl>
