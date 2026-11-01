@@ -31,7 +31,7 @@
   </ItemGroup>
   <!-- Steuerung durch eine KI über das Model Context Protocol (nur tools/AndiGenerator.Mcp): ModelContextProtocol Apache-2.0, Microsoft.Extensions.Hosting MIT. -->
   <ItemGroup>
-    <PackageVersion Include="ModelContextProtocol" Version="2.2.0" />
+    <PackageVersion Include="ModelContextProtocol" Version="2.3.0" />
     <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.10" />
     <!-- PDF-Ausdruck des MCP-Servers ohne Avalonia: dieselbe SkiaSharp-Version, die Avalonia.Skia mitbringt (MIT). -->
     <PackageVersion Include="SkiaSharp" Version="3.119.4" />
