@@ -57,7 +57,7 @@ public sealed class HauptfensterHighsTests : IDisposable
         {
             hf.LeitstandCommand.Execute(null);
             LeitstandAnsichtViewModel raum = Assert.Single(Ansichten<LeitstandAnsichtViewModel>());
-            for (int i = 0; i < 600 && !raum.Verfahren.Contains("Untere Schranke", StringComparison.Ordinal); i++)
+            for (int i = 0; i < 1800 && !raum.Verfahren.Contains("Untere Schranke", StringComparison.Ordinal); i++)
             {
                 await Task.Delay(100);
             }
@@ -87,7 +87,9 @@ public sealed class HauptfensterHighsTests : IDisposable
         o.Sammeln = true;
         hf.AutomodusCommand.Execute(null);
         Assert.True(qualitaet.ZeigtSchranke);
-        for (int i = 0; i < 600 && qualitaet.Zeilen.Any(z => z.BestmoeglichRechnet); i++)
+
+        // Bis HiGHS A und B fertig hat (allein einige Sekunden, neben anderen Tests länger).
+        for (int i = 0; i < 1800 && qualitaet.Zeilen.Any(z => z.BestmoeglichRechnet); i++)
         {
             await Task.Delay(100);
             o.Abarbeiten();
@@ -125,7 +127,7 @@ public sealed class HauptfensterHighsTests : IDisposable
         QualitaetAnsichtViewModel qualitaet = Assert.Single(Ansichten<QualitaetAnsichtViewModel>());
         qualitaet.Quelle = PlanQuelle.ClickTt;
         hf.AutomodusCommand.Execute(null);
-        for (int i = 0; i < 600 && !qualitaet.Zeilen.Any(z => z.NurC); i++)
+        for (int i = 0; i < 1800 && !qualitaet.Zeilen.Any(z => z.NurC); i++)
         {
             await Task.Delay(100);
         }

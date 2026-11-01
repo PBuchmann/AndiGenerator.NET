@@ -16,11 +16,26 @@ namespace AndiGenerator.Engine.Turniere;
 public sealed record Kompaktplanoptionen(TimeSpan Dauer, int Threads, int Startwert, int? Versuche, TimeSpan ExaktDauer)
 {
     /// <summary>
-    /// Holt die Standardeinstellungen auf allen Prozessorkernen bis auf einen: bis zu zwei Minuten gezielte Konstruktion
-    /// (bzw. vollständige Suche nach 4er-Plänen), danach zehn Sekunden zufällige Suche.
+    /// Holt die Standardeinstellungen auf allen Prozessorkernen bis auf einen (die Oberfläche bleibt bedienbar): rund drei
+    /// Minuten gezielte Konstruktion (bzw. vollständige Suche nach 4er-Plänen), länger nur, solange HiGHS noch vorankommt –
+    /// höchstens zehn Minuten (Peter, 26.10.2026: knapp vor dem Beweis nicht abbrechen, auch auf Rechnern mit 2 oder 4
+    /// Kernen gute Pläne) –, danach zehn Sekunden zufällige Suche.
     /// </summary>
     public static Kompaktplanoptionen Standard =>
-        new(TimeSpan.FromSeconds(10), Math.Max(1, Environment.ProcessorCount - 1), Random.Shared.Next(), null, TimeSpan.FromMinutes(2));
+        new(TimeSpan.FromSeconds(10), Math.Max(1, Environment.ProcessorCount - 1), Random.Shared.Next(), null, TimeSpan.FromMinutes(3))
+        {
+            ExaktHoechstens = TimeSpan.FromMinutes(10),
+        };
+
+    /// <summary>
+    /// Holt die Höchstdauer der gezielten Konstruktion, wenn HiGHS über <see cref="ExaktDauer"/> hinaus noch vorankommt (ein
+    /// besserer Plan oder eine deutlich kleinere Lücke zur Schranke binnen <see cref="Stillstand"/>); <c>null</c> = nicht
+    /// verlängern.
+    /// </summary>
+    public TimeSpan? ExaktHoechstens { get; init; }
+
+    /// <summary>Holt, wie lange HiGHS ohne Fortschritt über <see cref="ExaktDauer"/> hinaus weiterrechnet.</summary>
+    public TimeSpan Stillstand { get; init; } = TimeSpan.FromSeconds(40);
 
     /// <summary>
     /// Holt den Löser, mit dem die Pläne zuerst gezielt nach den Kriterien konstruiert werden (ganzzahlige Optimierung,

@@ -19,6 +19,13 @@ public static class Kartenbau
     private const double Schrifthoehe = 15;
     private const int HoechstensStaedte = 10;
 
+    /// <summary>
+    /// Höchstens so hoch im Verhältnis zur Breite (Peter, 26.10.2026; vorher 1,0): Die Ansicht zeigt die Karte höchstens 480
+    /// Bildpunkte hoch bei bis zu 760 breit – eine höhere Karte wäre dort verkleinert oder abgeschnitten. Bei Klassen, die sich
+    /// von Nord nach Süd erstrecken, kommt dafür links und rechts mehr Umgebung dazu.
+    /// </summary>
+    private const double HoechstesSeitenverhaeltnis = 0.75;
+
     /// <summary>Mögliche Längen des Maßstabsbalkens in km, die längste zuerst.</summary>
     private static readonly int[] Massstaebe = [200, 100, 50, 20, 10, 5];
 
@@ -175,16 +182,17 @@ public static class Kartenbau
             double randY = Math.Max(((y1 - y0) * 0.25) + 4, (27 - (y1 - y0)) / 2);
             (x0, x1, y0, y1) = (x0 - randX, x1 + randX, y0 - randY, y1 + randY);
 
-            // Seitenverhältnis zwischen 0,55 und 1,0: die kürzere Seite wird verlängert.
+            // Seitenverhältnis zwischen 0,55 und 0,75: die kürzere Seite wird verlängert, die Orte bleiben in der Mitte.
             double w = x1 - x0;
             double h = y1 - y0;
             if (h < 0.55 * w)
             {
                 (y0, y1) = (y0 - (((0.55 * w) - h) / 2), y1 + (((0.55 * w) - h) / 2));
             }
-            else if (h > w)
+            else if (h > HoechstesSeitenverhaeltnis * w)
             {
-                (x0, x1) = (x0 - ((h - w) / 2), x1 + ((h - w) / 2));
+                double mehr = ((h / HoechstesSeitenverhaeltnis) - w) / 2;
+                (x0, x1) = (x0 - mehr, x1 + mehr);
             }
 
             links = x0;

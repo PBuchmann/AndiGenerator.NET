@@ -9,12 +9,17 @@ namespace AndiGenerator.Application;
 /// Textdatei im eigenen Ordner, eine Zeile <c>Schlüssel=Wert</c> je Einstellung; Unbekanntes wird übergangen.
 /// </summary>
 /// <param name="UpdatesSuchen">Beim Start auf GitHub nach einer neuen Version suchen.</param>
-public sealed record Programmeinstellungen(bool UpdatesSuchen)
+/// <param name="Expertenmodus">
+/// Das Programm startet im Expertenmodus (Peter, 29.10.2026: einmal gewählt, bleibt es dabei); sonst im normalen Modus.
+/// </param>
+public sealed record Programmeinstellungen(bool UpdatesSuchen, bool Expertenmodus = false)
 {
     /// <summary>Name der Datei im eigenen Ordner.</summary>
     public const string Dateiname = "programm-einstellungen.txt";
 
     private const string SchluesselUpdates = "updates-suchen";
+
+    private const string SchluesselModus = "modus";
 
     /// <summary>Holt die Standardeinstellungen (Update-Suche an).</summary>
     public static Programmeinstellungen Standard { get; } = new(UpdatesSuchen: true);
@@ -40,6 +45,11 @@ public sealed record Programmeinstellungen(bool UpdatesSuchen)
             {
                 ergebnis = ergebnis with { UpdatesSuchen = teile[1] == "ja" };
             }
+
+            if (teile.Length == 2 && teile[0] == SchluesselModus && teile[1] is "experte" or "normal")
+            {
+                ergebnis = ergebnis with { Expertenmodus = teile[1] == "experte" };
+            }
         }
 
         return ergebnis;
@@ -52,6 +62,6 @@ public sealed record Programmeinstellungen(bool UpdatesSuchen)
     {
         ArgumentException.ThrowIfNullOrEmpty(basis);
         Directory.CreateDirectory(basis);
-        File.WriteAllLines(Path.Combine(basis, Dateiname), [SchluesselUpdates + "=" + (UpdatesSuchen ? "ja" : "nein")]);
+        File.WriteAllLines(Path.Combine(basis, Dateiname), [SchluesselUpdates + "=" + (UpdatesSuchen ? "ja" : "nein"), SchluesselModus + "=" + (Expertenmodus ? "experte" : "normal")]);
     }
 }

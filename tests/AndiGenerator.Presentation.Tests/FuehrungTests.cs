@@ -70,7 +70,7 @@ public sealed class FuehrungTests : IDisposable
         Assert.False(hf.FuehrungCommand.CanExecute(null));
         await OeffnenAsync();
         Assert.True(hf.FuehrungCommand.CanExecute(null));
-        Assert.Equal("Schritt für Schritt: Kostenoptimierung – nächster Schritt 1: Verfahren und Ausgangsplan wählen", hf.FuehrungsHinweis);
+        Assert.Equal("Schritt für Schritt: Kostenoptimierung – nächster Schritt 1: Verfahren wählen", hf.FuehrungsHinweis);
 
         hf.FuehrungCommand.Execute(null);
         FuehrungViewModel f = Assert.IsType<FuehrungViewModel>(hf.Fuehrung);

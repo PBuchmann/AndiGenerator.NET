@@ -11,6 +11,9 @@ namespace AndiGenerator.Presentation;
 /// </summary>
 public static class Beispielsammlung
 {
+    /// <summary>Name, unter dem ein mitgelieferter Plan (Datei <c>.plan</c> neben dem Beispiel) gemerkt wird.</summary>
+    public const string Beispielplan = "Beispielplan (mit HiGHS optimiert)";
+
     private static readonly Dictionary<string, (int Rang, string Text)> Beschreibungen = new(StringComparer.OrdinalIgnoreCase)
     {
         ["Liga mit idealen Meldungen"] = (1, "10 Mannschaften mit idealen Terminwünschen – der einfachste Einstieg."),
@@ -21,6 +24,9 @@ public static class Beispielsammlung
         ["Liga mit 11 Mannschaften und 40km Regel"] = (6, "11 Mannschaften, ungerade Zahl (spielfrei), Auswärtsspiele nur am Wochenende, mit Plan aus click-TT."),
         ["Liga für Doppelrunde"] = (7, "6 Mannschaften, jeder spielt viermal gegen jeden (Doppelrunde)."),
     };
+
+    /// <summary>Beispiele, die als Doppelrunde gedacht sind; beim ersten Öffnen wird die Doppelrunde eingeschaltet.</summary>
+    private static readonly HashSet<string> Doppelrunden = new(StringComparer.OrdinalIgnoreCase) { "Liga für Doppelrunde" };
 
     /// <summary>Holt den Ordner der beiliegenden Beispiele.</summary>
     public static string Programmordner { get; } = Path.Combine(AppContext.BaseDirectory, "Beispiele");
@@ -44,6 +50,11 @@ public static class Beispielsammlung
             .ToList();
     }
 
+    /// <summary>Gibt an, ob ein Beispiel als Doppelrunde gedacht ist (jeder spielt viermal gegen jeden).</summary>
+    /// <param name="pfad">Pfad des Beispiels (beiliegend oder Kopie).</param>
+    /// <returns><c>true</c> für eine Doppelrunde.</returns>
+    public static bool IstDoppelrunde(string pfad) => Doppelrunden.Contains(Path.GetFileNameWithoutExtension(pfad));
+
     /// <summary>
     /// Legt die Kopie eines Beispiels im Datenordner an (Unterordner „Beispiele“), falls es sie noch nicht gibt; eine
     /// vorhandene Kopie bleibt mit allen Änderungen erhalten.
@@ -65,6 +76,13 @@ public static class Beispielsammlung
             if (File.Exists(aenderungen))
             {
                 Kopie(aenderungen, Path.ChangeExtension(ziel, ".modifications"));
+            }
+
+            // Ein gut optimierter Plan (Kompaktspieltage: mit HiGHS bis zum Ende gerechnet) liegt als .plan daneben.
+            string plan = Path.ChangeExtension(quelle, ".plan");
+            if (File.Exists(plan))
+            {
+                Kopie(plan, Path.ChangeExtension(ziel, ".plan"));
             }
         }
 

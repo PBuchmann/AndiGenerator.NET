@@ -191,7 +191,9 @@ public sealed partial class Ligaschranke
         List<List<(int Spalte, double Faktor)>> a = [ohne, Stufenziel(einteilung.A)];
         List<List<(int Spalte, double Faktor)>> b = [Stufenziel(einteilung.B)];
         List<List<(int Spalte, double Faktor)>> c = [.. einteilung.C
-            .Select(k => Ziel(k, naeherung: true)).OfType<List<(int Spalte, double Faktor)>>().Select(Zusammenfassen)];
+            .Select(k => (Kriterium: k, Ziel: Ziel(k, naeherung: true)))
+            .Where(z => z.Ziel is not null)
+            .Select(z => Zusammenfassen(z.Ziel!.Select(x => (x.Spalte, x.Faktor * (e.CGewicht?.Invoke(z.Kriterium) ?? 1)))))];
 
         // Der Ausgangsplan im Modell: Ansetzungen festlegen (je Ansetzungsspalte eine Zeile), Hilfsspalten ergänzen.
         double[] x = Abbilden(plan, out int fremd);

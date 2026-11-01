@@ -13,9 +13,6 @@ public static class Fuehrungsziel
     /// <summary>Die Wahl des Verfahrens (Kostenoptimierung oder Automodus).</summary>
     public const string Verfahren = "Verfahren";
 
-    /// <summary>Die Wahl des Ausgangsplans („Start mit“).</summary>
-    public const string StartMit = "StartMit";
-
     /// <summary>Der Hauptknopf (Start, Pause, Fortsetzen).</summary>
     public const string Start = "Start";
 
@@ -91,7 +88,7 @@ public static class Fuehrungsziel
     /// <summary>Holt alle Ziele (für den Test, dass es jedes in der Oberfläche gibt).</summary>
     public static IReadOnlyList<string> Alle { get; } =
     [
-        Verfahren, StartMit, Start, Stopp, PlanMerken, Kacheln, KachelErgebnis, KachelVerlauf, KachelLeitstand, BVarianten,
+        Verfahren, Start, Stopp, PlanMerken, Kacheln, KachelErgebnis, KachelVerlauf, KachelLeitstand, BVarianten,
         NavEinstellungen, NavDaten, NavKompakt, NavKosten, NavQualitaet, NavMeldungen, NavDiagramme, NavExport, NavDrucken,
         KostenMatrix, QualitaetTabelle, KompaktPlaene, KompaktRaster, KompaktBearbeiten, KompaktKarte, KompaktSpieltage,
     ];

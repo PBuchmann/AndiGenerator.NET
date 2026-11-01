@@ -117,7 +117,7 @@ public sealed class UeberViewModel
             updatesSuchen = value;
             try
             {
-                new Programmeinstellungen(value).Speichern(basis);
+                (Programmeinstellungen.Laden(basis) with { UpdatesSuchen = value }).Speichern(basis);
             }
             catch (Exception fehler) when (fehler is IOException or UnauthorizedAccessException)
             {

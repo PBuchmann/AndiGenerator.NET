@@ -13,6 +13,7 @@ namespace AndiGenerator.Engine.Referenz;
 /// <param name="Hinweis">Hinweise wie „Ausweichtermin“, „kein Wunschtermin“, „ungültiger Termin“, kommagetrennt.</param>
 /// <param name="NachbartermineHeim">Spiele der Nachbar-/Vereinsmannschaften der Heimmannschaft am selben Tag.</param>
 /// <param name="NachbartermineGast">Spiele der Nachbar-/Vereinsmannschaften der Gastmannschaft am selben Tag.</param>
+/// <param name="Rundenname">Name der Runde (siehe <see cref="Rundennamen"/>), leer ohne Termin.</param>
 public sealed record Terminplanzeile(
     DateTime? Zeitpunkt,
     string Heim,
@@ -21,4 +22,5 @@ public sealed record Terminplanzeile(
     int Kalenderwoche,
     string Hinweis,
     IReadOnlyList<Nachbartermin> NachbartermineHeim,
-    IReadOnlyList<Nachbartermin> NachbartermineGast);
+    IReadOnlyList<Nachbartermin> NachbartermineGast,
+    string Rundenname = "");

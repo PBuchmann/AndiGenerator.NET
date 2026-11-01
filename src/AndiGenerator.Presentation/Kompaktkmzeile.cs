@@ -12,6 +12,6 @@ namespace AndiGenerator.Presentation;
 /// <param name="Gewaehlt">Mannschaft ist ausgewählt.</param>
 public sealed record Kompaktkmzeile(string Name, string Zusatz, string Km, double Anteil, bool Gewaehlt)
 {
-    /// <summary>Holt die Breite des Balkens bei 120 Bildpunkten für den längsten.</summary>
-    public double Balken => Math.Max(2, Anteil * 120);
+    /// <summary>Holt die Breite des Balkens bei 90 Bildpunkten für den längsten.</summary>
+    public double Balken => Math.Max(2, Anteil * 90);
 }

@@ -6,7 +6,7 @@
              x:DataType="p:DiagrammAnsichtViewModel">
   <UserControl.Styles>
     <Style Selector="Button.diagrammwahl">
-      <Setter Property="MinHeight" Value="44" />
+      <Setter Property="MinHeight" Value="32" />
       <Setter Property="MinWidth" Value="120" />
       <Setter Property="Padding" Value="16,0" />
       <Setter Property="Margin" Value="0,0,8,8" />
@@ -34,18 +34,7 @@
       <Setter Property="Foreground" Value="{StaticResource AkzentDunkel}" />
     </Style>
   </UserControl.Styles>
-  <DockPanel Margin="18,14">
-    <StackPanel DockPanel.Dock="Top" Classes="leiste" Orientation="Horizontal" Spacing="10" Margin="0,0,0,10">
-      <TextBlock Text="Plan" Classes="klein" FontSize="13" VerticalAlignment="Center" />
-      <ComboBox MinWidth="280" ItemsSource="{Binding Quellen}" SelectedItem="{Binding Quelle}">
-        <ComboBox.ItemTemplate>
-          <DataTemplate x:DataType="p:PlanQuelle">
-            <TextBlock Text="{Binding Name}" />
-          </DataTemplate>
-        </ComboBox.ItemTemplate>
-      </ComboBox>
-      <ui:Zoomauswahl DataContext="{Binding Zoom}" Margin="12,0,0,0" />
-    </StackPanel>
+  <DockPanel Margin="12,8">
     <TextBlock DockPanel.Dock="Top" Text="{Binding Hinweis}" IsVisible="{Binding HatHinweis}" Margin="0,8" />
     <ItemsControl DockPanel.Dock="Top" ItemsSource="{Binding Auswahl}" Margin="0,0,0,12">
       <ItemsControl.ItemsPanel>
@@ -57,12 +46,12 @@
         <DataTemplate x:DataType="p:Diagrammwahl">
           <Button Classes="diagrammwahl" Classes.aktiv="{Binding Aktiv}" ToolTip.Tip="{Binding Beschreibung}"
                   Command="{Binding $parent[UserControl].((p:DiagrammAnsichtViewModel)DataContext).WaehlenCommand}" CommandParameter="{Binding}">
-            <TextBlock Text="{Binding Titel}" FontSize="13" TextWrapping="Wrap" />
+            <TextBlock Text="{Binding Titel}" FontSize="12" TextWrapping="Wrap" />
           </Button>
         </DataTemplate>
       </ItemsControl.ItemTemplate>
     </ItemsControl>
-    <TextBlock DockPanel.Dock="Top" Text="{Binding Beschreibung}" IsVisible="{Binding HatBeschreibung}" Classes="klein" FontSize="13" TextWrapping="Wrap" Margin="2,0,0,10" />
+    <TextBlock DockPanel.Dock="Top" Text="{Binding Beschreibung}" IsVisible="{Binding HatBeschreibung}" Classes="klein" FontSize="12" TextWrapping="Wrap" Margin="2,0,0,10" />
     <Border Classes="karte" Padding="0" ClipToBounds="True">
       <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto">
         <LayoutTransformControl LayoutTransform="{Binding Zoom.Faktor, Converter={x:Static ui:Konverter.Skalierung}}" HorizontalAlignment="Left" VerticalAlignment="Top">

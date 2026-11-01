@@ -50,10 +50,10 @@
   <UserControl.Resources>
     <!-- Eine Zeile: Griff, Platz, Mannschaft; auch für die Zeile, die beim Ziehen am Mauszeiger hängt -->
     <DataTemplate x:Key="Setzvorlage" x:DataType="p:Setzlistenzeile">
-      <Border Classes="setzzeile" Classes.gezogen="{Binding IstGezogen}" Classes.gewaehlt="{Binding IstGewaehlt}" MinHeight="38" Padding="4,0">
+      <Border Classes="setzzeile" Classes.gezogen="{Binding IstGezogen}" Classes.gewaehlt="{Binding IstGewaehlt}" MinHeight="30" Padding="4,0">
         <Grid ColumnDefinitions="30,44,*,Auto">
           <Border Classes="griff" ToolTip.Tip="Ziehen: an die gewünschte Stelle legen – der Platz ergibt sich aus der Stelle">
-            <TextBlock Text="⋮⋮" FontSize="16" FontWeight="Bold" Foreground="{StaticResource Tinte2}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+            <TextBlock Text="⋮⋮" FontSize="14" FontWeight="Bold" Foreground="{StaticResource Tinte2}" HorizontalAlignment="Center" VerticalAlignment="Center" />
           </Border>
           <TextBlock Grid.Column="1" Text="{Binding PlatzText}" Classes="ziffer" FontWeight="SemiBold" Foreground="{StaticResource Tinte2}" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,12,0" />
           <TextBlock ToolTip.Tip="{Binding Name}" Classes="mannschaft" Grid.Column="2" Text="{Binding Name}" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />

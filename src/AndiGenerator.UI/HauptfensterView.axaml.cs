@@ -27,7 +27,7 @@ public partial class HauptfensterView : Window
     private const double NiedrigeHoehe = 820;
 
     /// <summary>Platz, den Reiter, Leiste und Ränder einer Ansicht über ihrem Inhalt brauchen.</summary>
-    private const double Ansichtskopf = 140;
+    private const double Ansichtskopf = 110;
 
     /// <summary>Ersatz, wenn ein Ziel gerade nicht zu sehen ist (z. B. „B-Varianten“ ohne Varianten: die Kachel von HiGHS).</summary>
     private static readonly Dictionary<string, string> Ersatzziele = new(StringComparer.Ordinal)

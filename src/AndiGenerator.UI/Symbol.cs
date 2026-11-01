@@ -22,7 +22,7 @@ public sealed class Symbol : Control
     public static readonly StyledProperty<bool> GefuelltProperty = AvaloniaProperty.Register<Symbol, bool>(nameof(Gefuellt));
 
     /// <summary>Definiert die Eigenschaft <see cref="Groesse"/>.</summary>
-    public static readonly StyledProperty<double> GroesseProperty = AvaloniaProperty.Register<Symbol, double>(nameof(Groesse), 22);
+    public static readonly StyledProperty<double> GroesseProperty = AvaloniaProperty.Register<Symbol, double>(nameof(Groesse), 18);
 
     /// <summary>Definiert die Eigenschaft <see cref="Farbe"/>.</summary>
     public static readonly StyledProperty<IBrush?> FarbeProperty = AvaloniaProperty.Register<Symbol, IBrush?>(nameof(Farbe));

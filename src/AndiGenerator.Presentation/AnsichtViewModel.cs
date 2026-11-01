@@ -94,9 +94,8 @@ public abstract class AnsichtViewModel : Document, IZoombar
     /// <param name="neu">Die neuen Quellen.</param>
     internal void QuellenUebernehmen(IReadOnlyList<PlanQuelle> neu)
     {
-        PlanQuelle? bisher = Quelle;
         Quellen = neu;
-        PlanQuelle gewaehlt = neu.FirstOrDefault(q => q == bisher) ?? neu[0];
+        PlanQuelle gewaehlt = hauptfenster.AktuellerPlan(neu);
         if (gewaehlt == quelle)
         {
             // Die Auswahlliste kann die Auswahl beim Tausch der Liste verworfen haben: erneut melden.

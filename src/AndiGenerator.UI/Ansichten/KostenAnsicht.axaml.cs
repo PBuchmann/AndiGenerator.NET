@@ -262,7 +262,7 @@ public partial class KostenAnsicht : UserControl
         inhalt.Children.Add(new TextBlock
         {
             Text = zeile.Name,
-            FontSize = 13,
+            FontSize = 12,
             FontWeight = zeile.Gewaehlt ? FontWeight.Bold : FontWeight.Medium,
             TextTrimming = TextTrimming.CharacterEllipsis,
             MaxWidth = zeile.Marke.Length > 0 ? 160 : 190,

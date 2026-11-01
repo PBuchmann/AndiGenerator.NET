@@ -2,15 +2,16 @@
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:ui="using:AndiGenerator.UI"
         xmlns:dock="using:Dock.Avalonia.Controls">
-  <!-- Gestaltung von AndiGenerator.NET: warmer, ruhiger Grund, weiße Karten, ein Blau als Akzent; große Bedienflächen (≥ 44 px) für Touch. -->
+  <!-- Gestaltung von AndiGenerator.NET: warmer, ruhiger Grund, weiße Karten, ein Blau als Akzent. Kompakt (Andreas/Peter, 27.10.2026):
+       Schrift 12, Bedienflächen 30–36 px statt 44–48 px, damit auch kleine Laptop-Bildschirme viele Daten zeigen. -->
   <Styles.Resources>
     <ResourceDictionary>
       <!-- Schrift IBM Plex Sans, eingebettet (Assets/Fonts, SIL Open Font License); Segoe UI als Ersatz -->
       <FontFamily x:Key="Grundschrift">avares://AndiGenerator.UI/Assets/Fonts#IBM Plex Sans, Segoe UI, Arial</FontFamily>
       <FontFamily x:Key="Ziffernschrift">avares://AndiGenerator.UI/Assets/Fonts#IBM Plex Mono, Consolas, monospace</FontFamily>
       <FontFamily x:Key="ContentControlThemeFontFamily">avares://AndiGenerator.UI/Assets/Fonts#IBM Plex Sans, Segoe UI, Arial</FontFamily>
-      <!-- Grundschrift: eine Stufe kleiner als der Fluent-Standard (14), damit große Tabellen übersichtlich bleiben -->
-      <x:Double x:Key="ControlContentThemeFontSize">13</x:Double>
+      <!-- Grundschrift: zwei Stufen kleiner als der Fluent-Standard (14), damit große Tabellen übersichtlich bleiben -->
+      <x:Double x:Key="ControlContentThemeFontSize">12</x:Double>
       <SolidColorBrush x:Key="Grund" Color="#F4F3EF" />
       <SolidColorBrush x:Key="Flaeche" Color="#FFFFFF" />
       <SolidColorBrush x:Key="Linie" Color="#E2E0DA" />
@@ -70,6 +71,7 @@
       <!-- Fortsetzen: links ein Balken wie bei Pause, rechts das Play-Dreieck -->
       <StreamGeometry x:Key="SymbolFortsetzen">M4 5a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z M11 4l11 8l-11 8z</StreamGeometry>
       <StreamGeometry x:Key="SymbolPause">M7 4h2a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1H7a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z M15 4h2a1 1 0 0 1 1 1v14a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1z</StreamGeometry>
+      <StreamGeometry x:Key="SymbolNeustart">M4 12a8 8 0 1 0 3-6.2 M4 4v4h4</StreamGeometry>
       <StreamGeometry x:Key="SymbolStopp">M7 5h10a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2z</StreamGeometry>
       <StreamGeometry x:Key="SymbolMerken">M6 3h12v18l-6-4l-6 4z</StreamGeometry>
       <StreamGeometry x:Key="SymbolLoeschen">M4 7h16 M10 11v6 M14 11v6 M6 7l1 13h10l1-13 M9 7V4h6v3</StreamGeometry>
@@ -79,23 +81,26 @@
       <StreamGeometry x:Key="SymbolLupe">M2.5 12s3.5-6.5 9.5-6.5 9.5 6.5 9.5 6.5-3.5 6.5-9.5 6.5S2.5 12 2.5 12z M12 9.5a2.5 2.5 0 1 0 0 5a2.5 2.5 0 1 0 0-5</StreamGeometry>
       <StreamGeometry x:Key="SymbolHoch">M12 19V5 M6 11l6-6 6 6</StreamGeometry>
       <StreamGeometry x:Key="SymbolSchliessen">M6 6l12 12 M18 6L6 18</StreamGeometry>
+      <StreamGeometry x:Key="SymbolZiel">M12 4a8 8 0 1 0 0 16a8 8 0 1 0 0-16z M12 8.5a3.5 3.5 0 1 0 0 7a3.5 3.5 0 1 0 0-7z</StreamGeometry>
+      <StreamGeometry x:Key="SymbolGleich">M5 9h14 M5 15h14</StreamGeometry>
       <StreamGeometry x:Key="SymbolRunter">M12 5v14 M6 13l6 6 6-6</StreamGeometry>
       <StreamGeometry x:Key="SymbolAuswahl">M6 9l6 6 6-6</StreamGeometry>
       <StreamGeometry x:Key="SymbolWarnung">M12 4l9 16H3z M12 10v4 M12 17h0.01</StreamGeometry>
       <StreamGeometry x:Key="SymbolSanduhr">M6 3h12 M6 21h12 M7 3c0 5 5 6 5 9s-5 4-5 9 M17 3c0 5-5 6-5 9s5 4 5 9 M9.5 19h5</StreamGeometry>
+      <StreamGeometry x:Key="SymbolMenue">M4 6h16 M4 12h16 M4 18h16</StreamGeometry>
       <StreamGeometry x:Key="SymbolKalender">M5 4h14a2 2 0 0 1 2 2v13a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2z M3 9h18 M8 2v4 M16 2v4</StreamGeometry>
     </ResourceDictionary>
   </Styles.Resources>
 
   <Style Selector="Window">
     <Setter Property="FontFamily" Value="{StaticResource Grundschrift}" />
-    <Setter Property="FontSize" Value="13" />
+    <Setter Property="FontSize" Value="12" />
     <Setter Property="Icon" Value="avares://AndiGenerator.UI/Assets/AndiGenerator.NET.ico" />
   </Style>
 
   <!-- Texte -->
   <Style Selector="TextBlock.klein">
-    <Setter Property="FontSize" Value="12" />
+    <Setter Property="FontSize" Value="11" />
     <Setter Property="Foreground" Value="{StaticResource Grau}" />
   </Style>
   <!-- Mannschaftsnamen: sehr lange Namen (z. B. mit Sponsor) werden mit „…“ gekürzt, der Hinweis zeigt den vollen Namen -->
@@ -118,8 +123,8 @@
     <Setter Property="Background" Value="{StaticResource Flaeche}" />
     <Setter Property="BorderBrush" Value="{StaticResource Linie}" />
     <Setter Property="BorderThickness" Value="1" />
-    <Setter Property="CornerRadius" Value="14" />
-    <Setter Property="Padding" Value="18,14" />
+    <Setter Property="CornerRadius" Value="8" />
+    <Setter Property="Padding" Value="14,10" />
   </Style>
 
   <!-- Navigation links -->
@@ -127,13 +132,13 @@
     <Setter Property="HorizontalAlignment" Value="Stretch" />
     <Setter Property="HorizontalContentAlignment" Value="Left" />
     <Setter Property="VerticalContentAlignment" Value="Center" />
-    <Setter Property="Height" Value="48" />
-    <Setter Property="Padding" Value="14,0" />
-    <Setter Property="CornerRadius" Value="10" />
+    <Setter Property="Height" Value="34" />
+    <Setter Property="Padding" Value="10,0" />
+    <Setter Property="CornerRadius" Value="8" />
     <Setter Property="Background" Value="Transparent" />
     <Setter Property="BorderThickness" Value="0" />
     <Setter Property="Foreground" Value="{StaticResource Tinte}" />
-    <Setter Property="FontSize" Value="13" />
+    <Setter Property="FontSize" Value="12" />
   </Style>
   <Style Selector="Button.nav:pointerover /template/ ContentPresenter#PART_ContentPresenter">
     <Setter Property="Background" Value="{StaticResource Schwebe}" />
@@ -172,7 +177,7 @@
     <Setter Property="Background" Value="Transparent" />
     <Setter Property="BorderThickness" Value="0" />
     <Setter Property="CornerRadius" Value="8" />
-    <Setter Property="Padding" Value="14,16,12,6" />
+    <Setter Property="Padding" Value="12,12,10,4" />
     <Setter Property="FontSize" Value="11" />
     <Setter Property="FontWeight" Value="SemiBold" />
     <Setter Property="Foreground" Value="{StaticResource Grau}" />
@@ -226,10 +231,10 @@
     <Setter Property="Farbe" Value="#B8BCC2" />
   </Style>
   <Style Selector="Border.navigation">
-    <Setter Property="Width" Value="248" />
+    <Setter Property="Width" Value="210" />
   </Style>
   <Style Selector="Border.navigation.schmal">
-    <Setter Property="Width" Value="84" />
+    <Setter Property="Width" Value="64" />
   </Style>
   <Style Selector="Border.schmal TextBlock.navtext, Border.schmal TextBlock.sektion, Border.schmal StackPanel.logotext">
     <Setter Property="IsVisible" Value="False" />
@@ -237,15 +242,15 @@
   <Style Selector="Border.schmal Button.nav">
     <Setter Property="HorizontalContentAlignment" Value="Center" />
     <Setter Property="Padding" Value="0" />
-    <Setter Property="Height" Value="52" />
+    <Setter Property="Height" Value="38" />
   </Style>
 
   <!-- Knöpfe -->
   <Style Selector="Button.gross">
-    <Setter Property="MinHeight" Value="48" />
-    <Setter Property="Padding" Value="18,0" />
-    <Setter Property="CornerRadius" Value="12" />
-    <Setter Property="FontSize" Value="13" />
+    <Setter Property="MinHeight" Value="36" />
+    <Setter Property="Padding" Value="14,0" />
+    <Setter Property="CornerRadius" Value="8" />
+    <Setter Property="FontSize" Value="12" />
     <Setter Property="FontWeight" Value="SemiBold" />
     <Setter Property="VerticalContentAlignment" Value="Center" />
     <Setter Property="Background" Value="{StaticResource Flaeche}" />
@@ -283,28 +288,28 @@
     <Setter Property="BorderThickness" Value="0" />
     <Setter Property="Foreground" Value="{StaticResource Akzent}" />
     <Setter Property="Padding" Value="0" />
-    <Setter Property="MinHeight" Value="44" />
+    <Setter Property="MinHeight" Value="32" />
   </Style>
   <Style Selector="Button.link:pointerover /template/ ContentPresenter#PART_ContentPresenter">
     <Setter Property="Background" Value="Transparent" />
     <Setter Property="Foreground" Value="{StaticResource AkzentDunkel}" />
   </Style>
 
-  <!-- Leisten oben in den Ansichten: große Bedienflächen -->
+  <!-- Leisten oben in den Ansichten -->
   <Style Selector="StackPanel.leiste > Button, StackPanel.leiste > ComboBox, StackPanel.leiste ComboBox">
-    <Setter Property="MinHeight" Value="44" />
-    <Setter Property="CornerRadius" Value="10" />
+    <Setter Property="MinHeight" Value="32" />
+    <Setter Property="CornerRadius" Value="8" />
     <Setter Property="VerticalAlignment" Value="Center" />
-    <Setter Property="FontSize" Value="13" />
+    <Setter Property="FontSize" Value="12" />
   </Style>
   <Style Selector="StackPanel.leiste > Button">
-    <Setter Property="Padding" Value="14,0" />
+    <Setter Property="Padding" Value="10,0" />
     <Setter Property="VerticalContentAlignment" Value="Center" />
   </Style>
   <!-- Reiter der Ansichten: flach, damit die Ansicht selbst möglichst viel Höhe bekommt (noch gut antippbar) -->
   <Style Selector="dock|DocumentTabStripItem">
     <Setter Property="MinHeight" Value="34" />
-    <Setter Property="FontSize" Value="13" />
+    <Setter Property="FontSize" Value="12" />
     <Setter Property="Padding" Value="12,0" />
     <Setter Property="Margin" Value="0,0,4,0" />
     <Setter Property="CornerRadius" Value="10,10,0,0" />
@@ -313,9 +318,9 @@
     <Setter Property="FontWeight" Value="SemiBold" />
   </Style>
   <Style Selector="ComboBox.gross">
-    <Setter Property="MinHeight" Value="48" />
-    <Setter Property="CornerRadius" Value="12" />
-    <Setter Property="FontSize" Value="13" />
+    <Setter Property="MinHeight" Value="36" />
+    <Setter Property="CornerRadius" Value="8" />
+    <Setter Property="FontSize" Value="12" />
     <Setter Property="VerticalContentAlignment" Value="Center" />
   </Style>
   <!-- Seiten der Spielplandaten: Grundformen (im Dialog), in der Einrichtung (Klasse „seite“) groß und im Stil der Anwendung -->
@@ -334,18 +339,18 @@
     <Setter Property="Foreground" Value="{StaticResource Schlecht}" />
   </Style>
   <Style Selector="ContentControl.seite">
-    <Setter Property="FontSize" Value="13" />
+    <Setter Property="FontSize" Value="12" />
     <Setter Property="Foreground" Value="{StaticResource Tinte}" />
   </Style>
   <Style Selector="ContentControl.seite TextBlock.erklaerung">
     <Setter Property="Foreground" Value="{StaticResource Tinte2}" />
-    <Setter Property="LineHeight" Value="23" />
+    <Setter Property="LineHeight" Value="19" />
   </Style>
   <Style Selector="ContentControl.seite TextBlock.doppelt">
     <Setter Property="IsVisible" Value="False" />
   </Style>
   <Style Selector="ContentControl.seite TextBlock.abschnitt">
-    <Setter Property="FontSize" Value="15" />
+    <Setter Property="FontSize" Value="14" />
     <Setter Property="Margin" Value="0,18,0,8" />
   </Style>
   <Style Selector="ContentControl.seite TextBlock.spaltenkopf">
@@ -356,10 +361,10 @@
     <Setter Property="Margin" Value="0,4" />
   </Style>
   <Style Selector="ContentControl.seite Button">
-    <Setter Property="MinHeight" Value="44" />
-    <Setter Property="Padding" Value="16,0" />
-    <Setter Property="CornerRadius" Value="10" />
-    <Setter Property="FontSize" Value="13" />
+    <Setter Property="MinHeight" Value="32" />
+    <Setter Property="Padding" Value="12,0" />
+    <Setter Property="CornerRadius" Value="8" />
+    <Setter Property="FontSize" Value="12" />
     <Setter Property="VerticalContentAlignment" Value="Center" />
     <Setter Property="Background" Value="{StaticResource Flaeche}" />
     <Setter Property="BorderBrush" Value="{StaticResource Rand}" />
@@ -377,28 +382,28 @@
     <Setter Property="Foreground" Value="#9CA2AA" />
   </Style>
   <Style Selector="ContentControl.seite CalendarDatePicker">
-    <Setter Property="MinHeight" Value="44" />
-    <Setter Property="CornerRadius" Value="10" />
-    <Setter Property="FontSize" Value="13" />
+    <Setter Property="MinHeight" Value="32" />
+    <Setter Property="CornerRadius" Value="8" />
+    <Setter Property="FontSize" Value="12" />
   </Style>
   <!-- Seitenliste links im Dialog „Spielplandaten bearbeiten“: wie die Navigation des Hauptfensters -->
   <Style Selector="Border.seitenleiste">
     <Setter Property="Background" Value="{StaticResource Grund}" />
     <Setter Property="BorderBrush" Value="{StaticResource Linie}" />
     <Setter Property="BorderThickness" Value="0,0,1,0" />
-    <Setter Property="Padding" Value="10" />
+    <Setter Property="Padding" Value="8" />
   </Style>
   <Style Selector="ListBox.seitenliste">
     <Setter Property="Background" Value="Transparent" />
     <Setter Property="BorderThickness" Value="0" />
   </Style>
   <Style Selector="ListBox.seitenliste ListBoxItem">
-    <Setter Property="MinHeight" Value="44" />
-    <Setter Property="Padding" Value="14,8" />
+    <Setter Property="MinHeight" Value="32" />
+    <Setter Property="Padding" Value="10,5" />
     <Setter Property="Margin" Value="0,1" />
-    <Setter Property="CornerRadius" Value="10" />
+    <Setter Property="CornerRadius" Value="8" />
     <Setter Property="VerticalContentAlignment" Value="Center" />
-    <Setter Property="FontSize" Value="13" />
+    <Setter Property="FontSize" Value="12" />
   </Style>
   <Style Selector="ListBox.seitenliste ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
     <Setter Property="Background" Value="{StaticResource Schwebe}" />
@@ -411,33 +416,33 @@
     <Setter Property="FontWeight" Value="SemiBold" />
   </Style>
   <Style Selector="ContentControl.seite ComboBox">
-    <Setter Property="MinHeight" Value="44" />
-    <Setter Property="CornerRadius" Value="10" />
-    <Setter Property="FontSize" Value="13" />
+    <Setter Property="MinHeight" Value="32" />
+    <Setter Property="CornerRadius" Value="8" />
+    <Setter Property="FontSize" Value="12" />
     <Setter Property="VerticalContentAlignment" Value="Center" />
   </Style>
   <Style Selector="ContentControl.seite TextBox">
-    <Setter Property="MinHeight" Value="44" />
-    <Setter Property="CornerRadius" Value="10" />
-    <Setter Property="FontSize" Value="13" />
+    <Setter Property="MinHeight" Value="32" />
+    <Setter Property="CornerRadius" Value="8" />
+    <Setter Property="FontSize" Value="12" />
     <Setter Property="VerticalContentAlignment" Value="Center" />
   </Style>
   <Style Selector="ContentControl.seite CheckBox">
-    <Setter Property="MinHeight" Value="44" />
-    <Setter Property="FontSize" Value="13" />
+    <Setter Property="MinHeight" Value="32" />
+    <Setter Property="FontSize" Value="12" />
   </Style>
   <Style Selector="ContentControl.seite ListBox">
     <Setter Property="Background" Value="{StaticResource Flaeche}" />
     <Setter Property="BorderBrush" Value="{StaticResource Linie}" />
     <Setter Property="BorderThickness" Value="1" />
-    <Setter Property="CornerRadius" Value="12" />
+    <Setter Property="CornerRadius" Value="8" />
     <Setter Property="Padding" Value="6" />
   </Style>
   <Style Selector="ContentControl.seite ListBoxItem">
-    <Setter Property="MinHeight" Value="46" />
-    <Setter Property="Padding" Value="14,6" />
+    <Setter Property="MinHeight" Value="32" />
+    <Setter Property="Padding" Value="10,4" />
     <Setter Property="Margin" Value="0,1" />
-    <Setter Property="CornerRadius" Value="10" />
+    <Setter Property="CornerRadius" Value="8" />
     <Setter Property="VerticalContentAlignment" Value="Center" />
   </Style>
   <Style Selector="ContentControl.seite ListBoxItem:pointerover /template/ ContentPresenter#PART_ContentPresenter">
@@ -452,31 +457,31 @@
     <Setter Property="BorderThickness" Value="0,0,0,1" />
     <Setter Property="Padding" Value="0,6" />
   </Style>
-  <!-- Kleine Dialoge (Klasse „dialog“): weiße Fläche, 15 pt, große Felder; unten rechts „Abbrechen“, ganz rechts die Bestätigung -->
+  <!-- Kleine Dialoge (Klasse „dialog“): weiße Fläche, kompakte Felder; unten rechts „Abbrechen“, ganz rechts die Bestätigung -->
   <Style Selector="Window.dialog">
     <Setter Property="Background" Value="{StaticResource Flaeche}" />
     <Setter Property="Foreground" Value="{StaticResource Tinte}" />
-    <Setter Property="FontSize" Value="13" />
+    <Setter Property="FontSize" Value="12" />
   </Style>
   <Style Selector="Window.dialog ComboBox">
-    <Setter Property="MinHeight" Value="40" />
+    <Setter Property="MinHeight" Value="30" />
     <Setter Property="CornerRadius" Value="8" />
     <Setter Property="VerticalContentAlignment" Value="Center" />
   </Style>
   <Style Selector="Window.dialog TextBox">
-    <Setter Property="MinHeight" Value="40" />
+    <Setter Property="MinHeight" Value="30" />
     <Setter Property="CornerRadius" Value="8" />
     <Setter Property="VerticalContentAlignment" Value="Center" />
   </Style>
   <Style Selector="Window.dialog CalendarDatePicker">
-    <Setter Property="MinHeight" Value="40" />
+    <Setter Property="MinHeight" Value="30" />
     <Setter Property="CornerRadius" Value="8" />
   </Style>
   <Style Selector="Window.dialog CheckBox">
-    <Setter Property="MinHeight" Value="40" />
+    <Setter Property="MinHeight" Value="30" />
   </Style>
   <Style Selector="Window.dialog RadioButton">
-    <Setter Property="MinHeight" Value="40" />
+    <Setter Property="MinHeight" Value="30" />
   </Style>
   <Style Selector="Window.dialog Button.gross">
     <Setter Property="MinWidth" Value="120" />
@@ -485,11 +490,11 @@
   <Style Selector="Border.dialogfuss">
     <Setter Property="BorderBrush" Value="{StaticResource Linie}" />
     <Setter Property="BorderThickness" Value="0,1,0,0" />
-    <Setter Property="Padding" Value="0,16,0,0" />
+    <Setter Property="Padding" Value="0,10,0,0" />
     <Setter Property="Margin" Value="0,8,0,0" />
   </Style>
   <Style Selector="TextBlock.frage">
-    <Setter Property="FontSize" Value="15" />
+    <Setter Property="FontSize" Value="14" />
     <Setter Property="FontWeight" Value="SemiBold" />
   </Style>
   <!--
@@ -521,9 +526,9 @@
     <Setter Property="HorizontalAlignment" Value="Stretch" />
     <Setter Property="HorizontalContentAlignment" Value="Left" />
     <Setter Property="VerticalContentAlignment" Value="Center" />
-    <Setter Property="MinHeight" Value="40" />
-    <Setter Property="Padding" Value="14,0" />
-    <Setter Property="CornerRadius" Value="10" />
+    <Setter Property="MinHeight" Value="30" />
+    <Setter Property="Padding" Value="10,0" />
+    <Setter Property="CornerRadius" Value="8" />
     <Setter Property="FontWeight" Value="SemiBold" />
     <Setter Property="Background" Value="{StaticResource AkzentHell}" />
     <Setter Property="BorderBrush" Value="#9DB5D3" />
@@ -542,10 +547,10 @@
   </Style>
   <!-- Umschalter (Segmente) und Schließen-Knopf der Ansichten -->
   <Style Selector="ToggleButton.segment">
-    <Setter Property="MinHeight" Value="40" />
-    <Setter Property="Padding" Value="14,0" />
+    <Setter Property="MinHeight" Value="30" />
+    <Setter Property="Padding" Value="10,0" />
     <Setter Property="CornerRadius" Value="8" />
-    <Setter Property="FontSize" Value="13" />
+    <Setter Property="FontSize" Value="12" />
     <Setter Property="VerticalContentAlignment" Value="Center" />
     <Setter Property="Background" Value="Transparent" />
     <Setter Property="BorderThickness" Value="0" />
@@ -564,10 +569,10 @@
   </Style>
   <!-- Dasselbe als Optionsfelder (genau eines gewählt, z. B. das Verfahren im Kopf) -->
   <Style Selector="RadioButton.segment">
-    <Setter Property="MinHeight" Value="40" />
-    <Setter Property="Padding" Value="14,0" />
+    <Setter Property="MinHeight" Value="30" />
+    <Setter Property="Padding" Value="10,0" />
     <Setter Property="CornerRadius" Value="8" />
-    <Setter Property="FontSize" Value="13" />
+    <Setter Property="FontSize" Value="12" />
     <Setter Property="Background" Value="Transparent" />
     <Setter Property="Foreground" Value="{StaticResource Tinte2}" />
     <Setter Property="Cursor" Value="Hand" />
@@ -586,15 +591,19 @@
     <Setter Property="Foreground" Value="{StaticResource AkzentDunkel}" />
     <Setter Property="FontWeight" Value="SemiBold" />
   </Style>
+  <Style Selector="RadioButton.segment:checked:disabled /template/ ContentPresenter#PART_ContentPresenter">
+    <Setter Property="Background" Value="{StaticResource Flaeche}" />
+    <Setter Property="Foreground" Value="{StaticResource AkzentDunkel}" />
+  </Style>
   <Style Selector="RadioButton.segment:pointerover:not(:checked)">
     <Setter Property="Background" Value="#E2E0DA" />
     <Setter Property="Foreground" Value="{StaticResource Tinte}" />
   </Style>
   <Style Selector="Button.schliessen">
-    <Setter Property="Width" Value="40" />
-    <Setter Property="Height" Value="40" />
+    <Setter Property="Width" Value="30" />
+    <Setter Property="Height" Value="30" />
     <Setter Property="Padding" Value="0" />
-    <Setter Property="CornerRadius" Value="10" />
+    <Setter Property="CornerRadius" Value="8" />
     <Setter Property="Background" Value="Transparent" />
     <Setter Property="BorderThickness" Value="0" />
     <Setter Property="HorizontalContentAlignment" Value="Center" />

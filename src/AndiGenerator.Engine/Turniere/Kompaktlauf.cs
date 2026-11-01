@@ -27,8 +27,12 @@ internal sealed class Kompaktlauf(Kompaktmodell modell, Kompaktplanoptionen opti
     private readonly List<string> optimierungshinweise = [];
     private readonly Stopwatch meldeuhr = Stopwatch.StartNew();
     private readonly Lock sperre = new();
+
+    /// <summary>Je laufendem Schritt der gezielten Konstruktion die Zeile zum Stand der Optimierung.</summary>
+    private readonly System.Collections.Concurrent.ConcurrentDictionary<int, string> laufende = new();
     private long geprueft;
     private long letzteMeldung = -1000;
+    private int laufendeNummer;
     private int stufe;
     private int phasen = 1;
     private int phase;
@@ -174,7 +178,6 @@ internal sealed class Kompaktlauf(Kompaktmodell modell, Kompaktplanoptionen opti
     private void Optimieren(IGanzzahlloeser loeser)
     {
         var optimierung = new Kompaktoptimierung(modell, loeser);
-        TimeSpan beginn = steuerung.Laufzeit;
         TimeSpan gesamt = optionen.ExaktDauer;
         int kerne = Math.Max(1, optionen.Threads);
         bool gruppen = modell.Gruppen.Count > 0;
@@ -183,27 +186,51 @@ internal sealed class Kompaktlauf(Kompaktmodell modell, Kompaktplanoptionen opti
 
         Kompaktloesung? Schritt(string text, Kompaktauftrag auftrag, Kompaktloesung? start, double anteilZeit, int parallel)
         {
+            // Jeder Schritt hat seinen Anteil der Zeit, auch wenn ein früherer länger gerechnet hat, weil er noch voranging.
             TimeSpan seit = steuerung.Laufzeit;
-            TimeSpan grenze = TimeSpan.FromTicks(Math.Min((long)(gesamt.Ticks * anteilZeit), (gesamt - (seit - beginn)).Ticks));
+            TimeSpan grenze = TimeSpan.FromTicks((long)(gesamt.Ticks * anteilZeit));
+            parallel = Math.Max(1, parallel);
             if (grenze <= TimeSpan.Zero || Abbruch.IsCancellationRequested)
             {
                 Interlocked.Increment(ref schritt);
                 return null;
             }
 
-            bool Aufhoeren()
+            // Über die Zeit des Schritts hinaus nur, solange HiGHS vorankommt, höchstens bis zum Anteil der Höchstdauer.
+            TimeSpan hoechstens = optionen.ExaktHoechstens is TimeSpan h ? TimeSpan.FromTicks(Math.Max(grenze.Ticks, (long)(h.Ticks * anteilZeit))) : grenze;
+            var verlauf = new Schrittverlauf(text, auftrag.KmBezug is null && !auftrag.MitGruppen, auftrag.Ausser.Count > 0, optimierung.KmJePunkt(auftrag), optionen.Stillstand);
+            int nummer = Interlocked.Increment(ref laufendeNummer);
+
+            // Pläne, die der Löser unterwegs findet, kommen gleich in die Auswahl (Peter, 26.10.2026: schon während der
+            // Rechnung ansehen); aufgenommen wird beim nächsten Rückfragen, nicht im Rückruf des Lösers.
+            Kompaktloesung? unterwegs = null;
+            void Gefunden(Kompaktloesung plan, double wert)
             {
-                steuerung.Warten();
-                TimeSpan verstrichen = steuerung.Laufzeit - seit;
-                double anteil = (Volatile.Read(ref schritt) + Math.Min(1, verstrichen / grenze)) / schritte;
-                Melden(string.Create(Deutsch, $"{text} ({verstrichen.TotalSeconds:N0} s, {parallel} Läufe parallel) …"), anteil);
-                return Abbruch.IsCancellationRequested || verstrichen > grenze;
+                verlauf.Plan(plan, wert);
+                Volatile.Write(ref unterwegs, plan);
             }
 
-            // HiGHS bekommt die Zeit des Schritts mit Reserve als harte Grenze: Sie greift auch in Phasen ohne Rückfrage
+            bool Aufhoeren()
+            {
+                if (Interlocked.Exchange(ref unterwegs, null) is Kompaktloesung neu)
+                {
+                    Aufnehmen(neu);
+                }
+
+                steuerung.Warten();
+                TimeSpan verstrichen = steuerung.Laufzeit - seit;
+                verlauf.Zeit(verstrichen);
+                double anteil = (Volatile.Read(ref schritt) + Math.Min(1, verstrichen / grenze)) / schritte;
+                laufende[nummer] = verlauf.Zeile(verstrichen > grenze ? hoechstens - verstrichen : null);
+                Melden(string.Create(Deutsch, $"{text} ({verstrichen.TotalSeconds:N0} s, {parallel} Läufe parallel) …"), anteil);
+                return Abbruch.IsCancellationRequested || verstrichen > hoechstens || (verstrichen > grenze && verlauf.Steht);
+            }
+
+            // HiGHS bekommt die Höchstzeit des Schritts mit Reserve als harte Grenze: Sie greift auch in Phasen ohne Rückfrage
             // (Stopp, Fortschritt); die Reserve deckt kurze Pausen, in denen die Uhr des Lösers weiterläuft.
-            TimeSpan hart = grenze + TimeSpan.FromTicks(Math.Max(TimeSpan.FromSeconds(15).Ticks, grenze.Ticks / 2));
-            (Kompaktloesung? l, bool optimal) = optimierung.Suchen(auftrag, start, Math.Max(1, parallel), Aufhoeren, hart);
+            TimeSpan hart = hoechstens + TimeSpan.FromTicks(Math.Max(TimeSpan.FromSeconds(15).Ticks, hoechstens.Ticks / 2));
+            (Kompaktloesung? l, bool optimal, double luecke) = optimierung.Suchen(auftrag, start, parallel, Aufhoeren, hart, verlauf.Aufnehmen, Gefunden);
+            laufende.TryRemove(nummer, out _);
             Interlocked.Increment(ref schritt);
             if (l is null)
             {
@@ -211,7 +238,7 @@ internal sealed class Kompaktlauf(Kompaktmodell modell, Kompaktplanoptionen opti
             }
 
             Aufnehmen(l);
-            string beweis = optimal ? "bestmöglich" : "nicht bewiesen bestmöglich (Zeit)";
+            string beweis = verlauf.Ergebnis(l, optimal, luecke);
             lock (sperre)
             {
                 optimierungshinweise.Add(string.Create(Deutsch, $"{text}: {l.Km:N0} km, {l.Vierer}× 4er, {l.Dreier}× 3er, {l.Einzel} Einzel, {l.Verstoesse} Verstöße – {beweis}."));
@@ -223,7 +250,13 @@ internal sealed class Kompaktlauf(Kompaktmodell modell, Kompaktplanoptionen opti
         // Startpunkte aus der Zufallssuche, damit der Löser sofort einen vollständigen Plan hat.
         Kompaktloesung? vierer = null;
         Kompaktloesung? kurz = null;
-        if (modell.NurViererMoeglich)
+        if (modell.NurViererMoeglich && kerne == 1)
+        {
+            // Mit nur einem Kern für die Suche (Rechner mit zwei Kernen) nacheinander: Der zweite Kern bleibt der Oberfläche.
+            vierer = Schritt("Kürzester Plan nur aus 4er-Spieltagen", new Kompaktauftrag(null, true, false, false, false), Zufallsplan(true), 0.25, 1);
+            kurz = Schritt("Kürzester Plan", new Kompaktauftrag(null, false, false, false, false), Zufallsplan(false), 0.25, 1);
+        }
+        else if (modell.NurViererMoeglich)
         {
             Parallel.Invoke(
                 () => vierer = Schritt("Kürzester Plan nur aus 4er-Spieltagen", new Kompaktauftrag(null, true, false, false, false), Zufallsplan(true), 0.25, kerne / 2),
@@ -253,7 +286,8 @@ internal sealed class Kompaktlauf(Kompaktmodell modell, Kompaktplanoptionen opti
         // Zugleich: Spitzen- und Abstiegsspieltag (falls nötig) und zwei weitere Pläne mit anderen Spieltagen.
         bool mitGruppen = gruppen && best.GruppenFehlen > 0;
         int teile = mitGruppen ? 3 : 2;
-        Parallel.Invoke(
+        Action[] letzte =
+        [
             () =>
             {
                 if (mitGruppen && Schritt("Plan mit Spitzen- und Abstiegsspieltag", punkte with { GruppenPflicht = true }, null, 0.15, kerne / teile) is Kompaktloesung g)
@@ -262,7 +296,18 @@ internal sealed class Kompaktlauf(Kompaktmodell modell, Kompaktplanoptionen opti
                 }
             },
             () => Schritt("Weiterer Plan mit anderen Spieltagen", punkte with { Ausser = [best] }, kurz, 0.15, kerne / teile),
-            () => Schritt("Weiterer Plan mit anderen Spieltagen", punkte with { Ausser = [best, .. new[] { kurz }.OfType<Kompaktloesung>()] }, vierer, 0.15, kerne - (2 * (kerne / teile))));
+            () => Schritt("Weiterer Plan mit anderen Spieltagen", punkte with { Ausser = [best, .. new[] { kurz }.OfType<Kompaktloesung>()] }, vierer, 0.15, kerne - (2 * (kerne / teile))),
+        ];
+
+        // Weniger Kerne als Schritte: nacheinander, damit nicht mehr Läufe rechnen, als Kerne für die Suche frei sind.
+        if (kerne < teile)
+        {
+            Array.ForEach(letzte, schritt => schritt());
+        }
+        else
+        {
+            Parallel.Invoke(letzte);
+        }
     }
 
     /// <summary>Ein Plan der Zufallssuche ohne Verstöße als Startpunkt für den Löser (höchstens zwei Sekunden), oder <c>null</c>.</summary>
@@ -300,7 +345,8 @@ internal sealed class Kompaktlauf(Kompaktmodell modell, Kompaktplanoptionen opti
 
         int schritt = Math.Min(phase, phasen - 1);
         double anteil = Math.Clamp((schritt + Math.Clamp(anteilImSchritt, 0, 1)) / phasen, 0, 1);
-        fortschritt(new Kompaktfortschritt(string.Create(Deutsch, $"Schritt {schritt + 1} von {phasen} – {text}"), anteil));
+        List<string> stand = laufende.OrderBy(e => e.Key).Select(e => e.Value).ToList();
+        fortschritt(new Kompaktfortschritt(string.Create(Deutsch, $"Schritt {schritt + 1} von {phasen} – {text}"), anteil) { Optimierung = stand });
     }
 
     /// <summary>

@@ -9,7 +9,7 @@ namespace AndiGenerator.Engine.Kern;
 
 /// <summary>
 /// Anzahlen für Kriterien, die im Original nur Kosten haben (nicht im Original): Spielverteilung, Länge und Überlappung der
-/// Spieltage. Sie erklären die Kosten und gehen in die C-Verstöße des Automodus ein; die Kostentabelle bleibt wie im Original.
+/// Spieltage; dazu der Zuschlag, mit dem der Wechsel H/A steigend zählt. Sie erklären die Kosten und gehen in die C-Verstöße des Automodus ein; die Kostentabelle bleibt wie im Original.
 /// </summary>
 internal sealed partial class KernPlan
 {
@@ -47,6 +47,12 @@ internal sealed partial class KernPlan
             }
         }
 
+        int[] zuschlag = new int[D.N];
+        for (int t = 0; t < D.N; t++)
+        {
+            zuschlag[t] = Wechselzuschlag(t);
+        }
+
         (int laenge, int ueberlappung, bool letzteLaenge, bool letzteUeberlappung, List<string> spieltage, List<string> letzter, List<int> zuLang, List<int> ueberlappend) = Spieltage(meldungen);
         return new Zusatzverstoesse(
             verteilung,
@@ -59,20 +65,24 @@ internal sealed partial class KernPlan
             letzter,
             pausen.Select(p => (IReadOnlyList<(double Start, double Ende)>)p).ToArray(),
             zuLang,
-            ueberlappend);
+            ueberlappend,
+            zuschlag);
     }
 
     /// <summary>
     /// Die Anzahlen von <see cref="ZusatzZaehlen"/> ohne Meldungen und Listen (für die Suche, die sie bei jedem Plan braucht):
-    /// Pausen aller Mannschaften, zu lange und überlappende Spieltage, der letzte zu lang bzw. überlappend.
+    /// Pausen aller Mannschaften, zu lange und überlappende Spieltage, der letzte zu lang bzw. überlappend, Verstöße gegen die
+    /// Zuschlag zum Wechsel H/A (steigend).
     /// </summary>
-    public (int Pausen, int Laenge, int Ueberlappung, bool LetzteLaenge, bool LetzteUeberlappung) ZusatzAnzahlen()
+    public (int Pausen, int Laenge, int Ueberlappung, bool LetzteLaenge, bool LetzteUeberlappung, int Wechselzuschlag) ZusatzAnzahlen()
     {
         int pausen = 0;
+        int zuschlag = 0;
         int spieltage = 0;
         for (int t = 0; t < D.N; t++)
         {
             pausen += Pausen(t);
+            zuschlag += Wechselzuschlag(t);
             spieltage = Math.Max(spieltage, SpieleAnzahl[t]);
         }
 
@@ -118,7 +128,45 @@ internal sealed partial class KernPlan
             bisherEnde = Math.Max(bisherEnde, DelphiDatum.Trunc(max));
         }
 
-        return (pausen, laenge, ueberlappung, letzteLaenge, letzteUeberlappung);
+        return (pausen, laenge, ueberlappung, letzteLaenge, letzteUeberlappung, zuschlag);
+    }
+
+    /// <summary>
+    /// Der Zuschlag zum Wechsel H/A einer Mannschaft (siehe <see cref="Zusatzverstoesse.Wechselzuschlag"/>): dieselbe Folge wie
+    /// <c>WechselHeimAuswaerts</c> (aktive Spiele, gekoppelte zählen nicht), je weiteres Spiel gleicher Art die Länge der Folge
+    /// minus 1.
+    /// </summary>
+    private int Wechselzuschlag(int t)
+    {
+        int gleich = 0;
+        int zuschlag = 0;
+        bool letztesHeim = false;
+        int[] liste = Spiele[t];
+        for (int i = 0; i < SpieleAnzahl[t]; i++)
+        {
+            if (!Aktiv(liste[i]))
+            {
+                continue;
+            }
+
+            bool heim = Heim[liste[i]] == t;
+            if (i != 0)
+            {
+                if (heim != letztesHeim)
+                {
+                    gleich = 0;
+                }
+                else if (liste[i - 1] != Gekoppelt(t, i))
+                {
+                    gleich++;
+                    zuschlag += gleich - 1;
+                }
+            }
+
+            letztesHeim = heim;
+        }
+
+        return zuschlag;
     }
 
     /// <summary>

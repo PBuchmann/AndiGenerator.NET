@@ -1,6 +1,6 @@
 # AndiGenerator.NET – Anleitung
 
-AndiGenerator.NET erstellt Spielpläne für Tischtennis-Staffeln. Grundlage sind die Terminwünsche, die die Vereine in click-TT gemeldet haben. Das Programm plant auf zwei Arten: **normale Runden** optimiert es so lange, bis Sie zufrieden sind (Kapitel [5](#5-normale-runden-optimieren)); für Klassen, die eine Halbrunde in **Kompaktspieltagen** spielen, baut es Pläne aus 3er- und 4er-Spieltagen in einer Halle (Kapitel [6](#6-kompaktspieltage-planen)). In beiden Fällen exportiert es das Ergebnis als CSV-Datei für den Import in click-TT. Wer mag, lässt eine KI-Anwendung das Programm bedienen (Kapitel [10](#10-steuerung-durch-eine-ki-mcp)).
+AndiGenerator.NET erstellt Spielpläne für Tischtennis-Staffeln. Grundlage sind die Terminwünsche, die die Vereine in click-TT gemeldet haben. Das Programm plant auf zwei Arten: **normale Runden** optimiert es so lange, bis Sie zufrieden sind (Kapitel [5](#5-normale-runden-optimieren)); für Klassen, die eine Halbrunde in **Kompaktspieltagen** spielen, baut es Pläne aus 3er- und 4er-Spieltagen in einer Halle (Kapitel [6](#6-kompaktspieltage-planen)). In beiden Fällen exportiert es das Ergebnis als CSV-Datei für den Import in click-TT. Wer einfach nur einen guten Plan möchte, nimmt den **normalen Modus** (Abschnitt [3.6](#36-der-normale-modus)): Dateien ablegen, planen lassen, übernehmen. Wer mag, lässt eine KI-Anwendung das Programm bedienen (Kapitel [10](#10-steuerung-durch-eine-ki-mcp)).
 
 AndiGenerator.NET ist die Weiterentwicklung des **AndiGenerators** von Andreas Hofmann. Die Optimierung normaler Runden, die Bewertung der Pläne und die Dateiformate stammen aus seinem Programm und rechnen genauso. Neu sind die Oberfläche, die Bedienung und die Planung von Kompaktspieltagen. Diese Anleitung beschreibt die neue Oberfläche; die fachlichen Abschnitte zu normalen Runden folgen inhaltlich der Anleitung des Originals.
 
@@ -8,7 +8,7 @@ AndiGenerator.NET ist die Weiterentwicklung des **AndiGenerators** von Andreas H
 
 1. [Allgemeines](#1-allgemeines) – [Was ist anders als im Original?](#11-was-ist-anders-als-im-original)
 2. [Installation](#2-installation)
-3. [Erste Schritte](#3-erste-schritte) – Staffel öffnen und einrichten, [Zwei Arten zu planen](#35-zwei-arten-zu-planen)
+3. [Erste Schritte](#3-erste-schritte) – Staffel öffnen und einrichten, [Zwei Arten zu planen](#35-zwei-arten-zu-planen), [Der normale Modus](#36-der-normale-modus)
 4. [Das Hauptfenster](#4-das-hauptfenster)
 5. [Normale Runden optimieren](#5-normale-runden-optimieren)
    - [Der Weg zum Plan](#51-der-weg-zum-plan) · [Die Kacheln](#52-die-kacheln) · [Die Generierung steuern](#53-die-generierung-steuern) · [Der Automodus](#54-der-automodus) · [Der Leitstand](#55-der-leitstand) · [Der Verlauf](#56-der-verlauf)
@@ -153,7 +153,7 @@ Die Datei enthält die Terminwünsche aller Mannschaften und die schon terminier
 
 Auf der Startseite **click-TT-Datei öffnen** wählen, oder links **Öffnen**. Im Dateidialog können Sie zusammen mit der XML-Datei gleich die beiden weiteren Downloads der Staffel markieren (mit gedrückter **Strg**-Taste): die **Mannschaftsmeldung (CSV)** und den Bericht **Terminwünsche (PDF)**. Das Programm übernimmt jede dieser Dateien, wenn alle Mannschaften der Staffel darin vorkommen – genau so, als hätten Sie sie in der Einrichtung unter *Daten aus click-TT ergänzen* geladen und übernommen (die Mannschaftsmeldung auch als Setzliste); mit beiden Dateien ist dieser Punkt dann schon erledigt. Passt eine Datei nicht zur Staffel (z. B. aus einer anderen Klasse), bleibt sie unberücksichtigt, und die Einrichtung sagt, welche Mannschaften fehlen. Zuletzt geöffnete Staffeln stehen in der Liste darunter und öffnen sich mit einem Klick; mit dem **×** am Ende einer Zeile entfernen Sie einen Eintrag aus der Liste (die Datei selbst bleibt erhalten).
 
-Zum Ausprobieren ohne eigene Daten stehen darunter **Beispiele zum Ausprobieren**: die fünf Testpläne aus dem Original (Saison 2015/16) und zwei Klassen mit Kompaktspieltagen (Jugend 19 Hessenliga und Jugend 19 NRW-Liga 1; Mannschaften aus der Saison 2026/27, Termine und Hallen erfunden). Ein Klick öffnet eine Kopie im Datenordner (Unterordner `Beispiele`); Ihre Änderungen bleiben dort erhalten, und beim nächsten Klick öffnet sich wieder diese Kopie. Um ein Beispiel wieder im Ursprungszustand zu haben, löschen Sie die Kopie im Explorer.
+Zum Ausprobieren ohne eigene Daten stehen darunter **Beispiele zum Ausprobieren**: die fünf Testpläne aus dem Original (Saison 2015/16) und zwei Klassen mit Kompaktspieltagen (Jugend 19 Hessenliga und Jugend 19 NRW-Liga 1; Mannschaften aus der Saison 2026/27, Termine und Hallen erfunden). Die beiden Klassen mit Kompaktspieltagen bringen einen fertig optimierten Plan mit (mit HiGHS bis zum Ende gerechnet): Er steht in der Ansicht **Kompaktspieltage** als gemerkter Plan „Beispielplan (mit HiGHS optimiert)“ neben den Varianten. Ein Klick öffnet eine Kopie im Datenordner (Unterordner `Beispiele`); Ihre Änderungen bleiben dort erhalten, und beim nächsten Klick öffnet sich wieder diese Kopie. Um ein Beispiel wieder im Ursprungszustand zu haben, löschen Sie die Kopie im Explorer.
 
 Ohne click-TT können Sie mit **Neu** eine leere Plandatei anlegen und Liga, Mannschaften und Termine von Hand eingeben. Die Eingabemasken sind dafür aber eher zum Korrigieren gedacht als zum Erfassen einer ganzen Staffel.
 
@@ -209,6 +209,34 @@ Nach der Einrichtung plant das Programm die Staffel auf eine von zwei Arten. Wel
 | **Hauptansichten** | Kosten, Qualität, Meldungen, Leitstand, Verlauf | Kompaktspieltage: Pläne, Raster, Karte, Spieltage |
 | **Beschrieben in** | Kapitel [5](#5-normale-runden-optimieren) | Kapitel [6](#6-kompaktspieltage-planen) |
 
+### 3.6 Der normale Modus
+
+Beim ersten Start zeigt das Programm den **normalen Modus**: drei Seiten, die ohne Vorwissen zu einem guten Plan führen. Unten rechts in der Leiste wechselt **Normal | Experte** in den **Expertenmodus** – die Oberfläche, die der Rest dieser Anleitung beschreibt. Das Programm merkt sich die Wahl und startet beim nächsten Mal wieder so; dieselbe Leiste unten führt im Expertenmodus mit **Normal** zurück. Kompaktspieltage plant der normale Modus noch nicht – dafür in den Expertenmodus wechseln.
+
+**1. Dateien.** Die Dateien aus click-TT auf die Ablage ziehen oder **Dateien auswählen …**: die XML-Datei (notwendig), dazu am besten die Terminmeldungen als PDF (Hallen und Adressen, Bemerkungen der Vereine) und die Mannschaftsmeldung als CSV (Setzliste nach Spielstärke). Die Liste zeigt, was geladen ist; darunter steht, was das Programm geprüft hat. Offene Punkte der Einrichtung übernimmt es mit seinen Vorschlägen – wer sie selbst ansehen will, wählt **Einrichtung prüfen (für Fortgeschrittene)**. Gibt es schon einen Plan aus einem früheren Lauf, lässt er sich mit **Ansehen** gleich öffnen. **Plan erstellen** startet die Planung.
+
+![Normaler Modus: Dateien geladen](Anleitung/Bilder/61-normal-dateien.png)
+
+**2. Planung.** Das Programm rechnet mit allen Kernen bis auf einen: Erst sorgt HiGHS für die Pflicht (**Muss**) und die Wünsche der Vereine (**Soll**: Sperrtermine, Ausweichtermine, Koppeltermine), dann glättet es den **Feinschliff** (Wechsel Heim/Auswärts, Abstände, Spieltage). Je Kriterium zeigt ein Balken die Verstöße des besten Plans: Der **schraffierte** Teil ist unvermeidbar – so viele Verstöße hat jeder mögliche Plan, das hat HiGHS bewiesen –, nur der **farbige** Teil lässt sich noch verbessern. Steht „bestmöglich“ daneben, geht es bei diesem Kriterium nicht besser. Gibt es einen gespeicherten Plan aus einem früheren Lauf, markiert ein **senkrechter Strich** dessen Wert. Rechts stehen das Urteil, die Anzeige **Suchraum** und die **größten Probleme** des besten Plans: Namen nennt das Programm nur, wenn höchstens drei Mannschaften betroffen sind, sonst steht ein allgemeiner Satz („Bei vielen Mannschaften …“).
+
+Die Anzeige **Suchraum** zeigt, wie die Suche vorankommt. Oben stehen die **beste Lösung** (Schönheitsfehler im Feinschliff), die **bewiesene Grenze**, **noch zu holen** und die Zahl der **Verbesserungen**. Rechts zeichnet sich die Treppenkurve des besten Plans: Jeder grüne Punkt ist eine Verbesserung, dann pulst der Rahmen grün. Gestrichelt liegt die von HiGHS bewiesene Grenze, der Streifen dazwischen ist noch zu holen; im Feinschliff ist die Grenze oft noch unbekannt, dann steht dort „noch unbekannt“. Die Fläche links ist ein Sinnbild: Sie zieht sich mit jeder Verbesserung zusammen, der schraffierte Kern ist unvermeidbar. Kurve und Zahlen sind echt.
+
+**Wichtigkeit einstellen:** Links neben jedem Balken im Feinschliff stehen drei Symbole (der Hinweis beim Darüberfahren erklärt sie): **↓** „nicht so wichtig“ – das Kriterium darf schlechter werden, wenn dafür anderes besser wird –, **◎** „so gut wie möglich optimieren“ – auch wenn dafür anderes etwas schlechter wird – und **=** „wie vom Programm vorgesehen“, das ein starkes Optimieren oder Zurückstellen wieder aufhebt. Die Einstellung gilt sofort für die laufende Suche und bleibt bei **Weiter** und **Neu starten** erhalten. Technisch wird das Gewicht des Kriteriums mit 0,15 bzw. 6 multipliziert; ein Kriterium, das als „nicht so wichtig“ gilt, steht nicht mehr unter den größten Problemen. Muss und Soll lassen sich nicht zurückstellen.
+
+**Reiter:** Wie im Ergebnis gibt es auf der Planungsseite die Reiter **Übersicht**, **Terminplan** und **Diagramme**. Terminplan und Diagramme zeigen den besten Plan bis jetzt (er wird dazu als „Bester Plan (normaler Modus)“ gespeichert, sofern er besser ist als der bisherige) und aktualisieren sich bei jeder Verbesserung.
+
+Oben stehen **Pause**, **Neu starten** und **Beenden**. **Pause** hält die Suche an (der beste Plan wird gesichert) und wird zu **Weiter**; Weiter startet eine neue Suche, der Verlauf und der beste Plan bleiben. **Neu starten** beginnt von vorn mit leerem Verlauf. **Beenden** schließt die Planung ab und zeigt das Ergebnis; ohne Verbesserung endet sie nach drei Minuten von selbst (nach 45 Sekunden ohne Verbesserung sagt ein Hinweis, dass sich das Warten kaum noch lohnt). In allen Fällen bleibt der beste Plan erhalten und wird nur durch einen besseren ersetzt.
+
+![Normaler Modus: Planung mit bewiesenen Grenzen](Anleitung/Bilder/62-normal-planung.png)
+
+![Normaler Modus: Terminplan schon während der Planung](Anleitung/Bilder/65-normal-planung-terminplan.png)
+
+**3. Ergebnis.** Das **Kurz-Fazit** sagt in einem Satz, wie gut der Plan ist und wo er hakt; darunter steht, was Sie den Vereinen sagen sollten (z. B. Spiele auf Sperrterminen) und die größten Schönheitsfehler (Feinschliff). Die Reiter **Terminplan** und **Diagramme** zeigen den Plan wie im Expertenmodus. Rechts: **Für click-TT exportieren**, **Für die Vereine drucken (PDF)** und **Nochmal planen**.
+
+**Der beste Plan bleibt immer erhalten.** Er liegt als gemerkter Plan „Bester Plan (normaler Modus)“ bei der Staffel und wird nur durch einen besseren ersetzt – erst zählt die Pflicht, dann die Wünsche, dann der Feinschliff. **Nochmal planen** kann ihn also nur verbessern. Ohne laufende Generierung zeigen die Ansichten den zuletzt gespeicherten Plan.
+
+![Normaler Modus: Ergebnis mit Kurz-Fazit](Anleitung/Bilder/63-normal-ergebnis.png)
+
 ## 4. Das Hauptfenster
 
 ![Hauptfenster während der Generierung](Anleitung/Bilder/03-hauptfenster.png)
@@ -224,13 +252,13 @@ Nach der Einrichtung plant das Programm die Staffel auf eine von zwei Arten. Wel
 
 Die Abschnitte *Staffel*, *Ansichten* und *Ausgabe* lassen sich mit einem Klick auf ihre Überschrift zu- und wieder aufklappen; so bleibt die Leiste auch auf kleinen Bildschirmen übersichtlich.
 
-**Oben** stehen links der Name der Staffel und die Datei, rechts die Steuerung: **Start mit**, **Plan merken**, **Verfahren** (Kostenoptimierung oder Automodus), **▶ Start** bzw. **⏸ Pausieren** und daneben **✕ Staffel schließen** (führt zur Startseite zurück) bzw. während der Generierung **■ Stopp**. Wählen Sie unter **Start mit** einen vorhandenen Plan (gemerkt oder aus click-TT), zeigen alle Ansichten und die Kacheln sofort diesen Plan – mit Kosten und Qualität –, ohne dass eine Optimierung startet und ihn verändert.
+**Oben** stehen links der Name der Staffel und die Datei, rechts die Steuerung: **Plan merken**, **Verfahren** (Kostenoptimierung oder Automodus), **▶ Start** bzw. **⏸ Pausieren** und daneben **✕ Staffel schließen** (führt zur Startseite zurück) bzw. während der Generierung **■ Stopp**. Alle Ansichten und die Kacheln zeigen den aktuell angezeigten Plan – mit Kosten und Qualität –, ohne dass eine Optimierung startet und ihn verändert.
 
 Darunter stehen **Kacheln** mit dem Stand der Generierung (Abschnitt [5.2](#52-die-kacheln)).
 
 Im **Kompaktmodus** sieht das Hauptfenster etwas anders aus: Die Ansicht *Kompaktspieltage* ist die Hauptansicht, *Kosten*, *Qualität* und *Meldungen* sowie die Wahl des Verfahrens entfallen, und ▶ berechnet die Pläne der Kompaktspieltage (Abschnitt [6.3](#63-der-kompaktmodus)).
 
-Den **Hauptbereich** füllen die Ansichten. Jede Ansicht öffnet sich als Reiter; Sie können mehrere öffnen, zwischen ihnen wechseln, sie per Maus nebeneinander anordnen und mit dem **×** am Reiter schließen. In vielen Ansichten vergrößert oder verkleinert **Strg + Mausrad** (auf dem Mac auch **⌘ + Mausrad**, oder der Zoomregler) die Darstellung – auf einem Touchbildschirm oder Touchpad auch zwei Finger, die Sie auseinander- oder zusammenschieben.
+Den **Hauptbereich** füllen die Ansichten. Jede Ansicht öffnet sich als Reiter; Sie können mehrere öffnen, zwischen ihnen wechseln, sie per Maus nebeneinander anordnen und mit dem **×** am Reiter schließen. In vielen Ansichten vergrößert oder verkleinert **Strg + Mausrad** (auf dem Mac auch **⌘ + Mausrad**) die Darstellung – auf einem Touchbildschirm oder Touchpad auch zwei Finger, die Sie auseinander- oder zusammenschieben. Dasselbe geht mit **Strg + Plus**, **Strg + Minus** und **Strg + 0** (100 %) oder über die Schaltflächen **− 100 % +** unten rechts in der Leiste, die auch die aktuelle Vergrößerung zeigt. Im normalen Modus vergrößern sich Terminplan und Diagramme des besten Plans.
 
 Ganz unten zeigt die **Statuszeile** den Stand in einer Zeile.
 
@@ -261,7 +289,7 @@ Passt der Plan, **pausieren** Sie und exportieren ihn mit **Für click-TT export
 
 #### Schritt für Schritt: Kostenoptimierung
 
-1. **Verfahren und Ausgangsplan wählen** – Wählen Sie oben rechts unter „Verfahren“ die Kostenoptimierung. Unter „Start mit“ legen Sie fest, wovon die Suche ausgeht: von einem leeren Plan, dem Plan aus click-TT oder einem gemerkten Plan. (Abschnitt 5.1)
+1. **Verfahren wählen** – Wählen Sie oben rechts unter „Verfahren“ die Kostenoptimierung. Gestartet wird immer mit einem leeren Plan, wie im Original. (Abschnitt 5.1)
 2. **Generierung starten** – Der blaue Knopf ▶ startet die Suche. Sie rechnet mit allen Kernen bis auf einen und zeigt laufend den besten Plan; nach wenigen Sekunden steht ein erster Plan. (Abschnitt 5.3)
 3. **Kacheln lesen** – Die Kacheln zeigen die Gesamtkosten des besten Plans, ob die Pflichtregeln (Stufe A) eingehalten sind und wie oft der Plan besser wurde. Solange Verbesserungen schnell kommen: einfach rechnen lassen. (Abschnitt 5.2)
 4. **Teuerste Kosten finden** – In der Ansicht „Kosten“ stehen die teuersten Mannschaften und Kostenarten links oben; je röter eine Zelle, desto mehr kostet sie. Ein Klick auf eine Zelle zeigt rechts, was genau verletzt ist. (Abschnitt 5.7)
@@ -269,7 +297,7 @@ Passt der Plan, **pausieren** Sie und exportieren ihn mit **Für click-TT export
 6. **Gewichtung anpassen** – Stört ein Verstoß, heben Sie seine Gewichtung an: in der Kostenansicht im Detailfeld rechts (Kostenart, Mannschaft oder eine Zelle) oder in den Einstellungen. Ändern Sie immer nur eine Gewichtung; die laufende Suche übernimmt sie sofort. (Abschnitt 5.10)
 7. **Fortschritt beobachten** – Die Kachel „Verbesserungen“ öffnet den Verlauf, „Berechnete Pläne“ den Leitstand. Wird die Kurve flach und kommen kaum noch Verbesserungen, bringt längeres Rechnen wenig. (Abschnitt 5.6)
 8. **Qualität und Diagramme prüfen** – Die Ansicht „Qualität“ zeigt, ob die Pflichtregeln eingehalten sind und wie viele Verstöße je Kriterium bleiben; die Diagramme zeigen Spieltage, Wechsel Heim/Auswärts und Spielverteilung auf einen Blick. (Abschnitt 5.8)
-9. **Anhalten und Plan merken** – Passt der Plan, halten Sie mit ⏸ an und merken ihn unter einem Namen. Gemerkte Pläne lassen sich später vergleichen oder als Ausgangsplan wählen. (Abschnitt 5.11)
+9. **Anhalten und Plan merken** – Passt der Plan, halten Sie mit ⏸ an und merken ihn unter einem Namen. Gemerkte Pläne lassen sich später vergleichen und wieder anzeigen. (Abschnitt 5.11)
 10. **Exportieren und drucken** – „Für click-TT exportieren“ schreibt den Plan als CSV-Datei für den Import in click-TT; „Drucken“ erzeugt ein PDF. (Abschnitt 8.1)
 
 #### Schritt für Schritt: Automodus
@@ -307,26 +335,18 @@ Im Automodus entfällt die Kachel *Pflichtregeln*; dafür wird *Berechnete Plän
 
 | Schaltfläche | Wirkung |
 |---|---|
-| **▶ Start** | Beginnt die Suche mit dem Ausgangsplan aus **Start mit** und dem gewählten Verfahren. |
+| **▶ Start** | Beginnt die Suche mit einem leeren Plan und dem gewählten Verfahren. |
 | **Verfahren** | Wählt das Verfahren für den nächsten Start; während der Generierung wechselt ein Klick zum anderen Verfahren, ab dem bisher besten Plan. |
 | **⏸ Pausieren** / **▮▶ Fortsetzen** (statt ▶ Start während der Generierung) | Hält die Suche an. Der beste Plan bleibt erhalten; so können Sie ihn in Ruhe ansehen oder exportieren. |
 | **Fortsetzen** | Setzt eine pausierte Suche mit ihrem besten Plan fort. |
-| **■ Stopp** (statt ✕ während der Generierung) | Beendet die Generierung. Ihr bester Plan bleibt erhalten (*bester Plan der letzten Generierung*); danach kann mit einem anderen Ausgangsplan neu gestartet werden. |
+| **■ Stopp** (statt ✕ während der Generierung) | Beendet die Generierung. Ihr bester Plan bleibt erhalten (*bester Plan der letzten Generierung*); danach startet die nächste Generierung wieder mit einem leeren Plan. |
 | **✕ Staffel schließen** (neben ▶ Start, solange keine Generierung läuft) | Schließt die Staffel (eine laufende Generierung wird beendet) und führt zur Startseite. |
 
-**Start mit** legt fest, wovon die nächste Generierung ausgeht:
+Eine Generierung **startet immer mit einem leeren Plan**, wie im Original. Die Ansichten und die Kacheln zeigen dagegen immer den **aktuell angezeigten Plan**. Den können Sie im Expertenmodus oben über **Plan** wählen, wenn keine Generierung läuft (gemerkte und gesicherte Pläne); eine Auswahl je Ansicht gibt es nicht: Während oder nach einer Generierung ist es der beste Plan der laufenden Generierung; sonst der zuletzt gespeicherte Plan (gesichert oder gemerkt, je nachdem, welcher jünger ist), und wenn es keinen gibt, der Plan aus click-TT. So sieht man beim Öffnen einer Staffel gleich Kosten und Qualität des gespeicherten Plans. Vorn liegt nach dem Öffnen die Ansicht **Terminwünsche** (Abschnitt [7.3](#73-terminwünsche)), damit man die Meldungen der Vereine gleich vor Augen hat.
 
-- **leerem Plan** – das Programm plant von Grund auf neu (Standard, solange noch kein Plan gespeichert ist);
-- **bestem Plan der letzten Generierung** – nach *Stopp* dort weitermachen;
-- **gesichertem Plan** – der automatisch gesicherte Plan (siehe unten);
-- **in click-TT vorhandenem Plan** – ein schon in click-TT eingetragener Plan wird verbessert;
-- **gemerktem Plan „…“** – ein früher gemerkter Plan (Abschnitt [5.11](#511-pläne-merken-und-vergleichen)).
+Eine Generierung startet immer mit einem leeren Plan. Eine laufende oder pausierte Generierung setzt ihren eigenen besten Plan fort, und die Ansichten zeigen diesen Plan.
 
-Beim Öffnen einer Staffel (normale Runde) steht unter *Start mit* der **zuletzt gespeicherte Plan** – gesichert oder gemerkt, je nachdem, welcher jünger ist –, sofern es schon einen gibt. Alle Ansichten und die Kacheln zeigen ihn sofort, und **▶ Start** optimiert mit ihm weiter; wer neu beginnen will, wählt *leerem Plan*. Vorn liegt nach dem Öffnen die Ansicht **Terminwünsche** (Abschnitt [7.3](#73-terminwünsche)), damit man die Meldungen der Vereine gleich vor Augen hat.
-
-Solange eine Generierung läuft oder pausiert ist, ist *Start mit* gesperrt: Eine laufende Generierung setzt immer ihren eigenen besten Plan fort. Für einen anderen Ausgangsplan zuerst **Stopp**.
-
-**Gesicherter Plan.** Je Staffel gibt es einen gesicherten Plan. Würde der aktuelle Plan verworfen – weil eine neue Generierung startet, die Staffel geschlossen, eine andere geöffnet oder das Programm beendet wird –, sichert das Programm ihn vorher: Gibt es noch keinen gesicherten Plan, geschieht das automatisch, und eine Meldung sagt es. Gibt es schon einen und hat er dieselben Begegnungen an denselben Tagen, meldet das Programm nur, dass beide identisch sind. Sonst fragt es, ob er durch den aktuellen ersetzt werden soll, und zeigt dazu beide nebeneinander: die Verstöße der Stufen A (mit den harten Fehlern), B und C, die Kosten und die einzelnen Kriterien, bei denen sie sich unterscheiden; der jeweils bessere Wert ist grün, und darunter steht, welcher Plan insgesamt besser ist (erst A, dann B, dann C, zuletzt die Kosten). Im Kompaktmodus vergleicht der Dialog stattdessen die Kennzahlen der Kompaktspieltage (Abschnitt [6.10](#610-pläne-sichern-und-merken)). Sie wählen **Aktuellen Plan sichern**, **Gesicherten Plan behalten** oder **Abbrechen** (dann unterbleibt der Neustart bzw. das Schließen). Der gesicherte Plan steht wie ein gemerkter unter **Start mit** und in der Planauswahl der Ansichten. Das Original kennt keine solche Sicherung; dort geht ein nicht gemerkter Plan beim Schließen verloren.
+**Gesicherter Plan.** Je Staffel gibt es einen gesicherten Plan. Würde der aktuelle Plan verworfen – weil eine neue Generierung startet, die Staffel geschlossen, eine andere geöffnet oder das Programm beendet wird –, sichert das Programm ihn vorher: Gibt es noch keinen gesicherten Plan, geschieht das automatisch, und eine Meldung sagt es. Gibt es schon einen und hat er dieselben Begegnungen an denselben Tagen, meldet das Programm nur, dass beide identisch sind. Sonst fragt es, ob er durch den aktuellen ersetzt werden soll, und zeigt dazu beide nebeneinander: die Verstöße der Stufen A (mit den harten Fehlern), B und C, die Kosten und die einzelnen Kriterien, bei denen sie sich unterscheiden; der jeweils bessere Wert ist grün, und darunter steht, welcher Plan insgesamt besser ist (erst A, dann B, dann C, zuletzt die Kosten). Im Kompaktmodus vergleicht der Dialog stattdessen die Kennzahlen der Kompaktspieltage (Abschnitt [6.10](#610-pläne-sichern-und-merken)). Sie wählen **Aktuellen Plan sichern**, **Gesicherten Plan behalten** oder **Abbrechen** (dann unterbleibt der Neustart bzw. das Schließen). Der gesicherte Plan wird wie ein gemerkter Plan angezeigt, sobald er der aktuelle ist. Das Original kennt keine solche Sicherung; dort geht ein nicht gemerkter Plan beim Schließen verloren.
 
 ![Rückfrage beim Sichern: aktueller und gesicherter Plan im Vergleich](Anleitung/Bilder/22-sicherung.png)
 
@@ -499,7 +519,7 @@ Um Pläne aus verschiedenen Einstellungen zu vergleichen, merken Sie sich Zwisch
 1. **Plan merken** (oben) anklicken – gemerkt wird der beste Plan der laufenden Generierung.
 2. Einen Namen eingeben, z. B. „Sperrtermine hoch“.
 
-Der Plan erscheint danach in jeder Ansicht in der Auswahl **Plan** und unter **Start mit**. Sie können ihn so ansehen, mit dem aktuellen vergleichen, als Ausgangsplan für eine neue Generierung nehmen oder löschen: Ist er vor dem Start unter **Start mit** gewählt, steht oben an der Stelle von *Plan merken* der Knopf **Plan löschen**. Den gesicherten Plan löscht dieser Knopf nicht – er wird nur durch einen neueren ersetzt (Abschnitt [5.3](#53-die-generierung-steuern)).
+Der Plan erscheint danach in allen Ansichten, sobald er der aktuell angezeigte ist (siehe oben – ohne laufende Generierung also als zuletzt gespeicherter Plan). Sie können ihn so ansehen, mit dem aktuellen vergleichen oder löschen: Ist er der angezeigte gemerkte Plan, steht oben an der Stelle von *Plan merken* der Knopf **Plan löschen**. Den gesicherten Plan löscht dieser Knopf nicht – er wird nur durch einen neueren ersetzt (Abschnitt [5.3](#53-die-generierung-steuern)).
 
 Gemerkte Pläne liegen im Datenordner der Staffel und stehen auch nach einem Neustart zur Verfügung.
 
@@ -513,7 +533,7 @@ Die Art der Runde stellen Sie in den **Einstellungen** unter **Runden** ein. Bei
 
 **Nur Vorrunde / Nur Rückrunde planen:** In manchen Verbänden werden die Runden einzeln geplant, weil Vereine ihre Hallenzeiten für die Rückrunde noch nicht kennen. Nutzen Sie das nur aus diesem Grund – gemeinsam geplant werden die Pläne besser. Wird nur die Rückrunde geplant, berücksichtigt das Programm die in click-TT vorhandenen Spiele der Vorrunde. Auch der Export enthält dann nur die geplante Runde.
 
-**Doppelrunde planen:** Jede Mannschaft spielt viermal gegen jede andere, in zwei Vor- und zwei Rückrunden (Viertelrunden). Das Programm ermittelt aus den Wunschterminen, wann die erste und die dritte Viertelrunde enden sollten. Passt das nicht, schalten Sie **Enddatum der Viertelrunden automatisch ermitteln** aus und tragen die Daten selbst ein.
+**Doppelrunde planen:** Jede Mannschaft spielt viermal gegen jede andere, in zwei Vor- und zwei Rückrunden (Viertelrunden). Das Programm ermittelt aus den Wunschterminen, wann die erste und die dritte Viertelrunde enden sollten. Passt das nicht, schalten Sie **Enddatum der Viertelrunden automatisch ermitteln** aus und tragen die Daten selbst ein. Terminplan und Diagramme nennen die Viertelrunden „1. Vorrunde“, „2. Vorrunde“, „1. Rückrunde“ und „2. Rückrunde“: Der Terminplan setzt eine Zwischenüberschrift vor jede Viertelrunde, im Diagramm **Wechsel Heim/Auswärts** trennt eine Lücke die Viertelrunden, **Spiele pro Woche** und **Setzliste** zeigen je Viertelrunde ein eigenes Raster bzw. eine eigene Treppe, und **Abstand Hin-/Rückspiel** misst den Abstand zwischen allen vier Spielen gegen denselben Gegner (ideal: eine Viertelrunde). Das Beispiel „Liga für Doppelrunde“ auf der Startseite öffnet sich beim ersten Mal schon mit eingeschalteter Doppelrunde.
 
 **Coronarunde planen:** Plant nur die noch nicht gespielten Spiele der Rückrunde. Die Einstellung stammt aus der Saison 2020/21 und ist für Sonderfälle erhalten geblieben.
 
@@ -561,7 +581,7 @@ In der Standardgewichtung haben die Kostenarten schon ein sinnvolles Verhältnis
 
 **Ungleich H/A** – Die Zahl der Heimspiele in Vor- und Rückrunde ist verschieden bzw. weicht von den Vorgaben beim *Heimrecht* ab.
 
-**Wechsel H/A** – Auf ein Heimspiel soll ein Auswärtsspiel folgen und umgekehrt. Siehe Diagramm *Wechsel Heim/Auswärts*.
+**Wechsel H/A** – Auf ein Heimspiel soll ein Auswärtsspiel folgen und umgekehrt. Im Automodus, im einfachen Modus und in der Qualitätsansicht zählt eine Folge steigend: zwei Heimspiele hintereinander ein Verstoß, drei hintereinander drei, vier sechs – lange Serien fallen mehr auf als ein einzelnes Doppel (die Kostentabelle zählt wie das Original jedes Doppel einmal). Ganz ohne Doppel geht es bei gerader Mannschaftszahl nicht: Ein Plan „jeder gegen jeden“ hat je Runde mindestens N − 2 davon. Siehe Diagramm *Wechsel Heim/Auswärts*.
 
 **Abstand H/A** – Die Rückrunde soll die Gegner in ähnlicher Reihenfolge bringen wie die Vorrunde: Wer das letzte Vorrundenspiel gegen B hat, soll die Rückrunde nicht wieder mit B beginnen. Siehe Diagramm *Abstand Hin-/Rückspiel*.
 
@@ -638,6 +658,16 @@ Die Ansicht **Kompaktspieltage** steht links oben unter *Ansichten* – nur bei 
 ### 6.5 Pläne berechnen
 
 Der Knopf **▶** berechnet die Pläne. Jede mögliche Kombination aus Spieltag und Tag ist dabei eine Ja/Nein-Entscheidung, die der freie Löser **HiGHS** als ganzzahlige Optimierung löst: jede Paarung genau einmal, jede Mannschaft höchstens einmal am Tag, jede richtet mindestens einen Spieltag aus, möglichst ohne Verstöße gegen die Meldungen. So findet der Planer den kürzesten Plan und den Plan mit den wenigsten Punkten nachweisbar – auch bei knappen Meldungen. Unabhängige Schritte rechnen gleichzeitig, und jeder Schritt lässt mehrere Läufe des Lösers mit verschiedenen Startwerten parallel laufen; der erste, der den besten Plan beweist, beendet die anderen. Eine Zufallssuche liefert die Startpunkte und ergänzt am Ende weitere Varianten. Bei 9 Mannschaften (oder 10 mit je einer Einzelbegegnung) geht der Plan genau mit 4er-Spieltagen auf; Pläne mit 3er-Spieltagen erscheinen dann nur, wenn sie ein Ziel besser treffen als jeder reine 4er-Plan (*Mit 3er-Spieltagen: kürzer*, *… gleich weite Fahrten* usw., höchstens drei).
+
+**Wie lange gerechnet wird und wie gut der Stand ist:** Jeder Schritt hat zunächst seinen Anteil von rund drei Minuten. Kommt HiGHS danach noch voran – ein besserer Plan oder eine deutlich kleinere Lücke zur bewiesenen Untergrenze binnen 40 Sekunden –, rechnet er weiter, insgesamt höchstens zehn Minuten; ist der beste Plan bewiesen, endet der Schritt sofort. Kleine Klassen sind so meist nach einer halben Minute fertig, große bekommen auf Rechnern mit wenigen Kernen die Zeit, die sie brauchen. Ein Kern bleibt immer frei, damit sich das Programm bedienen lässt; bei nur zwei Kernen rechnen die Schritte nacheinander. Unter dem Fortschrittsbalken steht je laufendem Schritt, wie es steht, zum Beispiel:
+
+> Kürzester Plan: bisher 2.452 km · mindestens ≈ 2.391 km sind nötig · zuletzt vorangekommen vor 12 s · rechnet weiter, solange es vorangeht (höchstens noch 1:30 min)
+
+„Bisher 2.452 km“ ist der beste Plan, den HiGHS in diesem Schritt gefunden hat; „mindestens ≈ 2.391 km sind nötig“ ist die Untergrenze, die HiGHS bewiesen hat – kürzer geht es mit keinem Plan (ungefähr, weil Einzelfahrten in der Rechnung doppelt zählen). Der wirklich beste Plan liegt dazwischen, oft sehr nahe am gefundenen. Treffen sich beide, steht dort „bestmöglich (bewiesen)“. Beim Plan mit den wenigsten Punkten zählen auch Stand und Spitzen- und Abstiegsspieltag; dort steht nur, ob er schon bewiesen der beste ist. Liegen Fund und Untergrenze nahe beieinander, kann man ohne Bedenken mit **■ Stopp** abbrechen.
+
+**Pläne schon während der Rechnung ansehen:** Was HiGHS unterwegs findet, erscheint nach wenigen Sekunden als Karte unter *Pläne* – den kürzesten Plan kann man so schon betrachten, während die übrigen Schritte noch rechnen. Etwa alle fünf Sekunden kommen bessere Pläne dazu; ein angeklickter Plan bleibt dabei gewählt.
+
+**Qualität der gefundenen Pläne:** Nach der Rechnung steht an derselben Stelle je Schritt, was gefunden wurde und ob es bewiesen das Beste ist, z. B. „Kürzester Plan nur aus 4er-Spieltagen: 2.403 km, 10× 4er, 0× 3er, 5 Einzel, 0 Verstöße – bestmöglich (bewiesen)“ oder „… – nicht bewiesen bestmöglich – mindestens ≈ 2.288 km sind nötig“.
 
 > **Windows-Laptops mit ARM-Prozessor:** Für die ARM-Fassung des Programms (`…-win-arm64-Setup.exe`) gibt es HiGHS noch nicht. Sie plant Kompaktspieltage mit der vollständigen Suche ohne Löser – das dauert länger und findet bei knappen Meldungen nicht immer den kürzesten Plan. Ohne Löser entstehen die Pläne außerdem oft erst am Ende der Berechnung – wer vorher **■ Stopp** drückt, hat dann noch keinen Plan. Wer dort Kompaktspieltage plant, installiert besser die normale Fassung (`AndiGeneratorNET-win-Setup.exe`); sie läuft auch auf ARM-Laptops und bringt HiGHS mit.
 
@@ -729,7 +759,7 @@ Die Diagramme zeigen auf einen Blick, wie sich der Plan für die Mannschaften an
 
 ![Diagramm Spieltage](Anleitung/Bilder/07-diagramm-spieltage.png)
 
-**Wechsel Heim/Auswärts** – je Mannschaft eine Reihe gleich breiter Kacheln, eine je Spiel in der Folge der Termine: blau für Heim, grau für Auswärts. Ideal ist ein gleichmäßiges Schachbrett – auf ein Heimspiel folgt ein Auswärtsspiel. Serien ab drei gleichen Spielen hintereinander sind rot unterstrichen; eine Lücke markiert den Beginn der Rückrunde. Rechts stehen die Brüche (Spiele, die nicht wechseln) als grauer Balken mit Zahl – dieselbe Zahl wie in der Qualitätsansicht, Koppeltermine zählen also nicht. Mit der Maus über einer Kachel nennt ein Hinweis Spiel, Tag, Gegner und die Länge der Serie. Ganz ohne Brüche geht es selbst bei idealen Meldungen nicht.
+**Wechsel Heim/Auswärts** – je Mannschaft eine Reihe gleich breiter Kacheln, eine je Spiel in der Folge der Termine: blau für Heim, grau für Auswärts. Ideal ist ein gleichmäßiges Schachbrett – auf ein Heimspiel folgt ein Auswärtsspiel. Serien ab drei gleichen Spielen hintereinander sind rot unterstrichen; eine Lücke markiert den Beginn der Rückrunde (bei einer Doppelrunde jeder Viertelrunde). Rechts stehen die Brüche (Spiele, die nicht wechseln) als grauer Balken mit Zahl – Koppeltermine zählen nicht; die Qualitätsansicht zählt Serien steigend und nennt deshalb bei Serien ab drei mehr. Mit der Maus über einer Kachel nennt ein Hinweis Spiel, Tag, Gegner und die Länge der Serie. Ganz ohne Brüche geht es selbst bei idealen Meldungen nicht.
 
 ![Diagramm Wechsel Heim/Auswärts](Anleitung/Bilder/35-diagramm-wechsel.png)
 
@@ -747,7 +777,7 @@ Die Diagramme zeigen auf einen Blick, wie sich der Plan für die Mannschaften an
 
 ![Diagramm Abstand Hin-/Rückspiel](Anleitung/Bilder/36-diagramm-abstand.png)
 
-**Spiele pro Woche** – je Runde ein Raster: eine Zeile je Mannschaft, eine Spalte je Woche (Montag bis Sonntag). In jeder Zelle steht ein Punkt je Spiel; leere Wochen bleiben leer, so sieht man den Rhythmus jeder Mannschaft. Rosa hinterlegt sind die Wochen, die die Bewertung als „2 Spiele die Woche“ zählt (jedes Spiel nach einem in derselben Woche, außer am Koppeltermin). Rechts stehen die Spiele der Runde und diese Verstöße wie in der Qualitätsansicht. Unten zeigt je Woche eine Säule, wie weit die Mannschaft mit den meisten und die mit den wenigsten absolvierten Spielen auseinanderliegen: grün bis 2, orange 3 bis 4, rot ab 5. Mit der Maus über einer Zelle nennt ein Hinweis die Spiele der Woche mit Tag und Gegner – bei Kompaktspieltagen mit der Halle – und den Stand danach. Das Diagramm gibt es bei normalen und bei Kompaktspieltagen.
+**Spiele pro Woche** – je Runde ein Raster: eine Zeile je Mannschaft, eine Spalte je Woche (Montag bis Sonntag). In jeder Zelle steht ein Punkt je Spiel; leere Wochen bleiben leer, so sieht man den Rhythmus jeder Mannschaft. Rosa hinterlegt sind die Wochen, die die Bewertung als „2 Spiele die Woche“ zählt (jedes Spiel nach einem in derselben Woche, außer am Koppeltermin). Rechts stehen die Spiele der Runde und diese Verstöße – bei nur einem Raster dieselbe Zahl wie in der Qualitätsansicht, bei mehreren die Verstöße in den Wochen dieses Rasters. Unten zeigt je Woche eine Säule, wie weit die Mannschaft mit den meisten und die mit den wenigsten absolvierten Spielen auseinanderliegen: grün bis 2, orange 3 bis 4, rot ab 5. Mit der Maus über einer Zelle nennt ein Hinweis die Spiele der Woche mit Tag und Gegner – bei Kompaktspieltagen mit der Halle – und den Stand danach. Das Diagramm gibt es bei normalen und bei Kompaktspieltagen.
 
 ![Diagramm Spiele pro Woche](Anleitung/Bilder/37-diagramm-woche.png)
 
@@ -780,7 +810,7 @@ Die Ansicht zeigt die Spiele aus anderen Staffeln, die mit der XML-Datei eingele
 
 ### 8.1 Für click-TT exportieren
 
-**Für click-TT exportieren** (linke Leiste, *Ausgabe*, farblich hervorgehoben) speichert den **gerade angezeigten Plan** als CSV-Datei, die click-TT als Spielplan importiert: den Plan, den die aktive Ansicht zeigt (laufende Generierung, click-TT-Plan oder ein gemerkter Plan), sonst den Stand der Generierung bzw. den unter *Start mit* gewählten Plan. Welcher es ist, verrät der Tooltip. Gibt es keinen Plan, ist der Eintrag grau und nicht anklickbar. Exportieren Sie den laufenden Plan, pausieren Sie die Generierung vorher, damit er sich nicht mehr ändert.
+**Für click-TT exportieren** (linke Leiste, *Ausgabe*, farblich hervorgehoben) speichert den **gerade angezeigten Plan** als CSV-Datei, die click-TT als Spielplan importiert: den Plan, den die aktive Ansicht zeigt (den aktuell angezeigten Plan), sonst den Stand der Generierung. Welcher es ist, verrät der Tooltip. Gibt es keinen Plan, ist der Eintrag grau und nicht anklickbar. Exportieren Sie den laufenden Plan, pausieren Sie die Generierung vorher, damit er sich nicht mehr ändert.
 
 Vor dem Export prüft das Programm auf harte Fehler: Spiele ohne Termin, Spiele mit ungültigem Termin und Spiele an spielfreien Tagen. Gibt es welche, werden sie aufgelistet, und Sie entscheiden, ob Sie trotzdem exportieren. Spiele ohne Termin stehen in der CSV-Datei am ersten Tag der Runde um 00:00 Uhr.
 
@@ -959,7 +989,7 @@ Zu beachten:
 ### 10.1 Was die KI kann
 
 - **Staffel:** öffnen (auch die [Beispiele](#32-staffel-öffnen)), Punkte der Einrichtung lesen und entscheiden, schließen.
-- **Rechnen:** Kostenoptimierung oder Automodus wählen, Ausgangsplan wählen, starten, pausieren, stoppen und den Fortschritt verfolgen (Kacheln, Phasen, HiGHS).
+- **Rechnen:** Kostenoptimierung oder Automodus wählen, starten, pausieren, stoppen und den Fortschritt verfolgen (Kacheln, Phasen, HiGHS).
 - **Bewerten:** Qualität mit Stufen und Verstößen je Mannschaft, Kriterien einstufen, B-Varianten aus HiGHS vergleichen und festlegen; Kosten und Gewichtungen lesen und ändern.
 - **Spielplandaten:** Termine, Sperren, spielfreie Tage, Setzliste, 60-km-Regel, festgelegte Begegnungen, Pflichtspieltage, Mannschaften, Spiellokale, Heim- und Auswärtskoppeln, Nachbarmannschaften mit ihren Spielen und das Heimrecht – Änderungen gelten sofort, auch für eine laufende Generierung.
 - **Ansehen:** den Terminplan Woche für Woche (auch nur einer Mannschaft) und jedes Diagramm als Bild mit den Verstößen je Mannschaft.
@@ -1035,7 +1065,7 @@ Im Bayerischen TTV werden Hallenbelegung und Spiele der Nachbarmannschaften bei 
 Das Programm lässt einen Prozessorkern frei und rechnet mit niedriger Priorität, damit andere Programme bedienbar bleiben. Wer den Rechner in Ruhe lassen möchte, pausiert die Generierung.
 
 **Das Programm meldet einen unerwarteten Fehler.**
-Dann ist etwas schiefgegangen, womit das Programm nicht gerechnet hat. Es beendet sich dabei nicht, sondern merkt den aktuellen Plan als **Notfallsicherung** (Sie finden ihn unter **Start mit** und in der Planauswahl der Ansichten) und schreibt die Einzelheiten in die Datei `fehlerprotokoll.txt` im Datenordner (unter Windows `%LOCALAPPDATA%\AndiGenerator.NET`); die Meldung nennt den genauen Pfad. Sie können weiterarbeiten, sicherer ist aber, den Plan zu exportieren oder zu merken und das Programm neu zu starten. Bricht eine laufende Generierung ab, steht das in der Statuszeile, und der beste Plan ist ebenso als Notfallsicherung gemerkt. Helfen Sie, den Fehler zu beheben: Schicken Sie das Fehlerprotokoll mit einer kurzen Beschreibung, was Sie gerade getan haben, über die [Fehlermeldungen auf GitHub](https://github.com/PBuchmann/AndiGenerator.NET/issues). Das Protokoll enthält keine Spielplandaten, kann aber Dateipfade Ihres Rechners nennen.
+Dann ist etwas schiefgegangen, womit das Programm nicht gerechnet hat. Es beendet sich dabei nicht, sondern merkt den aktuellen Plan als **Notfallsicherung** (Er wird in den Ansichten angezeigt, solange keine neue Generierung läuft) und schreibt die Einzelheiten in die Datei `fehlerprotokoll.txt` im Datenordner (unter Windows `%LOCALAPPDATA%\AndiGenerator.NET`); die Meldung nennt den genauen Pfad. Sie können weiterarbeiten, sicherer ist aber, den Plan zu exportieren oder zu merken und das Programm neu zu starten. Bricht eine laufende Generierung ab, steht das in der Statuszeile, und der beste Plan ist ebenso als Notfallsicherung gemerkt. Helfen Sie, den Fehler zu beheben: Schicken Sie das Fehlerprotokoll mit einer kurzen Beschreibung, was Sie gerade getan haben, über die [Fehlermeldungen auf GitHub](https://github.com/PBuchmann/AndiGenerator.NET/issues). Das Protokoll enthält keine Spielplandaten, kann aber Dateipfade Ihres Rechners nennen.
 
 ---
 

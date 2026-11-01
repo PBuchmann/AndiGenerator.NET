@@ -88,11 +88,11 @@
     </Style>
   </UserControl.Styles>
   <ScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-    <StackPanel Margin="18,14" Spacing="16" MaxWidth="1400" HorizontalAlignment="Left">
+    <StackPanel Margin="12,8" Spacing="12" MaxWidth="1400" HorizontalAlignment="Left">
       <Grid ColumnDefinitions="*,Auto">
         <StackPanel Spacing="2">
           <TextBlock Text="{Binding Kopfzeile}" Classes="klein" />
-          <TextBlock Text="Kompaktspieltage" FontSize="20" FontWeight="SemiBold" />
+          <TextBlock Text="Kompaktspieltage" FontSize="17" FontWeight="SemiBold" />
         </StackPanel>
         <StackPanel Grid.Column="1" Orientation="Horizontal" Spacing="14" VerticalAlignment="Bottom" IsVisible="{Binding Eingeschaltet}">
           <Button Classes="link" Command="{Binding AusschaltenCommand}" VerticalAlignment="Center"
@@ -108,14 +108,22 @@
         </StackPanel>
       </Border>
 
-      <StackPanel Spacing="16" IsVisible="{Binding Eingeschaltet}">
+      <StackPanel Spacing="12" IsVisible="{Binding Eingeschaltet}">
         <!-- Pläne: Plan aus click-TT und Varianten des Planers (wie im Entwurf: eine Zeile Karten) -->
         <StackPanel ui:Fuehrungsmarke.Ziel="KompaktPlaene" Spacing="6">
-          <TextBlock Text="Pläne" FontSize="15" FontWeight="SemiBold" />
+          <TextBlock Text="Pläne" FontSize="14" FontWeight="SemiBold" />
           <!-- Während der Berechnung: Fortschritt bis 100 % und was gerade geschieht -->
           <StackPanel Spacing="4" IsVisible="{Binding Rechnet}">
             <ProgressBar Minimum="0" Maximum="100" Value="{Binding Fortschritt}" Height="8" HorizontalAlignment="Stretch" />
             <TextBlock Text="{Binding FortschrittText}" Classes="klein" TextWrapping="Wrap" />
+            <!-- Stand der Optimierung je laufendem Schritt: was gefunden ist und was nach dem Beweis von HiGHS mindestens nötig ist -->
+            <ItemsControl ItemsSource="{Binding Optimierungsstand}" IsVisible="{Binding HatOptimierungsstand}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="x:String">
+                  <TextBlock Text="{Binding}" Classes="klein" TextWrapping="Wrap" />
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
             <!-- In der Pause: mit welchem Knopf oben es weitergeht -->
             <StackPanel Orientation="Horizontal" Spacing="6" IsVisible="{Binding Angehalten}">
               <ui:Symbol Daten="{StaticResource SymbolFortsetzen}" Gefuellt="True" Groesse="14" VerticalAlignment="Center" />
@@ -123,6 +131,17 @@
               <ui:Symbol Daten="{StaticResource SymbolStopp}" Gefuellt="True" Groesse="14" VerticalAlignment="Center" />
               <TextBlock Text="beendet mit den bisher besten Plänen." Classes="klein" VerticalAlignment="Center" />
             </StackPanel>
+          </StackPanel>
+          <!-- Nach der Berechnung: welche Qualität gefunden wurde und was nach dem Beweis von HiGHS mindestens nötig ist -->
+          <StackPanel Spacing="2" IsVisible="{Binding HatQualitaet}">
+            <TextBlock Text="Qualität der gefundenen Pläne" Classes="klein" FontWeight="SemiBold" />
+            <ItemsControl ItemsSource="{Binding Qualitaet}">
+              <ItemsControl.ItemTemplate>
+                <DataTemplate x:DataType="x:String">
+                  <TextBlock Text="{Binding}" Classes="klein" TextWrapping="Wrap" />
+                </DataTemplate>
+              </ItemsControl.ItemTemplate>
+            </ItemsControl>
           </StackPanel>
           <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
             <ItemsControl ItemsSource="{Binding Plaene}">
@@ -158,7 +177,7 @@
               <ItemsControl ItemsSource="{Binding Erlaeuterung}">
                 <ItemsControl.ItemTemplate>
                   <DataTemplate x:DataType="sys:String">
-                    <ui:Auszeichnungstext Auszeichnung="{Binding}" Hervorhebung="{StaticResource Akzent}" FontSize="12.5" TextWrapping="Wrap" Margin="0,1" />
+                    <ui:Auszeichnungstext Auszeichnung="{Binding}" Hervorhebung="{StaticResource Akzent}" FontSize="11.5" TextWrapping="Wrap" Margin="0,1" />
                   </DataTemplate>
                 </ItemsControl.ItemTemplate>
               </ItemsControl>
@@ -172,7 +191,7 @@
           <Border x:Name="Raster" ui:Fuehrungsmarke.Ziel="KompaktRaster" Classes="karte" VerticalAlignment="Top" Focusable="True">
             <StackPanel Spacing="8">
               <Grid ColumnDefinitions="*,Auto">
-                <TextBlock Text="Meldungen und Plan" FontSize="15" FontWeight="SemiBold" VerticalAlignment="Center" />
+                <TextBlock Text="Meldungen und Plan" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" />
                 <ToggleSwitch Grid.Column="1" IsChecked="{Binding Bearbeiten}" ui:Fuehrungsmarke.Ziel="KompaktBearbeiten" OnContent="Bearbeiten" OffContent="Anzeigen" Margin="12,0,0,0"
                               IsEnabled="{Binding !Rechnet}" ToolTip.Tip="Meldungen direkt im Raster erfassen (nicht während einer Berechnung; solange lässt sich keine starten)" />
               </Grid>
@@ -196,7 +215,7 @@
                           <LayoutTransformControl.LayoutTransform>
                             <RotateTransform Angle="-90" />
                           </LayoutTransformControl.LayoutTransform>
-                          <TextBlock Text="{Binding Beschriftung}" FontSize="12" LineHeight="14" Foreground="{StaticResource Tinte2}" Classes.gewaehlt="{Binding Gewaehlt}" />
+                          <TextBlock Text="{Binding Beschriftung}" FontSize="11" LineHeight="14" Foreground="{StaticResource Tinte2}" Classes.gewaehlt="{Binding Gewaehlt}" />
                         </LayoutTransformControl>
                       </Button>
                     </DataTemplate>
@@ -232,7 +251,7 @@
                                   <Ellipse Classes="symbol" Classes.zweiter="{Binding ZweiterSpieltag}" Classes.dritter="{Binding DritterSpieltag}" Classes.einzel="{Binding Einzel}"
                                            IsVisible="{Binding IstGast}" Width="8" Height="8" HorizontalAlignment="Center" VerticalAlignment="Center" />
                                   <TextBlock Text="?" Classes="zeichen" IsVisible="{Binding IstUnbekanntZeichen}"
-                                             HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="13" />
+                                             HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="12" />
                                 </Panel>
                               </Border>
                             </Border>
@@ -258,9 +277,9 @@
                       <Binding Path="LegendeZweiter" />
                     </MultiBinding>
                   </StackPanel.IsVisible>
-                  <TextBlock Text="★●" Foreground="{StaticResource Tinte}" FontSize="13" />
-                  <TextBlock Text="★●" Foreground="#C2410C" FontSize="13" />
-                  <TextBlock Text="★●" Foreground="#7E22CE" FontSize="13" IsVisible="{Binding LegendeDritter}" />
+                  <TextBlock Text="★●" Foreground="{StaticResource Tinte}" FontSize="12" />
+                  <TextBlock Text="★●" Foreground="#C2410C" FontSize="12" />
+                  <TextBlock Text="★●" Foreground="#7E22CE" FontSize="12" IsVisible="{Binding LegendeDritter}" />
                   <TextBlock Text="mehrere Spieltage am selben Sonntag" Classes="klein" VerticalAlignment="Center" />
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Spacing="4" Margin="0,0,14,4">
@@ -270,7 +289,7 @@
                       <Binding Path="LegendeEinzel" />
                     </MultiBinding>
                   </StackPanel.IsVisible>
-                  <TextBlock Text="★●" Foreground="#EAB308" FontWeight="Black" FontSize="13" />
+                  <TextBlock Text="★●" Foreground="#EAB308" FontWeight="Black" FontSize="12" />
                   <TextBlock Text="Einzelbegegnung" Classes="klein" VerticalAlignment="Center" />
                 </StackPanel>
                 <StackPanel Orientation="Horizontal" Spacing="6" Margin="0,0,14,4" IsVisible="{Binding !Bearbeiten}"><Border Width="16" Height="12" CornerRadius="3" BorderBrush="{StaticResource Schlecht}" BorderThickness="2" /><TextBlock Text="gegen die Meldung" Classes="klein" /></StackPanel>
@@ -347,35 +366,37 @@
           </Border>
 
           <!-- Karte und km je Mannschaft -->
-          <Border ui:Fuehrungsmarke.Ziel="KompaktKarte" Grid.Column="2" Classes="karte" VerticalAlignment="Top" MinWidth="360" MaxWidth="560" HorizontalAlignment="Left">
+          <Border ui:Fuehrungsmarke.Ziel="KompaktKarte" Grid.Column="2" Classes="karte" VerticalAlignment="Top" MinWidth="360" MaxWidth="760" HorizontalAlignment="Left">
             <StackPanel Spacing="10">
               <Grid ColumnDefinitions="*,Auto">
-                <TextBlock Text="{Binding Kartentitel}" FontSize="15" FontWeight="SemiBold" TextWrapping="Wrap" />
+                <TextBlock Text="{Binding Kartentitel}" FontSize="14" FontWeight="SemiBold" TextWrapping="Wrap" />
                 <TextBlock Grid.Column="1" Text="Entfernungen in Luftlinie" Classes="klein" VerticalAlignment="Center" />
               </Grid>
               <ui:Kompaktkarte Bild="{Binding Karte}" />
               <TextBlock Text="Für einige Mannschaften ist keine Halle bekannt – Terminwünsche (PDF) in der Einrichtung unter „Daten aus click-TT ergänzen“ laden."
                          Classes="leer" TextWrapping="Wrap" IsVisible="{Binding FehlenLagen}" />
               <Grid ColumnDefinitions="*,Auto" IsVisible="{Binding HatPlan}">
-                <TextBlock Text="km je Mannschaft" FontSize="15" FontWeight="SemiBold" />
+                <TextBlock Text="km je Mannschaft" FontSize="14" FontWeight="SemiBold" />
                 <TextBlock Grid.Column="1" Text="Luftlinie, hin und zurück" Classes="klein" VerticalAlignment="Center" />
               </Grid>
-              <!-- Spalten über alle Zeilen gleich breit: Name, Ausrichter, Balken, km -->
+              <!-- Spalten über alle Zeilen gleich breit: Name, Ausrichter, Balken, km; die Angabe „Ausrichter“ nimmt, was übrig
+                   ist, und wird bei Platzmangel gekürzt – so bleiben Balken und km immer in der Karte -->
               <ItemsControl ItemsSource="{Binding KmZeilen}" Grid.IsSharedSizeScope="True" IsVisible="{Binding HatPlan}">
                 <ItemsControl.ItemTemplate>
                   <DataTemplate x:DataType="p:Kompaktkmzeile">
-                    <Button Classes="flach" Command="{Binding $parent[UserControl].((p:KompaktspieltageAnsichtViewModel)DataContext).MannschaftWaehlenCommand}" CommandParameter="{Binding Name}">
+                    <Button Classes="flach" HorizontalAlignment="Stretch" HorizontalContentAlignment="Stretch"
+                            Command="{Binding $parent[UserControl].((p:KompaktspieltageAnsichtViewModel)DataContext).MannschaftWaehlenCommand}" CommandParameter="{Binding Name}">
                       <Grid Margin="0,2">
                         <Grid.ColumnDefinitions>
                           <ColumnDefinition Width="Auto" SharedSizeGroup="KmName" />
-                          <ColumnDefinition Width="Auto" SharedSizeGroup="KmZusatz" />
-                          <ColumnDefinition Width="132" />
+                          <ColumnDefinition Width="*" />
+                          <ColumnDefinition Width="100" />
                           <ColumnDefinition Width="Auto" SharedSizeGroup="KmWert" />
                         </Grid.ColumnDefinitions>
                         <TextBlock ToolTip.Tip="{Binding Name}" Classes="mannschaft" Text="{Binding Name}" Classes.gewaehlt="{Binding Gewaehlt}" Margin="0,0,12,0" VerticalAlignment="Center" />
-                        <TextBlock Grid.Column="1" Text="{Binding Zusatz}" Classes="klein" Margin="0,0,12,0" VerticalAlignment="Center" />
+                        <TextBlock Grid.Column="1" Text="{Binding Zusatz}" ToolTip.Tip="{Binding Zusatz}" Classes="klein" Margin="0,0,12,0" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
                         <Border Grid.Column="2" Height="8" CornerRadius="4" Background="{StaticResource Akzent}" Width="{Binding Balken}" HorizontalAlignment="Left" VerticalAlignment="Center" />
-                        <TextBlock Grid.Column="3" Text="{Binding Km}" Classes="ziffer" MinWidth="44" TextAlignment="Right" Margin="10,0,0,0" VerticalAlignment="Center" />
+                        <TextBlock Grid.Column="3" Text="{Binding Km}" Classes="ziffer" MinWidth="32" TextAlignment="Right" Margin="10,0,0,0" VerticalAlignment="Center" />
                       </Grid>
                     </Button>
                   </DataTemplate>
@@ -388,7 +409,7 @@
         <!-- Spieltage -->
         <Border ui:Fuehrungsmarke.Ziel="KompaktSpieltage" Classes="karte">
           <StackPanel Spacing="10">
-            <TextBlock Text="Spieltage" FontSize="15" FontWeight="SemiBold" />
+            <TextBlock Text="Spieltage" FontSize="14" FontWeight="SemiBold" />
             <ItemsControl ItemsSource="{Binding Spieltage}">
               <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
@@ -416,7 +437,7 @@
                           <ItemsControl ItemsSource="{Binding Spiele}">
                             <ItemsControl.ItemTemplate>
                               <DataTemplate x:DataType="sys:String">
-                                <TextBlock Text="{Binding}" FontSize="12.5" TextWrapping="Wrap" />
+                                <TextBlock Text="{Binding}" FontSize="11.5" TextWrapping="Wrap" />
                               </DataTemplate>
                             </ItemsControl.ItemTemplate>
                           </ItemsControl>
@@ -424,15 +445,15 @@
                           <ItemsControl ItemsSource="{Binding Hinweise}" IsVisible="{Binding HatHinweise}">
                             <ItemsControl.ItemTemplate>
                               <DataTemplate x:DataType="sys:String">
-                                <TextBlock Text="{Binding}" FontSize="12" Foreground="{StaticResource Schlecht}" TextWrapping="Wrap" />
+                                <TextBlock Text="{Binding}" FontSize="11" Foreground="{StaticResource Schlecht}" TextWrapping="Wrap" />
                               </DataTemplate>
                             </ItemsControl.ItemTemplate>
                           </ItemsControl>
-                          <TextBlock Text="{Binding Verlegen}" IsVisible="{Binding HatVerlegen}" FontSize="12" Foreground="{StaticResource AkzentDunkel}" TextWrapping="Wrap" />
+                          <TextBlock Text="{Binding Verlegen}" IsVisible="{Binding HatVerlegen}" FontSize="11" Foreground="{StaticResource AkzentDunkel}" TextWrapping="Wrap" />
                         </StackPanel>
                       </Button>
                       <!-- Adresse aus dem Bericht „Terminwünsche“ außerhalb des Knopfs, damit sie sich markieren und kopieren lässt -->
-                      <SelectableTextBlock Text="{Binding Adresse}" IsVisible="{Binding HatAdresse}" Margin="12,0,12,10" FontSize="12" TextWrapping="Wrap"
+                      <SelectableTextBlock Text="{Binding Adresse}" IsVisible="{Binding HatAdresse}" Margin="12,0,12,10" FontSize="11" TextWrapping="Wrap"
                                            Foreground="{StaticResource Tinte}" ToolTip.Tip="Markieren und mit Strg+C kopieren" />
                     </StackPanel>
                   </Border>
@@ -445,7 +466,7 @@
         <!-- Hinweise -->
         <Border Classes="karte">
           <StackPanel Spacing="6">
-            <TextBlock Text="Hinweise" FontSize="15" FontWeight="SemiBold" />
+            <TextBlock Text="Hinweise" FontSize="14" FontWeight="SemiBold" />
             <ItemsControl ItemsSource="{Binding Hinweise}">
               <ItemsControl.ItemTemplate>
                 <DataTemplate x:DataType="sys:String">

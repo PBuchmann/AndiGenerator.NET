@@ -355,17 +355,6 @@ public sealed class Generierungsanzeige : ObservableObject
         Highs = Highs is { } h ? h with { Zeit = "Generierung beendet", Anteil = null, Rechnet = false } : null;
     }
 
-    /// <summary>Zeigt vor dem Start einen gewählten Ausgangsplan: seine Kosten und Pflichtregeln, noch ohne Generierung.</summary>
-    /// <param name="bewertung">Bewertung des Plans.</param>
-    /// <param name="einteilung">Einteilung der Kriterien.</param>
-    /// <param name="name">Name des Plans für den Hinweis.</param>
-    internal void PlanZeigen(Planbewertung bewertung, Stufeneinteilung einteilung, string name)
-    {
-        Zuruecksetzen("Ausgangsplan: " + name);
-        Kosten = Kostenanzeige.Kurz(bewertung.Gesamtkosten);
-        Uebernehmen(bewertung, einteilung);
-    }
-
     /// <summary>Übernimmt die Pflichtregeln des besten Plans.</summary>
     /// <param name="bewertung">Die Bewertung des besten Plans.</param>
     /// <param name="einteilung">Einteilung der Kriterien durch den Staffelleiter.</param>

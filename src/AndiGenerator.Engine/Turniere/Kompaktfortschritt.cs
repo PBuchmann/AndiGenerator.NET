@@ -7,4 +7,11 @@ namespace AndiGenerator.Engine.Turniere;
 /// <summary>Stand eines Laufs des Kompaktplaners.</summary>
 /// <param name="Text">Was gerade geschieht, z. B. „Schritt 1 von 4 – Nur 4er-Spieltage: …“.</param>
 /// <param name="Anteil">Erledigter Anteil des ganzen Laufs von 0 bis 1.</param>
-public sealed record Kompaktfortschritt(string Text, double Anteil);
+public sealed record Kompaktfortschritt(string Text, double Anteil)
+{
+    /// <summary>
+    /// Holt je laufendem Schritt der gezielten Konstruktion eine Zeile zum Stand der Optimierung: wie viel besser es nach der
+    /// bewiesenen Untergrenze von HiGHS höchstens noch ginge und wann zuletzt etwas vorankam.
+    /// </summary>
+    public IReadOnlyList<string> Optimierung { get; init; } = [];
+}

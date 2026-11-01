@@ -3,6 +3,7 @@
 // SPDX-License-Identifier: GPL-3.0-only
 
 using AndiGenerator.Application;
+using AndiGenerator.Persistence.Tests;
 using AndiGenerator.Rendering;
 using Dock.Model.Core;
 
@@ -224,6 +225,30 @@ public sealed class KompaktspieltageTests : IDisposable
         hf.KompaktspieltageCommand.Execute(null);
         KompaktspieltageAnsichtViewModel wieder = Assert.Single(Ansichten<KompaktspieltageAnsichtViewModel>());
         Assert.Contains(wieder.Plaene, p => p.Gespeichert && p.Titel == "Gemerkt: Testplan");
+    }
+
+    /// <summary>
+    /// Pläne schon während der Rechnung (Peter, 26.10.2026): Was HiGHS unterwegs findet, steht nach wenigen Sekunden zur Wahl,
+    /// dazu der Stand je Schritt; nach der Rechnung die Qualität der gefundenen Pläne.
+    /// </summary>
+    /// <returns>Der Testlauf.</returns>
+    [HighsFact]
+    public async Task Plaene_schon_waehrend_der_Rechnung_und_danach_ihre_Qualitaet()
+    {
+        KompaktspieltageAnsichtViewModel ansicht = await AnsichtOeffnenAsync();
+        o.Sammeln = true;
+        Task lauf = hf.GenerierungCommand.ExecuteAsync(null);
+        await WartenAsync(() => ansicht.Rechnet && ansicht.Plaene.Any(p => p.Variante is not null));
+        Assert.Contains(ansicht.Plaene, p => p.Gewaehlt);
+        Assert.Contains(ansicht.Optimierungsstand, z => z.Contains("bisher", StringComparison.Ordinal) || z.Contains("noch kein Plan", StringComparison.Ordinal));
+        Assert.False(ansicht.HatQualitaet);
+
+        hf.StoppenCommand.Execute(null);
+        await WartenAsync(() => lauf.IsCompleted);
+        await lauf;
+        o.Abarbeiten();
+        Assert.True(ansicht.HatQualitaet);
+        Assert.All(ansicht.Qualitaet, z => Assert.Contains(" km", z, StringComparison.Ordinal));
     }
 
     /// <summary>Ausschalten nimmt den Kompaktmodus zurück, Einschalten stellt ihn wieder her.</summary>

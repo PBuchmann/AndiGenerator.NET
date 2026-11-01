@@ -33,6 +33,12 @@ public sealed partial class Ligaschranke
     /// <summary>Höchstens so oft geht ein besserer Plan mitten in einem Schritt hinaus.</summary>
     private static readonly TimeSpan Meldeabstand = TimeSpan.FromSeconds(2);
 
+    /// <summary>
+    /// Kriterien, deren Zeilen erst nach Stufe A ins Modell kommen, wenn sie in B stehen (sie würden Stufe A für HiGHS
+    /// verlangsamen, obwohl sie dort nicht zählen). Derzeit keine – so war es für die entfernte Heim/Auswärts-Bilanz.
+    /// </summary>
+    private static readonly Kostenkriterium[] SpaeteKriterien = [];
+
     private static readonly double Hallenfenster = DelphiDatum.EncodeTime(1, 29);
     private static readonly double Parallelfenster = DelphiDatum.EncodeTime(3, 59);
 
@@ -76,6 +82,9 @@ public sealed partial class Ligaschranke
 
     /// <summary>Zeitgrenze nach Fortschritt für die Schritte von A und B (statt der festen je Stufe), oder <c>null</c>.</summary>
     private Laufzeitregel? laufzeit;
+
+    /// <summary>Schnelle Schranke (einfacher Modus, <see cref="Schnell"/>): nur die Kette A → B, danach die Proben in C.</summary>
+    private bool schnell;
 
     private Ligaschranke(KernDefinition d)
     {
@@ -132,6 +141,39 @@ public sealed partial class Ligaschranke
         }
 
         return new Ligaschranke(d) { aufhoeren = aufhoeren, startplan = startplan, laufzeit = laufzeit }.Rechnen(loeser, zeitJeStufe, zeitStufeC ?? zeitJeStufe, (einteilung ?? Stufeneinteilung.Standard).Vervollstaendigt(), fortschritt ?? (_ => { }));
+    }
+
+    /// <summary>
+    /// Die schnelle Schranke des einfachen Modus: nur die Kette A1 → Summe A → Summe B – die Kriterien einzeln und die
+    /// B-Varianten rechnet sie mit (ohne sie fand HiGHS in der Verbandsoberliga B 10 bis 18 statt 8), gibt aber nur den Plan
+    /// der Summe heraus; ohne „A und B zusammen“ und ohne Stufe C. Danach bei festgehaltenem A und B je Kriterium der Stufe C,
+    /// das das Modell kennt, eine Probe: wie weit es sich allein senken lässt (gleichzeitig auf Kopien, je
+    /// <paramref name="zeitJeProbe"/>; 0 = keine).
+    /// </summary>
+    /// <param name="staffel">Die Staffel (bei „nur Rückrunde“ mit der Vorrunde als bestehendem Plan).</param>
+    /// <param name="optionen">Die Optionen.</param>
+    /// <param name="loeser">Der Löser (HiGHS).</param>
+    /// <param name="einteilung">Die Einteilung.</param>
+    /// <param name="zeitJeProbe">Zeitgrenze je Probe.</param>
+    /// <param name="fortschritt">Meldet die Schritte und Zwischenpläne (wie <see cref="Berechnen"/>), oder <c>null</c>.</param>
+    /// <param name="aufhoeren">Bricht ab (auch mitten in einem Lauf von HiGHS), oder <c>null</c>.</param>
+    /// <param name="startplan">Liefert den besten Plan der Suche als Startlösung, oder <c>null</c>.</param>
+    /// <param name="laufzeit">Zeitgrenze nach Fortschritt für die Kette, oder <c>null</c> (fest 20 s je Schritt).</param>
+    /// <returns>Der Bericht mit den <see cref="Schrankenbericht.Proben"/>.</returns>
+    public static Schrankenbericht Schnell(Staffel staffel, Berechnungsoptionen optionen, ISchrankenloeser loeser, Stufeneinteilung einteilung, TimeSpan zeitJeProbe, Action<Schrankenfortschritt>? fortschritt = null, Func<bool>? aufhoeren = null, Func<IReadOnlyList<Spiel>?>? startplan = null, Laufzeitregel? laufzeit = null)
+    {
+        ArgumentNullException.ThrowIfNull(staffel);
+        ArgumentNullException.ThrowIfNull(optionen);
+        ArgumentNullException.ThrowIfNull(loeser);
+        ArgumentNullException.ThrowIfNull(einteilung);
+        RefPlan plan = RefPlan.Laden(optionen.Rundenplanung == Rundenplanung.NurRueckrunde ? staffel : staffel with { BestehenderSpielplan = [] }, optionen);
+        var d = new KernDefinition(plan);
+        if (Grund(d) is { } grund)
+        {
+            return new Schrankenbericht(0, 0, [], [grund], []);
+        }
+
+        return new Ligaschranke(d) { aufhoeren = aufhoeren, startplan = startplan, laufzeit = laufzeit, schnell = true }.Rechnen(loeser, StandardZeitJeStufe, zeitJeProbe, einteilung.Vervollstaendigt(), fortschritt ?? (_ => { }));
     }
 
     /// <summary>
@@ -208,6 +250,9 @@ public sealed partial class Ligaschranke
     /// <summary>Kriterien, deren genaue Form das Modell für HiGHS schwer macht (Stufe B rechnet erst ohne sie).</summary>
     private static bool Schwer(Kostenkriterium k) => k is Kostenkriterium.AbstandHeimAuswaerts or Kostenkriterium.Setzliste;
 
+    /// <summary>Ob ein Kriterium dieser Stufe erst nach Stufe A ins Modell kommt (siehe <see cref="SpaeteKriterien"/>).</summary>
+    private static bool Spaet(string stufe, Kostenkriterium k) => stufe[0] == 'B' && SpaeteKriterien.Contains(k);
+
     /// <summary>Der Name eines Kriteriums in Bericht und Varianten.</summary>
     private static string Name(Kostenkriterium k) => k switch
     {
@@ -252,7 +297,7 @@ public sealed partial class Ligaschranke
         // Abstand H/A und Setzliste (genau) machen das Modell für HiGHS schwer: Ihre Zeilen werden zuletzt angelegt und gemerkt –
         // die Stufe B rechnet erst ohne sie („leicht“, dort findet HiGHS schnell gute Pläne) und dann mit ihnen von diesen Plänen aus.
         var schwereZeilen = new List<(int Von, int Bis)>();
-        void ZieleAnlegen()
+        void ZieleAnlegen(bool spaete)
         {
             var reihenfolge = new List<(string Stufe, Kostenkriterium Kriterium)>();
             foreach ((string buchstabe, IReadOnlyList<Kostenkriterium> liste, int erste) in new[] { ("A", einteilung.A, 2), ("B", einteilung.B, 1) })
@@ -260,7 +305,7 @@ public sealed partial class Ligaschranke
                 reihenfolge.AddRange(liste.Select((k, i) => (buchstabe + (i + erste).ToString(CultureInfo.InvariantCulture), k)));
             }
 
-            foreach ((string stufe, Kostenkriterium k) in reihenfolge.OrderBy(e => Schwer(e.Kriterium)))
+            foreach ((string stufe, Kostenkriterium k) in reihenfolge.Where(e => Spaet(e.Stufe, e.Kriterium) == spaete).OrderBy(e => Schwer(e.Kriterium)))
             {
                 int zeilen = modell.Zeilen;
                 if (Ziel(k) is not { } ziel)
@@ -281,8 +326,15 @@ public sealed partial class Ligaschranke
             einzelne.Sort((x, y) => x.Stufe[0] != y.Stufe[0]
                 ? x.Stufe[0].CompareTo(y.Stufe[0])
                 : int.Parse(x.Stufe[1..], CultureInfo.InvariantCulture).CompareTo(int.Parse(y.Stufe[1..], CultureInfo.InvariantCulture)));
+            (string, string, List<(int Spalte, double Faktor)>) summeB = ("B", "Stufe B gesamt", Zusammenfassen(einzelne.Where(z => z.Stufe[0] == 'B').SelectMany(z => z.Ziel)));
+            if (spaete)
+            {
+                kettenziele[2] = summeB;
+                return;
+            }
+
             kettenziele.Add(("A", "Stufe A gesamt", Zusammenfassen(einzelne.Where(z => z.Stufe[0] == 'A').SelectMany(z => z.Ziel))));
-            kettenziele.Add(("B", "Stufe B gesamt", Zusammenfassen(einzelne.Where(z => z.Stufe[0] == 'B').SelectMany(z => z.Ziel))));
+            kettenziele.Add(summeB);
         }
 
         // Das leichte Modell: eine Kopie, in der die schweren Zeilen nicht gelten (ihre Hilfsspalten sind dann frei und fallen
@@ -447,13 +499,14 @@ public sealed partial class Ligaschranke
                 Dictionary<int, double[]> starts = [];
                 if (Leicht() is { } mitALeicht)
                 {
-                    // Erst leicht (ohne Abstand H/A und Setzliste): Varianten und Summe der übrigen B-Kriterien, dann die Pläne im
+                    // Erst leicht (ohne die schweren Kriterien): Varianten und Summe der übrigen B-Kriterien, dann die Pläne im
                     // vollen Modell ergänzt als Startlösungen – von dort aus senkt HiGHS auch Abstand und Setzliste, so weit es kommt.
                     int[] leichte = Enumerable.Range(0, einzelne.Count).Where(i => einzelne[i].Stufe[0] == 'B' && !Schwer(einzelne[i].Kriterium!.Value)).ToArray();
                     List<(int Spalte, double Faktor)> summeLeicht = Zusammenfassen(leichte.SelectMany(i => einzelne[i].Ziel));
                     List<(int Index, double[] Werte)> leichtAlternativen = Alternativen(einzelne, alleinB, mitALeicht, summeLeicht, loeser, zeit, leichte);
                     double[]? leichtStart = leichtAlternativen.Select(e => e.Werte).Append(stufenstart).OfType<double[]>().MinBy(w => Wert(summeLeicht, w));
-                    fortschritt(new Schrankenfortschritt("Summe B ohne Abstand H/A und Setzliste", n, Stufen + 1, beste is null ? null : Plan(beste)));
+                    string schwere = string.Join(", ", einzelne.Where(z => z.Stufe[0] == 'B' && Schwer(z.Kriterium!.Value)).Select(z => z.Kriterium == Kostenkriterium.AbstandHeimAuswaerts ? "Abstand H/A" : z.Name));
+                    fortschritt(new Schrankenfortschritt($"Summe B ohne {schwere}", n, Stufen + 1, beste is null ? null : Plan(beste)));
                     double[]? leichtSumme = Minimieren(mitALeicht, summeLeicht, loeser, zeit, leichtStart, aufhoeren, laufzeit).Werte ?? leichtStart;
                     List<double[]> leichtePlaene = [.. leichtAlternativen.Select(e => e.Werte), .. leichtSumme is null ? Array.Empty<double[]>() : [leichtSumme]];
                     var ergaenzt = new double[]?[leichtePlaene.Count];
@@ -472,7 +525,7 @@ public sealed partial class Ligaschranke
                         start = s;
                     }
 
-                    fortschritt(new Schrankenfortschritt("Varianten in Stufe B mit Abstand H/A und Setzliste", n, Stufen + 1, beste is null ? null : Plan(beste)));
+                    fortschritt(new Schrankenfortschritt($"Varianten in Stufe B mit {schwere}", n, Stufen + 1, beste is null ? null : Plan(beste)));
                 }
 
                 alternativenB = Alternativen(einzelne, alleinB, mitA, ziel, loeser, zeit, starts: starts);
@@ -545,6 +598,7 @@ public sealed partial class Ligaschranke
                 hinweise.Add($"{name} in der Zeit nicht bewiesen (Grenze {schranke}, bester Plan {halten}) – die weiteren Stufen gelten bei {stufe} ≤ {halten}.");
             }
 
+            int haltezeile = modell.Zeilen;
             if (ziel.Count > 0)
             {
                 // Höhere Stufe festhalten: Die nächste darf sie nicht verschlechtern.
@@ -552,6 +606,25 @@ public sealed partial class Ligaschranke
             }
 
             festgehalten.Append(CultureInfo.InvariantCulture, $"{stufe}≤{halten};");
+            if (n == 1 && einteilung.B.Any(k => Spaet("B", k)))
+            {
+                // Die späten B-Kriterien erst jetzt ins Modell (sie machten Stufe A für HiGHS um ein Vielfaches langsamer); der
+                // Plan von A und das Modell für „A und B zusammen“ (nach A1, A frei) bekommen ihre Hilfsspalten nachträglich.
+                ZieleAnlegen(spaete: true);
+                Array.Resize(ref einzeln, einzelne.Count);
+                Array.Resize(ref alleinGefunden, einzelne.Count);
+                nachA1 = modell.Kopie();
+                if (ziel.Count > 0)
+                {
+                    nachA1.ZeileGrenzen(haltezeile, double.NegativeInfinity, double.PositiveInfinity);
+                }
+
+                if (beste is not null && beste.Length < modell.Spalten)
+                {
+                    beste = Ergaenzen(beste) ?? beste;
+                }
+            }
+
             if (n == 1)
             {
                 // Die Schranke von A gleich weitergeben: Hat der beste Plan sie, ist bei A nichts mehr zu holen. Und die
@@ -568,7 +641,7 @@ public sealed partial class Ligaschranke
                     hinweise.Add("Spiele ohne Termin sind unvermeidbar: Abstand H/A, Setzliste und Spieltage kennt das Modell dann nicht.");
                 }
 
-                ZieleAnlegen();
+                ZieleAnlegen(spaete: false);
                 einzeln = new int[einzelne.Count];
                 alleinGefunden = new int?[einzelne.Count];
                 nachA1 = modell.Kopie();
@@ -585,7 +658,7 @@ public sealed partial class Ligaschranke
         // weniger B-Verstöße bringt. Start ist der Plan für die Summe B (er erfüllt das Modell nach A1).
         List<(int Spalte, double Faktor)> zielAB = kettenziele.Count > 2 ? Zusammenfassen(kettenziele[1].Ziel.Concat(kettenziele[2].Ziel)) : [];
         (double[]? Werte, bool Bewiesen)? planAB = null;
-        if (nachA1 is not null && summenplanB is not null && zielAB.Count > 0 && aufhoeren?.Invoke() != true)
+        if (nachA1 is not null && summenplanB is not null && zielAB.Count > 0 && !schnell && aufhoeren?.Invoke() != true)
         {
             fortschritt(new Schrankenfortschritt("A und B zusammen", Stufen, Stufen + 1, beste is null ? null : Plan(beste)));
             (int schrankeAB, int? gefundenAB, double[]? werteAB, _) = Minimieren(nachA1, zielAB, loeser, zeit, summenplanB, aufhoeren, laufzeit, Zwischen("A und B zusammen"));
@@ -659,6 +732,13 @@ public sealed partial class Ligaschranke
             };
         }
 
+        if (kette.Count == Stufen && beste is not null && schnell)
+        {
+            // Einfacher Modus: A und B sind fertig; je C-Kriterium eine Probe bei festgehaltenem A und B.
+            fortschritt(new Schrankenfortschritt("Proben in Stufe C", Stufen, Stufen + 1, Plan(beste), Bericht(beste, []) with { Alternativen = [] }));
+            return Bericht(beste, []) with { Alternativen = [], Proben = Proben(einteilung, beste, loeser, zeitC) };
+        }
+
         if (kette.Count == Stufen && beste is not null)
         {
             // A und B sind fertig: Bericht mit den Varianten schon jetzt (zum Wählen, während C rechnet).
@@ -707,6 +787,58 @@ public sealed partial class Ligaschranke
         System.Threading.Tasks.Parallel.For(0, kandidaten.Count, optionen, j =>
             ergebnis[j] = Minimieren(kandidaten[j].Modell, summe, loeser, zeit, kandidaten[j].Start, aufhoeren, laufzeit));
         return kandidaten.Select((k, j) => (k.Index, ergebnis[j].Werte ?? k.Start)).ToList();
+    }
+
+    /// <summary>
+    /// Die Proben der schnellen Schranke: je Kriterium der Stufe C, das das Modell kennt und im Plan Verstöße hat, so wenige wie
+    /// möglich bei festgehaltenem A und B (gleichzeitig auf Kopien, Start ist der beste Plan). Wechsel H/A fehlt (zu schwer).
+    /// </summary>
+    private List<Kriteriumsprobe> Proben(Stufeneinteilung einteilung, double[] beste, ISchrankenloeser loeser, TimeSpan zeit)
+    {
+        if (zeit <= TimeSpan.Zero)
+        {
+            return [];
+        }
+
+        var ziele = einteilung.C
+            .Where(k => k != Kostenkriterium.WechselHeimAuswaerts && Stufeneinteilung.HatAnzahl(k))
+            .Select(k => (Kriterium: k, Ziel: Ziel(k)))
+            .Where(e => e.Ziel is { Count: > 0 })
+            .Select(e => (e.Kriterium, Ziel: Zusammenfassen(e.Ziel!)))
+            .ToList();
+        if (ziele.Count == 0 || aufhoeren?.Invoke() == true)
+        {
+            return [];
+        }
+
+        // Die neuen Hilfsspalten im besten Plan ergänzen (Ansetzungen fest).
+        double[] start = beste;
+        if (start.Length < modell.Spalten)
+        {
+            Ganzzahlmodell kopie = modell.Kopie();
+            foreach (int spalte in termine.Select(t => t.Spalte).Concat(ohneTermin.Select(u => u.Spalte)))
+            {
+                double wert = Math.Round(start[spalte]);
+                kopie.Zeile([spalte], wert, wert);
+            }
+
+            start = Minimieren(kopie, Zusammenfassen(ziele.SelectMany(z => z.Ziel)), loeser, zeit, aufhoeren: aufhoeren).Werte ?? start;
+        }
+
+        if (start.Length < modell.Spalten)
+        {
+            return [];
+        }
+
+        var mitVerstoss = ziele.Where(z => Wert(z.Ziel, start) > 0.5).ToList();
+        Ganzzahlmodell[] kopien = [.. mitVerstoss.Select(_ => modell.Kopie())];
+        (int Schranke, int? Gefunden, double[]? Werte, bool Unloesbar)[] ergebnisse = Parallel(kopien, [.. mitVerstoss.Select(z => z.Ziel)], loeser, zeit, aufhoeren, start);
+        return [.. mitVerstoss.Select((z, i) => new Kriteriumsprobe(
+            z.Kriterium,
+            (int)Math.Round(Wert(z.Ziel, start)),
+            ergebnisse[i].Gefunden,
+            ergebnisse[i].Schranke,
+            ergebnisse[i].Werte is { } w ? Plan(w) : []))];
     }
 
     /// <summary>

@@ -24,6 +24,24 @@ Entscheidungen mit Begründung stehen ausführlich im [MIGRATIONSPLAN](MIGRATION
 ## Was Peter wichtig ist (gelernte Vorlieben)
 
 - Oberfläche ruhig und verständlich; Hinweise erst zeigen, wenn sie etwas bedeuten (z. B. keine Hinweise ohne Plan).
+- Kompakt statt touch-optimiert (Andreas/Peter, 27.10.2026): Grundschrift 12, Bedienflächen 30–36 px, Zoom nur im Menü ☰
+  im Kopf (und Strg + Mausrad/Plus/Minus/0). Nächster Schritt: Expertenmodus (heutige Oberfläche) und ein einfacher Modus
+  für normale Klassenleiter; Seltenes hinter das Menü.
+- Neue Kriterien oder Zählweisen, die das Original nicht hat, gehören nur in den Automodus (Peter, 27.10.2026): keine
+  neue Kostenart, keine Gewichtung, die Kostenoptimierung bleibt wie im Original – zählen wie die Zusatzanzahlen
+  (`KernPlan.ZusatzZaehlen`). Beispiel: Wechsel H/A zählt steigend (29.10.2026, Zuschlag `Wechselzuschlag`). Die
+  Heim/Auswärts-Bilanz (27.10.) war ein Irrweg und ist entfernt: kein Stellvertreter für den Wechsel, in B schädlich; ohne
+  sie und mit steigendem Wechsel −22 % Güte in 6 Klassen. Lehre: einen Stellvertreter erst messen, bevor er in B kommt.
+- **Einfacher Modus (Peter, 28.10.2026):** nicht „der beste Plan“, sondern der beste für die gewählten Kriterien. Der
+  Algorithmus sucht an der Grenze des Machbaren (dort senkt man nichts, ohne anderes zu erhöhen); der Klassenleiter lotet sie
+  aus. Bewertung nach Gruppen statt A/B/C, Wünsche der Vereine nie opfern, Auffälligkeit zählt (mehrfach zu Hause > etwas
+  schlechtere Verteilung). Oberfläche später anschaulich als „Wippe“ (Gruppe drücken → andere gehen hoch), Diagramme schnell
+  einblendbar – keine Gruppen in Zeilen. MIGRATIONSPLAN Abschnitt 14.
+- **Kriterien sind im Automodus nicht fest** (Peter, 27.10.2026 – wichtigste Erkenntnis für den Automodus): Ein Kriterium
+  geht nach B, wenn es sich dort (nahezu) auf 0 bringen lässt, ohne andere Kriterien zu kannibalisieren; sonst bleibt bzw.
+  geht es nach C. Beispiel war die (inzwischen entfernte) H/A-Bilanz: in Klassen mit sehr vielen Koppelwünschen
+  (Verbandsoberliga) kostete sie in B Sperrtermine (R21: 1 → 18). Nächster Schritt: dynamisches Hoch-/Herunterstufen im
+  Automodus.
 - Karten: gerade Linien (keine Bögen), Pfeilspitzen am Rand des Ziels, Ausgangshalle grün, Ziel in Linienfarbe,
   zweifarbige Pfeile aus zwei Hälften (nicht dicker als ein einfacher Pfeil), kurze Fahrten im Vordergrund mit hellem
   Rand, Namen nie abgeschnitten, Maßstab nur „N km“. Beschriftung im Kompaktmodus überall der volle Mannschaftsname
@@ -93,6 +111,10 @@ Entscheidungen mit Begründung stehen ausführlich im [MIGRATIONSPLAN](MIGRATION
   Live-Bewertung, Neuplanung mit wenig Änderungen, untere Schranke mit HiGHS, verschiedene gute Pläne zur Wahl,
   Fahrtstrecken im normalen Modus, Robustheit, mehrere Staffeln, Tour. Empfehlung: vorerst keine LLM-Anbindung im Programm; seit 25.10.2026 gibt es dafür den MCP-Server
   `andigen-mcp` (tools/AndiGenerator.Mcp, README dort): KI-Anwendungen steuern die Planung von außen, das Programm bleibt offline.
+- Ideen aus dem Meinl-Generator (MIGRATIONSPLAN Abschnitt 13, M1–M11, 26.10.2026): vorn **Mindestspiele je Monat schnell
+  eingeben** und **Meldungen dagegen prüfen**, dann **Verbandsprofile**; danach einstellbare Abstände (Hin-/Rückspiel in
+  Tagen, Mindestabstand, Höchstpause, Serien), Sa+So, Koppeln verbieten, Mindestpause am selben Tag, Rundendaten
+  verschieben. Meinl-Pläne lassen sich mit `andigen bewerten` direkt nach A · B · C einstufen.
 - **Nach dem Umzug des Projektverzeichnisses** (aus OneDrive nach `C:\Users\peter\source\repos\AndiGenerator\`)
   teilweise angehen: die Punkte aus MIGRATIONSPLAN Abschnitt 10 (3–13, s. o.) und **HiGHS als Ergänzung der Suche**
   (Abschnitt 11, O7 neu): untere Schranke für Stufe A, Startplan aus HiGHS, gezielte Reparatur als Suchplatz – zuerst

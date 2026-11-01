@@ -26,6 +26,7 @@ namespace AndiGenerator.Engine.Schranke;
 /// Kriterien der Stufen A und B, die das Modell nicht kennt: Sie fehlen in den Grenzen (die bleiben gültig, sind aber nicht
 /// erreichbar, solange der Plan dort Verstöße hat) und in den Varianten; leer, wenn keine.
 /// </param>
+/// <param name="Proben">Nur bei der schnellen Schranke (einfacher Modus): je Kriterium der Stufe C seine Probe, sonst <c>null</c>.</param>
 public sealed record Schrankenbericht(
     int Spalten,
     int Zeilen,
@@ -35,7 +36,8 @@ public sealed record Schrankenbericht(
     Schrankenstufe? SummeA = null,
     Schrankenstufe? SummeB = null,
     IReadOnlyList<Planalternative>? Alternativen = null,
-    IReadOnlyList<Kostenkriterium>? Unbekannt = null)
+    IReadOnlyList<Kostenkriterium>? Unbekannt = null,
+    IReadOnlyList<Kriteriumsprobe>? Proben = null)
 {
     /// <summary>Holt die bewiesene Schranke der Stufe A (Summe); <c>null</c>, wenn sie nicht bewiesen ist.</summary>
     public int? SchrankeA => SummeA is { Bewiesen: true } a && (Stufen.FirstOrDefault(s => s.Stufe == "A1")?.Bewiesen ?? false) ? a.Schranke : null;

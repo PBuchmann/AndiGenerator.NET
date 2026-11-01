@@ -181,7 +181,7 @@ public class KompaktplanerTests
 
         // Mindestens ein Schritt des Lösers hat einen Plan geliefert. Welche Schritte in 20 s drankommen, hängt von der Last
         // des Rechners ab (andere Tests, Abdeckungsmessung); mehr Zeit macht den Test bei 8 Mannschaften minutenlang.
-        Assert.Contains(ergebnis.Hinweise, h => h.Contains("bestmöglich", StringComparison.Ordinal));
+        Assert.Contains(ergebnis.Qualitaet, h => h.Contains("bestmöglich", StringComparison.Ordinal));
         foreach (Kompaktvariante v in ergebnis.Varianten)
         {
             Turnierpruefungsergebnis pruefung = Turnierpruefung.Pruefen(Turniere(v), aufgabe.Mannschaften, aufgabe.Meldungen);
@@ -201,12 +201,20 @@ public class KompaktplanerTests
         // Großzügige Höchstdauer: Die Suche endet, sobald sie vollständig ist; unter Abdeckungsmessung läuft sie viel langsamer.
         baum.Suchen(Math.Max(1, Environment.ProcessorCount - 1), TimeSpan.FromMinutes(10), steuerung, null);
 
-        (Kompaktloesung? loesung, bool optimal) = new Kompaktoptimierung(modell, new Highsbruecke()).Suchen(new Kompaktauftrag(null, true, false, false, false), null, 2, () => false);
+        var staende = new System.Collections.Concurrent.ConcurrentQueue<Loeserstand>();
+        (Kompaktloesung? loesung, bool optimal, double luecke) = new Kompaktoptimierung(modell, new Highsbruecke()).Suchen(new Kompaktauftrag(null, true, false, false, false), null, 2, () => false, stand: staende.Enqueue);
 
         Assert.True(baum.Vollstaendig);
         Assert.NotNull(baum.Beste);
         Assert.NotNull(loesung);
         Assert.True(optimal);
+        Assert.Equal(0, luecke);
+
+        // Der Stand für die Anzeige: bester Wert fällt, Schranke steigt; am Ende treffen sie sich.
+        Loeserstand[] liste = [.. staende];
+        Assert.NotEmpty(liste);
+        Assert.True(liste.Zip(liste.Skip(1)).All(p => p.Second.Wert <= p.First.Wert && p.Second.Schranke >= p.First.Schranke));
+        Assert.Equal(liste[^1].Wert, liste[^1].Schranke, 6);
         Assert.Equal((9, 0), (loesung.Vierer, loesung.Dreier));
         Assert.Equal(baum.Beste.Sum(k => k.Km), loesung.Km, 3);
     }

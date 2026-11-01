@@ -46,8 +46,6 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
     private readonly DockFabrik fabrik;
     private readonly List<AnsichtViewModel> ansichten = [];
 
-    /// <summary>Ansichten, die „Start mit“ vor dem Start auf den Ausgangsplan gestellt hat.</summary>
-    private readonly List<AnsichtViewModel> startplanAnsichten = [];
     private readonly Dictionary<string, Planstand?> gemerkteStaende = new(StringComparer.Ordinal);
     private readonly Timer statusTakt;
     private readonly string eigeneBasis;
@@ -62,8 +60,7 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
     private IReadOnlyList<Spiel>? sicherungEntschieden;
     private Planstand? clickTtStand;
     private IReadOnlyList<PlanQuelle> planquellen = [PlanQuelle.Laufend];
-    private IReadOnlyList<Startplan> startplaene = [Startplan.Leer];
-    private Startplan startplan = Startplan.Leer;
+    private PlanQuelle? gewaehlterPlan;
     private string csvHinweis = KeinExportplan;
     private bool automodus;
     private OptionenAnsichtViewModel? optionenAnsicht;
@@ -82,6 +79,7 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
     private int naechsteAnsicht = 1;
     private string staffelname = string.Empty;
     private string staffelinfo = string.Empty;
+    private string rundentext = string.Empty;
     private IReadOnlyList<Zuletztzeile> zuletzt = [];
     private string aktiveAnsicht = string.Empty;
     private int startzoom = 100;
@@ -122,7 +120,9 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
             }
 
             ExportAktualisieren();
+            OnPropertyChanged(nameof(AktiverZoom));
         };
+        fabrik.FocusedDockableChanged += (_, _) => OnPropertyChanged(nameof(AktiverZoom));
         fabrik.DockableClosed += (_, e) =>
         {
             ansichten.RemoveAll(a => ReferenceEquals(a, e.Dockable));
@@ -180,7 +180,7 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
         StoppenCommand = new RelayCommand(Stoppen, () => Laeuft || KompaktRechnet);
         PlanMerkenCommand = new AsyncRelayCommand(PlanMerkenAsync, () => laufenderStand is not null);
         PlanLoeschenCommand = new AsyncRelayCommand(
-            () => startplan.Quelle is PlanQuelle quelle ? GemerktenPlanEntfernenAsync(quelle) : Task.CompletedTask,
+            () => AktuellerPlanQuelle.Art == PlanQuellenArt.GemerkterPlan ? GemerktenPlanEntfernenAsync(AktuellerPlanQuelle) : Task.CompletedTask,
             () => ZeigtPlanLoeschen);
         DruckenCommand = new AsyncRelayCommand(DruckenAsync, () => ZeigtArbeitsbereich);
         AnleitungCommand = new AsyncRelayCommand(AnleitungAsync);
@@ -206,6 +206,7 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
         Anzeige.PropertyChanged += (_, e) => FuehrungAktualisieren(e.PropertyName);
 
         Zuletzt = Zeilen(Zuletztlesen());
+        istNormal = !ModusLesen(eigeneBasis);
         statusTakt = new Timer(_ => StatusAbfragen(), null, TimeSpan.FromMilliseconds(500), TimeSpan.FromMilliseconds(500));
     }
 
@@ -231,6 +232,13 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
     {
         get => staffelinfo;
         private set => SetProperty(ref staffelinfo, value);
+    }
+
+    /// <summary>Holt die geplante Runde für die Kopfzeile, z. B. „Rückrunde“ oder „gesamte Runde“ (leer ohne Staffel).</summary>
+    public string Rundentext
+    {
+        get => rundentext;
+        private set => SetProperty(ref rundentext, value);
     }
 
     /// <summary>Holt die Kacheln mit dem Stand der Generierung.</summary>
@@ -331,17 +339,8 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
     /// <summary>Holt einen Wert, der angibt, ob rechts daneben „Stopp“ steht (Generierung läuft oder ruht; sonst „Schließen“).</summary>
     public bool ZeigtStopp => Laeuft || KompaktRechnet;
 
-    /// <summary>
-    /// Holt einen Wert, der angibt, ob „Start mit“ gewählt werden kann: nur vor dem Start. Eine laufende oder angehaltene
-    /// Generierung setzt immer ihren eigenen besten Plan fort; für einen anderen Ausgangsplan erst „Beenden“.
-    /// </summary>
-    public bool StartplanWaehlbar => IstGeoeffnet && !Laeuft;
-
-    /// <summary>
-    /// Holt einen Wert, der angibt, ob statt „Plan merken“ der Knopf „Plan löschen“ steht: vor dem Start, wenn unter
-    /// „Start mit“ ein gemerkter Plan gewählt ist.
-    /// </summary>
-    public bool ZeigtPlanLoeschen => StartplanWaehlbar && startplan.Quelle?.Art == PlanQuellenArt.GemerkterPlan;
+    /// <summary>Holt einen Wert, der angibt, ob statt „Plan merken“ der Knopf „Plan löschen“ steht: wenn der angezeigte Plan gemerkt ist.</summary>
+    public bool ZeigtPlanLoeschen => IstGeoeffnet && !Laeuft && AktuellerPlanQuelle.Art == PlanQuellenArt.GemerkterPlan;
 
     /// <summary>Holt die Statuszeile (Pläne, Pläne/s, Kosten, Verbesserungen).</summary>
     public string Statuszeile
@@ -415,6 +414,38 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
     /// <summary>Holt den Befehl, der die aktive Ansicht auf 100 % zurücksetzt (Strg + 0 wie im Browser).</summary>
     public IRelayCommand ZoomZuruecksetzenCommand { get; }
 
+    /// <summary>
+    /// Holt die Vergrößerung der aktiven Ansicht für die Leiste unten (in beiden Modi dieselbe Stelle), z. B. „Vergrößerung der
+    /// Ansicht: 90 %“. Ohne vergrößerbare Ansicht steht dort eine feste 100-%-Angabe, die keine Wirkung hat.
+    /// </summary>
+    public string ZoomStand => ZoombareAnsicht() is IZoombar ansicht
+        ? "Vergrößerung der Ansicht: " + ansicht.Zoom.Text
+        : "Diese Ansicht lässt sich nicht vergrößern";
+
+    /// <summary>Holt die Vergrößerung, die die Leiste unten gerade zeigt und ändert: die der aktiven Ansicht bzw. des normalen Modus.</summary>
+    public Zoom AktiverZoom => ZoombareAnsicht()?.Zoom ?? new Zoom();
+
+    /// <summary>
+    /// Holt oder setzt den Plan, den alle Ansichten zeigen, wenn gerade keine Generierung läuft (Auswahl in der Kopfleiste).
+    /// Die Auswahl gilt bis zum nächsten Start oder bis die Staffel neu geöffnet wird.
+    /// </summary>
+    public PlanQuelle PlanAuswahl
+    {
+        get => AktuellerPlanQuelle;
+        set
+        {
+            if (value == gewaehlterPlan || !Planquellen.Contains(value))
+            {
+                return;
+            }
+
+            gewaehlterPlan = value;
+            PlanAnzeigeAktualisieren();
+            OnPropertyChanged(nameof(PlanAuswahl));
+            OnPropertyChanged(nameof(ZeigtPlanLoeschen));
+        }
+    }
+
     /// <summary>Holt den Befehl „Generierung starten“ (mit leerem Plan wie im Original).</summary>
     public IAsyncRelayCommand StartenCommand { get; }
 
@@ -427,7 +458,7 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
     /// <summary>Holt den Befehl „Plan merken…“ (bester Plan der Generierung).</summary>
     public IAsyncRelayCommand PlanMerkenCommand { get; }
 
-    /// <summary>Holt den Befehl „Plan löschen“: den unter „Start mit“ gewählten gemerkten Plan nach Rückfrage löschen.</summary>
+    /// <summary>Holt den Befehl „Plan löschen“: den angezeigten gemerkten Plan nach Rückfrage löschen.</summary>
     public IAsyncRelayCommand PlanLoeschenCommand { get; }
 
     /// <summary>Holt den Befehl „Drucken…“ (Original: Druckauswahl und Ausdruck; hier als PDF-Datei).</summary>
@@ -485,7 +516,7 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
 
     /// <summary>
     /// Holt den Befehl „Für click-TT exportieren“: den aktuell angezeigten Plan (Plan der aktiven Ansicht, sonst den
-    /// Stand der Generierung bzw. den gewählten Ausgangsplan) als CSV speichern; deaktiviert, wenn es keinen gibt.
+    /// Stand der Generierung bzw. den angezeigten Plan) als CSV speichern; deaktiviert, wenn es keinen gibt.
     /// </summary>
     public IAsyncRelayCommand CsvExportierenCommand { get; }
 
@@ -496,32 +527,11 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
         private set => SetProperty(ref csvHinweis, value);
     }
 
-    /// <summary>Holt die möglichen Ausgangspläne für „Generierung starten“.</summary>
-    public IReadOnlyList<Startplan> Startplaene
-    {
-        get => startplaene;
-        private set => SetProperty(ref startplaene, value);
-    }
-
     /// <summary>
-    /// Holt oder setzt den Ausgangsplan für „Generierung starten“ (Standard: leerer Plan wie im Original). Ein gewählter
-    /// vorhandener Plan wird sofort in allen Ansichten und den Kacheln gezeigt, ohne dass eine Optimierung startet.
+    /// Holt den Plan, den alle Ansichten und Kacheln zeigen: der Stand der laufenden Generierung, sonst der zuletzt
+    /// gespeicherte (gesichert oder gemerkt), sonst der Plan aus click-TT. Gestartet wird immer mit einem leeren Plan.
     /// </summary>
-    public Startplan? Startplan
-    {
-        get => startplan;
-        set
-        {
-            if (value is not null && SetProperty(ref startplan, value))
-            {
-                PlanLoeschenAktualisieren();
-                if (value.Quelle is PlanQuelle quelle)
-                {
-                    StartplanZeigen(quelle);
-                }
-            }
-        }
-    }
+    public PlanQuelle AktuellerPlanQuelle => AktuellerPlan(Planquellen);
 
     /// <summary>
     /// Holt einen Wert, der angibt, ob mit Automodus generiert wird bzw. beim nächsten Start werden soll: Die Suche lenkt sich
@@ -598,11 +608,21 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
         statusTakt.Dispose();
         dienst.Verbessert -= BeiVerbesserung;
         dienst.Dispose();
+        normal?.Dispose();
     }
 
     /// <summary>Vor dem Beenden des Programms: Ein noch nicht gesicherter Plan wird gesichert (oder es wird gefragt).</summary>
     /// <returns><c>false</c>, wenn der Anwender abbricht und das Programm offen bleiben soll.</returns>
-    public Task<bool> BeendenErlaubtAsync() => PlanSichernAsync("Das Programm wird beendet.");
+    public async Task<bool> BeendenErlaubtAsync()
+    {
+        // Läuft die Planung des normalen Modus, wird ihr bester Plan übernommen (er bleibt so erhalten).
+        if (normal is { Laeuft: true } n)
+        {
+            await n.FertigAsync();
+        }
+
+        return await PlanSichernAsync("Das Programm wird beendet.");
+    }
 
     /// <summary>
     /// Sichert nach einem unerwarteten Fehler den aktuellen Plan als gemerkten Plan <see cref="NotfallsicherungName"/>, ohne
@@ -642,6 +662,8 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
         {
             ansicht.Zoom.Prozent = startzoom;
         }
+
+        OnPropertyChanged(nameof(AktiverZoom));
     }
 
     /// <summary>Liefert den Plan einer Quelle (bewertet), sofern vorhanden.</summary>
@@ -967,6 +989,33 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
         QuellenNeuAufbauen();
     }
 
+    /// <summary>
+    /// Der Plan, den alle Ansichten zeigen: der Stand der laufenden Generierung, sonst der zuletzt gespeicherte (gesichert
+    /// oder gemerkt), sonst der Plan aus click-TT, sonst die Generierung selbst (ohne Plan).
+    /// </summary>
+    /// <param name="quellen">Die möglichen Quellen; die Wahl stammt immer aus dieser Liste.</param>
+    /// <returns>Die Quelle.</returns>
+    internal PlanQuelle AktuellerPlan(IReadOnlyList<PlanQuelle> quellen)
+    {
+        if ((laufenderStand is not null || Laeuft) && quellen.Contains(PlanQuelle.Laufend))
+        {
+            return PlanQuelle.Laufend;
+        }
+
+        if (gewaehlterPlan is { } gewaehlt && quellen.Contains(gewaehlt))
+        {
+            return gewaehlt;
+        }
+
+        if (quellen.Where(q => q.Art is PlanQuellenArt.GesicherterPlan or PlanQuellenArt.GemerkterPlan && q.Eintrag is not null)
+            .MaxBy(q => q.Eintrag!.Geaendert) is { } gespeichert)
+        {
+            return gespeichert;
+        }
+
+        return quellen.FirstOrDefault(q => q.Art == PlanQuellenArt.ClickTtPlan) ?? PlanQuelle.Laufend;
+    }
+
     /// <summary>Ob zwei Pläne dieselben Begegnungen an denselben Tagen haben, gleich in welcher Reihenfolge.</summary>
     private static bool GleicheBegegnungen(IReadOnlyList<Spiel> a, IReadOnlyList<Spiel> b)
     {
@@ -1070,14 +1119,6 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
         _ => null,
     };
 
-    private static string StartplanName(PlanQuelle quelle) => quelle.Art switch
-    {
-        PlanQuellenArt.LaufendeGenerierung => "bestem Plan der letzten Generierung",
-        PlanQuellenArt.ClickTtPlan => "in click-TT vorhandenem Plan",
-        PlanQuellenArt.GesicherterPlan => "gesichertem Plan",
-        _ => "gemerktem Plan „" + quelle.Eintrag!.Name + "“",
-    };
-
     private static string Zahl(double wert) => wert.ToString("N0", Deutsch);
 
     private static string Statustext(Optimierungsstand stand)
@@ -1111,8 +1152,21 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
         : "Die Vorrunde liegt in der Vergangenheit. Soll nur die Rückrunde generiert werden?";
 
     /// <summary>Die Ansicht mit dem Fokus, sonst die aktive Ansicht des Hauptbereichs, sofern sie vergrößert werden kann.</summary>
-    private IZoombar? ZoombareAnsicht() =>
-        Layout.FocusedDockable as IZoombar ?? (Layout.ActiveDockable as IDock)?.ActiveDockable as IZoombar;
+    private IZoombar? ZoombareAnsicht()
+    {
+        if (IstNormal)
+        {
+            // Im normalen Modus vergrößern sich Terminplan und Diagramme des besten Plans; die Übersicht bleibt, wie sie ist.
+            if (Normal.ZeigtTerminplan)
+            {
+                return Normal.Terminplan;
+            }
+
+            return Normal.ZeigtDiagramme ? Normal.Diagramme : null;
+        }
+
+        return Layout.FocusedDockable as IZoombar ?? (Layout.ActiveDockable as IDock)?.ActiveDockable as IZoombar;
+    }
 
     private string NaechsteId() => "Ansicht" + (naechsteAnsicht++).ToString(CultureInfo.InvariantCulture);
 
@@ -1125,6 +1179,15 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
     {
         const string Titeltext = "Staffel öffnen";
         IReadOnlyList<string> pfade = await oberflaeche.DateienOeffnenAsync(Titeltext, [ClickTtDateien, PlanDateien]);
+        await DateienAuswertenAsync(pfade);
+    }
+
+    /// <summary>Öffnet eine Staffel aus ausgewählten oder abgelegten Dateien: eine XML-Datei, dazu höchstens eine CSV- und eine PDF-Datei aus click-TT.</summary>
+    /// <param name="pfade">Die Dateien.</param>
+    /// <returns>Erledigt, wenn die Staffel geöffnet ist (oder ein Hinweis kam).</returns>
+    private async Task DateienAuswertenAsync(IReadOnlyList<string> pfade)
+    {
+        const string Titeltext = "Staffel öffnen";
         if (pfade.Count == 0)
         {
             return;
@@ -1294,12 +1357,14 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
         Titel = UeberViewModel.Programm;
         Staffelname = string.Empty;
         Staffelinfo = string.Empty;
+        Rundentext = string.Empty;
         Statuszeile = "Bitte eine click-TT-Datei oder Plandatei öffnen.";
+        normal?.StaffelGeschlossen();
         Anzeige.Zuruecksetzen("Generierung noch nicht gestartet");
         OnPropertyChanged(nameof(IstGeoeffnet));
         OnPropertyChanged(nameof(ZeigtArbeitsbereich));
         OnPropertyChanged(nameof(AktiveAnsicht));
-        OnPropertyChanged(nameof(StartplanWaehlbar));
+        PlanLoeschenAktualisieren();
         KompaktAktualisieren();
         StartenCommand.NotifyCanExecuteChanged();
         GenerierungCommand.NotifyCanExecuteChanged();
@@ -1354,7 +1419,7 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
         OnPropertyChanged(nameof(IstGeoeffnet));
         OnPropertyChanged(nameof(ZeigtArbeitsbereich));
         OnPropertyChanged(nameof(AktiveAnsicht));
-        OnPropertyChanged(nameof(StartplanWaehlbar));
+        PlanLoeschenAktualisieren();
         StartenCommand.NotifyCanExecuteChanged();
         GenerierungCommand.NotifyCanExecuteChanged();
         KostenoptimierungCommand.NotifyCanExecuteChanged();
@@ -1396,6 +1461,7 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
             Statuszeile += " Daten aus click-TT übernommen.";
         }
 
+        normal?.StaffelGeoeffnet(mannschaftsmeldung, terminwuensche, hinweise);
         return true;
     }
 
@@ -1608,14 +1674,13 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
     {
         Einrichtung = null;
         ArbeitsbereichEinrichten();
+        normal?.EinrichtungBeendet();
         return Task.CompletedTask;
     }
 
     /// <summary>
-    /// Nach dem Öffnen einer normalen Runde (Peter, 25.10.2026): Ist schon ein Plan gespeichert (gesichert oder gemerkt),
-    /// steht der zuletzt gespeicherte unter „Start mit“ – alle Ansichten und Kacheln zeigen ihn, ▶ optimiert mit ihm
-    /// weiter. Vorne liegt die Ansicht „Terminwünsche“, damit man die Meldungen der Vereine gleich sieht. Im Kompaktmodus
-    /// bleibt es bei der Ansicht „Kompaktspieltage“.
+    /// Nach dem Öffnen einer normalen Runde liegt vorne die Ansicht „Terminwünsche“, damit man die Meldungen der Vereine
+    /// gleich sieht. Im Kompaktmodus bleibt es bei der Ansicht „Kompaktspieltage“.
     /// </summary>
     private void ArbeitsbereichEinrichten()
     {
@@ -1624,15 +1689,7 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
             return;
         }
 
-        PlanQuelle? juengster = Planquellen
-            .Where(q => q.Art is PlanQuellenArt.GesicherterPlan or PlanQuellenArt.GemerkterPlan && q.Eintrag is not null)
-            .MaxBy(q => q.Eintrag!.Geaendert);
-        if (juengster is not null && Startplaene.FirstOrDefault(p => p.Quelle == juengster) is Startplan gespeichert)
-        {
-            Startplan = gespeichert;
-            Statuszeile += $" Start mit dem zuletzt gespeicherten Plan „{juengster.Eintrag!.Name}“.";
-        }
-
+        gewaehlterPlan = null;
         TerminwuenscheOeffnen();
     }
 
@@ -1670,21 +1727,21 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
             return;
         }
 
-        PlanQuelle? ausgangsquelle = startplan.Quelle;
-        IReadOnlyList<Spiel>? ausgangsplan = ausgangsquelle is null ? null : PlanFuer(ausgangsquelle)?.Spiele;
+        // Gestartet wird immer mit einem leeren Plan (wie im Original).
+        IReadOnlyList<Spiel>? ausgangsplan = null;
         laufenderStand = null;
         dienst.Pausiert = false;
         dienst.Automodus = Automodus;
         Anzeige.Zuruecksetzen("erster Plan wird gesucht …");
         Verlauf.Zuruecksetzen();
         festlegung = null;
+        gewaehlterPlan = null;
         dienst.Starten(s.Staffel, s.Optionen, ausgangsplan);
         HighsEinspielen();
-        StartplaeneAufbauen();
         Laeuft = true;
+        PlanAnzeigeAktualisieren();
         Pausiert = false;
         BefehleAktualisieren();
-        StartplanAnsichtenZuruecksetzen(ausgangsquelle);
         AnsichtenAktualisieren(PlanQuellenArt.LaufendeGenerierung);
         VerfahrensansichtZeigen();
     }
@@ -1807,7 +1864,7 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
         OnPropertyChanged(nameof(ZeigtStart));
         OnPropertyChanged(nameof(ZeigtFortsetzen));
         OnPropertyChanged(nameof(ZeigtStopp));
-        OnPropertyChanged(nameof(StartplanWaehlbar));
+        PlanLoeschenAktualisieren();
         PlanLoeschenAktualisieren();
     }
 
@@ -1818,6 +1875,7 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
         Staffelname = name;
         string art = s.IstClickTtDatei ? "click-TT-Datei" : "Eigene Plandatei";
         Staffelinfo = string.Create(Deutsch, $"{art} · {s.Staffel.Mannschaften.Count} Mannschaften · {Path.GetFileName(s.Pfad)}");
+        Rundentext = RundentextVon(s.Optionen.Rundenplanung);
     }
 
     private IReadOnlyList<ZuletztGeoeffnet> Zuletztlesen()
@@ -1966,7 +2024,7 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
         leitstandAnsicht?.Uebernehmen(Optimierungsstand.Leer);
         Laeuft = false;
         Pausiert = false;
-        StartplaeneAufbauen();
+        PlanAnzeigeAktualisieren();
     }
 
     private async Task PlanMerkenAsync()
@@ -1997,9 +2055,14 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
     }
 
     /// <summary>Exportiert den aktuell angezeigten Plan als CSV für den click-TT-Import.</summary>
-    private async Task CsvExportierenAsync()
+    private Task CsvExportierenAsync() => ExportQuelle() is PlanQuelle quelle ? CsvExportierenAsync(quelle) : Task.CompletedTask;
+
+    /// <summary>Exportiert einen Plan als CSV für den click-TT-Import (mit Rückfrage bei harten Fehlern).</summary>
+    /// <param name="quelle">Der Plan.</param>
+    /// <returns>Erledigt nach dem Export (oder Abbruch).</returns>
+    private async Task CsvExportierenAsync(PlanQuelle quelle)
     {
-        if (sitzung is not Plansitzung s || ExportQuelle() is not PlanQuelle quelle || PlanFuer(quelle) is not Planstand stand)
+        if (sitzung is not Plansitzung s || PlanFuer(quelle) is not Planstand stand)
         {
             return;
         }
@@ -2045,14 +2108,20 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
         }
     }
 
-    private async Task DruckenAsync()
+    private Task DruckenAsync() => DruckenAsync(null);
+
+    /// <summary>Druckt einen Plan als PDF (Auswahl wie im Original); <paramref name="zuerst"/> steht in der Auswahl vorn.</summary>
+    /// <param name="zuerst">Der vorgeschlagene Plan, oder <c>null</c>.</param>
+    /// <returns>Erledigt nach dem Druck (oder Abbruch).</returns>
+    private async Task DruckenAsync(PlanQuelle? zuerst)
     {
         if (sitzung is not Plansitzung s)
         {
             return;
         }
 
-        DruckauswahlViewModel auswahl = KompaktAktiv ? KompaktDruckauswahl() : new DruckauswahlViewModel(Planquellen.Where(q => PlanFuer(q) is not null).ToList());
+        List<PlanQuelle> quellen = [.. Planquellen.Where(q => PlanFuer(q) is not null).OrderBy(q => q == zuerst ? 0 : 1)];
+        DruckauswahlViewModel auswahl = KompaktAktiv ? KompaktDruckauswahl() : new DruckauswahlViewModel(quellen);
         if (!await oberflaeche.DruckauswahlAsync(auswahl) || !auswahl.IstGueltig)
         {
             return;
@@ -2177,6 +2246,7 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
     /// <summary>Nach geänderten Optionen oder Stammdaten: Generierung fortsetzen, Pläne neu bewerten, Ansichten aktualisieren.</summary>
     private void NachAenderung(Plansitzung s)
     {
+        Rundentext = RundentextVon(s.Optionen.Rundenplanung);
         if (dienst.Laeuft)
         {
             dienst.DatenAendern(s.Staffel, s.Optionen);
@@ -2203,13 +2273,6 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
         ansichten.Add(ansicht);
         fabrik.AnsichtHinzufuegen(ansicht);
         ansicht.QuellenUebernehmen(Planquellen);
-
-        // Vor dem Start zeigt eine neue Ansicht den gewählten Ausgangsplan.
-        if (!Laeuft && startplan.Quelle is PlanQuelle quelle && Planquellen.Contains(quelle))
-        {
-            ansicht.Quelle = quelle;
-            startplanAnsichten.Add(ansicht);
-        }
     }
 
     private Planstand? GemerktenStandLaden(Plansitzung s, GemerkterPlanEintrag eintrag)
@@ -2252,7 +2315,7 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
         }
 
         Planquellen = neu;
-        StartplaeneAufbauen();
+        PlanLoeschenAktualisieren();
         KompaktGespeichertAufbauen();
         kompaktAnsicht?.Laden();
         foreach (AnsichtViewModel ansicht in ansichten)
@@ -2272,7 +2335,7 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
 
     /// <summary>
     /// Der aktuell angezeigte Plan: der Plan der aktiven Ansicht, sonst der Stand der Generierung, sonst der gewählte
-    /// Ausgangsplan; <c>null</c>, wenn es keinen gibt.
+    /// Plan; <c>null</c>, wenn es keinen gibt.
     /// </summary>
     private PlanQuelle? ExportQuelle()
     {
@@ -2282,57 +2345,19 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
         }
 
         PlanQuelle? quelle = ((Layout.ActiveDockable as IDock)?.ActiveDockable as AnsichtViewModel)?.Quelle;
-        quelle ??= laufenderStand is not null ? PlanQuelle.Laufend : startplan.Quelle;
+        quelle ??= AktuellerPlanQuelle;
         return quelle is not null && PlanFuer(quelle) is not null ? quelle : null;
     }
 
-    /// <summary>Zeigt den gewählten Ausgangsplan vor dem Start: alle Ansichten auf diesen Plan, die Kacheln mit seiner Bewertung.</summary>
-    private void StartplanZeigen(PlanQuelle quelle)
+    /// <summary>Holt den Plan, den die Ansichten zeigen, und gibt ihn der Oberfläche neu an (Kopf, Plan merken/löschen).</summary>
+    /// <remarks>Die Ansichten folgen immer dem aktuell angezeigten Plan (<see cref="AktuellerPlan"/>); eine Auswahl je Ansicht gibt es nicht.</remarks>
+    private void PlanAnzeigeAktualisieren()
     {
-        if (Laeuft || sitzung is null)
+        foreach (AnsichtViewModel ansicht in ansichten)
         {
-            return;
+            ansicht.QuellenUebernehmen(Planquellen);
         }
 
-        startplanAnsichten.Clear();
-        foreach (AnsichtViewModel ansicht in ansichten.Where(a => a.Quellen.Contains(quelle)))
-        {
-            ansicht.Quelle = quelle;
-            startplanAnsichten.Add(ansicht);
-        }
-
-        if (PlanFuer(quelle) is Planstand stand)
-        {
-            Anzeige.PlanZeigen(stand.Bewertung, Einteilung, quelle.Name);
-        }
-    }
-
-    /// <summary>
-    /// Nach dem Start zeigen die Ansichten, die „Start mit“ auf den Ausgangsplan gestellt hat, wieder die laufende
-    /// Generierung – sonst bliebe dort der unveränderte Ausgangsplan stehen, während die Kacheln den besten Plan zeigen.
-    /// Ansichten, deren Plan der Anwender selbst gewählt hat, bleiben, wie sie sind.
-    /// </summary>
-    /// <param name="ausgangsquelle">Die Quelle des Ausgangsplans.</param>
-    private void StartplanAnsichtenZuruecksetzen(PlanQuelle? ausgangsquelle)
-    {
-        foreach (AnsichtViewModel ansicht in startplanAnsichten.Where(a => ansichten.Contains(a) && a.Quelle == ausgangsquelle && a.Quellen.Contains(PlanQuelle.Laufend)))
-        {
-            ansicht.Quelle = PlanQuelle.Laufend;
-        }
-
-        startplanAnsichten.Clear();
-    }
-
-    private void StartplaeneAufbauen()
-    {
-        var starts = new List<Startplan> { Startplan.Leer };
-        starts.AddRange(Planquellen
-            .Where(q => q.Art != PlanQuellenArt.LaufendeGenerierung || laufenderStand is not null)
-            .Select(q => new Startplan(StartplanName(q), q)));
-        Startplan bisher = startplan;
-        Startplaene = starts;
-        startplan = starts.FirstOrDefault(p => p == bisher) ?? Startplan.Leer;
-        OnPropertyChanged(nameof(Startplan));
         PlanLoeschenAktualisieren();
     }
 
@@ -2415,7 +2440,7 @@ public sealed partial class HauptfensterViewModel : ObservableObject, IDisposabl
             Anzeige.Uebernehmen(neu.Bewertung, Einteilung);
             if (erster)
             {
-                StartplaeneAufbauen();
+                PlanAnzeigeAktualisieren();
             }
 
             BefehleAktualisieren();

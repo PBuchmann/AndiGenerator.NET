@@ -48,6 +48,7 @@ public sealed class Teilneuplaner : IDisposable
     private readonly ISchrankenloeser loeser;
     private readonly Stufeneinteilung einteilung;
     private readonly IReadOnlyDictionary<Kostenkriterium, int>? obergrenzen;
+    private readonly Func<Kostenkriterium, double>? cGewicht;
     private readonly Func<bool> warten;
     private readonly CancellationTokenSource abbruch = new();
     private readonly Lock sperre = new();
@@ -93,8 +94,10 @@ public sealed class Teilneuplaner : IDisposable
     /// So viele HiGHS-Linien (<see cref="Ligaschranke.Linie"/>): lange Läufe für A und B ab dem Start der Generierung, je
     /// zwei Teilneuplanungen verfeinern ihre Pläne (sie rechnen von Anfang an, nicht erst beim Glätten).
     /// </param>
-    public Teilneuplaner(Inseloptimierer optimierer, Staffel staffel, Berechnungsoptionen optionen, ISchrankenloeser loeser, Stufeneinteilung einteilung, IReadOnlyDictionary<Kostenkriterium, int>? obergrenzen = null, Func<bool>? warten = null, int? arbeiter = null, Func<int, ISchrankenloeser>? linienloeser = null, int linien = 0)
+    /// <param name="cGewicht">Gewicht je C-Kriterium im Ziel von HiGHS (einfacher Modus), oder <c>null</c> (jedes 1).</param>
+    public Teilneuplaner(Inseloptimierer optimierer, Staffel staffel, Berechnungsoptionen optionen, ISchrankenloeser loeser, Stufeneinteilung einteilung, IReadOnlyDictionary<Kostenkriterium, int>? obergrenzen = null, Func<bool>? warten = null, int? arbeiter = null, Func<int, ISchrankenloeser>? linienloeser = null, int linien = 0, Func<Kostenkriterium, double>? cGewicht = null)
     {
+        this.cGewicht = cGewicht;
         this.linienloeser = linienloeser;
         linienBester = new (IReadOnlyList<Spiel>, Stufenwert?)?[linienloeser is null ? 0 : Math.Max(0, linien)];
 
@@ -228,7 +231,8 @@ public sealed class Teilneuplaner : IDisposable
                 Unterbrechen: () => linie is null ? Ruht(nummer) : optimierer.Pausiert,
                 Verstoesse: verstoesse,
                 Belegung: belegung,
-                Platz: nummer);
+                Platz: nummer,
+                CGewicht: cGewicht);
             Neuplanungsbericht bericht;
             try
             {

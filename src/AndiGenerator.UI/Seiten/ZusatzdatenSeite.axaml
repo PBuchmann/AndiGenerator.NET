@@ -18,7 +18,7 @@
     </Button>
     <Border x:Name="AufstellungsBanner" IsVisible="{Binding HatAufstellungen}" Background="{StaticResource AkzentHell}" BorderBrush="{StaticResource Gut}" BorderThickness="4,0,0,0" CornerRadius="4" Padding="12,10" MaxWidth="700" HorizontalAlignment="Left">
       <Grid ColumnDefinitions="Auto,*">
-        <ui:Symbol Daten="{StaticResource SymbolHaken}" Farbe="{StaticResource Gut}" Groesse="22" VerticalAlignment="Top" Margin="0,0,10,0" />
+        <ui:Symbol Daten="{StaticResource SymbolHaken}" Farbe="{StaticResource Gut}" Groesse="18" VerticalAlignment="Top" Margin="0,0,10,0" />
         <TextBlock Grid.Column="1" Text="{Binding AufstellungsErgebnis}" FontWeight="SemiBold" TextWrapping="Wrap" VerticalAlignment="Center" />
       </Grid>
     </Border>
@@ -53,7 +53,7 @@
     </Button>
     <Border x:Name="TerminwunschBanner" IsVisible="{Binding HatTerminwuensche}" Background="{StaticResource AkzentHell}" BorderBrush="{StaticResource Gut}" BorderThickness="4,0,0,0" CornerRadius="4" Padding="12,10" MaxWidth="700" HorizontalAlignment="Left">
       <Grid ColumnDefinitions="Auto,*">
-        <ui:Symbol Daten="{StaticResource SymbolHaken}" Farbe="{StaticResource Gut}" Groesse="22" VerticalAlignment="Top" Margin="0,0,10,0" />
+        <ui:Symbol Daten="{StaticResource SymbolHaken}" Farbe="{StaticResource Gut}" Groesse="18" VerticalAlignment="Top" Margin="0,0,10,0" />
         <TextBlock Grid.Column="1" Text="{Binding TerminwunschErgebnis}" FontWeight="SemiBold" TextWrapping="Wrap" VerticalAlignment="Center" />
       </Grid>
     </Border>
@@ -70,8 +70,8 @@
           <DataTemplate x:DataType="p:Kachelwert">
             <Border Classes="karte" Padding="14,10" Margin="0,0,10,10" Width="175">
               <StackPanel Spacing="2">
-                <TextBlock Text="{Binding Wert}" Classes="ziffer" FontSize="22" FontWeight="SemiBold" Foreground="{StaticResource Akzent}" />
-                <TextBlock Text="{Binding Text}" FontSize="12" Foreground="{StaticResource Tinte2}" TextWrapping="Wrap" />
+                <TextBlock Text="{Binding Wert}" Classes="ziffer" FontSize="18" FontWeight="SemiBold" Foreground="{StaticResource Akzent}" />
+                <TextBlock Text="{Binding Text}" FontSize="11" Foreground="{StaticResource Tinte2}" TextWrapping="Wrap" />
               </StackPanel>
             </Border>
           </DataTemplate>
@@ -84,9 +84,9 @@
             <Border Classes="karte" Padding="16,12" Margin="0,0,0,10">
               <StackPanel Spacing="8">
                 <Grid ColumnDefinitions="*,Auto">
-                  <TextBlock ToolTip.Tip="{Binding Mannschaft}" Classes="mannschaft" Text="{Binding Mannschaft}" FontSize="15" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
+                  <TextBlock ToolTip.Tip="{Binding Mannschaft}" Classes="mannschaft" Text="{Binding Mannschaft}" FontSize="14" FontWeight="SemiBold" VerticalAlignment="Center" TextTrimming="CharacterEllipsis" />
                   <Border Grid.Column="1" CornerRadius="10" Padding="10,3" Background="{StaticResource AkzentHell}">
-                    <TextBlock Text="{Binding Marke}" FontSize="12" Foreground="{StaticResource AkzentDunkel}" />
+                    <TextBlock Text="{Binding Marke}" FontSize="11" Foreground="{StaticResource AkzentDunkel}" />
                   </Border>
                 </Grid>
                 <Border IsVisible="{Binding HatBemerkung}" BorderBrush="{StaticResource Akzent}" BorderThickness="3,0,0,0" Padding="10,4" Background="{StaticResource Schwebe}">
@@ -107,11 +107,11 @@
                     <DataTemplate x:DataType="a:Spiellokalangabe">
                       <Grid ColumnDefinitions="30,*" Margin="0,3">
                         <Border Width="22" Height="22" CornerRadius="11" Background="{StaticResource AkzentHell}" VerticalAlignment="Top">
-                          <TextBlock Text="{Binding Nummer}" FontSize="12" FontWeight="SemiBold" Foreground="{StaticResource AkzentDunkel}" HorizontalAlignment="Center" VerticalAlignment="Center" />
+                          <TextBlock Text="{Binding Nummer}" FontSize="11" FontWeight="SemiBold" Foreground="{StaticResource AkzentDunkel}" HorizontalAlignment="Center" VerticalAlignment="Center" />
                         </Border>
                         <StackPanel Grid.Column="1">
                           <TextBlock Text="{Binding Name}" FontWeight="SemiBold" TextWrapping="Wrap" />
-                          <TextBlock Text="{Binding Adresse}" FontSize="12" Foreground="{StaticResource Tinte2}" TextWrapping="Wrap" />
+                          <TextBlock Text="{Binding Adresse}" FontSize="11" Foreground="{StaticResource Tinte2}" TextWrapping="Wrap" />
                         </StackPanel>
                       </Grid>
                     </DataTemplate>
@@ -142,8 +142,8 @@
           <DataTemplate x:DataType="p:Kachelwert">
             <Border Classes="karte" Padding="14,10" Margin="0,0,10,10" Width="175">
               <StackPanel Spacing="2">
-                <TextBlock Text="{Binding Wert}" Classes="ziffer" FontSize="22" FontWeight="SemiBold" Foreground="{StaticResource Akzent}" />
-                <TextBlock Text="{Binding Text}" FontSize="12" Foreground="{StaticResource Tinte2}" TextWrapping="Wrap" />
+                <TextBlock Text="{Binding Wert}" Classes="ziffer" FontSize="18" FontWeight="SemiBold" Foreground="{StaticResource Akzent}" />
+                <TextBlock Text="{Binding Text}" FontSize="11" Foreground="{StaticResource Tinte2}" TextWrapping="Wrap" />
               </StackPanel>
             </Border>
           </DataTemplate>
@@ -155,7 +155,7 @@
       <TextBlock Text="{Binding WochenspielText}" Classes="leer" TextWrapping="Wrap" IsVisible="{Binding WochenspielText, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
         <Border Classes="karte" Padding="16,12" IsVisible="{Binding HatFehlendeSperren}">
           <StackPanel Spacing="6">
-            <TextBlock Text="Sperre fehlt vermutlich – weiter als die Grenze, aber keine Sperre" FontSize="15" FontWeight="SemiBold" />
+            <TextBlock Text="Sperre fehlt vermutlich – weiter als die Grenze, aber keine Sperre" FontSize="14" FontWeight="SemiBold" />
             <ItemsControl ItemsSource="{Binding FehlendeSperren}">
               <ItemsControl.ItemTemplate>
                 <DataTemplate x:DataType="p:Wochenspielzeile">
@@ -174,7 +174,7 @@
         </Border>
         <Border Classes="karte" Padding="16,12" IsVisible="{Binding HatSperrenProtokoll}">
           <StackPanel Spacing="6">
-            <TextBlock Text="Protokoll – gesetzte Sperren" FontSize="15" FontWeight="SemiBold" />
+            <TextBlock Text="Protokoll – gesetzte Sperren" FontSize="14" FontWeight="SemiBold" />
             <TextBlock Text="{Binding SperrenProtokollKopf}" Classes="leer" TextWrapping="Wrap" />
             <ItemsControl ItemsSource="{Binding SperrenProtokoll}">
               <ItemsControl.ItemTemplate>
@@ -190,7 +190,7 @@
         </Border>
         <Border Classes="karte" Padding="16,12" IsVisible="{Binding HatUnnoetigeSperren}">
           <StackPanel Spacing="6">
-            <TextBlock Text="Sperre vermutlich unnötig – Sperre, obwohl höchstens so weit wie die Grenze" FontSize="15" FontWeight="SemiBold" />
+            <TextBlock Text="Sperre vermutlich unnötig – Sperre, obwohl höchstens so weit wie die Grenze" FontSize="14" FontWeight="SemiBold" />
             <ItemsControl ItemsSource="{Binding UnnoetigeSperren}">
               <ItemsControl.ItemTemplate>
                 <DataTemplate x:DataType="p:Wochenspielzeile">

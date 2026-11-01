@@ -53,7 +53,7 @@ die verbleibenden Sperrtermin-Verstöße.“
 | `staffel_oeffnen`, `staffel_schliessen` | XML-Export aus click-TT öffnen bzw. schließen |
 | `beispiel_oeffnen` | Eine der beiliegenden Beispielstaffeln öffnen (Kopie im Datenordner); ohne Namen die Liste |
 | `einrichtung`, `einrichtung_waehlen`, `einrichtung_abschliessen` | Punkte der Einrichtung ansehen, entscheiden, abschließen |
-| `verfahren_waehlen`, `startplan_waehlen` | Automodus oder Kostenoptimierung; Ausgangsplan |
+| `verfahren_waehlen` | Automodus oder Kostenoptimierung |
 | `starten`, `anhalten`, `fortsetzen`, `stoppen`, `warten` | Generierung bzw. Berechnung steuern und verfolgen |
 | `qualitaet`, `verstoesse` | Qualitätsansicht: Stufen, Verstöße, bestmöglich (HiGHS); Verstöße je Mannschaft |
 | `einstufen` | Kriterium in A, B oder C einstufen (Automodus) |

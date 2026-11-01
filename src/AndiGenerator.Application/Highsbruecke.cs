@@ -15,10 +15,11 @@ public sealed class Highsbruecke(Highsvorgabe? vorgabe = null) : IGanzzahlloeser
     public static bool Verfuegbar => HighsLoeser.Verfuegbar;
 
     /// <inheritdoc/>
-    public (double[]? Werte, bool Optimal) Loesen(Ganzzahlmodell modell, double[]? start, int startwert, Func<bool> aufhoeren, TimeSpan? zeitgrenze = null)
+    public (double[]? Werte, bool Optimal) Loesen(Ganzzahlmodell modell, double[]? start, int startwert, Func<bool> aufhoeren, TimeSpan? zeitgrenze = null, Action<Loeserstand>? stand = null, Action<double[]>? loesung = null)
     {
         ArgumentNullException.ThrowIfNull(modell);
-        return HighsLoeser.Loesen(Problem(modell), start, startwert, aufhoeren, zeitgrenze);
+        Action<double, double>? melden = stand is null ? null : (wert, schranke) => stand(new Loeserstand(wert, schranke));
+        return HighsLoeser.Loesen(Problem(modell), start, startwert, aufhoeren, zeitgrenze, melden, loesung);
     }
 
     /// <inheritdoc/>

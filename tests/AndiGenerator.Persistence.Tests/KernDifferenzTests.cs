@@ -112,7 +112,7 @@ public class KernDifferenzTests
         Stufenwert stufenwert = plan.StufenBewerten(stufen, new double[Stufeneinteilung.AnzahlKriterien], new double[Stufeneinteilung.AnzahlKriterien]);
         Zusatzverstoesse zusatz = plan.ZusatzZaehlen(meldungen: false);
 
-        Assert.Equal((zusatz.Spielverteilung.Sum(), zusatz.SpieltageLaenge, zusatz.SpieltageUeberlappung, zusatz.LetzterLaenge == 1, zusatz.LetzterUeberlappung == 1), plan.ZusatzAnzahlen());
+        Assert.Equal((zusatz.Spielverteilung.Sum(), zusatz.SpieltageLaenge, zusatz.SpieltageUeberlappung, zusatz.LetzterLaenge == 1, zusatz.LetzterUeberlappung == 1, zusatz.Wechselzuschlag!.Sum()), plan.ZusatzAnzahlen());
         Assert.Equal((stufenwert.Harte * 1e12) + (stufenwert.A * 1e9) + (stufenwert.B * 1e6) + stufenwert.CAnzahl, Math.Floor(wert));
     }
 

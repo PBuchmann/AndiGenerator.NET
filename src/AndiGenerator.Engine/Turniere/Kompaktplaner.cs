@@ -169,7 +169,6 @@ public static class Kompaktplaner
             front.Add(Kompaktverbesserung.EinzelAusgleichen(modell, new Kompaktloesung(modell, bisher)));
         }
 
-        hinweise.AddRange(lauf.Optimierungshinweise());
         hinweise.AddRange(Viererhinweise(lauf.Baum));
         hinweise.AddRange(Ergebnishinweise(front, modell));
         List<Kompaktvariante> varianten = Kompaktauswahl.Varianten(front, gesamtpaket is null);
@@ -194,7 +193,7 @@ public static class Kompaktplaner
         hinweise.AddRange(Gruppenhinweise(lauf, modell, front, gesamtMitGruppen));
         DreierAnhaengen(lauf, modell, front, varianten, hinweise);
         OhneVerstossAnhaengen(lauf, modell, varianten, hinweise);
-        return new Kompaktergebnis(varianten, lauf.Geprueft, hinweise);
+        return new Kompaktergebnis(varianten, lauf.Geprueft, hinweise) { Qualitaet = lauf.Optimierungshinweise() };
     }
 
     /// <summary>Hängt die Varianten mit 3er-Spieltagen an (Peter, 13.10.2026: nur, wenn sie etwas können, was kein Plan nur aus 4er-Spieltagen kann).</summary>

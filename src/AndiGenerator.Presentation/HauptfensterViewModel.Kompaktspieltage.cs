@@ -16,6 +16,7 @@ namespace AndiGenerator.Presentation;
 /// </summary>
 public sealed partial class HauptfensterViewModel
 {
+    private readonly System.Diagnostics.Stopwatch kompaktZwischenuhr = new();
     private KompaktspieltageAnsichtViewModel? kompaktAnsicht;
     private bool kompaktMeldungenBearbeiten;
     private Datenbearbeitung? kompaktLesekopie;
@@ -24,6 +25,8 @@ public sealed partial class HauptfensterViewModel
     private Dictionary<Kompaktvariante, double> kompaktPunkte = [];
     private double? kompaktClickTtPunkte;
     private IReadOnlyList<string> kompaktPlanerhinweise = [];
+    private IReadOnlyList<string> kompaktQualitaet = [];
+    private bool kompaktZwischenstandLaeuft;
     private IReadOnlyList<Kompaktkachel> kompaktKacheln = [];
     private Kompaktvariante? kompaktVariante;
     private Kompaktauswertung? kompaktStand;
@@ -117,6 +120,9 @@ public sealed partial class HauptfensterViewModel
 
     /// <summary>Holt die Hinweise der letzten Berechnung.</summary>
     internal IReadOnlyList<string> KompaktPlanerhinweise => kompaktPlanerhinweise;
+
+    /// <summary>Holt nach der Berechnung je Schritt, welche Qualität gefunden wurde und was mindestens nötig ist.</summary>
+    internal IReadOnlyList<string> KompaktQualitaet => kompaktQualitaet;
 
     /// <summary>Holt einen Wert, der angibt, ob es einen Plan aus click-TT gibt.</summary>
     internal bool HatClickTtPlan => sitzung?.Staffel.BestehenderSpielplan.Count > 0;
@@ -226,8 +232,10 @@ public sealed partial class HauptfensterViewModel
         using var steuerung = new Kompaktsteuerung();
         kompaktSteuerung = steuerung;
         kompaktBehalten = null;
+        kompaktQualitaet = [];
+        kompaktZwischenuhr.Restart();
         KompaktRechnet = true;
-        kompaktAnsicht?.FortschrittZeigen(0, "Wird vorbereitet …");
+        kompaktAnsicht?.FortschrittZeigen(0, "Wird vorbereitet …", []);
         kompaktAnsicht?.Laden();
         Kompaktaufgabe aufgabe = Kompaktplanung.Aufgabe(s.Staffel, s.DatenBearbeiten(), s.Optionen.Rundenplanung, DateOnly.FromDateTime(DateTime.Today));
         Kompaktplanoptionen optionen = Kompaktplanung.Optionen();
@@ -326,7 +334,7 @@ public sealed partial class HauptfensterViewModel
                 laufenderStand = new Planstand(spiele, s.Bewerten(spiele));
             }
 
-            StartplaeneAufbauen();
+            PlanAnzeigeAktualisieren();
             BefehleAktualisieren();
             AnsichtenAktualisieren(PlanQuellenArt.LaufendeGenerierung);
         }
@@ -440,6 +448,7 @@ public sealed partial class HauptfensterViewModel
 
         kompaktVarianten = NachPunkten(s, varianten);
         kompaktPlanerhinweise = ergebnis.Hinweise;
+        kompaktQualitaet = ergebnis.Qualitaet;
         KompaktspieltageOeffnen();
         KompaktplanWaehlen(kompaktVarianten.Count > 0 ? kompaktVarianten[0] : kompaktVariante);
     }
@@ -524,6 +533,7 @@ public sealed partial class HauptfensterViewModel
         kompaktPunkte = [];
         kompaktClickTtPunkte = null;
         kompaktPlanerhinweise = [];
+        kompaktQualitaet = [];
         kompaktVariante = null;
     }
 
@@ -554,8 +564,75 @@ public sealed partial class HauptfensterViewModel
             }
 
             Statuszeile = "Kompaktspieltage werden geplant – " + stand.Text;
-            kompaktAnsicht?.FortschrittZeigen(stand.Anteil * 100, stand.Text);
+            kompaktAnsicht?.FortschrittZeigen(stand.Anteil * 100, stand.Text, stand.Optimierung);
+            _ = KompaktZwischenstandHolenAsync();
         });
+
+    /// <summary>
+    /// Zeigt während der Berechnung höchstens alle fünf Sekunden die bisher gefundenen Pläne (Peter, 26.10.2026: schon
+    /// ansehen, während noch gerechnet wird). Ein gewählter Plan bleibt gewählt.
+    /// </summary>
+    private async Task KompaktZwischenstandHolenAsync()
+    {
+        if (kompaktSteuerung is not Kompaktsteuerung steuerung || sitzung is not Plansitzung s || KompaktPausiert
+            || kompaktZwischenstandLaeuft || kompaktZwischenuhr.Elapsed < TimeSpan.FromSeconds(5))
+        {
+            return;
+        }
+
+        kompaktZwischenstandLaeuft = true;
+        try
+        {
+            Kompaktergebnis? zwischenstand = await Task.Run(() => steuerung.Zwischenstand(), CancellationToken.None);
+            if (zwischenstand is not null && KompaktRechnet && !KompaktPausiert && ReferenceEquals(s, sitzung) && ReferenceEquals(steuerung, kompaktSteuerung))
+            {
+                KompaktZwischenstandZeigen(s, zwischenstand);
+            }
+        }
+        finally
+        {
+            kompaktZwischenstandLaeuft = false;
+            kompaktZwischenuhr.Restart();
+        }
+    }
+
+    /// <summary>Übernimmt die bisher gefundenen Pläne während der Berechnung, ohne den gewählten Plan zu wechseln.</summary>
+    private void KompaktZwischenstandZeigen(Plansitzung s, Kompaktergebnis ergebnis)
+    {
+        if (ergebnis.Varianten.Count == 0)
+        {
+            return;
+        }
+
+        var alt = kompaktVarianten.Select(Planschluessel).ToList();
+        List<Kompaktvariante> neu = NachPunkten(s, ergebnis.Varianten);
+        if (neu.Select(Planschluessel).SequenceEqual(alt) && neu.Select(v => v.Name).SequenceEqual(kompaktVarianten.Select(v => v.Name)))
+        {
+            return;
+        }
+
+        Kompaktvariante? gewaehlt = kompaktVariante is null ? null : neu.Find(v => Planschluessel(v) == Planschluessel(kompaktVariante));
+        if (kompaktVariante is not null && gewaehlt is null)
+        {
+            // Der gewählte Plan steht nicht mehr unter den besten: Er bleibt zur Ansicht, bis man einen anderen wählt.
+            neu.Add(kompaktVariante);
+        }
+
+        kompaktVarianten = neu;
+        kompaktPlanerhinweise = ergebnis.Hinweise;
+        if (kompaktVariante is null)
+        {
+            KompaktplanWaehlen(neu[0]);
+            return;
+        }
+
+        if (gewaehlt is not null)
+        {
+            kompaktVariante = gewaehlt;
+        }
+
+        kompaktAnsicht?.Laden();
+    }
 
     private void KompaktspieltageOeffnen()
     {

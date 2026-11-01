@@ -23,6 +23,16 @@ try
         return await BewertenBefehl.Ausfuehren(args[1..]);
     }
 
+    if (args.Length >= 1 && args[0] == "einfach")
+    {
+        return await EinfachBefehl.Ausfuehren(args[1..]);
+    }
+
+    if (args.Length >= 1 && args[0] == "einfachreihe")
+    {
+        return await EinfachreiheBefehl.Ausfuehren(args[1..]);
+    }
+
     if (args.Length >= 1 && args[0] == "schranke")
     {
         return SchrankeBefehl.Ausfuehren(args[1..]);
@@ -48,4 +58,6 @@ Console.WriteLine("Aufruf: andigen info <click-TT-Exportdatei.xml>");
 Console.WriteLine("        andigen optimieren <click-TT-Exportdatei.xml> [Optionen]   (Hilfe: andigen optimieren --hilfe)");
 Console.WriteLine("        andigen bewerten <click-TT-Exportdatei.xml> <Plan> [<Plan> ...] [Optionen]   (Hilfe: andigen bewerten --hilfe)");
 Console.WriteLine("        andigen schranke <click-TT-Exportdatei.xml> [Optionen]   (untere Schranke der Stufe A mit HiGHS)");
+Console.WriteLine("        andigen einfach <click-TT-Exportdatei.xml> [Optionen]   (einfacher Modus; Hilfe: andigen einfach)");
+Console.WriteLine("        andigen einfachreihe <Ordner oder Dateien> [Optionen]   (einfacher Modus über mehrere Klassen; Hilfe: andigen einfachreihe)");
 return 1;

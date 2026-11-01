@@ -90,13 +90,6 @@ internal sealed class Werkzeuge
     public Task<Aktionsergebnis> VerfahrenWaehlen([Description("„automodus“ oder „kostenoptimierung“.")] string verfahren) =>
         s.VerfahrenAsync(verfahren.Trim().StartsWith("auto", StringComparison.OrdinalIgnoreCase));
 
-    /// <summary>Ausgangsplan wählen.</summary>
-    /// <param name="name">Name aus „Startplaene“.</param>
-    /// <returns>Das Ergebnis.</returns>
-    [McpServerTool(Name = "startplan_waehlen")]
-    [Description("Wählt den Ausgangsplan des nächsten Starts (Namen siehe „status“: Startplaene, z. B. leerem Plan, in click-TT vorhandenem Plan, gemerktem Plan …).")]
-    public Task<Aktionsergebnis> StartplanWaehlen([Description("Name des Ausgangsplans.")] string name) => s.StartplanAsync(name);
-
     /// <summary>Starten.</summary>
     /// <returns>Das Ergebnis.</returns>
     [McpServerTool(Name = "starten")]

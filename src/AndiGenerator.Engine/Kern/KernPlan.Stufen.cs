@@ -71,6 +71,10 @@ internal sealed partial class KernPlan
             anzahl[(int)Kostenkriterium.LetzterSpieltagUeberlappung] = s.LetzteUeberlappung > 0 ? zusatz.LetzterUeberlappung : 0;
         }
 
+        // Der Wechsel H/A zählt steigend (Zuschlag nur zur Anzahl, die Kosten bleiben wie im Original).
+        int wechsel = (int)Kostenkriterium.WechselHeimAuswaerts;
+        anzahl[wechsel] += anzahl[wechsel] > 0 ? zusatz.Wechselzuschlag?.Sum() ?? 0 : 0;
+
         double[] jeStufe = new double[3];
         double kostenC = 0;
         for (int k = 0; k < stufen.Length; k++)

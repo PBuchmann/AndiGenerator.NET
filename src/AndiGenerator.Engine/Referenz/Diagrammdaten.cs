@@ -9,7 +9,9 @@ namespace AndiGenerator.Engine.Referenz;
 /// <param name="Erster">Frühester Wunschtermin (Original <c>GetFirstDate</c>), Nullpunkt der Zeitachse.</param>
 /// <param name="Letzter">Spätester Wunschtermin (Original <c>GetLastDate</c>).</param>
 /// <param name="Mannschaften">Die Mannschaften in der Reihenfolge der Staffel.</param>
-/// <param name="MitRueckrunde">Rückrunde wird geplant (Diagramm „Abstand Heimspiel zu Auswärtsspiel“).</param>
+/// <param name="MitRueckrunde">
+/// Die Gegner treffen mehrmals aufeinander: Rückrunde wird geplant oder Doppelrunde (Diagramm „Abstand Hin-/Rückspiel“).
+/// </param>
 /// <param name="Wochen">Spiele pro Woche für Hinrunde und ggf. Rückrunde.</param>
 /// <param name="HatSetzliste">Setzliste vorhanden (Diagramm „Setzliste“).</param>
 /// <param name="MaxSpiele">Größte Anzahl Spiele einer Mannschaft.</param>
@@ -18,6 +20,7 @@ namespace AndiGenerator.Engine.Referenz;
 /// wer wie oft ausrichtet und wo jede Mannschaft spielt.
 /// </param>
 /// <param name="Verstoesse">Die Verstöße, wie die Bewertung sie zählt (rechte Spalten und Markierungen der Diagramme).</param>
+/// <param name="Rundennamen">Die Namen der Runden (Index wie <see cref="Diagrammspiel.Runde"/>); <c>null</c> = Vorrunde und Rückrunde.</param>
 public sealed record Diagrammdaten(
     bool HatSpiele,
     DateTime Erster,
@@ -28,4 +31,5 @@ public sealed record Diagrammdaten(
     bool HatSetzliste,
     int MaxSpiele,
     IReadOnlyList<Ausrichtertag>? Kompakttage = null,
-    Diagrammverstoesse? Verstoesse = null);
+    Diagrammverstoesse? Verstoesse = null,
+    IReadOnlyList<string>? Rundennamen = null);

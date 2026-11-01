@@ -76,6 +76,25 @@ public sealed class SetzlisteTests
         Assert.Equal("0", flaeche.Texte[flaeche.Texte.IndexOf("A") + 1]);
     }
 
+    [Fact]
+    public void DoppelrundeNenntDieViertelrunden()
+    {
+        // Vier Viertelrunden: vier Treppen nebeneinander mit den Namen der Runden.
+        List<Diagrammmannschaft> mannschaften = new[] { "A", "B", "C", "D" }
+            .Select(n => new Diagrammmannschaft(n, Enumerable.Range(0, 12).Select(i => new Diagrammspiel(Samstag.AddDays(7 * i), true, false, i / 3, 3 - (i % 3), "X")).ToList(), []))
+            .ToList();
+        IReadOnlyList<string> namen = Rundennamen.Fuer(Domain.Optionen.Berechnungsoptionen.Standard with { Doppelrunde = true });
+        var daten = new Diagrammdaten(true, Samstag, Samstag.AddDays(90), mannschaften, true, [], true, 12, Rundennamen: namen);
+        var flaeche = new Messflaeche();
+
+        new Diagrammzeichner(daten, flaeche).Zeichnen(Diagrammteil.Setzliste, 0);
+
+        Assert.Equal(["1. Vorrunde", "2. Vorrunde", "1. Rückrunde", "2. Rückrunde"], namen);
+        Assert.All(namen, n => Assert.Contains(n, flaeche.Texte));
+        Assert.DoesNotContain("Hinrunde", flaeche.Texte);
+        Assert.Equal("0", flaeche.Texte[flaeche.Texte.IndexOf("A") + 1]);
+    }
+
     private static Diagrammmannschaft Mannschaft(string name, int[] abstaende) =>
         new(name, abstaende.Select((ab, i) => new Diagrammspiel(Samstag.AddDays(7 * i), i % 2 == 0, false, 1, ab, "X")).ToList(), []);
 }

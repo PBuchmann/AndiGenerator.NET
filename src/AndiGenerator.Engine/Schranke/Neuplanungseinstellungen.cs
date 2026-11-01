@@ -48,6 +48,9 @@ namespace AndiGenerator.Engine.Schranke;
 /// Bekommt jeden Plan, den HiGHS im Modell für besser hielt, die Bewertung aber nicht (A und B gleich gut, anders verteilt) –
 /// z. B. als Startplan einer Insel –, oder <c>null</c>.
 /// </param>
+/// <param name="CGewicht">
+/// Gewicht je Kriterium der Stufe C im Ziel von HiGHS (einfacher Modus: nach den Gruppen des Maßstabs); <c>null</c> = jedes 1.
+/// </param>
 public sealed record Neuplanungseinstellungen(
     TimeSpan Gesamt,
     TimeSpan JeSchritt,
@@ -63,4 +66,5 @@ public sealed record Neuplanungseinstellungen(
     Func<IReadOnlyList<Spiel>, IReadOnlyDictionary<string, int>>? Verstoesse = null,
     Ausschnittsbelegung? Belegung = null,
     int Platz = 0,
-    Action<IReadOnlyList<Spiel>>? Abgelehnt = null);
+    Action<IReadOnlyList<Spiel>>? Abgelehnt = null,
+    Func<Kostenkriterium, double>? CGewicht = null);
