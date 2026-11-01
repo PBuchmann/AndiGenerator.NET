@@ -1,21 +1,21 @@
 <Project>
   <!-- Zentrale Paketversionen. Ausgelieferte und als Bibliothek verwendete Pakete: nur MIT/Apache/BSD/LGPL (MIGRATIONSPLAN E11). -->
   <ItemGroup>
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.10.1" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="18.11.0" />
     <PackageVersion Include="xunit" Version="2.9.3" />
-    <PackageVersion Include="xunit.runner.visualstudio" Version="4.0.0" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="4.0.1" />
   </ItemGroup>
   <!-- Oberfläche (MIGRATIONSPLAN E2/E3/E15), alle MIT. -->
   <ItemGroup>
-    <PackageVersion Include="Avalonia" Version="12.1.3" />
-    <PackageVersion Include="Avalonia.Desktop" Version="12.1.3" />
-    <PackageVersion Include="Avalonia.Headless" Version="12.1.3" />
-    <PackageVersion Include="Avalonia.Skia" Version="12.1.3" />
-    <PackageVersion Include="Avalonia.Themes.Fluent" Version="12.1.3" />
+    <PackageVersion Include="Avalonia" Version="12.1.4" />
+    <PackageVersion Include="Avalonia.Desktop" Version="12.1.4" />
+    <PackageVersion Include="Avalonia.Headless" Version="12.1.4" />
+    <PackageVersion Include="Avalonia.Skia" Version="12.1.4" />
+    <PackageVersion Include="Avalonia.Themes.Fluent" Version="12.1.4" />
     <PackageVersion Include="CommunityToolkit.Mvvm" Version="8.4.2" />
-    <PackageVersion Include="Dock.Avalonia" Version="12.1.0.6" />
-    <PackageVersion Include="Dock.Avalonia.Themes.Fluent" Version="12.1.0.6" />
-    <PackageVersion Include="Dock.Model.Mvvm" Version="12.1.0.6" />
+    <PackageVersion Include="Dock.Avalonia" Version="12.1.0.13" />
+    <PackageVersion Include="Dock.Avalonia.Themes.Fluent" Version="12.1.0.13" />
+    <PackageVersion Include="Dock.Model.Mvvm" Version="12.1.0.13" />
   </ItemGroup>
   <!-- PDF lesen (Bericht „Terminwünsche“ aus click-TT, nur im Baustein Import), Apache-2.0. -->
   <ItemGroup>
@@ -31,8 +31,8 @@
   </ItemGroup>
   <!-- Steuerung durch eine KI über das Model Context Protocol (nur tools/AndiGenerator.Mcp): ModelContextProtocol Apache-2.0, Microsoft.Extensions.Hosting MIT. -->
   <ItemGroup>
-    <PackageVersion Include="ModelContextProtocol" Version="2.2.0" />
-    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.10" />
+    <PackageVersion Include="ModelContextProtocol" Version="2.3.0" />
+    <PackageVersion Include="Microsoft.Extensions.Hosting" Version="10.0.14" />
     <!-- PDF-Ausdruck des MCP-Servers ohne Avalonia: dieselbe SkiaSharp-Version, die Avalonia.Skia mitbringt (MIT). -->
     <PackageVersion Include="SkiaSharp" Version="4.154.0" />
     <PackageVersion Include="SkiaSharp.NativeAssets.Linux" Version="3.119.4" />
