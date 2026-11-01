@@ -140,7 +140,15 @@ public sealed class FernsteuerungTests : IDisposable
         Assert.Equal("Ist schon angehalten.", (await w.Anhalten()).Text);
         Assert.True((await w.Fortsetzen()).Erfolg);
 
-        Qualitaet q = Assert.IsType<Qualitaet>(await w.Qualitaet());
+        // Auf langsamen Runnern (windows-arm) ist der Plan erst nach einiger Zeit bewertet: auf die Qualität warten, nicht auf eine feste Zeit.
+        Qualitaet? q = await w.Qualitaet();
+        for (int i = 0; i < 24 && (q is null || q.Kriterien.Count == 0); i++)
+        {
+            await Task.Delay(5000);
+            q = await w.Qualitaet() ?? q;
+        }
+
+        Assert.NotNull(q);
         Assert.NotEmpty(q.Kriterien);
         Assert.Contains(q.Kriterien, k => k.Kriterium == "Sperrtermine");
         Verstossliste v = Assert.IsType<Verstossliste>(await w.Verstoesse("Sperrtermine"));
