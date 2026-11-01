@@ -45,7 +45,7 @@ internal sealed partial class SkiaZeichenflaeche : IZeichenflaeche, IDisposable
         schrift.GetFontMetrics(out SKFontMetrics metriken);
         stift.Style = SKPaintStyle.Fill;
         stift.Color = Skia(farbe);
-        leinwand.DrawText(text, (float)x, (float)(y - metriken.Ascent), schrift, stift);
+        leinwand.DrawText(text, (float)x, (float)(y - metriken.Ascent), SKTextAlign.Left, schrift, stift);
     }
 
     /// <inheritdoc/>
@@ -63,7 +63,7 @@ internal sealed partial class SkiaZeichenflaeche : IZeichenflaeche, IDisposable
         leinwand.Save();
         leinwand.Translate((float)x, (float)y);
         leinwand.RotateDegrees(-90);
-        leinwand.DrawText(text, 0, -metriken.Ascent, schrift, stift);
+        leinwand.DrawText(text, 0, -metriken.Ascent, SKTextAlign.Left, schrift, stift);
         leinwand.Restore();
     }
 
@@ -127,17 +127,19 @@ internal sealed partial class SkiaZeichenflaeche : IZeichenflaeche, IDisposable
             return;
         }
 
-        using var pfad = new SKPath();
-        pfad.MoveTo((float)punkte[0].X, (float)punkte[0].Y);
+        SKPathBuilder baumeister = new();
+        baumeister.MoveTo((float)punkte[0].X, (float)punkte[0].Y);
         for (int i = 1; i < punkte.Count; i++)
         {
-            pfad.LineTo((float)punkte[i].X, (float)punkte[i].Y);
+            baumeister.LineTo((float)punkte[i].X, (float)punkte[i].Y);
         }
 
         if (geschlossen)
         {
-            pfad.Close();
+            baumeister.Close();
         }
+
+        using SKPath pfad = baumeister.Detach();
 
         if (fuellung is Farbe f)
         {
@@ -171,7 +173,7 @@ internal sealed partial class SkiaZeichenflaeche : IZeichenflaeche, IDisposable
         stift.StrokeWidth = (float)staerke;
         stift.StrokeJoin = SKStrokeJoin.Round;
         stift.Color = Skia(rand);
-        leinwand.DrawText(text, (float)x, (float)(y - metriken.Ascent), schrift, stift);
+        leinwand.DrawText(text, (float)x, (float)(y - metriken.Ascent), SKTextAlign.Left, schrift, stift);
         stift.StrokeJoin = SKStrokeJoin.Miter;
         Text(text, x, y, groesse, farbe, fett);
     }
