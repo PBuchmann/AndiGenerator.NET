@@ -70,7 +70,7 @@ public sealed class FernsteuerungTests : IDisposable
         });
         await using McpClient client = await McpClient.CreateAsync(transport);
 
-        Assert.Equal("andigen-mcp", client.ServerInfo.Name);
+        Assert.Equal("andigen-mcp", client.ServerInfo!.Name);
         Assert.Contains("click-TT", client.ServerInstructions, StringComparison.Ordinal);
         IList<McpClientTool> werkzeuge = await client.ListToolsAsync();
         Assert.Contains(werkzeuge, t => t.Name == "staffel_oeffnen");
